@@ -2,7 +2,7 @@
 
 # Mind map: Hiring
 
-Every module, sub-module and feature in this domain (157 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (162 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -51,6 +51,9 @@ mindmap
         JOB-040 Closed listing experience and deadline
         JOB-041 Job search preferences and
         JOB-042 Application history export and deletion
+        JOB-043 Offer comparison
+        JOB-044 Offer negotiation guidance
+        JOB-045 Pre-start preparation
     ATS Recruiter Workspace Hiring Pipeline
       Features
         ATS-001 Requisition creation
@@ -172,6 +175,8 @@ mindmap
         EMP-031 Employer notification preferences
         EMP-032 Brand analytics and follower insights
         EMP-033 Data export and account closure
+        EMP-034 Interview experience repository
+        EMP-035 Company culture survey
 ```
 
 ## Specifications

@@ -23,19 +23,19 @@ Career assistant (chat, memory, resume feedback, interview practice, career plan
 
 ### 1.4 Out of scope (owned elsewhere)
 
-| Capability | Owner |
-|---|---|
-| Profile, resume, portfolio data and editing UI | PRF (planned) |
-| Verified evidence and credentials | EVD, BGV (planned) |
-| Job postings, applications, pipeline, hiring decisions | JOB, ATS (planned) |
-| Assessment content and integrity engine | ASM (planned) |
-| Course content and learning paths | LRN (planned) |
-| Plans, prices and quota purchase | BIL (planned) |
-| Moderation and fraud decisions (AIC supplies classifiers only through its registry) | TSF |
-| Search ranking infrastructure | SRC (planned) |
-| Market data and salary benchmarks | MKT (planned) |
-| Notifications | NTF (planned) |
-| Feed ranking | NET (`FR-NET-036`) uses AIC only for optional suggestions |
+| Capability                                                                          | Owner                                                     |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Profile, resume, portfolio data and editing UI                                      | PRF (planned)                                             |
+| Verified evidence and credentials                                                   | EVD, BGV (planned)                                        |
+| Job postings, applications, pipeline, hiring decisions                              | JOB, ATS (planned)                                        |
+| Assessment content and integrity engine                                             | ASM (planned)                                             |
+| Course content and learning paths                                                   | LRN (planned)                                             |
+| Plans, prices and quota purchase                                                    | BIL (planned)                                             |
+| Moderation and fraud decisions (AIC supplies classifiers only through its registry) | TSF                                                       |
+| Search ranking infrastructure                                                       | SRC (planned)                                             |
+| Market data and salary benchmarks                                                   | MKT (planned)                                             |
+| Notifications                                                                       | NTF (planned)                                             |
+| Feed ranking                                                                        | NET (`FR-NET-036`) uses AIC only for optional suggestions |
 
 ### 1.5 Owned versus consumed
 
@@ -49,30 +49,30 @@ Owned: assistant sessions, suggestions and apply flow, match results and explana
 
 Legend: Y allowed, O own data only, S scoped (organization, institution), R by rule, N not allowed.
 
-| Capability | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD | SAD |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Use career assistant | N | O | O | O | O | N | N | N | N | N | N | N | N | N |
-| Resume feedback and interview practice | N | O | O | N | N | N | N | N | N | N | N | N | N | N |
-| See own job fit and explanations | N | O | O | N | N | N | N | N | N | N | N | N | N | N |
-| Use candidate matching as decision support | N | N | N | N | N | S | S | S | N | N | N | N | N | N |
-| See recommendations | N | O | O | O | O | O | O | O | S | S | N | N | N | N |
-| Manage own AI settings and history | N | O | O | O | O | O | O | O | O | O | O | O | O | O |
-| View AI request logs of a user | N | O | O | N | N | N | N | N | N | N | N | R | R | R |
-| Configure policies, quotas, providers | N | N | N | N | N | N | N | S (org AI settings) | S (institution AI settings) | N | N | N | Y | Y |
-| Approve model versions | N | N | N | N | N | N | N | N | N | N | N | N | Y | Y |
-| Run bias audit and see reports | N | N | N | N | N | N | N | S (own org results) | S | N | N | N | Y | Y |
-| Review AI incidents | N | O (report) | O (report) | N | N | N | N | N | N | N | R | R | Y | Y |
+| Capability                                 | GUE | CAN        | STD        | INS | MNT | REC | HMG | EAD                 | IAD                         | PLO | MOD | SUP | PAD | SAD |
+| ------------------------------------------ | --- | ---------- | ---------- | --- | --- | --- | --- | ------------------- | --------------------------- | --- | --- | --- | --- | --- |
+| Use career assistant                       | N   | O          | O          | O   | O   | N   | N   | N                   | N                           | N   | N   | N   | N   | N   |
+| Resume feedback and interview practice     | N   | O          | O          | N   | N   | N   | N   | N                   | N                           | N   | N   | N   | N   | N   |
+| See own job fit and explanations           | N   | O          | O          | N   | N   | N   | N   | N                   | N                           | N   | N   | N   | N   | N   |
+| Use candidate matching as decision support | N   | N          | N          | N   | N   | S   | S   | S                   | N                           | N   | N   | N   | N   | N   |
+| See recommendations                        | N   | O          | O          | O   | O   | O   | O   | O                   | S                           | S   | N   | N   | N   | N   |
+| Manage own AI settings and history         | N   | O          | O          | O   | O   | O   | O   | O                   | O                           | O   | O   | O   | O   | O   |
+| View AI request logs of a user             | N   | O          | O          | N   | N   | N   | N   | N                   | N                           | N   | N   | R   | R   | R   |
+| Configure policies, quotas, providers      | N   | N          | N          | N   | N   | N   | N   | S (org AI settings) | S (institution AI settings) | N   | N   | N   | Y   | Y   |
+| Approve model versions                     | N   | N          | N          | N   | N   | N   | N   | N                   | N                           | N   | N   | N   | Y   | Y   |
+| Run bias audit and see reports             | N   | N          | N          | N   | N   | N   | N   | S (own org results) | S                           | N   | N   | N   | Y   | Y   |
+| Review AI incidents                        | N   | O (report) | O (report) | N   | N   | N   | N   | N                   | N                           | N   | R   | R   | Y   | Y   |
 
 Notes. `SUP` log access requires a ticket and the user's consent (`BR-AIC-020`). `MOD` handles AI-harm reports routed through TSF. `STD` features may be constrained by `IAD` institution settings and assessment policy (`BR-AIC-019`). Minors follow `BR-AIC-030`. `REC` and `HMG` use matching only within pipelines they are authorized for. `API` principals have no AIC write access in this blueprint.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| AIC-A | Career assistant | FR-AIC-001 to 009 |
-| AIC-B | Matching | FR-AIC-010 to 016 |
-| AIC-C | Recommendations | FR-AIC-017 to 021 |
-| AIC-D | AI governance and platform | FR-AIC-022 to 034 |
+| Code  | Sub-module                 | Features                      |
+| ----- | -------------------------- | ----------------------------- |
+| AIC-A | Career assistant           | FR-AIC-001 to 009             |
+| AIC-B | Matching                   | FR-AIC-010 to 016             |
+| AIC-C | Recommendations            | FR-AIC-017 to 021, FR-AIC-035 |
+| AIC-D | AI governance and platform | FR-AIC-022 to 034             |
 
 ```mermaid
 flowchart LR
@@ -959,47 +959,79 @@ flowchart LR
   - Given a disconnect, then the key is deleted.
   - Given SENSITIVE data, then the gateway refuses external provider routes.
 
+### FR-AIC-035 — Open-source contribution recommendations
+
+- **Sub-module:** AIC-C Recommendations
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.3 F-143 OSS Contribution Discovery (priority 4, Ph8; dependencies F-89, F-26); legacy status description "list open-source issues that match a member's skills"] [PROP] for behavior
+- **Purpose and outcome:** A member finds beginner-appropriate open-source issues that match their skills and goals, contributes outside the platform, and later adds the merged work as verified evidence. The system knows it works when saved issues lead to connected, verified contributions (FR-EVD-007).
+- **Roles and permissions:** `CAN, STD, FRL: view, save, dismiss own recommendations` · `PAD: manage sources, eligibility thresholds and repository exclusions`
+- **Preconditions and entry points:** The member has at least one skill (claimed or evidenced) or a target role, and recommendations are enabled (FR-SET-029). The feature needs no AI model: the deterministic ranking engine of FR-AIC-021 is sufficient. Entry: Recommendations > "Open source", skill pages (FR-LRN-005), the "Add contribution" step of FR-EVD-007.
+- **User interactions and actions:**
+  1. Open "Open source". See cards: issue title, repository, language, labels (for example good first issue, help wanted), effort band (under 2 hours, 2 to 8 hours, over 8 hours) when the maintainers declared it, repository health (last commit date, median maintainer response), and a "Why this" line naming the matching skills and whether they are verified or claimed.
+  2. Filter by language, skill, label, effort band, topic and license. Sort by best match (default) or newest.
+  3. Press "Save", or "Dismiss" with a reason (not relevant, too hard, too easy, repository looks inactive). Press "Open on provider" to leave for the issue page, with a leaving-site notice.
+  4. Press "I contributed" to be taken to the connection step of FR-EVD-007 so the merged work can be verified.
+  5. Set preferences: languages, topics and weekly time available.
+- **System behaviour:** A catalogue of public repositories and open issues is ingested daily through a provider adapter (FR-PLT-016) within provider terms and rate limits (`ENT-AIC-21`). Only repositories with a recognized open-source license, recent maintainer activity (at least one merged change in the last {90} days) and a contribution guide are eligible; repositories with signs of contribution farming are excluded (BR-AIC-038). Ranking is deterministic: skill overlap (verified skills weigh more than claimed ones, both shown), level fit from the member's contribution history, repository health, and diversity (at most {3} cards per repository). Cards follow FR-AIC-020 (reasons, dismissal, expiry, feedback). Dismissals tune only the member's own results (BR-AIC-028). The platform never claims an issue, comments, forks or opens a pull request on the member's behalf and sends no member data to the provider (BR-AIC-004, BR-AIC-038). Contributions count as evidence only after FR-EVD-007 verification.
+- **UI elements and controls:** Recommendation cards with chips for labels and effort, health text, "Why this", Save, Dismiss menu with reasons, "Open on provider", "I contributed", filters, preference form. States: empty ("No matching issues right now; broaden your filters or add skills"), loading, provider data stale ("Updated 2 days ago"), error with Retry.
+- **Configuration options:** User: languages, topics, weekly time, recommendations on or off. Platform: eligibility thresholds (activity window, license list, minimum guide), cards per repository, refresh interval ({24} hours), excluded repositories.
+- **Business rules:** BR-AIC-038, BR-AIC-016, BR-AIC-028, BR-AIC-035
+- **Validation:** Preference values from the taxonomy and provider language list; at most 10 languages and 10 topics; dismiss reason from the list.
+- **Inputs and outputs:** In: member skills and preferences (allowlisted inputs, BR-AIC-035), catalogue. Out: ranked recommendation cards with reasons and dismissal feedback.
+- **Filters, sorting, search:** Language, skill, label, effort band, topic, license; sort best match or newest; keyword search in titles.
+- **Notifications and communication:** Optional weekly digest of new matches (class engagement, opt-in); no other message.
+- **Error handling and edge cases:** Provider API limit or outage: the last catalogue stays with an "as of" label and ranking continues. Issue closed since the last refresh: shown as "Closed" and removed at the next refresh. Member with no skills: prompts to add skills or pick a goal. Repository later excluded: its cards disappear within one refresh. Member under 18: shown only with institution-vetted settings (BR-AIC-030).
+- **Dependencies:** FR-AIC-020, FR-AIC-021, FR-EVD-007, FR-LRN-005, FR-PLT-016, FR-PLT-041, FR-SET-029, ENT-AIC-05, ENT-AIC-21.
+- **Security and privacy:** Only public repository data is stored; member preferences are private; outbound fetches use the SSRF-safe client (FR-PLT-041); provider credentials stay in the vault (FR-PLT-016).
+- **Acceptance criteria:**
+  - Given a member with verified Python skill, when they open "Open source", then eligible Python issues appear with a "Why this" line naming Python as verified.
+  - Given a repository with no merged change in 120 days, when the catalogue refreshes, then its issues are not recommended.
+  - Given a member dismisses a card as "too hard", when the list refreshes, then similar-difficulty cards from that repository are not shown to that member.
+  - Given the member presses "Open on provider", when the page opens, then no comment, claim or fork is created on their behalf (negative).
+
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-AIC-001 | AI may suggest, draft, explain, summarize and recommend. AI never decides, hires, rejects, disqualifies, penalizes, sanctions or terminates. | Human accountability. | Gateway, sink registry | [SRC: SSOT §15.10.1] |
-| BR-AIC-002 | No code path exists from AI output to an authoritative state change (profile, evidence, application status, grade, moderation outcome, payment, publication) without a human confirmation token issued from a user action in the owning module. | Enforced human gate. | Sink registry, CI tests | [SRC: SSOT §15.10.1] |
-| BR-AIC-003 | Impact classes are INFORMATION, DRAFT, RECOMMENDATION, ANALYSIS, DECISION_SUPPORT, CONSEQUENTIAL_DECISION; the last is blocked at the gateway. | Governed by impact. | Gateway | [SRC: SSOT §16.7] |
-| BR-AIC-004 | AI drafts that will be sent to others or published require the user to review and take the send action; no auto-send, no scheduled AI send, no AI agent that contacts others. Employer-side AI drafts of feedback or rejections require human review before sending. | Prevents unreviewed outbound AI. | Host composers, gateway | [SRC: SSOT BR-221] |
-| BR-AIC-005 | Prohibited: autonomous hiring or rejection, autonomous disqualification, real-time behavioral profiling for screening, emotion or sentiment analysis of candidates, resume fabrication, predictive performance scoring, AI grading of peer reviews, AI-decided refunds, AI auto-publishing of courses, inference of protected attributes. | Zero tolerance list. | Gateway deny list, code review | [SRC: SSOT §15.10.2] |
-| BR-AIC-006 | No opaque universal talent score. Any fit indicator shows its meaningful dimensions and limitations. | Explainability. | Match output schema | [SRC: SSOT §18.1] |
-| BR-AIC-007 | Confidence gates: below 0.5 suppress; 0.5 to 0.7 show with disclaimer; 0.7 and above show with evidence; auto-apply only non-consequential changes at 0.85 or above and only where the user enabled it. | Calibrated trust. | Output validation | [SRC: SSOT §15.10.5] |
-| BR-AIC-008 | AI conversation memory, user profile, talent graph and verified evidence are separate. AI suggestions never silently alter verified state. | Integrity of evidence. | Gateway, host APIs | [SRC: SSOT §16.6] |
-| BR-AIC-009 | TalentSphere incurs no paid third-party inference cost for a free user unless an explicit active cost policy permits it; no silent paid fallback. | Cost invariant. | Gateway entitlement stage | [SRC: SSOT §16.4] |
-| BR-AIC-010 | Execution order: on-device when capable, genuinely free provider quota, user-authorized provider, TalentSphere cloud only when policy permits, non-AI fallback. | Cost and privacy. | Gateway routing | [SRC: SSOT §16.3] |
-| BR-AIC-011 | All AI calls go through the gateway; modules hold no provider credentials. | Central control. | Architecture, CI | [SRC: SSOT §16.1] |
-| BR-AIC-012 | Data is classified PUBLIC, INTERNAL, PRIVATE, SENSITIVE, RESTRICTED, NEVER-EXTERNAL; context is minimized; SENSITIVE and above never go to external providers; NEVER-EXTERNAL never leaves. | Data boundary. | Context firewall | [SRC: SSOT §16.5] |
-| BR-AIC-013 | Mandatory redaction before any external provider call: names, emails, phones, addresses, national ids, configured company exclusions; restored for display only; cannot be disabled. | Privacy. | Context firewall | [SRC: SSOT §15.10.3] |
-| BR-AIC-014 | Prompt-injection defenses: sanitization, structural enclosure, canary token, low temperature for extraction and matching, strict output validation; canary leak drops the response, alerts and flags the account for review. | Security. | Gateway | [SRC: SSOT §15.10.4] |
-| BR-AIC-015 | Every AI output retains provenance: request id, capability, provider and model, mode, timestamp, data class, context references, policy decision, sources, output, user modifications; suggestions carry rationale, source handles, calibrated confidence, assumptions, redactions, prompt hash. | Auditability. | Provenance service | [SRC: SSOT §15.10.6, §16.8] |
-| BR-AIC-016 | Recommendations disclose factors ("why am I seeing this"), never use protected attributes, are dismissible (dismissals train the member's own results), carry a sponsored label if sponsored and never mix sponsored into organic ranking, and engines are replaceable behind a contract. | Trust and flexibility. | Recommendation service | [SRC: SSOT BR-184..188] |
-| BR-AIC-017 | Matching order: hard constraints, eligibility, required capabilities, evidence quality, experience, recency, transferable skills, preferences, uncertainty, explainable result. Verified evidence outweighs self-reported; self-attestation counts at 0.5. | Evidence-based matching. | Matching service | [SRC: SSOT §18.1; BR-229] |
-| BR-AIC-018 | Recruiter-side AI fit is decision support: opt-in per job or session, labelled, never auto-rejects, never hides candidates, never bulk-actions by fit; recruiters give human reasons for decisions. | No autonomous screening. | ATS integration, matching UI | [DER] from [SRC: SSOT §15.10.1] |
-| BR-AIC-019 | While an assessment is AI-prohibited, all AI features deny assistance server-side on any device of the member; context loss fails closed. | Integrity. | Gateway | [SRC: SSOT §17.2, §17.3] |
-| BR-AIC-020 | Metadata is always logged (24 months); prompt and response content is stored only in the member's history (default 90 days), or with explicit share, incident need (30 days), or consented de-identified evaluation; no use of member content for advertising or training by TalentSphere or providers; staff access to content needs consent or incident approval and is logged. | Minimization. | Provenance, access service | [PROP] |
-| BR-AIC-021 | Matching, ranking, feedback drafting and screening-adjacent capabilities pass a bias audit (counterfactual and outcome tests) before release and quarterly; failing blocks promotion. Groups under 30 are not reported. | Fairness. | Release gate | [PROP] from [SRC: SSOT §18.3] |
-| BR-AIC-022 | Every model, prompt template and classifier is registered with a model card, evaluation results and approvals before production use. | Governance. | Model registry | [PROP] |
-| BR-AIC-023 | Outputs pass safety filters (harm, leakage, fabricated facts, discrimination); blocked output is replaced with a safe message. | Safety. | Gateway output stage | [DER] |
-| BR-AIC-024 | When AI is unavailable, over budget or denied, features fall back to a deterministic non-AI path or show an explicit unavailable state; retries never violate `BR-AIC-009`. | Resilience. | Gateway, engines | [SRC: SSOT §16.3] |
-| BR-AIC-025 | AI usage is metered; allowances are set per plan by BIL; global budget guards degrade routes at 80 percent and stop paid routes at 100 percent. | Cost control. | Metering service | [PROP] values `OD-AIC-02` |
-| BR-AIC-026 | Members can opt out of AI personalization or AI altogether; no core career-loop step requires AI. | Agency. | Settings, features | [DER] |
-| BR-AIC-027 | AI-generated content is labelled; the assistant states it is an AI and never claims actions it did not perform. | Honesty. | UI and gateway | [DER] |
-| BR-AIC-028 | Member feedback and dismissals affect that member's own results; aggregate learning uses only consented, de-identified data. | Privacy-preserving learning. | Feedback service | [SRC: SSOT BR-186] [DER] |
-| BR-AIC-029 | Interview practice is private; no emotion, tone, voice or face analysis; audio not stored; transcripts kept 30 days by default; never shared with employers or used for matching. | Prevents profiling. | Practice service | [SRC: SSOT §15.10.2] [PROP] |
-| BR-AIC-030 | Members aged 16 and 17 use restricted AI: assistant limited to learning and career exploration, no personalization with sensitive attributes, no people recommendations except vetted institution mentors, institution may disable. | Protects minors. | Gateway policy | [PROP] `OD-AIC-03` |
-| BR-AIC-031 | Assistant scope is career help; it gives only general information on legal, immigration, medical, tax and investment topics with disclaimers and refuses to forge, deceive, harass or discriminate. | Safe scope. | Assistant policy | [PROP] |
-| BR-AIC-032 | Forecasts and plans are conditional and time-bounded, with sources, collection time, geography, population, coverage, methodology and limitations. | Honest uncertainty. | Plan and market outputs | [SRC: SSOT §18.4] |
-| BR-AIC-033 | On-device runs send no content; user-authorized providers use only provider-supported authorization (consumer subscriptions are not API rights) and still pass the gateway; SENSITIVE or above runs only on-device or in TalentSphere-controlled infrastructure. | Respect provider terms and privacy. | Gateway, provider adapters | [SRC: SSOT §16.2] |
-| BR-AIC-034 | AI incidents are triaged by severity with kill switches; S1 requires capability shutdown within 1 hour and SAD notification. | Rapid containment. | Incident process | [PROP] |
-| BR-AIC-035 | Matching and recommendation inputs are limited to an allowlist (profile, verified and self-reported evidence labelled as such, declared preferences, learning and assessment results with consent, limited on-platform behavior). Never used: protected attributes or proxies (name, photo, age, graduation year as age proxy, precise address), health, inferred sensitive traits, private messages, referral tags, practice sessions, assessment integrity signals. | Fairness. | Feature store allowlist | [SRC: SSOT BR-185] [DER] |
-| BR-AIC-036 | Candidates are told when employer AI-assisted tools may be used, can see which factors were assessed, and can request human review; the employer must respond within 7 days. | Candidate rights. | ATS integration | [PROP] `OD-AIC-06` |
-| BR-AIC-037 | AI-extracted skills are `ai_suggested` until the member confirms, then `self_reported` until verified; unconfirmed suggestions never affect matching. | Evidence honesty. | Skill service | [SRC: SSOT MIG-04, BR-229] [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Rationale                                                                       | Enforced where                      | Source                           |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- | -------------------------------- |
+| BR-AIC-001 | AI may suggest, draft, explain, summarize and recommend. AI never decides, hires, rejects, disqualifies, penalizes, sanctions or terminates.                                                                                                                                                                                                                                                                                                                          | Human accountability.                                                           | Gateway, sink registry              | [SRC: SSOT §15.10.1]             |
+| BR-AIC-002 | No code path exists from AI output to an authoritative state change (profile, evidence, application status, grade, moderation outcome, payment, publication) without a human confirmation token issued from a user action in the owning module.                                                                                                                                                                                                                       | Enforced human gate.                                                            | Sink registry, CI tests             | [SRC: SSOT §15.10.1]             |
+| BR-AIC-003 | Impact classes are INFORMATION, DRAFT, RECOMMENDATION, ANALYSIS, DECISION_SUPPORT, CONSEQUENTIAL_DECISION; the last is blocked at the gateway.                                                                                                                                                                                                                                                                                                                        | Governed by impact.                                                             | Gateway                             | [SRC: SSOT §16.7]                |
+| BR-AIC-004 | AI drafts that will be sent to others or published require the user to review and take the send action; no auto-send, no scheduled AI send, no AI agent that contacts others. Employer-side AI drafts of feedback or rejections require human review before sending.                                                                                                                                                                                                  | Prevents unreviewed outbound AI.                                                | Host composers, gateway             | [SRC: SSOT BR-221]               |
+| BR-AIC-005 | Prohibited: autonomous hiring or rejection, autonomous disqualification, real-time behavioral profiling for screening, emotion or sentiment analysis of candidates, resume fabrication, predictive performance scoring, AI grading of peer reviews, AI-decided refunds, AI auto-publishing of courses, inference of protected attributes.                                                                                                                             | Zero tolerance list.                                                            | Gateway deny list, code review      | [SRC: SSOT §15.10.2]             |
+| BR-AIC-006 | No opaque universal talent score. Any fit indicator shows its meaningful dimensions and limitations.                                                                                                                                                                                                                                                                                                                                                                  | Explainability.                                                                 | Match output schema                 | [SRC: SSOT §18.1]                |
+| BR-AIC-007 | Confidence gates: below 0.5 suppress; 0.5 to 0.7 show with disclaimer; 0.7 and above show with evidence; auto-apply only non-consequential changes at 0.85 or above and only where the user enabled it.                                                                                                                                                                                                                                                               | Calibrated trust.                                                               | Output validation                   | [SRC: SSOT §15.10.5]             |
+| BR-AIC-008 | AI conversation memory, user profile, talent graph and verified evidence are separate. AI suggestions never silently alter verified state.                                                                                                                                                                                                                                                                                                                            | Integrity of evidence.                                                          | Gateway, host APIs                  | [SRC: SSOT §16.6]                |
+| BR-AIC-009 | TalentSphere incurs no paid third-party inference cost for a free user unless an explicit active cost policy permits it; no silent paid fallback.                                                                                                                                                                                                                                                                                                                     | Cost invariant.                                                                 | Gateway entitlement stage           | [SRC: SSOT §16.4]                |
+| BR-AIC-010 | Execution order: on-device when capable, genuinely free provider quota, user-authorized provider, TalentSphere cloud only when policy permits, non-AI fallback.                                                                                                                                                                                                                                                                                                       | Cost and privacy.                                                               | Gateway routing                     | [SRC: SSOT §16.3]                |
+| BR-AIC-011 | All AI calls go through the gateway; modules hold no provider credentials.                                                                                                                                                                                                                                                                                                                                                                                            | Central control.                                                                | Architecture, CI                    | [SRC: SSOT §16.1]                |
+| BR-AIC-012 | Data is classified PUBLIC, INTERNAL, PRIVATE, SENSITIVE, RESTRICTED, NEVER-EXTERNAL; context is minimized; SENSITIVE and above never go to external providers; NEVER-EXTERNAL never leaves.                                                                                                                                                                                                                                                                           | Data boundary.                                                                  | Context firewall                    | [SRC: SSOT §16.5]                |
+| BR-AIC-013 | Mandatory redaction before any external provider call: names, emails, phones, addresses, national ids, configured company exclusions; restored for display only; cannot be disabled.                                                                                                                                                                                                                                                                                  | Privacy.                                                                        | Context firewall                    | [SRC: SSOT §15.10.3]             |
+| BR-AIC-014 | Prompt-injection defenses: sanitization, structural enclosure, canary token, low temperature for extraction and matching, strict output validation; canary leak drops the response, alerts and flags the account for review.                                                                                                                                                                                                                                          | Security.                                                                       | Gateway                             | [SRC: SSOT §15.10.4]             |
+| BR-AIC-015 | Every AI output retains provenance: request id, capability, provider and model, mode, timestamp, data class, context references, policy decision, sources, output, user modifications; suggestions carry rationale, source handles, calibrated confidence, assumptions, redactions, prompt hash.                                                                                                                                                                      | Auditability.                                                                   | Provenance service                  | [SRC: SSOT §15.10.6, §16.8]      |
+| BR-AIC-016 | Recommendations disclose factors ("why am I seeing this"), never use protected attributes, are dismissible (dismissals train the member's own results), carry a sponsored label if sponsored and never mix sponsored into organic ranking, and engines are replaceable behind a contract.                                                                                                                                                                             | Trust and flexibility.                                                          | Recommendation service              | [SRC: SSOT BR-184..188]          |
+| BR-AIC-017 | Matching order: hard constraints, eligibility, required capabilities, evidence quality, experience, recency, transferable skills, preferences, uncertainty, explainable result. Verified evidence outweighs self-reported; self-attestation counts at 0.5.                                                                                                                                                                                                            | Evidence-based matching.                                                        | Matching service                    | [SRC: SSOT §18.1; BR-229]        |
+| BR-AIC-018 | Recruiter-side AI fit is decision support: opt-in per job or session, labelled, never auto-rejects, never hides candidates, never bulk-actions by fit; recruiters give human reasons for decisions.                                                                                                                                                                                                                                                                   | No autonomous screening.                                                        | ATS integration, matching UI        | [DER] from [SRC: SSOT §15.10.1]  |
+| BR-AIC-019 | While an assessment is AI-prohibited, all AI features deny assistance server-side on any device of the member; context loss fails closed.                                                                                                                                                                                                                                                                                                                             | Integrity.                                                                      | Gateway                             | [SRC: SSOT §17.2, §17.3]         |
+| BR-AIC-020 | Metadata is always logged (24 months); prompt and response content is stored only in the member's history (default 90 days), or with explicit share, incident need (30 days), or consented de-identified evaluation; no use of member content for advertising or training by TalentSphere or providers; staff access to content needs consent or incident approval and is logged.                                                                                     | Minimization.                                                                   | Provenance, access service          | [PROP]                           |
+| BR-AIC-021 | Matching, ranking, feedback drafting and screening-adjacent capabilities pass a bias audit (counterfactual and outcome tests) before release and quarterly; failing blocks promotion. Groups under 30 are not reported.                                                                                                                                                                                                                                               | Fairness.                                                                       | Release gate                        | [PROP] from [SRC: SSOT §18.3]    |
+| BR-AIC-022 | Every model, prompt template and classifier is registered with a model card, evaluation results and approvals before production use.                                                                                                                                                                                                                                                                                                                                  | Governance.                                                                     | Model registry                      | [PROP]                           |
+| BR-AIC-023 | Outputs pass safety filters (harm, leakage, fabricated facts, discrimination); blocked output is replaced with a safe message.                                                                                                                                                                                                                                                                                                                                        | Safety.                                                                         | Gateway output stage                | [DER]                            |
+| BR-AIC-024 | When AI is unavailable, over budget or denied, features fall back to a deterministic non-AI path or show an explicit unavailable state; retries never violate `BR-AIC-009`.                                                                                                                                                                                                                                                                                           | Resilience.                                                                     | Gateway, engines                    | [SRC: SSOT §16.3]                |
+| BR-AIC-025 | AI usage is metered; allowances are set per plan by BIL; global budget guards degrade routes at 80 percent and stop paid routes at 100 percent.                                                                                                                                                                                                                                                                                                                       | Cost control.                                                                   | Metering service                    | [PROP] values `OD-AIC-02`        |
+| BR-AIC-026 | Members can opt out of AI personalization or AI altogether; no core career-loop step requires AI.                                                                                                                                                                                                                                                                                                                                                                     | Agency.                                                                         | Settings, features                  | [DER]                            |
+| BR-AIC-027 | AI-generated content is labelled; the assistant states it is an AI and never claims actions it did not perform.                                                                                                                                                                                                                                                                                                                                                       | Honesty.                                                                        | UI and gateway                      | [DER]                            |
+| BR-AIC-028 | Member feedback and dismissals affect that member's own results; aggregate learning uses only consented, de-identified data.                                                                                                                                                                                                                                                                                                                                          | Privacy-preserving learning.                                                    | Feedback service                    | [SRC: SSOT BR-186] [DER]         |
+| BR-AIC-029 | Interview practice is private; no emotion, tone, voice or face analysis; audio not stored; transcripts kept 30 days by default; never shared with employers or used for matching.                                                                                                                                                                                                                                                                                     | Prevents profiling.                                                             | Practice service                    | [SRC: SSOT §15.10.2] [PROP]      |
+| BR-AIC-030 | Members aged 16 and 17 use restricted AI: assistant limited to learning and career exploration, no personalization with sensitive attributes, no people recommendations except vetted institution mentors, institution may disable.                                                                                                                                                                                                                                   | Protects minors.                                                                | Gateway policy                      | [PROP] `OD-AIC-03`               |
+| BR-AIC-031 | Assistant scope is career help; it gives only general information on legal, immigration, medical, tax and investment topics with disclaimers and refuses to forge, deceive, harass or discriminate.                                                                                                                                                                                                                                                                   | Safe scope.                                                                     | Assistant policy                    | [PROP]                           |
+| BR-AIC-032 | Forecasts and plans are conditional and time-bounded, with sources, collection time, geography, population, coverage, methodology and limitations.                                                                                                                                                                                                                                                                                                                    | Honest uncertainty.                                                             | Plan and market outputs             | [SRC: SSOT §18.4]                |
+| BR-AIC-033 | On-device runs send no content; user-authorized providers use only provider-supported authorization (consumer subscriptions are not API rights) and still pass the gateway; SENSITIVE or above runs only on-device or in TalentSphere-controlled infrastructure.                                                                                                                                                                                                      | Respect provider terms and privacy.                                             | Gateway, provider adapters          | [SRC: SSOT §16.2]                |
+| BR-AIC-034 | AI incidents are triaged by severity with kill switches; S1 requires capability shutdown within 1 hour and SAD notification.                                                                                                                                                                                                                                                                                                                                          | Rapid containment.                                                              | Incident process                    | [PROP]                           |
+| BR-AIC-035 | Matching and recommendation inputs are limited to an allowlist (profile, verified and self-reported evidence labelled as such, declared preferences, learning and assessment results with consent, limited on-platform behavior). Never used: protected attributes or proxies (name, photo, age, graduation year as age proxy, precise address), health, inferred sensitive traits, private messages, referral tags, practice sessions, assessment integrity signals. | Fairness.                                                                       | Feature store allowlist             | [SRC: SSOT BR-185] [DER]         |
+| BR-AIC-036 | Candidates are told when employer AI-assisted tools may be used, can see which factors were assessed, and can request human review; the employer must respond within 7 days.                                                                                                                                                                                                                                                                                          | Candidate rights.                                                               | ATS integration                     | [PROP] `OD-AIC-06`               |
+| BR-AIC-037 | AI-extracted skills are `ai_suggested` until the member confirms, then `self_reported` until verified; unconfirmed suggestions never affect matching.                                                                                                                                                                                                                                                                                                                 | Evidence honesty.                                                               | Skill service                       | [SRC: SSOT MIG-04, BR-229] [DER] |
+| BR-AIC-038 | Open-source recommendations use only public repositories with a recognized open-source license, recent maintainer activity and a contribution guide; the platform never claims issues, comments, forks or opens pull requests for a member, and contributions become evidence only through verification under FR-EVD-007.                                                                                                                                             | Protects maintainers and the member's reputation; keeps recommendations honest. | Catalogue ingestion; ranking engine | [DER] [PROP] thresholds          |
 
 ## 6. State machines
 
@@ -1007,18 +1039,18 @@ flowchart LR
 
 States: `received`, `policy_checked`, `denied`, `executing`, `validated`, `suppressed`, `fallback_served`, `delivered`, `failed`. Terminal: `denied`, `suppressed`, `fallback_served`, `delivered`, `failed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | received | Feature calls gateway | capability registered |
-| received | policy_checked | Policy, entitlement, firewall pass | `BR-AIC-009`, `BR-AIC-012` |
-| received | denied | Any policy failure | typed reason |
-| policy_checked | executing | Route chosen | provider or local available |
-| policy_checked | fallback_served | No AI route allowed | non-AI fallback exists |
-| executing | validated | Output passes schema and safety | confidence at least 0.5 |
-| executing | suppressed | Confidence below 0.5 or safety block | n/a |
-| executing | failed | Timeout or provider error | retry exhausted |
-| failed | fallback_served | Fallback available | n/a |
-| validated | delivered | Returned to user | provenance written |
+| From           | To              | Trigger                              | Guard                       |
+| -------------- | --------------- | ------------------------------------ | --------------------------- |
+| (new)          | received        | Feature calls gateway                | capability registered       |
+| received       | policy_checked  | Policy, entitlement, firewall pass   | `BR-AIC-009`, `BR-AIC-012`  |
+| received       | denied          | Any policy failure                   | typed reason                |
+| policy_checked | executing       | Route chosen                         | provider or local available |
+| policy_checked | fallback_served | No AI route allowed                  | non-AI fallback exists      |
+| executing      | validated       | Output passes schema and safety      | confidence at least 0.5     |
+| executing      | suppressed      | Confidence below 0.5 or safety block | n/a                         |
+| executing      | failed          | Timeout or provider error            | retry exhausted             |
+| failed         | fallback_served | Fallback available                   | n/a                         |
+| validated      | delivered       | Returned to user                     | provenance written          |
 
 ```mermaid
 stateDiagram-v2
@@ -1043,15 +1075,15 @@ stateDiagram-v2
 
 States: `generated`, `shown`, `engaged`, `dismissed`, `expired`, `withdrawn`. Terminal: `engaged` (result recorded), `expired`, `withdrawn`; `dismissed` can be restored within 30 days.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | generated | Engine output | required fields present |
-| generated | shown | Rendered to member | not expired |
-| shown | engaged | Member acts (apply, enroll, connect) | n/a |
-| shown | dismissed | Member dismisses | reason optional |
-| dismissed | shown | Member restores | within 30 days |
-| generated, shown | expired | Expiry reached | n/a |
-| generated, shown | withdrawn | Target closed or constraint change | n/a |
+| From             | To        | Trigger                              | Guard                   |
+| ---------------- | --------- | ------------------------------------ | ----------------------- |
+| (new)            | generated | Engine output                        | required fields present |
+| generated        | shown     | Rendered to member                   | not expired             |
+| shown            | engaged   | Member acts (apply, enroll, connect) | n/a                     |
+| shown            | dismissed | Member dismisses                     | reason optional         |
+| dismissed        | shown     | Member restores                      | within 30 days          |
+| generated, shown | expired   | Expiry reached                       | n/a                     |
+| generated, shown | withdrawn | Target closed or constraint change   | n/a                     |
 
 ```mermaid
 stateDiagram-v2
@@ -1073,16 +1105,16 @@ stateDiagram-v2
 
 States: `proposed`, `evaluating`, `approved`, `active`, `deprecated`, `retired`, `rejected`. Terminal: `retired`, `rejected`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | proposed | PAD registers | card complete |
-| proposed | evaluating | Evaluation started | n/a |
-| evaluating | approved | Gates pass | `BR-AIC-021`, `BR-AIC-022` |
-| evaluating | rejected | Gates fail | n/a |
-| approved | active | Promotion | SAD sign-off if high impact |
-| active | deprecated | Replacement active or issue found | n/a |
-| deprecated | retired | Traffic zero | n/a |
-| active | deprecated | Emergency rollback | SAD sign-off |
+| From       | To         | Trigger                           | Guard                       |
+| ---------- | ---------- | --------------------------------- | --------------------------- |
+| (new)      | proposed   | PAD registers                     | card complete               |
+| proposed   | evaluating | Evaluation started                | n/a                         |
+| evaluating | approved   | Gates pass                        | `BR-AIC-021`, `BR-AIC-022`  |
+| evaluating | rejected   | Gates fail                        | n/a                         |
+| approved   | active     | Promotion                         | SAD sign-off if high impact |
+| active     | deprecated | Replacement active or issue found | n/a                         |
+| deprecated | retired    | Traffic zero                      | n/a                         |
+| active     | deprecated | Emergency rollback                | SAD sign-off                |
 
 ```mermaid
 stateDiagram-v2
@@ -1101,14 +1133,14 @@ stateDiagram-v2
 
 States: `active`, `idle`, `closed`, `deleted`. Terminal: `deleted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | First message | AI enabled |
-| active | idle | 30 minutes without activity | n/a |
-| idle | active | New message | n/a |
-| active, idle | closed | User closes or retention reached | n/a |
-| closed | active | User reopens | within retention |
-| any | deleted | User deletes or retention purge | n/a |
+| From         | To      | Trigger                          | Guard            |
+| ------------ | ------- | -------------------------------- | ---------------- |
+| (new)        | active  | First message                    | AI enabled       |
+| active       | idle    | 30 minutes without activity      | n/a              |
+| idle         | active  | New message                      | n/a              |
+| active, idle | closed  | User closes or retention reached | n/a              |
+| closed       | active  | User reopens                     | within retention |
+| any          | deleted | User deletes or retention purge  | n/a              |
 
 ```mermaid
 stateDiagram-v2
@@ -1128,16 +1160,16 @@ stateDiagram-v2
 
 States: `proposed`, `previewed`, `accepted`, `applied`, `rejected`, `stale`, `expired`. Terminal: `applied`, `rejected`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | proposed | Capability output | target not protected |
-| proposed | previewed | User opens diff | n/a |
-| previewed | accepted | User accepts | host validation pass |
-| accepted | applied | Host API succeeds | human token present |
-| previewed, proposed | rejected | User rejects | n/a |
-| proposed, previewed | stale | Target changed | n/a |
-| stale | proposed | Regenerated | n/a |
-| proposed, previewed, stale | expired | 30 days | n/a |
+| From                       | To        | Trigger           | Guard                |
+| -------------------------- | --------- | ----------------- | -------------------- |
+| (new)                      | proposed  | Capability output | target not protected |
+| proposed                   | previewed | User opens diff   | n/a                  |
+| previewed                  | accepted  | User accepts      | host validation pass |
+| accepted                   | applied   | Host API succeeds | human token present  |
+| previewed, proposed        | rejected  | User rejects      | n/a                  |
+| proposed, previewed        | stale     | Target changed    | n/a                  |
+| stale                      | proposed  | Regenerated       | n/a                  |
+| proposed, previewed, stale | expired   | 30 days           | n/a                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1162,14 +1194,14 @@ stateDiagram-v2
 
 States: `reported`, `triaged`, `mitigating`, `monitoring`, `closed`. Terminal: `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | reported | User report or alert | n/a |
-| reported | triaged | PAD assigns severity | owner assigned |
-| triaged | mitigating | Kill switch or fix started | S1 within 1 hour |
-| mitigating | monitoring | Fix deployed | n/a |
-| monitoring | closed | Post-incident note and golden-set tasks | SAD for S1 |
-| triaged | closed | Not an issue | reason recorded |
+| From       | To         | Trigger                                 | Guard            |
+| ---------- | ---------- | --------------------------------------- | ---------------- |
+| (new)      | reported   | User report or alert                    | n/a              |
+| reported   | triaged    | PAD assigns severity                    | owner assigned   |
+| triaged    | mitigating | Kill switch or fix started              | S1 within 1 hour |
+| mitigating | monitoring | Fix deployed                            | n/a              |
+| monitoring | closed     | Post-incident note and golden-set tasks | SAD for S1       |
+| triaged    | closed     | Not an issue                            | reason recorded  |
 
 ```mermaid
 stateDiagram-v2
@@ -1184,65 +1216,66 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-AIC-001 | Assistant panel | global overlay | CAN, STD, INS, MNT | Chat | streaming, quota-exhausted, unavailable, assessment-locked |
-| SCR-AIC-002 | Assistant history | `/assistant/history` | same | Browse and delete chats | empty |
-| SCR-AIC-003 | My AI settings | `/settings/ai` | all members | Context sources, memory, provider, opt-out | institution-locked |
-| SCR-AIC-004 | AI memory manager | `/settings/ai/memory` | same | View and edit memory | empty |
-| SCR-AIC-005 | AI usage | `/settings/ai/usage` | same | Allowance and history | exhausted |
-| SCR-AIC-006 | Resume feedback | `/resume/:id/feedback` | CAN, STD | Scorecard and suggestions | processing, needs-input |
-| SCR-AIC-007 | Interview practice setup | `/practice/new` | CAN, STD | Configure session | voice-unavailable |
-| SCR-AIC-008 | Interview practice session | `/practice/:id` | CAN, STD | Q and A with feedback | recording, offline |
-| SCR-AIC-009 | Practice summary | `/practice/:id/summary` | CAN, STD | Strengths and areas | deleted |
-| SCR-AIC-010 | Career plan | `/plan` | CAN, STD | Goal and staged plan | draft, active, stale-data |
-| SCR-AIC-011 | Skill-gap matrix | `/skills/gap/:targetId` | CAN, STD | Gap analysis | insufficient-data |
-| SCR-AIC-012 | Drafting dialog | modal | members | Draft messages and letters | consent-required |
-| SCR-AIC-013 | Suggestion inbox | `/assistant/suggestions` | CAN, STD | Review and apply suggestions | stale |
-| SCR-AIC-014 | Job fit panel | panel on `/jobs/:id` | CAN, STD | Candidate-side fit | unavailable, unclear-requirements |
-| SCR-AIC-015 | Recruiter fit view | panel in ATS | REC, HMG | Dimension chips and summary | disabled, loading |
-| SCR-AIC-016 | Explanation sheet | sheet | members, REC, HMG | Why for matches and recommendations | expired |
-| SCR-AIC-017 | Job preferences | `/settings/job-preferences` | CAN, STD | Must-haves and nice-to-haves | conflict-warning |
-| SCR-AIC-018 | Suggested skills | inline | CAN, STD, REC, EAD | Confirm extracted skills | none |
-| SCR-AIC-019 | Feedback and human review | dialog | CAN, STD | Feedback and review request | submitted |
-| SCR-AIC-020 | Employer review queue | `/org/:id/ai-reviews` | REC, EAD | Human review requests | overdue |
-| SCR-AIC-021 | Job recommendations | `/jobs/recommended` | CAN, STD | Recommended jobs | empty |
-| SCR-AIC-022 | Learning recommendations | `/learn/recommended` | CAN, STD | Recommended learning | catalog-gap |
-| SCR-AIC-023 | People recommendations | `/network/recommended` | CAN, STD, MNT | Suggested people and mentors | none |
-| SCR-AIC-024 | Dismissed items | `/recommendations/dismissed` | members | Restore dismissed | empty |
-| SCR-AIC-025 | AI policy admin | `/admin/ai/policies` | PAD, SAD | Capabilities, policies, routes | pending-change |
-| SCR-AIC-026 | Model registry | `/admin/ai/models` | PAD, SAD | Models and cards | awaiting-approval |
-| SCR-AIC-027 | Evaluation dashboard | `/admin/ai/evaluations` | PAD | Runs and gates | gate-failed |
-| SCR-AIC-028 | Fairness reports | `/admin/ai/fairness` | PAD, SAD, EAD (own) | Bias audit results | alert |
-| SCR-AIC-029 | Provider health and cost | `/admin/ai/providers` | PAD, FIN | Health, cost, kill switches | circuit-open |
-| SCR-AIC-030 | AI incidents | `/admin/ai/incidents` | PAD, MOD, SAD | Triage board | S1 |
-| SCR-AIC-031 | AI transparency page | `/ai` | GUE, all | Capabilities, model summaries, data use | none |
-| SCR-AIC-032 | Provider connection | `/settings/ai/providers` | members | On-device and connected providers | unsupported-device |
+| ID          | Name                       | Route proposal               | Roles               | Purpose                                    | Key states                                                 |
+| ----------- | -------------------------- | ---------------------------- | ------------------- | ------------------------------------------ | ---------------------------------------------------------- |
+| SCR-AIC-001 | Assistant panel            | global overlay               | CAN, STD, INS, MNT  | Chat                                       | streaming, quota-exhausted, unavailable, assessment-locked |
+| SCR-AIC-002 | Assistant history          | `/assistant/history`         | same                | Browse and delete chats                    | empty                                                      |
+| SCR-AIC-003 | My AI settings             | `/settings/ai`               | all members         | Context sources, memory, provider, opt-out | institution-locked                                         |
+| SCR-AIC-004 | AI memory manager          | `/settings/ai/memory`        | same                | View and edit memory                       | empty                                                      |
+| SCR-AIC-005 | AI usage                   | `/settings/ai/usage`         | same                | Allowance and history                      | exhausted                                                  |
+| SCR-AIC-006 | Resume feedback            | `/resume/:id/feedback`       | CAN, STD            | Scorecard and suggestions                  | processing, needs-input                                    |
+| SCR-AIC-007 | Interview practice setup   | `/practice/new`              | CAN, STD            | Configure session                          | voice-unavailable                                          |
+| SCR-AIC-008 | Interview practice session | `/practice/:id`              | CAN, STD            | Q and A with feedback                      | recording, offline                                         |
+| SCR-AIC-009 | Practice summary           | `/practice/:id/summary`      | CAN, STD            | Strengths and areas                        | deleted                                                    |
+| SCR-AIC-010 | Career plan                | `/plan`                      | CAN, STD            | Goal and staged plan                       | draft, active, stale-data                                  |
+| SCR-AIC-011 | Skill-gap matrix           | `/skills/gap/:targetId`      | CAN, STD            | Gap analysis                               | insufficient-data                                          |
+| SCR-AIC-012 | Drafting dialog            | modal                        | members             | Draft messages and letters                 | consent-required                                           |
+| SCR-AIC-013 | Suggestion inbox           | `/assistant/suggestions`     | CAN, STD            | Review and apply suggestions               | stale                                                      |
+| SCR-AIC-014 | Job fit panel              | panel on `/jobs/:id`         | CAN, STD            | Candidate-side fit                         | unavailable, unclear-requirements                          |
+| SCR-AIC-015 | Recruiter fit view         | panel in ATS                 | REC, HMG            | Dimension chips and summary                | disabled, loading                                          |
+| SCR-AIC-016 | Explanation sheet          | sheet                        | members, REC, HMG   | Why for matches and recommendations        | expired                                                    |
+| SCR-AIC-017 | Job preferences            | `/settings/job-preferences`  | CAN, STD            | Must-haves and nice-to-haves               | conflict-warning                                           |
+| SCR-AIC-018 | Suggested skills           | inline                       | CAN, STD, REC, EAD  | Confirm extracted skills                   | none                                                       |
+| SCR-AIC-019 | Feedback and human review  | dialog                       | CAN, STD            | Feedback and review request                | submitted                                                  |
+| SCR-AIC-020 | Employer review queue      | `/org/:id/ai-reviews`        | REC, EAD            | Human review requests                      | overdue                                                    |
+| SCR-AIC-021 | Job recommendations        | `/jobs/recommended`          | CAN, STD            | Recommended jobs                           | empty                                                      |
+| SCR-AIC-022 | Learning recommendations   | `/learn/recommended`         | CAN, STD            | Recommended learning                       | catalog-gap                                                |
+| SCR-AIC-023 | People recommendations     | `/network/recommended`       | CAN, STD, MNT       | Suggested people and mentors               | none                                                       |
+| SCR-AIC-024 | Dismissed items            | `/recommendations/dismissed` | members             | Restore dismissed                          | empty                                                      |
+| SCR-AIC-025 | AI policy admin            | `/admin/ai/policies`         | PAD, SAD            | Capabilities, policies, routes             | pending-change                                             |
+| SCR-AIC-026 | Model registry             | `/admin/ai/models`           | PAD, SAD            | Models and cards                           | awaiting-approval                                          |
+| SCR-AIC-027 | Evaluation dashboard       | `/admin/ai/evaluations`      | PAD                 | Runs and gates                             | gate-failed                                                |
+| SCR-AIC-028 | Fairness reports           | `/admin/ai/fairness`         | PAD, SAD, EAD (own) | Bias audit results                         | alert                                                      |
+| SCR-AIC-029 | Provider health and cost   | `/admin/ai/providers`        | PAD, FIN            | Health, cost, kill switches                | circuit-open                                               |
+| SCR-AIC-030 | AI incidents               | `/admin/ai/incidents`        | PAD, MOD, SAD       | Triage board                               | S1                                                         |
+| SCR-AIC-031 | AI transparency page       | `/ai`                        | GUE, all            | Capabilities, model summaries, data use    | none                                                       |
+| SCR-AIC-032 | Provider connection        | `/settings/ai/providers`     | members             | On-device and connected providers          | unsupported-device                                         |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-AIC-01 | AssistantSession | id, member, mode, state, title, created_at | AssistantMessage | Member retention (default 90 days) |
-| ENT-AIC-02 | AssistantMessage | session_id, role, content, sources, confidence, request_id | AssistantSession, AIRequest | Same as session |
-| ENT-AIC-03 | AIRequest (provenance) | id, member, capability, model_version, mode, data_class, context_refs, policy_decision, redactions, prompt_hash, tokens, cost, latency, outcome | ModelVersion | Metadata 24 months |
-| ENT-AIC-04 | Suggestion | id, member, target_ref, field, proposed, rationale, sources, confidence, state | AIRequest | 90 days after terminal |
-| ENT-AIC-05 | Recommendation | id, member, kind, target_ref, reasons, evidence_refs, benefit, confidence, alternatives, expires_at, engine_version, sponsored | Member | 90 days after expiry |
-| ENT-AIC-06 | MatchResult | id, subject (member), object (job), dimensions, band, uncertainty, engine_version, computed_at | Member, Job | 90 days; fairness samples per policy |
-| ENT-AIC-07 | MatchExplanation | match_id, reasons, evidence_refs, counterfactuals, template_version | MatchResult | With match |
-| ENT-AIC-08 | CareerPlan | id, member, goal, phases, items, assumptions, sources, state | Member | Life of account |
-| ENT-AIC-09 | SkillGapAnalysis | id, member, target_ref, matrix, computed_at | Member | 90 days |
-| ENT-AIC-10 | PracticeSession | id, member, setup, transcripts, feedback, summary | Member | 30 days default |
-| ENT-AIC-11 | ModelVersion and ModelCard | id, capability, provider_model, prompt_version, status, card, evaluations, approvals | Capability | Permanent |
-| ENT-AIC-12 | QuotaLedger | member or org, capability_family, period, units, cost, source | Member, Plan | 24 months |
-| ENT-AIC-13 | AIPolicy | capability, regions, plans, min_age, route_order, limits, version | Capability | Permanent |
-| ENT-AIC-14 | UserAIPreference and Memory | member, sources, provider_mode, memory_items, retention | Member | Life of account |
-| ENT-AIC-15 | MatchPreference | member, musts, nice_to_haves, pause_until | Member | Life of account |
-| ENT-AIC-16 | ExtractedSkill | id, member or job, taxonomy_id, snippet_ref, confidence, state | Skill taxonomy | With owner |
-| ENT-AIC-17 | FairnessReport and ReviewRequest | id, scope, metrics, period, model_version; review: application, status | Model, Org | 5 years (reports) |
-| ENT-AIC-18 | EvaluationRun and AIIncident | id, model_version, dataset, metrics, gates; incident: severity, status, owner | ModelVersion | 5 years |
-| ENT-AIC-19 | ProviderConfig and GuardrailRegistry | provider, region, credentials_ref, health; capability, sinks, impact_class, last_review | Capability | Permanent |
-| ENT-AIC-20 | PromptTemplate | id, capability, version, hash, text, state | ModelVersion | Permanent |
+| ID         | Name                                 | Key attributes                                                                                                                                      | Relationships                                           | Retention class                      |
+| ---------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------ |
+| ENT-AIC-01 | AssistantSession                     | id, member, mode, state, title, created_at                                                                                                          | AssistantMessage                                        | Member retention (default 90 days)   |
+| ENT-AIC-02 | AssistantMessage                     | session_id, role, content, sources, confidence, request_id                                                                                          | AssistantSession, AIRequest                             | Same as session                      |
+| ENT-AIC-03 | AIRequest (provenance)               | id, member, capability, model_version, mode, data_class, context_refs, policy_decision, redactions, prompt_hash, tokens, cost, latency, outcome     | ModelVersion                                            | Metadata 24 months                   |
+| ENT-AIC-04 | Suggestion                           | id, member, target_ref, field, proposed, rationale, sources, confidence, state                                                                      | AIRequest                                               | 90 days after terminal               |
+| ENT-AIC-05 | Recommendation                       | id, member, kind, target_ref, reasons, evidence_refs, benefit, confidence, alternatives, expires_at, engine_version, sponsored                      | Member                                                  | 90 days after expiry                 |
+| ENT-AIC-06 | MatchResult                          | id, subject (member), object (job), dimensions, band, uncertainty, engine_version, computed_at                                                      | Member, Job                                             | 90 days; fairness samples per policy |
+| ENT-AIC-07 | MatchExplanation                     | match_id, reasons, evidence_refs, counterfactuals, template_version                                                                                 | MatchResult                                             | With match                           |
+| ENT-AIC-08 | CareerPlan                           | id, member, goal, phases, items, assumptions, sources, state                                                                                        | Member                                                  | Life of account                      |
+| ENT-AIC-09 | SkillGapAnalysis                     | id, member, target_ref, matrix, computed_at                                                                                                         | Member                                                  | 90 days                              |
+| ENT-AIC-10 | PracticeSession                      | id, member, setup, transcripts, feedback, summary                                                                                                   | Member                                                  | 30 days default                      |
+| ENT-AIC-11 | ModelVersion and ModelCard           | id, capability, provider_model, prompt_version, status, card, evaluations, approvals                                                                | Capability                                              | Permanent                            |
+| ENT-AIC-12 | QuotaLedger                          | member or org, capability_family, period, units, cost, source                                                                                       | Member, Plan                                            | 24 months                            |
+| ENT-AIC-13 | AIPolicy                             | capability, regions, plans, min_age, route_order, limits, version                                                                                   | Capability                                              | Permanent                            |
+| ENT-AIC-14 | UserAIPreference and Memory          | member, sources, provider_mode, memory_items, retention                                                                                             | Member                                                  | Life of account                      |
+| ENT-AIC-15 | MatchPreference                      | member, musts, nice_to_haves, pause_until                                                                                                           | Member                                                  | Life of account                      |
+| ENT-AIC-16 | ExtractedSkill                       | id, member or job, taxonomy_id, snippet_ref, confidence, state                                                                                      | Skill taxonomy                                          | With owner                           |
+| ENT-AIC-17 | FairnessReport and ReviewRequest     | id, scope, metrics, period, model_version; review: application, status                                                                              | Model, Org                                              | 5 years (reports)                    |
+| ENT-AIC-18 | EvaluationRun and AIIncident         | id, model_version, dataset, metrics, gates; incident: severity, status, owner                                                                       | ModelVersion                                            | 5 years                              |
+| ENT-AIC-19 | ProviderConfig and GuardrailRegistry | provider, region, credentials_ref, health; capability, sinks, impact_class, last_review                                                             | Capability                                              | Permanent                            |
+| ENT-AIC-20 | PromptTemplate                       | id, capability, version, hash, text, state                                                                                                          | ModelVersion                                            | Permanent                            |
+| ENT-AIC-21 | OpenSourceIssue                      | id, provider, repo ref, issue ref, title, language, labels[], license, effort band, repository health, state (open, closed, excluded), last seen at | Provider adapter; feeds Recommendation (kind oss_issue) | 90 days after closed                 |
 
 ```mermaid
 erDiagram
@@ -1262,155 +1295,156 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-AIC-001 | aic.assistant.turn_completed | FR-AIC-001 | session id, request id | ANL |
-| EVT-AIC-002 | aic.assistant.refused | FR-AIC-009 | category | ANL, TSF |
-| EVT-AIC-003 | aic.settings.updated | FR-AIC-002, FR-AIC-030 | member, diff | SET |
-| EVT-AIC-004 | aic.resume.feedback_generated | FR-AIC-003 | resume ref | PRF |
-| EVT-AIC-005 | aic.suggestion.accepted | FR-AIC-008 | suggestion id, target | PRF, EVD, ANL |
-| EVT-AIC-006 | aic.suggestion.rejected | FR-AIC-008 | suggestion id | ANL |
-| EVT-AIC-007 | aic.practice.completed | FR-AIC-004 | session id | ANL |
-| EVT-AIC-008 | aic.plan.created | FR-AIC-005 | plan id | MEN, LRN |
-| EVT-AIC-009 | aic.plan.updated | FR-AIC-005 | plan id | LRN |
-| EVT-AIC-010 | aic.skillgap.generated | FR-AIC-006 | target | LRN |
-| EVT-AIC-011 | aic.draft.generated | FR-AIC-007 | type | ANL |
-| EVT-AIC-012 | aic.match.candidate_view | FR-AIC-010 | job ref | ANL |
-| EVT-AIC-013 | aic.match.recruiter_view | FR-AIC-011 | job ref, candidate set size | ATS, ANL |
-| EVT-AIC-014 | aic.explanation.viewed | FR-AIC-012 | match id | ANL |
-| EVT-AIC-015 | aic.preferences.updated | FR-AIC-013 | member | JOB |
-| EVT-AIC-016 | aic.skills.extracted | FR-AIC-014 | owner ref | PRF, JOB |
-| EVT-AIC-017 | aic.feedback.submitted | FR-AIC-015 | match id, issue | ANL |
-| EVT-AIC-018 | aic.review.requested | FR-AIC-015 | application ref | ATS, NTF |
-| EVT-AIC-019 | aic.fairness.report_generated | FR-AIC-016 | report id | ADM |
-| EVT-AIC-020 | aic.recommendation.shown | FR-AIC-017 to 020 | recommendation id | ANL |
-| EVT-AIC-021 | aic.recommendation.dismissed | FR-AIC-020 | id, reason | ANL |
-| EVT-AIC-022 | aic.recommendation.engaged | FR-AIC-020 | id | ANL |
-| EVT-AIC-023 | aic.engine.switched | FR-AIC-021 | capability, engine | ADM |
-| EVT-AIC-024 | aic.request.completed | FR-AIC-022 | request id, outcome | ANL, BIL |
-| EVT-AIC-025 | aic.request.denied | FR-AIC-022 | capability, reason | ANL |
-| EVT-AIC-026 | aic.guardrail.blocked | FR-AIC-023 | rule | SAD |
-| EVT-AIC-027 | aic.model.status_changed | FR-AIC-024 | model, from, to | ADM |
-| EVT-AIC-028 | aic.provenance.recorded | FR-AIC-025 | request id | ADM |
-| EVT-AIC-029 | aic.injection.detected | FR-AIC-026 | request id | TSF, SAD |
-| EVT-AIC-030 | aic.quota.warning | FR-AIC-027 | member, family | NTF |
-| EVT-AIC-031 | aic.quota.exhausted | FR-AIC-027 | member, family | NTF |
-| EVT-AIC-032 | aic.provider.circuit_opened | FR-AIC-028 | provider | ADM |
-| EVT-AIC-033 | aic.output.blocked | FR-AIC-029 | category | TSF |
-| EVT-AIC-034 | aic.assessment.denied | FR-AIC-031 | attempt id | ASM |
-| EVT-AIC-035 | aic.evaluation.completed | FR-AIC-032 | run id, gate | ADM |
-| EVT-AIC-036 | aic.incident.opened | FR-AIC-033 | incident id, severity | ADM, SAD |
-| EVT-AIC-037 | aic.provider.connected | FR-AIC-034 | member, provider | SET |
+| ID          | Event                         | Trigger                | Key payload                 | Consumers     |
+| ----------- | ----------------------------- | ---------------------- | --------------------------- | ------------- |
+| EVT-AIC-001 | aic.assistant.turn_completed  | FR-AIC-001             | session id, request id      | ANL           |
+| EVT-AIC-002 | aic.assistant.refused         | FR-AIC-009             | category                    | ANL, TSF      |
+| EVT-AIC-003 | aic.settings.updated          | FR-AIC-002, FR-AIC-030 | member, diff                | SET           |
+| EVT-AIC-004 | aic.resume.feedback_generated | FR-AIC-003             | resume ref                  | PRF           |
+| EVT-AIC-005 | aic.suggestion.accepted       | FR-AIC-008             | suggestion id, target       | PRF, EVD, ANL |
+| EVT-AIC-006 | aic.suggestion.rejected       | FR-AIC-008             | suggestion id               | ANL           |
+| EVT-AIC-007 | aic.practice.completed        | FR-AIC-004             | session id                  | ANL           |
+| EVT-AIC-008 | aic.plan.created              | FR-AIC-005             | plan id                     | MEN, LRN      |
+| EVT-AIC-009 | aic.plan.updated              | FR-AIC-005             | plan id                     | LRN           |
+| EVT-AIC-010 | aic.skillgap.generated        | FR-AIC-006             | target                      | LRN           |
+| EVT-AIC-011 | aic.draft.generated           | FR-AIC-007             | type                        | ANL           |
+| EVT-AIC-012 | aic.match.candidate_view      | FR-AIC-010             | job ref                     | ANL           |
+| EVT-AIC-013 | aic.match.recruiter_view      | FR-AIC-011             | job ref, candidate set size | ATS, ANL      |
+| EVT-AIC-014 | aic.explanation.viewed        | FR-AIC-012             | match id                    | ANL           |
+| EVT-AIC-015 | aic.preferences.updated       | FR-AIC-013             | member                      | JOB           |
+| EVT-AIC-016 | aic.skills.extracted          | FR-AIC-014             | owner ref                   | PRF, JOB      |
+| EVT-AIC-017 | aic.feedback.submitted        | FR-AIC-015             | match id, issue             | ANL           |
+| EVT-AIC-018 | aic.review.requested          | FR-AIC-015             | application ref             | ATS, NTF      |
+| EVT-AIC-019 | aic.fairness.report_generated | FR-AIC-016             | report id                   | ADM           |
+| EVT-AIC-020 | aic.recommendation.shown      | FR-AIC-017 to 020      | recommendation id           | ANL           |
+| EVT-AIC-021 | aic.recommendation.dismissed  | FR-AIC-020             | id, reason                  | ANL           |
+| EVT-AIC-022 | aic.recommendation.engaged    | FR-AIC-020             | id                          | ANL           |
+| EVT-AIC-023 | aic.engine.switched           | FR-AIC-021             | capability, engine          | ADM           |
+| EVT-AIC-024 | aic.request.completed         | FR-AIC-022             | request id, outcome         | ANL, BIL      |
+| EVT-AIC-025 | aic.request.denied            | FR-AIC-022             | capability, reason          | ANL           |
+| EVT-AIC-026 | aic.guardrail.blocked         | FR-AIC-023             | rule                        | SAD           |
+| EVT-AIC-027 | aic.model.status_changed      | FR-AIC-024             | model, from, to             | ADM           |
+| EVT-AIC-028 | aic.provenance.recorded       | FR-AIC-025             | request id                  | ADM           |
+| EVT-AIC-029 | aic.injection.detected        | FR-AIC-026             | request id                  | TSF, SAD      |
+| EVT-AIC-030 | aic.quota.warning             | FR-AIC-027             | member, family              | NTF           |
+| EVT-AIC-031 | aic.quota.exhausted           | FR-AIC-027             | member, family              | NTF           |
+| EVT-AIC-032 | aic.provider.circuit_opened   | FR-AIC-028             | provider                    | ADM           |
+| EVT-AIC-033 | aic.output.blocked            | FR-AIC-029             | category                    | TSF           |
+| EVT-AIC-034 | aic.assessment.denied         | FR-AIC-031             | attempt id                  | ASM           |
+| EVT-AIC-035 | aic.evaluation.completed      | FR-AIC-032             | run id, gate                | ADM           |
+| EVT-AIC-036 | aic.incident.opened           | FR-AIC-033             | incident id, severity       | ADM, SAD      |
+| EVT-AIC-037 | aic.provider.connected        | FR-AIC-034             | member, provider            | SET           |
 
 ### 9.2 Consumed
 
-| Event | From | Use |
-|---|---|---|
+| Event                                                | From     | Use                                   |
+| ---------------------------------------------------- | -------- | ------------------------------------- |
 | prf.profile.updated, evd.evidence.verified (planned) | PRF, EVD | Invalidate matches, stale suggestions |
-| job.job.published, job.job.closed (planned) | JOB | Index, expire recommendations |
-| lrn.course.published, lrn.course.retired (planned) | LRN | Catalog updates |
-| asm.attempt.started, asm.attempt.ended (planned) | ASM | Assessment context for `BR-AIC-019` |
-| net.block.created (EVT-NET-005) | NET | Exclude people recommendations |
-| net.privacy.changed (EVT-NET-006) | NET | Respect discovery settings |
-| bil.entitlement.changed (planned) | BIL | Allowances |
-| tsf.sanction.applied (EVT-TSF-013) | TSF | Restrict AI features if sanctioned |
-| idn.account.deleted (planned) | IDN, SET | Erase AI data |
-| ats.application.created (planned) | ATS | Candidate notice and fit computation |
+| job.job.published, job.job.closed (planned)          | JOB      | Index, expire recommendations         |
+| lrn.course.published, lrn.course.retired (planned)   | LRN      | Catalog updates                       |
+| asm.attempt.started, asm.attempt.ended (planned)     | ASM      | Assessment context for `BR-AIC-019`   |
+| net.block.created (EVT-NET-005)                      | NET      | Exclude people recommendations        |
+| net.privacy.changed (EVT-NET-006)                    | NET      | Respect discovery settings            |
+| bil.entitlement.changed (planned)                    | BIL      | Allowances                            |
+| tsf.sanction.applied (EVT-TSF-013)                   | TSF      | Restrict AI features if sanctioned    |
+| idn.account.deleted (planned)                        | IDN, SET | Erase AI data                         |
+| ats.application.created (planned)                    | ATS      | Candidate notice and fit computation  |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behaviour |
-|---|---|---|
-| Language model providers (several, behind adapters) | Generation, extraction | Circuit breaker, fallback, unavailable states |
-| On-device model runtime (WebGPU and WASM) | Local capabilities | Option disabled |
-| Speech-to-text (browser API or provider with consent) | Interview voice | Typing only |
-| Embedding and vector search service | Retrieval for matching and recommendations | Rule-based fallback |
-| Secret manager | Provider keys | Gateway refuses cloud routes |
-| Classifier services for safety and injection | Output and input filters | Fail closed for free-form generation |
-| Evaluation datasets store | Golden sets | Gates block promotion |
-| Market data (MKT planned) | Plan and gap context | Limitation stated |
+| Dependency                                            | Purpose                                    | Failure behaviour                             |
+| ----------------------------------------------------- | ------------------------------------------ | --------------------------------------------- |
+| Language model providers (several, behind adapters)   | Generation, extraction                     | Circuit breaker, fallback, unavailable states |
+| On-device model runtime (WebGPU and WASM)             | Local capabilities                         | Option disabled                               |
+| Speech-to-text (browser API or provider with consent) | Interview voice                            | Typing only                                   |
+| Embedding and vector search service                   | Retrieval for matching and recommendations | Rule-based fallback                           |
+| Secret manager                                        | Provider keys                              | Gateway refuses cloud routes                  |
+| Classifier services for safety and injection          | Output and input filters                   | Fail closed for free-form generation          |
+| Evaluation datasets store                             | Golden sets                                | Gates block promotion                         |
+| Market data (MKT planned)                             | Plan and gap context                       | Limitation stated                             |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For |
-|---|---|
-| PRF, EVD, BGV (planned) | Profile, evidence levels, verification |
-| JOB, ATS (planned) | Jobs, requirements, pipelines, human review tasks |
-| LRN, ASM (planned) | Catalog, assessment results and context |
-| NET, MSG | People signals (consented), conversation features by consent |
-| BIL (planned) | Plans and entitlements |
-| IDN, SET (planned) | Identity, age, consent, erasure |
-| TSF | Self-harm protocol, AI-harm review, injection abuse signals |
-| MKT (planned) | Market data for plans |
-| PLT, PWA (planned) | Infrastructure, on-device capability |
+| Depends on              | For                                                          |
+| ----------------------- | ------------------------------------------------------------ |
+| PRF, EVD, BGV (planned) | Profile, evidence levels, verification                       |
+| JOB, ATS (planned)      | Jobs, requirements, pipelines, human review tasks            |
+| LRN, ASM (planned)      | Catalog, assessment results and context                      |
+| NET, MSG                | People signals (consented), conversation features by consent |
+| BIL (planned)           | Plans and entitlements                                       |
+| IDN, SET (planned)      | Identity, age, consent, erasure                              |
+| TSF                     | Self-harm protocol, AI-harm review, injection abuse signals  |
+| MKT (planned)           | Market data for plans                                        |
+| PLT, PWA (planned)      | Infrastructure, on-device capability                         |
 
-| Depended on by | Uses |
-|---|---|
-| TSF | Classifiers registered through the registry; gateway for any AI assist for moderators (no AI decisions) |
-| NET | Suggestions, explanations, referral eligibility match |
-| MSG | Drafting, summarize, translate with consent |
-| ATS, JOB (planned) | Fit, summaries, recommendations |
-| LRN, ASM (planned) | Learning recommendations, content assistance under policy |
-| PRF (planned) | Resume feedback, skill extraction |
-| MEN (planned) | Mentor recommendations |
-| ANL (planned) | Usage and quality metrics |
+| Depended on by     | Uses                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| TSF                | Classifiers registered through the registry; gateway for any AI assist for moderators (no AI decisions) |
+| NET                | Suggestions, explanations, referral eligibility match                                                   |
+| MSG                | Drafting, summarize, translate with consent                                                             |
+| ATS, JOB (planned) | Fit, summaries, recommendations                                                                         |
+| LRN, ASM (planned) | Learning recommendations, content assistance under policy                                               |
+| PRF (planned)      | Resume feedback, skill extraction                                                                       |
+| MEN (planned)      | Mentor recommendations                                                                                  |
+| ANL (planned)      | Usage and quality metrics                                                                               |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner |
-|---|---|---|---|
-| Suggestion acceptance rate | Accepted share of reviewed suggestions | accepted / (accepted + rejected) | Product |
-| Groundedness rate | Answers with valid sources among factual answers | grounded / factual answers | AI lead |
-| Fabrication rate | Suggestions adding unsupported facts in audits | fabricated / audited | AI lead |
-| Fallback rate | Requests served by non-AI fallback | fallback / requests | Platform |
-| Gateway denial rate by reason | Denials per reason | denials / requests | PAD |
-| Cost per active user | Metered cost divided by active members | cost / MAU | FIN |
-| Free-user paid-inference incidents | Paid calls for free users without policy | count (target 0) | AI lead |
-| Recommendation dismiss rate | Dismissed share of shown | dismissed / shown | Product |
-| Explanation coverage | Matches with complete explanation | explained / matches | AI lead |
-| Fairness alert count | Alerts above threshold per quarter | count | PAD |
-| Human review response within 7 days | Requests answered in time | on-time / requests | Employer success lead |
-| Incident time to containment (S1) | Report to kill switch | median(minutes) | SAD |
-| Guardrail test pass rate | CI tests passing | passing / total | Engineering lead |
+| Metric                              | Definition                                       | Formula                          | Owner                 |
+| ----------------------------------- | ------------------------------------------------ | -------------------------------- | --------------------- |
+| Suggestion acceptance rate          | Accepted share of reviewed suggestions           | accepted / (accepted + rejected) | Product               |
+| Groundedness rate                   | Answers with valid sources among factual answers | grounded / factual answers       | AI lead               |
+| Fabrication rate                    | Suggestions adding unsupported facts in audits   | fabricated / audited             | AI lead               |
+| Fallback rate                       | Requests served by non-AI fallback               | fallback / requests              | Platform              |
+| Gateway denial rate by reason       | Denials per reason                               | denials / requests               | PAD                   |
+| Cost per active user                | Metered cost divided by active members           | cost / MAU                       | FIN                   |
+| Free-user paid-inference incidents  | Paid calls for free users without policy         | count (target 0)                 | AI lead               |
+| Recommendation dismiss rate         | Dismissed share of shown                         | dismissed / shown                | Product               |
+| Explanation coverage                | Matches with complete explanation                | explained / matches              | AI lead               |
+| Fairness alert count                | Alerts above threshold per quarter               | count                            | PAD                   |
+| Human review response within 7 days | Requests answered in time                        | on-time / requests               | Employer success lead |
+| Incident time to containment (S1)   | Report to kill switch                            | median(minutes)                  | SAD                   |
+| Guardrail test pass rate            | CI tests passing                                 | passing / total                  | Engineering lead      |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-AIC-01 | Which AI capabilities are in the first release and which providers are acceptable | List of capabilities; provider shortlist | Assistant chat, resume feedback, skill gap, explanations; providers behind the gateway | Owner | R4 scope |
-| OD-AIC-02 | AI allowances and prices per plan; whether a paid cost policy exists for free users | None; limited free quota; none for free | Free users use local or free quota only (`BR-AIC-009`); amounts set with BIL | Owner and BIL lead | FR-AIC-027 |
-| OD-AIC-03 | Which AI features minors may use | Learning only; none; full with controls | Learning and exploration only | Owner and counsel | `BR-AIC-030` |
-| OD-AIC-04 | Data residency and region restrictions for providers | Single region; per-region routing | Per-region routing with allowlist | Counsel and security | FR-AIC-028 |
-| OD-AIC-05 | Regulatory notification duties and classification (for example hiring-related AI as high-risk in some jurisdictions) | Treat recruiter-side fit as high-risk everywhere; by jurisdiction | Treat as high-risk everywhere | Counsel | FR-AIC-011, FR-AIC-016 |
-| OD-AIC-06 | Candidate human-review SLA and which employers must offer it | 7 days; 14 days; by region | 7 days for all AI-enabled employers | Product and counsel | FR-AIC-015 |
-| OD-AIC-07 | Should recruiter-side AI fit exist at all in v1, given non-goal on ungoverned autonomous decisions | Yes with controls; talent search only; none | Yes with controls, opt-in per job | Owner | FR-AIC-011 |
-| OD-AIC-08 | Demographic data collection for fairness audits (consent, regions) | Voluntary survey; none; third-party audit | Voluntary survey plus counterfactual tests | Counsel and owner | FR-AIC-016 |
-| OD-AIC-09 | Employer-side matching weights: may orgs customize beyond hiding dimensions | None; limited with audit | None beyond hiding | Product | FR-AIC-011 |
-| OD-AIC-10 | Retention of AI history content default | 30; 90; 365 days | 90 days | Product and counsel | FR-AIC-025 |
+| ID        | Question                                                                                                             | Options                                                           | Default proposal                                                                       | Who decides                  | Blocking               |
+| --------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------- | ---------------------- |
+| OD-AIC-01 | Which AI capabilities are in the first release and which providers are acceptable                                    | List of capabilities; provider shortlist                          | Assistant chat, resume feedback, skill gap, explanations; providers behind the gateway | Owner                        | R4 scope               |
+| OD-AIC-02 | AI allowances and prices per plan; whether a paid cost policy exists for free users                                  | None; limited free quota; none for free                           | Free users use local or free quota only (`BR-AIC-009`); amounts set with BIL           | Owner and BIL lead           | FR-AIC-027             |
+| OD-AIC-03 | Which AI features minors may use                                                                                     | Learning only; none; full with controls                           | Learning and exploration only                                                          | Owner and counsel            | `BR-AIC-030`           |
+| OD-AIC-04 | Data residency and region restrictions for providers                                                                 | Single region; per-region routing                                 | Per-region routing with allowlist                                                      | Counsel and security         | FR-AIC-028             |
+| OD-AIC-05 | Regulatory notification duties and classification (for example hiring-related AI as high-risk in some jurisdictions) | Treat recruiter-side fit as high-risk everywhere; by jurisdiction | Treat as high-risk everywhere                                                          | Counsel                      | FR-AIC-011, FR-AIC-016 |
+| OD-AIC-06 | Candidate human-review SLA and which employers must offer it                                                         | 7 days; 14 days; by region                                        | 7 days for all AI-enabled employers                                                    | Product and counsel          | FR-AIC-015             |
+| OD-AIC-07 | Should recruiter-side AI fit exist at all in v1, given non-goal on ungoverned autonomous decisions                   | Yes with controls; talent search only; none                       | Yes with controls, opt-in per job                                                      | Owner                        | FR-AIC-011             |
+| OD-AIC-08 | Demographic data collection for fairness audits (consent, regions)                                                   | Voluntary survey; none; third-party audit                         | Voluntary survey plus counterfactual tests                                             | Counsel and owner            | FR-AIC-016             |
+| OD-AIC-09 | Employer-side matching weights: may orgs customize beyond hiding dimensions                                          | None; limited with audit                                          | None beyond hiding                                                                     | Product                      | FR-AIC-011             |
+| OD-AIC-10 | Retention of AI history content default                                                                              | 30; 90; 365 days                                                  | 90 days                                                                                | Product and counsel          | FR-AIC-025             |
+| OD-AIC-11 | Which code-hosting providers may be used as sources for open-source recommendations, and under what terms?           | GitHub only; GitHub and GitLab; more later                        | GitHub first, then GitLab, through the adapter `[PROP]`                                | Engineering lead and counsel | FR-AIC-035             |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-AIC-01 | Biased matching harms protected groups | M / H | Allowlist inputs, counterfactual tests, fairness gates, human review, no auto-reject |
-| RSK-AIC-02 | Hallucinated or fabricated resume content misleads employers | H / H | "Needs your input" rule, golden-set zero tolerance, verified evidence separation |
-| RSK-AIC-03 | Provider data exposure or training on user data | M / H | Redaction, contracts, class-based routing, on-device option |
-| RSK-AIC-04 | Cost overrun from heavy use | M / M | Metering, budgets, fallbacks, free-user invariant |
-| RSK-AIC-05 | Prompt injection via uploaded resumes or job posts | H / M | Sanitization, enclosure, canary, schema validation |
-| RSK-AIC-06 | Users over-trust AI outputs | M / M | Confidence labels, disclaimers, evidence links |
-| RSK-AIC-07 | AI use during assessments undermines integrity | M / H | Server-side deny with fail-closed context |
-| RSK-AIC-08 | Regulatory classification of hiring AI | M / H | Treat as high-risk, transparency, human review, audits, `OD-AIC-05` |
-| RSK-AIC-09 | Provider outage or deprecation | H / M | Breakers, fallbacks, model registry migration plan |
+| ID         | Risk                                                         | Likelihood and impact | Mitigation                                                                           |
+| ---------- | ------------------------------------------------------------ | --------------------- | ------------------------------------------------------------------------------------ |
+| RSK-AIC-01 | Biased matching harms protected groups                       | M / H                 | Allowlist inputs, counterfactual tests, fairness gates, human review, no auto-reject |
+| RSK-AIC-02 | Hallucinated or fabricated resume content misleads employers | H / H                 | "Needs your input" rule, golden-set zero tolerance, verified evidence separation     |
+| RSK-AIC-03 | Provider data exposure or training on user data              | M / H                 | Redaction, contracts, class-based routing, on-device option                          |
+| RSK-AIC-04 | Cost overrun from heavy use                                  | M / M                 | Metering, budgets, fallbacks, free-user invariant                                    |
+| RSK-AIC-05 | Prompt injection via uploaded resumes or job posts           | H / M                 | Sanitization, enclosure, canary, schema validation                                   |
+| RSK-AIC-06 | Users over-trust AI outputs                                  | M / M                 | Confidence labels, disclaimers, evidence links                                       |
+| RSK-AIC-07 | AI use during assessments undermines integrity               | M / H                 | Server-side deny with fail-closed context                                            |
+| RSK-AIC-08 | Regulatory classification of hiring AI                       | M / H                 | Treat as high-risk, transparency, human review, audits, `OD-AIC-05`                  |
+| RSK-AIC-09 | Provider outage or deprecation                               | H / M                 | Breakers, fallbacks, model registry migration plan                                   |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §15.10 (human gate, prohibited list, redaction, injection, confidence, AI evidence layer) | `BR-AIC-001`, `-005`, `-007`, `-013`, `-014`, `-015` | Renumbered; AIE-001..009 folded into provenance |
-| SSOT §16 (gateway, execution policy, cost invariant, data boundary, memory separation, impact classes, provenance) | `FR-AIC-022` to `025`, `BR-AIC-008` to `012` | Quotas left open (V61-09) as `OD-AIC-02` |
-| SSOT §17 (AI modes in assessments) | `FR-AIC-031`, `BR-AIC-019` | n/a |
-| SSOT §18 (matching pipeline, recommendations, reputation, career intelligence) | `FR-AIC-010` to `021`, `BR-AIC-016`, `-017`, `-032` | "Talent Score" excluded |
-| SSOT BR-184..188, BR-221, BR-229, MIG-04 | Recommendation and draft rules, evidence weights | Renamed |
-| SSOT F-11, F-84, F-91, F-93, F-99, F-92 | Feature scope | Phase labels dropped |
-| docs/registries/FEATURE_REGISTRY.md | Cross-check | n/a |
-| Added by this blueprint [PROP] | Gateway admin, model registry and cards, bias program, incident process, human-review requests, on-device and user-authorized providers, safety filters, fairness reports | n/a |
+| Legacy source                                                                                                      | Used for                                                                                                                                                                  | Dropped or changed                              |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| SSOT §15.10 (human gate, prohibited list, redaction, injection, confidence, AI evidence layer)                     | `BR-AIC-001`, `-005`, `-007`, `-013`, `-014`, `-015`                                                                                                                      | Renumbered; AIE-001..009 folded into provenance |
+| SSOT §16 (gateway, execution policy, cost invariant, data boundary, memory separation, impact classes, provenance) | `FR-AIC-022` to `025`, `BR-AIC-008` to `012`                                                                                                                              | Quotas left open (V61-09) as `OD-AIC-02`        |
+| SSOT §17 (AI modes in assessments)                                                                                 | `FR-AIC-031`, `BR-AIC-019`                                                                                                                                                | n/a                                             |
+| SSOT §18 (matching pipeline, recommendations, reputation, career intelligence)                                     | `FR-AIC-010` to `021`, `BR-AIC-016`, `-017`, `-032`                                                                                                                       | "Talent Score" excluded                         |
+| SSOT BR-184..188, BR-221, BR-229, MIG-04                                                                           | Recommendation and draft rules, evidence weights                                                                                                                          | Renamed                                         |
+| SSOT F-11, F-84, F-91, F-93, F-99, F-92                                                                            | Feature scope                                                                                                                                                             | Phase labels dropped                            |
+| docs/registries/FEATURE_REGISTRY.md                                                                                | Cross-check                                                                                                                                                               | n/a                                             |
+| Added by this blueprint [PROP]                                                                                     | Gateway admin, model registry and cards, bias program, incident process, human-review requests, on-device and user-authorized providers, safety filters, fairness reports | n/a                                             |

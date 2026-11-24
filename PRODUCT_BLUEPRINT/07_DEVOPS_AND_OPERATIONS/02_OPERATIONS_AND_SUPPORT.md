@@ -12,20 +12,20 @@ Status: intended operating model for the complete product. No on-call rotation, 
 
 ## 2. Operating roles
 
-| Role | Operates | Notes |
-|---|---|---|
-| On-call engineer (primary, secondary) | first response to pages | one person may hold several roles; rotation size is a parameter `OD-SUP-01` |
-| Incident commander (IC) | runs the incident, decides, delegates | assigned per incident from trained pool |
-| Communications lead | status page, stakeholder and customer updates | may be the IC in small incidents |
-| Scribe | timeline | optional for Sev 3 |
-| Subject-matter responder | module expertise | paged by IC |
-| Release manager | release record, gate enforcement (doc 06/02 section 13) | rotating |
-| Support agent (`SUP`) | tiers 1 to 2 | product role in `ADM` module |
-| Moderator (`MOD`) | trust and safety queue | not an operations pager role unless abuse surge |
-| Platform admin (`PAD`) | configuration, flags, tenant admin actions | audited |
-| Security officer (`SAD`) | security incidents, access reviews, break-glass approver | |
-| Finance operator (`FIN`) | billing support, refunds, reconciliation | |
-| Privacy lead | data subject requests, breach assessment | named role, parameter `OD-SUP-02` |
+| Role                                  | Operates                                                 | Notes                                                                       |
+| ------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------- |
+| On-call engineer (primary, secondary) | first response to pages                                  | one person may hold several roles; rotation size is a parameter `OD-SUP-01` |
+| Incident commander (IC)               | runs the incident, decides, delegates                    | assigned per incident from trained pool                                     |
+| Communications lead                   | status page, stakeholder and customer updates            | may be the IC in small incidents                                            |
+| Scribe                                | timeline                                                 | optional for Sev 3                                                          |
+| Subject-matter responder              | module expertise                                         | paged by IC                                                                 |
+| Release manager                       | release record, gate enforcement (doc 06/02 section 13)  | rotating                                                                    |
+| Support agent (`SUP`)                 | tiers 1 to 2                                             | product role in `ADM` module                                                |
+| Moderator (`MOD`)                     | trust and safety queue                                   | not an operations pager role unless abuse surge                             |
+| Platform admin (`PAD`)                | configuration, flags, tenant admin actions               | audited                                                                     |
+| Security officer (`SAD`)              | security incidents, access reviews, break-glass approver |                                                                             |
+| Finance operator (`FIN`)              | billing support, refunds, reconciliation                 |                                                                             |
+| Privacy lead                          | data subject requests, breach assessment                 | named role, parameter `OD-SUP-02`                                           |
 
 ## 3. Runbook catalogue
 
@@ -33,70 +33,70 @@ Runbooks are Markdown in `docs/runbooks/` (proposed), one per id, using the temp
 
 ### 3.1 Catalogue
 
-| Id | Runbook | Trigger / alert | Severity default |
-|---|---|---|---|
-| RB-GEN-01 | Triage a page: first five minutes | any page | n/a |
-| RB-GEN-02 | Declare, run and close an incident | Sev 1 to 3 | n/a |
-| RB-GEN-03 | Rollback a release (levels L0 to L4) | failed canary, regression | Sev 2 |
-| RB-GEN-04 | Toggle kill switch / feature flag | feature incident | Sev 2 |
-| RB-GEN-05 | Emergency change and hotfix | urgent fix | Sev 1 to 2 |
-| RB-GEN-06 | Maintenance mode and graceful degradation | planned or emergency | Sev 2 |
-| RB-API-01 | Elevated 5xx rate | error-rate alert | Sev 2 |
-| RB-API-02 | Latency SLO burn | latency alert | Sev 2 |
-| RB-API-03 | Rate-limit false positives or abuse surge | 429 spike | Sev 3 |
-| RB-API-04 | Instance crash loop or failed readiness | readiness alert | Sev 2 |
-| RB-WEB-01 | Bad frontend release (white screen, service worker stuck) | RUM error spike | Sev 2 |
-| RB-WEB-02 | CDN or WAF misconfiguration | edge errors | Sev 2 |
-| RB-WEB-03 | Certificate or DNS problem | expiry/DNS alert | Sev 1 |
-| RB-DB-01 | Database saturation (connections, CPU, locks) | DB alert | Sev 1 to 2 |
-| RB-DB-02 | Point-in-time restore | corruption, bad migration | Sev 1 |
-| RB-DB-03 | Partial restore of a tenant or record set | user data loss | Sev 2 |
-| RB-DB-04 | Failed or slow migration | deploy alert | Sev 2 |
-| RB-DB-05 | Replica lag / replica failure | lag alert | Sev 3 |
-| RB-DB-06 | Disk growth, bloat, vacuum problems | storage alert | Sev 3 |
-| RB-JOB-01 | Queue backlog or oldest-job age breach | queue age alert | Sev 2 |
-| RB-JOB-02 | Dead-letter inspection and replay | dead-job alert | Sev 3 |
-| RB-JOB-03 | Duplicate job execution suspicion (idempotency check) | anomaly | Sev 2 |
-| RB-JOB-04 | Worker lease storm / stuck leases | lease alert | Sev 2 |
-| RB-STO-01 | Object storage failure or restore by version | storage errors | Sev 2 |
-| RB-STO-02 | Malware scan backlog or false positive | scanner alert | Sev 3 |
-| RB-EML-01 | Email provider outage or deliverability drop | bounce/complaint spike | Sev 2 |
-| RB-EML-02 | Domain reputation / blocklisting | deliverability | Sev 2 |
-| RB-PAY-01 | Payment webhook failures or backlog | webhook alert | Sev 1 to 2 |
-| RB-PAY-02 | Entitlement mismatch reconciliation | reconcile job | Sev 2 |
-| RB-PAY-03 | Refund, dispute and chargeback handling | finance request | Sev 3 |
-| RB-SEC-01 | Secret leak or credential compromise | scan or report | Sev 1 |
-| RB-SEC-02 | Account takeover wave / credential stuffing | auth anomaly | Sev 1 to 2 |
-| RB-SEC-03 | Tenant isolation / RLS violation suspicion | isolation signal | Sev 1 |
-| RB-SEC-04 | Personal data breach assessment and notification | suspected breach | Sev 1 |
-| RB-SEC-05 | Vulnerability disclosure intake and fix | report | per severity |
-| RB-SEC-06 | Impersonation or admin abuse investigation | audit anomaly | Sev 2 |
-| RB-AUTH-01 | Login or token failures, session key rotation | auth alert | Sev 1 to 2 |
-| RB-SRC-01 | Search degraded or index rebuild | search alert | Sev 3 |
-| RB-RT-01 | Realtime gateway failure (messaging, live sessions) | realtime alert | Sev 2 |
-| RB-ASM-01 | Assessment platform incident during live cohort exam | exam alert | Sev 1 |
-| RB-ASM-02 | Integrity-signal anomaly (false flag wave) | anomaly | Sev 2 |
-| RB-AI-01 | AI provider outage, cost spike or policy anomaly | AI alert | Sev 3 |
-| RB-AI-02 | Harmful or biased AI output report | report | Sev 2 |
-| RB-INT-01 | Calendar or video provider failure during interviews | provider alert | Sev 2 |
-| RB-BGV-01 | Background-check vendor outage or wrong report | vendor alert | Sev 2 |
-| RB-TSF-01 | Abuse surge (spam, fake employers, scam jobs) | moderation backlog | Sev 2 |
-| RB-TSF-02 | Content removal and legal takedown | legal request | Sev 2 |
-| RB-PRV-01 | Data subject access / export request | request | n/a |
-| RB-PRV-02 | Erasure request and deletion-ledger handling | request | n/a |
-| RB-PRV-03 | Legal hold placement and release | legal | n/a |
-| RB-DAT-01 | Run a backfill safely | planned | n/a |
-| RB-DAT-02 | Retention sweep failure or dry-run review | sweep alert | Sev 3 |
-| RB-DAT-03 | Bulk data correction with approval | planned | n/a |
-| RB-OPS-01 | Capacity scale-up before known burst | planned event | n/a |
-| RB-OPS-02 | Cost anomaly | cost alert | Sev 3 |
-| RB-OPS-03 | Region or zone loss | cloud alert | Sev 1 |
-| RB-OPS-04 | Full rebuild from IaC | DR drill or disaster | Sev 1 |
-| RB-OPS-05 | Status page publishing and templates | incident | n/a |
-| RB-OPS-06 | Break-glass access procedure | emergency | n/a |
-| RB-SUP-01 | Support escalation to engineering | ticket | n/a |
-| RB-SUP-02 | Account recovery with identity checks | ticket | n/a |
-| RB-SUP-03 | Mass-impact ticket surge handling | ticket spike | Sev 2 |
+| Id         | Runbook                                                   | Trigger / alert           | Severity default |
+| ---------- | --------------------------------------------------------- | ------------------------- | ---------------- |
+| RB-GEN-01  | Triage a page: first five minutes                         | any page                  | n/a              |
+| RB-GEN-02  | Declare, run and close an incident                        | Sev 1 to 3                | n/a              |
+| RB-GEN-03  | Rollback a release (levels L0 to L4)                      | failed canary, regression | Sev 2            |
+| RB-GEN-04  | Toggle kill switch / feature flag                         | feature incident          | Sev 2            |
+| RB-GEN-05  | Emergency change and hotfix                               | urgent fix                | Sev 1 to 2       |
+| RB-GEN-06  | Maintenance mode and graceful degradation                 | planned or emergency      | Sev 2            |
+| RB-API-01  | Elevated 5xx rate                                         | error-rate alert          | Sev 2            |
+| RB-API-02  | Latency SLO burn                                          | latency alert             | Sev 2            |
+| RB-API-03  | Rate-limit false positives or abuse surge                 | 429 spike                 | Sev 3            |
+| RB-API-04  | Instance crash loop or failed readiness                   | readiness alert           | Sev 2            |
+| RB-WEB-01  | Bad frontend release (white screen, service worker stuck) | RUM error spike           | Sev 2            |
+| RB-WEB-02  | CDN or WAF misconfiguration                               | edge errors               | Sev 2            |
+| RB-WEB-03  | Certificate or DNS problem                                | expiry/DNS alert          | Sev 1            |
+| RB-DB-01   | Database saturation (connections, CPU, locks)             | DB alert                  | Sev 1 to 2       |
+| RB-DB-02   | Point-in-time restore                                     | corruption, bad migration | Sev 1            |
+| RB-DB-03   | Partial restore of a tenant or record set                 | user data loss            | Sev 2            |
+| RB-DB-04   | Failed or slow migration                                  | deploy alert              | Sev 2            |
+| RB-DB-05   | Replica lag / replica failure                             | lag alert                 | Sev 3            |
+| RB-DB-06   | Disk growth, bloat, vacuum problems                       | storage alert             | Sev 3            |
+| RB-JOB-01  | Queue backlog or oldest-job age breach                    | queue age alert           | Sev 2            |
+| RB-JOB-02  | Dead-letter inspection and replay                         | dead-job alert            | Sev 3            |
+| RB-JOB-03  | Duplicate job execution suspicion (idempotency check)     | anomaly                   | Sev 2            |
+| RB-JOB-04  | Worker lease storm / stuck leases                         | lease alert               | Sev 2            |
+| RB-STO-01  | Object storage failure or restore by version              | storage errors            | Sev 2            |
+| RB-STO-02  | Malware scan backlog or false positive                    | scanner alert             | Sev 3            |
+| RB-EML-01  | Email provider outage or deliverability drop              | bounce/complaint spike    | Sev 2            |
+| RB-EML-02  | Domain reputation / blocklisting                          | deliverability            | Sev 2            |
+| RB-PAY-01  | Payment webhook failures or backlog                       | webhook alert             | Sev 1 to 2       |
+| RB-PAY-02  | Entitlement mismatch reconciliation                       | reconcile job             | Sev 2            |
+| RB-PAY-03  | Refund, dispute and chargeback handling                   | finance request           | Sev 3            |
+| RB-SEC-01  | Secret leak or credential compromise                      | scan or report            | Sev 1            |
+| RB-SEC-02  | Account takeover wave / credential stuffing               | auth anomaly              | Sev 1 to 2       |
+| RB-SEC-03  | Tenant isolation / RLS violation suspicion                | isolation signal          | Sev 1            |
+| RB-SEC-04  | Personal data breach assessment and notification          | suspected breach          | Sev 1            |
+| RB-SEC-05  | Vulnerability disclosure intake and fix                   | report                    | per severity     |
+| RB-SEC-06  | Impersonation or admin abuse investigation                | audit anomaly             | Sev 2            |
+| RB-AUTH-01 | Login or token failures, session key rotation             | auth alert                | Sev 1 to 2       |
+| RB-SRC-01  | Search degraded or index rebuild                          | search alert              | Sev 3            |
+| RB-RT-01   | Realtime gateway failure (messaging, live sessions)       | realtime alert            | Sev 2            |
+| RB-ASM-01  | Assessment platform incident during live cohort exam      | exam alert                | Sev 1            |
+| RB-ASM-02  | Integrity-signal anomaly (false flag wave)                | anomaly                   | Sev 2            |
+| RB-AI-01   | AI provider outage, cost spike or policy anomaly          | AI alert                  | Sev 3            |
+| RB-AI-02   | Harmful or biased AI output report                        | report                    | Sev 2            |
+| RB-INT-01  | Calendar or video provider failure during interviews      | provider alert            | Sev 2            |
+| RB-BGV-01  | Background-check vendor outage or wrong report            | vendor alert              | Sev 2            |
+| RB-TSF-01  | Abuse surge (spam, fake employers, scam jobs)             | moderation backlog        | Sev 2            |
+| RB-TSF-02  | Content removal and legal takedown                        | legal request             | Sev 2            |
+| RB-PRV-01  | Data subject access / export request                      | request                   | n/a              |
+| RB-PRV-02  | Erasure request and deletion-ledger handling              | request                   | n/a              |
+| RB-PRV-03  | Legal hold placement and release                          | legal                     | n/a              |
+| RB-DAT-01  | Run a backfill safely                                     | planned                   | n/a              |
+| RB-DAT-02  | Retention sweep failure or dry-run review                 | sweep alert               | Sev 3            |
+| RB-DAT-03  | Bulk data correction with approval                        | planned                   | n/a              |
+| RB-OPS-01  | Capacity scale-up before known burst                      | planned event             | n/a              |
+| RB-OPS-02  | Cost anomaly                                              | cost alert                | Sev 3            |
+| RB-OPS-03  | Region or zone loss                                       | cloud alert               | Sev 1            |
+| RB-OPS-04  | Full rebuild from IaC                                     | DR drill or disaster      | Sev 1            |
+| RB-OPS-05  | Status page publishing and templates                      | incident                  | n/a              |
+| RB-OPS-06  | Break-glass access procedure                              | emergency                 | n/a              |
+| RB-SUP-01  | Support escalation to engineering                         | ticket                    | n/a              |
+| RB-SUP-02  | Account recovery with identity checks                     | ticket                    | n/a              |
+| RB-SUP-03  | Mass-impact ticket surge handling                         | ticket spike              | Sev 2            |
 
 ### 3.2 Runbook template (MUST)
 
@@ -164,14 +164,15 @@ Recurring incidents (same signature twice) get a problem record, owned by a modu
 
 ## 6. Severity levels
 
-| Severity | Definition | Examples | Response `[PROP]` | Comms |
-|---|---|---|---|---|
-| Sev 1 | critical: widespread outage of core flows, data loss or corruption, security or privacy breach, cross-tenant exposure, payments wrongly processed | login down for all; applications not saving; database restore needed; leaked candidate data | page immediately, IC assigned, 24x7 response, all hands as needed | status page within the Sev 1 target; exec and legal informed |
-| Sev 2 | major: significant degradation or a core feature unavailable for a segment, no workaround | search down; email delayed hours; assessments failing for one institution | page, response within business and out-of-hours as parameter | status page if user-visible; support briefed |
-| Sev 3 | moderate: partial impairment with workaround, non-core feature failure | recommendations stale; one provider degraded with fallback | ticket and next-business-cycle response; page only if worsening | support note; status page optional |
-| Sev 4 | minor: cosmetic, single-user issues | UI glitch | normal backlog | none |
+| Severity | Definition                                                                                                                                        | Examples                                                                                    | Response `[PROP]`                                                 | Comms                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| Sev 1    | critical: widespread outage of core flows, data loss or corruption, security or privacy breach, cross-tenant exposure, payments wrongly processed | login down for all; applications not saving; database restore needed; leaked candidate data | page immediately, IC assigned, 24x7 response, all hands as needed | status page within the Sev 1 target; exec and legal informed |
+| Sev 2    | major: significant degradation or a core feature unavailable for a segment, no workaround                                                         | search down; email delayed hours; assessments failing for one institution                   | page, response within business and out-of-hours as parameter      | status page if user-visible; support briefed                 |
+| Sev 3    | moderate: partial impairment with workaround, non-core feature failure                                                                            | recommendations stale; one provider degraded with fallback                                  | ticket and next-business-cycle response; page only if worsening   | support note; status page optional                           |
+| Sev 4    | minor: cosmetic, single-user issues                                                                                                               | UI glitch                                                                                   | normal backlog                                                    | none                                                         |
 
 Rules:
+
 - Severity is set by impact, not cause, and re-assessed during the incident; it may only be lowered by the IC with a stated reason.
 - Any suspected security or privacy breach starts at Sev 1 until assessed.
 - Severity aligns with defect severity S1 to S5 (doc 06/02 section 7) for production defects: S1 maps to Sev 1, S2 to Sev 2, S3 to Sev 3, S4/S5 to Sev 4.
@@ -192,13 +193,13 @@ Rules:
 
 ## 8. Support tiers
 
-| Tier | Who | Handles | Tools | Escalates when |
-|---|---|---|---|---|
-| Tier 0 self-service | users | help center, in-app guidance, status page, chatbot with honest AI label, account self-service (reset, export, delete) | knowledge base | no answer found |
-| Tier 1 | support agents (`SUP`) | how-to, account access, billing questions, known-issue handling, reports triage | ticketing, macros, read-only admin view | cannot resolve with playbook, or severity indicators |
-| Tier 2 | senior support / specialists (`SUP` senior, `FIN`, `MOD`) | complex account issues, refunds, verification disputes, moderation appeals, data corrections within policy | admin console with scoped actions, audit | requires code or data fix |
-| Tier 3 | engineering on rotation (support engineer role) | bugs, data repairs, performance issues, integration failures | logs by `requestId`, runbooks, scripts | confirmed defect -> defect process |
-| Tier 4 | module owner, security officer, privacy lead, legal | security, privacy, legal and compliance cases | | decision-level |
+| Tier                | Who                                                       | Handles                                                                                                               | Tools                                    | Escalates when                                       |
+| ------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| Tier 0 self-service | users                                                     | help center, in-app guidance, status page, chatbot with honest AI label, account self-service (reset, export, delete) | knowledge base                           | no answer found                                      |
+| Tier 1              | support agents (`SUP`)                                    | how-to, account access, billing questions, known-issue handling, reports triage                                       | ticketing, macros, read-only admin view  | cannot resolve with playbook, or severity indicators |
+| Tier 2              | senior support / specialists (`SUP` senior, `FIN`, `MOD`) | complex account issues, refunds, verification disputes, moderation appeals, data corrections within policy            | admin console with scoped actions, audit | requires code or data fix                            |
+| Tier 3              | engineering on rotation (support engineer role)           | bugs, data repairs, performance issues, integration failures                                                          | logs by `requestId`, runbooks, scripts   | confirmed defect -> defect process                   |
+| Tier 4              | module owner, security officer, privacy lead, legal       | security, privacy, legal and compliance cases                                                                         |                                          | decision-level                                       |
 
 Routing queues: Accounts and access, Billing, Jobs and applications (candidate), Employer and recruiter, Institutions, Learning and certificates, Assessments (with priority lane during scheduled exams), Verification and background checks, Trust and safety reports, Privacy requests, Integrations and API, Accessibility feedback.
 
@@ -222,19 +223,19 @@ In-app help and contact form (attaches `requestId`, app version, role, environme
 
 ### 9.3 Standard workflows
 
-| Workflow | Steps and controls |
-|---|---|
-| Account recovery | verify identity with allowed factors; never reveal whether an email exists; no password handling by agents; MFA reset requires stronger verification and notifies the account owner (RB-SUP-02) |
+| Workflow                | Steps and controls                                                                                                                                                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account recovery        | verify identity with allowed factors; never reveal whether an email exists; no password handling by agents; MFA reset requires stronger verification and notifies the account owner (RB-SUP-02)                                   |
 | Impersonation / view-as | agent requests with reason and ticket id; user consent where feasible; time-boxed read-only by default; every action audited; banner shown to user session; prohibited for sensitive classes unless consent (module ADM controls) |
-| Billing issue | confirm entitlement state; refund or credit via `FIN` with approval threshold `OD-SUP-07`; reconcile with provider (RB-PAY-02) |
-| Verification dispute | route to verification queue with evidence; outcome recorded; employer verifier contact templates |
-| Content report | route to moderation (TSF); support updates reporter with outcome class only |
-| Privacy request | identity verification, route to privacy lead, deadline tracked on the ticket per legal timeframe (`OD-SUP-04`), outcome logged (RB-PRV-01/02) |
-| Bug report | reproduce, collect `requestId`, link to defect with severity (doc 06/02 section 7), tell the user the workaround and keep them updated at status changes |
-| Feature request | recorded with demand count; reviewed by product on cadence |
-| Accessibility help | priority queue; response by a trained agent; defects get an accessibility label |
-| Assessment-day support | pre-registered institution contact, priority lane, incident runbook RB-ASM-01, accommodation questions to ASM owner |
-| Mass issue | create parent incident; macro; auto-link new tickets; proactive outreach after resolution |
+| Billing issue           | confirm entitlement state; refund or credit via `FIN` with approval threshold `OD-SUP-07`; reconcile with provider (RB-PAY-02)                                                                                                    |
+| Verification dispute    | route to verification queue with evidence; outcome recorded; employer verifier contact templates                                                                                                                                  |
+| Content report          | route to moderation (TSF); support updates reporter with outcome class only                                                                                                                                                       |
+| Privacy request         | identity verification, route to privacy lead, deadline tracked on the ticket per legal timeframe (`OD-SUP-04`), outcome logged (RB-PRV-01/02)                                                                                     |
+| Bug report              | reproduce, collect `requestId`, link to defect with severity (doc 06/02 section 7), tell the user the workaround and keep them updated at status changes                                                                          |
+| Feature request         | recorded with demand count; reviewed by product on cadence                                                                                                                                                                        |
+| Accessibility help      | priority queue; response by a trained agent; defects get an accessibility label                                                                                                                                                   |
+| Assessment-day support  | pre-registered institution contact, priority lane, incident runbook RB-ASM-01, accommodation questions to ASM owner                                                                                                               |
+| Mass issue              | create parent incident; macro; auto-link new tickets; proactive outreach after resolution                                                                                                                                         |
 
 ### 9.4 Knowledge base
 
@@ -275,14 +276,14 @@ Scheduled reconciliation jobs with alerting on mismatch: payments provider vs lo
 
 ### 10.5 Approvals for data operations
 
-| Operation | Approver |
-|---|---|
-| Read-only analytics extraction with personal data | privacy lead + data owner |
-| Non-destructive backfill | module owner + SRE |
-| Destructive backfill, bulk correction, bulk delete | module owner + SRE + `SAD` or privacy lead |
-| Retention policy change | privacy lead + legal |
-| Production data copy to lower environment | not permitted; synthetic or scrubbed only (doc 06/02 section 5) |
-| Tenant data export for a customer contract | account owner + privacy lead + legal |
+| Operation                                          | Approver                                                        |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| Read-only analytics extraction with personal data  | privacy lead + data owner                                       |
+| Non-destructive backfill                           | module owner + SRE                                              |
+| Destructive backfill, bulk correction, bulk delete | module owner + SRE + `SAD` or privacy lead                      |
+| Retention policy change                            | privacy lead + legal                                            |
+| Production data copy to lower environment          | not permitted; synthetic or scrubbed only (doc 06/02 section 5) |
+| Tenant data export for a customer contract         | account owner + privacy lead + legal                            |
 
 ### 10.6 Operational data hygiene
 
@@ -302,17 +303,17 @@ Orphan file cleanup; expired token and session purge; expired invitation cleanup
 
 ## 12. Operational reviews and cadences
 
-| Review | Cadence name | Inputs | Outputs |
-|---|---|---|---|
-| Alert review | weekly | page volume, noisy alerts | tuned or deleted alerts |
-| Incident review | after each Sev 1/2 plus monthly aggregate | postmortems | action tracking, trend |
-| Error-budget review | monthly | SLO burn | release pacing decisions |
-| Capacity and cost review | monthly | utilization and spend | scaling actions |
-| Support review | monthly | ticket categories, SLA, CSAT, top defects | KB and product actions |
-| Access review | quarterly | privileged roles, break-glass use | revoke or recertify |
-| Vendor review | quarterly | vendor health, cost, incidents | continue, renegotiate, replace |
-| DR and restore drill | quarterly | drill results | RPO/RTO vs target |
-| Quarterly health review | quarterly | doc 07/03 section 11 checklist | health report |
+| Review                   | Cadence name                              | Inputs                                    | Outputs                        |
+| ------------------------ | ----------------------------------------- | ----------------------------------------- | ------------------------------ |
+| Alert review             | weekly                                    | page volume, noisy alerts                 | tuned or deleted alerts        |
+| Incident review          | after each Sev 1/2 plus monthly aggregate | postmortems                               | action tracking, trend         |
+| Error-budget review      | monthly                                   | SLO burn                                  | release pacing decisions       |
+| Capacity and cost review | monthly                                   | utilization and spend                     | scaling actions                |
+| Support review           | monthly                                   | ticket categories, SLA, CSAT, top defects | KB and product actions         |
+| Access review            | quarterly                                 | privileged roles, break-glass use         | revoke or recertify            |
+| Vendor review            | quarterly                                 | vendor health, cost, incidents            | continue, renegotiate, replace |
+| DR and restore drill     | quarterly                                 | drill results                             | RPO/RTO vs target              |
+| Quarterly health review  | quarterly                                 | doc 07/03 section 11 checklist            | health report                  |
 
 ## 13. Postmortem learning loop
 
@@ -359,12 +360,12 @@ Treated as our incident if user impact exists: IC runs it, status page reference
 
 ### 16.1 Change types
 
-| Type | Definition | Approval | Examples |
-|---|---|---|---|
-| Standard | pre-approved, low risk, repeatable, with a runbook | none beyond pipeline gates | normal deploys of reviewed low-risk code, flag ramp steps within an approved plan, scheduled retention sweep |
-| Normal | requires review of risk and rollback | change approver per risk class | new feature enablement, config change, infrastructure change, migration with backfill |
-| Major | high blast radius or irreversible | change advisory group: engineering lead, SRE, security officer, product owner | database engine upgrade, auth model change, region move, vendor switch |
-| Emergency | urgent to restore service or close a critical vulnerability | IC approval, retrospective review | hotfix, emergency config |
+| Type      | Definition                                                  | Approval                                                                      | Examples                                                                                                     |
+| --------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Standard  | pre-approved, low risk, repeatable, with a runbook          | none beyond pipeline gates                                                    | normal deploys of reviewed low-risk code, flag ramp steps within an approved plan, scheduled retention sweep |
+| Normal    | requires review of risk and rollback                        | change approver per risk class                                                | new feature enablement, config change, infrastructure change, migration with backfill                        |
+| Major     | high blast radius or irreversible                           | change advisory group: engineering lead, SRE, security officer, product owner | database engine upgrade, auth model change, region move, vendor switch                                       |
+| Emergency | urgent to restore service or close a critical vulnerability | IC approval, retrospective review                                             | hotfix, emergency config                                                                                     |
 
 ### 16.2 Change record (MUST for Normal, Major, Emergency)
 
@@ -387,60 +388,60 @@ Description and reason; linked `FR-`/ADR/ticket; risk class and blast radius; te
 
 ## 18. Operations metrics
 
-| Metric | Definition / formula | Owner role |
-|---|---|---|
-| Time to acknowledge | page time to ack, p50 and p90 by severity | on-call lead |
-| Time to mitigate | incident start to containment | IC pool |
-| Time to restore (MTTR) | detection to recovery for Sev 1/2 | SRE |
-| Incident count by severity and cause class | counts per period | SRE |
-| Repeat incident rate | incidents with an existing problem record / all incidents | engineering lead |
-| Postmortem completion | Sev 1/2 with published postmortem inside target / all | engineering lead |
-| Action item closure | closed within target / opened | engineering lead |
-| Pages per on-call shift | pages received per rotation; share non-actionable | SRE |
-| Alert precision | actionable pages / total pages | SRE |
-| Detection source mix | alerts vs customer-reported incidents | SRE |
-| Status communication latency | detection to first public update | comms lead |
-| Support first-response | median and p90 per priority | support lead |
-| Support resolution | median per priority; reopen rate | support lead |
-| Backlog age | open tickets older than target | support lead |
-| Customer satisfaction | survey score per ticket | support lead |
-| Escalation rate | tickets reaching Tier 3 / all | support lead |
-| Runbook coverage | alerts with verified runbook / all paging alerts | SRE |
-| Restore drill result | achieved RPO and RTO vs targets | SRE |
-| Change failure rate | failed or rolled-back changes / all changes | release manager |
-| Data operation success | operations completed and verified without rollback / all | module owner |
-| Vendor SLA attainment | per vendor | vendor owner |
+| Metric                                     | Definition / formula                                      | Owner role       |
+| ------------------------------------------ | --------------------------------------------------------- | ---------------- |
+| Time to acknowledge                        | page time to ack, p50 and p90 by severity                 | on-call lead     |
+| Time to mitigate                           | incident start to containment                             | IC pool          |
+| Time to restore (MTTR)                     | detection to recovery for Sev 1/2                         | SRE              |
+| Incident count by severity and cause class | counts per period                                         | SRE              |
+| Repeat incident rate                       | incidents with an existing problem record / all incidents | engineering lead |
+| Postmortem completion                      | Sev 1/2 with published postmortem inside target / all     | engineering lead |
+| Action item closure                        | closed within target / opened                             | engineering lead |
+| Pages per on-call shift                    | pages received per rotation; share non-actionable         | SRE              |
+| Alert precision                            | actionable pages / total pages                            | SRE              |
+| Detection source mix                       | alerts vs customer-reported incidents                     | SRE              |
+| Status communication latency               | detection to first public update                          | comms lead       |
+| Support first-response                     | median and p90 per priority                               | support lead     |
+| Support resolution                         | median per priority; reopen rate                          | support lead     |
+| Backlog age                                | open tickets older than target                            | support lead     |
+| Customer satisfaction                      | survey score per ticket                                   | support lead     |
+| Escalation rate                            | tickets reaching Tier 3 / all                             | support lead     |
+| Runbook coverage                           | alerts with verified runbook / all paging alerts          | SRE              |
+| Restore drill result                       | achieved RPO and RTO vs targets                           | SRE              |
+| Change failure rate                        | failed or rolled-back changes / all changes               | release manager  |
+| Data operation success                     | operations completed and verified without rollback / all  | module owner     |
+| Vendor SLA attainment                      | per vendor                                                | vendor owner     |
 
 Targets for these are proposed after baseline (`OD-SUP-10`), not invented here.
 
 ## 19. Open decisions
 
-| Id | Question | Options | Default proposal `[PROP]` | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-SUP-01 | On-call rotation structure and sizing | follow-the-sun / single region / best-effort | primary plus secondary, size set by actual team | engineering lead, HR | on-call launch |
-| OD-SUP-02 | Named privacy lead and security officer roles | assign internal / external | internal named roles | leadership | incident and privacy workflows |
-| OD-SUP-03 | Acknowledgment, update and resolution targets per severity | as section 6 qualitative / numeric | Sev 1 ack 5 minutes, first update within 30 minutes, then every 30; Sev 2 ack 15 minutes, update every 60 | engineering lead, product owner | incident process, status page |
-| OD-SUP-04 | Breach notification and data-subject-request deadlines | jurisdiction-specific | follow the strictest applicable legal timeframe, confirmed by legal | legal, privacy lead | RB-SEC-04, RB-PRV-* |
-| OD-SUP-05 | Maintenance notice lead time | hours / days | days for user-impacting maintenance | product owner | status policy |
-| OD-SUP-06 | Support channels, hours and per-plan SLAs | email only / plus chat and phone | email and in-app first; chat for paid plans | product owner, finance | support design |
-| OD-SUP-07 | Refund and credit approval thresholds | by amount | agent up to a low threshold, `FIN` above | finance | billing workflow |
-| OD-SUP-08 | Release cadence and freeze criteria | continuous / scheduled | continuous for low risk, scheduled for high risk, freeze by declared conditions | product owner, SRE | release plan |
-| OD-SUP-09 | Vendor security attestations required | none / specific reports | evidence of recognized security attestation or equivalent questionnaire | security officer, legal | vendor onboarding |
-| OD-SUP-10 | Targets for operations metrics | after baseline | propose after two quarterly cycles | engineering lead | dashboards |
-| OD-SUP-11 | In-house support vs outsourced tier 1 | in-house / outsourced | in-house initially | product owner | staffing |
+| Id        | Question                                                   | Options                                      | Default proposal `[PROP]`                                                                                 | Decides                         | Blocks                         |
+| --------- | ---------------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------ |
+| OD-SUP-01 | On-call rotation structure and sizing                      | follow-the-sun / single region / best-effort | primary plus secondary, size set by actual team                                                           | engineering lead, HR            | on-call launch                 |
+| OD-SUP-02 | Named privacy lead and security officer roles              | assign internal / external                   | internal named roles                                                                                      | leadership                      | incident and privacy workflows |
+| OD-SUP-03 | Acknowledgment, update and resolution targets per severity | as section 6 qualitative / numeric           | Sev 1 ack 5 minutes, first update within 30 minutes, then every 30; Sev 2 ack 15 minutes, update every 60 | engineering lead, product owner | incident process, status page  |
+| OD-SUP-04 | Breach notification and data-subject-request deadlines     | jurisdiction-specific                        | follow the strictest applicable legal timeframe, confirmed by legal                                       | legal, privacy lead             | RB-SEC-04, RB-PRV-\*           |
+| OD-SUP-05 | Maintenance notice lead time                               | hours / days                                 | days for user-impacting maintenance                                                                       | product owner                   | status policy                  |
+| OD-SUP-06 | Support channels, hours and per-plan SLAs                  | email only / plus chat and phone             | email and in-app first; chat for paid plans                                                               | product owner, finance          | support design                 |
+| OD-SUP-07 | Refund and credit approval thresholds                      | by amount                                    | agent up to a low threshold, `FIN` above                                                                  | finance                         | billing workflow               |
+| OD-SUP-08 | Release cadence and freeze criteria                        | continuous / scheduled                       | continuous for low risk, scheduled for high risk, freeze by declared conditions                           | product owner, SRE              | release plan                   |
+| OD-SUP-09 | Vendor security attestations required                      | none / specific reports                      | evidence of recognized security attestation or equivalent questionnaire                                   | security officer, legal         | vendor onboarding              |
+| OD-SUP-10 | Targets for operations metrics                             | after baseline                               | propose after two quarterly cycles                                                                        | engineering lead                | dashboards                     |
+| OD-SUP-11 | In-house support vs outsourced tier 1                      | in-house / outsourced                        | in-house initially                                                                                        | product owner                   | staffing                       |
 
 ## 20. Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
-| RSK-SUP-01 | Alert fatigue leads to missed Sev 1 | symptom-based paging, weekly alert review, precision metric |
-| RSK-SUP-02 | Runbooks rot | verification metadata, game days, postmortem checks |
-| RSK-SUP-03 | Support access leaks personal data | role-scoped views, masking, audit, impersonation limits |
-| RSK-SUP-04 | Single vendor outage cascades | concentration review, fallbacks, exit plans |
-| RSK-SUP-05 | Data operation damages production data | dry runs, approvals, restore point, idempotency, audit |
-| RSK-SUP-06 | Status page unavailable during platform outage | separate hosting and domain |
+| Id         | Risk                                                    | Mitigation                                                   |
+| ---------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| RSK-SUP-01 | Alert fatigue leads to missed Sev 1                     | symptom-based paging, weekly alert review, precision metric  |
+| RSK-SUP-02 | Runbooks rot                                            | verification metadata, game days, postmortem checks          |
+| RSK-SUP-03 | Support access leaks personal data                      | role-scoped views, masking, audit, impersonation limits      |
+| RSK-SUP-04 | Single vendor outage cascades                           | concentration review, fallbacks, exit plans                  |
+| RSK-SUP-05 | Data operation damages production data                  | dry runs, approvals, restore point, idempotency, audit       |
+| RSK-SUP-06 | Status page unavailable during platform outage          | separate hosting and domain                                  |
 | RSK-SUP-07 | Support overwhelmed during assessment day or mass issue | priority lanes, pre-registered contacts, mass-issue workflow |
-| RSK-SUP-08 | Breach notification deadline missed | clock tracked from awareness, legal on-call, RB-SEC-04 |
+| RSK-SUP-08 | Breach notification deadline missed                     | clock tracked from awareness, legal on-call, RB-SEC-04       |
 
 ## 21. Acceptance criteria (testable)
 

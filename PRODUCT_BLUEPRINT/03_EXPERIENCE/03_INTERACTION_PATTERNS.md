@@ -10,15 +10,15 @@ Every interaction specification answers six questions: Trigger, User action, Sta
 
 ### 1.1 Response-time budgets
 
-| Time since user action | Required UI behavior |
-|---|---|
-| 0 to 100 ms | The control shows its pressed or toggled state. No spinner |
-| 100 to 300 ms | Nothing extra (avoid flicker). Optimistic update allowed where section 8.4 permits |
-| 300 ms to 2 s | Show an in-place progress cue: button loading state, or skeleton for a region |
-| 2 s to 10 s | Skeleton or progress bar plus a text status naming what is happening ("Checking your document") |
-| 10 s to 15 s | Add "This is taking longer than usual" and keep Cancel available where cancellation is possible |
-| Over 15 s (request timeout default) | Stop waiting: show the error state with Retry; the operation may continue on the server, so the retry uses an idempotency key and the system reconciles |
-| Operations over 30 s by design (import, export, report, media processing) | Run as a background task: confirm start, show in the task tray, notify on completion (section 10) |
+| Time since user action                                                    | Required UI behavior                                                                                                                                    |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 to 100 ms                                                               | The control shows its pressed or toggled state. No spinner                                                                                              |
+| 100 to 300 ms                                                             | Nothing extra (avoid flicker). Optimistic update allowed where section 8.4 permits                                                                      |
+| 300 ms to 2 s                                                             | Show an in-place progress cue: button loading state, or skeleton for a region                                                                           |
+| 2 s to 10 s                                                               | Skeleton or progress bar plus a text status naming what is happening ("Checking your document")                                                         |
+| 10 s to 15 s                                                              | Add "This is taking longer than usual" and keep Cancel available where cancellation is possible                                                         |
+| Over 15 s (request timeout default)                                       | Stop waiting: show the error state with Retry; the operation may continue on the server, so the retry uses an idempotency key and the system reconciles |
+| Operations over 30 s by design (import, export, report, media processing) | Run as a background task: confirm start, show in the task tray, notify on completion (section 10)                                                       |
 
 `NFR-IXP-001` Every user-initiated asynchronous action has exactly one visible pending state, one success outcome and one failure outcome that the user can see without navigating away. Test: for each action in a screen spec, simulate success, failure and 12 s latency.
 
@@ -44,28 +44,28 @@ Principles: value before paperwork; ask only what the next step needs (progressi
 
 ### 2.2 Candidate path
 
-| Step | Content | Required | Skip effect |
-|---|---|---|---|
-| 1 Basics | Name, headline (suggestions), location, work-mode preference | Name, location | None for headline |
-| 2 Import | Upload resume (PDF, DOCX), import from LinkedIn export file, or start blank | No | Blank profile |
-| 3 Review imported data | Table of parsed roles, education, skills with per-item accept, edit, discard; confidence marks low-confidence fields ("Check this date") | Only if import done | Nothing saved until accepted |
-| 4 Skills | Pick 5 or more skills (SkillPicker) with suggestions from step 3 | No (5 recommended: "Profiles with 5 skills get better matches" only if evidence-based) | Empty skills; checklist item remains |
-| 5 Goals | Target roles, availability, salary expectation (optional, private by default), job types | No | Defaults: not set |
-| 6 Visibility | Choose profile visibility (Private, Visible to recruiters, Public) with plain-language previews of what each shows | Yes: a choice is required, default Private | Cannot skip; default selected |
-| 7 Done | Summary and three next steps (Add evidence, Find jobs, Take a skill assessment) | | |
+| Step                   | Content                                                                                                                                  | Required                                                                               | Skip effect                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------ |
+| 1 Basics               | Name, headline (suggestions), location, work-mode preference                                                                             | Name, location                                                                         | None for headline                    |
+| 2 Import               | Upload resume (PDF, DOCX), import from LinkedIn export file, or start blank                                                              | No                                                                                     | Blank profile                        |
+| 3 Review imported data | Table of parsed roles, education, skills with per-item accept, edit, discard; confidence marks low-confidence fields ("Check this date") | Only if import done                                                                    | Nothing saved until accepted         |
+| 4 Skills               | Pick 5 or more skills (SkillPicker) with suggestions from step 3                                                                         | No (5 recommended: "Profiles with 5 skills get better matches" only if evidence-based) | Empty skills; checklist item remains |
+| 5 Goals                | Target roles, availability, salary expectation (optional, private by default), job types                                                 | No                                                                                     | Defaults: not set                    |
+| 6 Visibility           | Choose profile visibility (Private, Visible to recruiters, Public) with plain-language previews of what each shows                       | Yes: a choice is required, default Private                                             | Cannot skip; default selected        |
+| 7 Done                 | Summary and three next steps (Add evidence, Find jobs, Take a skill assessment)                                                          |                                                                                        |                                      |
 
 The checklist items afterward: Add one work-history item with evidence, Verify an email or credential, Set job alerts, Take one assessment, Connect with 3 people (shown only when NET enabled). Each item links to the screen and shows estimated time.
 
 ### 2.3 Employer path
 
-| Step | Content | Required |
-|---|---|---|
-| 1 Account | Work email (domain checked against free-mail list: free-mail addresses go to manual verification) | Yes |
-| 2 Organization | Company name, website, size band, industry, country; match against existing organizations to avoid duplicates ("Is this your company? Request access") | Yes |
+| Step           | Content                                                                                                                                                             | Required                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 1 Account      | Work email (domain checked against free-mail list: free-mail addresses go to manual verification)                                                                   | Yes                              |
+| 2 Organization | Company name, website, size band, industry, country; match against existing organizations to avoid duplicates ("Is this your company? Request access")              | Yes                              |
 | 3 Verification | Domain email verification or document upload; unverified orgs are labeled "Not yet verified" on job posts and have posting limits (limits set in `OD-UX-12` [PROP]) | Start required, completion later |
-| 4 Hiring need | "Do you have an open role?" Yes starts the job wizard; No goes to Brand step | No |
-| 5 Team | Invite colleagues (email list, role selection per invite), skip allowed | No |
-| 6 Brand | Logo, banner, about, benefits | No |
+| 4 Hiring need  | "Do you have an open role?" Yes starts the job wizard; No goes to Brand step                                                                                        | No                               |
+| 5 Team         | Invite colleagues (email list, role selection per invite), skip allowed                                                                                             | No                               |
+| 6 Brand        | Logo, banner, about, benefits                                                                                                                                       | No                               |
 
 Checklist afterward: Verify organization, Post first job, Invite a teammate, Set up hiring pipeline stages, Connect calendar, Complete company page.
 
@@ -92,13 +92,13 @@ Checklist afterward: Verify organization, Post first job, Invite a teammate, Set
 
 ### 2.7 Onboarding states
 
-| State | Behavior |
-|---|---|
-| Loading import parse | Progress with status ("Reading your resume", "Finding skills"), cancel allowed, 60 s limit then "We couldn't read this file. Try a PDF or fill in manually." |
-| Import partial | Reviews screen with counts ("We found 4 roles and 12 skills. 2 items need a check.") |
-| Email not verified | Banner on dashboard with Resend (cooldown 60 s) and Change email; apply, message and publish actions open a dialog explaining verification is needed |
-| Invitation invalid or expired | State per `01` section 10.2 |
-| Abandoned | After 3 days with incomplete required steps, one reminder email (opt-out class `onboarding`), none after |
+| State                         | Behavior                                                                                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Loading import parse          | Progress with status ("Reading your resume", "Finding skills"), cancel allowed, 60 s limit then "We couldn't read this file. Try a PDF or fill in manually." |
+| Import partial                | Reviews screen with counts ("We found 4 roles and 12 skills. 2 items need a check.")                                                                         |
+| Email not verified            | Banner on dashboard with Resend (cooldown 60 s) and Change email; apply, message and publish actions open a dialog explaining verification is needed         |
+| Invitation invalid or expired | State per `01` section 10.2                                                                                                                                  |
+| Abandoned                     | After 3 days with incomplete required steps, one reminder email (opt-out class `onboarding`), none after                                                     |
 
 ## 3. Forms and validation timing
 
@@ -108,16 +108,16 @@ Validate when the user can act on the message; never interrupt typing; never blo
 
 ### 3.2 Timing table
 
-| Event | Behavior |
-|---|---|
-| While typing | No error is shown for the field being typed in. Exceptions: character counters; password rules that tick off as met (a checklist with text "Met"/"Not met", polite announce only on first met-all); username or handle availability after 500 ms idle |
-| On blur (leaving the field) | Validate that field's format rules and show the error under it. A required field that was never entered is not flagged on blur (so tabbing through a form is not punished); it is flagged on submit. A required field the user typed into and then cleared is flagged on blur |
-| After first error is shown | The field re-validates on every change. The error is removed the moment the value becomes valid (no announcement of the removal); if the value is still invalid the message updates silently and the field keeps `aria-invalid="true"` |
-| On submit | Validate all fields client-side; if any invalid: do not send; show error summary; move focus to the summary; first invalid field is the second Tab stop |
-| Server validation | Returned errors map to fields by name; unmapped errors show in a notice above the action bar; focus goes to the summary |
-| Cross-field rules (end date after start, passwords match) | Evaluated on blur of the later field and on submit; the error attaches to the later field and mentions the earlier |
-| Async checks (email taken, handle available, duplicate organization) | Run on blur or 500 ms idle; show "Checking" text with spinner inline; result never blocks typing; submit waits for pending checks up to 3 s then proceeds and lets the server decide |
-| Paste | Validate on paste as on blur; trim whitespace; never strip characters silently unless they are known invisible/formatting characters, in which case a note says "We removed extra spaces" |
+| Event                                                                | Behavior                                                                                                                                                                                                                                                                      |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| While typing                                                         | No error is shown for the field being typed in. Exceptions: character counters; password rules that tick off as met (a checklist with text "Met"/"Not met", polite announce only on first met-all); username or handle availability after 500 ms idle                         |
+| On blur (leaving the field)                                          | Validate that field's format rules and show the error under it. A required field that was never entered is not flagged on blur (so tabbing through a form is not punished); it is flagged on submit. A required field the user typed into and then cleared is flagged on blur |
+| After first error is shown                                           | The field re-validates on every change. The error is removed the moment the value becomes valid (no announcement of the removal); if the value is still invalid the message updates silently and the field keeps `aria-invalid="true"`                                        |
+| On submit                                                            | Validate all fields client-side; if any invalid: do not send; show error summary; move focus to the summary; first invalid field is the second Tab stop                                                                                                                       |
+| Server validation                                                    | Returned errors map to fields by name; unmapped errors show in a notice above the action bar; focus goes to the summary                                                                                                                                                       |
+| Cross-field rules (end date after start, passwords match)            | Evaluated on blur of the later field and on submit; the error attaches to the later field and mentions the earlier                                                                                                                                                            |
+| Async checks (email taken, handle available, duplicate organization) | Run on blur or 500 ms idle; show "Checking" text with spinner inline; result never blocks typing; submit waits for pending checks up to 3 s then proceeds and lets the server decide                                                                                          |
+| Paste                                                                | Validate on paste as on blur; trim whitespace; never strip characters silently unless they are known invisible/formatting characters, in which case a note says "We removed extra spaces"                                                                                     |
 
 ### 3.3 Submit behavior
 
@@ -139,19 +139,19 @@ Validate when the user can act on the message; never interrupt typing; never blo
 
 ### 3.6 Field-specific rules
 
-| Field | Rules |
-|---|---|
-| Email | Syntactic check only (no regex over-strictness: one `@`, a dot in domain, max 254); typo hints for common domains ("Did you mean gmail.com?" as a suggestion button, never auto-corrected); lowercase for comparison, preserved for display; plus-addressing allowed |
-| Password | Min 12 characters, no composition rules (no forced symbols), blocked if in breach list or contains email local part, strength meter by length and entropy estimate; show/hide; paste allowed; messages say what to do ("Use at least 12 characters"). Final policy owned by IDN |
-| Phone | Country selector plus number; format as typed using the country; stored E.164; accept spaces, dashes, parentheses; error "Enter a phone number for {Country}" |
-| Name | Single "Full name" field plus optional "Preferred name"; no max beyond 100; no rejection of apostrophes, hyphens, single names, non-Latin scripts, titles; no "first/last" split unless a downstream system needs it (then derive with an "Edit" option) |
-| URL | Accept missing scheme and add `https://`; show normalized form; reject non-http(s) |
-| Dates | Typed in locale format; calendar optional; work history end can be "Present"; future dates allowed only for expected graduation or scheduled events; error text states the allowed range |
-| Money | Currency selector, decimal by locale; min/max with currency; stores integer minor units; the input reformats by locale on blur (grouping separators are accepted when typed and removed from the stored value) |
-| Free text | Trim; max length with counter; no HTML; newlines preserved; emoji allowed |
-| Address | Structured with country-driven fields; autocomplete; optional second line; never require a state or postal code where the country has none |
-| Uploads | Section 13 |
-| Consent checkboxes | Unticked by default; required consent blocks only the feature that needs it, not the whole form; errors say "Tick the box to continue" only when the consent is truly required |
+| Field              | Rules                                                                                                                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Email              | Syntactic check only (no regex over-strictness: one `@`, a dot in domain, max 254); typo hints for common domains ("Did you mean gmail.com?" as a suggestion button, never auto-corrected); lowercase for comparison, preserved for display; plus-addressing allowed            |
+| Password           | Min 12 characters, no composition rules (no forced symbols), blocked if in breach list or contains email local part, strength meter by length and entropy estimate; show/hide; paste allowed; messages say what to do ("Use at least 12 characters"). Final policy owned by IDN |
+| Phone              | Country selector plus number; format as typed using the country; stored E.164; accept spaces, dashes, parentheses; error "Enter a phone number for {Country}"                                                                                                                   |
+| Name               | Single "Full name" field plus optional "Preferred name"; no max beyond 100; no rejection of apostrophes, hyphens, single names, non-Latin scripts, titles; no "first/last" split unless a downstream system needs it (then derive with an "Edit" option)                        |
+| URL                | Accept missing scheme and add `https://`; show normalized form; reject non-http(s)                                                                                                                                                                                              |
+| Dates              | Typed in locale format; calendar optional; work history end can be "Present"; future dates allowed only for expected graduation or scheduled events; error text states the allowed range                                                                                        |
+| Money              | Currency selector, decimal by locale; min/max with currency; stores integer minor units; the input reformats by locale on blur (grouping separators are accepted when typed and removed from the stored value)                                                                  |
+| Free text          | Trim; max length with counter; no HTML; newlines preserved; emoji allowed                                                                                                                                                                                                       |
+| Address            | Structured with country-driven fields; autocomplete; optional second line; never require a state or postal code where the country has none                                                                                                                                      |
+| Uploads            | Section 13                                                                                                                                                                                                                                                                      |
+| Consent checkboxes | Unticked by default; required consent blocks only the feature that needs it, not the whole form; errors say "Tick the box to continue" only when the consent is truly required                                                                                                  |
 
 ### 3.7 Prevent loss
 
@@ -162,19 +162,19 @@ Validate when the user can act on the message; never interrupt typing; never blo
 
 ### 4.1 Search
 
-| Aspect | Rule |
-|---|---|
-| Entry | Search field is `role="search"`; submit on `Enter`; live results (debounced 400 ms) only where results are cheap and the screen is a list of the same type; otherwise submit-on-enter |
-| Query in URL | `q` updates on submit and after 400 ms idle; back button restores earlier queries |
-| Minimum characters | 1 for local filters, 2 for remote search; shorter shows nothing and no error |
-| Suggestions | On focus with empty field: recent searches (up to 5, clearable) and popular or saved searches. While typing: up to 8 type-ahead suggestions (queries and entities), as Combobox |
-| Highlighting | Matched terms highlighted with `<mark>` (also visible in HC) in titles and snippets |
-| Zero results | "No results for "{query}"." plus: check spelling suggestion (did you mean), remove the most restrictive filter (button per filter, with the count it would return), broaden (related terms), and for jobs "Create an alert for this search" |
-| Typos and synonyms | Server-side fuzzy match and synonym expansion; the UI states when a synonym or corrected term was used ("Showing results for "javascript". Search instead for "javascipt"") |
-| Result count | Always shown, exact up to 1,000 and "1,000+" above; announced politely after update |
-| Saved searches | "Save search" button after a query or filters are applied (names default to a summary, editable), manageable under the screen's "Saved" menu; alerts optional with frequency (instant, daily, weekly) and channel |
-| Search scope | Visible chips for scope (All, Jobs, People...). Global palette rules in `01` section 7 |
-| Privacy | Search history is per user, deletable, and off by switch in `/settings/privacy`. Employer candidate searches are logged for audit (see ATS) and the user is told |
+| Aspect             | Rule                                                                                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry              | Search field is `role="search"`; submit on `Enter`; live results (debounced 400 ms) only where results are cheap and the screen is a list of the same type; otherwise submit-on-enter                                                       |
+| Query in URL       | `q` updates on submit and after 400 ms idle; back button restores earlier queries                                                                                                                                                           |
+| Minimum characters | 1 for local filters, 2 for remote search; shorter shows nothing and no error                                                                                                                                                                |
+| Suggestions        | On focus with empty field: recent searches (up to 5, clearable) and popular or saved searches. While typing: up to 8 type-ahead suggestions (queries and entities), as Combobox                                                             |
+| Highlighting       | Matched terms highlighted with `<mark>` (also visible in HC) in titles and snippets                                                                                                                                                         |
+| Zero results       | "No results for "{query}"." plus: check spelling suggestion (did you mean), remove the most restrictive filter (button per filter, with the count it would return), broaden (related terms), and for jobs "Create an alert for this search" |
+| Typos and synonyms | Server-side fuzzy match and synonym expansion; the UI states when a synonym or corrected term was used ("Showing results for "javascript". Search instead for "javascipt"")                                                                 |
+| Result count       | Always shown, exact up to 1,000 and "1,000+" above; announced politely after update                                                                                                                                                         |
+| Saved searches     | "Save search" button after a query or filters are applied (names default to a summary, editable), manageable under the screen's "Saved" menu; alerts optional with frequency (instant, daily, weekly) and channel                           |
+| Search scope       | Visible chips for scope (All, Jobs, People...). Global palette rules in `01` section 7                                                                                                                                                      |
+| Privacy            | Search history is per user, deletable, and off by switch in `/settings/privacy`. Employer candidate searches are logged for audit (see ATS) and the user is told                                                                            |
 
 ### 4.2 Filters
 
@@ -232,14 +232,14 @@ Scope: reorder (lists, sections, lessons, questions, resume sections, pipeline s
 
 ## 7. Pagination versus infinite scroll
 
-| Content | Pattern | Reason |
-|---|---|---|
-| Searchable catalogs where position matters and users share links (jobs, courses, candidates) | Pagination (numbered where total is known, else cursor Previous/Next) with page size 25 default (10, 25, 50, 100 for tables) | Place keeping, footer reachability, back-button restore |
-| Admin and operational tables (audit, tickets, users) | Pagination with page size select; cursor above 10,000 rows | Precision, export, counts |
-| Feeds and streams (network feed, notifications, activity) | Infinite scroll with a "Load more" button after every 3 loads on desktop; automatic loading on phone | Low stakes browsing; the button guarantees footer access and keyboard access |
-| Messages | Reverse infinite scroll (older loaded on scroll up) | Chat convention |
-| Short lists (under 50 items known) | No pagination: render all (virtualized above 200) | Simplicity |
-| Mobile job search results | "Load more" button (not auto) with page size 20 | Predictable data usage, accessibility |
+| Content                                                                                      | Pattern                                                                                                                      | Reason                                                                       |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Searchable catalogs where position matters and users share links (jobs, courses, candidates) | Pagination (numbered where total is known, else cursor Previous/Next) with page size 25 default (10, 25, 50, 100 for tables) | Place keeping, footer reachability, back-button restore                      |
+| Admin and operational tables (audit, tickets, users)                                         | Pagination with page size select; cursor above 10,000 rows                                                                   | Precision, export, counts                                                    |
+| Feeds and streams (network feed, notifications, activity)                                    | Infinite scroll with a "Load more" button after every 3 loads on desktop; automatic loading on phone                         | Low stakes browsing; the button guarantees footer access and keyboard access |
+| Messages                                                                                     | Reverse infinite scroll (older loaded on scroll up)                                                                          | Chat convention                                                              |
+| Short lists (under 50 items known)                                                           | No pagination: render all (virtualized above 200)                                                                            | Simplicity                                                                   |
+| Mobile job search results                                                                    | "Load more" button (not auto) with page size 20                                                                              | Predictable data usage, accessibility                                        |
 
 Rules:
 
@@ -253,13 +253,13 @@ Rules:
 
 ### 8.1 What autosaves
 
-| Class | Autosave | Examples |
-|---|---|---|
-| Drafts of long-form creation | Yes | Job post, course lesson, resume, application answers, post, assignment submission draft, profile section edit |
-| Settings with immediate effect | Yes, per control | Switches, theme, notification toggles |
-| Transactional or irreversible submissions | No (explicit submit) | Submit application, send offer, submit assessment, pay, publish course |
-| Short forms | No | Login, invite, report |
-| Messages | Draft saved locally and server side | Composer |
+| Class                                     | Autosave                            | Examples                                                                                                      |
+| ----------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Drafts of long-form creation              | Yes                                 | Job post, course lesson, resume, application answers, post, assignment submission draft, profile section edit |
+| Settings with immediate effect            | Yes, per control                    | Switches, theme, notification toggles                                                                         |
+| Transactional or irreversible submissions | No (explicit submit)                | Submit application, send offer, submit assessment, pay, publish course                                        |
+| Short forms                               | No                                  | Login, invite, report                                                                                         |
+| Messages                                  | Draft saved locally and server side | Composer                                                                                                      |
 
 ### 8.2 Cadence
 
@@ -298,13 +298,13 @@ Edits made offline are queued in order with their base revisions and replayed on
 
 ### 9.2 Confirmation tiers
 
-| Tier | When | Pattern | Example |
-|---|---|---|---|
-| 0 None | Reversible, own data, undo available | Immediate with Undo toast | Remove a skill, archive a job |
-| 1 Simple confirm | Irreversible, own data, low blast radius | AlertDialog: object named, consequence, Cancel (focused) and Verb-object button | Delete an uploaded document with no dependents; withdraw an application |
-| 2 Impact confirm | Affects other people, or many items, or has dependents | AlertDialog listing the impact ("This job has 38 applicants. They will be told the job is closed.") with a checkbox "I understand" for counts over 50 | Close a job with applicants, remove a teammate, reject 20 candidates with email |
-| 3 Typed confirm | Destroys a large or regulated body of data, or locks the user out | AlertDialog plus typed object name or word, plus re-authentication if the last strong authentication is older than the window | Delete account, delete organization, revoke API key in use, purge data, delete a course with enrollments |
-| 4 Two-person | Operational high risk (admin) | Request goes to a second approver with reason; first user sees "Awaiting approval" | Platform-wide config change, bulk refund over a threshold, impersonation (if allowed), break-glass |
+| Tier             | When                                                              | Pattern                                                                                                                                               | Example                                                                                                  |
+| ---------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 0 None           | Reversible, own data, undo available                              | Immediate with Undo toast                                                                                                                             | Remove a skill, archive a job                                                                            |
+| 1 Simple confirm | Irreversible, own data, low blast radius                          | AlertDialog: object named, consequence, Cancel (focused) and Verb-object button                                                                       | Delete an uploaded document with no dependents; withdraw an application                                  |
+| 2 Impact confirm | Affects other people, or many items, or has dependents            | AlertDialog listing the impact ("This job has 38 applicants. They will be told the job is closed.") with a checkbox "I understand" for counts over 50 | Close a job with applicants, remove a teammate, reject 20 candidates with email                          |
+| 3 Typed confirm  | Destroys a large or regulated body of data, or locks the user out | AlertDialog plus typed object name or word, plus re-authentication if the last strong authentication is older than the window                         | Delete account, delete organization, revoke API key in use, purge data, delete a course with enrollments |
+| 4 Two-person     | Operational high risk (admin)                                     | Request goes to a second approver with reason; first user sees "Awaiting approval"                                                                    | Platform-wide config change, bulk refund over a threshold, impersonation (if allowed), break-glass       |
 
 Rules:
 
@@ -328,18 +328,18 @@ Domain: NTF owns channels, templates and preferences. This section fixes the int
 
 ### 10.1 Surfaces
 
-| Surface | Purpose | Rules |
-|---|---|---|
-| Bell and unread badge | Ambient awareness | Count of unread items (max 99+); updates in real time; cleared per item, not by opening the popover |
-| Bell popover | Latest 8 items, mark all read, Settings link, "See all" | Opens on click; items are links; `Esc` closes; focus returns to bell |
-| Notification center `/notifications` | Full history (90 days default [PROP]), tabs All, Unread, Mentions and actions needed | Filters by type; bulk mark read; infinite scroll with Load more |
-| Toast | Result of own action only | Section 7.5 of the design system |
-| Banner | Account-level conditions | Priority rules in the design system |
-| Inline pill | New content in the current view | "3 new applications. Show" |
-| Push (web push, mobile PWA) | Time-sensitive items | Section 10.3 |
-| Email | Records, digests, off-platform reach | Opt-out classes in NTF |
-| SMS | Only security codes, interview day-of reminders where opted in | Opt-in explicit |
-| In-product message center (announcements) | Product news | Separate "What's new"; never in the bell as unread count unless actionable |
+| Surface                                   | Purpose                                                                              | Rules                                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Bell and unread badge                     | Ambient awareness                                                                    | Count of unread items (max 99+); updates in real time; cleared per item, not by opening the popover |
+| Bell popover                              | Latest 8 items, mark all read, Settings link, "See all"                              | Opens on click; items are links; `Esc` closes; focus returns to bell                                |
+| Notification center `/notifications`      | Full history (90 days default [PROP]), tabs All, Unread, Mentions and actions needed | Filters by type; bulk mark read; infinite scroll with Load more                                     |
+| Toast                                     | Result of own action only                                                            | Section 7.5 of the design system                                                                    |
+| Banner                                    | Account-level conditions                                                             | Priority rules in the design system                                                                 |
+| Inline pill                               | New content in the current view                                                      | "3 new applications. Show"                                                                          |
+| Push (web push, mobile PWA)               | Time-sensitive items                                                                 | Section 10.3                                                                                        |
+| Email                                     | Records, digests, off-platform reach                                                 | Opt-out classes in NTF                                                                              |
+| SMS                                       | Only security codes, interview day-of reminders where opted in                       | Opt-in explicit                                                                                     |
+| In-product message center (announcements) | Product news                                                                         | Separate "What's new"; never in the bell as unread count unless actionable                          |
 
 ### 10.2 Item design
 
@@ -365,19 +365,19 @@ Each notification: type icon, title (who did what, max 90 chars), optional one-l
 
 ## 11. Real-time updates
 
-| Aspect | Rule |
-|---|---|
-| Transport states | Connected, Reconnecting (after 3 s of failure: subtle indicator in the footer of the thread or list "Reconnecting..."), Offline (banner). Exponential backoff with jitter: 1, 2, 4, 8, 15, 30 s cap; resync (fetch missed items since last id) on reconnect; page visible only (pause when hidden after 60 s) |
-| Messages | New message appends at the bottom; if the user is within 80 px of the bottom, scroll follows; otherwise a "New messages" pill (count) appears and does not move the scroll; incoming messages announced politely with sender and the first 100 characters only if the thread is focused and the user enabled message announcements (default on in focused thread, off otherwise) |
-| Lists and tables | New items do not reorder or insert into the viewport unprompted; an inline pill "N new. Show" above the list inserts them on click; row updates (status change) update in place with a 2 s highlight (outline plus background, no animation under reduced motion) |
-| Counters | Update silently except live-region summary every 30 s at most |
-| Presence | Shown only inside a conversation or a collaboration object, only to participants, with opt-out (`/settings/privacy`); text alternative "Online"/"Last seen {time}"; candidates' presence is never shown to employers |
-| Typing indicator | Text "{Name} is typing", shown within a conversation, expires after 5 s, not announced to screen readers |
-| Live status (interview waiting room, assessment proctoring check) | A single status line with `role="status"`; transitions announced once |
-| Stale data | Data older than the screen's freshness limit shows "Updated {time}. Refresh" instead of silently refreshing under the user's cursor |
-| Collisions | Real-time updates never replace the content of a field the user is editing; they surface through the conflict flow (8.3) |
-| Throttle | UI updates coalesce to at most 1 per second per region; high-frequency feeds (leaderboards, live scores) update at most every 5 s |
-| Battery and data | On `saveData` or low battery mode, real-time reduces to polling every 60 s |
+| Aspect                                                            | Rule                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Transport states                                                  | Connected, Reconnecting (after 3 s of failure: subtle indicator in the footer of the thread or list "Reconnecting..."), Offline (banner). Exponential backoff with jitter: 1, 2, 4, 8, 15, 30 s cap; resync (fetch missed items since last id) on reconnect; page visible only (pause when hidden after 60 s)                                                                    |
+| Messages                                                          | New message appends at the bottom; if the user is within 80 px of the bottom, scroll follows; otherwise a "New messages" pill (count) appears and does not move the scroll; incoming messages announced politely with sender and the first 100 characters only if the thread is focused and the user enabled message announcements (default on in focused thread, off otherwise) |
+| Lists and tables                                                  | New items do not reorder or insert into the viewport unprompted; an inline pill "N new. Show" above the list inserts them on click; row updates (status change) update in place with a 2 s highlight (outline plus background, no animation under reduced motion)                                                                                                                |
+| Counters                                                          | Update silently except live-region summary every 30 s at most                                                                                                                                                                                                                                                                                                                    |
+| Presence                                                          | Shown only inside a conversation or a collaboration object, only to participants, with opt-out (`/settings/privacy`); text alternative "Online"/"Last seen {time}"; candidates' presence is never shown to employers                                                                                                                                                             |
+| Typing indicator                                                  | Text "{Name} is typing", shown within a conversation, expires after 5 s, not announced to screen readers                                                                                                                                                                                                                                                                         |
+| Live status (interview waiting room, assessment proctoring check) | A single status line with `role="status"`; transitions announced once                                                                                                                                                                                                                                                                                                            |
+| Stale data                                                        | Data older than the screen's freshness limit shows "Updated {time}. Refresh" instead of silently refreshing under the user's cursor                                                                                                                                                                                                                                              |
+| Collisions                                                        | Real-time updates never replace the content of a field the user is editing; they surface through the conflict flow (8.3)                                                                                                                                                                                                                                                         |
+| Throttle                                                          | UI updates coalesce to at most 1 per second per region; high-frequency feeds (leaderboards, live scores) update at most every 5 s                                                                                                                                                                                                                                                |
+| Battery and data                                                  | On `saveData` or low battery mode, real-time reduces to polling every 60 s                                                                                                                                                                                                                                                                                                       |
 
 `NFR-IXP-018` Real-time must degrade to correct behavior via polling or manual refresh; no feature depends on a socket being open to be correct.
 
@@ -387,36 +387,36 @@ Every screen declares which of these states apply (`07` checklist). Each state h
 
 ### 12.1 Catalogue
 
-| State | Trigger | Layout | Announcement | Copy pattern | Actions |
-|---|---|---|---|---|---|
-| Loading (initial) | First request in flight | Skeleton of the final layout (design system section 12) | `aria-busy`, status "Loading {region}" | none in skeleton | none; Cancel only for long tasks |
-| Loading (refresh) | Re-request with data present | Existing content stays, thin top progress, "Updating" | None | none | none |
-| Empty, first use | The user has never created any of this | `CMP-EmptyState` with illustration, heading, explanation of value, one primary action | none | Heading: what this is for ("Show your work"). Body: why it matters, one sentence. Action: verb plus object ("Add work history") | Primary; optional "Learn more" |
-| Empty, no results | Filters or search return zero | Compact empty state inside the results area, filters stay | Count live region "0 results" | "No {things} match your filters." | "Clear filters", remove-most-restrictive buttons, "Save this search" where relevant |
-| Empty, cleared | User completed or cleared all (inbox zero) | Positive empty state | none | "You're all caught up." plus what is next | Optional link |
-| Empty, permission | The list exists but the user may see none | As empty, no hint of hidden items | none | "No {things} to show." | Request access if applicable |
-| Success (inline) | Action done, user still on screen | Notice success or inline confirmation card | Polite | "{Object} {past tense verb}." ("Resume saved.") | Next best action |
-| Success (page) | Wizard or large task completes | Full success page: check icon, heading, summary, next steps | Heading focus | "You've applied to {Job}." | Up to 2 next actions |
-| Partial | Some regions failed or part of an operation failed | Working regions render; failed region shows compact error with Retry; operation summary lists failures | Polite | "We couldn't load {region}." / "{n} of {m} {things} {verb}. {k} didn't." | Retry; View failures |
-| Error, recoverable | Network or server failure that retry can solve | `CMP-ErrorState` in region (or Notice in form) | Polite (assertive when blocking submit) | Formula `06` section 3 | Retry; Report a problem after 2 failures |
-| Error, not recoverable | Object gone, invalid state | Error state without Retry | Polite | What happened, what it means, where to go | Go to {parent}; Contact support |
-| Offline | `navigator.onLine` false or requests failing with network error | Banner (global) plus per-screen indication: cached content marked "Saved on this device" with timestamp; actions that need network are `aria-disabled` with reason | Polite once on change | "You're offline. {What still works.}" | Retry now; View saved items |
-| Permission denied | 403 | In-shell state (nav visible) | Polite | "You don't have access to this {object}." + why where safe + who can grant | Request access; Switch workspace; Go home |
-| Not found / unavailable | 404, 410 | In-shell state | Polite | "We can't find that {object}. It may have been removed or you may not have access." (private resources use this single sentence by `NFR-IAX-021`) | Go home, Search |
-| Session expired | 401 mid-session | Modal "Sign in again" that preserves the page | Alert | "Your session ended. Sign in to continue where you left off." | Sign in; Cancel (leaves, with unsaved prompt) |
-| Rate limited | 429 | Notice (inline) near the control, or banner for global | Polite | "You're doing that a lot. Try again in {n} seconds." with a countdown text updated every 10 s (not per second) | Retry becomes enabled at expiry; no auto retry loops |
-| Maintenance (planned) | Scheduled window announced | Banner 24 hours ahead with local time window | Polite | "Planned maintenance on {date}, {start} to {end} ({time zone}). {What is unavailable}." | Details link |
-| Maintenance (active) | 503 or flag | Static maintenance page from edge; in-app read-only mode when partial | Heading focus | "We're updating TalentSphere. Back by {time}." (no time if unknown: "We'll be back soon.") | Status page link; Subscribe to updates |
-| Degraded | Dependency down (payments, video) | Banner plus inline disabling of affected actions with reason | Polite | "{Feature} is temporarily unavailable. {Alternative}." | Status link |
-| Restricted account | Suspended or banned | Shell with limited nav | Polite | "Your account is restricted. {Reason class}. You can still {allowed actions}." | Appeal; Export data; Contact support |
-| Entitlement locked | Plan lacks feature | `CMP-EntitlementGate` inline | none | "{Feature} is part of {Plan}." plus what it gives | Upgrade; Ask your admin |
-| Region unavailable | Legal or availability | Inline notice | none | "{Feature} isn't available in {Country} yet." | Notify me |
-| Conflict | Revision mismatch | Dialog (8.3) | Alert | "{User} changed this while you were editing." | Keep mine; Use theirs; Compare |
-| Stale | Data older than freshness limit | Inline "Updated {time}" with Refresh | none | "Updated 12 minutes ago." | Refresh |
-| In progress (async task) | Background task running | Progress in place and tray entry | Polite at steps | "Importing 240 students. 40 percent done." | Cancel; Continue working |
-| Verification pending | Waiting on third party | Status pill and timeline | none | "Checking with {issuer}. Usually done within {time}." (time from observed data, not invented) | Resend; Cancel |
-| Read-only | Archived or locked object | Banner in the object | none | "This {object} is archived. You can view it but not change it." | Restore (if permitted) |
-| Disabled feature (flag) | Feature flag off | Not shown | n/a | n/a | n/a |
+| State                    | Trigger                                                         | Layout                                                                                                                                                             | Announcement                            | Copy pattern                                                                                                                                      | Actions                                                                             |
+| ------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Loading (initial)        | First request in flight                                         | Skeleton of the final layout (design system section 12)                                                                                                            | `aria-busy`, status "Loading {region}"  | none in skeleton                                                                                                                                  | none; Cancel only for long tasks                                                    |
+| Loading (refresh)        | Re-request with data present                                    | Existing content stays, thin top progress, "Updating"                                                                                                              | None                                    | none                                                                                                                                              | none                                                                                |
+| Empty, first use         | The user has never created any of this                          | `CMP-EmptyState` with illustration, heading, explanation of value, one primary action                                                                              | none                                    | Heading: what this is for ("Show your work"). Body: why it matters, one sentence. Action: verb plus object ("Add work history")                   | Primary; optional "Learn more"                                                      |
+| Empty, no results        | Filters or search return zero                                   | Compact empty state inside the results area, filters stay                                                                                                          | Count live region "0 results"           | "No {things} match your filters."                                                                                                                 | "Clear filters", remove-most-restrictive buttons, "Save this search" where relevant |
+| Empty, cleared           | User completed or cleared all (inbox zero)                      | Positive empty state                                                                                                                                               | none                                    | "You're all caught up." plus what is next                                                                                                         | Optional link                                                                       |
+| Empty, permission        | The list exists but the user may see none                       | As empty, no hint of hidden items                                                                                                                                  | none                                    | "No {things} to show."                                                                                                                            | Request access if applicable                                                        |
+| Success (inline)         | Action done, user still on screen                               | Notice success or inline confirmation card                                                                                                                         | Polite                                  | "{Object} {past tense verb}." ("Resume saved.")                                                                                                   | Next best action                                                                    |
+| Success (page)           | Wizard or large task completes                                  | Full success page: check icon, heading, summary, next steps                                                                                                        | Heading focus                           | "You've applied to {Job}."                                                                                                                        | Up to 2 next actions                                                                |
+| Partial                  | Some regions failed or part of an operation failed              | Working regions render; failed region shows compact error with Retry; operation summary lists failures                                                             | Polite                                  | "We couldn't load {region}." / "{n} of {m} {things} {verb}. {k} didn't."                                                                          | Retry; View failures                                                                |
+| Error, recoverable       | Network or server failure that retry can solve                  | `CMP-ErrorState` in region (or Notice in form)                                                                                                                     | Polite (assertive when blocking submit) | Formula `06` section 3                                                                                                                            | Retry; Report a problem after 2 failures                                            |
+| Error, not recoverable   | Object gone, invalid state                                      | Error state without Retry                                                                                                                                          | Polite                                  | What happened, what it means, where to go                                                                                                         | Go to {parent}; Contact support                                                     |
+| Offline                  | `navigator.onLine` false or requests failing with network error | Banner (global) plus per-screen indication: cached content marked "Saved on this device" with timestamp; actions that need network are `aria-disabled` with reason | Polite once on change                   | "You're offline. {What still works.}"                                                                                                             | Retry now; View saved items                                                         |
+| Permission denied        | 403                                                             | In-shell state (nav visible)                                                                                                                                       | Polite                                  | "You don't have access to this {object}." + why where safe + who can grant                                                                        | Request access; Switch workspace; Go home                                           |
+| Not found / unavailable  | 404, 410                                                        | In-shell state                                                                                                                                                     | Polite                                  | "We can't find that {object}. It may have been removed or you may not have access." (private resources use this single sentence by `NFR-IAX-021`) | Go home, Search                                                                     |
+| Session expired          | 401 mid-session                                                 | Modal "Sign in again" that preserves the page                                                                                                                      | Alert                                   | "Your session ended. Sign in to continue where you left off."                                                                                     | Sign in; Cancel (leaves, with unsaved prompt)                                       |
+| Rate limited             | 429                                                             | Notice (inline) near the control, or banner for global                                                                                                             | Polite                                  | "You're doing that a lot. Try again in {n} seconds." with a countdown text updated every 10 s (not per second)                                    | Retry becomes enabled at expiry; no auto retry loops                                |
+| Maintenance (planned)    | Scheduled window announced                                      | Banner 24 hours ahead with local time window                                                                                                                       | Polite                                  | "Planned maintenance on {date}, {start} to {end} ({time zone}). {What is unavailable}."                                                           | Details link                                                                        |
+| Maintenance (active)     | 503 or flag                                                     | Static maintenance page from edge; in-app read-only mode when partial                                                                                              | Heading focus                           | "We're updating TalentSphere. Back by {time}." (no time if unknown: "We'll be back soon.")                                                        | Status page link; Subscribe to updates                                              |
+| Degraded                 | Dependency down (payments, video)                               | Banner plus inline disabling of affected actions with reason                                                                                                       | Polite                                  | "{Feature} is temporarily unavailable. {Alternative}."                                                                                            | Status link                                                                         |
+| Restricted account       | Suspended or banned                                             | Shell with limited nav                                                                                                                                             | Polite                                  | "Your account is restricted. {Reason class}. You can still {allowed actions}."                                                                    | Appeal; Export data; Contact support                                                |
+| Entitlement locked       | Plan lacks feature                                              | `CMP-EntitlementGate` inline                                                                                                                                       | none                                    | "{Feature} is part of {Plan}." plus what it gives                                                                                                 | Upgrade; Ask your admin                                                             |
+| Region unavailable       | Legal or availability                                           | Inline notice                                                                                                                                                      | none                                    | "{Feature} isn't available in {Country} yet."                                                                                                     | Notify me                                                                           |
+| Conflict                 | Revision mismatch                                               | Dialog (8.3)                                                                                                                                                       | Alert                                   | "{User} changed this while you were editing."                                                                                                     | Keep mine; Use theirs; Compare                                                      |
+| Stale                    | Data older than freshness limit                                 | Inline "Updated {time}" with Refresh                                                                                                                               | none                                    | "Updated 12 minutes ago."                                                                                                                         | Refresh                                                                             |
+| In progress (async task) | Background task running                                         | Progress in place and tray entry                                                                                                                                   | Polite at steps                         | "Importing 240 students. 40 percent done."                                                                                                        | Cancel; Continue working                                                            |
+| Verification pending     | Waiting on third party                                          | Status pill and timeline                                                                                                                                           | none                                    | "Checking with {issuer}. Usually done within {time}." (time from observed data, not invented)                                                     | Resend; Cancel                                                                      |
+| Read-only                | Archived or locked object                                       | Banner in the object                                                                                                                                               | none                                    | "This {object} is archived. You can view it but not change it."                                                                                   | Restore (if permitted)                                                              |
+| Disabled feature (flag)  | Feature flag off                                                | Not shown                                                                                                                                                          | n/a                                     | n/a                                                                                                                                               | n/a                                                                                 |
 
 ### 12.2 Copy rules for states
 
@@ -444,30 +444,30 @@ Automatic retries for idempotent GETs: 2 retries with 1 s and 3 s delay, invisib
 
 ### 13.2 Limits and types (defaults [PROP], owned by PLT)
 
-| Use | Types | Max size | Max count |
-|---|---|---|---|
-| Resume | PDF, DOCX | 10 MB | 1 per import |
-| Evidence document | PDF, PNG, JPG, DOCX | 20 MB | 10 per item |
-| Profile photo | JPG, PNG, WebP | 5 MB | 1 (crop dialog 1:1) |
-| Company banner | JPG, PNG, WebP | 5 MB | 1 (crop 4:1) |
-| Message attachment | Common docs, images, archives except executables | 25 MB | 10 |
-| Assignment submission | As set by instructor | up to 100 MB | as set |
-| Video (course, intro) | MP4, MOV, WebM | 2 GB resumable | 1 |
-| Bulk import | CSV, XLSX | 20 MB | 1 |
+| Use                   | Types                                            | Max size       | Max count           |
+| --------------------- | ------------------------------------------------ | -------------- | ------------------- |
+| Resume                | PDF, DOCX                                        | 10 MB          | 1 per import        |
+| Evidence document     | PDF, PNG, JPG, DOCX                              | 20 MB          | 10 per item         |
+| Profile photo         | JPG, PNG, WebP                                   | 5 MB           | 1 (crop dialog 1:1) |
+| Company banner        | JPG, PNG, WebP                                   | 5 MB           | 1 (crop 4:1)        |
+| Message attachment    | Common docs, images, archives except executables | 25 MB          | 10                  |
+| Assignment submission | As set by instructor                             | up to 100 MB   | as set              |
+| Video (course, intro) | MP4, MOV, WebM                                   | 2 GB resumable | 1                   |
+| Bulk import           | CSV, XLSX                                        | 20 MB          | 1                   |
 
 ### 13.3 States and copy
 
-| State | Visual | Text |
-|---|---|---|
-| Queued | Neutral | "Waiting" |
-| Uploading | ProgressBar | "Uploading, 42 percent" |
-| Paused (offline) | Warning icon | "Paused. Resumes when you're online." |
-| Checking | Info, static icon | "Checking file" |
-| Ready | Success icon | "Ready" |
-| Rejected: type | Danger | "This file type isn't supported. Use PDF, PNG or JPG." |
-| Rejected: size | Danger | "This file is {size}. The limit is {limit}." |
-| Rejected: infected | Danger | "We couldn't accept this file because it failed a safety check." |
-| Failed (network) | Danger with Retry | "Upload failed. Retry" |
+| State              | Visual            | Text                                                             |
+| ------------------ | ----------------- | ---------------------------------------------------------------- |
+| Queued             | Neutral           | "Waiting"                                                        |
+| Uploading          | ProgressBar       | "Uploading, 42 percent"                                          |
+| Paused (offline)   | Warning icon      | "Paused. Resumes when you're online."                            |
+| Checking           | Info, static icon | "Checking file"                                                  |
+| Ready              | Success icon      | "Ready"                                                          |
+| Rejected: type     | Danger            | "This file type isn't supported. Use PDF, PNG or JPG."           |
+| Rejected: size     | Danger            | "This file is {size}. The limit is {limit}."                     |
+| Rejected: infected | Danger            | "We couldn't accept this file because it failed a safety check." |
+| Failed (network)   | Danger with Retry | "Upload failed. Retry"                                           |
 
 ### 13.4 Rules
 
@@ -551,43 +551,43 @@ Applies to assistants, recommendations, résumé suggestions, match explanations
 
 ## 17. Consolidated interaction rules
 
-| Id | Rule | Test |
-|---|---|---|
-| NFR-IXP-001 | Every async action has one pending, one success, one failure state | Latency and failure simulation per action |
-| NFR-IXP-002 | Mutations carry idempotency keys; double activation ignored | Double click test |
-| NFR-IXP-003 | Required onboarding steps state why | Review |
-| NFR-IXP-004 | Onboarding collects only data used in session; no sensitive categories | Data inventory review |
-| NFR-IXP-005 | Onboarding progress saved each step and real step count | Close and return test |
-| NFR-IXP-006 | Dismissed onboarding stays dismissed | Persistence test |
-| NFR-IXP-007 | User's task completes before onboarding resumes | Journey test |
-| NFR-IXP-008 | Submit buttons are not disabled for invalid input | Form test |
-| NFR-IXP-009 | Every drag has a non-drag equivalent | Keyboard test |
-| NFR-IXP-010 | Infinite scroll meets the eight conditions | Keyboard and screen reader test |
-| NFR-IXP-011 | Confirmation buttons name verb and object; Cancel focused first | Dialog test |
-| NFR-IXP-012 | Confirmations state what, what not, undoability in 3 sentences | Copy review |
-| NFR-IXP-013 | No confirmations for non-destructive actions; no double confirms | Review |
-| NFR-IXP-014 | No notification for the user's own action within 5 s | Event test |
-| NFR-IXP-015 | No badges for non-actionable counts | Review |
-| NFR-IXP-016 | Notification copy follows the guide and channel privacy | Copy lint |
-| NFR-IXP-017 | Notifications deduplicated and rate limited | Load test |
-| NFR-IXP-018 | Real-time degrades to polling; correctness without sockets | Disable sockets test |
-| NFR-IXP-019 | Uploads resumable without loss | Network throttle test |
-| NFR-IXP-020 | No autoplay with sound; autoplay-next is pausable and off by default | Player test |
-| NFR-IXP-021 | AI output labeled and never shown as verified | Visual review |
+| Id          | Rule                                                                   | Test                                      |
+| ----------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| NFR-IXP-001 | Every async action has one pending, one success, one failure state     | Latency and failure simulation per action |
+| NFR-IXP-002 | Mutations carry idempotency keys; double activation ignored            | Double click test                         |
+| NFR-IXP-003 | Required onboarding steps state why                                    | Review                                    |
+| NFR-IXP-004 | Onboarding collects only data used in session; no sensitive categories | Data inventory review                     |
+| NFR-IXP-005 | Onboarding progress saved each step and real step count                | Close and return test                     |
+| NFR-IXP-006 | Dismissed onboarding stays dismissed                                   | Persistence test                          |
+| NFR-IXP-007 | User's task completes before onboarding resumes                        | Journey test                              |
+| NFR-IXP-008 | Submit buttons are not disabled for invalid input                      | Form test                                 |
+| NFR-IXP-009 | Every drag has a non-drag equivalent                                   | Keyboard test                             |
+| NFR-IXP-010 | Infinite scroll meets the eight conditions                             | Keyboard and screen reader test           |
+| NFR-IXP-011 | Confirmation buttons name verb and object; Cancel focused first        | Dialog test                               |
+| NFR-IXP-012 | Confirmations state what, what not, undoability in 3 sentences         | Copy review                               |
+| NFR-IXP-013 | No confirmations for non-destructive actions; no double confirms       | Review                                    |
+| NFR-IXP-014 | No notification for the user's own action within 5 s                   | Event test                                |
+| NFR-IXP-015 | No badges for non-actionable counts                                    | Review                                    |
+| NFR-IXP-016 | Notification copy follows the guide and channel privacy                | Copy lint                                 |
+| NFR-IXP-017 | Notifications deduplicated and rate limited                            | Load test                                 |
+| NFR-IXP-018 | Real-time degrades to polling; correctness without sockets             | Disable sockets test                      |
+| NFR-IXP-019 | Uploads resumable without loss                                         | Network throttle test                     |
+| NFR-IXP-020 | No autoplay with sound; autoplay-next is pausable and off by default   | Player test                               |
+| NFR-IXP-021 | AI output labeled and never shown as verified                          | Visual review                             |
 
 ## 18. Open decisions and risks
 
-| Id | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-UX-12 | Posting limits for unverified employer organizations | None; low cap; manual approval | Manual approval for first job, low cap after | Product owner and TSF | Employer onboarding |
-| OD-UX-13 | Mentor application response window | Parameter | Shown as a parameter, no number promised | Product owner | MEN |
-| OD-UX-14 | Real-time collaborative editing | Not offered; offered for documents | Not offered; soft locks only | Engineering | STU, ATS |
-| OD-UX-15 | Trash retention and undo-send window | 7, 30, 90 days; 10 s undo send | 30 days; 10 s | Privacy officer | SET |
+| Id       | Question                                             | Options                            | Default proposal                             | Decides               | Blocks              |
+| -------- | ---------------------------------------------------- | ---------------------------------- | -------------------------------------------- | --------------------- | ------------------- |
+| OD-UX-12 | Posting limits for unverified employer organizations | None; low cap; manual approval     | Manual approval for first job, low cap after | Product owner and TSF | Employer onboarding |
+| OD-UX-13 | Mentor application response window                   | Parameter                          | Shown as a parameter, no number promised     | Product owner         | MEN                 |
+| OD-UX-14 | Real-time collaborative editing                      | Not offered; offered for documents | Not offered; soft locks only                 | Engineering           | STU, ATS            |
+| OD-UX-15 | Trash retention and undo-send window                 | 7, 30, 90 days; 10 s undo send     | 30 days; 10 s                                | Privacy officer       | SET                 |
 
 ### 18.1 Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
+| Id        | Risk                                          | Mitigation                                                           |
+| --------- | --------------------------------------------- | -------------------------------------------------------------------- |
 | RSK-UX-08 | Autosave and conflict rules differ per module | Section 8 is the single rule; module specs may only choose the class |
-| RSK-UX-09 | Notification fatigue | Frequency caps, quiet hours, digest defaults, preference matrix |
-| RSK-UX-10 | Optimistic updates showing false state | Section 8.4 allow-list; rollback within 150 ms |
+| RSK-UX-09 | Notification fatigue                          | Frequency caps, quiet hours, digest defaults, preference matrix      |
+| RSK-UX-10 | Optimistic updates showing false state        | Section 8.4 allow-list; rollback within 150 ms                       |

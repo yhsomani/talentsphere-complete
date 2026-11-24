@@ -56,6 +56,7 @@ modules/<code>/
 ```
 
 Rules:
+
 - A module MAY call another module only through that module's `index.ts` exports or through domain events; it MUST NOT read another module's tables directly. [DER]
 - Each module declares in its `index.ts` metadata: `persistence: "durable" | "ephemeral"`. Ephemeral modules MUST label responses as ephemeral. [SRC: CLAUDE.md Stack]
 - Splitting `server.ts` into module folders is a refactor and needs approval before it happens. [SRC: CLAUDE.md "Ask before any big refactor"]
@@ -86,13 +87,13 @@ Rules:
 
 ### 2.2 Layering (MUST) `[SRC: CODE_STYLE §3; CLAUDE.md Rules]`
 
-| Layer | Allowed | Forbidden |
-|---|---|---|
-| Route | parse input, resolve actor, authorize, call a use case, serialize | restating business rules, SQL, provider calls |
-| Use case | orchestrate repositories, domain rules, adapters, transactions, emit events | HTTP types, direct SQL strings |
-| Domain | pure rules and state machines | I/O, time, randomness |
-| Repository | SQL, row mapping, constraint-to-error mapping | business decisions |
-| Adapter | provider SDK calls with timeout, retry, mapping to internal types | business decisions, leaking provider types |
+| Layer      | Allowed                                                                     | Forbidden                                     |
+| ---------- | --------------------------------------------------------------------------- | --------------------------------------------- |
+| Route      | parse input, resolve actor, authorize, call a use case, serialize           | restating business rules, SQL, provider calls |
+| Use case   | orchestrate repositories, domain rules, adapters, transactions, emit events | HTTP types, direct SQL strings                |
+| Domain     | pure rules and state machines                                               | I/O, time, randomness                         |
+| Repository | SQL, row mapping, constraint-to-error mapping                               | business decisions                            |
+| Adapter    | provider SDK calls with timeout, retry, mapping to internal types           | business decisions, leaking provider types    |
 
 ### 2.3 Functions and complexity
 
@@ -276,16 +277,16 @@ Never in one release: rename a column, change a type in place, add `NOT NULL` wi
 
 ### 5.3 Approvals
 
-| Change type | Required approvals |
-|---|---|
-| Ordinary code | 1 reviewer who did not author, plus CODEOWNER for touched paths |
-| Auth, session, permissions, RLS, rate limits | CODEOWNER plus security officer (`SAD`) review |
-| Migrations | CODEOWNER plus a second engineer who has read the SQL |
-| Billing and entitlements | CODEOWNER plus finance-aware reviewer (`FIN` representative) |
-| Privacy-affecting (new personal data, retention, sharing) | privacy reviewer sign-off |
-| AI behavior | AI evaluation gate G8 plus owner approval |
-| Build files, CI, deploy | repository owner (human) |
-| Public API/contract breaking change | ADR approved by architecture owner |
+| Change type                                               | Required approvals                                              |
+| --------------------------------------------------------- | --------------------------------------------------------------- |
+| Ordinary code                                             | 1 reviewer who did not author, plus CODEOWNER for touched paths |
+| Auth, session, permissions, RLS, rate limits              | CODEOWNER plus security officer (`SAD`) review                  |
+| Migrations                                                | CODEOWNER plus a second engineer who has read the SQL           |
+| Billing and entitlements                                  | CODEOWNER plus finance-aware reviewer (`FIN` representative)    |
+| Privacy-affecting (new personal data, retention, sharing) | privacy reviewer sign-off                                       |
+| AI behavior                                               | AI evaluation gate G8 plus owner approval                       |
+| Build files, CI, deploy                                   | repository owner (human)                                        |
+| Public API/contract breaking change                       | ADR approved by architecture owner                              |
 
 CODEOWNERS is maintained per path; reviewer count minimums are parameters (`OD-ENG-04`), not invented headcount.
 
@@ -334,6 +335,7 @@ New or changed: data store, queue, search engine, major library or framework, au
 
 ```markdown
 # ADR-nnn: Title
+
 Status: Proposed | Accepted | Superseded by ADR-xxx | Rejected | Deprecated
 Context: forces, constraints, linked ODs/DECs
 Decision: what we will do, in the active voice
@@ -383,13 +385,13 @@ A PR adding or upgrading a runtime dependency states: purpose, alternatives cons
 
 ### 10.1 Flag types
 
-| Type | Purpose | Max life |
-|---|---|---|
-| Release | hide incomplete or risky work, gradual rollout | until fully rolled out plus one release cycle, then removed |
-| Experiment | A/B tests | until decision, then removed |
-| Ops / kill switch | disable a feature or provider quickly | permanent, documented in runbook |
-| Entitlement | plan-based access | not a flag; modeled in the billing module (BIL) |
-| Permission | role access | not a flag; modeled in authorization |
+| Type              | Purpose                                        | Max life                                                    |
+| ----------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| Release           | hide incomplete or risky work, gradual rollout | until fully rolled out plus one release cycle, then removed |
+| Experiment        | A/B tests                                      | until decision, then removed                                |
+| Ops / kill switch | disable a feature or provider quickly          | permanent, documented in runbook                            |
+| Entitlement       | plan-based access                              | not a flag; modeled in the billing module (BIL)             |
+| Permission        | role access                                    | not a flag; modeled in authorization                        |
 
 ### 10.2 Lifecycle
 
@@ -533,44 +535,44 @@ A change is done only when every item is true (this is the engineering view of t
 
 ## 19. Compliance with CODE_STYLE
 
-| CODE_STYLE section | Extended here |
-|---|---|
-| §1 TypeScript | 2.1 |
-| §2 Naming | 1.5 |
-| §3 Structure | 1.3, 2.2 |
-| §4 React | 2.5 |
-| §5 Errors | 3.6, 12 |
-| §6 Async | 2.4 |
-| §7 Database | 4 |
-| §8 Security | 2.7, 13 |
-| §9 Abstraction | 9.2, 1.4 (no premature abstraction; shared abstractions need an owner and tests) |
-| §10 PR rule | 5.1, 8.4 |
+| CODE_STYLE section | Extended here                                                                    |
+| ------------------ | -------------------------------------------------------------------------------- |
+| §1 TypeScript      | 2.1                                                                              |
+| §2 Naming          | 1.5                                                                              |
+| §3 Structure       | 1.3, 2.2                                                                         |
+| §4 React           | 2.5                                                                              |
+| §5 Errors          | 3.6, 12                                                                          |
+| §6 Async           | 2.4                                                                              |
+| §7 Database        | 4                                                                                |
+| §8 Security        | 2.7, 13                                                                          |
+| §9 Abstraction     | 9.2, 1.4 (no premature abstraction; shared abstractions need an owner and tests) |
+| §10 PR rule        | 5.1, 8.4                                                                         |
 
 Where this document and CODE_STYLE differ, CODE_STYLE governs until an ADR amends it.
 
 ## 20. Open decisions
 
-| Id | Question | Options | Default proposal `[PROP]` | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-ENG-01 | Function size and complexity thresholds | advisory / lint-enforced | advisory, lint warning | engineering lead | lint config |
-| OD-ENG-02 | Idempotency key retention window | hours / days | days, set by longest client retry horizon | architecture owner | API standard |
-| OD-ENG-03 | Migration lock and statement timeouts | strict / lenient | strict lock timeout, per-migration override with note | DB owner | migration tooling |
-| OD-ENG-04 | PR size guideline and minimum reviewer count | as proposed / custom | under 400 lines; one non-author reviewer plus CODEOWNER | engineering lead | branch protection |
-| OD-ENG-05 | Signed commits required | yes / no | no initially | security officer | branch protection |
-| OD-ENG-06 | License allow-list | permissive only / case by case | permissive only | legal, engineering lead | license check |
-| OD-ENG-07 | Vulnerability response targets | as proposed / custom | section 9.2 | security officer | dependency gate |
-| OD-ENG-08 | Default outbound timeouts per adapter class | tune after baseline | set from measured provider p99 | architecture owner | adapters |
-| OD-ENG-09 | Split `server.ts` into module folders and timing | now / when first module outgrows it | defer until needed; requires approval | architecture owner | module layout |
+| Id        | Question                                         | Options                             | Default proposal `[PROP]`                               | Decides                 | Blocks            |
+| --------- | ------------------------------------------------ | ----------------------------------- | ------------------------------------------------------- | ----------------------- | ----------------- |
+| OD-ENG-01 | Function size and complexity thresholds          | advisory / lint-enforced            | advisory, lint warning                                  | engineering lead        | lint config       |
+| OD-ENG-02 | Idempotency key retention window                 | hours / days                        | days, set by longest client retry horizon               | architecture owner      | API standard      |
+| OD-ENG-03 | Migration lock and statement timeouts            | strict / lenient                    | strict lock timeout, per-migration override with note   | DB owner                | migration tooling |
+| OD-ENG-04 | PR size guideline and minimum reviewer count     | as proposed / custom                | under 400 lines; one non-author reviewer plus CODEOWNER | engineering lead        | branch protection |
+| OD-ENG-05 | Signed commits required                          | yes / no                            | no initially                                            | security officer        | branch protection |
+| OD-ENG-06 | License allow-list                               | permissive only / case by case      | permissive only                                         | legal, engineering lead | license check     |
+| OD-ENG-07 | Vulnerability response targets                   | as proposed / custom                | section 9.2                                             | security officer        | dependency gate   |
+| OD-ENG-08 | Default outbound timeouts per adapter class      | tune after baseline                 | set from measured provider p99                          | architecture owner      | adapters          |
+| OD-ENG-09 | Split `server.ts` into module folders and timing | now / when first module outgrows it | defer until needed; requires approval                   | architecture owner      | module layout     |
 
 ## 21. Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
-| RSK-ENG-01 | Single `server.ts` grows to unmaintainable size with 30 modules | module folder standard, approved split plan (OD-ENG-09) |
-| RSK-ENG-02 | Standards documented but not enforced | each MUST maps to a CI check or review checklist item; quarterly review of unenforced rules |
-| RSK-ENG-03 | Build-file restriction blocks required tooling | ask-first path with batching and ADRs |
-| RSK-ENG-04 | Flag sprawl | lifecycle rules and stale-flag report |
-| RSK-ENG-05 | Business rules leak into routes and UI | review checklist, lint import boundaries, domain tests per BR |
+| Id         | Risk                                                            | Mitigation                                                                                  |
+| ---------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| RSK-ENG-01 | Single `server.ts` grows to unmaintainable size with 30 modules | module folder standard, approved split plan (OD-ENG-09)                                     |
+| RSK-ENG-02 | Standards documented but not enforced                           | each MUST maps to a CI check or review checklist item; quarterly review of unenforced rules |
+| RSK-ENG-03 | Build-file restriction blocks required tooling                  | ask-first path with batching and ADRs                                                       |
+| RSK-ENG-04 | Flag sprawl                                                     | lifecycle rules and stale-flag report                                                       |
+| RSK-ENG-05 | Business rules leak into routes and UI                          | review checklist, lint import boundaries, domain tests per BR                               |
 
 ## 22. Legacy trace
 

@@ -22,18 +22,18 @@ flowchart LR
     S6 -.->|"defects and spec gaps"| S2
 ```
 
-| Stage | Purpose | Status of this stage in the blueprint |
-|---|---|---|
-| S0 Discovery and definition | Vision, scope, roles, journeys, business rules, unknowns | Drafted in [`01_PRODUCT`](../01_PRODUCT/). Needs owner ratification (`OD-PRD-31`). |
-| S1 Requirements finalization | Close the open decisions that block building; freeze the baseline for R0 and R1 | Not started. 38 high-level decisions and every module `OD-` are open: see the [register](../09_REGISTERS/OPEN_DECISIONS_REGISTER.md). |
-| S2 Feature specification | Feature-level specs a team can build from | Drafted for all 30 modules in [`02_MODULES`](../02_MODULES/). |
-| S3 UX planning | Information architecture, design system, interaction rules, screen specs | Drafted in [`03_EXPERIENCE`](../03_EXPERIENCE/). Visual design and prototypes not started. |
-| S4 Architecture and technical design | Target architecture, data, API, events, AI, security | Drafted in [`04_ARCHITECTURE`](../04_ARCHITECTURE/) and [`05_SECURITY_PRIVACY`](../05_SECURITY_PRIVACY/). |
-| S5 Development planning | Slice the baseline into buildable work, assign ownership, set up environments | Not started. Depends on S1 and the owner-approved build-file change (F1). |
-| S6 Build | Implement tier by tier | Not started. See [tier plan](02_TIER_PLAN.md). |
-| S7 Quality assurance | Verify every acceptance criterion and quality target | Strategy drafted in [`06_QUALITY_AND_PERFORMANCE`](../06_QUALITY_AND_PERFORMANCE/). |
-| S8 Release and deployment | Controlled rollout with rollback | Drafted in [`07_DEVOPS_AND_OPERATIONS`](../07_DEVOPS_AND_OPERATIONS/). |
-| S9 Operate, maintain, improve | Run, support, evolve, retire | Drafted in [`07_DEVOPS_AND_OPERATIONS`](../07_DEVOPS_AND_OPERATIONS/). |
+| Stage                                | Purpose                                                                         | Status of this stage in the blueprint                                                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| S0 Discovery and definition          | Vision, scope, roles, journeys, business rules, unknowns                        | Drafted in [`01_PRODUCT`](../01_PRODUCT/). Needs owner ratification (`OD-PRD-31`).                                                    |
+| S1 Requirements finalization         | Close the open decisions that block building; freeze the baseline for R0 and R1 | Not started. 38 high-level decisions and every module `OD-` are open: see the [register](../09_REGISTERS/OPEN_DECISIONS_REGISTER.md). |
+| S2 Feature specification             | Feature-level specs a team can build from                                       | Drafted for all 30 modules in [`02_MODULES`](../02_MODULES/).                                                                         |
+| S3 UX planning                       | Information architecture, design system, interaction rules, screen specs        | Drafted in [`03_EXPERIENCE`](../03_EXPERIENCE/). Visual design and prototypes not started.                                            |
+| S4 Architecture and technical design | Target architecture, data, API, events, AI, security                            | Drafted in [`04_ARCHITECTURE`](../04_ARCHITECTURE/) and [`05_SECURITY_PRIVACY`](../05_SECURITY_PRIVACY/).                             |
+| S5 Development planning              | Slice the baseline into buildable work, assign ownership, set up environments   | Not started. Depends on S1 and the owner-approved build-file change (F1).                                                             |
+| S6 Build                             | Implement tier by tier                                                          | Not started. See [tier plan](02_TIER_PLAN.md).                                                                                        |
+| S7 Quality assurance                 | Verify every acceptance criterion and quality target                            | Strategy drafted in [`06_QUALITY_AND_PERFORMANCE`](../06_QUALITY_AND_PERFORMANCE/).                                                   |
+| S8 Release and deployment            | Controlled rollout with rollback                                                | Drafted in [`07_DEVOPS_AND_OPERATIONS`](../07_DEVOPS_AND_OPERATIONS/).                                                                |
+| S9 Operate, maintain, improve        | Run, support, evolve, retire                                                    | Drafted in [`07_DEVOPS_AND_OPERATIONS`](../07_DEVOPS_AND_OPERATIONS/).                                                                |
 
 ## 2. Stage detail
 
@@ -92,13 +92,13 @@ Support, incident response, dependency and debt management, deprecation, cost re
 
 ## 3. Cross-cutting tracks
 
-| Track | Runs through | Owner role | Output |
-|---|---|---|---|
-| Decision management | S0 to S9 | Product owner | Decision register kept current |
-| Security and privacy | S1 to S9 | Security and privacy lead | Threat models, DPIAs, reviews |
-| Accessibility | S3 to S9 | Design lead and QA | Conformance evidence |
-| Documentation | S0 to S9 | Documentation owner | Blueprint kept in step with built behavior; "implemented" only from executable evidence |
-| Cost and capacity | S4 to S9 | Engineering lead | Budgets and reviews against `OD-` parameters |
+| Track                | Runs through | Owner role                | Output                                                                                  |
+| -------------------- | ------------ | ------------------------- | --------------------------------------------------------------------------------------- |
+| Decision management  | S0 to S9     | Product owner             | Decision register kept current                                                          |
+| Security and privacy | S1 to S9     | Security and privacy lead | Threat models, DPIAs, reviews                                                           |
+| Accessibility        | S3 to S9     | Design lead and QA        | Conformance evidence                                                                    |
+| Documentation        | S0 to S9     | Documentation owner       | Blueprint kept in step with built behavior; "implemented" only from executable evidence |
+| Cost and capacity    | S4 to S9     | Engineering lead          | Budgets and reviews against `OD-` parameters                                            |
 
 ## 4. Change control for this blueprint
 

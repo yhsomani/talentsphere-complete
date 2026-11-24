@@ -12,13 +12,13 @@ ASM is the "Practice" and "Prove" engine of TalentSphere. It lets people practic
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| Passing results are trustworthy | Evidence minted only from `passed` attempts with no open integrity case; zero evidence from `unverified`, `voided` or `under_review` attempts (reconciliation job) |
-| Candidates get a fair, accessible experience | Accommodation grant turnaround; accessibility audit; false-positive rate of integrity flags |
-| Authors can build valid, reliable assessments | Share of published assessments that reach evidence-eligible calibration; item discrimination distribution |
-| Practice is abundant and safe | Practice sessions per active learner; sandbox error rate; judge latency p95 |
-| Results are portable by consent | Result shares created and revoked; no employer view without consent |
+| Outcome                                       | How the system knows                                                                                                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Passing results are trustworthy               | Evidence minted only from `passed` attempts with no open integrity case; zero evidence from `unverified`, `voided` or `under_review` attempts (reconciliation job) |
+| Candidates get a fair, accessible experience  | Accommodation grant turnaround; accessibility audit; false-positive rate of integrity flags                                                                        |
+| Authors can build valid, reliable assessments | Share of published assessments that reach evidence-eligible calibration; item discrimination distribution                                                          |
+| Practice is abundant and safe                 | Practice sessions per active learner; sandbox error rate; judge latency p95                                                                                        |
+| Results are portable by consent               | Result shares created and revoked; no employer view without consent                                                                                                |
 
 ### 1.3 In scope
 
@@ -26,18 +26,18 @@ Challenge arena (coding, MCQ and objective formats, scenario, project, system de
 
 ### 1.4 Out of scope (owned elsewhere)
 
-| Capability | Owner | Boundary |
-|---|---|---|
-| Course player, lesson flow, course grade and completion | LRN | LRN embeds ASM attempts for quizzes (context `course_lesson`) and consumes results |
-| Course authoring placement, weights, completion rule | STU | STU embeds ASM builders and owns only course context |
-| Evidence ledger and rungs | EVD (planned) | ASM calls the issuer API; it never writes evidence |
-| Candidate pipeline, recruiter workflows, scorecards | ATS (planned) | Employer-assigned assessment results are delivered to ATS on consent |
-| Live interview rooms and collaborative coding | INT (planned) | Share the sandbox runner; interview sessions are not ASM attempts |
-| AI model gateway | AIC (planned) | ASM writes assessment restrictions; the gateway enforces them on every call |
-| Identity verification provider integration | BGV (planned) | ASM requests identity checks and receives results |
-| Remote proctoring vendor | External, behind adapter (OD-ASM-02) | ASM stores sessions and decisions |
-| Notification delivery, billing for paid exams | NTF, BIL (planned) | ASM names templates; BIL sells exam seats |
-| Case management for integrity and abuse | ASM owns integrity cases; TSF (planned) owns broader trust cases | Shared moderation tooling |
+| Capability                                              | Owner                                                            | Boundary                                                                           |
+| ------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Course player, lesson flow, course grade and completion | LRN                                                              | LRN embeds ASM attempts for quizzes (context `course_lesson`) and consumes results |
+| Course authoring placement, weights, completion rule    | STU                                                              | STU embeds ASM builders and owns only course context                               |
+| Evidence ledger and rungs                               | EVD (planned)                                                    | ASM calls the issuer API; it never writes evidence                                 |
+| Candidate pipeline, recruiter workflows, scorecards     | ATS (planned)                                                    | Employer-assigned assessment results are delivered to ATS on consent               |
+| Live interview rooms and collaborative coding           | INT (planned)                                                    | Share the sandbox runner; interview sessions are not ASM attempts                  |
+| AI model gateway                                        | AIC (planned)                                                    | ASM writes assessment restrictions; the gateway enforces them on every call        |
+| Identity verification provider integration              | BGV (planned)                                                    | ASM requests identity checks and receives results                                  |
+| Remote proctoring vendor                                | External, behind adapter (OD-ASM-02)                             | ASM stores sessions and decisions                                                  |
+| Notification delivery, billing for paid exams           | NTF, BIL (planned)                                               | ASM names templates; BIL sells exam seats                                          |
+| Case management for integrity and abuse                 | ASM owns integrity cases; TSF (planned) owns broader trust cases | Shared moderation tooling                                                          |
 
 ### 1.5 Owned versus consumed
 
@@ -49,24 +49,24 @@ Role mapping note: SSOT lists "Exam Administrator", "Employer" and "Proctor" as 
 
 Cell legend: **R** read, **C** create, **U** update, **D** delete, **A** administer, **-** none, **S** scoped (see note).
 
-| Capability | GUE | CAN | STD | INS | EAD/REC/HMG | IAD | MOD | SUP | PAD |
-|---|---|---|---|---|---|---|---|---|---|
-| Browse challenge catalog | R | R | R | R | R | R | R | R | R |
-| Attempt challenges and practice | - | C | C | C | - | - | - | - | - |
-| Take assessments and exams | - | C | C | C | - | - | - | - | - |
-| Author challenges and assessments | - | - | - | C U (own, S) | C U (employer templates) | C U (institution) | - | - | A |
-| Manage question bank | - | - | - | C U (own, shared S) | C U (own org) | C U (institution) | R | - | A |
-| Grade manually (rubric) | - | - | - | C (own course or assessment) | C (own assigned) | C | - | - | A |
-| View attempt details | - | own | own | S (own authored) | S (assigned, consented) | S (cohort, aggregate default) | S (case) | S (grant) | R (audit) |
-| Assign assessment to candidate | - | - | - | - | C | C (members) | - | - | A |
-| Run integrity review and decide | - | - | - | - | - | - | C U (decide) | R | A |
-| File appeal | - | C | C | C | - | - | - | - | - |
-| Decide appeal | - | - | - | - | - | - | C (second reviewer) | - | A |
-| Grant accommodation | - | request | request | - | - | S (institution) | - | C (verify and grant) | A |
-| Share results | - | C (own) | C (own) | - | - | - | - | - | - |
-| View leaderboards | R (public tabs) | R, opt-out | R, opt-out | R | - | R | R | R | R |
-| Configure integrity policy and runtimes | - | - | - | - | - | - | - | - | A |
-| Issue and revoke certification | - | - | - | - | - | S (institution exams) | revoke (integrity) | - | A |
+| Capability                              | GUE             | CAN        | STD        | INS                          | EAD/REC/HMG              | IAD                           | MOD                 | SUP                  | PAD       |
+| --------------------------------------- | --------------- | ---------- | ---------- | ---------------------------- | ------------------------ | ----------------------------- | ------------------- | -------------------- | --------- |
+| Browse challenge catalog                | R               | R          | R          | R                            | R                        | R                             | R                   | R                    | R         |
+| Attempt challenges and practice         | -               | C          | C          | C                            | -                        | -                             | -                   | -                    | -         |
+| Take assessments and exams              | -               | C          | C          | C                            | -                        | -                             | -                   | -                    | -         |
+| Author challenges and assessments       | -               | -          | -          | C U (own, S)                 | C U (employer templates) | C U (institution)             | -                   | -                    | A         |
+| Manage question bank                    | -               | -          | -          | C U (own, shared S)          | C U (own org)            | C U (institution)             | R                   | -                    | A         |
+| Grade manually (rubric)                 | -               | -          | -          | C (own course or assessment) | C (own assigned)         | C                             | -                   | -                    | A         |
+| View attempt details                    | -               | own        | own        | S (own authored)             | S (assigned, consented)  | S (cohort, aggregate default) | S (case)            | S (grant)            | R (audit) |
+| Assign assessment to candidate          | -               | -          | -          | -                            | C                        | C (members)                   | -                   | -                    | A         |
+| Run integrity review and decide         | -               | -          | -          | -                            | -                        | -                             | C U (decide)        | R                    | A         |
+| File appeal                             | -               | C          | C          | C                            | -                        | -                             | -                   | -                    | -         |
+| Decide appeal                           | -               | -          | -          | -                            | -                        | -                             | C (second reviewer) | -                    | A         |
+| Grant accommodation                     | -               | request    | request    | -                            | -                        | S (institution)               | -                   | C (verify and grant) | A         |
+| Share results                           | -               | C (own)    | C (own)    | -                            | -                        | -                             | -                   | -                    | -         |
+| View leaderboards                       | R (public tabs) | R, opt-out | R, opt-out | R                            | -                        | R                             | R                   | R                    | R         |
+| Configure integrity policy and runtimes | -               | -          | -          | -                            | -                        | -                             | -                   | -                    | A         |
+| Issue and revoke certification          | -               | -          | -          | -                            | -                        | S (institution exams)         | revoke (integrity)  | -                    | A         |
 
 `SAD` has audit access; `API` principals include the runner service, the proctoring vendor and ATS integrations with narrowly scoped capabilities. Authorization is enforced server-side on every request, and answer keys and hidden test data are readable only by the grading service and authorized authors.
 
@@ -87,17 +87,17 @@ flowchart LR
     I --> D
 ```
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Challenges arena | FR-ASM-001 to 015 |
-| B | Authoring and question bank | FR-ASM-016 to 022 |
-| C | Execution and grading | FR-ASM-023 to 028 |
-| D | Integrity and proctoring | FR-ASM-029 to 039 |
-| E | Attempt policy | FR-ASM-040 to 042 |
-| F | Scoring, calibration and skill mapping | FR-ASM-043 to 045 |
-| G | Employer-assigned and certification | FR-ASM-046 to 049 |
-| H | Results, sharing and leaderboards | FR-ASM-050 to 053 |
-| I | Fairness, accessibility and operations | FR-ASM-054 to 058 |
+| Code | Sub-module                             | Features          |
+| ---- | -------------------------------------- | ----------------- |
+| A    | Challenges arena                       | FR-ASM-001 to 015 |
+| B    | Authoring and question bank            | FR-ASM-016 to 022 |
+| C    | Execution and grading                  | FR-ASM-023 to 028 |
+| D    | Integrity and proctoring               | FR-ASM-029 to 039 |
+| E    | Attempt policy                         | FR-ASM-040 to 042 |
+| F    | Scoring, calibration and skill mapping | FR-ASM-043 to 045 |
+| G    | Employer-assigned and certification    | FR-ASM-046 to 049 |
+| H    | Results, sharing and leaderboards      | FR-ASM-050 to 053 |
+| I    | Fairness, accessibility and operations | FR-ASM-054 to 058 |
 
 ## 4. Feature specifications
 
@@ -1800,70 +1800,102 @@ Notification opt-out classes (owned by NTF, planned): `TRANSACTIONAL` (cannot be
   2. Given an open integrity case, when the job runs, then its signals are retained.
   3. Negative: Given a deletion request on an attempt referenced by a certification, when processed, then the personal answers are removed and the certification tombstone remains verifiable.
 
+### FR-ASM-059 — Code review challenges
+
+- **Sub-module:** A. Challenges arena
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.2 F-134 Code Review Practice (priority 4, Ph5; dependencies F-08, F-26)] [PROP] for behavior
+- **Purpose and outcome:** Candidates practice and demonstrate reviewing someone else's code: read a change, find defects, write review comments and give a verdict. The system knows it works when reviewers find the seeded issues without flagging good code and receive specific feedback.
+- **Roles and permissions:** `CAN, STD: attempt` · `INS, EAD: author` · `PAD: approve for the public catalog` · evidence rules follow FR-ASM-045
+- **Preconditions and entry points:** A challenge of type `code_review` is published (FR-ASM-001). Entry: challenge catalog filter "Code review", skill pages, employer-assigned assessments (FR-ASM-046).
+- **User interactions and actions:**
+  1. Open the challenge (FR-ASM-002) and start. See a pull-request-style view: title and description, up to {10} changed files with unified or split diff, and optional CI log excerpt.
+  2. Select a line or range with the keyboard or pointer, press "Add comment", choose a category (bug, security, performance, readability, test gap, praise) and severity (blocker, major, minor, nit), and write the comment (up to 1,000 characters). Edit or delete own comments before submit.
+  3. Write the overall verdict (approve or request changes) and a summary (up to 1,500 characters).
+  4. Submit. Read the results per the release policy: seeded issues found and missed, flagged lines that were not issues, summary feedback, and the reference review shown after the attempt.
+  5. Authors: build the change set, mark each seeded issue (file, line range, category, severity, accepted keywords, explanation, weight) and distractor regions that are correct, attach a rubric (FR-ASM-020), and set time limit and attempts.
+- **System behaviour:** The change set is static; nothing is executed, so no sandbox is needed. A comment matches a seeded issue when its line range overlaps the issue's range within {2} lines and its category equals the issue's or an author keyword appears. Score equals weighted recall of seeded issues minus a capped penalty for comments on distractor regions, plus rubric points for the verdict and summary. Auto-scoring produces practice feedback; evidence is minted only after finalized human review of the summary and borderline matches (BR-ASM-059, BR-ASM-050). Comment text is sanitized and never executed. AI-assist policy modes apply (FR-ASM-034), and hints follow FR-ASM-012. Solutions and the reference review are hidden until the attempt ends in assessment mode and released per FR-ASM-050. Scoring thresholds and skill mapping follow FR-ASM-043 and FR-ASM-045.
+- **UI elements and controls:** Diff viewer with line numbers, "+" and "-" text markers in addition to color, comment form, comment list per file, verdict radio group, summary field, submit confirmation; author builder with issue table and weight total. A screen-reader mode presents each hunk as a list of changed lines. States: not started, in progress with autosave, submitted, results, author draft with validation errors.
+- **Configuration options:** Author: categories enabled, time limit, attempts, hint policy. Platform: maximum files ({10}) and changed lines ({800}) `[PROP]`, results release policy.
+- **Business rules:** BR-ASM-059, BR-ASM-050
+- **Validation:** Authoring needs at least 3 seeded issues and 1 distractor region; weights total 100; line ranges inside the change set and not overlapping across issues; comment 1 to 1,000 characters; summary 0 to 1,500; at most 60 comments per attempt.
+- **Inputs and outputs:** In: comments with ranges, categories and severities, verdict, summary; author change set and issue key. Out: attempt result with matched and missed issues, penalties, rubric feedback and score.
+- **Filters, sorting, search:** Catalog filters by type, difficulty, language, skill (FR-ASM-001); results list sorted by file and line.
+- **Notifications and communication:** Result-ready notification through the existing assessment notices (class engagement); human-review completion notice when evidence is minted.
+- **Error handling and edge cases:** Autosave failure: local draft preserved and retried (FR-PWA-013). Timer expiry: the attempt submits with comments saved so far. Comment range outside the file: rejected with a field error. Duplicate comments on the same range: allowed but counted once for matching. The change set is edited after attempts exist: a new version is created and old attempts keep the old version (FR-ASM-022). Plagiarized reference text: flagged by similarity check (FR-ASM-033).
+- **Dependencies:** FR-ASM-001, FR-ASM-002, FR-ASM-012, FR-ASM-020, FR-ASM-022, FR-ASM-027, FR-ASM-033, FR-ASM-034, FR-ASM-043, FR-ASM-045, FR-ASM-050, FR-PWA-013, ENT-ASM-33.
+- **Security and privacy:** The issue key is stored with the same protection as hidden tests (ENT-ASM-06) and never sent to the client before release; attempt content is private to the candidate and graders; authoring requires the author role in the owning context.
+- **Acceptance criteria:**
+  - Given a change set with 5 seeded issues, when a candidate comments on 4 of them correctly, then the result lists 4 found and 1 missed with the explanation for the missed one after release.
+  - Given a candidate comments on a distractor region as a bug, when scoring, then a capped penalty is applied and the comment is listed under "Not an issue".
+  - Given a keyboard-only user, when they select a line and press "Add comment", then the comment form opens without a pointer.
+  - Given an author saves a challenge with only 2 seeded issues, when submitting for review, then validation fails with `min_seeded_issues` (negative).
+
 ## 5. Business rules
 
 Parameters in braces are `[PROP]` defaults pending the decisions in section 13.
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-ASM-001 | Every assessment has one AI policy mode: `AI_PROHIBITED`, `AI_RESTRICTED`, `AI_ALLOWED` or `POST_ASSESSMENT_ONLY`. Any assessment that can mint verified evidence must be `AI_PROHIBITED`. While an `AI_PROHIBITED` attempt is active, no answers, solving hints, generated code, debugging, screenshot-to-answer help, alternative solution paths or indirect help may be provided by any platform feature or provider; the restriction is enforced inline in the AI gateway, never only in the UI. | Protect result validity. | Assessment builder, AI gateway | [SRC: SSOT §17.1 to §17.3; V61-22] |
-| BR-ASM-002 | Time is server-authoritative: deadlines and durations come from database time; client clocks never extend or shorten them. | Prevent time manipulation. | Attempt service | [SRC: SSOT §17.4] |
-| BR-ASM-003 | Answer keys, hidden tests, rubric answer notes and grading configuration never appear in client payloads, logs or exports to candidates; only the grading service and authorized authors can read them. | Prevent leakage. | API, storage | [SRC: SSOT §17.4; VER-024] |
-| BR-ASM-004 | A published assessment version is immutable; edits create a new version; running attempts stay on their version. | Fairness and auditability. | Version service | [SRC: YASH-G3 SPEC-05 §3.1] |
-| BR-ASM-005 | Evidence may be minted only from `passed` attempts of a `published_eligible` version, non-practice, with integrity level at least L1, AI policy `AI_PROHIBITED`, and no open integrity case. | Honest evidence. | Evidence consumer | [SRC: YASH-G3 SPEC-05 §3.5; INV-T26] |
-| BR-ASM-006 | At most one `in_progress` attempt per (account, assessment); a second concurrent session is refused or replaces the first only where policy allows, and is logged as a signal. | Prevent parallel sessions. | Attempt service | [SRC: YASH-G3 SPEC-05 §9] |
-| BR-ASM-007 | Autosave is idempotent: the server keeps the highest `clientSeq` per question; writes after the deadline are rejected with `409 attempt_closed`. | Offline tolerance and correctness. | Attempt service | [SRC: YASH-G3 SPEC-05 §3.2] |
-| BR-ASM-008 | `deadline_at = started_at + duration × accommodationMultiplier`; the attempt is auto-submitted at the deadline, with lazy deadline checks on any later request. | Deadline correctness regardless of job lag. | Attempt service, scheduler | [SRC: YASH-G3 SPEC-05 §3.2] |
-| BR-ASM-009 | Default attempt limits for standalone assessments: cooldown {24 hours} after a fail and at most {3} attempts per rolling 7 days; certification exams and course quizzes use their own configured policies; practice is unlimited. | Prevent brute-force retries. | Attempt service | [SRC: YASH-G3 SPEC-05 §3.8; SSOT BR-107] [PROP] OD-ASM-04 |
-| BR-ASM-010 | Score = points earned divided by points available times 100, rounded half-up to 0.01; pass is inclusive of the threshold; multi-select partial credit = (correct selected minus incorrect selected) over total correct, floored at 0; unanswered scores 0. | Deterministic scoring. | Grading service | [SRC: YASH-G3 SPEC-05 §3.5] |
-| BR-ASM-011 | Code, SQL and data are executed only in the isolated sandbox with no network, read-only base filesystem, resource limits, and public tests only for Run; hidden tests run only on Submit and are never revealed. | Safety and fairness. | Sandbox service | [SRC: SSOT BR-049, BR-050, BR-051] |
-| BR-ASM-012 | If a code attempt cannot be verified because the runner is unavailable past the retry budget, its state is `unverified`: no score, no pass or fail wording, no evidence; eligible attempts (at most 30 days old) are re-graded when a runner exists. | Never fake a pass. | Judge service | [SRC: YASH-G3 SPEC-05 §3.4; V61-22] |
-| BR-ASM-013 | Evidence is never minted from `unverified`, `voided` or `under_review` attempts; at most one mint per attempt (idempotent on attemptId); minting for a flagged pass waits for the integrity decision. | Evidence integrity. | Evidence consumer | [SRC: YASH-G3 SPEC-05 §3.5; INV-T26, INV-T27] |
-| BR-ASM-014 | Integrity signals and AI-detection outputs are indicators for human review, never proof; they cannot fail, void or penalize an attempt automatically. | Fairness. | Integrity services | [SRC: SSOT §17.4] |
-| BR-ASM-015 | Every attempt discloses before start the integrity signals collected, AI policy, retake and release rules; the signal set is minimal: no keystroke logging, screen capture or webcam except at L3 with consent. | Transparency and minimization. | Start screen, collectors | [SRC: YASH-G3 SPEC-05 §3.7] |
-| BR-ASM-016 | Remote proctoring applies only to assessments configured at L3, requires explicit consent and a lawful alternative where proctoring is mandatory for a credential, and uses no inference of personal traits. | Privacy and fairness. | Proctoring service | [SRC: SSOT §7 F-45] [PROP] |
-| BR-ASM-017 | Similarity and plagiarism checks run asynchronously and open review cases; they never penalize on their own. | Avoid false penalties. | Similarity service | [SRC: SSOT BR-052] |
-| BR-ASM-018 | Each integrity decision or grade may be appealed once; an appeal is decided by a reviewer who did not take part in the original decision, within {7 days}. | Independent review. | Appeal service | [SRC: SSOT F-115 step 11; YASH-G3 SPEC-05 §3.7] |
-| BR-ASM-019 | Accommodation multipliers are {1.25, 1.5, 2.0}, stored on the attempt, granted after verification of need, and never shown to employers, recruiters or on shared results and score reports. | Dignity and privacy. | Accommodation service, share views | [SRC: YASH-G3 SPEC-05 §3.8; BR-T030] |
-| BR-ASM-020 | Manual scores reference rubric criteria; the rubric version is pinned to the assessment version and each submission; double grading and moderation apply per policy. | Consistent grading. | Grading service | [DER] |
-| BR-ASM-021 | AI grading suggestions are drafts for human graders only, are off by default for evidence-eligible assessments, send no identity or protected attributes, and are never the final grade. | Human accountability. | Grading workbench, AI gateway | [SRC: SSOT §16] [PROP] |
-| BR-ASM-022 | Question items have a lifecycle (draft, in review, active, flagged, retired); editing an active item creates a new version; retired items cannot be drawn into new assessments. | Stability of published assessments. | Bank service | [SRC: SSOT BR-113] |
-| BR-ASM-023 | Each attempt pins the item versions drawn at start; later edits or retirements never change an attempt in progress or past attempts. | No retroactive edits. | Attempt service | [SRC: SSOT BR-113; F-115 edge cases] |
-| BR-ASM-024 | Forms are generated from a stored per-attempt seed (order, options, pool draw) so they are reproducible for audit. | Auditability. | Form generator | [SRC: SSOT §17.4] [DER] |
-| BR-ASM-025 | Practice attempts (and mock rounds) never mint evidence and do not count for leaderboards or evidence-related XP. | Separate learning from proof. | Evidence consumer, leaderboard | [SRC: SSOT §9.2 F-08 step 10] |
-| BR-ASM-026 | Viewing a full solution before solving marks the challenge `assisted`; assisted solves are excluded from evidence and rankings; hints and solutions are unavailable in `AI_PROHIBITED` graded attempts. | Fair rankings. | Hint service | [DER] |
-| BR-ASM-027 | Shared solutions and spoilers may be posted only after the poster has solved the challenge; evidence-eligible and employer-private assessments have no discussion. | Protect assessments. | Discussion service | [PROP] |
-| BR-ASM-028 | Contest submissions lock at the server-authoritative end time; clock skew never extends; a submission received before the end is judged and counts even if judged later. | Fair contests. | Contest service | [SRC: SSOT BR-139] |
-| BR-ASM-029 | Leaderboards include only graded, unflagged, unassisted solves from opted-in display names; voided entries are removed; ties break by earlier achievement time. | Integrity of rankings. | Leaderboard service | [DER] |
-| BR-ASM-030 | A certification pass requires the configured score in a single attempt; retake policy is per exam (default cooldown {7 days}); issuance waits for any open integrity case. | Credential credibility. | Certification service | [SRC: SSOT BR-140; F-115] |
-| BR-ASM-031 | Certification validity is per definition (default perpetual {OD-ASM-05}); expired and revoked certifications stay verifiable with status and reason class. | Honest verification. | Certification service | [SRC: SSOT OD-18] [DEC-REQ] OD-ASM-05 |
-| BR-ASM-032 | An employer may assign an assessment only to a candidate who is an applicant or has opted into employer contact; the candidate sees exactly what the employer will see and may decline without penalty. | Consent. | Assignment service | [SRC: SSOT §3 principles] [DER] |
-| BR-ASM-033 | Result shares are scoped, time-bound and revocable; revoked or expired shares return `410`; shares never expose accommodations, raw signals or other attempts. | Candidate control. | Share service | [SRC: SSOT BR-190] [DER] |
-| BR-ASM-034 | Skill levels are derived from documented per-skill bands on calibrated assessments; retakes can upgrade a level only through a new qualifying attempt and never overwrite earlier evidence. | No inflation. | Skill mapping | [DER] |
-| BR-ASM-035 | Item and assessment statistics are computed after minimum samples {200 attempts, 50 per item}; an assessment becomes `published_eligible` only when reliability, coverage and standard-setting thresholds are met. | Valid measurement. | Calibration jobs | [PROP] OD-ASM-08 |
-| BR-ASM-036 | Statistics and fairness reports hide groups smaller than {10} (outcome and demographic analyses {30}); demographic data is voluntary, consented and never inferred. | Privacy and statistical validity. | Analytics services | [PROP] |
-| BR-ASM-037 | Assessment delivery meets WCAG 2.2 AA; no mandatory fullscreen, camera or microphone below L3; accessible alternatives exist for every item type used in evidence-eligible assessments. | Inclusion. | UI, authoring checks | [SRC: SSOT §21.4; YASH-G3 SPEC-05 §8] |
-| BR-ASM-038 | Only allowlisted, pinned language runtimes (image digests) and library sets are used; packages are never installed at run time; deprecated runtimes still serve existing attempts and re-grades. | Reproducibility. | Runtime catalog | [SRC: SSOT BR-024] |
-| BR-ASM-039 | Rate limits per user: Run {30 per minute}; Submit {10 per minute}. | Protect the sandbox. | API gateway | [SRC: SSOT §9.2 F-08] |
-| BR-ASM-040 | Secure items have exposure caps and rotation; confirmed leaks trigger retirement and review of affected attempts with possible rescoring. | Test security. | Item security service | [PROP] |
-| BR-ASM-041 | Integrity signals are retained {90 days} unless a case is open. | Minimization. | Retention job | [SRC: YASH-G3 SPEC-05 §8] |
-| BR-ASM-042 | Confirmed item defects are remedied by fix, credit or exclusion with rescoring from pinned data; outcome changes are audited and downgrades need human confirmation and notice. | Fair remediation. | Regrade service | [PROP] |
-| BR-ASM-043 | Employer-authored assessments are labeled and never mint platform-verified evidence; results flow only to the employer by candidate consent. | Prevent borrowed authority. | Evidence consumer | [DER] |
-| BR-ASM-044 | Registration for scheduled exams reserves seats atomically; cancellation before the cutoff {24 hours} has no penalty; a no-show consumes an attempt only if the policy states so. | Predictability. | Registration service | [PROP] |
-| BR-ASM-045 | Identity verification results are stored as result, method, time and provider reference only; images are not stored by ASM; failures route to manual review, never auto-rejection. | Privacy. | Identity service | [PROP] |
-| BR-ASM-046 | Authors, graders and reviewers cannot grade, review or decide on their own attempts or those of related accounts or the same organization where conflict rules apply. | Independence. | Assignment services | [SRC: YASH-MICRO AC-05-04-53, AC-05-04-54] |
-| BR-ASM-047 | A submission snapshot (code, files, hashes) is immutable once submitted; grading and re-grading use the snapshot hash. | Auditability. | Submission service | [SRC: YASH-G3 SPEC-05 §3.3] |
-| BR-ASM-048 | The results release policy (score, breakdown, per-question feedback, correct answers) is set per assessment and recorded; for evidence-eligible assessments correct answers are not shown before the retake window closes unless OD-ASM-03 decides otherwise. | Item security vs learning. | Results service | [PROP] OD-ASM-03 |
-| BR-ASM-049 | Only published challenges appear in the public catalog; retired challenges remain visible to those who solved them; employer-private and institution-private items are never listed publicly. | Visibility control. | Catalog service | [DER] |
-| BR-ASM-050 | Projects, system designs, essays and scenarios graded by humans require a finalized human review before any evidence is minted. | No auto-pass on subjective work. | Evidence consumer | [PROP] |
-| BR-ASM-051 | Runner results carry a signature and the snapshot hash; the grader verifies both; writes are fenced by job generation so only the highest generation stores a result. | Tamper resistance and concurrency. | Judge service | [SRC: YASH-G3 SPEC-05 §3.3] |
-| BR-ASM-052 | Datasets for SQL and data challenges are synthetic or properly licensed and contain no personal data. | Privacy and licensing. | Authoring checks | [DER] |
-| BR-ASM-053 | Score reports have a verification id and hash; verification shows the current status of the attempt (valid, under review, voided, revoked). | Honest verification. | Report service | [PROP] |
-| BR-ASM-054 | Proctoring recordings are retained {30 days} unless a case is open and are accessible only to the vendor and assigned reviewers. | Minimization. | Retention job | [PROP] |
-| BR-ASM-055 | Pass thresholds for evidence-eligible assessments are set through a documented standard-setting process (for example Angoff or bookmark) and reviewed when item statistics change materially. | Defensible cut scores. | Publish workflow | [PROP] OD-ASM-08 |
-| BR-ASM-056 | The candidate must accept the current rules (AI policy, integrity signals, retake rules) before an evidence-eligible attempt starts; acceptance records the policy version hash. | Informed consent. | Start flow | [SRC: YASH-G3 SPEC-05 §3.2] |
-| BR-ASM-057 | Start and submit endpoints are idempotent with an idempotency key. | Safe retries. | API | [SRC: YASH-G3 SPEC-05 §5] |
-| BR-ASM-058 | A voided attempt mints nothing and revokes any evidence or certification minted from it; revocation is propagated to result shares. | Consistency after decisions. | Integrity and evidence services | [SRC: YASH-G3 SPEC-05 §3.5] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Rationale                                                                      | Enforced where                       | Source                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------ | --------------------------------------------------------- |
+| BR-ASM-001 | Every assessment has one AI policy mode: `AI_PROHIBITED`, `AI_RESTRICTED`, `AI_ALLOWED` or `POST_ASSESSMENT_ONLY`. Any assessment that can mint verified evidence must be `AI_PROHIBITED`. While an `AI_PROHIBITED` attempt is active, no answers, solving hints, generated code, debugging, screenshot-to-answer help, alternative solution paths or indirect help may be provided by any platform feature or provider; the restriction is enforced inline in the AI gateway, never only in the UI. | Protect result validity.                                                       | Assessment builder, AI gateway       | [SRC: SSOT §17.1 to §17.3; V61-22]                        |
+| BR-ASM-002 | Time is server-authoritative: deadlines and durations come from database time; client clocks never extend or shorten them.                                                                                                                                                                                                                                                                                                                                                                           | Prevent time manipulation.                                                     | Attempt service                      | [SRC: SSOT §17.4]                                         |
+| BR-ASM-003 | Answer keys, hidden tests, rubric answer notes and grading configuration never appear in client payloads, logs or exports to candidates; only the grading service and authorized authors can read them.                                                                                                                                                                                                                                                                                              | Prevent leakage.                                                               | API, storage                         | [SRC: SSOT §17.4; VER-024]                                |
+| BR-ASM-004 | A published assessment version is immutable; edits create a new version; running attempts stay on their version.                                                                                                                                                                                                                                                                                                                                                                                     | Fairness and auditability.                                                     | Version service                      | [SRC: YASH-G3 SPEC-05 §3.1]                               |
+| BR-ASM-005 | Evidence may be minted only from `passed` attempts of a `published_eligible` version, non-practice, with integrity level at least L1, AI policy `AI_PROHIBITED`, and no open integrity case.                                                                                                                                                                                                                                                                                                         | Honest evidence.                                                               | Evidence consumer                    | [SRC: YASH-G3 SPEC-05 §3.5; INV-T26]                      |
+| BR-ASM-006 | At most one `in_progress` attempt per (account, assessment); a second concurrent session is refused or replaces the first only where policy allows, and is logged as a signal.                                                                                                                                                                                                                                                                                                                       | Prevent parallel sessions.                                                     | Attempt service                      | [SRC: YASH-G3 SPEC-05 §9]                                 |
+| BR-ASM-007 | Autosave is idempotent: the server keeps the highest `clientSeq` per question; writes after the deadline are rejected with `409 attempt_closed`.                                                                                                                                                                                                                                                                                                                                                     | Offline tolerance and correctness.                                             | Attempt service                      | [SRC: YASH-G3 SPEC-05 §3.2]                               |
+| BR-ASM-008 | `deadline_at = started_at + duration × accommodationMultiplier`; the attempt is auto-submitted at the deadline, with lazy deadline checks on any later request.                                                                                                                                                                                                                                                                                                                                      | Deadline correctness regardless of job lag.                                    | Attempt service, scheduler           | [SRC: YASH-G3 SPEC-05 §3.2]                               |
+| BR-ASM-009 | Default attempt limits for standalone assessments: cooldown {24 hours} after a fail and at most {3} attempts per rolling 7 days; certification exams and course quizzes use their own configured policies; practice is unlimited.                                                                                                                                                                                                                                                                    | Prevent brute-force retries.                                                   | Attempt service                      | [SRC: YASH-G3 SPEC-05 §3.8; SSOT BR-107] [PROP] OD-ASM-04 |
+| BR-ASM-010 | Score = points earned divided by points available times 100, rounded half-up to 0.01; pass is inclusive of the threshold; multi-select partial credit = (correct selected minus incorrect selected) over total correct, floored at 0; unanswered scores 0.                                                                                                                                                                                                                                           | Deterministic scoring.                                                         | Grading service                      | [SRC: YASH-G3 SPEC-05 §3.5]                               |
+| BR-ASM-011 | Code, SQL and data are executed only in the isolated sandbox with no network, read-only base filesystem, resource limits, and public tests only for Run; hidden tests run only on Submit and are never revealed.                                                                                                                                                                                                                                                                                     | Safety and fairness.                                                           | Sandbox service                      | [SRC: SSOT BR-049, BR-050, BR-051]                        |
+| BR-ASM-012 | If a code attempt cannot be verified because the runner is unavailable past the retry budget, its state is `unverified`: no score, no pass or fail wording, no evidence; eligible attempts (at most 30 days old) are re-graded when a runner exists.                                                                                                                                                                                                                                                 | Never fake a pass.                                                             | Judge service                        | [SRC: YASH-G3 SPEC-05 §3.4; V61-22]                       |
+| BR-ASM-013 | Evidence is never minted from `unverified`, `voided` or `under_review` attempts; at most one mint per attempt (idempotent on attemptId); minting for a flagged pass waits for the integrity decision.                                                                                                                                                                                                                                                                                                | Evidence integrity.                                                            | Evidence consumer                    | [SRC: YASH-G3 SPEC-05 §3.5; INV-T26, INV-T27]             |
+| BR-ASM-014 | Integrity signals and AI-detection outputs are indicators for human review, never proof; they cannot fail, void or penalize an attempt automatically.                                                                                                                                                                                                                                                                                                                                                | Fairness.                                                                      | Integrity services                   | [SRC: SSOT §17.4]                                         |
+| BR-ASM-015 | Every attempt discloses before start the integrity signals collected, AI policy, retake and release rules; the signal set is minimal: no keystroke logging, screen capture or webcam except at L3 with consent.                                                                                                                                                                                                                                                                                      | Transparency and minimization.                                                 | Start screen, collectors             | [SRC: YASH-G3 SPEC-05 §3.7]                               |
+| BR-ASM-016 | Remote proctoring applies only to assessments configured at L3, requires explicit consent and a lawful alternative where proctoring is mandatory for a credential, and uses no inference of personal traits.                                                                                                                                                                                                                                                                                         | Privacy and fairness.                                                          | Proctoring service                   | [SRC: SSOT §7 F-45] [PROP]                                |
+| BR-ASM-017 | Similarity and plagiarism checks run asynchronously and open review cases; they never penalize on their own.                                                                                                                                                                                                                                                                                                                                                                                         | Avoid false penalties.                                                         | Similarity service                   | [SRC: SSOT BR-052]                                        |
+| BR-ASM-018 | Each integrity decision or grade may be appealed once; an appeal is decided by a reviewer who did not take part in the original decision, within {7 days}.                                                                                                                                                                                                                                                                                                                                           | Independent review.                                                            | Appeal service                       | [SRC: SSOT F-115 step 11; YASH-G3 SPEC-05 §3.7]           |
+| BR-ASM-019 | Accommodation multipliers are {1.25, 1.5, 2.0}, stored on the attempt, granted after verification of need, and never shown to employers, recruiters or on shared results and score reports.                                                                                                                                                                                                                                                                                                          | Dignity and privacy.                                                           | Accommodation service, share views   | [SRC: YASH-G3 SPEC-05 §3.8; BR-T030]                      |
+| BR-ASM-020 | Manual scores reference rubric criteria; the rubric version is pinned to the assessment version and each submission; double grading and moderation apply per policy.                                                                                                                                                                                                                                                                                                                                 | Consistent grading.                                                            | Grading service                      | [DER]                                                     |
+| BR-ASM-021 | AI grading suggestions are drafts for human graders only, are off by default for evidence-eligible assessments, send no identity or protected attributes, and are never the final grade.                                                                                                                                                                                                                                                                                                             | Human accountability.                                                          | Grading workbench, AI gateway        | [SRC: SSOT §16] [PROP]                                    |
+| BR-ASM-022 | Question items have a lifecycle (draft, in review, active, flagged, retired); editing an active item creates a new version; retired items cannot be drawn into new assessments.                                                                                                                                                                                                                                                                                                                      | Stability of published assessments.                                            | Bank service                         | [SRC: SSOT BR-113]                                        |
+| BR-ASM-023 | Each attempt pins the item versions drawn at start; later edits or retirements never change an attempt in progress or past attempts.                                                                                                                                                                                                                                                                                                                                                                 | No retroactive edits.                                                          | Attempt service                      | [SRC: SSOT BR-113; F-115 edge cases]                      |
+| BR-ASM-024 | Forms are generated from a stored per-attempt seed (order, options, pool draw) so they are reproducible for audit.                                                                                                                                                                                                                                                                                                                                                                                   | Auditability.                                                                  | Form generator                       | [SRC: SSOT §17.4] [DER]                                   |
+| BR-ASM-025 | Practice attempts (and mock rounds) never mint evidence and do not count for leaderboards or evidence-related XP.                                                                                                                                                                                                                                                                                                                                                                                    | Separate learning from proof.                                                  | Evidence consumer, leaderboard       | [SRC: SSOT §9.2 F-08 step 10]                             |
+| BR-ASM-026 | Viewing a full solution before solving marks the challenge `assisted`; assisted solves are excluded from evidence and rankings; hints and solutions are unavailable in `AI_PROHIBITED` graded attempts.                                                                                                                                                                                                                                                                                              | Fair rankings.                                                                 | Hint service                         | [DER]                                                     |
+| BR-ASM-027 | Shared solutions and spoilers may be posted only after the poster has solved the challenge; evidence-eligible and employer-private assessments have no discussion.                                                                                                                                                                                                                                                                                                                                   | Protect assessments.                                                           | Discussion service                   | [PROP]                                                    |
+| BR-ASM-028 | Contest submissions lock at the server-authoritative end time; clock skew never extends; a submission received before the end is judged and counts even if judged later.                                                                                                                                                                                                                                                                                                                             | Fair contests.                                                                 | Contest service                      | [SRC: SSOT BR-139]                                        |
+| BR-ASM-029 | Leaderboards include only graded, unflagged, unassisted solves from opted-in display names; voided entries are removed; ties break by earlier achievement time.                                                                                                                                                                                                                                                                                                                                      | Integrity of rankings.                                                         | Leaderboard service                  | [DER]                                                     |
+| BR-ASM-030 | A certification pass requires the configured score in a single attempt; retake policy is per exam (default cooldown {7 days}); issuance waits for any open integrity case.                                                                                                                                                                                                                                                                                                                           | Credential credibility.                                                        | Certification service                | [SRC: SSOT BR-140; F-115]                                 |
+| BR-ASM-031 | Certification validity is per definition (default perpetual {OD-ASM-05}); expired and revoked certifications stay verifiable with status and reason class.                                                                                                                                                                                                                                                                                                                                           | Honest verification.                                                           | Certification service                | [SRC: SSOT OD-18] [DEC-REQ] OD-ASM-05                     |
+| BR-ASM-032 | An employer may assign an assessment only to a candidate who is an applicant or has opted into employer contact; the candidate sees exactly what the employer will see and may decline without penalty.                                                                                                                                                                                                                                                                                              | Consent.                                                                       | Assignment service                   | [SRC: SSOT §3 principles] [DER]                           |
+| BR-ASM-033 | Result shares are scoped, time-bound and revocable; revoked or expired shares return `410`; shares never expose accommodations, raw signals or other attempts.                                                                                                                                                                                                                                                                                                                                       | Candidate control.                                                             | Share service                        | [SRC: SSOT BR-190] [DER]                                  |
+| BR-ASM-034 | Skill levels are derived from documented per-skill bands on calibrated assessments; retakes can upgrade a level only through a new qualifying attempt and never overwrite earlier evidence.                                                                                                                                                                                                                                                                                                          | No inflation.                                                                  | Skill mapping                        | [DER]                                                     |
+| BR-ASM-035 | Item and assessment statistics are computed after minimum samples {200 attempts, 50 per item}; an assessment becomes `published_eligible` only when reliability, coverage and standard-setting thresholds are met.                                                                                                                                                                                                                                                                                   | Valid measurement.                                                             | Calibration jobs                     | [PROP] OD-ASM-08                                          |
+| BR-ASM-036 | Statistics and fairness reports hide groups smaller than {10} (outcome and demographic analyses {30}); demographic data is voluntary, consented and never inferred.                                                                                                                                                                                                                                                                                                                                  | Privacy and statistical validity.                                              | Analytics services                   | [PROP]                                                    |
+| BR-ASM-037 | Assessment delivery meets WCAG 2.2 AA; no mandatory fullscreen, camera or microphone below L3; accessible alternatives exist for every item type used in evidence-eligible assessments.                                                                                                                                                                                                                                                                                                              | Inclusion.                                                                     | UI, authoring checks                 | [SRC: SSOT §21.4; YASH-G3 SPEC-05 §8]                     |
+| BR-ASM-038 | Only allowlisted, pinned language runtimes (image digests) and library sets are used; packages are never installed at run time; deprecated runtimes still serve existing attempts and re-grades.                                                                                                                                                                                                                                                                                                     | Reproducibility.                                                               | Runtime catalog                      | [SRC: SSOT BR-024]                                        |
+| BR-ASM-039 | Rate limits per user: Run {30 per minute}; Submit {10 per minute}.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Protect the sandbox.                                                           | API gateway                          | [SRC: SSOT §9.2 F-08]                                     |
+| BR-ASM-040 | Secure items have exposure caps and rotation; confirmed leaks trigger retirement and review of affected attempts with possible rescoring.                                                                                                                                                                                                                                                                                                                                                            | Test security.                                                                 | Item security service                | [PROP]                                                    |
+| BR-ASM-041 | Integrity signals are retained {90 days} unless a case is open.                                                                                                                                                                                                                                                                                                                                                                                                                                      | Minimization.                                                                  | Retention job                        | [SRC: YASH-G3 SPEC-05 §8]                                 |
+| BR-ASM-042 | Confirmed item defects are remedied by fix, credit or exclusion with rescoring from pinned data; outcome changes are audited and downgrades need human confirmation and notice.                                                                                                                                                                                                                                                                                                                      | Fair remediation.                                                              | Regrade service                      | [PROP]                                                    |
+| BR-ASM-043 | Employer-authored assessments are labeled and never mint platform-verified evidence; results flow only to the employer by candidate consent.                                                                                                                                                                                                                                                                                                                                                         | Prevent borrowed authority.                                                    | Evidence consumer                    | [DER]                                                     |
+| BR-ASM-044 | Registration for scheduled exams reserves seats atomically; cancellation before the cutoff {24 hours} has no penalty; a no-show consumes an attempt only if the policy states so.                                                                                                                                                                                                                                                                                                                    | Predictability.                                                                | Registration service                 | [PROP]                                                    |
+| BR-ASM-045 | Identity verification results are stored as result, method, time and provider reference only; images are not stored by ASM; failures route to manual review, never auto-rejection.                                                                                                                                                                                                                                                                                                                   | Privacy.                                                                       | Identity service                     | [PROP]                                                    |
+| BR-ASM-046 | Authors, graders and reviewers cannot grade, review or decide on their own attempts or those of related accounts or the same organization where conflict rules apply.                                                                                                                                                                                                                                                                                                                                | Independence.                                                                  | Assignment services                  | [SRC: YASH-MICRO AC-05-04-53, AC-05-04-54]                |
+| BR-ASM-047 | A submission snapshot (code, files, hashes) is immutable once submitted; grading and re-grading use the snapshot hash.                                                                                                                                                                                                                                                                                                                                                                               | Auditability.                                                                  | Submission service                   | [SRC: YASH-G3 SPEC-05 §3.3]                               |
+| BR-ASM-048 | The results release policy (score, breakdown, per-question feedback, correct answers) is set per assessment and recorded; for evidence-eligible assessments correct answers are not shown before the retake window closes unless OD-ASM-03 decides otherwise.                                                                                                                                                                                                                                        | Item security vs learning.                                                     | Results service                      | [PROP] OD-ASM-03                                          |
+| BR-ASM-049 | Only published challenges appear in the public catalog; retired challenges remain visible to those who solved them; employer-private and institution-private items are never listed publicly.                                                                                                                                                                                                                                                                                                        | Visibility control.                                                            | Catalog service                      | [DER]                                                     |
+| BR-ASM-050 | Projects, system designs, essays and scenarios graded by humans require a finalized human review before any evidence is minted.                                                                                                                                                                                                                                                                                                                                                                      | No auto-pass on subjective work.                                               | Evidence consumer                    | [PROP]                                                    |
+| BR-ASM-051 | Runner results carry a signature and the snapshot hash; the grader verifies both; writes are fenced by job generation so only the highest generation stores a result.                                                                                                                                                                                                                                                                                                                                | Tamper resistance and concurrency.                                             | Judge service                        | [SRC: YASH-G3 SPEC-05 §3.3]                               |
+| BR-ASM-052 | Datasets for SQL and data challenges are synthetic or properly licensed and contain no personal data.                                                                                                                                                                                                                                                                                                                                                                                                | Privacy and licensing.                                                         | Authoring checks                     | [DER]                                                     |
+| BR-ASM-053 | Score reports have a verification id and hash; verification shows the current status of the attempt (valid, under review, voided, revoked).                                                                                                                                                                                                                                                                                                                                                          | Honest verification.                                                           | Report service                       | [PROP]                                                    |
+| BR-ASM-054 | Proctoring recordings are retained {30 days} unless a case is open and are accessible only to the vendor and assigned reviewers.                                                                                                                                                                                                                                                                                                                                                                     | Minimization.                                                                  | Retention job                        | [PROP]                                                    |
+| BR-ASM-055 | Pass thresholds for evidence-eligible assessments are set through a documented standard-setting process (for example Angoff or bookmark) and reviewed when item statistics change materially.                                                                                                                                                                                                                                                                                                        | Defensible cut scores.                                                         | Publish workflow                     | [PROP] OD-ASM-08                                          |
+| BR-ASM-056 | The candidate must accept the current rules (AI policy, integrity signals, retake rules) before an evidence-eligible attempt starts; acceptance records the policy version hash.                                                                                                                                                                                                                                                                                                                     | Informed consent.                                                              | Start flow                           | [SRC: YASH-G3 SPEC-05 §3.2]                               |
+| BR-ASM-057 | Start and submit endpoints are idempotent with an idempotency key.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Safe retries.                                                                  | API                                  | [SRC: YASH-G3 SPEC-05 §5]                                 |
+| BR-ASM-058 | A voided attempt mints nothing and revokes any evidence or certification minted from it; revocation is propagated to result shares.                                                                                                                                                                                                                                                                                                                                                                  | Consistency after decisions.                                                   | Integrity and evidence services      | [SRC: YASH-G3 SPEC-05 §3.5]                               |
+| BR-ASM-059 | Code review challenges auto-match comments to seeded issues for practice feedback only; evidence is minted only after finalized human review of the summary and borderline matches, and the issue key is never exposed before release.                                                                                                                                                                                                                                                               | Consistent with the rule for subjective graded items and integrity of the key. | Grading service; evidence mint guard | [DER] [SRC: BR-ASM-050]                                   |
 
 ## 6. State machines
 
@@ -1895,13 +1927,13 @@ stateDiagram-v2
     abandoned --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `created` | `in_progress` | Start | Eligible, rules accepted, no other open attempt (BR-ASM-006, BR-ASM-056) |
-| `in_progress` | `submitted` | Submit or scheduler | Deadline or user action (BR-ASM-008) |
-| `grading` | `unverified` | Retry budget exhausted | Code attempt only (BR-ASM-012) |
-| `passed` | `under_review` | Case opened | Evidence minting held (BR-ASM-013) |
-| `under_review` | `voided` | Reviewer | Reason code and note (BR-ASM-018) |
+| From           | To             | Trigger                | Guard                                                                    |
+| -------------- | -------------- | ---------------------- | ------------------------------------------------------------------------ |
+| `created`      | `in_progress`  | Start                  | Eligible, rules accepted, no other open attempt (BR-ASM-006, BR-ASM-056) |
+| `in_progress`  | `submitted`    | Submit or scheduler    | Deadline or user action (BR-ASM-008)                                     |
+| `grading`      | `unverified`   | Retry budget exhausted | Code attempt only (BR-ASM-012)                                           |
+| `passed`       | `under_review` | Case opened            | Evidence minting held (BR-ASM-013)                                       |
+| `under_review` | `voided`       | Reviewer               | Reason code and note (BR-ASM-018)                                        |
 
 Forbidden: `unverified -> passed` without a re-grade; any edit after `submitted`; minting from `unverified`, `under_review` or `voided`.
 
@@ -1923,8 +1955,8 @@ stateDiagram-v2
     retired --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From                    | To                   | Trigger                            | Guard                  |
+| ----------------------- | -------------------- | ---------------------------------- | ---------------------- |
 | `published_calibrating` | `published_eligible` | Calibration job and staff approval | BR-ASM-035, BR-ASM-055 |
 
 ### SM-ASM-03 Question item
@@ -1944,8 +1976,8 @@ stateDiagram-v2
     retired --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From     | To        | Trigger                      | Guard                  |
+| -------- | --------- | ---------------------------- | ---------------------- |
 | `active` | `flagged` | Calibration or issue reports | BR-ASM-022, BR-ASM-042 |
 
 ### SM-ASM-04 Judge job
@@ -1969,8 +2001,8 @@ stateDiagram-v2
     timed_out --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From      | To       | Trigger      | Guard                              |
+| --------- | -------- | ------------ | ---------------------------------- |
 | `running` | `queued` | Runner crash | Attempt count under 3 (BR-ASM-051) |
 
 ### SM-ASM-05 Integrity case
@@ -1996,10 +2028,10 @@ stateDiagram-v2
     closed --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `in_review` | `decided_void` | Reviewer | Reason code, no conflict (BR-ASM-046) |
-| `decided_void` | `appealed` | Candidate | Different reviewer (BR-ASM-018) |
+| From           | To             | Trigger   | Guard                                 |
+| -------------- | -------------- | --------- | ------------------------------------- |
+| `in_review`    | `decided_void` | Reviewer  | Reason code, no conflict (BR-ASM-046) |
+| `decided_void` | `appealed`     | Candidate | Different reviewer (BR-ASM-018)       |
 
 ### SM-ASM-06 Appeal
 
@@ -2018,8 +2050,8 @@ stateDiagram-v2
     closed --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From    | To         | Trigger    | Guard                                               |
+| ------- | ---------- | ---------- | --------------------------------------------------- |
 | `filed` | `assigned` | Assignment | Reviewer not part of original decision (BR-ASM-018) |
 
 ### SM-ASM-07 Certification record
@@ -2039,10 +2071,10 @@ stateDiagram-v2
     expired --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `expiring` | `renewed` | Renewal pass | Within window (BR-ASM-031) |
-| `active` | `revoked` | Staff | Reason class and note (BR-ASM-058) |
+| From       | To        | Trigger      | Guard                              |
+| ---------- | --------- | ------------ | ---------------------------------- |
+| `expiring` | `renewed` | Renewal pass | Within window (BR-ASM-031)         |
+| `active`   | `revoked` | Staff        | Reason class and note (BR-ASM-058) |
 
 ### SM-ASM-08 Exam registration
 
@@ -2064,8 +2096,8 @@ stateDiagram-v2
     no_show --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From         | To          | Trigger   | Guard                      |
+| ------------ | ----------- | --------- | -------------------------- |
 | `registered` | `cancelled` | Candidate | Before cutoff (BR-ASM-044) |
 
 ### SM-ASM-09 Contest
@@ -2089,8 +2121,8 @@ stateDiagram-v2
     cancelled --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From    | To                  | Trigger   | Guard                                              |
+| ------- | ------------------- | --------- | -------------------------------------------------- |
 | `ended` | `results_published` | Organizer | Similarity cases reviewed (BR-ASM-028, BR-ASM-017) |
 
 ### SM-ASM-10 Employer assignment
@@ -2114,10 +2146,10 @@ stateDiagram-v2
     withdrawn --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `invited` | `accepted` | Candidate | Consent screen shown (BR-ASM-032) |
-| `completed` | `shared` | System | Only consented scope (BR-ASM-033) |
+| From        | To         | Trigger   | Guard                             |
+| ----------- | ---------- | --------- | --------------------------------- |
+| `invited`   | `accepted` | Candidate | Consent screen shown (BR-ASM-032) |
+| `completed` | `shared`   | System    | Only consented scope (BR-ASM-033) |
 
 ### SM-ASM-11 Manual grading task
 
@@ -2135,9 +2167,9 @@ stateDiagram-v2
     finalized --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `graded_draft` | `moderation` | System | Score difference above tolerance (BR-ASM-020) |
+| From           | To           | Trigger | Guard                                         |
+| -------------- | ------------ | ------- | --------------------------------------------- |
+| `graded_draft` | `moderation` | System  | Score difference above tolerance (BR-ASM-020) |
 
 ### SM-ASM-12 Accommodation grant
 
@@ -2158,102 +2190,103 @@ stateDiagram-v2
     revoked --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From        | To         | Trigger | Guard                                     |
+| ----------- | ---------- | ------- | ----------------------------------------- |
 | `requested` | `verified` | Support | Documentation or attestation (BR-ASM-019) |
 
 ## 7. Screen inventory
 
 Key states for every screen include loading (skeleton), empty, error with retry, forbidden and offline where applicable. Only screen-specific states are listed.
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-ASM-001 | Challenge catalog | `/challenges` | GUE, CAN, STD, INS | Browse and filter (FR-ASM-001) | no results, approximate counts |
-| SCR-ASM-002 | Challenge and assessment detail | `/challenges/:id`, `/assessments/:id` | GUE, CAN, STD, INS | Rules, policy box and start (FR-ASM-002) | cooldown, not eligible, resume, acknowledgment pending |
-| SCR-ASM-003 | Coding workspace | `/challenges/:id/attempt` | CAN, STD, INS | Edit, run, submit (FR-ASM-003, 004) | queued, running, rate limited, runner unavailable, unverified |
-| SCR-ASM-004 | Objective attempt | `/assessments/:id/attempt` | CAN, STD, INS | Questions, navigator, timer (FR-ASM-005, 029, 030) | saved, offline queue, deadline passed, submit confirm |
-| SCR-ASM-005 | Scenario attempt | `/assessments/:id/scenario` | CAN, STD, INS | Branching scenario (FR-ASM-006) | awaiting manual review |
-| SCR-ASM-006 | Project submission | `/challenges/:id/project` | CAN, STD, INS | Project submit and status (FR-ASM-007) | link unreachable, in review |
-| SCR-ASM-007 | System design workspace | `/challenges/:id/design` | CAN, STD, INS | Canvas and notes (FR-ASM-008) | outline mode |
-| SCR-ASM-008 | SQL workspace | `/challenges/:id/sql` | CAN, STD, INS | Schema, editor, results (FR-ASM-009) | timeout, syntax error |
-| SCR-ASM-009 | Data workspace | `/challenges/:id/notebook` | CAN, STD, INS | Notebook and submit (FR-ASM-010) | kernel restart |
-| SCR-ASM-010 | Practice hub | `/practice` | CAN, STD, INS | Practice entry and history (FR-ASM-011) | none |
-| SCR-ASM-011 | Hints and editorial panel | panel within SCR-ASM-003 | CAN, STD, INS | Hints and solutions (FR-ASM-012) | locked, assisted warning |
-| SCR-ASM-012 | Challenge discussion | `/challenges/:id/discuss` | CAN, STD, INS | Threads (FR-ASM-013) | spoiler hidden, disabled |
-| SCR-ASM-013 | Challenge sets | `/challenges/sets`, `/challenges/sets/:id` | CAN, STD, INS | Sets and mock rounds (FR-ASM-014) | retired item |
-| SCR-ASM-014 | Contest lobby | `/contests/:id` | CAN, STD, INS | Register and enter (FR-ASM-015) | before start, live, ended |
-| SCR-ASM-015 | Contest standings | `/contests/:id/standings` | all signed-in | Live standings | frozen, final |
-| SCR-ASM-016 | Result page | `/assessments/:id/attempts/:attemptId/result` | CAN, STD, INS | Results and feedback (FR-ASM-050) | passed, failed, under review, unverified, pending manual, voided |
-| SCR-ASM-017 | Share dialog and shared view | dialog; `/r/:shareId` | CAN; recipients | Consented sharing (FR-ASM-051) | revoked, expired |
-| SCR-ASM-018 | My assessments | `/me/assessments` | CAN, STD, INS | History, reports (FR-ASM-053) | no attempts |
-| SCR-ASM-019 | Score report verification | `/verify/report/:id` | GUE, all | Verify score report | valid, under review, voided |
-| SCR-ASM-020 | Leaderboard | `/challenges/leaderboard` | GUE, all | Rankings (FR-ASM-052) | opted out, refresh lag |
-| SCR-ASM-021 | Certification catalog | `/certifications` | GUE, CAN, STD | Browse certifications (FR-ASM-048) | none |
-| SCR-ASM-022 | Certification detail and registration | `/certifications/:id` | CAN, STD | Eligibility and slots (FR-ASM-042) | full, not eligible, registered |
-| SCR-ASM-023 | Exam check-in and system check | `/exams/:regId/check-in` | CAN, STD | Pre-exam steps | camera failed, ready |
-| SCR-ASM-024 | Proctoring consent | `/exams/:regId/consent` | CAN, STD | Consent and alternative (FR-ASM-036) | declined, alternative chosen |
-| SCR-ASM-025 | Identity check | `/exams/:regId/identity` | CAN, STD | Identity verification (FR-ASM-035) | pending, failed |
-| SCR-ASM-026 | Accommodations | `/me/accommodations` | CAN, STD | Request and view (FR-ASM-041) | pending, active, denied |
-| SCR-ASM-027 | Appeal | `/appeals/:id` | CAN, STD, INS, MOD | File and track (FR-ASM-038) | window closed, decided |
-| SCR-ASM-028 | Author assessment list | `/author/assessments` | INS, EAD, IAD, PAD | Manage assessments | filters |
-| SCR-ASM-029 | Assessment builder | `/author/assessments/:id` | INS, EAD, IAD, PAD | Build and publish (FR-ASM-016, 022) | validation errors, version conflict |
-| SCR-ASM-030 | Composition and integrity settings | `/author/assessments/:id/composition` | INS, EAD, IAD, PAD | Blueprint, randomization, integrity (FR-ASM-021, 031) | unsatisfiable blueprint |
-| SCR-ASM-031 | Question editor | `/author/questions/:id` | INS, EAD, IAD, PAD | Item authoring (FR-ASM-017) | review needed |
-| SCR-ASM-032 | Question bank | `/author/bank` | INS, EAD, IAD, PAD | Bank (FR-ASM-018) | import report |
-| SCR-ASM-033 | Test suite editor | `/author/challenges/:id/tests` | INS, EAD, IAD, PAD | Tests and checkers (FR-ASM-019) | validation run |
-| SCR-ASM-034 | Rubric editor | `/author/rubrics/:id` | INS, EAD, IAD, PAD | Rubrics (FR-ASM-020) | total mismatch |
-| SCR-ASM-035 | Author analytics and item analysis | `/author/assessments/:id/analytics` | INS, EAD, IAD, PAD | Results and item stats (FR-ASM-044, 056) | insufficient data |
-| SCR-ASM-036 | Grading queue and workbench | `/grading`, `/grading/:taskId` | graders | Manual grading (FR-ASM-027) | claimed, moderation |
-| SCR-ASM-037 | Integrity review queue | `/staff/integrity` | MOD, PAD | Cases queue (FR-ASM-037) | SLA warning |
-| SCR-ASM-038 | Integrity case workbench | `/staff/integrity/:caseId` | MOD, PAD | Evidence and decision | awaiting candidate |
-| SCR-ASM-039 | Exam administration | `/staff/exams` | PAD, IAD | Definitions, sessions, seats (FR-ASM-048, 042) | capacity |
-| SCR-ASM-040 | Runtime and sandbox operations | `/staff/runtimes` | PAD | Runtimes and pools (FR-ASM-023, 024) | degraded pool |
-| SCR-ASM-041 | Fairness dashboard | `/staff/fairness` | PAD, analyst | Fairness reports (FR-ASM-055) | suppressed groups |
-| SCR-ASM-042 | Issue triage and regrade | `/author/issues` | authors, MOD, PAD | Reports and remediation (FR-ASM-057) | impact preview |
-| SCR-ASM-043 | Employer assignments | `/employer/assessments` | EAD, REC, HMG | Assign and track (FR-ASM-046) | declined, expired |
-| SCR-ASM-044 | Employer invitation | `/assessments/invite/:token` | CAN, STD | Consent and accept (FR-ASM-046) | expired, declined |
-| SCR-ASM-045 | Employer template builder | `/employer/assessment-templates` | EAD, REC, HMG | Templates (FR-ASM-047) | policy blocked |
-| SCR-ASM-046 | Certification record and verification | `/me/certifications`, `/verify/cert/:id` | CAN, GUE | Validity and renewal (FR-ASM-049) | expiring, revoked |
-| SCR-ASM-047 | Assessment privacy settings | `/settings/assessments` | CAN, STD | Retention, export, leaderboard visibility (FR-ASM-058) | export pending |
+| ID          | Name                                  | Route proposal                                | Roles              | Purpose                                                | Key states                                                       |
+| ----------- | ------------------------------------- | --------------------------------------------- | ------------------ | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| SCR-ASM-001 | Challenge catalog                     | `/challenges`                                 | GUE, CAN, STD, INS | Browse and filter (FR-ASM-001)                         | no results, approximate counts                                   |
+| SCR-ASM-002 | Challenge and assessment detail       | `/challenges/:id`, `/assessments/:id`         | GUE, CAN, STD, INS | Rules, policy box and start (FR-ASM-002)               | cooldown, not eligible, resume, acknowledgment pending           |
+| SCR-ASM-003 | Coding workspace                      | `/challenges/:id/attempt`                     | CAN, STD, INS      | Edit, run, submit (FR-ASM-003, 004)                    | queued, running, rate limited, runner unavailable, unverified    |
+| SCR-ASM-004 | Objective attempt                     | `/assessments/:id/attempt`                    | CAN, STD, INS      | Questions, navigator, timer (FR-ASM-005, 029, 030)     | saved, offline queue, deadline passed, submit confirm            |
+| SCR-ASM-005 | Scenario attempt                      | `/assessments/:id/scenario`                   | CAN, STD, INS      | Branching scenario (FR-ASM-006)                        | awaiting manual review                                           |
+| SCR-ASM-006 | Project submission                    | `/challenges/:id/project`                     | CAN, STD, INS      | Project submit and status (FR-ASM-007)                 | link unreachable, in review                                      |
+| SCR-ASM-007 | System design workspace               | `/challenges/:id/design`                      | CAN, STD, INS      | Canvas and notes (FR-ASM-008)                          | outline mode                                                     |
+| SCR-ASM-008 | SQL workspace                         | `/challenges/:id/sql`                         | CAN, STD, INS      | Schema, editor, results (FR-ASM-009)                   | timeout, syntax error                                            |
+| SCR-ASM-009 | Data workspace                        | `/challenges/:id/notebook`                    | CAN, STD, INS      | Notebook and submit (FR-ASM-010)                       | kernel restart                                                   |
+| SCR-ASM-010 | Practice hub                          | `/practice`                                   | CAN, STD, INS      | Practice entry and history (FR-ASM-011)                | none                                                             |
+| SCR-ASM-011 | Hints and editorial panel             | panel within SCR-ASM-003                      | CAN, STD, INS      | Hints and solutions (FR-ASM-012)                       | locked, assisted warning                                         |
+| SCR-ASM-012 | Challenge discussion                  | `/challenges/:id/discuss`                     | CAN, STD, INS      | Threads (FR-ASM-013)                                   | spoiler hidden, disabled                                         |
+| SCR-ASM-013 | Challenge sets                        | `/challenges/sets`, `/challenges/sets/:id`    | CAN, STD, INS      | Sets and mock rounds (FR-ASM-014)                      | retired item                                                     |
+| SCR-ASM-014 | Contest lobby                         | `/contests/:id`                               | CAN, STD, INS      | Register and enter (FR-ASM-015)                        | before start, live, ended                                        |
+| SCR-ASM-015 | Contest standings                     | `/contests/:id/standings`                     | all signed-in      | Live standings                                         | frozen, final                                                    |
+| SCR-ASM-016 | Result page                           | `/assessments/:id/attempts/:attemptId/result` | CAN, STD, INS      | Results and feedback (FR-ASM-050)                      | passed, failed, under review, unverified, pending manual, voided |
+| SCR-ASM-017 | Share dialog and shared view          | dialog; `/r/:shareId`                         | CAN; recipients    | Consented sharing (FR-ASM-051)                         | revoked, expired                                                 |
+| SCR-ASM-018 | My assessments                        | `/me/assessments`                             | CAN, STD, INS      | History, reports (FR-ASM-053)                          | no attempts                                                      |
+| SCR-ASM-019 | Score report verification             | `/verify/report/:id`                          | GUE, all           | Verify score report                                    | valid, under review, voided                                      |
+| SCR-ASM-020 | Leaderboard                           | `/challenges/leaderboard`                     | GUE, all           | Rankings (FR-ASM-052)                                  | opted out, refresh lag                                           |
+| SCR-ASM-021 | Certification catalog                 | `/certifications`                             | GUE, CAN, STD      | Browse certifications (FR-ASM-048)                     | none                                                             |
+| SCR-ASM-022 | Certification detail and registration | `/certifications/:id`                         | CAN, STD           | Eligibility and slots (FR-ASM-042)                     | full, not eligible, registered                                   |
+| SCR-ASM-023 | Exam check-in and system check        | `/exams/:regId/check-in`                      | CAN, STD           | Pre-exam steps                                         | camera failed, ready                                             |
+| SCR-ASM-024 | Proctoring consent                    | `/exams/:regId/consent`                       | CAN, STD           | Consent and alternative (FR-ASM-036)                   | declined, alternative chosen                                     |
+| SCR-ASM-025 | Identity check                        | `/exams/:regId/identity`                      | CAN, STD           | Identity verification (FR-ASM-035)                     | pending, failed                                                  |
+| SCR-ASM-026 | Accommodations                        | `/me/accommodations`                          | CAN, STD           | Request and view (FR-ASM-041)                          | pending, active, denied                                          |
+| SCR-ASM-027 | Appeal                                | `/appeals/:id`                                | CAN, STD, INS, MOD | File and track (FR-ASM-038)                            | window closed, decided                                           |
+| SCR-ASM-028 | Author assessment list                | `/author/assessments`                         | INS, EAD, IAD, PAD | Manage assessments                                     | filters                                                          |
+| SCR-ASM-029 | Assessment builder                    | `/author/assessments/:id`                     | INS, EAD, IAD, PAD | Build and publish (FR-ASM-016, 022)                    | validation errors, version conflict                              |
+| SCR-ASM-030 | Composition and integrity settings    | `/author/assessments/:id/composition`         | INS, EAD, IAD, PAD | Blueprint, randomization, integrity (FR-ASM-021, 031)  | unsatisfiable blueprint                                          |
+| SCR-ASM-031 | Question editor                       | `/author/questions/:id`                       | INS, EAD, IAD, PAD | Item authoring (FR-ASM-017)                            | review needed                                                    |
+| SCR-ASM-032 | Question bank                         | `/author/bank`                                | INS, EAD, IAD, PAD | Bank (FR-ASM-018)                                      | import report                                                    |
+| SCR-ASM-033 | Test suite editor                     | `/author/challenges/:id/tests`                | INS, EAD, IAD, PAD | Tests and checkers (FR-ASM-019)                        | validation run                                                   |
+| SCR-ASM-034 | Rubric editor                         | `/author/rubrics/:id`                         | INS, EAD, IAD, PAD | Rubrics (FR-ASM-020)                                   | total mismatch                                                   |
+| SCR-ASM-035 | Author analytics and item analysis    | `/author/assessments/:id/analytics`           | INS, EAD, IAD, PAD | Results and item stats (FR-ASM-044, 056)               | insufficient data                                                |
+| SCR-ASM-036 | Grading queue and workbench           | `/grading`, `/grading/:taskId`                | graders            | Manual grading (FR-ASM-027)                            | claimed, moderation                                              |
+| SCR-ASM-037 | Integrity review queue                | `/staff/integrity`                            | MOD, PAD           | Cases queue (FR-ASM-037)                               | SLA warning                                                      |
+| SCR-ASM-038 | Integrity case workbench              | `/staff/integrity/:caseId`                    | MOD, PAD           | Evidence and decision                                  | awaiting candidate                                               |
+| SCR-ASM-039 | Exam administration                   | `/staff/exams`                                | PAD, IAD           | Definitions, sessions, seats (FR-ASM-048, 042)         | capacity                                                         |
+| SCR-ASM-040 | Runtime and sandbox operations        | `/staff/runtimes`                             | PAD                | Runtimes and pools (FR-ASM-023, 024)                   | degraded pool                                                    |
+| SCR-ASM-041 | Fairness dashboard                    | `/staff/fairness`                             | PAD, analyst       | Fairness reports (FR-ASM-055)                          | suppressed groups                                                |
+| SCR-ASM-042 | Issue triage and regrade              | `/author/issues`                              | authors, MOD, PAD  | Reports and remediation (FR-ASM-057)                   | impact preview                                                   |
+| SCR-ASM-043 | Employer assignments                  | `/employer/assessments`                       | EAD, REC, HMG      | Assign and track (FR-ASM-046)                          | declined, expired                                                |
+| SCR-ASM-044 | Employer invitation                   | `/assessments/invite/:token`                  | CAN, STD           | Consent and accept (FR-ASM-046)                        | expired, declined                                                |
+| SCR-ASM-045 | Employer template builder             | `/employer/assessment-templates`              | EAD, REC, HMG      | Templates (FR-ASM-047)                                 | policy blocked                                                   |
+| SCR-ASM-046 | Certification record and verification | `/me/certifications`, `/verify/cert/:id`      | CAN, GUE           | Validity and renewal (FR-ASM-049)                      | expiring, revoked                                                |
+| SCR-ASM-047 | Assessment privacy settings           | `/settings/assessments`                       | CAN, STD           | Retention, export, leaderboard visibility (FR-ASM-058) | export pending                                                   |
 
 ## 8. Data entities owned
 
 Retention classes: `ACCT` deleted or anonymized with the account; `EVID` kept while evidence or a certification refers to it (tombstone after erasure); `LOG90` {90 days}; `REC30` {30 days}; `LEGAL` legal or audit period; `AGG` anonymized aggregate; `SECURE` encrypted, restricted, kept for the life of the item version.
 
-| ID | Entity | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-ASM-01 | Challenge | id, type, title, statement, difficulty, skills[], languages[], state, suiteId, visibility (public, employer, institution), solveRate | n Attempts; TestSuite | SECURE for tests; public for statement |
-| ENT-ASM-02 | Assessment | id, context, mode, title, ownerRef, skills[], integrityLevel, aiPolicy, state | n AssessmentVersion | LEGAL while versions referenced |
-| ENT-ASM-03 | AssessmentVersion | id, assessmentId, number, config, composition, thresholds, releasePolicy, state (SM-ASM-02), publishedAt | n Attempt | SECURE |
-| ENT-ASM-04 | QuestionItem and ItemVersion | id, bankId, type, stem, options, keyRef, explanation, skills, difficulty, securityLevel, state (SM-ASM-03) | Bank; used in versions | SECURE |
-| ENT-ASM-05 | QuestionBank | id, ownerRef, scope, sharing | n Items | ACCT of owner or org |
-| ENT-ASM-06 | TestSuite | id, challengeId, tests[] (public, hidden), checkers, weights, version | Challenge | SECURE |
-| ENT-ASM-07 | Rubric and RubricVersion | id, criteria[], levels[], points, version | Used by items, assignments | LEGAL |
-| ENT-ASM-08 | Attempt | id, accountId, assessmentVersionId, context, state (SM-ASM-01), startedAt, deadlineAt, multiplier, seed, score, result, autoSubmitted, evidenceId, policyHash | n Answers; Case | EVID; answers {24 months} |
-| ENT-ASM-09 | AttemptAnswer | attemptId, questionId, value, clientSeq, savedAt | Attempt | {24 months} |
-| ENT-ASM-10 | SubmissionSnapshot | attemptId, hash, filesRef, createdAt | Attempt | {24 months} |
-| ENT-ASM-11 | RunnerJob | id, attemptId, snapshotHash, generation, state (SM-ASM-04), runnerVersion, resultSignature | Attempt | LOG90 |
-| ENT-ASM-12 | AttemptSignal | attemptId, kind, count, detailMin, at | Attempt | LOG90 unless case open |
-| ENT-ASM-13 | IntegrityCase | id, attemptId, state (SM-ASM-05), priority, signalsConsidered, reviewerIds, decision, reasonCode, notes | Attempt; Appeal | LEGAL |
-| ENT-ASM-14 | Appeal | id, caseOrAttemptRef, type, state (SM-ASM-06), reviewerId, outcome | Case | LEGAL |
-| ENT-ASM-15 | PrincipalRestriction | principal, kind, attemptId, until | Attempt | LOG90 |
-| ENT-ASM-16 | AccommodationGrant | accountId, kind, multiplier, state (SM-ASM-12), grantedBy, reasonCode, validFrom, expiresAt, docRef | Account | LEGAL; restricted |
-| ENT-ASM-17 | CertificationDefinition | id, title, skills, blueprint, threshold, retakePolicy, integrityLevel, validity, price | n Records | LEGAL |
-| ENT-ASM-18 | CertificationRecord | id, accountId, definitionId, attemptId, state (SM-ASM-07), issuedAt, expiresAt, revokedReason | Account | EVID |
-| ENT-ASM-19 | ExamRegistration | id, accountId, definitionId, slot, state (SM-ASM-08), paymentRef | Account | LEGAL |
-| ENT-ASM-20 | EmployerAssignment | id, employerRef, candidateId, assessmentVersionId, state (SM-ASM-10), consentScope, deadline | Attempt | LEGAL while employer relation |
-| ENT-ASM-21 | ResultShare | id, attemptId, scope, recipientRef, expiresAt, revokedAt, accessLog | Attempt | LEGAL |
-| ENT-ASM-22 | LeaderboardEntry | accountId, board, points, solved, updatedAt | Account | ACCT |
-| ENT-ASM-23 | Contest | id, title, window, scoring, rated, freeze, problems[], state (SM-ASM-09) | n Entries | LEGAL |
-| ENT-ASM-24 | ItemStatistic | itemVersionId, n, difficulty, discrimination, distractors, timeStats, flags | Item | AGG |
-| ENT-ASM-25 | FairnessReport | id, scope, period, metrics, suppressed, actions | Assessment | AGG |
-| ENT-ASM-26 | LanguageRuntime | id, language, version, imageDigest, limits, libs, state | Used by challenges | LEGAL |
-| ENT-ASM-27 | ProctoringSession | attemptId, vendorRef, mode, consentRef, flags[], reviewState | Attempt | REC30 for media; flags LOG90 unless case |
-| ENT-ASM-28 | IdentityCheckRef | accountId, method, result, at, providerRef | Account | EVID or {24 months} |
-| ENT-ASM-29 | HintUnlock | attemptId or practiceId, hintIndex, solutionViewed, at | Attempt | ACCT |
-| ENT-ASM-30 | ChallengeSet | id, title, items[], ordered | Challenges | PUBLIC |
-| ENT-ASM-31 | ScoreReport | id, attemptId, hash, verificationId, createdAt | Attempt | EVID |
-| ENT-ASM-32 | ItemIssueReport | id, reporterId, itemRef, category, note, state, outcome | Item | ACCT; outcome AGG |
+| ID         | Entity                       | Key attributes                                                                                                                                                | Relationships                 | Retention                                  |
+| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------ |
+| ENT-ASM-01 | Challenge                    | id, type, title, statement, difficulty, skills[], languages[], state, suiteId, visibility (public, employer, institution), solveRate                          | n Attempts; TestSuite         | SECURE for tests; public for statement     |
+| ENT-ASM-02 | Assessment                   | id, context, mode, title, ownerRef, skills[], integrityLevel, aiPolicy, state                                                                                 | n AssessmentVersion           | LEGAL while versions referenced            |
+| ENT-ASM-03 | AssessmentVersion            | id, assessmentId, number, config, composition, thresholds, releasePolicy, state (SM-ASM-02), publishedAt                                                      | n Attempt                     | SECURE                                     |
+| ENT-ASM-04 | QuestionItem and ItemVersion | id, bankId, type, stem, options, keyRef, explanation, skills, difficulty, securityLevel, state (SM-ASM-03)                                                    | Bank; used in versions        | SECURE                                     |
+| ENT-ASM-05 | QuestionBank                 | id, ownerRef, scope, sharing                                                                                                                                  | n Items                       | ACCT of owner or org                       |
+| ENT-ASM-06 | TestSuite                    | id, challengeId, tests[] (public, hidden), checkers, weights, version                                                                                         | Challenge                     | SECURE                                     |
+| ENT-ASM-07 | Rubric and RubricVersion     | id, criteria[], levels[], points, version                                                                                                                     | Used by items, assignments    | LEGAL                                      |
+| ENT-ASM-08 | Attempt                      | id, accountId, assessmentVersionId, context, state (SM-ASM-01), startedAt, deadlineAt, multiplier, seed, score, result, autoSubmitted, evidenceId, policyHash | n Answers; Case               | EVID; answers {24 months}                  |
+| ENT-ASM-09 | AttemptAnswer                | attemptId, questionId, value, clientSeq, savedAt                                                                                                              | Attempt                       | {24 months}                                |
+| ENT-ASM-10 | SubmissionSnapshot           | attemptId, hash, filesRef, createdAt                                                                                                                          | Attempt                       | {24 months}                                |
+| ENT-ASM-11 | RunnerJob                    | id, attemptId, snapshotHash, generation, state (SM-ASM-04), runnerVersion, resultSignature                                                                    | Attempt                       | LOG90                                      |
+| ENT-ASM-12 | AttemptSignal                | attemptId, kind, count, detailMin, at                                                                                                                         | Attempt                       | LOG90 unless case open                     |
+| ENT-ASM-13 | IntegrityCase                | id, attemptId, state (SM-ASM-05), priority, signalsConsidered, reviewerIds, decision, reasonCode, notes                                                       | Attempt; Appeal               | LEGAL                                      |
+| ENT-ASM-14 | Appeal                       | id, caseOrAttemptRef, type, state (SM-ASM-06), reviewerId, outcome                                                                                            | Case                          | LEGAL                                      |
+| ENT-ASM-15 | PrincipalRestriction         | principal, kind, attemptId, until                                                                                                                             | Attempt                       | LOG90                                      |
+| ENT-ASM-16 | AccommodationGrant           | accountId, kind, multiplier, state (SM-ASM-12), grantedBy, reasonCode, validFrom, expiresAt, docRef                                                           | Account                       | LEGAL; restricted                          |
+| ENT-ASM-17 | CertificationDefinition      | id, title, skills, blueprint, threshold, retakePolicy, integrityLevel, validity, price                                                                        | n Records                     | LEGAL                                      |
+| ENT-ASM-18 | CertificationRecord          | id, accountId, definitionId, attemptId, state (SM-ASM-07), issuedAt, expiresAt, revokedReason                                                                 | Account                       | EVID                                       |
+| ENT-ASM-19 | ExamRegistration             | id, accountId, definitionId, slot, state (SM-ASM-08), paymentRef                                                                                              | Account                       | LEGAL                                      |
+| ENT-ASM-20 | EmployerAssignment           | id, employerRef, candidateId, assessmentVersionId, state (SM-ASM-10), consentScope, deadline                                                                  | Attempt                       | LEGAL while employer relation              |
+| ENT-ASM-21 | ResultShare                  | id, attemptId, scope, recipientRef, expiresAt, revokedAt, accessLog                                                                                           | Attempt                       | LEGAL                                      |
+| ENT-ASM-22 | LeaderboardEntry             | accountId, board, points, solved, updatedAt                                                                                                                   | Account                       | ACCT                                       |
+| ENT-ASM-23 | Contest                      | id, title, window, scoring, rated, freeze, problems[], state (SM-ASM-09)                                                                                      | n Entries                     | LEGAL                                      |
+| ENT-ASM-24 | ItemStatistic                | itemVersionId, n, difficulty, discrimination, distractors, timeStats, flags                                                                                   | Item                          | AGG                                        |
+| ENT-ASM-25 | FairnessReport               | id, scope, period, metrics, suppressed, actions                                                                                                               | Assessment                    | AGG                                        |
+| ENT-ASM-26 | LanguageRuntime              | id, language, version, imageDigest, limits, libs, state                                                                                                       | Used by challenges            | LEGAL                                      |
+| ENT-ASM-27 | ProctoringSession            | attemptId, vendorRef, mode, consentRef, flags[], reviewState                                                                                                  | Attempt                       | REC30 for media; flags LOG90 unless case   |
+| ENT-ASM-28 | IdentityCheckRef             | accountId, method, result, at, providerRef                                                                                                                    | Account                       | EVID or {24 months}                        |
+| ENT-ASM-29 | HintUnlock                   | attemptId or practiceId, hintIndex, solutionViewed, at                                                                                                        | Attempt                       | ACCT                                       |
+| ENT-ASM-30 | ChallengeSet                 | id, title, items[], ordered                                                                                                                                   | Challenges                    | PUBLIC                                     |
+| ENT-ASM-31 | ScoreReport                  | id, attemptId, hash, verificationId, createdAt                                                                                                                | Attempt                       | EVID                                       |
+| ENT-ASM-32 | ItemIssueReport              | id, reporterId, itemRef, category, note, state, outcome                                                                                                       | Item                          | ACCT; outcome AGG                          |
+| ENT-ASM-33 | CodeReviewSpec               | challengeId, version, changeSetRef (files, hunks), seededIssues[{file, range, category, severity, keywords, explanation, weight}], distractors[], rubricId    | One per code review Challenge | SECURE for the issue key; statement public |
 
 ```mermaid
 erDiagram
@@ -2276,171 +2309,171 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event name | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-ASM-001 | `assessment.attempt.started` | Attempt created | attemptId, versionId, context, policyHash | AI gateway (restriction), ANL |
-| EVT-ASM-002 | `assessment.attempt.submitted` | Submit or deadline | attemptId, autoSubmitted | grading |
-| EVT-ASM-003 | `assessment.attempt.graded` | Final grade (passed or failed) | attemptId, score, passed, versionId, context, courseRef | LRN, EVD, ATS, REP, NTF |
-| EVT-ASM-004 | `assessment.attempt.unverified` | Runner unavailable | attemptId, reason | NTF, ops |
-| EVT-ASM-005 | `assessment.attempt.voided` | Void decision | attemptId, reasonClass | LRN, EVD, ATS, REP |
-| EVT-ASM-006 | `assessment.attempt.abandoned` | Inactivity or cancel | attemptId | ANL |
-| EVT-ASM-007 | `assessment.challenge.solved` | Challenge passed (graded or practice, flagged assisted or not) | accountId, challengeId, assisted | REP, AIC |
-| EVT-ASM-008 | `assessment.evidence.requested` | Qualifying pass | attemptId, skills, levels, issuerRef | EVD |
-| EVT-ASM-009 | `assessment.integrity.flagged` | Case opened | caseId, attemptId, priority | MOD queue, NTF |
-| EVT-ASM-010 | `assessment.integrity.decided` | Case decision | caseId, decision | EVD, LRN, ATS, NTF |
-| EVT-ASM-011 | `assessment.appeal.filed` | Appeal filed | appealId | MOD queue |
-| EVT-ASM-012 | `assessment.appeal.decided` | Appeal decided | appealId, outcome | NTF, EVD |
-| EVT-ASM-013 | `assessment.accommodation.granted` | Grant active | accountId, scope (no details) | ASM internal |
-| EVT-ASM-014 | `assessment.version.published` | Publish | versionId, state | catalogs |
-| EVT-ASM-015 | `assessment.version.eligible` | Evidence-eligible | versionId | EVD, catalogs |
-| EVT-ASM-016 | `assessment.version.retired` | Retired | versionId | LRN, STU |
-| EVT-ASM-017 | `assessment.item.retired` | Item retired | itemId | authors |
-| EVT-ASM-018 | `assessment.item.stats_updated` | Nightly stats | itemVersionId, aggregates | STU, authors |
-| EVT-ASM-019 | `assessment.item.flagged` | Flag raised | itemId, reason | authors |
-| EVT-ASM-020 | `assessment.regrade.applied` | Regrade done | assessmentId, affected, changes | LRN, EVD, NTF |
-| EVT-ASM-021 | `assessment.certification.issued` | Certification issued | recordId, definitionId | EVD, PRF, REP, NTF |
-| EVT-ASM-022 | `assessment.certification.revoked` | Revoked | recordId, reasonClass | EVD, PRF, ATS |
-| EVT-ASM-023 | `assessment.certification.expired` | Validity ended | recordId | EVD, PRF |
-| EVT-ASM-024 | `assessment.exam.registered` | Registered | registrationId | NTF, proctoring |
-| EVT-ASM-025 | `assessment.exam.cancelled` | Cancelled | registrationId | NTF, seats |
-| EVT-ASM-026 | `assessment.assignment.invited` | Employer invitation | assignmentId | NTF |
-| EVT-ASM-027 | `assessment.assignment.completed` | Completed and consented | assignmentId, scope | ATS |
-| EVT-ASM-028 | `assessment.share.created` | Share created | shareId, scope | audit |
-| EVT-ASM-029 | `assessment.share.revoked` | Revoked | shareId | recipients |
-| EVT-ASM-030 | `assessment.contest.started` | Contest live | contestId | ANL |
-| EVT-ASM-031 | `assessment.contest.ended` | Contest ended | contestId | leaderboard |
-| EVT-ASM-032 | `assessment.leaderboard.updated` | Board refreshed | board | ANL |
-| EVT-ASM-033 | `assessment.ai_restriction.set` | Restriction written | principal, until | AI gateway |
-| EVT-ASM-034 | `assessment.proctoring.flagged` | Vendor flag | attemptId, flagType | integrity queue |
-| EVT-ASM-035 | `assessment.runner.degraded` | Pool unhealthy | pool, severity | ops |
+| ID          | Event name                         | Trigger                                                        | Key payload                                             | Consumers                     |
+| ----------- | ---------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------- |
+| EVT-ASM-001 | `assessment.attempt.started`       | Attempt created                                                | attemptId, versionId, context, policyHash               | AI gateway (restriction), ANL |
+| EVT-ASM-002 | `assessment.attempt.submitted`     | Submit or deadline                                             | attemptId, autoSubmitted                                | grading                       |
+| EVT-ASM-003 | `assessment.attempt.graded`        | Final grade (passed or failed)                                 | attemptId, score, passed, versionId, context, courseRef | LRN, EVD, ATS, REP, NTF       |
+| EVT-ASM-004 | `assessment.attempt.unverified`    | Runner unavailable                                             | attemptId, reason                                       | NTF, ops                      |
+| EVT-ASM-005 | `assessment.attempt.voided`        | Void decision                                                  | attemptId, reasonClass                                  | LRN, EVD, ATS, REP            |
+| EVT-ASM-006 | `assessment.attempt.abandoned`     | Inactivity or cancel                                           | attemptId                                               | ANL                           |
+| EVT-ASM-007 | `assessment.challenge.solved`      | Challenge passed (graded or practice, flagged assisted or not) | accountId, challengeId, assisted                        | REP, AIC                      |
+| EVT-ASM-008 | `assessment.evidence.requested`    | Qualifying pass                                                | attemptId, skills, levels, issuerRef                    | EVD                           |
+| EVT-ASM-009 | `assessment.integrity.flagged`     | Case opened                                                    | caseId, attemptId, priority                             | MOD queue, NTF                |
+| EVT-ASM-010 | `assessment.integrity.decided`     | Case decision                                                  | caseId, decision                                        | EVD, LRN, ATS, NTF            |
+| EVT-ASM-011 | `assessment.appeal.filed`          | Appeal filed                                                   | appealId                                                | MOD queue                     |
+| EVT-ASM-012 | `assessment.appeal.decided`        | Appeal decided                                                 | appealId, outcome                                       | NTF, EVD                      |
+| EVT-ASM-013 | `assessment.accommodation.granted` | Grant active                                                   | accountId, scope (no details)                           | ASM internal                  |
+| EVT-ASM-014 | `assessment.version.published`     | Publish                                                        | versionId, state                                        | catalogs                      |
+| EVT-ASM-015 | `assessment.version.eligible`      | Evidence-eligible                                              | versionId                                               | EVD, catalogs                 |
+| EVT-ASM-016 | `assessment.version.retired`       | Retired                                                        | versionId                                               | LRN, STU                      |
+| EVT-ASM-017 | `assessment.item.retired`          | Item retired                                                   | itemId                                                  | authors                       |
+| EVT-ASM-018 | `assessment.item.stats_updated`    | Nightly stats                                                  | itemVersionId, aggregates                               | STU, authors                  |
+| EVT-ASM-019 | `assessment.item.flagged`          | Flag raised                                                    | itemId, reason                                          | authors                       |
+| EVT-ASM-020 | `assessment.regrade.applied`       | Regrade done                                                   | assessmentId, affected, changes                         | LRN, EVD, NTF                 |
+| EVT-ASM-021 | `assessment.certification.issued`  | Certification issued                                           | recordId, definitionId                                  | EVD, PRF, REP, NTF            |
+| EVT-ASM-022 | `assessment.certification.revoked` | Revoked                                                        | recordId, reasonClass                                   | EVD, PRF, ATS                 |
+| EVT-ASM-023 | `assessment.certification.expired` | Validity ended                                                 | recordId                                                | EVD, PRF                      |
+| EVT-ASM-024 | `assessment.exam.registered`       | Registered                                                     | registrationId                                          | NTF, proctoring               |
+| EVT-ASM-025 | `assessment.exam.cancelled`        | Cancelled                                                      | registrationId                                          | NTF, seats                    |
+| EVT-ASM-026 | `assessment.assignment.invited`    | Employer invitation                                            | assignmentId                                            | NTF                           |
+| EVT-ASM-027 | `assessment.assignment.completed`  | Completed and consented                                        | assignmentId, scope                                     | ATS                           |
+| EVT-ASM-028 | `assessment.share.created`         | Share created                                                  | shareId, scope                                          | audit                         |
+| EVT-ASM-029 | `assessment.share.revoked`         | Revoked                                                        | shareId                                                 | recipients                    |
+| EVT-ASM-030 | `assessment.contest.started`       | Contest live                                                   | contestId                                               | ANL                           |
+| EVT-ASM-031 | `assessment.contest.ended`         | Contest ended                                                  | contestId                                               | leaderboard                   |
+| EVT-ASM-032 | `assessment.leaderboard.updated`   | Board refreshed                                                | board                                                   | ANL                           |
+| EVT-ASM-033 | `assessment.ai_restriction.set`    | Restriction written                                            | principal, until                                        | AI gateway                    |
+| EVT-ASM-034 | `assessment.proctoring.flagged`    | Vendor flag                                                    | attemptId, flagType                                     | integrity queue               |
+| EVT-ASM-035 | `assessment.runner.degraded`       | Pool unhealthy                                                 | pool, severity                                          | ops                           |
 
 ### 9.2 Consumed
 
-| Event (producer) | Used by | Effect |
-|---|---|---|
-| `studio.course.published`, `studio.version.published` (STU) | FR-ASM-016 | Link course-context assessments to published versions |
-| `learning.enrollment.expired`, `learning.enrollment.refunded` (LRN) | FR-ASM-029 | Close open course attempts |
-| `billing.purchase.fulfilled` (BIL, planned) | FR-ASM-042 | Confirm paid exam seats |
-| `verification.result` (BGV, planned) | FR-ASM-035 | Identity result |
-| `consent.changed` (SET, planned) | FR-ASM-046, 051 | Withdraw employer sharing, personalization |
-| `ats.assessment.requested` (ATS, planned) | FR-ASM-046 | Create employer assignment |
-| `evidence.item.revoked` (EVD, planned) | FR-ASM-045 | Mark minted evidence status in results |
-| `trust.case.decided` (TSF, planned) | FR-ASM-037 | Apply broader trust decisions |
-| `identity.account.erased` (IDN, planned) | FR-ASM-058 | Run erasure rules |
+| Event (producer)                                                    | Used by         | Effect                                                |
+| ------------------------------------------------------------------- | --------------- | ----------------------------------------------------- |
+| `studio.course.published`, `studio.version.published` (STU)         | FR-ASM-016      | Link course-context assessments to published versions |
+| `learning.enrollment.expired`, `learning.enrollment.refunded` (LRN) | FR-ASM-029      | Close open course attempts                            |
+| `billing.purchase.fulfilled` (BIL, planned)                         | FR-ASM-042      | Confirm paid exam seats                               |
+| `verification.result` (BGV, planned)                                | FR-ASM-035      | Identity result                                       |
+| `consent.changed` (SET, planned)                                    | FR-ASM-046, 051 | Withdraw employer sharing, personalization            |
+| `ats.assessment.requested` (ATS, planned)                           | FR-ASM-046      | Create employer assignment                            |
+| `evidence.item.revoked` (EVD, planned)                              | FR-ASM-045      | Mark minted evidence status in results                |
+| `trust.case.decided` (TSF, planned)                                 | FR-ASM-037      | Apply broader trust decisions                         |
+| `identity.account.erased` (IDN, planned)                            | FR-ASM-058      | Run erasure rules                                     |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Direction | Purpose | Failure behavior |
-|---|---|---|---|
-| Sandbox compute pools (PLT, planned; technology per OD-ASM-01) | Outbound | Run code, SQL, data | Queue with honest status, then `unverified` |
-| AI gateway (AIC, planned) | Outbound restriction writes and inline checks | Enforce AI policy; AI grading suggestions | Fail closed for restricted principals |
-| Proctoring vendor adapter (OD-ASM-02) | Outbound and inbound | Remote proctoring sessions and flags | Exam postponed, no level reduction |
-| Identity verification provider via BGV (planned) | Outbound | Identity checks | Honest pending state; manual review |
-| Evidence issuer API (EVD, planned) | Outbound | Mint and revoke evidence | Retry; "evidence pending" |
-| Plagiarism corpora and web scan services | Outbound | Similarity and leak detection | Check deferred; no auto-penalty |
-| Payments via BIL (planned) | Via BIL | Paid exams | Registration held |
-| ATS (planned) | Both | Employer assignments and results | Queue and retry |
-| Notification service (NTF, planned) | Outbound | Templates | Retry |
-| File storage and scanning (PLT, planned) | Outbound | Submissions, datasets | Hold until scanned |
-| QTI and CSV import/export | Offline files | Bank import | Per-item error report |
+| Dependency                                                     | Direction                                     | Purpose                                   | Failure behavior                            |
+| -------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------- | ------------------------------------------- |
+| Sandbox compute pools (PLT, planned; technology per OD-ASM-01) | Outbound                                      | Run code, SQL, data                       | Queue with honest status, then `unverified` |
+| AI gateway (AIC, planned)                                      | Outbound restriction writes and inline checks | Enforce AI policy; AI grading suggestions | Fail closed for restricted principals       |
+| Proctoring vendor adapter (OD-ASM-02)                          | Outbound and inbound                          | Remote proctoring sessions and flags      | Exam postponed, no level reduction          |
+| Identity verification provider via BGV (planned)               | Outbound                                      | Identity checks                           | Honest pending state; manual review         |
+| Evidence issuer API (EVD, planned)                             | Outbound                                      | Mint and revoke evidence                  | Retry; "evidence pending"                   |
+| Plagiarism corpora and web scan services                       | Outbound                                      | Similarity and leak detection             | Check deferred; no auto-penalty             |
+| Payments via BIL (planned)                                     | Via BIL                                       | Paid exams                                | Registration held                           |
+| ATS (planned)                                                  | Both                                          | Employer assignments and results          | Queue and retry                             |
+| Notification service (NTF, planned)                            | Outbound                                      | Templates                                 | Retry                                       |
+| File storage and scanning (PLT, planned)                       | Outbound                                      | Submissions, datasets                     | Hold until scanned                          |
+| QTI and CSV import/export                                      | Offline files                                 | Bank import                               | Per-item error report                       |
 
 ## 11. Cross-module dependencies
 
-| Depends on | What ASM needs |
-|---|---|
-| IDN (planned) | Accounts, sessions, re-authentication, age gates |
-| EVD (planned) | Evidence issuer API, skills ontology, revocation |
-| AIC (planned) | AI gateway enforcement, recommendations, grading suggestions |
-| BGV (planned) | Identity checks |
-| SET (planned) | Consent records, data rights |
-| BIL (planned) | Paid exam seats, refunds |
-| NTF (planned) | Templates and channels |
-| STU, LRN | Course context for quizzes; course version and enrollment data |
-| ATS, EMP (planned) | Employer assignments and organization context |
-| INS (planned) | Institution exams, cohorts, accommodations pre-grants |
-| TSF (planned) | Broader abuse handling |
-| PLT (planned) | Compute, storage, scanning |
-| ANL (planned) | Aggregate analytics |
+| Depends on         | What ASM needs                                                 |
+| ------------------ | -------------------------------------------------------------- |
+| IDN (planned)      | Accounts, sessions, re-authentication, age gates               |
+| EVD (planned)      | Evidence issuer API, skills ontology, revocation               |
+| AIC (planned)      | AI gateway enforcement, recommendations, grading suggestions   |
+| BGV (planned)      | Identity checks                                                |
+| SET (planned)      | Consent records, data rights                                   |
+| BIL (planned)      | Paid exam seats, refunds                                       |
+| NTF (planned)      | Templates and channels                                         |
+| STU, LRN           | Course context for quizzes; course version and enrollment data |
+| ATS, EMP (planned) | Employer assignments and organization context                  |
+| INS (planned)      | Institution exams, cohorts, accommodations pre-grants          |
+| TSF (planned)      | Broader abuse handling                                         |
+| PLT (planned)      | Compute, storage, scanning                                     |
+| ANL (planned)      | Aggregate analytics                                            |
 
-| Depended on by | What they use |
-|---|---|
-| LRN | In-lesson quizzes and exams, practice runner, results for completion and grades |
-| STU | Quiz authoring components, rubric engine, item stats |
-| EVD (planned) | Evidence requests and revocations |
-| ATS, JOB (planned) | Candidate assessment results by consent |
-| INT (planned) | Sandbox runner for interviews |
-| PRF (planned) | Certifications and shared results |
-| REP (planned) | Solve and certification events |
-| AIC, MKT (planned) | Skill signals |
-| INS (planned) | Institution exam results within scope |
+| Depended on by     | What they use                                                                   |
+| ------------------ | ------------------------------------------------------------------------------- |
+| LRN                | In-lesson quizzes and exams, practice runner, results for completion and grades |
+| STU                | Quiz authoring components, rubric engine, item stats                            |
+| EVD (planned)      | Evidence requests and revocations                                               |
+| ATS, JOB (planned) | Candidate assessment results by consent                                         |
+| INT (planned)      | Sandbox runner for interviews                                                   |
+| PRF (planned)      | Certifications and shared results                                               |
+| REP (planned)      | Solve and certification events                                                  |
+| AIC, MKT (planned) | Skill signals                                                                   |
+| INS (planned)      | Institution exam results within scope                                           |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Challenge start-to-submit rate | Graded or practice submissions divided by challenge starts | Assessment product owner |
-| Judge latency p95 | 95th percentile seconds from submit to final status | Engineering lead |
-| Runner availability | Share of submissions graded without falling back to `unverified` | Engineering lead |
-| Unverified rate | Code attempts ending `unverified` divided by code attempts | Engineering lead |
-| Evidence integrity | Evidence items minted only from eligible `passed` attempts divided by all minted items (target 100 percent) | Trust owner |
-| Integrity flag rate | Cases opened per 1,000 evidence-eligible attempts, split by signal | Integrity owner |
-| Flag false-positive rate | Cases decided `clear` divided by cases decided | Integrity owner |
-| Appeal overturn rate | Appeals overturned divided by appeals decided | Integrity owner |
-| Case decision SLA attainment | Cases decided within SLA divided by cases | Integrity owner |
-| Accommodation turnaround | Median business days from request to decision | Support lead |
-| Item quality | Share of active items with discrimination above threshold after calibration | Assessment product owner |
-| Calibration coverage | Evidence-eligible assessments divided by evidence-seeking assessments | Assessment product owner |
-| Certification pass rate and retake rate | Passes over first attempts; retakes over fails | Certification owner |
-| Fairness disparity ratio | Pass rate and flag rate ratio between groups above suppression size | Fairness analyst |
-| Accessibility defects open | Count of open candidate-reported barriers older than SLA | Accessibility owner |
-| AI-block events | Blocked AI calls during prohibited attempts per 1,000 attempts | Integrity owner |
+| Metric                                  | Definition and formula                                                                                      | Owner role               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------ |
+| Challenge start-to-submit rate          | Graded or practice submissions divided by challenge starts                                                  | Assessment product owner |
+| Judge latency p95                       | 95th percentile seconds from submit to final status                                                         | Engineering lead         |
+| Runner availability                     | Share of submissions graded without falling back to `unverified`                                            | Engineering lead         |
+| Unverified rate                         | Code attempts ending `unverified` divided by code attempts                                                  | Engineering lead         |
+| Evidence integrity                      | Evidence items minted only from eligible `passed` attempts divided by all minted items (target 100 percent) | Trust owner              |
+| Integrity flag rate                     | Cases opened per 1,000 evidence-eligible attempts, split by signal                                          | Integrity owner          |
+| Flag false-positive rate                | Cases decided `clear` divided by cases decided                                                              | Integrity owner          |
+| Appeal overturn rate                    | Appeals overturned divided by appeals decided                                                               | Integrity owner          |
+| Case decision SLA attainment            | Cases decided within SLA divided by cases                                                                   | Integrity owner          |
+| Accommodation turnaround                | Median business days from request to decision                                                               | Support lead             |
+| Item quality                            | Share of active items with discrimination above threshold after calibration                                 | Assessment product owner |
+| Calibration coverage                    | Evidence-eligible assessments divided by evidence-seeking assessments                                       | Assessment product owner |
+| Certification pass rate and retake rate | Passes over first attempts; retakes over fails                                                              | Certification owner      |
+| Fairness disparity ratio                | Pass rate and flag rate ratio between groups above suppression size                                         | Fairness analyst         |
+| Accessibility defects open              | Count of open candidate-reported barriers older than SLA                                                    | Accessibility owner      |
+| AI-block events                         | Blocked AI calls during prohibited attempts per 1,000 attempts                                              | Integrity owner          |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocks |
-|---|---|---|---|---|---|
-| OD-ASM-01 | Sandbox technology, isolation model and resource limits (the TD-05 decision text is missing from the SSOT) | Container with seccomp; microVM; managed service | Isolated, network-less runner with signed results; limits as in BR-ASM-011; until it exists, code attempts stay `unverified` (SSOT V61-22) | Engineering, Security | FR-ASM-023, 025 |
-| OD-ASM-02 | Proctoring vendor, which exams need L3, and the alternative for candidates who refuse | Vendor live; vendor recorded; none; test centre | Vendor behind an adapter at SSOT Ph10 (OD-35); L3 only for high-stakes certifications with an alternative | Founder, Legal | FR-ASM-036 |
-| OD-ASM-03 | Show correct answers after a pass or fail on evidence-eligible assessments? | Never; after retake window; immediately | After the retake window closes, for secure items never (YASH-G3 decision pending) | Product, Assessment lead | FR-ASM-050 |
-| OD-ASM-04 | Attempt and cooldown defaults for evidence-eligible assessments | 24 h and 3 per 7 days; stricter; per assessment | 24 h and 3 per 7 days; certification 7 days | Product | FR-ASM-040 |
-| OD-ASM-05 | Certification validity default and renewal | Perpetual; 2 years; per certification | Perpetual default, configurable; renewal by retake or recertification exam (SSOT OD-18) | Product | FR-ASM-049 |
-| OD-ASM-06 | Leaderboard display rules and minors | Public; opt-in only; institution only | Opt-out available, display names only, minors excluded from public boards | Legal, Product | FR-ASM-052 |
-| OD-ASM-07 | Role mapping: Exam Administrator, Proctor, Employer actors have no SSOT §5.4 role | Map to PAD, IAD, MOD, EAD as in section 2; create new roles | Map as in section 2 | Product, Security | Section 2 |
-| OD-ASM-08 | Calibration thresholds, sample sizes and the standard-setting method | Angoff; bookmark; empirical | 200 attempts, 50 per item, reliability threshold set by psychometrician, Angoff for exams | Assessment lead | FR-ASM-044, 055 |
-| OD-ASM-09 | Is AI-assisted grading allowed, and where? | Off; practice and assignments only; all | Off for evidence-eligible; optional for assignments and practice | Product, Legal | FR-ASM-028 |
-| OD-ASM-10 | Similarity corpus scope and fingerprint retention | Platform only; platform plus public web | Platform plus approved public corpus; fingerprints retained with the case | Security, Legal | FR-ASM-033 |
-| OD-ASM-11 | Employer assessment data retention and delivery to ATS | Delete with requisition; retain per employer agreement | Delete on requisition close plus {12 months}, subject to candidate rights | Legal | FR-ASM-046 |
-| OD-ASM-12 | Contest infrastructure and rated contests | Separate sandbox pool; shared | Separate pool (SSOT OD-44); rated contests after unrated pilot | Engineering | FR-ASM-015 |
-| OD-ASM-13 | Which integrity signals and thresholds may be enabled before validation | All at L1; only after false-positive study | Enable flagging only after a fairness review (YASH-G3 testing note) | Integrity lead, Legal | FR-ASM-032 |
-| OD-ASM-14 | Publish practice item content or keep secure | Public statements; hidden | Public for practice challenges; secure for exam pools | Product | FR-ASM-039 |
+| ID        | Question                                                                                                   | Options                                                     | Default proposal                                                                                                                           | Who decides              | Blocks          |
+| --------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | --------------- |
+| OD-ASM-01 | Sandbox technology, isolation model and resource limits (the TD-05 decision text is missing from the SSOT) | Container with seccomp; microVM; managed service            | Isolated, network-less runner with signed results; limits as in BR-ASM-011; until it exists, code attempts stay `unverified` (SSOT V61-22) | Engineering, Security    | FR-ASM-023, 025 |
+| OD-ASM-02 | Proctoring vendor, which exams need L3, and the alternative for candidates who refuse                      | Vendor live; vendor recorded; none; test centre             | Vendor behind an adapter at SSOT Ph10 (OD-35); L3 only for high-stakes certifications with an alternative                                  | Founder, Legal           | FR-ASM-036      |
+| OD-ASM-03 | Show correct answers after a pass or fail on evidence-eligible assessments?                                | Never; after retake window; immediately                     | After the retake window closes, for secure items never (YASH-G3 decision pending)                                                          | Product, Assessment lead | FR-ASM-050      |
+| OD-ASM-04 | Attempt and cooldown defaults for evidence-eligible assessments                                            | 24 h and 3 per 7 days; stricter; per assessment             | 24 h and 3 per 7 days; certification 7 days                                                                                                | Product                  | FR-ASM-040      |
+| OD-ASM-05 | Certification validity default and renewal                                                                 | Perpetual; 2 years; per certification                       | Perpetual default, configurable; renewal by retake or recertification exam (SSOT OD-18)                                                    | Product                  | FR-ASM-049      |
+| OD-ASM-06 | Leaderboard display rules and minors                                                                       | Public; opt-in only; institution only                       | Opt-out available, display names only, minors excluded from public boards                                                                  | Legal, Product           | FR-ASM-052      |
+| OD-ASM-07 | Role mapping: Exam Administrator, Proctor, Employer actors have no SSOT §5.4 role                          | Map to PAD, IAD, MOD, EAD as in section 2; create new roles | Map as in section 2                                                                                                                        | Product, Security        | Section 2       |
+| OD-ASM-08 | Calibration thresholds, sample sizes and the standard-setting method                                       | Angoff; bookmark; empirical                                 | 200 attempts, 50 per item, reliability threshold set by psychometrician, Angoff for exams                                                  | Assessment lead          | FR-ASM-044, 055 |
+| OD-ASM-09 | Is AI-assisted grading allowed, and where?                                                                 | Off; practice and assignments only; all                     | Off for evidence-eligible; optional for assignments and practice                                                                           | Product, Legal           | FR-ASM-028      |
+| OD-ASM-10 | Similarity corpus scope and fingerprint retention                                                          | Platform only; platform plus public web                     | Platform plus approved public corpus; fingerprints retained with the case                                                                  | Security, Legal          | FR-ASM-033      |
+| OD-ASM-11 | Employer assessment data retention and delivery to ATS                                                     | Delete with requisition; retain per employer agreement      | Delete on requisition close plus {12 months}, subject to candidate rights                                                                  | Legal                    | FR-ASM-046      |
+| OD-ASM-12 | Contest infrastructure and rated contests                                                                  | Separate sandbox pool; shared                               | Separate pool (SSOT OD-44); rated contests after unrated pilot                                                                             | Engineering              | FR-ASM-015      |
+| OD-ASM-13 | Which integrity signals and thresholds may be enabled before validation                                    | All at L1; only after false-positive study                  | Enable flagging only after a fairness review (YASH-G3 testing note)                                                                        | Integrity lead, Legal    | FR-ASM-032      |
+| OD-ASM-14 | Publish practice item content or keep secure                                                               | Public statements; hidden                                   | Public for practice challenges; secure for exam pools                                                                                      | Product                  | FR-ASM-039      |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-ASM-01 | Sandbox escape or abuse (crypto mining, network probing) | Medium, high | Network-less isolation, seccomp, limits, security tests, separate pools |
-| RSK-ASM-02 | False-positive integrity flags harm candidates or disproportionately affect groups | Medium, high | Human review, disclosure, appeals, fairness monitoring, thresholds validated before enabling |
-| RSK-ASM-03 | AI misuse outside the platform cannot be detected | High, medium | Honest policy statements, proctoring levels for high stakes, item design resistant to lookup |
-| RSK-ASM-04 | Item leaks undermine exams | Medium, high | Pools, rotation, exposure caps, watermarking, leak scans, response playbook |
-| RSK-ASM-05 | Runner outages cause backlogs and many `unverified` attempts | Medium, medium | Multiple pools, autoscaling, honest status, re-grade window |
-| RSK-ASM-06 | Proctoring privacy and legal exposure | Medium, high | Consent, alternatives, DPIA, minimal retention, vendor contracts |
-| RSK-ASM-07 | Accommodation data exposure | Low, high | Special-category controls, access logs, no employer visibility |
-| RSK-ASM-08 | Employers misuse assessments for discriminatory screening | Medium, high | Job-relatedness mapping, disallowed content rules, consent, audit |
-| RSK-ASM-09 | Evidence inflation from poorly calibrated or short assessments | Medium, high | Calibration, standard setting, eligibility gate, level bands |
-| RSK-ASM-10 | Sandbox compute cost grows unbounded | Medium, medium | Rate limits, caps per user, queue priorities, cost dashboards |
-| RSK-ASM-11 | Timer, clock or session manipulation | Low, high | Server authority, session binding, signals, tests |
-| RSK-ASM-12 | Content licensing disputes for imported item banks | Medium, medium | License matrix, provenance fields, takedown path (STU process reuse) |
-| RSK-ASM-13 | Candidate anxiety and perceived unfairness reduce adoption | Medium, medium | Clear disclosure, accessible design, practice mode, appeals |
+| ID         | Risk                                                                               | Likelihood and impact | Mitigation                                                                                   |
+| ---------- | ---------------------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------- |
+| RSK-ASM-01 | Sandbox escape or abuse (crypto mining, network probing)                           | Medium, high          | Network-less isolation, seccomp, limits, security tests, separate pools                      |
+| RSK-ASM-02 | False-positive integrity flags harm candidates or disproportionately affect groups | Medium, high          | Human review, disclosure, appeals, fairness monitoring, thresholds validated before enabling |
+| RSK-ASM-03 | AI misuse outside the platform cannot be detected                                  | High, medium          | Honest policy statements, proctoring levels for high stakes, item design resistant to lookup |
+| RSK-ASM-04 | Item leaks undermine exams                                                         | Medium, high          | Pools, rotation, exposure caps, watermarking, leak scans, response playbook                  |
+| RSK-ASM-05 | Runner outages cause backlogs and many `unverified` attempts                       | Medium, medium        | Multiple pools, autoscaling, honest status, re-grade window                                  |
+| RSK-ASM-06 | Proctoring privacy and legal exposure                                              | Medium, high          | Consent, alternatives, DPIA, minimal retention, vendor contracts                             |
+| RSK-ASM-07 | Accommodation data exposure                                                        | Low, high             | Special-category controls, access logs, no employer visibility                               |
+| RSK-ASM-08 | Employers misuse assessments for discriminatory screening                          | Medium, high          | Job-relatedness mapping, disallowed content rules, consent, audit                            |
+| RSK-ASM-09 | Evidence inflation from poorly calibrated or short assessments                     | Medium, high          | Calibration, standard setting, eligibility gate, level bands                                 |
+| RSK-ASM-10 | Sandbox compute cost grows unbounded                                               | Medium, medium        | Rate limits, caps per user, queue priorities, cost dashboards                                |
+| RSK-ASM-11 | Timer, clock or session manipulation                                               | Low, high             | Server authority, session binding, signals, tests                                            |
+| RSK-ASM-12 | Content licensing disputes for imported item banks                                 | Medium, medium        | License matrix, provenance fields, takedown path (STU process reuse)                         |
+| RSK-ASM-13 | Candidate anxiety and perceived unfairness reduce adoption                         | Medium, medium        | Clear disclosure, accessible design, practice mode, appeals                                  |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed and why |
-|---|---|---|
-| `SSOT.md` §9.2 F-08 (Challenges Arena), §10.17, §10.21 to §10.22, §10.26 (BR-139, BR-140), §17 (assessment and exam integrity), §7 rows F-45, F-76, F-77, F-78, F-104, F-115, F-135 | Catalog, workspace, run versus submit, scoring, sandbox limits, contests, certification, AI modes, integrity controls, proctoring gate | The sandbox limits' decision text (TD-05) is missing in the SSOT, so limits are `[PROP]` with OD-ASM-01; XP awards are left to REP (planned) |
-| `SSOT.md` §9.2 F-115 (Certification Exam Platform), WF-33 and WF-53 | Exam definition, registration, auto-grading, retake cooldown, item analysis, appeal SLA | WF-33 and WF-53 duplicate; this module treats them as one flow with registration and attempt machines |
-| `SSOT.md` Appendix E V61-22 | Unverified fallback, runner gating of verified code evidence | None |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-05 | Attempt lifecycle, heartbeat, autosave, runner contract, unverified fallback, scoring, minting, AI restriction, signals, accommodations, acceptance criteria | Signal retention and reveal-after-pass left as decisions (OD-ASM-03, OD-ASM-13) |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` AC-05-04-53, AC-05-04-54, AC-07-01-01 | Independence rules, catalog disclosure | None |
-| `docs/registries/FEATURE_REGISTRY.md` F-08, F-45, F-76 to F-78, F-104, F-115, F-134, F-135 | Cross-check of scope | Registry status is not treated as built |
-| `SSOT.md` §3 and §16 (principles, AI governance) | Consent, human accountability, AI suggestions rules | None |
-| Own knowledge of HackerRank, CodeSignal, LeetCode, Codility, Pearson VUE, ProctorU, Kaggle, Credly, psychometrics practice (Angoff, DIF) | Challenge types, contests, calibration, certification lifecycle, proctoring and fairness methods | Tagged `[PROP]` where used |
+| Legacy source                                                                                                                                                                       | Used for                                                                                                                                                     | Dropped or changed and why                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` §9.2 F-08 (Challenges Arena), §10.17, §10.21 to §10.22, §10.26 (BR-139, BR-140), §17 (assessment and exam integrity), §7 rows F-45, F-76, F-77, F-78, F-104, F-115, F-135 | Catalog, workspace, run versus submit, scoring, sandbox limits, contests, certification, AI modes, integrity controls, proctoring gate                       | The sandbox limits' decision text (TD-05) is missing in the SSOT, so limits are `[PROP]` with OD-ASM-01; XP awards are left to REP (planned) |
+| `SSOT.md` §9.2 F-115 (Certification Exam Platform), WF-33 and WF-53                                                                                                                 | Exam definition, registration, auto-grading, retake cooldown, item analysis, appeal SLA                                                                      | WF-33 and WF-53 duplicate; this module treats them as one flow with registration and attempt machines                                        |
+| `SSOT.md` Appendix E V61-22                                                                                                                                                         | Unverified fallback, runner gating of verified code evidence                                                                                                 | None                                                                                                                                         |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-05                                                                                  | Attempt lifecycle, heartbeat, autosave, runner contract, unverified fallback, scoring, minting, AI restriction, signals, accommodations, acceptance criteria | Signal retention and reveal-after-pass left as decisions (OD-ASM-03, OD-ASM-13)                                                              |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` AC-05-04-53, AC-05-04-54, AC-07-01-01                                                                | Independence rules, catalog disclosure                                                                                                                       | None                                                                                                                                         |
+| `docs/registries/FEATURE_REGISTRY.md` F-08, F-45, F-76 to F-78, F-104, F-115, F-134, F-135                                                                                          | Cross-check of scope                                                                                                                                         | Registry status is not treated as built                                                                                                      |
+| `SSOT.md` §3 and §16 (principles, AI governance)                                                                                                                                    | Consent, human accountability, AI suggestions rules                                                                                                          | None                                                                                                                                         |
+| Own knowledge of HackerRank, CodeSignal, LeetCode, Codility, Pearson VUE, ProctorU, Kaggle, Credly, psychometrics practice (Angoff, DIF)                                            | Challenge types, contests, calibration, certification lifecycle, proctoring and fairness methods                                                             | Tagged `[PROP]` where used                                                                                                                   |

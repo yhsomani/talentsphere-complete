@@ -15,27 +15,27 @@ Status: intended design. The product is PWA-first [SRC: CLAUDE.md "A PWA-first c
 
 Widths and class names are in `01` section 3.1 and `02` section 3.11. Below is how patterns change.
 
-| Pattern | Phone (0 to 767) | Tablet (768 to 1023) | Desktop (1024 and up) |
-|---|---|---|---|
-| Primary navigation | Bottom tab bar (5), Me screen | Rail 72 px | Sidebar 248 px |
-| Top bar | App bar 56: back or logo, title, search, bell | 56: switcher, search, bell, avatar | 64: breadcrumbs, palette field, New, help, bell, avatar |
-| Page layout | Single column; sections stack | Single or two-pane (list and detail) where `md` panes fit 320 + 400 | Multi-column; optional right panel at 1280 |
-| Page header | Title, status, primary action as full-width button below or sticky bottom bar; overflow menu | Title and actions inline | Title and actions inline |
-| Lists and cards | 1 column (2 for compact thumbnails from 640) | 2 columns | 3 to 4 columns |
-| Data tables | Card list per row (default) or horizontal scroll with frozen first column | Table with fewer columns (column priority) | Full table |
-| Filters | Full-height sheet, "Show N results" | Side sheet 360 px | Left panel 280 or filter bar |
-| Detail view next to list | Separate full screen (push) | Two-pane (list 40 percent, detail 60 percent) | Two-pane or drawer |
-| Dialogs | Bottom sheet or full screen for forms | Centered dialog 480 to 640 | Centered dialog |
-| Menus and popovers | Bottom sheet list | Anchored | Anchored |
-| Forms | Single column; sticky bottom primary; native input types | Single column max 640 | Single column max 640; optional section nav |
-| Wizard | One stage per screen; compact stepper; sticky action bar | Stepper left or top | Stepper left |
-| Kanban board | One column per screen with a column switcher (tabs of stage names with counts) and swipe between columns; "Move to" menu; list alternative | Two to three columns visible, horizontal scroll | All columns, horizontal scroll if more than fit |
-| Calendar | Agenda list by day with month strip | Week view | Month, week, day |
-| Charts | Simplified (fewer series, direct labels, tap for tooltip); table alternative one tap away | Standard | Standard |
-| Command palette | Full-screen sheet | Dialog | Dialog |
-| Toasts | Bottom, above tab bar and above the keyboard | Bottom start | Bottom start |
-| Media player | Pinned top, tabs below, fullscreen on rotate (opt-in) | Side panel at landscape | Side panel |
-| Rich text editor | Reduced toolbar (bold, italic, list, link) scrollable; full toolbar behind "More" | Full | Full |
+| Pattern                  | Phone (0 to 767)                                                                                                                           | Tablet (768 to 1023)                                                | Desktop (1024 and up)                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------- |
+| Primary navigation       | Bottom tab bar (5), Me screen                                                                                                              | Rail 72 px                                                          | Sidebar 248 px                                          |
+| Top bar                  | App bar 56: back or logo, title, search, bell                                                                                              | 56: switcher, search, bell, avatar                                  | 64: breadcrumbs, palette field, New, help, bell, avatar |
+| Page layout              | Single column; sections stack                                                                                                              | Single or two-pane (list and detail) where `md` panes fit 320 + 400 | Multi-column; optional right panel at 1280              |
+| Page header              | Title, status, primary action as full-width button below or sticky bottom bar; overflow menu                                               | Title and actions inline                                            | Title and actions inline                                |
+| Lists and cards          | 1 column (2 for compact thumbnails from 640)                                                                                               | 2 columns                                                           | 3 to 4 columns                                          |
+| Data tables              | Card list per row (default) or horizontal scroll with frozen first column                                                                  | Table with fewer columns (column priority)                          | Full table                                              |
+| Filters                  | Full-height sheet, "Show N results"                                                                                                        | Side sheet 360 px                                                   | Left panel 280 or filter bar                            |
+| Detail view next to list | Separate full screen (push)                                                                                                                | Two-pane (list 40 percent, detail 60 percent)                       | Two-pane or drawer                                      |
+| Dialogs                  | Bottom sheet or full screen for forms                                                                                                      | Centered dialog 480 to 640                                          | Centered dialog                                         |
+| Menus and popovers       | Bottom sheet list                                                                                                                          | Anchored                                                            | Anchored                                                |
+| Forms                    | Single column; sticky bottom primary; native input types                                                                                   | Single column max 640                                               | Single column max 640; optional section nav             |
+| Wizard                   | One stage per screen; compact stepper; sticky action bar                                                                                   | Stepper left or top                                                 | Stepper left                                            |
+| Kanban board             | One column per screen with a column switcher (tabs of stage names with counts) and swipe between columns; "Move to" menu; list alternative | Two to three columns visible, horizontal scroll                     | All columns, horizontal scroll if more than fit         |
+| Calendar                 | Agenda list by day with month strip                                                                                                        | Week view                                                           | Month, week, day                                        |
+| Charts                   | Simplified (fewer series, direct labels, tap for tooltip); table alternative one tap away                                                  | Standard                                                            | Standard                                                |
+| Command palette          | Full-screen sheet                                                                                                                          | Dialog                                                              | Dialog                                                  |
+| Toasts                   | Bottom, above tab bar and above the keyboard                                                                                               | Bottom start                                                        | Bottom start                                            |
+| Media player             | Pinned top, tabs below, fullscreen on rotate (opt-in)                                                                                      | Side panel at landscape                                             | Side panel                                              |
+| Rich text editor         | Reduced toolbar (bold, italic, list, link) scrollable; full toolbar behind "More"                                                          | Full                                                                | Full                                                    |
 
 Rules:
 
@@ -51,18 +51,18 @@ Rules:
 
 ## 3. Touch targets and spacing
 
-| Element | Minimum | Standard |
-|---|---|---|
-| Any interactive target (coarse pointer) | 44 by 44 CSS px (including padding), 8 px gap between adjacent targets | Same |
-| Any interactive target (fine pointer) | 24 by 24 CSS px (WCAG 2.5.8) | 32 to 40 |
-| Bottom tab slot | 48 height, full width / 5 | 56 height |
-| List row | 44 | 56 |
-| Icon button | 44 hit area even if icon is 20 | 44 |
-| Checkbox, radio, switch | Control 20 to 24, hit area 44 (with label) | |
-| Inline text links | Exempt from size, but at least 8 px vertical separation in lists; link lists use full-row targets | |
-| Table row actions | 44 button | |
-| Slider thumb | 44 | |
-| Close button on sheets | 44, top end corner and also reachable at the bottom as "Close" action when content is long | |
+| Element                                 | Minimum                                                                                           | Standard  |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------- | --------- |
+| Any interactive target (coarse pointer) | 44 by 44 CSS px (including padding), 8 px gap between adjacent targets                            | Same      |
+| Any interactive target (fine pointer)   | 24 by 24 CSS px (WCAG 2.5.8)                                                                      | 32 to 40  |
+| Bottom tab slot                         | 48 height, full width / 5                                                                         | 56 height |
+| List row                                | 44                                                                                                | 56        |
+| Icon button                             | 44 hit area even if icon is 20                                                                    | 44        |
+| Checkbox, radio, switch                 | Control 20 to 24, hit area 44 (with label)                                                        |           |
+| Inline text links                       | Exempt from size, but at least 8 px vertical separation in lists; link lists use full-row targets |           |
+| Table row actions                       | 44 button                                                                                         |           |
+| Slider thumb                            | 44                                                                                                |           |
+| Close button on sheets                  | 44, top end corner and also reachable at the bottom as "Close" action when content is long        |           |
 
 Rules:
 
@@ -74,18 +74,18 @@ Rules:
 
 ## 4. Gesture rules
 
-| Gesture | Use | Rule |
-|---|---|---|
-| Tap | Primary activation | |
-| Long press | Enter selection mode, open context menu | Always paired with a visible alternative (checkbox, menu button); threshold 500 ms; haptic tick if enabled |
-| Swipe horizontally on list rows | Reveal actions (archive, mark read) | Enhancement only: every action also exists in the row menu; actions are reversible (Undo) or confirm; swipe never deletes without Undo; threshold 40 percent width; RTL mirrors |
-| Swipe between board columns or tabs | Navigation within a view | Does not conflict with system back swipe (do not capture edge gestures within 20 px of screen edges); visible tab controls remain |
-| Pull to refresh | Refresh a list or feed | Optional; a Refresh button exists in the page menu; disabled where it conflicts with scroll in editors, chats (older messages load by scroll), maps |
-| Drag and drop | Reorder, move | Handle-initiated, long press start, `03` section 6 alternatives |
-| Pinch and double-tap zoom | Images, documents, maps | Page zoom is never disabled; in-app image viewer allows pinch |
-| Edge swipe back | System navigation | Respected; in-app back is a visible control |
-| Bottom sheet drag | Resize or dismiss | Close button visible; snap points; `Esc` and Close for non-touch |
-| Shake, tilt | Not used | `04` `NFR-AXS-035` |
+| Gesture                             | Use                                     | Rule                                                                                                                                                                            |
+| ----------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tap                                 | Primary activation                      |                                                                                                                                                                                 |
+| Long press                          | Enter selection mode, open context menu | Always paired with a visible alternative (checkbox, menu button); threshold 500 ms; haptic tick if enabled                                                                      |
+| Swipe horizontally on list rows     | Reveal actions (archive, mark read)     | Enhancement only: every action also exists in the row menu; actions are reversible (Undo) or confirm; swipe never deletes without Undo; threshold 40 percent width; RTL mirrors |
+| Swipe between board columns or tabs | Navigation within a view                | Does not conflict with system back swipe (do not capture edge gestures within 20 px of screen edges); visible tab controls remain                                               |
+| Pull to refresh                     | Refresh a list or feed                  | Optional; a Refresh button exists in the page menu; disabled where it conflicts with scroll in editors, chats (older messages load by scroll), maps                             |
+| Drag and drop                       | Reorder, move                           | Handle-initiated, long press start, `03` section 6 alternatives                                                                                                                 |
+| Pinch and double-tap zoom           | Images, documents, maps                 | Page zoom is never disabled; in-app image viewer allows pinch                                                                                                                   |
+| Edge swipe back                     | System navigation                       | Respected; in-app back is a visible control                                                                                                                                     |
+| Bottom sheet drag                   | Resize or dismiss                       | Close button visible; snap points; `Esc` and Close for non-touch                                                                                                                |
+| Shake, tilt                         | Not used                                | `04` `NFR-AXS-035`                                                                                                                                                              |
 
 Rules:
 
@@ -132,18 +132,18 @@ Manifest: name "TalentSphere", short name "TalentSphere", `display: standalone`,
 
 ### 7.2 When to prompt
 
-| Rule | Detail |
-|---|---|
-| Eligibility | Browser fired `beforeinstallprompt` (Chromium) or platform is iOS Safari (manual instructions) |
-| Timing | After the user has visited at least twice, on different days, and completed one meaningful action (applied, saved a job, completed a lesson, sent a message) |
-| Never during | Forms in progress, assessments, interviews, checkout, onboarding steps, first minute of a session, and within 30 days after the user dismissed the prompt twice |
-| Placement | A small dismissible card in the dashboard region (not a modal) and a permanent "Install app" item in Help and the account menu |
-| Copy | "Install TalentSphere to open it from your home screen and keep your applications and lessons available offline." Buttons "Install" and "Not now". A "Never ask again" link under the Not now (stored) |
-| Dismiss memory | "Not now" snoozes 14 days; after two dismissals: 90 days; "Never ask again" is permanent for the account and device; Help menu item remains |
-| iOS | Card with three steps and icons: Share, Add to Home Screen, Add; shown only in Safari; explains that notifications on iOS require the installed app |
-| Desktop | Chromium shows install icon in the address bar; our card is offered at the same timing, within the page |
-| After install | Standalone launch shows a one-time "You're using the app" tip: notifications opt-in soft ask, offline readiness status ("Your applications and 3 lessons are ready offline") |
-| Analytics | Prompt shown, accepted, dismissed, installed, launched from standalone (no personal data) |
+| Rule           | Detail                                                                                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Eligibility    | Browser fired `beforeinstallprompt` (Chromium) or platform is iOS Safari (manual instructions)                                                                                                         |
+| Timing         | After the user has visited at least twice, on different days, and completed one meaningful action (applied, saved a job, completed a lesson, sent a message)                                           |
+| Never during   | Forms in progress, assessments, interviews, checkout, onboarding steps, first minute of a session, and within 30 days after the user dismissed the prompt twice                                        |
+| Placement      | A small dismissible card in the dashboard region (not a modal) and a permanent "Install app" item in Help and the account menu                                                                         |
+| Copy           | "Install TalentSphere to open it from your home screen and keep your applications and lessons available offline." Buttons "Install" and "Not now". A "Never ask again" link under the Not now (stored) |
+| Dismiss memory | "Not now" snoozes 14 days; after two dismissals: 90 days; "Never ask again" is permanent for the account and device; Help menu item remains                                                            |
+| iOS            | Card with three steps and icons: Share, Add to Home Screen, Add; shown only in Safari; explains that notifications on iOS require the installed app                                                    |
+| Desktop        | Chromium shows install icon in the address bar; our card is offered at the same timing, within the page                                                                                                |
+| After install  | Standalone launch shows a one-time "You're using the app" tip: notifications opt-in soft ask, offline readiness status ("Your applications and 3 lessons are ready offline")                           |
+| Analytics      | Prompt shown, accepted, dismissed, installed, launched from standalone (no personal data)                                                                                                              |
 
 ### 7.3 Standalone behavior
 
@@ -167,12 +167,12 @@ Manifest: name "TalentSphere", short name "TalentSphere", `display: standalone`,
 
 ### 8.1 Offline capability classes
 
-| Class | Meaning | Examples |
-|---|---|---|
-| R: Read offline | Last-viewed data is cached and viewable, marked with "Saved on this device, {time}" | Dashboard summary, profile, evidence list, applications and statuses, saved jobs, job details viewed, enrolled course outline and notes, downloaded lessons, messages recently opened, interview details and schedule, certificates, upcoming events, mentor sessions |
-| W: Queue writes | Changes are stored locally and sent when online, in order, idempotent | Draft edits (profile, evidence draft, application draft, resume), bookmarks, mark as read, notes, lesson progress, message drafts and sends ("Waiting to send"), settings toggles, checklist items |
-| O: Online only | Requires live server | Submitting an application (draft is saved, submission waits: "Ready to submit when you're online" with explicit manual submit after reconnect), payments, assessment start (an attempt in progress can continue offline only where the format allows and the module declares sync-on-submit), video interviews, search beyond cached, AI assistant, verifications, publishing, sensitive admin actions |
-| D: Download for offline | Explicit download by user | Course lessons (video, PDF, quizzes where permitted), reading materials, certificates PDFs |
+| Class                   | Meaning                                                                             | Examples                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R: Read offline         | Last-viewed data is cached and viewable, marked with "Saved on this device, {time}" | Dashboard summary, profile, evidence list, applications and statuses, saved jobs, job details viewed, enrolled course outline and notes, downloaded lessons, messages recently opened, interview details and schedule, certificates, upcoming events, mentor sessions                                                                                                                                  |
+| W: Queue writes         | Changes are stored locally and sent when online, in order, idempotent               | Draft edits (profile, evidence draft, application draft, resume), bookmarks, mark as read, notes, lesson progress, message drafts and sends ("Waiting to send"), settings toggles, checklist items                                                                                                                                                                                                     |
+| O: Online only          | Requires live server                                                                | Submitting an application (draft is saved, submission waits: "Ready to submit when you're online" with explicit manual submit after reconnect), payments, assessment start (an attempt in progress can continue offline only where the format allows and the module declares sync-on-submit), video interviews, search beyond cached, AI assistant, verifications, publishing, sensitive admin actions |
+| D: Download for offline | Explicit download by user                                                           | Course lessons (video, PDF, quizzes where permitted), reading materials, certificates PDFs                                                                                                                                                                                                                                                                                                             |
 
 Rule `NFR-RWD-012` Each module's screen spec declares the class per action (R, W, O, D). An action in class O is `aria-disabled` offline with the reason; a class W action works and shows a queued state.
 
@@ -288,40 +288,40 @@ Defined with `03` section 10. Mobile specifics: Web Push on Android Chrome and i
 
 ## 12. Consolidated rules
 
-| Id | Rule | Test |
-|---|---|---|
-| NFR-RWD-001 | No horizontal page scroll at 320 px outside labeled containers | Playwright at 320 on every route |
-| NFR-RWD-002 | DOM order equals reading order at all widths | Keyboard and screen reader walkthrough |
-| NFR-RWD-003 | Primary data and actions are never removed on small screens | Spec review |
-| NFR-RWD-004 | Container queries for components; no UA sniffing | Lint |
-| NFR-RWD-005 | Supported 320 to 2560 px, any orientation, 200 percent text | Visual tests |
-| NFR-RWD-006 | 16 px between adjacent destructive and non-destructive targets | Target audit |
-| NFR-RWD-007 | No hover-only functionality | Touch emulation tests |
-| NFR-RWD-008 | Phone primary actions in a sticky bottom bar within the lower 60 percent | Visual test |
-| NFR-RWD-009 | No gesture-only functionality | Spec review and test |
-| NFR-RWD-010 | Destructive or outward actions need an explicit tap or confirm | Test |
-| NFR-RWD-011 | No scroll hijacking | Manual |
-| NFR-RWD-012 | Each action declares offline class R, W, O or D | Spec lint |
-| NFR-RWD-013 | No user data lost to connectivity failure | Offline fault injection |
-| NFR-RWD-014 | Offline state never silent; disabled actions explain why | Offline run |
-| NFR-RWD-015 | Sensitive classes not cached without opt-in; assessments never cached beyond the attempt | Storage inspection |
-| NFR-RWD-016 | Data saver reduces fidelity, not function | Feature parity test |
-| NFR-RWD-017 | Data saver status visible and changeable in one tap from the slow-network banner | UI test |
+| Id          | Rule                                                                                     | Test                                   |
+| ----------- | ---------------------------------------------------------------------------------------- | -------------------------------------- |
+| NFR-RWD-001 | No horizontal page scroll at 320 px outside labeled containers                           | Playwright at 320 on every route       |
+| NFR-RWD-002 | DOM order equals reading order at all widths                                             | Keyboard and screen reader walkthrough |
+| NFR-RWD-003 | Primary data and actions are never removed on small screens                              | Spec review                            |
+| NFR-RWD-004 | Container queries for components; no UA sniffing                                         | Lint                                   |
+| NFR-RWD-005 | Supported 320 to 2560 px, any orientation, 200 percent text                              | Visual tests                           |
+| NFR-RWD-006 | 16 px between adjacent destructive and non-destructive targets                           | Target audit                           |
+| NFR-RWD-007 | No hover-only functionality                                                              | Touch emulation tests                  |
+| NFR-RWD-008 | Phone primary actions in a sticky bottom bar within the lower 60 percent                 | Visual test                            |
+| NFR-RWD-009 | No gesture-only functionality                                                            | Spec review and test                   |
+| NFR-RWD-010 | Destructive or outward actions need an explicit tap or confirm                           | Test                                   |
+| NFR-RWD-011 | No scroll hijacking                                                                      | Manual                                 |
+| NFR-RWD-012 | Each action declares offline class R, W, O or D                                          | Spec lint                              |
+| NFR-RWD-013 | No user data lost to connectivity failure                                                | Offline fault injection                |
+| NFR-RWD-014 | Offline state never silent; disabled actions explain why                                 | Offline run                            |
+| NFR-RWD-015 | Sensitive classes not cached without opt-in; assessments never cached beyond the attempt | Storage inspection                     |
+| NFR-RWD-016 | Data saver reduces fidelity, not function                                                | Feature parity test                    |
+| NFR-RWD-017 | Data saver status visible and changeable in one tap from the slow-network banner         | UI test                                |
 
 ## 13. Open decisions and risks
 
-| Id | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-RWD-01 | Browser and OS support matrix | Last 2 versions; last 3; evergreen only | Last 2 major versions of Chrome, Edge, Firefox, Safari (macOS, iOS), Samsung Internet; iOS 16.4+ for push | Engineering and product | Build targets |
-| OD-RWD-02 | Offline validity of downloaded lessons | 7, 14, 30 days | 30 days, subject to license | Product and legal | LRN, PWA |
-| OD-RWD-03 | Whether application submission may be queued offline and auto-sent | Manual only; auto | Manual confirm after reconnect | Product owner | JOB, PWA |
-| OD-RWD-04 | Encrypting local caches | Off; WebCrypto session-bound | WebCrypto, session-bound | Security officer | PWA |
+| Id        | Question                                                           | Options                                 | Default proposal                                                                                          | Decides                 | Blocks        |
+| --------- | ------------------------------------------------------------------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------- | ------------- |
+| OD-RWD-01 | Browser and OS support matrix                                      | Last 2 versions; last 3; evergreen only | Last 2 major versions of Chrome, Edge, Firefox, Safari (macOS, iOS), Samsung Internet; iOS 16.4+ for push | Engineering and product | Build targets |
+| OD-RWD-02 | Offline validity of downloaded lessons                             | 7, 14, 30 days                          | 30 days, subject to license                                                                               | Product and legal       | LRN, PWA      |
+| OD-RWD-03 | Whether application submission may be queued offline and auto-sent | Manual only; auto                       | Manual confirm after reconnect                                                                            | Product owner           | JOB, PWA      |
+| OD-RWD-04 | Encrypting local caches                                            | Off; WebCrypto session-bound            | WebCrypto, session-bound                                                                                  | Security officer        | PWA           |
 
 ### 13.1 Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
+| Id         | Risk                                                          | Mitigation                                                                       |
+| ---------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | RSK-RWD-01 | iOS PWA limits (push, storage eviction, background sync gaps) | Honest messaging, draft protection, server-side drafts as truth, email fallbacks |
-| RSK-RWD-02 | Offline conflict complexity | One conflict model (`03` section 8.3), restricted queueable classes |
-| RSK-RWD-03 | Install prompt annoyance | Timing and dismissal memory rules in section 7.2 |
-| RSK-RWD-04 | Mobile assessments with weaker integrity and accessibility | Device requirements stated up front; "Continue on a computer" path |
+| RSK-RWD-02 | Offline conflict complexity                                   | One conflict model (`03` section 8.3), restricted queueable classes              |
+| RSK-RWD-03 | Install prompt annoyance                                      | Timing and dismissal memory rules in section 7.2                                 |
+| RSK-RWD-04 | Mobile assessments with weaker integrity and accessibility    | Device requirements stated up front; "Continue on a computer" path               |

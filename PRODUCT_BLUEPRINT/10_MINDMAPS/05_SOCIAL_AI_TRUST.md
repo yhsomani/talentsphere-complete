@@ -2,7 +2,7 @@
 
 # Mind map: Social, intelligence and trust
 
-Every module, sub-module and feature in this domain (137 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (138 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -117,6 +117,7 @@ mindmap
         AIC-032 Evaluation program and bias audit
         AIC-033 AI incident management and user AI-harm
         AIC-034 On-device models and user-authorized
+        AIC-035 Open-source contribution recommendations
     TSF Trust, Safety Moderation
       Features
         TSF-001 Report content or account

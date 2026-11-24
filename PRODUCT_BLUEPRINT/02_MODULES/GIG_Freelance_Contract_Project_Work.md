@@ -12,15 +12,15 @@ GIG lets a person turn on freelancer mode on their TalentSphere profile, find or
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A freelancer is eligible, discoverable and can get paid | Freelancer state `active` (SM-GIG-01) with payout onboarding complete |
-| Clients publish well-scoped projects inside the allowed categories | Listing `published` (SM-GIG-02) after the scope guard |
-| Work is agreed in writing with acceptance criteria | Contract `active` (SM-GIG-04) with at least one milestone |
-| Delivered work is reviewed and paid under clear rules | Milestones `accepted` then `paid` (SM-GIG-05) |
-| Disputes are resolved without trapping either side | Dispute reaches a terminal state (SM-GIG-07) |
-| Completed projects strengthen the freelancer's verified record | Client-confirmed evidence records created (FR-GIG-023) |
-| Tax, classification and cross-border rules are respected | Tax documents on file before payout; classification flags reviewed |
+| Outcome                                                            | How the system knows                                                  |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| A freelancer is eligible, discoverable and can get paid            | Freelancer state `active` (SM-GIG-01) with payout onboarding complete |
+| Clients publish well-scoped projects inside the allowed categories | Listing `published` (SM-GIG-02) after the scope guard                 |
+| Work is agreed in writing with acceptance criteria                 | Contract `active` (SM-GIG-04) with at least one milestone             |
+| Delivered work is reviewed and paid under clear rules              | Milestones `accepted` then `paid` (SM-GIG-05)                         |
+| Disputes are resolved without trapping either side                 | Dispute reaches a terminal state (SM-GIG-07)                          |
+| Completed projects strengthen the freelancer's verified record     | Client-confirmed evidence records created (FR-GIG-023)                |
+| Tax, classification and cross-border rules are respected           | Tax documents on file before payout; classification flags reviewed    |
 
 ### 1.3 Boundaries
 
@@ -28,20 +28,20 @@ GIG lets a person turn on freelancer mode on their TalentSphere profile, find or
 
 **Out of scope (owned elsewhere):**
 
-| Capability | Owner | Relationship |
-|---|---|---|
-| Money movement: charges, fees, refunds, payouts, tax computation, 1099-style reporting by the provider | BIL (this batch) | GIG creates orders and earning events (FR-BIL-028, FR-BIL-029) |
-| Profile, portfolio, resume | PRF (planned) | GIG adds freelancer fields and writes accepted projects to the portfolio with consent |
-| Evidence records and verification ladder | EVD, BGV (planned) | GIG submits client-confirmed work evidence |
-| Messaging and attachments | MSG (planned) | Per-project threads |
-| Job postings for employees | JOB (planned) | Hire conversion links to JOB |
-| Moderation and enforcement | TSF (planned) | GIG raises reports |
-| Notifications | NTF (planned) | GIG emits events |
-| Employer organization and verification | EMP (planned) | Client identity |
-| Payroll, benefits, employer-of-record, staffing, workforce management | Out of product (SSOT §4.2) | Never offered |
-| Learning content | LRN, STU (planned) | Learning projects reuse assignments |
+| Capability                                                                                             | Owner                      | Relationship                                                                          |
+| ------------------------------------------------------------------------------------------------------ | -------------------------- | ------------------------------------------------------------------------------------- |
+| Money movement: charges, fees, refunds, payouts, tax computation, 1099-style reporting by the provider | BIL (this batch)           | GIG creates orders and earning events (FR-BIL-028, FR-BIL-029)                        |
+| Profile, portfolio, resume                                                                             | PRF (planned)              | GIG adds freelancer fields and writes accepted projects to the portfolio with consent |
+| Evidence records and verification ladder                                                               | EVD, BGV (planned)         | GIG submits client-confirmed work evidence                                            |
+| Messaging and attachments                                                                              | MSG (planned)              | Per-project threads                                                                   |
+| Job postings for employees                                                                             | JOB (planned)              | Hire conversion links to JOB                                                          |
+| Moderation and enforcement                                                                             | TSF (planned)              | GIG raises reports                                                                    |
+| Notifications                                                                                          | NTF (planned)              | GIG emits events                                                                      |
+| Employer organization and verification                                                                 | EMP (planned)              | Client identity                                                                       |
+| Payroll, benefits, employer-of-record, staffing, workforce management                                  | Out of product (SSOT §4.2) | Never offered                                                                         |
+| Learning content                                                                                       | LRN, STU (planned)         | Learning projects reuse assignments                                                   |
 
-**Non-goal brushes (SSOT §4.2):** (1) *General marketplace*: categories are an allowlist of skill-based professional project work (BR-GIG-002). (2) *HR/payroll*: no hours-based employment features, no benefits, no payroll; classification guard (BR-GIG-014). (3) *Pay-to-rank*: no proposal boosting or paid freelancer placement (BR-GIG-011). (4) *Ad network*: no sponsored listings. Recorded as `OD-GIG-01`, `OD-GIG-09`, `OD-GIG-04`.
+**Non-goal brushes (SSOT §4.2):** (1) _General marketplace_: categories are an allowlist of skill-based professional project work (BR-GIG-002). (2) _HR/payroll_: no hours-based employment features, no benefits, no payroll; classification guard (BR-GIG-014). (3) _Pay-to-rank_: no proposal boosting or paid freelancer placement (BR-GIG-011). (4) _Ad network_: no sponsored listings. Recorded as `OD-GIG-01`, `OD-GIG-09`, `OD-GIG-04`.
 
 ### 1.4 Owned versus consumed
 
@@ -53,41 +53,41 @@ Owned entities: `ENT-GIG-01` to `ENT-GIG-21` (section 8). Consumed: user, organi
 
 Legend: C create, R read, U update, A approve or act, `own` own record, `—` none.
 
-| Capability | CAN | FRL | Client (EAD, REC, HMG) | IAD / PLO | FIN | MOD | PAD | SUP |
-|---|---|---|---|---|---|---|---|---|
-| Turn on freelancer mode | U own | U own | — | — | — | — | — | — |
-| Edit freelancer profile | — | U own | — | — | — | — | override (audit) | — |
-| Browse listings | R | R | R | R | — | R | R | R |
-| Create, edit, close listing | — | — | C, U own org | C, U (learning projects) | — | — | override | — |
-| Approve listing (review queue) | — | — | — | — | — | A | A | R |
-| Invite freelancer | — | — | C | — | — | — | — | — |
-| Submit, edit, withdraw proposal | — | C, U own | R own org | — | — | — | — | — |
-| Shortlist, award | — | — | A | — | — | — | — | — |
-| Accept contract | — | A own | A own org | — | — | — | — | — |
-| Fund milestone (if escrow) | — | — | C | — | R | — | — | — |
-| Submit deliverable | — | C own | R | — | — | — | — | — |
-| Accept, request revision on milestone | — | — | A | — | — | — | — | — |
-| Request change, terminate contract | — | C, U | C, U | — | — | — | override | assist |
-| Open dispute | — | C | C | — | — | — | — | assist |
-| Decide dispute | — | — | — | — | A (money) | A (conduct) | A (appeal) | — |
-| Review counterparty | — | C own | C own | — | — | R, remove | R | R |
-| Tax documents, payout | — | C own | — | — | R, A | — | R | — |
-| View earnings and spend | — | R own | R org | R (own institution learning projects: none) | R | — | R | — |
+| Capability                            | CAN   | FRL      | Client (EAD, REC, HMG) | IAD / PLO                                   | FIN       | MOD         | PAD              | SUP    |
+| ------------------------------------- | ----- | -------- | ---------------------- | ------------------------------------------- | --------- | ----------- | ---------------- | ------ |
+| Turn on freelancer mode               | U own | U own    | —                      | —                                           | —         | —           | —                | —      |
+| Edit freelancer profile               | —     | U own    | —                      | —                                           | —         | —           | override (audit) | —      |
+| Browse listings                       | R     | R        | R                      | R                                           | —         | R           | R                | R      |
+| Create, edit, close listing           | —     | —        | C, U own org           | C, U (learning projects)                    | —         | —           | override         | —      |
+| Approve listing (review queue)        | —     | —        | —                      | —                                           | —         | A           | A                | R      |
+| Invite freelancer                     | —     | —        | C                      | —                                           | —         | —           | —                | —      |
+| Submit, edit, withdraw proposal       | —     | C, U own | R own org              | —                                           | —         | —           | —                | —      |
+| Shortlist, award                      | —     | —        | A                      | —                                           | —         | —           | —                | —      |
+| Accept contract                       | —     | A own    | A own org              | —                                           | —         | —           | —                | —      |
+| Fund milestone (if escrow)            | —     | —        | C                      | —                                           | R         | —           | —                | —      |
+| Submit deliverable                    | —     | C own    | R                      | —                                           | —         | —           | —                | —      |
+| Accept, request revision on milestone | —     | —        | A                      | —                                           | —         | —           | —                | —      |
+| Request change, terminate contract    | —     | C, U     | C, U                   | —                                           | —         | —           | override         | assist |
+| Open dispute                          | —     | C        | C                      | —                                           | —         | —           | —                | assist |
+| Decide dispute                        | —     | —        | —                      | —                                           | A (money) | A (conduct) | A (appeal)       | —      |
+| Review counterparty                   | —     | C own    | C own                  | —                                           | —         | R, remove   | R                | R      |
+| Tax documents, payout                 | —     | C own    | —                      | —                                           | R, A      | —           | R                | —      |
+| View earnings and spend               | —     | R own    | R org                  | R (own institution learning projects: none) | R         | —           | R                | —      |
 
 Notes: `REC` and `HMG` can post projects only if the organization's `EAD` enabled project posting. `IAD` and `PLO` handle only learning and apprenticeship projects (FR-GIG-031). Freelancer contract data is never visible to employers who evaluate the same person as a job candidate unless the freelancer shares it (BR-GIG-027).
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Freelancer mode and profile | FR-GIG-001 to 003 |
-| B | Project listings and discovery | FR-GIG-004 to 007 |
-| C | Proposals and award | FR-GIG-008 to 011 |
-| D | Contracts, milestones and deliverables | FR-GIG-012 to 017 |
-| E | Money: escrow gate, time tracking gate, payment | FR-GIG-018 to 020 |
-| F | Compliance: tax, classification, cross-border | FR-GIG-021 to 023 |
-| G | Trust: reviews, disputes, reputation, circumvention, IP | FR-GIG-024 to 029 |
-| H | Conversion, learning projects, dashboards | FR-GIG-030 to 032 |
+| Code | Sub-module                                              | Features          |
+| ---- | ------------------------------------------------------- | ----------------- |
+| A    | Freelancer mode and profile                             | FR-GIG-001 to 003 |
+| B    | Project listings and discovery                          | FR-GIG-004 to 007 |
+| C    | Proposals and award                                     | FR-GIG-008 to 011 |
+| D    | Contracts, milestones and deliverables                  | FR-GIG-012 to 017 |
+| E    | Money: escrow gate, time tracking gate, payment         | FR-GIG-018 to 020 |
+| F    | Compliance: tax, classification, cross-border           | FR-GIG-021 to 023 |
+| G    | Trust: reviews, disputes, reputation, circumvention, IP | FR-GIG-024 to 029 |
+| H    | Conversion, learning projects, dashboards               | FR-GIG-030 to 032 |
 
 ## 4. Feature specifications
 
@@ -909,38 +909,38 @@ Notes: `REC` and `HMG` can post projects only if the organization's `EAD` enable
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-GIG-001 | Freelancer mode is opt-in, off by default, and does not change job-seeker visibility or ranking. | Candidate control. | Mode service | [PROP] |
-| BR-GIG-002 | Listings are limited to skill-based professional project categories on an allowlist; prohibited: illegal work, adult content, regulated professions without licence, weapons, gambling, multi-level schemes, discriminatory requirements, misleading identity use. | Stay inside SSOT §4.2 (no general marketplace). | Scope guard | [PROP] [SRC: §4.2] [DEC-REQ] OD-GIG-09 |
-| BR-GIG-003 | Listings that ask someone to complete another person's graded work, exams or assessments, or to fake credentials, are prohibited. | Academic and credential integrity. | Scope guard | [SRC: ASM integrity principles] [PROP] |
-| BR-GIG-004 | The contract is between client and freelancer; the platform is not the employer, agent or a party to the work and offers no payroll, benefits or employer-of-record. | Non-goal and liability. | Terms template, product scope | [SRC: §4.2] |
-| BR-GIG-005 | Every contract is fixed-price with at least one milestone, each with written acceptance criteria. | Clarity and dispute basis. | Contract builder | [PROP] |
-| BR-GIG-006 | The platform does not hold third-party funds except in a mode approved by the escrow decision gate through a licensed structure; the default mode is pay on acceptance. | Regulatory and non-goal risk. | Mode flag | [DEC-REQ] OD-GIG-02 |
-| BR-GIG-007 | Time tracking exists only if approved; it is consent-based, with no covert monitoring (no keystroke, mouse, webcam capture). | Privacy and classification risk. | Feature flag, time service | [DEC-REQ] OD-GIG-03 |
-| BR-GIG-008 | Review windows are fixed (default 7 days); after the window plus a 3-day reminder period an unanswered submission auto-accepts, with a 7-day dispute right. | Prevents holding freelancers hostage. | Scheduler | [PROP] |
-| BR-GIG-009 | Revisions per milestone are limited (default 2) and must cite unmet criteria; more need a change request. | Scope control. | Review service | [PROP] |
-| BR-GIG-010 | Fees are disclosed before award, identical per fee table for everyone, and fixed in the terms snapshot. | Transparency. | Fee preview, BIL | [SRC: BR-101 pattern] [DEC-REQ] OD-GIG-08 |
-| BR-GIG-011 | No payment, plan or promotion influences listing order, proposal order, freelancer ranking, badges or reputation; plans change capacity only. | No pay-to-rank. | Ranking services | [SRC: §4.2; BR-BIL-004] |
-| BR-GIG-012 | Contact details and off-platform payment solicitation are masked before contract acceptance; off-platform payment during a contract is prohibited. | Marketplace integrity. | Message filter | [PROP] |
-| BR-GIG-013 | Payouts require valid identity, payout account and tax information; the platform reports where legally required and gives no tax advice. | Compliance. | Eligibility and payout guards | [PROP] [DEC-REQ] OD-GIG-05 |
-| BR-GIG-014 | The platform blocks terms that require exclusivity and warns on employment-like control (fixed hours, supervision, equipment); it never decides legal classification. | Misclassification risk. | Classification guard | [PROP] [DEC-REQ] OD-GIG-04 |
-| BR-GIG-015 | Parties and payouts must be in supported countries and clear sanctions screening; one currency per contract. | Legal compliance. | Award and payout checks | [PROP] [DEC-REQ] OD-GIG-06 |
-| BR-GIG-016 | IP is assigned to the client on payment in full for the relevant milestone unless the contract says otherwise; the freelancer keeps pre-existing materials. | Clear ownership. | Terms template | [PROP] |
-| BR-GIG-017 | NDA work shows only category, skills and dates publicly unless the client permits more; portfolio use needs client permission under NDA. | Confidentiality. | Evidence and portfolio visibility | [PROP] |
-| BR-GIG-018 | Reviews need a contract with a paid milestone, are mutual, hidden until both submit or 14 days pass, and cannot be a condition of payment. | Honest reviews. | Review service | [PROP] |
-| BR-GIG-019 | Work evidence from a contract reaches "client confirmed" only by the client's confirmation; freelancers cannot self-verify. | Verification ladder integrity. | Evidence service | [SRC: verification ladder; subject cannot verify own evidence] |
-| BR-GIG-020 | Disputes follow a ladder (respond, negotiate, mediate, appeal once); decisions are reasoned, based on terms and criteria, and reviewers must be independent. | Fair resolution. | Dispute service | [PROP] |
-| BR-GIG-021 | Freelancers and clients acting for themselves must be adults under local law (minimum 18); learning projects for minors are only through institution programs. | Legal capacity. | Eligibility | [PROP] |
-| BR-GIG-022 | When a party is suspended, running contracts follow a defined path: the other party may continue or cancel, unreleased funds are returned or held per mode, accepted work stays payable. | Fairness. | Contract and enforcement services | [PROP] |
-| BR-GIG-023 | Clients need a verified payment method and organization verification; new clients have a spend limit that rises with clean history. | Payment risk. | Posting and award guards | [PROP] |
-| BR-GIG-024 | Unpaid spec work is prohibited; any trial task must be paid or be a time-boxed (maximum 1 hour) assessment with no reuse rights. | Fair labor. | Scope guard | [PROP] |
-| BR-GIG-025 | Proposals are limited by a plan quota, duplicates are blocked, edits after viewing are marked and notified, quota is refunded when a listing is cancelled or removed. | Fair access and anti-spam. | Proposal service, BIL | [PROP] |
-| BR-GIG-026 | Hiring a freelancer through JOB is always allowed; any conversion fee is a decision parameter (default none); non-solicitation is not enforced. | Candidate freedom. | Conversion service | [DEC-REQ] OD-GIG-08 |
-| BR-GIG-027 | Freelancer contract data, rates and earnings are invisible to employers evaluating the person as a job candidate unless shared; clients cannot request private evidence beyond the contract's needs. | Separation of roles. | Visibility rules | [PROP] |
-| BR-GIG-028 | Learning projects are labeled, optional and educational; partners attest that they do not substitute for paid roles; patterns of free-labor use are reviewed. | Prevents exploitation. | Learning project guard | [PROP] |
-| BR-GIG-029 | Contract workroom records, terms and deliverable metadata are retained for the statutory period (default 7 years for money-related records) and are the evidence base for disputes. | Legal and dispute support. | Retention job | [PROP] |
-| BR-GIG-030 | Payments are idempotent per milestone acceptance; refunds and clawbacks follow BIL rules; accepted work stays payable after termination. | No double payment. | Payment service | [SRC: BR-BIL-003, BR-BIL-024] |
+| ID         | Rule                                                                                                                                                                                                                                                               | Rationale                                       | Enforced where                    | Source                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------- | -------------------------------------------------------------- |
+| BR-GIG-001 | Freelancer mode is opt-in, off by default, and does not change job-seeker visibility or ranking.                                                                                                                                                                   | Candidate control.                              | Mode service                      | [PROP]                                                         |
+| BR-GIG-002 | Listings are limited to skill-based professional project categories on an allowlist; prohibited: illegal work, adult content, regulated professions without licence, weapons, gambling, multi-level schemes, discriminatory requirements, misleading identity use. | Stay inside SSOT §4.2 (no general marketplace). | Scope guard                       | [PROP] [SRC: §4.2] [DEC-REQ] OD-GIG-09                         |
+| BR-GIG-003 | Listings that ask someone to complete another person's graded work, exams or assessments, or to fake credentials, are prohibited.                                                                                                                                  | Academic and credential integrity.              | Scope guard                       | [SRC: ASM integrity principles] [PROP]                         |
+| BR-GIG-004 | The contract is between client and freelancer; the platform is not the employer, agent or a party to the work and offers no payroll, benefits or employer-of-record.                                                                                               | Non-goal and liability.                         | Terms template, product scope     | [SRC: §4.2]                                                    |
+| BR-GIG-005 | Every contract is fixed-price with at least one milestone, each with written acceptance criteria.                                                                                                                                                                  | Clarity and dispute basis.                      | Contract builder                  | [PROP]                                                         |
+| BR-GIG-006 | The platform does not hold third-party funds except in a mode approved by the escrow decision gate through a licensed structure; the default mode is pay on acceptance.                                                                                            | Regulatory and non-goal risk.                   | Mode flag                         | [DEC-REQ] OD-GIG-02                                            |
+| BR-GIG-007 | Time tracking exists only if approved; it is consent-based, with no covert monitoring (no keystroke, mouse, webcam capture).                                                                                                                                       | Privacy and classification risk.                | Feature flag, time service        | [DEC-REQ] OD-GIG-03                                            |
+| BR-GIG-008 | Review windows are fixed (default 7 days); after the window plus a 3-day reminder period an unanswered submission auto-accepts, with a 7-day dispute right.                                                                                                        | Prevents holding freelancers hostage.           | Scheduler                         | [PROP]                                                         |
+| BR-GIG-009 | Revisions per milestone are limited (default 2) and must cite unmet criteria; more need a change request.                                                                                                                                                          | Scope control.                                  | Review service                    | [PROP]                                                         |
+| BR-GIG-010 | Fees are disclosed before award, identical per fee table for everyone, and fixed in the terms snapshot.                                                                                                                                                            | Transparency.                                   | Fee preview, BIL                  | [SRC: BR-101 pattern] [DEC-REQ] OD-GIG-08                      |
+| BR-GIG-011 | No payment, plan or promotion influences listing order, proposal order, freelancer ranking, badges or reputation; plans change capacity only.                                                                                                                      | No pay-to-rank.                                 | Ranking services                  | [SRC: §4.2; BR-BIL-004]                                        |
+| BR-GIG-012 | Contact details and off-platform payment solicitation are masked before contract acceptance; off-platform payment during a contract is prohibited.                                                                                                                 | Marketplace integrity.                          | Message filter                    | [PROP]                                                         |
+| BR-GIG-013 | Payouts require valid identity, payout account and tax information; the platform reports where legally required and gives no tax advice.                                                                                                                           | Compliance.                                     | Eligibility and payout guards     | [PROP] [DEC-REQ] OD-GIG-05                                     |
+| BR-GIG-014 | The platform blocks terms that require exclusivity and warns on employment-like control (fixed hours, supervision, equipment); it never decides legal classification.                                                                                              | Misclassification risk.                         | Classification guard              | [PROP] [DEC-REQ] OD-GIG-04                                     |
+| BR-GIG-015 | Parties and payouts must be in supported countries and clear sanctions screening; one currency per contract.                                                                                                                                                       | Legal compliance.                               | Award and payout checks           | [PROP] [DEC-REQ] OD-GIG-06                                     |
+| BR-GIG-016 | IP is assigned to the client on payment in full for the relevant milestone unless the contract says otherwise; the freelancer keeps pre-existing materials.                                                                                                        | Clear ownership.                                | Terms template                    | [PROP]                                                         |
+| BR-GIG-017 | NDA work shows only category, skills and dates publicly unless the client permits more; portfolio use needs client permission under NDA.                                                                                                                           | Confidentiality.                                | Evidence and portfolio visibility | [PROP]                                                         |
+| BR-GIG-018 | Reviews need a contract with a paid milestone, are mutual, hidden until both submit or 14 days pass, and cannot be a condition of payment.                                                                                                                         | Honest reviews.                                 | Review service                    | [PROP]                                                         |
+| BR-GIG-019 | Work evidence from a contract reaches "client confirmed" only by the client's confirmation; freelancers cannot self-verify.                                                                                                                                        | Verification ladder integrity.                  | Evidence service                  | [SRC: verification ladder; subject cannot verify own evidence] |
+| BR-GIG-020 | Disputes follow a ladder (respond, negotiate, mediate, appeal once); decisions are reasoned, based on terms and criteria, and reviewers must be independent.                                                                                                       | Fair resolution.                                | Dispute service                   | [PROP]                                                         |
+| BR-GIG-021 | Freelancers and clients acting for themselves must be adults under local law (minimum 18); learning projects for minors are only through institution programs.                                                                                                     | Legal capacity.                                 | Eligibility                       | [PROP]                                                         |
+| BR-GIG-022 | When a party is suspended, running contracts follow a defined path: the other party may continue or cancel, unreleased funds are returned or held per mode, accepted work stays payable.                                                                           | Fairness.                                       | Contract and enforcement services | [PROP]                                                         |
+| BR-GIG-023 | Clients need a verified payment method and organization verification; new clients have a spend limit that rises with clean history.                                                                                                                                | Payment risk.                                   | Posting and award guards          | [PROP]                                                         |
+| BR-GIG-024 | Unpaid spec work is prohibited; any trial task must be paid or be a time-boxed (maximum 1 hour) assessment with no reuse rights.                                                                                                                                   | Fair labor.                                     | Scope guard                       | [PROP]                                                         |
+| BR-GIG-025 | Proposals are limited by a plan quota, duplicates are blocked, edits after viewing are marked and notified, quota is refunded when a listing is cancelled or removed.                                                                                              | Fair access and anti-spam.                      | Proposal service, BIL             | [PROP]                                                         |
+| BR-GIG-026 | Hiring a freelancer through JOB is always allowed; any conversion fee is a decision parameter (default none); non-solicitation is not enforced.                                                                                                                    | Candidate freedom.                              | Conversion service                | [DEC-REQ] OD-GIG-08                                            |
+| BR-GIG-027 | Freelancer contract data, rates and earnings are invisible to employers evaluating the person as a job candidate unless shared; clients cannot request private evidence beyond the contract's needs.                                                               | Separation of roles.                            | Visibility rules                  | [PROP]                                                         |
+| BR-GIG-028 | Learning projects are labeled, optional and educational; partners attest that they do not substitute for paid roles; patterns of free-labor use are reviewed.                                                                                                      | Prevents exploitation.                          | Learning project guard            | [PROP]                                                         |
+| BR-GIG-029 | Contract workroom records, terms and deliverable metadata are retained for the statutory period (default 7 years for money-related records) and are the evidence base for disputes.                                                                                | Legal and dispute support.                      | Retention job                     | [PROP]                                                         |
+| BR-GIG-030 | Payments are idempotent per milestone acceptance; refunds and clawbacks follow BIL rules; accepted work stays payable after termination.                                                                                                                           | No double payment.                              | Payment service                   | [SRC: BR-BIL-003, BR-BIL-024]                                  |
 
 ## 6. State machines
 
@@ -948,18 +948,18 @@ Notes: `REC` and `HMG` can post projects only if the organization's `EAD` enable
 
 States: `inactive`, `pending_requirements`, `active`, `paused`, `limited`, `suspended`. Terminal: none (reversible).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| inactive | pending_requirements | User turns on | Age, terms |
-| pending_requirements | active | Checklist complete | Payout, tax, identity |
-| active | pending_requirements | Document expires | 30-day notice |
-| active | paused | User pauses | n/a |
-| paused | active | User resumes | Eligible |
-| active | limited | Risk flag | Reason |
-| limited | active | Cleared | n/a |
-| active, paused, limited | suspended | `MOD` or `PAD` | Reason |
-| suspended | active | Reinstated | Review done |
-| active, paused, pending_requirements | inactive | User turns off | Active contracts continue |
+| From                                 | To                   | Trigger            | Guard                     |
+| ------------------------------------ | -------------------- | ------------------ | ------------------------- |
+| inactive                             | pending_requirements | User turns on      | Age, terms                |
+| pending_requirements                 | active               | Checklist complete | Payout, tax, identity     |
+| active                               | pending_requirements | Document expires   | 30-day notice             |
+| active                               | paused               | User pauses        | n/a                       |
+| paused                               | active               | User resumes       | Eligible                  |
+| active                               | limited              | Risk flag          | Reason                    |
+| limited                              | active               | Cleared            | n/a                       |
+| active, paused, limited              | suspended            | `MOD` or `PAD`     | Reason                    |
+| suspended                            | active               | Reinstated         | Review done               |
+| active, paused, pending_requirements | inactive             | User turns off     | Active contracts continue |
 
 ```mermaid
 stateDiagram-v2
@@ -983,17 +983,17 @@ stateDiagram-v2
 
 States: `draft`, `pending_review`, `changes_requested`, `published`, `closed_filled`, `expired`, `cancelled`, `rejected`. Terminal: `closed_filled`, `expired`, `cancelled`, `rejected`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | pending_review | Client submits | Scope guard passed |
-| pending_review | published | Approved or auto-publish | Client verified |
-| pending_review | changes_requested | Reviewer requests | Message |
-| changes_requested | pending_review | Client resubmits | n/a |
-| pending_review | rejected | Reviewer rejects | Reason |
-| published | pending_review | Material edit | n/a |
-| published | closed_filled | Last position awarded and accepted | n/a |
-| published | expired | Duration ends | n/a |
-| published, draft | cancelled | Client cancels | Proposals declined with notice |
+| From              | To                | Trigger                            | Guard                          |
+| ----------------- | ----------------- | ---------------------------------- | ------------------------------ |
+| draft             | pending_review    | Client submits                     | Scope guard passed             |
+| pending_review    | published         | Approved or auto-publish           | Client verified                |
+| pending_review    | changes_requested | Reviewer requests                  | Message                        |
+| changes_requested | pending_review    | Client resubmits                   | n/a                            |
+| pending_review    | rejected          | Reviewer rejects                   | Reason                         |
+| published         | pending_review    | Material edit                      | n/a                            |
+| published         | closed_filled     | Last position awarded and accepted | n/a                            |
+| published         | expired           | Duration ends                      | n/a                            |
+| published, draft  | cancelled         | Client cancels                     | Proposals declined with notice |
 
 ```mermaid
 stateDiagram-v2
@@ -1018,16 +1018,16 @@ stateDiagram-v2
 
 States: `submitted`, `viewed`, `shortlisted`, `declined`, `withdrawn`, `awarded`, `accepted`, `expired`. Terminal: `declined`, `withdrawn`, `accepted`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| submitted | viewed | Client opens | n/a |
-| submitted, viewed | shortlisted | Client shortlists | n/a |
-| submitted, viewed, shortlisted | declined | Client declines | Template reason |
-| submitted, viewed, shortlisted | withdrawn | Freelancer withdraws | n/a |
-| shortlisted, viewed | awarded | Client sends offer | Eligible |
-| awarded | accepted | Freelancer accepts | Within 7 days |
-| awarded | shortlisted | Offer expires or declined | n/a |
-| submitted, viewed, shortlisted | expired | Listing closes | n/a |
+| From                           | To          | Trigger                   | Guard           |
+| ------------------------------ | ----------- | ------------------------- | --------------- |
+| submitted                      | viewed      | Client opens              | n/a             |
+| submitted, viewed              | shortlisted | Client shortlists         | n/a             |
+| submitted, viewed, shortlisted | declined    | Client declines           | Template reason |
+| submitted, viewed, shortlisted | withdrawn   | Freelancer withdraws      | n/a             |
+| shortlisted, viewed            | awarded     | Client sends offer        | Eligible        |
+| awarded                        | accepted    | Freelancer accepts        | Within 7 days   |
+| awarded                        | shortlisted | Offer expires or declined | n/a             |
+| submitted, viewed, shortlisted | expired     | Listing closes            | n/a             |
 
 ```mermaid
 stateDiagram-v2
@@ -1058,18 +1058,18 @@ stateDiagram-v2
 
 States: `offered`, `active`, `paused`, `completed`, `cancelled`, `terminated`, `disputed`, `auto_closed`. Terminal: `completed`, `cancelled`, `terminated`, `auto_closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| offered | active | Both accepted terms | Eligible, payment mode ready |
-| offered | cancelled | Offer expires or withdrawn | n/a |
-| active | paused | Mutual pause | n/a |
-| paused | active | Resume | n/a |
-| active | completed | All milestones paid or cancelled and both confirm | n/a |
-| active | cancelled | Mutual cancellation | Settlement agreed |
-| active | terminated | Unilateral termination | Reason, settlement negotiation |
-| active | disputed | Dispute opened | n/a |
-| disputed | active, terminated | Decision | n/a |
-| active, paused | auto_closed | 60 days inactivity | Notices sent |
+| From           | To                 | Trigger                                           | Guard                          |
+| -------------- | ------------------ | ------------------------------------------------- | ------------------------------ |
+| offered        | active             | Both accepted terms                               | Eligible, payment mode ready   |
+| offered        | cancelled          | Offer expires or withdrawn                        | n/a                            |
+| active         | paused             | Mutual pause                                      | n/a                            |
+| paused         | active             | Resume                                            | n/a                            |
+| active         | completed          | All milestones paid or cancelled and both confirm | n/a                            |
+| active         | cancelled          | Mutual cancellation                               | Settlement agreed              |
+| active         | terminated         | Unilateral termination                            | Reason, settlement negotiation |
+| active         | disputed           | Dispute opened                                    | n/a                            |
+| disputed       | active, terminated | Decision                                          | n/a                            |
+| active, paused | auto_closed        | 60 days inactivity                                | Notices sent                   |
 
 ```mermaid
 stateDiagram-v2
@@ -1096,18 +1096,18 @@ stateDiagram-v2
 
 States: `pending`, `funded`, `in_progress`, `submitted`, `revision_requested`, `accepted`, `paid`, `disputed`, `cancelled`. `funded` exists only in the gated funding mode. Terminal: `paid`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| pending | funded | Client funds | Mode B enabled |
-| pending, funded | in_progress | Start | Contract active; pre-authorization ok (mode A) |
-| in_progress | submitted | Freelancer submits | Criteria notes present |
-| submitted | revision_requested | Client requests | Unmet criterion, within limit |
-| revision_requested | submitted | Resubmission | n/a |
-| submitted | accepted | Client accepts or auto-accept | n/a |
-| accepted | paid | Payment released | Idempotent |
-| submitted, revision_requested | disputed | Dispute | n/a |
-| disputed | accepted, cancelled | Decision | n/a |
-| pending, funded, in_progress | cancelled | Change or termination | Refund rules |
+| From                          | To                  | Trigger                       | Guard                                          |
+| ----------------------------- | ------------------- | ----------------------------- | ---------------------------------------------- |
+| pending                       | funded              | Client funds                  | Mode B enabled                                 |
+| pending, funded               | in_progress         | Start                         | Contract active; pre-authorization ok (mode A) |
+| in_progress                   | submitted           | Freelancer submits            | Criteria notes present                         |
+| submitted                     | revision_requested  | Client requests               | Unmet criterion, within limit                  |
+| revision_requested            | submitted           | Resubmission                  | n/a                                            |
+| submitted                     | accepted            | Client accepts or auto-accept | n/a                                            |
+| accepted                      | paid                | Payment released              | Idempotent                                     |
+| submitted, revision_requested | disputed            | Dispute                       | n/a                                            |
+| disputed                      | accepted, cancelled | Decision                      | n/a                                            |
+| pending, funded, in_progress  | cancelled           | Change or termination         | Refund rules                                   |
 
 ```mermaid
 stateDiagram-v2
@@ -1135,13 +1135,13 @@ stateDiagram-v2
 
 States: `proposed`, `countered`, `agreed`, `declined`, `expired`. Terminal: `agreed`, `declined`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| proposed | agreed | Other side accepts | Funding if needed |
-| proposed | countered | Other side counters | n/a |
-| countered | agreed | Original side accepts | n/a |
-| proposed, countered | declined | Decline | n/a |
-| proposed, countered | expired | 7 days | n/a |
+| From                | To        | Trigger               | Guard             |
+| ------------------- | --------- | --------------------- | ----------------- |
+| proposed            | agreed    | Other side accepts    | Funding if needed |
+| proposed            | countered | Other side counters   | n/a               |
+| countered           | agreed    | Original side accepts | n/a               |
+| proposed, countered | declined  | Decline               | n/a               |
+| proposed, countered | expired   | 7 days                | n/a               |
 
 ```mermaid
 stateDiagram-v2
@@ -1162,16 +1162,16 @@ stateDiagram-v2
 
 States: `opened`, `response_pending`, `negotiation`, `mediation`, `decided`, `appealed`, `settled`, `closed`. Terminal: `settled`, `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| opened | response_pending | Counterparty notified | n/a |
-| response_pending | negotiation | Response or 5 days | n/a |
-| negotiation | settled | Both accept settlement | n/a |
-| negotiation | mediation | 5 days without settlement | n/a |
-| mediation | decided | Reviewer decision | Independent reviewer |
-| decided | appealed | Appeal | Within 7 days |
-| appealed | decided | Second reviewer | Different person |
-| decided | closed | 7 days or appeal done | n/a |
+| From             | To               | Trigger                   | Guard                |
+| ---------------- | ---------------- | ------------------------- | -------------------- |
+| opened           | response_pending | Counterparty notified     | n/a                  |
+| response_pending | negotiation      | Response or 5 days        | n/a                  |
+| negotiation      | settled          | Both accept settlement    | n/a                  |
+| negotiation      | mediation        | 5 days without settlement | n/a                  |
+| mediation        | decided          | Reviewer decision         | Independent reviewer |
+| decided          | appealed         | Appeal                    | Within 7 days        |
+| appealed         | decided          | Second reviewer           | Different person     |
+| decided          | closed           | 7 days or appeal done     | n/a                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1192,14 +1192,14 @@ stateDiagram-v2
 
 States: `logged`, `submitted`, `approved`, `disputed`, `auto_approved`, `paid`. Terminal: `paid`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| logged | submitted | Weekly timesheet submit | Within caps |
-| submitted | approved | Client approves | n/a |
-| submitted | auto_approved | Window passes | 5 days plus reminder |
-| submitted | disputed | Client disputes entries | Reason |
-| disputed | approved | Resolved | n/a |
-| approved, auto_approved | paid | Payment released | Idempotent |
+| From                    | To            | Trigger                 | Guard                |
+| ----------------------- | ------------- | ----------------------- | -------------------- |
+| logged                  | submitted     | Weekly timesheet submit | Within caps          |
+| submitted               | approved      | Client approves         | n/a                  |
+| submitted               | auto_approved | Window passes           | 5 days plus reminder |
+| submitted               | disputed      | Client disputes entries | Reason               |
+| disputed                | approved      | Resolved                | n/a                  |
+| approved, auto_approved | paid          | Payment released        | Idempotent           |
 
 ```mermaid
 stateDiagram-v2
@@ -1216,40 +1216,40 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-GIG-001 | Start freelancing | `/freelance/start` | CAN | Explain, activate | underage blocked |
-| SCR-GIG-002 | Requirements checklist | `/freelance/requirements` | FRL | Identity, payout, tax | partial, expired |
-| SCR-GIG-003 | Freelancer profile editor | `/freelance/profile` | FRL | Services and evidence | preview |
-| SCR-GIG-004 | Freelancer public page | `/freelancers/:slug` | all | View services | paused, NDA items |
-| SCR-GIG-005 | Project brief editor | `/projects/new` | Client | Create brief | blockers, warnings |
-| SCR-GIG-006 | Listing review queue | `/admin/projects/review` | MOD | Review listings | empty, decision |
-| SCR-GIG-007 | Project search | `/projects` | FRL, CAN | Discover | empty, filtered |
-| SCR-GIG-008 | Project detail | `/projects/:id` | all | Read brief, propose | NDA teaser, closed |
-| SCR-GIG-009 | Invite freelancer dialog | modal | Client | Invite | limit reached |
-| SCR-GIG-010 | Proposal form | `/projects/:id/propose` | FRL | Submit proposal | quota, closed |
-| SCR-GIG-011 | My proposals | `/freelance/proposals` | FRL | Track | by status |
-| SCR-GIG-012 | Proposals comparison | `/projects/:id/proposals` | Client | Compare, shortlist | none, many |
-| SCR-GIG-013 | Offer and terms | `/contracts/:id/offer` | Client, FRL | Review and accept | edited resets |
-| SCR-GIG-014 | Contract workroom | `/contracts/:id` | parties | Timeline, files | access denied |
-| SCR-GIG-015 | Milestone page | `/contracts/:id/milestones/:mid` | parties | Submit, review | submitted, auto-accept countdown |
-| SCR-GIG-016 | Change requests | `/contracts/:id/changes` | parties | Propose and agree | pending |
-| SCR-GIG-017 | End contract | `/contracts/:id/end` | parties | Complete, cancel, terminate | settlement |
-| SCR-GIG-018 | Payment mode and funding | `/contracts/:id/payments` | Client | Mode, funding status | mode unavailable |
-| SCR-GIG-019 | Timesheet (gated) | `/contracts/:id/time` | FRL, Client | Time entries | flag off |
-| SCR-GIG-020 | Earnings and tax | `/freelance/earnings` | FRL | Payments, forms | held |
-| SCR-GIG-021 | Spend and invoices | `/projects/manage/spend` | Client | Costs | failed charge |
-| SCR-GIG-022 | Reviews and evidence | `/contracts/:id/reviews` | parties | Rate, confirm | hidden until both |
-| SCR-GIG-023 | Dispute center | `/contracts/:id/disputes` | parties | Open, respond | each ladder state |
-| SCR-GIG-024 | Dispute review queue | `/admin/projects/disputes` | FIN, MOD | Decide | conflict |
-| SCR-GIG-025 | Reputation panel | `/freelance/reputation` | FRL, Client | Metrics | insufficient data |
-| SCR-GIG-026 | Fraud and risk queue | `/admin/projects/risk` | MOD, FIN | Flags | held |
-| SCR-GIG-027 | NDA and permissions | `/contracts/:id/confidentiality` | parties | NDA, portfolio | pending |
-| SCR-GIG-028 | Hire conversion | `/contracts/:id/hire` | Client, FRL | Convert | declined |
-| SCR-GIG-029 | Learning projects | `/projects/learning` | STD, IAD, EAD | Learning flow | sign-off |
-| SCR-GIG-030 | Freelancer dashboard | `/freelance/dashboard` | FRL | Overview | empty |
-| SCR-GIG-031 | Client dashboard | `/projects/manage` | Client | Overview | empty |
-| SCR-GIG-032 | Compliance review | `/admin/projects/compliance` | FIN, PAD | Sanctions, classification | hit, cleared |
+| ID          | Name                      | Route proposal                   | Roles         | Purpose                     | Key states                       |
+| ----------- | ------------------------- | -------------------------------- | ------------- | --------------------------- | -------------------------------- |
+| SCR-GIG-001 | Start freelancing         | `/freelance/start`               | CAN           | Explain, activate           | underage blocked                 |
+| SCR-GIG-002 | Requirements checklist    | `/freelance/requirements`        | FRL           | Identity, payout, tax       | partial, expired                 |
+| SCR-GIG-003 | Freelancer profile editor | `/freelance/profile`             | FRL           | Services and evidence       | preview                          |
+| SCR-GIG-004 | Freelancer public page    | `/freelancers/:slug`             | all           | View services               | paused, NDA items                |
+| SCR-GIG-005 | Project brief editor      | `/projects/new`                  | Client        | Create brief                | blockers, warnings               |
+| SCR-GIG-006 | Listing review queue      | `/admin/projects/review`         | MOD           | Review listings             | empty, decision                  |
+| SCR-GIG-007 | Project search            | `/projects`                      | FRL, CAN      | Discover                    | empty, filtered                  |
+| SCR-GIG-008 | Project detail            | `/projects/:id`                  | all           | Read brief, propose         | NDA teaser, closed               |
+| SCR-GIG-009 | Invite freelancer dialog  | modal                            | Client        | Invite                      | limit reached                    |
+| SCR-GIG-010 | Proposal form             | `/projects/:id/propose`          | FRL           | Submit proposal             | quota, closed                    |
+| SCR-GIG-011 | My proposals              | `/freelance/proposals`           | FRL           | Track                       | by status                        |
+| SCR-GIG-012 | Proposals comparison      | `/projects/:id/proposals`        | Client        | Compare, shortlist          | none, many                       |
+| SCR-GIG-013 | Offer and terms           | `/contracts/:id/offer`           | Client, FRL   | Review and accept           | edited resets                    |
+| SCR-GIG-014 | Contract workroom         | `/contracts/:id`                 | parties       | Timeline, files             | access denied                    |
+| SCR-GIG-015 | Milestone page            | `/contracts/:id/milestones/:mid` | parties       | Submit, review              | submitted, auto-accept countdown |
+| SCR-GIG-016 | Change requests           | `/contracts/:id/changes`         | parties       | Propose and agree           | pending                          |
+| SCR-GIG-017 | End contract              | `/contracts/:id/end`             | parties       | Complete, cancel, terminate | settlement                       |
+| SCR-GIG-018 | Payment mode and funding  | `/contracts/:id/payments`        | Client        | Mode, funding status        | mode unavailable                 |
+| SCR-GIG-019 | Timesheet (gated)         | `/contracts/:id/time`            | FRL, Client   | Time entries                | flag off                         |
+| SCR-GIG-020 | Earnings and tax          | `/freelance/earnings`            | FRL           | Payments, forms             | held                             |
+| SCR-GIG-021 | Spend and invoices        | `/projects/manage/spend`         | Client        | Costs                       | failed charge                    |
+| SCR-GIG-022 | Reviews and evidence      | `/contracts/:id/reviews`         | parties       | Rate, confirm               | hidden until both                |
+| SCR-GIG-023 | Dispute center            | `/contracts/:id/disputes`        | parties       | Open, respond               | each ladder state                |
+| SCR-GIG-024 | Dispute review queue      | `/admin/projects/disputes`       | FIN, MOD      | Decide                      | conflict                         |
+| SCR-GIG-025 | Reputation panel          | `/freelance/reputation`          | FRL, Client   | Metrics                     | insufficient data                |
+| SCR-GIG-026 | Fraud and risk queue      | `/admin/projects/risk`           | MOD, FIN      | Flags                       | held                             |
+| SCR-GIG-027 | NDA and permissions       | `/contracts/:id/confidentiality` | parties       | NDA, portfolio              | pending                          |
+| SCR-GIG-028 | Hire conversion           | `/contracts/:id/hire`            | Client, FRL   | Convert                     | declined                         |
+| SCR-GIG-029 | Learning projects         | `/projects/learning`             | STD, IAD, EAD | Learning flow               | sign-off                         |
+| SCR-GIG-030 | Freelancer dashboard      | `/freelance/dashboard`           | FRL           | Overview                    | empty                            |
+| SCR-GIG-031 | Client dashboard          | `/projects/manage`               | Client        | Overview                    | empty                            |
+| SCR-GIG-032 | Compliance review         | `/admin/projects/compliance`     | FIN, PAD      | Sanctions, classification   | hit, cleared                     |
 
 Accessibility notes: money amounts always show currency and sign; countdowns have text equivalents; file upload has keyboard-operable controls; comparison tables are real tables with headers; notices of auto-accept are delivered by email and in-app, not by color alone.
 
@@ -1257,29 +1257,29 @@ Accessibility notes: money amounts always show currency and sign; countdowns hav
 
 Retention classes: `R-contract` contract plus statutory period (default 7 years for money-related records), `R-profile` while account, `R-risk` as required for fraud and compliance, `R-short` 90 days.
 
-| ID | Name | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-GIG-01 | FreelancerProfile | user_id, state (SM-GIG-01), categories[], services[], availability, rate display | user | R-profile |
-| ENT-GIG-02 | FreelancerEligibility | user_id, identity, payout, tax, country status, expiries | FreelancerProfile | R-contract |
-| ENT-GIG-03 | ProjectListing | id, client_org_id, category, brief, deliverables[], budget, visibility, state (SM-GIG-02), nda flag | client | R-contract |
-| ENT-GIG-04 | Invitation | id, listing_id, freelancer_id, message, state | Listing | R-short |
-| ENT-GIG-05 | Proposal | id, listing_id, freelancer_id, cover, milestones[], total, state (SM-GIG-03) | Listing | R-contract |
-| ENT-GIG-06 | Contract | id, listing_id, client_org_id, freelancer_id, currency, payment_mode, state (SM-GIG-04) | Proposal | R-contract |
-| ENT-GIG-07 | ContractTerms | contract_id, version, sections, hash, accepted_by[] | Contract | R-contract |
-| ENT-GIG-08 | Milestone | id, contract_id, title, amount_minor, due, criteria[], state (SM-GIG-05), revisions_used | Contract | R-contract |
-| ENT-GIG-09 | Deliverable | milestone_id, files[], links[], notes, submitted_at, hash | Milestone | R-contract |
-| ENT-GIG-10 | ChangeRequest | id, contract_id, diff, state (SM-GIG-06) | Contract | R-contract |
-| ENT-GIG-11 | PaymentRecord | milestone_id, mode, order_ref, earning_ref, state | Milestone, BIL | R-contract |
-| ENT-GIG-12 | TimeEntry (gated) | contract_id, date, minutes, description, state (SM-GIG-08) | Contract | R-contract |
-| ENT-GIG-13 | Dispute | id, contract_id, milestone_id, issue, state (SM-GIG-07), decision, reviewers | Contract | R-contract |
-| ENT-GIG-14 | GigReview | contract_id, rater, ratee, scores, text, published | Contract | R-profile |
-| ENT-GIG-15 | TaxDocumentRef | user_id, form type, status, provider_ref, expires | FreelancerProfile | R-contract |
-| ENT-GIG-16 | ComplianceFlag | subject, type (classification, sanctions, fraud, conduct), detail ref, state | user, contract | R-risk |
-| ENT-GIG-17 | ReputationMetric | subject, window, metrics, badges | user | R-profile |
-| ENT-GIG-18 | SavedSearch | user_id, query, frequency | user | R-profile |
-| ENT-GIG-19 | NdaAcceptance and PortfolioPermission | contract_id, party, nda version, permission scope | Contract | R-contract |
-| ENT-GIG-20 | HireConversion | contract_id, job_ref, application_ref, state | Contract | R-contract |
-| ENT-GIG-21 | LearningProject | id, supervisor, partner, outcomes[], learners[], stipend, sign-off | INS, EMP | R-contract |
+| ID         | Name                                  | Key attributes                                                                                      | Relationships     | Retention  |
+| ---------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------- | ---------- |
+| ENT-GIG-01 | FreelancerProfile                     | user_id, state (SM-GIG-01), categories[], services[], availability, rate display                    | user              | R-profile  |
+| ENT-GIG-02 | FreelancerEligibility                 | user_id, identity, payout, tax, country status, expiries                                            | FreelancerProfile | R-contract |
+| ENT-GIG-03 | ProjectListing                        | id, client_org_id, category, brief, deliverables[], budget, visibility, state (SM-GIG-02), nda flag | client            | R-contract |
+| ENT-GIG-04 | Invitation                            | id, listing_id, freelancer_id, message, state                                                       | Listing           | R-short    |
+| ENT-GIG-05 | Proposal                              | id, listing_id, freelancer_id, cover, milestones[], total, state (SM-GIG-03)                        | Listing           | R-contract |
+| ENT-GIG-06 | Contract                              | id, listing_id, client_org_id, freelancer_id, currency, payment_mode, state (SM-GIG-04)             | Proposal          | R-contract |
+| ENT-GIG-07 | ContractTerms                         | contract_id, version, sections, hash, accepted_by[]                                                 | Contract          | R-contract |
+| ENT-GIG-08 | Milestone                             | id, contract_id, title, amount_minor, due, criteria[], state (SM-GIG-05), revisions_used            | Contract          | R-contract |
+| ENT-GIG-09 | Deliverable                           | milestone_id, files[], links[], notes, submitted_at, hash                                           | Milestone         | R-contract |
+| ENT-GIG-10 | ChangeRequest                         | id, contract_id, diff, state (SM-GIG-06)                                                            | Contract          | R-contract |
+| ENT-GIG-11 | PaymentRecord                         | milestone_id, mode, order_ref, earning_ref, state                                                   | Milestone, BIL    | R-contract |
+| ENT-GIG-12 | TimeEntry (gated)                     | contract_id, date, minutes, description, state (SM-GIG-08)                                          | Contract          | R-contract |
+| ENT-GIG-13 | Dispute                               | id, contract_id, milestone_id, issue, state (SM-GIG-07), decision, reviewers                        | Contract          | R-contract |
+| ENT-GIG-14 | GigReview                             | contract_id, rater, ratee, scores, text, published                                                  | Contract          | R-profile  |
+| ENT-GIG-15 | TaxDocumentRef                        | user_id, form type, status, provider_ref, expires                                                   | FreelancerProfile | R-contract |
+| ENT-GIG-16 | ComplianceFlag                        | subject, type (classification, sanctions, fraud, conduct), detail ref, state                        | user, contract    | R-risk     |
+| ENT-GIG-17 | ReputationMetric                      | subject, window, metrics, badges                                                                    | user              | R-profile  |
+| ENT-GIG-18 | SavedSearch                           | user_id, query, frequency                                                                           | user              | R-profile  |
+| ENT-GIG-19 | NdaAcceptance and PortfolioPermission | contract_id, party, nda version, permission scope                                                   | Contract          | R-contract |
+| ENT-GIG-20 | HireConversion                        | contract_id, job_ref, application_ref, state                                                        | Contract          | R-contract |
+| ENT-GIG-21 | LearningProject                       | id, supervisor, partner, outcomes[], learners[], stipend, sign-off                                  | INS, EMP          | R-contract |
 
 ```mermaid
 erDiagram
@@ -1301,36 +1301,36 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Emitted when | Key payload | Consumers (planned) |
-|---|---|---|---|---|
-| EVT-GIG-001 | `gig.freelancer.activated` | State `active` | user_id | SRC, NTF |
-| EVT-GIG-002 | `gig.freelancer.suspended` | Suspension | user_id | BIL, NTF |
-| EVT-GIG-003 | `gig.listing.submitted` | Listing submitted | listing_id | TSF |
-| EVT-GIG-004 | `gig.listing.published` | Published | listing_id | SRC, NTF |
-| EVT-GIG-005 | `gig.listing.closed` | Closed or expired | listing_id, reason | NTF |
-| EVT-GIG-006 | `gig.invitation.sent` | Invitation | invitation_id | NTF |
-| EVT-GIG-007 | `gig.proposal.submitted` | Proposal | proposal_id | NTF, BIL |
-| EVT-GIG-008 | `gig.proposal.declined` | Declined | proposal_id | NTF |
-| EVT-GIG-009 | `gig.offer.sent` | Offer sent | contract_id | NTF |
-| EVT-GIG-010 | `gig.contract.activated` | Both accepted | contract_id | BIL, ANL |
-| EVT-GIG-011 | `gig.contract.completed` | Completed | contract_id | EVD, PRF |
-| EVT-GIG-012 | `gig.contract.terminated` | Terminated or cancelled | contract_id | BIL |
-| EVT-GIG-013 | `gig.milestone.submitted` | Submission | milestone_id | NTF |
-| EVT-GIG-014 | `gig.milestone.accepted` | Accepted (manual or auto) | milestone_id, mode | BIL |
-| EVT-GIG-015 | `gig.milestone.revision_requested` | Revision | milestone_id | NTF |
-| EVT-GIG-016 | `gig.change.agreed` | Change agreed | change_id | BIL |
-| EVT-GIG-017 | `gig.payment.released` | Earning event posted | milestone_id | BIL, NTF |
-| EVT-GIG-018 | `gig.payment.failed` | Client charge failed | milestone_id | BIL, TSF |
-| EVT-GIG-019 | `gig.dispute.opened` | Dispute opened | dispute_id | FIN, TSF |
-| EVT-GIG-020 | `gig.dispute.decided` | Decision | dispute_id, outcome | BIL, REP |
-| EVT-GIG-021 | `gig.review.published` | Reviews revealed | contract_id | REP, PRF |
-| EVT-GIG-022 | `gig.evidence.confirmed` | Client-confirmed evidence | contract_id | EVD |
-| EVT-GIG-023 | `gig.flag.raised` | Compliance flag | flag_id, type | TSF, ADM |
-| EVT-GIG-024 | `gig.hire.accepted` | Conversion accepted | conversion_id | JOB, ATS |
-| EVT-GIG-025 | `gig.learning.completed` | Learning project sign-off | project_id | EVD, INS |
-| EVT-GIG-026 | `gig.timesheet.approved` | Time approved (gated) | timesheet_id | BIL |
-| EVT-GIG-027 | `gig.nda.accepted` | NDA accepted | contract_id | audit |
-| EVT-GIG-028 | `gig.tax.status_changed` | Tax form state change | user_id | NTF |
+| ID          | Event                              | Emitted when              | Key payload         | Consumers (planned) |
+| ----------- | ---------------------------------- | ------------------------- | ------------------- | ------------------- |
+| EVT-GIG-001 | `gig.freelancer.activated`         | State `active`            | user_id             | SRC, NTF            |
+| EVT-GIG-002 | `gig.freelancer.suspended`         | Suspension                | user_id             | BIL, NTF            |
+| EVT-GIG-003 | `gig.listing.submitted`            | Listing submitted         | listing_id          | TSF                 |
+| EVT-GIG-004 | `gig.listing.published`            | Published                 | listing_id          | SRC, NTF            |
+| EVT-GIG-005 | `gig.listing.closed`               | Closed or expired         | listing_id, reason  | NTF                 |
+| EVT-GIG-006 | `gig.invitation.sent`              | Invitation                | invitation_id       | NTF                 |
+| EVT-GIG-007 | `gig.proposal.submitted`           | Proposal                  | proposal_id         | NTF, BIL            |
+| EVT-GIG-008 | `gig.proposal.declined`            | Declined                  | proposal_id         | NTF                 |
+| EVT-GIG-009 | `gig.offer.sent`                   | Offer sent                | contract_id         | NTF                 |
+| EVT-GIG-010 | `gig.contract.activated`           | Both accepted             | contract_id         | BIL, ANL            |
+| EVT-GIG-011 | `gig.contract.completed`           | Completed                 | contract_id         | EVD, PRF            |
+| EVT-GIG-012 | `gig.contract.terminated`          | Terminated or cancelled   | contract_id         | BIL                 |
+| EVT-GIG-013 | `gig.milestone.submitted`          | Submission                | milestone_id        | NTF                 |
+| EVT-GIG-014 | `gig.milestone.accepted`           | Accepted (manual or auto) | milestone_id, mode  | BIL                 |
+| EVT-GIG-015 | `gig.milestone.revision_requested` | Revision                  | milestone_id        | NTF                 |
+| EVT-GIG-016 | `gig.change.agreed`                | Change agreed             | change_id           | BIL                 |
+| EVT-GIG-017 | `gig.payment.released`             | Earning event posted      | milestone_id        | BIL, NTF            |
+| EVT-GIG-018 | `gig.payment.failed`               | Client charge failed      | milestone_id        | BIL, TSF            |
+| EVT-GIG-019 | `gig.dispute.opened`               | Dispute opened            | dispute_id          | FIN, TSF            |
+| EVT-GIG-020 | `gig.dispute.decided`              | Decision                  | dispute_id, outcome | BIL, REP            |
+| EVT-GIG-021 | `gig.review.published`             | Reviews revealed          | contract_id         | REP, PRF            |
+| EVT-GIG-022 | `gig.evidence.confirmed`           | Client-confirmed evidence | contract_id         | EVD                 |
+| EVT-GIG-023 | `gig.flag.raised`                  | Compliance flag           | flag_id, type       | TSF, ADM            |
+| EVT-GIG-024 | `gig.hire.accepted`                | Conversion accepted       | conversion_id       | JOB, ATS            |
+| EVT-GIG-025 | `gig.learning.completed`           | Learning project sign-off | project_id          | EVD, INS            |
+| EVT-GIG-026 | `gig.timesheet.approved`           | Time approved (gated)     | timesheet_id        | BIL                 |
+| EVT-GIG-027 | `gig.nda.accepted`                 | NDA accepted              | contract_id         | audit               |
+| EVT-GIG-028 | `gig.tax.status_changed`           | Tax form state change     | user_id             | NTF                 |
 
 ### 9.2 Consumed
 
@@ -1338,88 +1338,88 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| System | Direction | Purpose | Notes |
-|---|---|---|---|
-| Payment provider (via BIL) | Both | Charges, held funds (gated), payouts, tax forms | Connected accounts; OD-GIG-02 |
-| Tax form and reporting vendor | Both | W-9, W-8, 1099-style, DAC7-style reporting | OD-GIG-05 |
-| Sanctions screening vendor | Outbound | Party and payout screening | Neutral user wording |
-| Identity verification | Outbound | Freelancer and client verification | Via IDN, BGV |
-| Object storage and malware scan | Internal | Deliverables | Via PLT |
-| Source and design platforms (links only) | Outbound | Deliverable links | Allowlisted hosts; no deep integration at launch |
-| NDA and contract templates | Internal | Terms | Counsel-reviewed |
+| System                                   | Direction | Purpose                                         | Notes                                            |
+| ---------------------------------------- | --------- | ----------------------------------------------- | ------------------------------------------------ |
+| Payment provider (via BIL)               | Both      | Charges, held funds (gated), payouts, tax forms | Connected accounts; OD-GIG-02                    |
+| Tax form and reporting vendor            | Both      | W-9, W-8, 1099-style, DAC7-style reporting      | OD-GIG-05                                        |
+| Sanctions screening vendor               | Outbound  | Party and payout screening                      | Neutral user wording                             |
+| Identity verification                    | Outbound  | Freelancer and client verification              | Via IDN, BGV                                     |
+| Object storage and malware scan          | Internal  | Deliverables                                    | Via PLT                                          |
+| Source and design platforms (links only) | Outbound  | Deliverable links                               | Allowlisted hosts; no deep integration at launch |
+| NDA and contract templates               | Internal  | Terms                                           | Counsel-reviewed                                 |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| BIL (this batch) | Orders FR-BIL-028, payouts FR-BIL-029, refunds FR-BIL-016, limits FR-BIL-003 and FR-BIL-022 | — |
-| INS (this batch) | Learning projects, guardian consent | INS (placement context) |
-| MEN (this batch) | Mentors can also be freelancers; shared payout rail | — |
-| PRF, EVD, BGV (planned) | Profile, evidence, verification | REP |
-| EMP, JOB, ATS (planned) | Client organizations, hire conversion | — |
-| MSG, NTF (planned) | Workroom and delivery | — |
-| TSF (planned) | Reports, enforcement | — |
-| SRC (planned) | Search | — |
-| IDN, SET (planned) | Identity, consent | — |
-| PLT (planned) | Files, secrets | — |
-| ANL (planned) | Metrics | — |
+| Depends on              | For                                                                                         | Depended on by          |
+| ----------------------- | ------------------------------------------------------------------------------------------- | ----------------------- |
+| BIL (this batch)        | Orders FR-BIL-028, payouts FR-BIL-029, refunds FR-BIL-016, limits FR-BIL-003 and FR-BIL-022 | —                       |
+| INS (this batch)        | Learning projects, guardian consent                                                         | INS (placement context) |
+| MEN (this batch)        | Mentors can also be freelancers; shared payout rail                                         | —                       |
+| PRF, EVD, BGV (planned) | Profile, evidence, verification                                                             | REP                     |
+| EMP, JOB, ATS (planned) | Client organizations, hire conversion                                                       | —                       |
+| MSG, NTF (planned)      | Workroom and delivery                                                                       | —                       |
+| TSF (planned)           | Reports, enforcement                                                                        | —                       |
+| SRC (planned)           | Search                                                                                      | —                       |
+| IDN, SET (planned)      | Identity, consent                                                                           | —                       |
+| PLT (planned)           | Files, secrets                                                                              | —                       |
+| ANL (planned)           | Metrics                                                                                     | —                       |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| Listing publish rate | Submitted listings that publish | published / submitted | MOD |
-| Proposal-to-award rate | Listings with at least one award | awarded listings / published listings | PAD |
-| Time to first proposal | Publish to first proposal | median | PAD |
-| Milestone on-time rate | Milestones submitted by due date | on time / submitted | PAD |
-| Auto-accept share | Milestones auto-accepted | auto / accepted | PAD |
-| Dispute rate | Contracts with a dispute | disputed contracts / completed and terminated | FIN |
-| Payment failure rate | Mode A charges failing at acceptance | failed / accepted milestones | FIN |
-| Circumvention flag precision | Confirmed over flagged | confirmed / flagged | MOD |
-| Evidence yield | Completed contracts producing confirmed evidence | evidence / completed | PAD |
-| Hire conversion rate | Conversions accepted | accepted / offered | PAD |
+| Metric                       | Definition                                       | Formula                                       | Owner role |
+| ---------------------------- | ------------------------------------------------ | --------------------------------------------- | ---------- |
+| Listing publish rate         | Submitted listings that publish                  | published / submitted                         | MOD        |
+| Proposal-to-award rate       | Listings with at least one award                 | awarded listings / published listings         | PAD        |
+| Time to first proposal       | Publish to first proposal                        | median                                        | PAD        |
+| Milestone on-time rate       | Milestones submitted by due date                 | on time / submitted                           | PAD        |
+| Auto-accept share            | Milestones auto-accepted                         | auto / accepted                               | PAD        |
+| Dispute rate                 | Contracts with a dispute                         | disputed contracts / completed and terminated | FIN        |
+| Payment failure rate         | Mode A charges failing at acceptance             | failed / accepted milestones                  | FIN        |
+| Circumvention flag precision | Confirmed over flagged                           | confirmed / flagged                           | MOD        |
+| Evidence yield               | Completed contracts producing confirmed evidence | evidence / completed                          | PAD        |
+| Hire conversion rate         | Conversions accepted                             | accepted / offered                            | PAD        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking what |
-|---|---|---|---|---|---|
-| OD-GIG-01 | **Is GIG in scope at all, and what is the minimal slice?** SSOT has F-130 (priority 3, Ph7) and F-124 but also lists "general-purpose marketplace" and "generic HR/payroll" as non-goals. | A: out of scope. B: learning and apprenticeship projects only (FR-GIG-031 with INS and EVD). C: B plus evidence-based fixed-price projects, mode A payment (pay on acceptance), no escrow, no time tracking (FR-GIG-001 to 017, 020 to 029, 032). D: C plus gated escrow and hourly. E: general marketplace (rejected by SSOT §4.2). | B first (lowest regulatory risk and best fit to evidence), then C after OD-GIG-04, 05, 06 are decided | Founder (DEC-002) | Entire module |
-| OD-GIG-02 | **Escrow decision gate.** SSOT S-14 says "escrow via Stripe". Holding third-party funds raises money-transmission and licensing questions. | A: no holding (mode A only); B: provider-managed funding (mode B) through a licensed provider; C: platform escrow (rejected by default) | A until Legal confirms B with a named provider and countries | Founder, Legal, Finance | FR-GIG-018 mode B, FR-GIG-016 fund handling |
-| OD-GIG-03 | **Time tracking decision gate.** Hourly work and monitoring raise classification and privacy risk and touch the HR non-goal. | A: not offered; B: manual time entry only; C: timer with optional screenshots | A | Founder, Legal | FR-GIG-019 |
-| OD-GIG-04 | Worker-classification stance and governing law defaults by jurisdiction. | Block only exclusivity; also block fixed hours; per-country rules | Rules in BR-GIG-014 with country configuration | Legal | FR-GIG-012, 022 |
-| OD-GIG-05 | Tax reporting responsibility (W-9, W-8, 1099, DAC7, other) and vendor. | Provider-hosted collection and filing; own filings | Provider or vendor-hosted | Finance, Legal | FR-GIG-021 |
-| OD-GIG-06 | Supported countries and sanctions policy for freelancers and clients. | Start with a short list; expand | Start with countries where BIL payouts and tax are supported | Founder, Legal | FR-GIG-003, 023 |
-| OD-GIG-07 | Client types: organizations only, or also individuals. | Organizations only; add individuals later | Organizations only | Product | FR-GIG-004 |
-| OD-GIG-08 | Fee model (client-side, freelancer-side) and any hire-conversion fee. | Parameters; none | No numbers here; no conversion fee | Founder, Finance | FR-GIG-020, 030 |
-| OD-GIG-09 | Category allowlist and prohibited list. | Software, data, design, writing, marketing, research, translation, training content; others later | The listed categories | Product, Legal | FR-GIG-004 |
-| OD-GIG-10 | Minimum project budget and maximum duration. | Parameters | Set with Finance; maximum 6 months proposed | Product, Finance | FR-GIG-004 |
-| OD-GIG-11 | Free proposal allowance and plan quotas (BIL entitlement values). | Parameters | Set with OD-BIL-01 | Product, Finance | FR-GIG-009 |
-| OD-GIG-12 | Review window and revision limit defaults (7 days, 2 revisions) and auto-accept. | Shorter, longer, or none | As in BR-GIG-008, BR-GIG-009 | Product | FR-GIG-014 |
-| OD-GIG-13 | Volunteer matching (SSOT F-133) in scope under GIG or elsewhere. | Out; under learning projects; separate | Out of GIG; revisit with INS and NET | Product | None |
+| ID        | Question                                                                                                                                                                                  | Options                                                                                                                                                                                                                                                                                                                              | Default proposal                                                                                      | Who decides             | Blocking what                               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------- |
+| OD-GIG-01 | **Is GIG in scope at all, and what is the minimal slice?** SSOT has F-130 (priority 3, Ph7) and F-124 but also lists "general-purpose marketplace" and "generic HR/payroll" as non-goals. | A: out of scope. B: learning and apprenticeship projects only (FR-GIG-031 with INS and EVD). C: B plus evidence-based fixed-price projects, mode A payment (pay on acceptance), no escrow, no time tracking (FR-GIG-001 to 017, 020 to 029, 032). D: C plus gated escrow and hourly. E: general marketplace (rejected by SSOT §4.2). | B first (lowest regulatory risk and best fit to evidence), then C after OD-GIG-04, 05, 06 are decided | Founder (DEC-002)       | Entire module                               |
+| OD-GIG-02 | **Escrow decision gate.** SSOT S-14 says "escrow via Stripe". Holding third-party funds raises money-transmission and licensing questions.                                                | A: no holding (mode A only); B: provider-managed funding (mode B) through a licensed provider; C: platform escrow (rejected by default)                                                                                                                                                                                              | A until Legal confirms B with a named provider and countries                                          | Founder, Legal, Finance | FR-GIG-018 mode B, FR-GIG-016 fund handling |
+| OD-GIG-03 | **Time tracking decision gate.** Hourly work and monitoring raise classification and privacy risk and touch the HR non-goal.                                                              | A: not offered; B: manual time entry only; C: timer with optional screenshots                                                                                                                                                                                                                                                        | A                                                                                                     | Founder, Legal          | FR-GIG-019                                  |
+| OD-GIG-04 | Worker-classification stance and governing law defaults by jurisdiction.                                                                                                                  | Block only exclusivity; also block fixed hours; per-country rules                                                                                                                                                                                                                                                                    | Rules in BR-GIG-014 with country configuration                                                        | Legal                   | FR-GIG-012, 022                             |
+| OD-GIG-05 | Tax reporting responsibility (W-9, W-8, 1099, DAC7, other) and vendor.                                                                                                                    | Provider-hosted collection and filing; own filings                                                                                                                                                                                                                                                                                   | Provider or vendor-hosted                                                                             | Finance, Legal          | FR-GIG-021                                  |
+| OD-GIG-06 | Supported countries and sanctions policy for freelancers and clients.                                                                                                                     | Start with a short list; expand                                                                                                                                                                                                                                                                                                      | Start with countries where BIL payouts and tax are supported                                          | Founder, Legal          | FR-GIG-003, 023                             |
+| OD-GIG-07 | Client types: organizations only, or also individuals.                                                                                                                                    | Organizations only; add individuals later                                                                                                                                                                                                                                                                                            | Organizations only                                                                                    | Product                 | FR-GIG-004                                  |
+| OD-GIG-08 | Fee model (client-side, freelancer-side) and any hire-conversion fee.                                                                                                                     | Parameters; none                                                                                                                                                                                                                                                                                                                     | No numbers here; no conversion fee                                                                    | Founder, Finance        | FR-GIG-020, 030                             |
+| OD-GIG-09 | Category allowlist and prohibited list.                                                                                                                                                   | Software, data, design, writing, marketing, research, translation, training content; others later                                                                                                                                                                                                                                    | The listed categories                                                                                 | Product, Legal          | FR-GIG-004                                  |
+| OD-GIG-10 | Minimum project budget and maximum duration.                                                                                                                                              | Parameters                                                                                                                                                                                                                                                                                                                           | Set with Finance; maximum 6 months proposed                                                           | Product, Finance        | FR-GIG-004                                  |
+| OD-GIG-11 | Free proposal allowance and plan quotas (BIL entitlement values).                                                                                                                         | Parameters                                                                                                                                                                                                                                                                                                                           | Set with OD-BIL-01                                                                                    | Product, Finance        | FR-GIG-009                                  |
+| OD-GIG-12 | Review window and revision limit defaults (7 days, 2 revisions) and auto-accept.                                                                                                          | Shorter, longer, or none                                                                                                                                                                                                                                                                                                             | As in BR-GIG-008, BR-GIG-009                                                                          | Product                 | FR-GIG-014                                  |
+| OD-GIG-13 | Volunteer matching (SSOT F-133) in scope under GIG or elsewhere.                                                                                                                          | Out; under learning projects; separate                                                                                                                                                                                                                                                                                               | Out of GIG; revisit with INS and NET                                                                  | Product                 | None                                        |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-GIG-01 | Regulatory exposure from holding funds (money transmission). | Medium, severe | Mode A default, OD-GIG-02, licensed provider only |
-| RSK-GIG-02 | Worker misclassification claims against clients or the platform. | Medium, high | Classification guard, no payroll features, counsel-reviewed terms |
-| RSK-GIG-03 | Scope creep into a general marketplace against SSOT §4.2. | High, medium | Category allowlist, OD-GIG-01, no pay-to-rank |
-| RSK-GIG-04 | Client non-payment under pay-on-acceptance. | Medium, high | Pre-authorization, spend limits, suspensions, collections, auto-accept protection |
-| RSK-GIG-05 | Fraud: fake clients, stolen cards, fake freelancers. | Medium, high | Verification, limits, fraud queue |
-| RSK-GIG-06 | Off-platform circumvention eroding revenue and safety. | High, medium | Masking, value-add features, post-contract freedom |
-| RSK-GIG-07 | Tax and cross-border compliance errors. | Medium, high | Provider-hosted forms, supported-country list, sanctions screening |
-| RSK-GIG-08 | Academic dishonesty and credential fraud brokered through projects. | Medium, high | BR-GIG-003, scope guard, reports |
-| RSK-GIG-09 | Exploitation through unpaid spec work or learning projects as free labor. | Medium, medium | BR-GIG-024, BR-GIG-028, pattern review |
-| RSK-GIG-10 | Low liquidity at launch (few clients or freelancers). | High, medium | Start with learning and institution partner projects, OD-GIG-01 slice B |
+| ID         | Risk                                                                      | Likelihood and impact | Mitigation                                                                        |
+| ---------- | ------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------- |
+| RSK-GIG-01 | Regulatory exposure from holding funds (money transmission).              | Medium, severe        | Mode A default, OD-GIG-02, licensed provider only                                 |
+| RSK-GIG-02 | Worker misclassification claims against clients or the platform.          | Medium, high          | Classification guard, no payroll features, counsel-reviewed terms                 |
+| RSK-GIG-03 | Scope creep into a general marketplace against SSOT §4.2.                 | High, medium          | Category allowlist, OD-GIG-01, no pay-to-rank                                     |
+| RSK-GIG-04 | Client non-payment under pay-on-acceptance.                               | Medium, high          | Pre-authorization, spend limits, suspensions, collections, auto-accept protection |
+| RSK-GIG-05 | Fraud: fake clients, stolen cards, fake freelancers.                      | Medium, high          | Verification, limits, fraud queue                                                 |
+| RSK-GIG-06 | Off-platform circumvention eroding revenue and safety.                    | High, medium          | Masking, value-add features, post-contract freedom                                |
+| RSK-GIG-07 | Tax and cross-border compliance errors.                                   | Medium, high          | Provider-hosted forms, supported-country list, sanctions screening                |
+| RSK-GIG-08 | Academic dishonesty and credential fraud brokered through projects.       | Medium, high          | BR-GIG-003, scope guard, reports                                                  |
+| RSK-GIG-09 | Exploitation through unpaid spec work or learning projects as free labor. | Medium, medium        | BR-GIG-024, BR-GIG-028, pattern review                                            |
+| RSK-GIG-10 | Low liquidity at launch (few clients or freelancers).                     | High, medium          | Start with learning and institution partner projects, OD-GIG-01 slice B           |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed and why |
-|---|---|---|
-| SSOT.md F-130 Freelance Marketplace, F-124 Project Marketplace, S-14 (escrow via Stripe), F-100 Peer Projects, F-131 Apprenticeship Matching, F-133 Volunteer Matching, §4.2 non-goals | Scope, learning projects, apprenticeship pathways, escrow idea, non-goal limits | Escrow not adopted as default (conflict recorded, OD-GIG-02); volunteer matching left open (OD-GIG-13); general marketplace rejected |
-| docs/registries/FEATURE_REGISTRY.md F-124, F-130, F-131, F-133 | Inventory and priorities | Priority 3 for F-130 noted only |
-| Yash_Final_Project_Document 30_PRIOR_IMPLEMENTATION_REFERENCE (long-tail rows marked planned, no code) | Confirms nothing existing | No status copied |
-| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md | Awareness only | Not copied |
-| Own domain knowledge (Upwork, Fiverr, Toptal, Contra, Braintrust, Stripe Connect, Deel and Gusto contractor flows, IR35 and AB5 style classification issues, W-9/W-8/1099 and DAC7 reporting) | Proposals, milestones, auto-accept, dispute ladder, reviews, tax and classification guards | Tagged [PROP] |
+| Source                                                                                                                                                                                        | Used for                                                                                   | Dropped or changed and why                                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| SSOT.md F-130 Freelance Marketplace, F-124 Project Marketplace, S-14 (escrow via Stripe), F-100 Peer Projects, F-131 Apprenticeship Matching, F-133 Volunteer Matching, §4.2 non-goals        | Scope, learning projects, apprenticeship pathways, escrow idea, non-goal limits            | Escrow not adopted as default (conflict recorded, OD-GIG-02); volunteer matching left open (OD-GIG-13); general marketplace rejected |
+| docs/registries/FEATURE_REGISTRY.md F-124, F-130, F-131, F-133                                                                                                                                | Inventory and priorities                                                                   | Priority 3 for F-130 noted only                                                                                                      |
+| Yash_Final_Project_Document 30_PRIOR_IMPLEMENTATION_REFERENCE (long-tail rows marked planned, no code)                                                                                        | Confirms nothing existing                                                                  | No status copied                                                                                                                     |
+| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md                                                                                                                                    | Awareness only                                                                             | Not copied                                                                                                                           |
+| Own domain knowledge (Upwork, Fiverr, Toptal, Contra, Braintrust, Stripe Connect, Deel and Gusto contractor flows, IR35 and AB5 style classification issues, W-9/W-8/1099 and DAC7 reporting) | Proposals, milestones, auto-accept, dispute ladder, reviews, tax and classification guards | Tagged [PROP]                                                                                                                        |
 
 **Conflicts recorded:** (1) Stakeholder "OS" goal versus SSOT §4.2 (general marketplace, HR/payroll): OD-GIG-01. (2) SSOT S-14 "escrow via Stripe" versus regulatory risk and the BIL decision on holding funds: OD-GIG-02 and OD-BIL-10. (3) Hourly time tracking versus the HR non-goal and classification risk: OD-GIG-03. (4) F-130 at Ph7 priority 3 versus the owner's wish for a complete platform: slice approach in OD-GIG-01.

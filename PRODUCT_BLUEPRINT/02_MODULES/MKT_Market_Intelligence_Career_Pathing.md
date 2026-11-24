@@ -18,13 +18,13 @@ MKT is the platform's labor-market brain. It owns the **skills taxonomy and onto
 
 ### 1.3 Scope
 
-| In scope | Out of scope | Owned by MKT | Consumed from other modules |
-|---|---|---|---|
-| Skills taxonomy, aliases, relationships, versioning, external mappings | Skill evidence, verification and freshness of an individual's skill claim (`EVD`, `BGV` planned) | Skills, roles, relationships, taxonomy versions | Job postings (`JOB` planned), applications and hires (`ATS` planned), course catalogue (`LRN` planned), profiles and evidence (`PRF`, `EVD` planned) |
-| Demand and supply indices, regional heat maps, trends, forecasts | Individual job matching and ranking (`AIC` planned) | Market signals, indices, forecasts, published dataset snapshots | Billing entitlements for premium insights (`BIL` planned) |
-| Salary and equity benchmarks from user submissions and licensed data | Generic HR/payroll systems [SRC: SSOT §4.2] | Salary reports and aggregates, career transitions and benchmarks | Consent and privacy settings (`SET` planned) |
-| Career path explorer, skill-gap analysis, readiness, action plans | Delivering courses (`LRN`) or coaching (`MEN` planned) | Path graph, gap analyses, readiness explanations | Analytics platform for metric registry (`ANL`) |
-| Dashboards for institutions, employers, platform admins; exports; partner API | Candidate-level analytics for employers (`ATS`, `ANL`) | Dashboard definitions for market views, export jobs, partner API grants | Institution cohorts (`INS` planned) |
+| In scope                                                                      | Out of scope                                                                                     | Owned by MKT                                                            | Consumed from other modules                                                                                                                          |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skills taxonomy, aliases, relationships, versioning, external mappings        | Skill evidence, verification and freshness of an individual's skill claim (`EVD`, `BGV` planned) | Skills, roles, relationships, taxonomy versions                         | Job postings (`JOB` planned), applications and hires (`ATS` planned), course catalogue (`LRN` planned), profiles and evidence (`PRF`, `EVD` planned) |
+| Demand and supply indices, regional heat maps, trends, forecasts              | Individual job matching and ranking (`AIC` planned)                                              | Market signals, indices, forecasts, published dataset snapshots         | Billing entitlements for premium insights (`BIL` planned)                                                                                            |
+| Salary and equity benchmarks from user submissions and licensed data          | Generic HR/payroll systems [SRC: SSOT §4.2]                                                      | Salary reports and aggregates, career transitions and benchmarks        | Consent and privacy settings (`SET` planned)                                                                                                         |
+| Career path explorer, skill-gap analysis, readiness, action plans             | Delivering courses (`LRN`) or coaching (`MEN` planned)                                           | Path graph, gap analyses, readiness explanations                        | Analytics platform for metric registry (`ANL`)                                                                                                       |
+| Dashboards for institutions, employers, platform admins; exports; partner API | Candidate-level analytics for employers (`ATS`, `ANL`)                                           | Dashboard definitions for market views, export jobs, partner API grants | Institution cohorts (`INS` planned)                                                                                                                  |
 
 ### 1.4 Boundary note on SSOT non-goals
 
@@ -34,34 +34,34 @@ SSOT §4.2 excludes a "generic HR/payroll system" and warns against opaque scori
 
 Legend: C create, R read, U update, D delete, A approve, X execute, — none. "Own" = the user's own data.
 
-| Capability | GUE | CAN/STD | INS | MNT | REC/HMG | EAD | IAD/PLO | EXA | PAD |
-|---|---|---|---|---|---|---|---|---|---|
-| Browse public insights (above threshold) | R | R | R | R | R | R | R | R | R |
-| Explore career paths | R (limited) | R | R | R | R | R | R | R | R |
-| Run personal skill-gap and readiness | — | X own | — | X for mentee with consent | — | — | X cohort aggregate | X aggregate | — |
-| Submit salary or transition data | — | C own, D own | C own | C own | C own | — | — | — | — |
-| Propose a skill | — | C proposal | C proposal | C proposal | C proposal | C proposal | C proposal | C proposal | — |
-| Curate taxonomy (create, merge, deprecate) | — | — | — | — | — | — | — | — | CRUDA (taxonomy curator permission) |
-| Employer benchmarks and offer calibration | — | — | — | — | R | R | — | R | R |
-| Institution market dashboard | — | — | — | — | — | — | R | — | R |
-| Export (aggregate only) | — | — | — | — | R (own org scope) | R | R | R | X |
-| Partner API grants | — | — | — | — | — | — | request | request | A |
-| Data source and suppression policy | — | — | — | — | — | — | — | — | CRUDA |
-| Disputes and corrections | file | file | file | file | file | file | file | file | A |
+| Capability                                 | GUE         | CAN/STD      | INS        | MNT                       | REC/HMG           | EAD        | IAD/PLO            | EXA         | PAD                                 |
+| ------------------------------------------ | ----------- | ------------ | ---------- | ------------------------- | ----------------- | ---------- | ------------------ | ----------- | ----------------------------------- |
+| Browse public insights (above threshold)   | R           | R            | R          | R                         | R                 | R          | R                  | R           | R                                   |
+| Explore career paths                       | R (limited) | R            | R          | R                         | R                 | R          | R                  | R           | R                                   |
+| Run personal skill-gap and readiness       | —           | X own        | —          | X for mentee with consent | —                 | —          | X cohort aggregate | X aggregate | —                                   |
+| Submit salary or transition data           | —           | C own, D own | C own      | C own                     | C own             | —          | —                  | —           | —                                   |
+| Propose a skill                            | —           | C proposal   | C proposal | C proposal                | C proposal        | C proposal | C proposal         | C proposal  | —                                   |
+| Curate taxonomy (create, merge, deprecate) | —           | —            | —          | —                         | —                 | —          | —                  | —           | CRUDA (taxonomy curator permission) |
+| Employer benchmarks and offer calibration  | —           | —            | —          | —                         | R                 | R          | —                  | R           | R                                   |
+| Institution market dashboard               | —           | —            | —          | —                         | —                 | —          | R                  | —           | R                                   |
+| Export (aggregate only)                    | —           | —            | —          | —                         | R (own org scope) | R          | R                  | R           | X                                   |
+| Partner API grants                         | —           | —            | —          | —                         | —                 | —          | request            | request     | A                                   |
+| Data source and suppression policy         | —           | —            | —          | —                         | —                 | —          | —                  | —           | CRUDA                               |
+| Disputes and corrections                   | file        | file         | file       | file                      | file              | file       | file               | file        | A                                   |
 
 Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Skills taxonomy and ontology | FR-MKT-001 to 007 |
-| B | Data sources, provenance and quality | FR-MKT-008 to 011 |
-| C | Demand, supply and trends | FR-MKT-012 to 016 |
-| D | Compensation benchmarks | FR-MKT-017 to 021 |
-| E | Career pathing | FR-MKT-022 to 027 |
-| F | Dashboards, exports and API | FR-MKT-028 to 032 |
-| G | Privacy and governance | FR-MKT-033 to 036 |
+| Code | Sub-module                           | Features                      |
+| ---- | ------------------------------------ | ----------------------------- |
+| A    | Skills taxonomy and ontology         | FR-MKT-001 to 007             |
+| B    | Data sources, provenance and quality | FR-MKT-008 to 011             |
+| C    | Demand, supply and trends            | FR-MKT-012 to 016, FR-MKT-037 |
+| D    | Compensation benchmarks              | FR-MKT-017 to 021             |
+| E    | Career pathing                       | FR-MKT-022 to 027             |
+| F    | Dashboards, exports and API          | FR-MKT-028 to 032             |
+| G    | Privacy and governance               | FR-MKT-033 to 036             |
 
 ## 4. Feature specifications
 
@@ -197,7 +197,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Sub-module:** A Skills taxonomy and ontology
 - **Priority / tier:** Could · R4
 - **Source:** [PROP]; SSOT §6.2 "industry mappings"
-- **Purpose and outcome:** Canonical skills and roles map to public frameworks (for example ESCO, O*NET, SFIA, national occupation codes) so insights are comparable and interoperable. Success: each mapped skill/role has an external code with provenance.
+- **Purpose and outcome:** Canonical skills and roles map to public frameworks (for example ESCO, O\*NET, SFIA, national occupation codes) so insights are comparable and interoperable. Success: each mapped skill/role has an external code with provenance.
 - **Roles and permissions:** `PAD (curator): import, map, review` · `all: read mappings`
 - **Preconditions and entry points:** Admin "Mappings"; frameworks enabled per `OD-MKT-03` (licensing).
 - **User interactions and actions:** 1. Curator uploads or syncs a framework release. 2. System proposes matches with scores. 3. Curator accepts or edits. 4. Publishes mapping set with version.
@@ -527,7 +527,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 
 - **Sub-module:** D Compensation benchmarks
 - **Priority / tier:** Must · R4
-- **Source:** [SRC: SSOT F-86 steps 3-4; BR-179, BR-180]
+- **Source:** [SRC: SSOT F-86 steps 3-4; BR-179, BR-180] · also [SRC: SSOT §7 F-172 Advanced Compensation Intelligence]
 - **Purpose and outcome:** Candidates see typical pay for roles, with transparent sample sizes, and on job pages. Success: a benchmark page and a job-page range sourced from published snapshots.
 - **Roles and permissions:** `all signed-in: read; GUE: national level only`
 - **Preconditions and entry points:** `/salaries`, job detail (`JOB` planned), path explorer.
@@ -577,7 +577,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 
 - **Sub-module:** D Compensation benchmarks
 - **Priority / tier:** Could · R5
-- **Source:** [SRC: SSOT F-98, BR-183]
+- **Source:** [SRC: SSOT F-98, BR-183] · also [SRC: SSOT §7 F-172 Advanced Compensation Intelligence]
 - **Purpose and outcome:** Equity grants and vesting are aggregated separately from salary so total compensation can be understood without distorting base-pay bands. Success: equity bands and an education panel.
 - **Roles and permissions:** `CAN/STD/…: submit, withdraw own` · `all signed-in: read aggregates`
 - **Preconditions and entry points:** "Add equity" in the salary form; `/salaries/equity`.
@@ -979,46 +979,78 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
   - Given a group below k, when reviewing, then results show "not assessable".
   - Given the author as reviewer, when approving, then the system rejects.
 
+### FR-MKT-037 — Company skill profiles
+
+- **Sub-module:** C Demand, supply and trends
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.3 F-173 Company-to-Skills Mapping (priority 3, Ph4; dependencies F-84, F-04)] [PROP] for behavior
+- **Purpose and outcome:** A candidate or learner sees which skills a company currently hires for, so they can target learning and applications. The system knows it works when the panel appears only for companies with enough public postings and learners add its skills to their plans.
+- **Roles and permissions:** `GUE, CAN, STD, FRL, INS: read published profiles` · `EAD: read own organization's profile, request corrections, add declared technologies` · `PAD: configure thresholds and review disputes`
+- **Preconditions and entry points:** The company has at least `min_company_postings` (default {5}) distinct published postings with structured skills in the last 12 months. Entry: "Skills they hire for" panel on the company page (FR-EMP-005), "Companies hiring for this skill" on skill pages (FR-LRN-005), the career path explorer (FR-MKT-023).
+- **User interactions and actions:**
+  1. Open a company page. Read the top 10 skills as shares of postings ("Python: 6 of 9 postings in the last 12 months"), grouped as core, common and optional, with a trend marker where both 12-month windows have at least {5} postings, plus the top 5 role families hired.
+  2. Open a skill to reach its skill page, press "Add to my plan" (FR-LRN-025), or press "See my fit" to compare the viewer's own evidenced skills with the company's top skills ("You evidence 6 of the top 10"), shown only to the viewer.
+  3. On a skill page, read "Companies hiring for this skill" (top 10 by posting volume among companies above the threshold).
+  4. Employer admin: open the profile of their own organization, press "Request correction" for a wrong mapping or duplicate (FR-MKT-035), and optionally add a "Technologies we use" list labelled "declared by the employer".
+- **System behaviour:** Profiles are computed monthly from the organization's published postings (native or licensed sources only, FR-MKT-009), with skills normalized through the taxonomy (FR-MKT-002), reposts deduplicated, and staffing agency postings excluded or labelled as agency (their postings reflect clients). Only skills present in at least {2} postings are shown. Profiles never use employees' profiles, applications or evidence (BR-MKT-035). Company identity resolves to a verified EMP organization; unresolved domains are not profiled. Employers cannot hide or edit derived values; a profile is withdrawn only for a verified data error (BR-MKT-036). Statements are descriptive ("appears in") and never promise hiring outcomes (BR-MKT-019). Snapshots follow the methodology and provenance rules of FR-MKT-010.
+- **UI elements and controls:** Skills panel with horizontal bars and text values, importance chips, trend icon with text, "See my fit" button, "Request correction" link, methodology link, "About this data" popover. States: below threshold ("Not enough public postings to show skills yet"), loading, error with Retry.
+- **Configuration options:** Platform: `min_company_postings` (default 5), minimum postings per skill (default 2), window (12 months), trend window rules, agency handling. Employer: declared technologies list (up to 30 skills).
+- **Business rules:** BR-MKT-035, BR-MKT-036, BR-MKT-007, BR-MKT-019
+- **Validation:** Declared technologies are canonical skill ids from the taxonomy; at most 30; correction request text 20 to 1,000 characters; thresholds are positive integers.
+- **Inputs and outputs:** In: company id or skill id, viewer context for "See my fit". Out: ranked skills with shares, counts, importance, trend and sample size; viewer-only fit summary.
+- **Filters, sorting, search:** Filter skills by importance and role family; sort by share or trend; skill-page company list filter by region.
+- **Notifications and communication:** Employer admin is notified when a correction request is decided (`mkt.dispute.decided`, in-app, class workflow); n/a for readers.
+- **Error handling and edge cases:** Company below threshold: the panel states why and no numbers appear. A skill merged in the taxonomy: shown under its successor. A company with a single mass-posted role: shares are computed on distinct postings, and a posting count above {50} for one skill from one source is flagged for review. Agency account: panel labelled "Agency postings reflect clients". Candidate without evidence data: "See my fit" is hidden.
+- **Dependencies:** FR-MKT-002, FR-MKT-008, FR-MKT-009, FR-MKT-010, FR-MKT-012, FR-MKT-035, FR-JOB-008, FR-EMP-005, FR-LRN-005, FR-LRN-025, ENT-MKT-10, ENT-MKT-11, ENT-MKT-26.
+- **Security and privacy:** Public postings only; no employee-level data; "See my fit" reads the viewer's own evidence under their consent and returns nothing to the company; access to correction cases is limited to the organization's admins and PAD.
+- **Acceptance criteria:**
+  - Given a company with 9 qualifying postings, 6 of which list Python, when a guest opens its page, then the panel shows Python as "6 of 9 postings".
+  - Given a company with 3 qualifying postings, when the page loads, then no skills panel numbers appear and the below-threshold text is shown.
+  - Given an employer admin disputes a mapping, when PAD upholds it, then the next snapshot shows the corrected mapping and the admin is notified.
+  - Given an employer admin tries to delete a skill from their derived profile, when the request is made, then the system refuses it (negative).
+
 ## 5. Business rule table
 
 `min_cohort_k` is the single policy parameter for minimum sample; default 10 [SRC: SSOT Amendment G, BR-178]. Feature overrides stricter than the default are allowed; lower values need an owner and counsel decision record.
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-MKT-001 | Canonical skills and roles are created and changed only by users with the taxonomy-curator permission; other users may only propose. | Prevents taxonomy pollution. | Taxonomy service, admin console | [SRC: SSOT BR-141] |
-| BR-MKT-002 | Every skill tag on a course, challenge, job, profile or role requirement references a canonical `skillId`; free text is resolved or queued. | Comparable counts and matching. | Skills API, tag validators in consumers | [SRC: SSOT BR-144] |
-| BR-MKT-003 | Skill relationships are directional (`prerequisite_of`, `subskill_of`, `supersedes`) or symmetric (`related_to`); `prerequisite_of` must be acyclic, checked at write; traversal depth is at most 5. | Valid dependency reasoning. | Graph service | [SRC: SSOT BR-142, BR-146, BR-147] |
-| BR-MKT-004 | `correlates_with` edges are computed statistically from aggregates above sample thresholds and are never edited manually. | Objectivity. | Nightly job | [SRC: SSOT BR-143] |
-| BR-MKT-005 | A candidate emerging skill needs at least 5 independent signals (distinct employers, jobs, users, courses or institutions, counted once per source entity; default also at least 3 distinct employer or institution sources) before promotion review. | Avoids hype and manipulation. | Candidate evaluator | [SRC: SSOT BR-148]; independence detail [PROP] (`OD-MKT-06`) |
-| BR-MKT-006 | Taxonomy changes ship only in published, immutable versions with four-eyes approval and automatic reference migration; deprecation requires a successor. | Safe evolution. | Version service | [SRC: SSOT §6.2]; four-eyes [PROP] |
-| BR-MKT-007 | No aggregate is published with fewer than `min_cohort_k` distinct contributors in the cell (default 10); feature overrides: career-transition edges at least 20 [SRC: BR-160]; stricter values are allowed; values below default need a decision record. | Re-identification protection. | Privacy engine (FR-MKT-033) | [SRC: SSOT BR-178, BR-160, BR-158, BR-207, BR-220] |
-| BR-MKT-008 | Suppression is complementary: a suppressed cell must not be derivable from totals, siblings, or overlapping queries; counts are rounded; query dimensions and budgets are capped per client. | Blocks differencing attacks. | Privacy engine | [DER] |
-| BR-MKT-009 | Salary reports carry a weight: 0.5 self-reported, 1.0 employment-verified. | Data quality. | Salary service | [SRC: SSOT BR-177] |
-| BR-MKT-010 | Money is stored and displayed in minor units with an ISO-4217 currency. | Correctness. | Domain types | [SRC: SSOT BR-179] |
-| BR-MKT-011 | Company-specific salary figures are shown only above the threshold (default `min_cohort_k`); the SSOT value of 3 is an override below default and needs an owner and counsel decision; an employer opt-in cannot lower it until decided (`OD-MKT-05`). | Privacy. | Display service | [SRC: SSOT BR-180]; [DEC-REQ] |
-| BR-MKT-012 | Contributors may withdraw any submission at any time; aggregates are recomputed and the contribution removed within 24 hours. | Data rights. | Salary and consent services | [SRC: SSOT BR-181] |
-| BR-MKT-013 | Equity data is aggregated separately and never merged into base-pay percentiles. | Prevents distortion. | Aggregation job | [SRC: SSOT BR-183] |
-| BR-MKT-014 | Reports outside ±3σ (robust) of the cell median, duplicates, bursts and impossible values are flagged and excluded until reviewed; rate limit is 5 reports per user per day. | Data integrity. | Quality service | [SRC: SSOT F-86 step 7] |
-| BR-MKT-015 | Published snapshots are versioned and immutable; compute may run nightly, publication cadence is set by `OD-MKT-02` (SSOT states nightly in F-86 and quarterly in BR-182). | Reproducibility; conflict recorded. | Snapshot service | [SRC: SSOT BR-182, F-86]; conflict recorded |
-| BR-MKT-016 | Career transitions are collected only with explicit opt-in; an individual's transitions are visible only to that individual. | Consent. | Transition service, authz | [SRC: SSOT BR-157, BR-159] |
-| BR-MKT-017 | Updates to the graph or taxonomy never retroactively change published historical snapshots; new data produces a new snapshot version. | Auditability. | Snapshot service | [SRC: SSOT BR-162] |
-| BR-MKT-018 | Every insight or recommendation shows its data sources, sample size, window and, where applicable, a confidence interval. | Transparency. | API contract, UI | [SRC: SSOT BR-163] |
-| BR-MKT-019 | Outcome and trend statements are descriptive or correlational; the product never states or implies a guarantee or causation. | Honesty. | Copy review, UI templates | [DER] from [SRC: SSOT BR-193] |
-| BR-MKT-020 | When data is insufficient the product shows a "not enough data" state; it never fabricates, interpolates silently, or shows zero for suppressed cells. | Trust. | UI and API | [SRC: SSOT F-85 failure modes] |
-| BR-MKT-021 | Every snapshot records sources, window, method version, taxonomy version, sample size, computed-at; a snapshot older than 2× its cadence is flagged stale; snapshots without provenance are not published. | Traceability. | Publication gate | [DER] |
-| BR-MKT-022 | External data is used, displayed and exported only as its license allows, with the required attribution; expired licenses disable the source. | Legal compliance. | Source registry, export | [PROP] |
-| BR-MKT-023 | No individual-level record appears in any export, API response, dashboard or admin view of aggregates. | Privacy. | API gateway, exports | [DER] |
-| BR-MKT-024 | Readiness and path indicators are explainable (factors and weights shown), never use protected attributes or proxies, and are never exposed to employers, recruiters or matching. | Fairness; non-goal on opaque scoring. | Authz, model gate | [SRC: SSOT §4.2, BR-185]; [DER] |
-| BR-MKT-025 | Employer-facing supply and talent views are aggregate only, rounded, and suppressed under threshold; they never list or rank individuals. | Candidate protection. | Employer dashboards | [DER] |
-| BR-MKT-026 | Employer pay-equity analysis uses data the employer uploads, stays inside that tenant, outputs aggregates only, suppresses small cells, and deletes raw rows per retention. | Narrow HR boundary. | Equity job | [PROP] (`OD-MKT-08`) |
-| BR-MKT-027 | Forecasts cover at most 12 months, always show an interval and model version, and need at least 12 months of valid history. | Honest uncertainty. | Forecast job | [SRC: SSOT F-151] |
-| BR-MKT-028 | Institution dashboards are cohort-level only; faculty and administrators cannot see non-consented individual data. | Student privacy. | Authz | [DER] from [SRC: docs/experience, METRICS_CATALOG §6.2] |
-| BR-MKT-029 | Partner API keys are scoped, rate-limited, hashed at rest, auditable and revocable; responses obey the same suppression as the UI. | Safe API. | API gateway | [PROP] |
-| BR-MKT-030 | Reposted jobs (same employer, title and location within 30 days) count once in demand signals. | Accurate demand. | Ingestion | [PROP] |
-| BR-MKT-031 | Geography is published no finer than metro or region where thresholds pass; no street-level or postal-level insight. | Re-identification control. | Display service | [DER] |
-| BR-MKT-032 | Breakdowns by sensitive attributes come only from voluntary, separate, purpose-limited self-identification, subject to threshold and review, and are never used as inputs to any score. | Fairness data handling. | Fairness store | [SRC: SSOT F-119]; [DER] |
-| BR-MKT-033 | Disputes about displayed data are reviewed within the SLA; upheld disputes lead to a corrected version and notification of the filer. | Accountability. | Dispute workflow | [PROP] |
-| BR-MKT-034 | Currency conversion uses dated rates; on conversion failure the original currency is shown and the report is excluded from cross-currency aggregates. | Correctness. | Salary service | [SRC: SSOT F-86 failure modes] |
+| ID         | Rule                                                                                                                                                                                                                                                                                    | Rationale                                             | Enforced where                          | Source                                                       |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| BR-MKT-001 | Canonical skills and roles are created and changed only by users with the taxonomy-curator permission; other users may only propose.                                                                                                                                                    | Prevents taxonomy pollution.                          | Taxonomy service, admin console         | [SRC: SSOT BR-141]                                           |
+| BR-MKT-002 | Every skill tag on a course, challenge, job, profile or role requirement references a canonical `skillId`; free text is resolved or queued.                                                                                                                                             | Comparable counts and matching.                       | Skills API, tag validators in consumers | [SRC: SSOT BR-144]                                           |
+| BR-MKT-003 | Skill relationships are directional (`prerequisite_of`, `subskill_of`, `supersedes`) or symmetric (`related_to`); `prerequisite_of` must be acyclic, checked at write; traversal depth is at most 5.                                                                                    | Valid dependency reasoning.                           | Graph service                           | [SRC: SSOT BR-142, BR-146, BR-147]                           |
+| BR-MKT-004 | `correlates_with` edges are computed statistically from aggregates above sample thresholds and are never edited manually.                                                                                                                                                               | Objectivity.                                          | Nightly job                             | [SRC: SSOT BR-143]                                           |
+| BR-MKT-005 | A candidate emerging skill needs at least 5 independent signals (distinct employers, jobs, users, courses or institutions, counted once per source entity; default also at least 3 distinct employer or institution sources) before promotion review.                                   | Avoids hype and manipulation.                         | Candidate evaluator                     | [SRC: SSOT BR-148]; independence detail [PROP] (`OD-MKT-06`) |
+| BR-MKT-006 | Taxonomy changes ship only in published, immutable versions with four-eyes approval and automatic reference migration; deprecation requires a successor.                                                                                                                                | Safe evolution.                                       | Version service                         | [SRC: SSOT §6.2]; four-eyes [PROP]                           |
+| BR-MKT-007 | No aggregate is published with fewer than `min_cohort_k` distinct contributors in the cell (default 10); feature overrides: career-transition edges at least 20 [SRC: BR-160]; stricter values are allowed; values below default need a decision record.                                | Re-identification protection.                         | Privacy engine (FR-MKT-033)             | [SRC: SSOT BR-178, BR-160, BR-158, BR-207, BR-220]           |
+| BR-MKT-008 | Suppression is complementary: a suppressed cell must not be derivable from totals, siblings, or overlapping queries; counts are rounded; query dimensions and budgets are capped per client.                                                                                            | Blocks differencing attacks.                          | Privacy engine                          | [DER]                                                        |
+| BR-MKT-009 | Salary reports carry a weight: 0.5 self-reported, 1.0 employment-verified.                                                                                                                                                                                                              | Data quality.                                         | Salary service                          | [SRC: SSOT BR-177]                                           |
+| BR-MKT-010 | Money is stored and displayed in minor units with an ISO-4217 currency.                                                                                                                                                                                                                 | Correctness.                                          | Domain types                            | [SRC: SSOT BR-179]                                           |
+| BR-MKT-011 | Company-specific salary figures are shown only above the threshold (default `min_cohort_k`); the SSOT value of 3 is an override below default and needs an owner and counsel decision; an employer opt-in cannot lower it until decided (`OD-MKT-05`).                                  | Privacy.                                              | Display service                         | [SRC: SSOT BR-180]; [DEC-REQ]                                |
+| BR-MKT-012 | Contributors may withdraw any submission at any time; aggregates are recomputed and the contribution removed within 24 hours.                                                                                                                                                           | Data rights.                                          | Salary and consent services             | [SRC: SSOT BR-181]                                           |
+| BR-MKT-013 | Equity data is aggregated separately and never merged into base-pay percentiles.                                                                                                                                                                                                        | Prevents distortion.                                  | Aggregation job                         | [SRC: SSOT BR-183]                                           |
+| BR-MKT-014 | Reports outside ±3σ (robust) of the cell median, duplicates, bursts and impossible values are flagged and excluded until reviewed; rate limit is 5 reports per user per day.                                                                                                            | Data integrity.                                       | Quality service                         | [SRC: SSOT F-86 step 7]                                      |
+| BR-MKT-015 | Published snapshots are versioned and immutable; compute may run nightly, publication cadence is set by `OD-MKT-02` (SSOT states nightly in F-86 and quarterly in BR-182).                                                                                                              | Reproducibility; conflict recorded.                   | Snapshot service                        | [SRC: SSOT BR-182, F-86]; conflict recorded                  |
+| BR-MKT-016 | Career transitions are collected only with explicit opt-in; an individual's transitions are visible only to that individual.                                                                                                                                                            | Consent.                                              | Transition service, authz               | [SRC: SSOT BR-157, BR-159]                                   |
+| BR-MKT-017 | Updates to the graph or taxonomy never retroactively change published historical snapshots; new data produces a new snapshot version.                                                                                                                                                   | Auditability.                                         | Snapshot service                        | [SRC: SSOT BR-162]                                           |
+| BR-MKT-018 | Every insight or recommendation shows its data sources, sample size, window and, where applicable, a confidence interval.                                                                                                                                                               | Transparency.                                         | API contract, UI                        | [SRC: SSOT BR-163]                                           |
+| BR-MKT-019 | Outcome and trend statements are descriptive or correlational; the product never states or implies a guarantee or causation.                                                                                                                                                            | Honesty.                                              | Copy review, UI templates               | [DER] from [SRC: SSOT BR-193]                                |
+| BR-MKT-020 | When data is insufficient the product shows a "not enough data" state; it never fabricates, interpolates silently, or shows zero for suppressed cells.                                                                                                                                  | Trust.                                                | UI and API                              | [SRC: SSOT F-85 failure modes]                               |
+| BR-MKT-021 | Every snapshot records sources, window, method version, taxonomy version, sample size, computed-at; a snapshot older than 2× its cadence is flagged stale; snapshots without provenance are not published.                                                                              | Traceability.                                         | Publication gate                        | [DER]                                                        |
+| BR-MKT-022 | External data is used, displayed and exported only as its license allows, with the required attribution; expired licenses disable the source.                                                                                                                                           | Legal compliance.                                     | Source registry, export                 | [PROP]                                                       |
+| BR-MKT-023 | No individual-level record appears in any export, API response, dashboard or admin view of aggregates.                                                                                                                                                                                  | Privacy.                                              | API gateway, exports                    | [DER]                                                        |
+| BR-MKT-024 | Readiness and path indicators are explainable (factors and weights shown), never use protected attributes or proxies, and are never exposed to employers, recruiters or matching.                                                                                                       | Fairness; non-goal on opaque scoring.                 | Authz, model gate                       | [SRC: SSOT §4.2, BR-185]; [DER]                              |
+| BR-MKT-025 | Employer-facing supply and talent views are aggregate only, rounded, and suppressed under threshold; they never list or rank individuals.                                                                                                                                               | Candidate protection.                                 | Employer dashboards                     | [DER]                                                        |
+| BR-MKT-026 | Employer pay-equity analysis uses data the employer uploads, stays inside that tenant, outputs aggregates only, suppresses small cells, and deletes raw rows per retention.                                                                                                             | Narrow HR boundary.                                   | Equity job                              | [PROP] (`OD-MKT-08`)                                         |
+| BR-MKT-027 | Forecasts cover at most 12 months, always show an interval and model version, and need at least 12 months of valid history.                                                                                                                                                             | Honest uncertainty.                                   | Forecast job                            | [SRC: SSOT F-151]                                            |
+| BR-MKT-028 | Institution dashboards are cohort-level only; faculty and administrators cannot see non-consented individual data.                                                                                                                                                                      | Student privacy.                                      | Authz                                   | [DER] from [SRC: docs/experience, METRICS_CATALOG §6.2]      |
+| BR-MKT-029 | Partner API keys are scoped, rate-limited, hashed at rest, auditable and revocable; responses obey the same suppression as the UI.                                                                                                                                                      | Safe API.                                             | API gateway                             | [PROP]                                                       |
+| BR-MKT-030 | Reposted jobs (same employer, title and location within 30 days) count once in demand signals.                                                                                                                                                                                          | Accurate demand.                                      | Ingestion                               | [PROP]                                                       |
+| BR-MKT-031 | Geography is published no finer than metro or region where thresholds pass; no street-level or postal-level insight.                                                                                                                                                                    | Re-identification control.                            | Display service                         | [DER]                                                        |
+| BR-MKT-032 | Breakdowns by sensitive attributes come only from voluntary, separate, purpose-limited self-identification, subject to threshold and review, and are never used as inputs to any score.                                                                                                 | Fairness data handling.                               | Fairness store                          | [SRC: SSOT F-119]; [DER]                                     |
+| BR-MKT-033 | Disputes about displayed data are reviewed within the SLA; upheld disputes lead to a corrected version and notification of the filer.                                                                                                                                                   | Accountability.                                       | Dispute workflow                        | [PROP]                                                       |
+| BR-MKT-034 | Currency conversion uses dated rates; on conversion failure the original currency is shown and the report is excluded from cross-currency aggregates.                                                                                                                                   | Correctness.                                          | Salary service                          | [SRC: SSOT F-86 failure modes]                               |
+| BR-MKT-035 | Company skill profiles are computed only from the organization's own published postings and employer-declared technologies, never from employees' profiles, applications or evidence; they are shown only above `min_company_postings` and, per skill, above the minimum posting count. | Avoids profiling employees and low-sample distortion. | Company profile job (FR-MKT-037)        | [DER] [PROP] thresholds                                      |
+| BR-MKT-036 | Employers may dispute but not suppress or edit accurate derived company skill data; a profile or skill is withdrawn only after review confirms a data error (taxonomy mis-mapping, duplicate or agency postings).                                                                       | Credibility of market data.                           | Dispute workflow (FR-MKT-035)           | [PROP]                                                       |
 
 ## 6. State machines
 
@@ -1164,179 +1196,182 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-MKT-001 | Market insights explorer | `/market` | All | Demand, supply, trend by skill, role, region | Loading, suppressed cell, stale banner, empty |
-| SCR-MKT-002 | Skill detail | `/market/skills/:skillId` | All | Description, relationships, demand, related roles | Deprecated redirect |
-| SCR-MKT-003 | Regional gap map | `/market/gaps` | Signed-in | Heat map and ranked list | Threshold greyed regions |
-| SCR-MKT-004 | Trends and forecast | `/market/trends` | Signed-in | Forecast with intervals | Low confidence, withheld |
-| SCR-MKT-005 | Salary benchmarks | `/salaries` | GUE (national), signed-in | Bands, trend, methodology | Not enough reports, currency failure |
-| SCR-MKT-006 | Career path explorer | `/careers` | All | Role transition graph and details | Sparse role, skill-similarity mode |
-| SCR-MKT-007 | Role detail | `/careers/roles/:roleId` | All | Requirements, pay, demand | Deprecated redirect |
-| SCR-MKT-008 | Skill-gap analysis | `/me/careers/gap` | CAN, STD | Compare skills to target role | Outdated, empty profile |
-| SCR-MKT-009 | Readiness and time estimate | `/me/careers/readiness/:id` | CAN, STD | Factors and range | Insufficient data |
-| SCR-MKT-010 | Action plan | `/me/careers/plan/:id` | CAN, STD | Plan items and progress | Item unavailable |
-| SCR-MKT-011 | Compare careers | `/careers/compare` | CAN, STD | Side-by-side roles | Missing cells |
-| SCR-MKT-012 | Add salary / equity | `/salaries/contribute` | Signed-in | Submit and manage reports | Validation, under review, withdrawn |
-| SCR-MKT-013 | My contributions | `/me/market/contributions` | Signed-in | Salary, transitions, withdrawal | Empty, pending |
-| SCR-MKT-014 | Employer market view | `/employer/market` | REC, HMG, EAD, EXA | Workforce planning, benchmarks | No entitlement, thin data |
-| SCR-MKT-015 | Pay-equity analysis | `/employer/market/equity` | EAD, EXA | Upload and aggregate report | Parsing errors, suppressed cells |
-| SCR-MKT-016 | Market data consent | `/settings/privacy/market` | Signed-in | Contribution consents | Toggles, history |
-| SCR-MKT-017 | Institution market dashboard | `/institution/market` | IAD, PLO | Programme alignment | Unmapped programme |
-| SCR-MKT-018 | Admin: skills catalogue | `/admin/market/skills` | PAD | Create, merge, deprecate | Duplicates, conflicts |
-| SCR-MKT-019 | Admin: taxonomy versions | `/admin/market/versions` | PAD | Draft, approve, publish | Migration progress |
-| SCR-MKT-020 | Admin: data quality and sources | `/admin/market/data` | PAD | Pipeline, sources, quality queue | Alerts, license expiry |
-| SCR-MKT-021 | Admin: privacy policy and fairness | `/admin/market/policy` | PAD, SAD | k parameters, simulation, reviews | Simulation results |
-| SCR-MKT-022 | Partner API and exports | `/settings/market/api` | IAD, EXA, PAD | Grants, keys, usage, exports | Pending, revoked |
+| ID          | Name                               | Route proposal              | Roles                     | Purpose                                           | Key states                                    |
+| ----------- | ---------------------------------- | --------------------------- | ------------------------- | ------------------------------------------------- | --------------------------------------------- |
+| SCR-MKT-001 | Market insights explorer           | `/market`                   | All                       | Demand, supply, trend by skill, role, region      | Loading, suppressed cell, stale banner, empty |
+| SCR-MKT-002 | Skill detail                       | `/market/skills/:skillId`   | All                       | Description, relationships, demand, related roles | Deprecated redirect                           |
+| SCR-MKT-003 | Regional gap map                   | `/market/gaps`              | Signed-in                 | Heat map and ranked list                          | Threshold greyed regions                      |
+| SCR-MKT-004 | Trends and forecast                | `/market/trends`            | Signed-in                 | Forecast with intervals                           | Low confidence, withheld                      |
+| SCR-MKT-005 | Salary benchmarks                  | `/salaries`                 | GUE (national), signed-in | Bands, trend, methodology                         | Not enough reports, currency failure          |
+| SCR-MKT-006 | Career path explorer               | `/careers`                  | All                       | Role transition graph and details                 | Sparse role, skill-similarity mode            |
+| SCR-MKT-007 | Role detail                        | `/careers/roles/:roleId`    | All                       | Requirements, pay, demand                         | Deprecated redirect                           |
+| SCR-MKT-008 | Skill-gap analysis                 | `/me/careers/gap`           | CAN, STD                  | Compare skills to target role                     | Outdated, empty profile                       |
+| SCR-MKT-009 | Readiness and time estimate        | `/me/careers/readiness/:id` | CAN, STD                  | Factors and range                                 | Insufficient data                             |
+| SCR-MKT-010 | Action plan                        | `/me/careers/plan/:id`      | CAN, STD                  | Plan items and progress                           | Item unavailable                              |
+| SCR-MKT-011 | Compare careers                    | `/careers/compare`          | CAN, STD                  | Side-by-side roles                                | Missing cells                                 |
+| SCR-MKT-012 | Add salary / equity                | `/salaries/contribute`      | Signed-in                 | Submit and manage reports                         | Validation, under review, withdrawn           |
+| SCR-MKT-013 | My contributions                   | `/me/market/contributions`  | Signed-in                 | Salary, transitions, withdrawal                   | Empty, pending                                |
+| SCR-MKT-014 | Employer market view               | `/employer/market`          | REC, HMG, EAD, EXA        | Workforce planning, benchmarks                    | No entitlement, thin data                     |
+| SCR-MKT-015 | Pay-equity analysis                | `/employer/market/equity`   | EAD, EXA                  | Upload and aggregate report                       | Parsing errors, suppressed cells              |
+| SCR-MKT-016 | Market data consent                | `/settings/privacy/market`  | Signed-in                 | Contribution consents                             | Toggles, history                              |
+| SCR-MKT-017 | Institution market dashboard       | `/institution/market`       | IAD, PLO                  | Programme alignment                               | Unmapped programme                            |
+| SCR-MKT-018 | Admin: skills catalogue            | `/admin/market/skills`      | PAD                       | Create, merge, deprecate                          | Duplicates, conflicts                         |
+| SCR-MKT-019 | Admin: taxonomy versions           | `/admin/market/versions`    | PAD                       | Draft, approve, publish                           | Migration progress                            |
+| SCR-MKT-020 | Admin: data quality and sources    | `/admin/market/data`        | PAD                       | Pipeline, sources, quality queue                  | Alerts, license expiry                        |
+| SCR-MKT-021 | Admin: privacy policy and fairness | `/admin/market/policy`      | PAD, SAD                  | k parameters, simulation, reviews                 | Simulation results                            |
+| SCR-MKT-022 | Partner API and exports            | `/settings/market/api`      | IAD, EXA, PAD             | Grants, keys, usage, exports                      | Pending, revoked                              |
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-MKT-01 | Skill | skillId (`SK-`), name, category, status, scaleId, successorId, version | N:M aliases, relationships | Permanent reference data |
-| ENT-MKT-02 | SkillAlias | alias, skillId, contextRule | N:1 Skill | Permanent |
-| ENT-MKT-03 | SkillRelationship | fromSkillId, toSkillId, type, strength, source (curated or computed) | Skill to Skill | Permanent; versioned |
-| ENT-MKT-04 | TaxonomyVersion | versionId, state, changeList, approvers, publishedAt | 1:N changes | Permanent |
-| ENT-MKT-05 | EmergingSkillCandidate | term, signals (by distinct source), state, firstSeen | N:1 resulting Skill | 2 years |
-| ENT-MKT-06 | ExternalFrameworkMapping | skillId or roleId, framework, code, relation, releaseVersion | N:1 Skill/Role | With framework license |
-| ENT-MKT-07 | Role | roleId (`RL-`), title, family, levels, status, successorId | 1:N requirements | Permanent reference |
-| ENT-MKT-08 | RoleSkillRequirement | roleId, level, skillId, importance, proficiency | N:1 Role, Skill | Versioned with taxonomy |
-| ENT-MKT-09 | DataSource | sourceId, type, license terms, allowed outputs, expiry, status | 1:N signals | Business record |
-| ENT-MKT-10 | MarketSignal | signalId, type, skillIds, roleId, region, industry, sizeBand, period, sourcePseudonym | N:1 DataSource | 25 months |
-| ENT-MKT-11 | DatasetSnapshot | snapshotId, kind, window, methodVersion, taxonomyVersion, sampleSize, computedAt, state, provenance | 1:N published cells | Permanent (immutable) |
-| ENT-MKT-12 | SalaryReport | reportId, role, level, region, industry, sizeBand, amountMinor, currency, period, weight, state, contributorLink | Link to consent | Personal; deleted on withdrawal; reversible link kept only for withdrawal |
-| ENT-MKT-13 | SalaryAggregate | snapshotId, cell key, percentiles, contributorCount, flags | N:1 Snapshot | Permanent (immutable) |
-| ENT-MKT-14 | EquityReport and Aggregate | instrument, grantValue, vesting, stage; aggregate cells | As salary | As salary |
-| ENT-MKT-15 | CareerTransition | fromRoleId, toRoleId, dates, timeInRole, salaryDeltaBand?, state, contributorLink | Link to consent | Personal; deleted on opt-out |
-| ENT-MKT-16 | ProgressionBenchmark | fromRoleId, toRoleId, region, frequency, medianTime, interval, sample, snapshotId | N:1 Snapshot | Permanent (immutable) |
-| ENT-MKT-17 | GapAnalysis | analysisId, userId, targetRole, level, taxonomyVersion, results | N:1 User | Personal; user-owned, deleted with account |
-| ENT-MKT-18 | ActionPlanLink | planId, userId, itemType, itemRef, status | N:1 GapAnalysis | Personal |
-| ENT-MKT-19 | Forecast | snapshotId, series, interval, modelVersion, backtest | N:1 Snapshot | Permanent |
-| ENT-MKT-20 | SavedMarketView | viewId, ownerId or orgId, filters | N:1 Owner | Business |
-| ENT-MKT-21 | ExportJob | jobId, requesterId, scope, state, expiresAt | N:1 User | 7 days file, audit 24 months |
-| ENT-MKT-22 | ApiGrant | grantId, orgId, scopes, rateTier, keyHash, state | N:1 Org | Business |
-| ENT-MKT-23 | ContributionConsent | userId, purpose, consentVersion, state, at | N:1 User | Append-only, anonymized after deletion |
-| ENT-MKT-24 | Dispute | disputeId, filerId, targetRef, type, state | N:1 target | 24 months |
-| ENT-MKT-25 | SuppressionPolicy | parameter, value, scope, decisionRecordId, version | Permanent audit | Permanent |
+| ID         | Entity                     | Key attributes                                                                                                   | Relationships              | Retention class                                                           |
+| ---------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------- |
+| ENT-MKT-01 | Skill                      | skillId (`SK-`), name, category, status, scaleId, successorId, version                                           | N:M aliases, relationships | Permanent reference data                                                  |
+| ENT-MKT-02 | SkillAlias                 | alias, skillId, contextRule                                                                                      | N:1 Skill                  | Permanent                                                                 |
+| ENT-MKT-03 | SkillRelationship          | fromSkillId, toSkillId, type, strength, source (curated or computed)                                             | Skill to Skill             | Permanent; versioned                                                      |
+| ENT-MKT-04 | TaxonomyVersion            | versionId, state, changeList, approvers, publishedAt                                                             | 1:N changes                | Permanent                                                                 |
+| ENT-MKT-05 | EmergingSkillCandidate     | term, signals (by distinct source), state, firstSeen                                                             | N:1 resulting Skill        | 2 years                                                                   |
+| ENT-MKT-06 | ExternalFrameworkMapping   | skillId or roleId, framework, code, relation, releaseVersion                                                     | N:1 Skill/Role             | With framework license                                                    |
+| ENT-MKT-07 | Role                       | roleId (`RL-`), title, family, levels, status, successorId                                                       | 1:N requirements           | Permanent reference                                                       |
+| ENT-MKT-08 | RoleSkillRequirement       | roleId, level, skillId, importance, proficiency                                                                  | N:1 Role, Skill            | Versioned with taxonomy                                                   |
+| ENT-MKT-09 | DataSource                 | sourceId, type, license terms, allowed outputs, expiry, status                                                   | 1:N signals                | Business record                                                           |
+| ENT-MKT-10 | MarketSignal               | signalId, type, skillIds, roleId, region, industry, sizeBand, period, sourcePseudonym                            | N:1 DataSource             | 25 months                                                                 |
+| ENT-MKT-11 | DatasetSnapshot            | snapshotId, kind, window, methodVersion, taxonomyVersion, sampleSize, computedAt, state, provenance              | 1:N published cells        | Permanent (immutable)                                                     |
+| ENT-MKT-12 | SalaryReport               | reportId, role, level, region, industry, sizeBand, amountMinor, currency, period, weight, state, contributorLink | Link to consent            | Personal; deleted on withdrawal; reversible link kept only for withdrawal |
+| ENT-MKT-13 | SalaryAggregate            | snapshotId, cell key, percentiles, contributorCount, flags                                                       | N:1 Snapshot               | Permanent (immutable)                                                     |
+| ENT-MKT-14 | EquityReport and Aggregate | instrument, grantValue, vesting, stage; aggregate cells                                                          | As salary                  | As salary                                                                 |
+| ENT-MKT-15 | CareerTransition           | fromRoleId, toRoleId, dates, timeInRole, salaryDeltaBand?, state, contributorLink                                | Link to consent            | Personal; deleted on opt-out                                              |
+| ENT-MKT-16 | ProgressionBenchmark       | fromRoleId, toRoleId, region, frequency, medianTime, interval, sample, snapshotId                                | N:1 Snapshot               | Permanent (immutable)                                                     |
+| ENT-MKT-17 | GapAnalysis                | analysisId, userId, targetRole, level, taxonomyVersion, results                                                  | N:1 User                   | Personal; user-owned, deleted with account                                |
+| ENT-MKT-18 | ActionPlanLink             | planId, userId, itemType, itemRef, status                                                                        | N:1 GapAnalysis            | Personal                                                                  |
+| ENT-MKT-19 | Forecast                   | snapshotId, series, interval, modelVersion, backtest                                                             | N:1 Snapshot               | Permanent                                                                 |
+| ENT-MKT-20 | SavedMarketView            | viewId, ownerId or orgId, filters                                                                                | N:1 Owner                  | Business                                                                  |
+| ENT-MKT-21 | ExportJob                  | jobId, requesterId, scope, state, expiresAt                                                                      | N:1 User                   | 7 days file, audit 24 months                                              |
+| ENT-MKT-22 | ApiGrant                   | grantId, orgId, scopes, rateTier, keyHash, state                                                                 | N:1 Org                    | Business                                                                  |
+| ENT-MKT-23 | ContributionConsent        | userId, purpose, consentVersion, state, at                                                                       | N:1 User                   | Append-only, anonymized after deletion                                    |
+| ENT-MKT-24 | Dispute                    | disputeId, filerId, targetRef, type, state                                                                       | N:1 target                 | 24 months                                                                 |
+| ENT-MKT-25 | SuppressionPolicy          | parameter, value, scope, decisionRecordId, version                                                               | Permanent audit            | Permanent                                                                 |
+| ENT-MKT-26 | CompanySkillProfile        | orgId, snapshotId, skillId, postingShare, postingCount, importance, trend, sampleSize, computedAt                | N:1 DatasetSnapshot, org   | Aggregate: permanent; detail 24 months                                    |
 
 ## 9. Events emitted and consumed
 
 ### 9.1 Emitted
 
-| ID | Name | Trigger | Key payload |
-|---|---|---|---|
-| EVT-MKT-001 | mkt.skill.created | Skill created | skillId, category |
-| EVT-MKT-002 | mkt.skill.deprecated | Skill deprecated | skillId, successorId |
-| EVT-MKT-003 | mkt.skill.proposal_decided | Proposal promoted, aliased, dismissed | candidateId, decision |
-| EVT-MKT-004 | mkt.taxonomy.version_published | Version published | versionId, changeCounts |
-| EVT-MKT-005 | mkt.role.updated | Role or requirements changed | roleId, versionId |
-| EVT-MKT-006 | mkt.source.state_changed | Data source enabled, disabled, expired | sourceId, state |
-| EVT-MKT-007 | mkt.pipeline.alert | Reconciliation or freshness breach | sourceId, kind |
-| EVT-MKT-008 | mkt.snapshot.published | Snapshot published | snapshotId, kind, cellsPublished, cellsSuppressed |
-| EVT-MKT-009 | mkt.snapshot.held | Snapshot held | snapshotId, reason |
-| EVT-MKT-010 | mkt.salary.submitted | Report submitted | reportId (pseudonymous), weight |
-| EVT-MKT-011 | mkt.salary.flagged | Report flagged | reportId, reasonClass |
-| EVT-MKT-012 | mkt.salary.withdrawn | Report withdrawn | reportId |
-| EVT-MKT-013 | mkt.transition.recorded | Transition opt-in recorded | transitionId (pseudonymous) |
-| EVT-MKT-014 | mkt.transition.removed | Transition removed | transitionId |
-| EVT-MKT-015 | mkt.benchmark.viewed | Benchmark viewed | kind, cellClass (no identity beyond pseudonym) |
-| EVT-MKT-016 | mkt.gap.computed | Gap analysis run | targetRoleId, taxonomyVersion |
-| EVT-MKT-017 | mkt.readiness.computed | Readiness computed | modelVersion |
-| EVT-MKT-018 | mkt.plan.created | Action plan created | planId, itemCount |
-| EVT-MKT-019 | mkt.consent.changed | Contribution consent changed | purpose, state |
-| EVT-MKT-020 | mkt.export.requested | Export requested | scope, format |
-| EVT-MKT-021 | mkt.api.grant_changed | Grant approved or revoked | grantId, state |
-| EVT-MKT-022 | mkt.dispute.opened | Dispute filed | disputeId, type |
-| EVT-MKT-023 | mkt.dispute.resolved | Dispute resolved | disputeId, outcome |
-| EVT-MKT-024 | mkt.policy.changed | Suppression policy changed | parameter, decisionRecordId |
-| EVT-MKT-025 | mkt.fairness.review_recorded | Fairness review done | modelVersion, outcome |
+| ID          | Name                           | Trigger                                       | Key payload                                       |
+| ----------- | ------------------------------ | --------------------------------------------- | ------------------------------------------------- |
+| EVT-MKT-001 | mkt.skill.created              | Skill created                                 | skillId, category                                 |
+| EVT-MKT-002 | mkt.skill.deprecated           | Skill deprecated                              | skillId, successorId                              |
+| EVT-MKT-003 | mkt.skill.proposal_decided     | Proposal promoted, aliased, dismissed         | candidateId, decision                             |
+| EVT-MKT-004 | mkt.taxonomy.version_published | Version published                             | versionId, changeCounts                           |
+| EVT-MKT-005 | mkt.role.updated               | Role or requirements changed                  | roleId, versionId                                 |
+| EVT-MKT-006 | mkt.source.state_changed       | Data source enabled, disabled, expired        | sourceId, state                                   |
+| EVT-MKT-007 | mkt.pipeline.alert             | Reconciliation or freshness breach            | sourceId, kind                                    |
+| EVT-MKT-008 | mkt.snapshot.published         | Snapshot published                            | snapshotId, kind, cellsPublished, cellsSuppressed |
+| EVT-MKT-009 | mkt.snapshot.held              | Snapshot held                                 | snapshotId, reason                                |
+| EVT-MKT-010 | mkt.salary.submitted           | Report submitted                              | reportId (pseudonymous), weight                   |
+| EVT-MKT-011 | mkt.salary.flagged             | Report flagged                                | reportId, reasonClass                             |
+| EVT-MKT-012 | mkt.salary.withdrawn           | Report withdrawn                              | reportId                                          |
+| EVT-MKT-013 | mkt.transition.recorded        | Transition opt-in recorded                    | transitionId (pseudonymous)                       |
+| EVT-MKT-014 | mkt.transition.removed         | Transition removed                            | transitionId                                      |
+| EVT-MKT-015 | mkt.benchmark.viewed           | Benchmark viewed                              | kind, cellClass (no identity beyond pseudonym)    |
+| EVT-MKT-016 | mkt.gap.computed               | Gap analysis run                              | targetRoleId, taxonomyVersion                     |
+| EVT-MKT-017 | mkt.readiness.computed         | Readiness computed                            | modelVersion                                      |
+| EVT-MKT-018 | mkt.plan.created               | Action plan created                           | planId, itemCount                                 |
+| EVT-MKT-019 | mkt.consent.changed            | Contribution consent changed                  | purpose, state                                    |
+| EVT-MKT-020 | mkt.export.requested           | Export requested                              | scope, format                                     |
+| EVT-MKT-021 | mkt.api.grant_changed          | Grant approved or revoked                     | grantId, state                                    |
+| EVT-MKT-022 | mkt.dispute.opened             | Dispute filed                                 | disputeId, type                                   |
+| EVT-MKT-023 | mkt.dispute.resolved           | Dispute resolved                              | disputeId, outcome                                |
+| EVT-MKT-024 | mkt.policy.changed             | Suppression policy changed                    | parameter, decisionRecordId                       |
+| EVT-MKT-025 | mkt.fairness.review_recorded   | Fairness review done                          | modelVersion, outcome                             |
+| EVT-MKT-026 | mkt.company_profile.published  | Company skill snapshot computed and published | orgId, snapshotId                                 |
 
 ### 9.2 Consumed
 
-| Source (module) | Event | Use |
-|---|---|---|
-| `JOB` (planned) | job published, closed | Demand signals, dedupe |
-| `ATS` (planned) | application, hire events | Outcome signals, transitions with consent |
-| `LRN`, `ASM` (planned) | enrollment, completion, assessment passed | Skill supply, learning-to-role signals |
-| `PRF`, `EVD` (planned) | skill added/verified, work history changed | Supply index, transition candidates |
-| `SET` (planned) | consent changed, account deleted | Withdrawal of contributions |
-| `BIL` (planned) | entitlement changed | Premium insight access |
+| Source (module)        | Event                                      | Use                                       |
+| ---------------------- | ------------------------------------------ | ----------------------------------------- |
+| `JOB` (planned)        | job published, closed                      | Demand signals, dedupe                    |
+| `ATS` (planned)        | application, hire events                   | Outcome signals, transitions with consent |
+| `LRN`, `ASM` (planned) | enrollment, completion, assessment passed  | Skill supply, learning-to-role signals    |
+| `PRF`, `EVD` (planned) | skill added/verified, work history changed | Supply index, transition candidates       |
+| `SET` (planned)        | consent changed, account deleted           | Withdrawal of contributions               |
+| `BIL` (planned)        | entitlement changed                        | Premium insight access                    |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-|---|---|---|
-| Public frameworks (ESCO, O*NET, SFIA, national occupation codes) | External mappings | Licenses vary; `OD-MKT-03` |
-| Labor-market data providers, salary surveys, statistics agencies | Supplementary demand and pay data | Registry with licensing (FR-MKT-009); `OD-MKT-03` |
-| Exchange rate provider | FX for normalization | Dated rates; failure handling per `BR-MKT-034` |
-| Geo hierarchy dataset | Region polygons and names | Public data |
-| Time-series forecasting library | Forecasts | Internal; versioned |
-| `PLT` API gateway, `NTF` notifications | API delivery, alerts | Consumed |
+| Dependency                                                        | Purpose                           | Notes                                             |
+| ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------- |
+| Public frameworks (ESCO, O\*NET, SFIA, national occupation codes) | External mappings                 | Licenses vary; `OD-MKT-03`                        |
+| Labor-market data providers, salary surveys, statistics agencies  | Supplementary demand and pay data | Registry with licensing (FR-MKT-009); `OD-MKT-03` |
+| Exchange rate provider                                            | FX for normalization              | Dated rates; failure handling per `BR-MKT-034`    |
+| Geo hierarchy dataset                                             | Region polygons and names         | Public data                                       |
+| Time-series forecasting library                                   | Forecasts                         | Internal; versioned                               |
+| `PLT` API gateway, `NTF` notifications                            | API delivery, alerts              | Consumed                                          |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why | Depended on by | Why |
-|---|---|---|---|
-| JOB (planned) | Job postings and skill tags | JOB | Salary band on job page, skill picker |
-| ATS (planned) | Hire and stage outcomes | ATS | Offer calibration panel |
-| LRN, ASM (planned) | Courses, assessments mapped to skills | LRN | Skill gap to course suggestions, skill ids |
-| PRF, EVD (planned) | User skills and evidence | AIC (planned) | Career assistant uses paths and gaps |
-| SET (planned) | Consent | INS (planned) | Programme alignment dashboards |
-| BIL (planned) | Entitlements | ENT (planned) | Skills inventory uses the taxonomy |
-| INS (planned) | Cohorts | ANL | Market metric definitions |
-| PLT (planned) | API gateway | EVT, GIG, MEN (planned) | Skill tags and plan items |
+| Depends on         | Why                                   | Depended on by          | Why                                        |
+| ------------------ | ------------------------------------- | ----------------------- | ------------------------------------------ |
+| JOB (planned)      | Job postings and skill tags           | JOB                     | Salary band on job page, skill picker      |
+| ATS (planned)      | Hire and stage outcomes               | ATS                     | Offer calibration panel                    |
+| LRN, ASM (planned) | Courses, assessments mapped to skills | LRN                     | Skill gap to course suggestions, skill ids |
+| PRF, EVD (planned) | User skills and evidence              | AIC (planned)           | Career assistant uses paths and gaps       |
+| SET (planned)      | Consent                               | INS (planned)           | Programme alignment dashboards             |
+| BIL (planned)      | Entitlements                          | ENT (planned)           | Skills inventory uses the taxonomy         |
+| INS (planned)      | Cohorts                               | ANL                     | Market metric definitions                  |
+| PLT (planned)      | API gateway                           | EVT, GIG, MEN (planned) | Skill tags and plan items                  |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| MET-MKT-01 Tag resolution rate | Skill tags resolved automatically to canonical ids | auto-resolved / all tags | Taxonomy curator |
-| MET-MKT-02 Unresolved backlog age | Median age of unresolved terms | median(now − firstSeen) | Taxonomy curator |
-| MET-MKT-03 Cell publication rate | Cells published vs candidate cells | published / candidate | Data owner |
-| MET-MKT-04 Suppression rate | Cells suppressed under threshold | suppressed / candidate | Privacy lead |
-| MET-MKT-05 Snapshot freshness | Share of snapshots not stale | non-stale / published | Data owner |
-| MET-MKT-06 Salary contribution coverage | Verified salary reports per active role family | count of verified reports with distinct contributors ≥ k cells / total cells | Product |
-| MET-MKT-07 Path explorer usage to plan | Gap analyses that become plans | plans / gap analyses | Product |
-| MET-MKT-08 Dispute turnaround | Median days to resolve | median(resolved − opened) | Data owner |
-| MET-MKT-09 Forecast accuracy | Interval coverage of realized values | within interval / forecasts evaluated | Data science |
+| Metric                                  | Definition                                         | Formula                                                                      | Owner role       |
+| --------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------- |
+| MET-MKT-01 Tag resolution rate          | Skill tags resolved automatically to canonical ids | auto-resolved / all tags                                                     | Taxonomy curator |
+| MET-MKT-02 Unresolved backlog age       | Median age of unresolved terms                     | median(now − firstSeen)                                                      | Taxonomy curator |
+| MET-MKT-03 Cell publication rate        | Cells published vs candidate cells                 | published / candidate                                                        | Data owner       |
+| MET-MKT-04 Suppression rate             | Cells suppressed under threshold                   | suppressed / candidate                                                       | Privacy lead     |
+| MET-MKT-05 Snapshot freshness           | Share of snapshots not stale                       | non-stale / published                                                        | Data owner       |
+| MET-MKT-06 Salary contribution coverage | Verified salary reports per active role family     | count of verified reports with distinct contributors ≥ k cells / total cells | Product          |
+| MET-MKT-07 Path explorer usage to plan  | Gap analyses that become plans                     | plans / gap analyses                                                         | Product          |
+| MET-MKT-08 Dispute turnaround           | Median days to resolve                             | median(resolved − opened)                                                    | Data owner       |
+| MET-MKT-09 Forecast accuracy            | Interval coverage of realized values               | within interval / forecasts evaluated                                        | Data science     |
 
 All are P0 or P2 aggregates [DER].
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-MKT-01 | Is MKT in scope beyond the taxonomy slice given SSOT §4.2 and the "operating system" goal? | A: full module; B: taxonomy + salary + path explorer only; C: taxonomy only | A, with minimal viable slice = FR-MKT-001, 002, 003, 004, 007, 008, 010, 012, 033 at R1 to R4 (taxonomy and demand, no salary, no paths) | Product owner | Salary, paths, dashboards |
-| OD-MKT-02 | Compute and publication cadence for salary data (SSOT F-86 nightly vs BR-182 quarterly) | Nightly compute with weekly publication; nightly; quarterly | Nightly compute, weekly publication | Product owner | FR-MKT-018 |
-| OD-MKT-03 | Which external data sources and taxonomies, and their licensing and cost | List of providers | None until legal review; use platform data and public statistics only | Product owner, Finance, Counsel | FR-MKT-006, 009 |
-| OD-MKT-04 | Default for including members' skills in aggregate supply counts | Opt-out default (aggregate use allowed) or opt-in | Opt-out default for aggregate, clearly disclosed, counsel to confirm | Counsel, Privacy | FR-MKT-013, 034 |
-| OD-MKT-05 | What `min_cohort_k` counts (distinct people, reports, employers) and whether employers' opt-in may lower the company-level threshold of 3 (BR-180) | People vs reports; override yes/no | Distinct contributors; no lowering without a decision record | Owner, Counsel | FR-MKT-018, 033 |
-| OD-MKT-06 | Independence rule for emerging skill signals | ≥ 3 distinct employer or institution sources, or only count distinct entities | ≥ 3 distinct employer or institution sources and ≥ 5 signals | Taxonomy owner | FR-MKT-005 |
-| OD-MKT-07 | Are market insights free, or gated by plan (employer dashboards, API)? | Free; per plan; per seat | Candidate insights free; employer and API by plan | Commercial owner | FR-MKT-029, 032 |
-| OD-MKT-08 | Employer pay-equity analysis: legal scope, markets, retention of uploads, sensitive group data | Offer, defer | Defer protected-group analysis; offer role/level/location pay gap only | Counsel, Product | FR-MKT-020 |
-| OD-MKT-09 | Dispute SLA | Business days | 10 business days | Data owner | FR-MKT-035 |
+| ID        | Question                                                                                                                                           | Options                                                                       | Default proposal                                                                                                                         | Who decides                     | Blocking                  |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------- |
+| OD-MKT-01 | Is MKT in scope beyond the taxonomy slice given SSOT §4.2 and the "operating system" goal?                                                         | A: full module; B: taxonomy + salary + path explorer only; C: taxonomy only   | A, with minimal viable slice = FR-MKT-001, 002, 003, 004, 007, 008, 010, 012, 033 at R1 to R4 (taxonomy and demand, no salary, no paths) | Product owner                   | Salary, paths, dashboards |
+| OD-MKT-02 | Compute and publication cadence for salary data (SSOT F-86 nightly vs BR-182 quarterly)                                                            | Nightly compute with weekly publication; nightly; quarterly                   | Nightly compute, weekly publication                                                                                                      | Product owner                   | FR-MKT-018                |
+| OD-MKT-03 | Which external data sources and taxonomies, and their licensing and cost                                                                           | List of providers                                                             | None until legal review; use platform data and public statistics only                                                                    | Product owner, Finance, Counsel | FR-MKT-006, 009           |
+| OD-MKT-04 | Default for including members' skills in aggregate supply counts                                                                                   | Opt-out default (aggregate use allowed) or opt-in                             | Opt-out default for aggregate, clearly disclosed, counsel to confirm                                                                     | Counsel, Privacy                | FR-MKT-013, 034           |
+| OD-MKT-05 | What `min_cohort_k` counts (distinct people, reports, employers) and whether employers' opt-in may lower the company-level threshold of 3 (BR-180) | People vs reports; override yes/no                                            | Distinct contributors; no lowering without a decision record                                                                             | Owner, Counsel                  | FR-MKT-018, 033           |
+| OD-MKT-06 | Independence rule for emerging skill signals                                                                                                       | ≥ 3 distinct employer or institution sources, or only count distinct entities | ≥ 3 distinct employer or institution sources and ≥ 5 signals                                                                             | Taxonomy owner                  | FR-MKT-005                |
+| OD-MKT-07 | Are market insights free, or gated by plan (employer dashboards, API)?                                                                             | Free; per plan; per seat                                                      | Candidate insights free; employer and API by plan                                                                                        | Commercial owner                | FR-MKT-029, 032           |
+| OD-MKT-08 | Employer pay-equity analysis: legal scope, markets, retention of uploads, sensitive group data                                                     | Offer, defer                                                                  | Defer protected-group analysis; offer role/level/location pay gap only                                                                   | Counsel, Product                | FR-MKT-020                |
+| OD-MKT-09 | Dispute SLA                                                                                                                                        | Business days                                                                 | 10 business days                                                                                                                         | Data owner                      | FR-MKT-035                |
+| OD-MKT-10 | Thresholds for company skill profiles: minimum postings per company, per skill and the lookback window.                                            | 5 / 2 / 12 months; 10 / 3 / 12 months; 3 / 1 / 6 months                       | 5 postings, 2 per skill, 12 months `[PROP]`                                                                                              | Data owner                      | FR-MKT-037                |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-|---|---|---|---|
-| RSK-MKT-01 | Re-identification through small cells or overlapping queries | Privacy breach | Central engine, complementary suppression, query budgets (FR-MKT-033) |
-| RSK-MKT-02 | Platform sample bias presented as "the market" | Misleading insight | Labelling, provenance, external sources (FR-MKT-010, 013) |
-| RSK-MKT-03 | Salary gaming and coordinated false reports | Poor benchmarks | Weights, outlier and burst controls, review (FR-MKT-011, 017) |
-| RSK-MKT-04 | Readiness or path outputs taken as guarantees, or used by employers | Harm, fairness issues | Honest copy, no employer exposure, fairness review (BR-MKT-019, 024; FR-MKT-036) |
-| RSK-MKT-05 | External data license breach | Legal exposure | Source registry, export filter (FR-MKT-009, 031) |
-| RSK-MKT-06 | Taxonomy churn breaks consumers | Regressions across modules | Versioning, migration, immutable snapshots (FR-MKT-004) |
-| RSK-MKT-07 | Scope drift toward HR/payroll | Violates SSOT §4.2 | Narrow employer features, `OD-MKT-01`, `OD-MKT-08` |
+| ID         | Risk                                                                | Impact                     | Mitigation                                                                       |
+| ---------- | ------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------- |
+| RSK-MKT-01 | Re-identification through small cells or overlapping queries        | Privacy breach             | Central engine, complementary suppression, query budgets (FR-MKT-033)            |
+| RSK-MKT-02 | Platform sample bias presented as "the market"                      | Misleading insight         | Labelling, provenance, external sources (FR-MKT-010, 013)                        |
+| RSK-MKT-03 | Salary gaming and coordinated false reports                         | Poor benchmarks            | Weights, outlier and burst controls, review (FR-MKT-011, 017)                    |
+| RSK-MKT-04 | Readiness or path outputs taken as guarantees, or used by employers | Harm, fairness issues      | Honest copy, no employer exposure, fairness review (BR-MKT-019, 024; FR-MKT-036) |
+| RSK-MKT-05 | External data license breach                                        | Legal exposure             | Source registry, export filter (FR-MKT-009, 031)                                 |
+| RSK-MKT-06 | Taxonomy churn breaks consumers                                     | Regressions across modules | Versioning, migration, immutable snapshots (FR-MKT-004)                          |
+| RSK-MKT-07 | Scope drift toward HR/payroll                                       | Violates SSOT §4.2         | Narrow employer features, `OD-MKT-01`, `OD-MKT-08`                               |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §6.2 Skill ontology; §10.27 BR-141..BR-148; F-84 | Taxonomy governance, relationships, emerging skills | Detailed F-84 text lives with consumers; MKT owns taxonomy |
-| SSOT F-85 Career Graph and Progression (BR-157..BR-163) | Transitions, benchmarks, opt-in, readiness | Threshold of 20 kept as feature override of `min_cohort_k` |
-| SSOT F-86 Salary Intelligence (BR-177..BR-183) | Salary submission, weights, aggregation, display | Nightly vs quarterly conflict recorded as `OD-MKT-02`; company threshold 3 recorded as `OD-MKT-05` |
-| SSOT F-97, F-151, F-152, F-98 | Demand analytics, forecast, trajectory, equity | Forecast horizon kept at 12 months |
-| SSOT Amendment G, V61-04 | Single `min_cohort_k` parameter | Lower values only via decision record |
-| SSOT F-46, F-158, F-161, F-119, F-165 | Institution, employer views; fairness | Employer equity narrowed; D&I data voluntary only |
-| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` | Privacy classes P0–P3, aggregation principles | None |
-| docs/registries (F-86, F-97, F-151, F-152) | Feature identity | Status never copied |
+| Source                                                                        | Used for                                            | Dropped or changed                                                                                 |
+| ----------------------------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| SSOT §6.2 Skill ontology; §10.27 BR-141..BR-148; F-84                         | Taxonomy governance, relationships, emerging skills | Detailed F-84 text lives with consumers; MKT owns taxonomy                                         |
+| SSOT F-85 Career Graph and Progression (BR-157..BR-163)                       | Transitions, benchmarks, opt-in, readiness          | Threshold of 20 kept as feature override of `min_cohort_k`                                         |
+| SSOT F-86 Salary Intelligence (BR-177..BR-183)                                | Salary submission, weights, aggregation, display    | Nightly vs quarterly conflict recorded as `OD-MKT-02`; company threshold 3 recorded as `OD-MKT-05` |
+| SSOT F-97, F-151, F-152, F-98                                                 | Demand analytics, forecast, trajectory, equity      | Forecast horizon kept at 12 months                                                                 |
+| SSOT Amendment G, V61-04                                                      | Single `min_cohort_k` parameter                     | Lower values only via decision record                                                              |
+| SSOT F-46, F-158, F-161, F-119, F-165                                         | Institution, employer views; fairness               | Employer equity narrowed; D&I data voluntary only                                                  |
+| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` | Privacy classes P0–P3, aggregation principles       | None                                                                                               |
+| docs/registries (F-86, F-97, F-151, F-152)                                    | Feature identity                                    | Status never copied                                                                                |

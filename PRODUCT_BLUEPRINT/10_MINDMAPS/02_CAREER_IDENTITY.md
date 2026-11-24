@@ -2,7 +2,7 @@
 
 # Mind map: Career identity and discovery
 
-Every module, sub-module and feature in this domain (135 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (136 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -150,6 +150,7 @@ mindmap
         SRC-032 Multilingual and locale-aware search
         SRC-033 Location normalization and geographic
         SRC-034 Degraded mode and fallback
+        SRC-035 Contribution and growth signals in
 ```
 
 ## Specifications

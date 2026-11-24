@@ -20,18 +20,18 @@ Admin console information architecture and authentication hardening; user, organ
 
 ### 1.2 Out of scope (owned elsewhere)
 
-| Capability | Owner | ADM relationship |
-|---|---|---|
-| Authentication, sessions, MFA, passkeys for end users | IDN | ADM consumes force-logout, session revoke, credential-reset APIs |
-| Consent records, data export and erasure execution, legal-hold flag | SET | ADM provides the staff queue and decisions; SET executes |
-| Moderation queues, reports, appeals, sanctions | TSF | ADM links to TSF cases; does not duplicate moderation tooling |
-| Plans, entitlements, invoices, payment provider state | BIL | ADM provides refund and dispute tooling that calls BIL |
-| Notification delivery, templates, channels | NTF | ADM publishes announcements through NTF and in-app banner surface |
-| Job queue engine, scheduler, outbox | PLT | ADM owns the console over PLT's job platform |
-| Metrics definitions and dashboards for product analytics | ANL | ADM owns only the platform-health dashboard |
-| Employer-side org admin (teams, brand) | EMP | ADM administers orgs from the platform side only |
-| Institution-side admin (cohorts, roster) | INS | ADM administers institutions from the platform side only |
-| Human-resources, payroll or staff scheduling for TalentSphere's own employees | none | Out of scope (SSOT §4.2 non-goal: not generic HR) |
+| Capability                                                                    | Owner | ADM relationship                                                  |
+| ----------------------------------------------------------------------------- | ----- | ----------------------------------------------------------------- |
+| Authentication, sessions, MFA, passkeys for end users                         | IDN   | ADM consumes force-logout, session revoke, credential-reset APIs  |
+| Consent records, data export and erasure execution, legal-hold flag           | SET   | ADM provides the staff queue and decisions; SET executes          |
+| Moderation queues, reports, appeals, sanctions                                | TSF   | ADM links to TSF cases; does not duplicate moderation tooling     |
+| Plans, entitlements, invoices, payment provider state                         | BIL   | ADM provides refund and dispute tooling that calls BIL            |
+| Notification delivery, templates, channels                                    | NTF   | ADM publishes announcements through NTF and in-app banner surface |
+| Job queue engine, scheduler, outbox                                           | PLT   | ADM owns the console over PLT's job platform                      |
+| Metrics definitions and dashboards for product analytics                      | ANL   | ADM owns only the platform-health dashboard                       |
+| Employer-side org admin (teams, brand)                                        | EMP   | ADM administers orgs from the platform side only                  |
+| Institution-side admin (cohorts, roster)                                      | INS   | ADM administers institutions from the platform side only          |
+| Human-resources, payroll or staff scheduling for TalentSphere's own employees | none  | Out of scope (SSOT §4.2 non-goal: not generic HR)                 |
 
 ### 1.3 Owned versus consumed
 
@@ -51,57 +51,57 @@ Roles use the canonical codes: `SUP` Support Agent, `MOD` Moderator, `FIN` Finan
 
 Legend: **R** read, **W** write, **A** approve, **M** masked read (PII masked), **G** read after active grant, **2P** requires two-person approval, **—** none.
 
-| Capability | SUP | SUP-L | MOD | FIN | FIN-L | PAD | SAD |
-|---|---|---|---|---|---|---|---|
-| Console access (with step-up MFA) | R | R | R | R | R | R | R |
-| User directory search | M | M | M | M | M | M | M |
-| Unmask user PII (grant + ticket) | G | G | G | G | G | G | G |
-| Suspend / reinstate account | — | W | W (via TSF) | — | — | W | W |
-| Force logout, trigger credential reset | W | W | — | — | — | W | W |
-| Merge accounts | — | — | — | — | — | W + 2P | W + 2P |
-| Delete / erase account | — | — | — | — | — | 2P (via SET) | 2P (via SET) |
-| Org approve / suspend | — | W | — | — | — | W | W |
-| Institution onboarding and tenant config | — | — | — | — | — | W | W |
-| Admin role assignment | — | — | — | — | — | W (not SAD-tier) + 2P | W + 2P |
-| Privileged grant request | W | W | W | W | W | W | W |
-| Privileged grant approval | — | A (SUP scope) | — | — | A (FIN scope) | A | A |
-| Break-glass invoke | — | — | — | — | — | W | W |
-| Feature flag read | R | R | R | R | R | R | R |
-| Feature flag write (non-prod / prod) | — | — | — | — | — | W / W | W / W |
-| Kill switch activate | — | — | W (TSF-scope switches) | — | — | W | W |
-| Kill switch deactivate | — | — | — | — | — | W | W |
-| Config read / write | — | — | — | — | — | R / W | R / W |
-| Config write on security-class keys | — | — | — | — | — | — | W + 2P |
-| Announcements and maintenance | — | W (drafts) | — | — | — | W | W |
-| Tickets (own queue / all queues) | W / — | W / W | — | — | — | W / W | R / R |
-| Macros author | — | W | — | — | — | W | — |
-| Impersonation start | W (consented, read-only) | W | — | — | — | W | W (2P for non-consented) |
-| Knowledge base author / publish | W / — | W / W | — | — | — | W / W | — |
-| CMS page edit / publish | — | — | — | — | — | W / W | W / W |
-| Legal page publish | — | — | — | — | — | W + 2P | W + 2P |
-| Audit log viewer | scoped R | scoped R | scoped R | scoped R | scoped R | R | R (all) |
-| Audit export | — | — | — | — | — | W | W |
-| Data-request console | W (intake only) | W | — | — | — | W | W |
-| Refund / dispute actions | — | — | — | W (below threshold) | W + A | — | R |
-| Job queue / DLQ console | — | — | — | — | — | W | R |
-| Incident declare / command | W (declare) | W (declare) | — | — | — | W | W |
-| Platform health dashboard | R | R | R | R | R | R | R |
-| Bulk operations | — | — | — | — | — | W | W |
+| Capability                               | SUP                      | SUP-L         | MOD                    | FIN                 | FIN-L         | PAD                   | SAD                      |
+| ---------------------------------------- | ------------------------ | ------------- | ---------------------- | ------------------- | ------------- | --------------------- | ------------------------ |
+| Console access (with step-up MFA)        | R                        | R             | R                      | R                   | R             | R                     | R                        |
+| User directory search                    | M                        | M             | M                      | M                   | M             | M                     | M                        |
+| Unmask user PII (grant + ticket)         | G                        | G             | G                      | G                   | G             | G                     | G                        |
+| Suspend / reinstate account              | —                        | W             | W (via TSF)            | —                   | —             | W                     | W                        |
+| Force logout, trigger credential reset   | W                        | W             | —                      | —                   | —             | W                     | W                        |
+| Merge accounts                           | —                        | —             | —                      | —                   | —             | W + 2P                | W + 2P                   |
+| Delete / erase account                   | —                        | —             | —                      | —                   | —             | 2P (via SET)          | 2P (via SET)             |
+| Org approve / suspend                    | —                        | W             | —                      | —                   | —             | W                     | W                        |
+| Institution onboarding and tenant config | —                        | —             | —                      | —                   | —             | W                     | W                        |
+| Admin role assignment                    | —                        | —             | —                      | —                   | —             | W (not SAD-tier) + 2P | W + 2P                   |
+| Privileged grant request                 | W                        | W             | W                      | W                   | W             | W                     | W                        |
+| Privileged grant approval                | —                        | A (SUP scope) | —                      | —                   | A (FIN scope) | A                     | A                        |
+| Break-glass invoke                       | —                        | —             | —                      | —                   | —             | W                     | W                        |
+| Feature flag read                        | R                        | R             | R                      | R                   | R             | R                     | R                        |
+| Feature flag write (non-prod / prod)     | —                        | —             | —                      | —                   | —             | W / W                 | W / W                    |
+| Kill switch activate                     | —                        | —             | W (TSF-scope switches) | —                   | —             | W                     | W                        |
+| Kill switch deactivate                   | —                        | —             | —                      | —                   | —             | W                     | W                        |
+| Config read / write                      | —                        | —             | —                      | —                   | —             | R / W                 | R / W                    |
+| Config write on security-class keys      | —                        | —             | —                      | —                   | —             | —                     | W + 2P                   |
+| Announcements and maintenance            | —                        | W (drafts)    | —                      | —                   | —             | W                     | W                        |
+| Tickets (own queue / all queues)         | W / —                    | W / W         | —                      | —                   | —             | W / W                 | R / R                    |
+| Macros author                            | —                        | W             | —                      | —                   | —             | W                     | —                        |
+| Impersonation start                      | W (consented, read-only) | W             | —                      | —                   | —             | W                     | W (2P for non-consented) |
+| Knowledge base author / publish          | W / —                    | W / W         | —                      | —                   | —             | W / W                 | —                        |
+| CMS page edit / publish                  | —                        | —             | —                      | —                   | —             | W / W                 | W / W                    |
+| Legal page publish                       | —                        | —             | —                      | —                   | —             | W + 2P                | W + 2P                   |
+| Audit log viewer                         | scoped R                 | scoped R      | scoped R               | scoped R            | scoped R      | R                     | R (all)                  |
+| Audit export                             | —                        | —             | —                      | —                   | —             | W                     | W                        |
+| Data-request console                     | W (intake only)          | W             | —                      | —                   | —             | W                     | W                        |
+| Refund / dispute actions                 | —                        | —             | —                      | W (below threshold) | W + A         | —                     | R                        |
+| Job queue / DLQ console                  | —                        | —             | —                      | —                   | —             | W                     | R                        |
+| Incident declare / command               | W (declare)              | W (declare)   | —                      | —                   | —             | W                     | W                        |
+| Platform health dashboard                | R                        | R             | R                      | R                   | R             | R                     | R                        |
+| Bulk operations                          | —                        | —             | —                      | —                   | —             | W                     | W                        |
 
 Separation rules: the requester of a 2P action can never approve it; `SAD` role assignments require a second `SAD`; no role can grant a permission it does not itself hold (BR-ADM-023). [DER]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Console foundation and access | FR-ADM-001 to FR-ADM-004 |
-| B | Entity administration | FR-ADM-005 to FR-ADM-008 |
-| C | Privileged access and approvals | FR-ADM-009 to FR-ADM-013 |
-| D | Platform controls | FR-ADM-014 to FR-ADM-019 |
-| E | Support desk | FR-ADM-020 to FR-ADM-028 |
-| F | Content CMS | FR-ADM-029 to FR-ADM-031 |
-| G | Oversight and compliance | FR-ADM-032 to FR-ADM-034 |
-| H | Finance and operations | FR-ADM-035 to FR-ADM-039 |
+| Code | Sub-module                      | Features                             |
+| ---- | ------------------------------- | ------------------------------------ |
+| A    | Console foundation and access   | FR-ADM-001 to FR-ADM-004             |
+| B    | Entity administration           | FR-ADM-005 to FR-ADM-008             |
+| C    | Privileged access and approvals | FR-ADM-009 to FR-ADM-013             |
+| D    | Platform controls               | FR-ADM-014 to FR-ADM-019             |
+| E    | Support desk                    | FR-ADM-020 to FR-ADM-028             |
+| F    | Content CMS                     | FR-ADM-029 to FR-ADM-031, FR-ADM-040 |
+| G    | Oversight and compliance        | FR-ADM-032 to FR-ADM-034             |
+| H    | Finance and operations          | FR-ADM-035 to FR-ADM-039             |
 
 ## 4. Feature specifications
 
@@ -296,7 +296,7 @@ Common conventions used by every feature below (not repeated in each field):
 
 - **Sub-module:** B. Entity administration
 - **Priority / tier:** Must · R2 (orgs) · R3 (institutions)
-- **Source:** [SRC: SSOT BR-036 jobs require approved org] · [SRC: Yash 18 PROC-02]
+- **Source:** [SRC: SSOT BR-036 jobs require approved org] · [SRC: Yash 18 PROC-02] · also [SRC: SSOT §7 F-83 Admin Platform Expansion]
 - **Purpose and outcome:** Platform staff vet and administer employer organizations and institutions: approval, suspension, ownership transfer, tenant settings visibility, SSO status and seat overview, without replicating the org's own admin tools.
 - **Roles and permissions:** `SUP-L, PAD, SAD: approve, suspend` · `PAD, SAD: ownership transfer with 2P, tenant config` · `SUP, FIN: view`
 - **Preconditions and entry points:** People > Organizations or Institutions; ticket links; verification queue.
@@ -829,7 +829,7 @@ Common conventions used by every feature below (not repeated in each field):
 
 - **Sub-module:** F. Content CMS
 - **Priority / tier:** Should · R1
-- **Source:** [PROP]; [SRC: SSOT §3 public routes]
+- **Source:** [PROP]; [SRC: SSOT §3 public routes] · also [SRC: SSOT §7 F-02 Landing Page (content side; public page in FR-ADM-040)]
 - **Purpose and outcome:** Non-engineers update marketing, help-linked and system message pages through a safe structured editor with review and instant rollback.
 - **Roles and permissions:** `PAD, SAD: edit, publish` · `SUP-L: edit help-linked and system messages, request publish` · `all: none (public sees result)`
 - **Preconditions and entry points:** Content > Pages. Pages declared in a registry (route, template, fields).
@@ -983,7 +983,7 @@ Common conventions used by every feature below (not repeated in each field):
 
 - **Sub-module:** H. Finance and operations
 - **Priority / tier:** Should · R5
-- **Source:** [SRC: Yash 18 PROC-13 billing disputes, refunds, chargebacks] · [SRC: SSOT BR-32 webhook-owned subscription state]
+- **Source:** [SRC: Yash 18 PROC-13 billing disputes, refunds, chargebacks] · [SRC: SSOT BR-32 webhook-owned subscription state] · also [SRC: SSOT §7 F-83 Admin Platform Expansion]
 - **Purpose and outcome:** Finance staff resolve refund requests, chargebacks and failed-payment cases and reconcile payment-provider records against internal ledgers, without the console ever becoming the source of billing truth.
 - **Roles and permissions:** `FIN: process below threshold` · `FIN-L: approve above threshold, adjust` · `SAD: read` · `SUP: view billing summary only`
 - **Preconditions and entry points:** Finance > Worklists; ticket links in billing category.
@@ -1104,44 +1104,78 @@ Common conventions used by every feature below (not repeated in each field):
   - Given error rate above threshold, when the evaluation runs, then an alert is sent and the tile turns degraded with an icon and the word "Degraded".
   - Given a synthetic login check fails twice in a row, when evaluated, then an alert opens with the failing step named.
 
+### FR-ADM-040 — Public landing page
+
+- **Sub-module:** F. Content CMS
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §7.1 F-02 Landing Page (title only: Shell, priority 3, Ph0, no detailed spec); PRODUCT_BLUEPRINT/03_EXPERIENCE/01_INFORMATION_ARCHITECTURE.md §5.1 route `/`] [DER] for behavior; [PROP] for the section list
+- **Purpose and outcome:** A first-time visitor understands in one screen what TalentSphere does for their role, sees real public content, and reaches sign-up or sign-in in one click. The system knows it works when the share of visitors who reach sign-up with a role preselected is measurable and the page meets its performance budget.
+- **Roles and permissions:** `GUE: view` · `CAN, STD, FRL, INS, MNT, REC, HMG, EAD, IAD, PLO, EXA (signed in): view, header shows "Go to dashboard"` · `PAD, SAD: edit content through FR-ADM-029` · `API: none`
+- **Preconditions and entry points:** CMS page key `home` has a published version (FR-ADM-029). Entry: `/`, the brand logo from any public page, and marketing links with `?as=candidate|employer|institution|instructor`.
+- **User interactions and actions:**
+  1. Open `/`. See a header (logo, links to enabled public areas such as Jobs, Courses, Mentors, Events, Pricing; "Sign in"; "Join"), a hero statement with a primary "Join" button and a secondary "See how it works" link.
+  2. Choose a role card ("Build my career", "Hire talent", "Run an institution", "Teach or mentor"). The card sends the visitor to sign-up with the role preselected (FR-IDN-001, FR-IDN-021).
+  3. Read the "how it works" section describing the verified career loop (set a goal, learn, prove skills, get discovered, apply, interview, hire) in plain language.
+  4. Scroll to public previews: up to {6} featured open jobs (FR-JOB-001, public listings only) and up to {6} featured courses (FR-LRN-001). Open any item to its public detail page.
+  5. Read the trust section (how verification works, link to a sample public verification page, FR-EVD-018), the FAQ accordion, and the footer (legal documents FR-ADM-030, status FR-ADM-038, pricing FR-BIL-005, language selector FR-SET-020).
+  6. A signed-in visitor clicks "Go to dashboard"; the page never redirects them automatically.
+- **System behaviour:** The page is rendered from the published CMS version and served from the CDN (FR-PLT-036) with revalidation on publish. Static sections work without JavaScript. Dynamic blocks (featured jobs and courses, optional platform statistics) are fetched from public read APIs with a cached fallback, run through listing-integrity filters (FR-JOB-035, FR-JOB-036) and show only items visible to a guest. Statistics and outcome claims render only from certified metrics with an "as of" date or from recorded consents (BR-ADM-035). Navigation, role cards and sitemap list only modules whose feature flag is on for the visitor's region (BR-ADM-036). The `as` parameter is checked against an allowlist; unknown values are ignored. Page metadata includes title, description, canonical URL, Open Graph image, JSON-LD `Organization` and `WebSite`, and `hreflang` for published locales (FR-ADM-031). Non-essential scripts and analytics events load only after cookie consent (FR-SET-009); UX events use the taxonomy of FR-ANL-007. Locale follows the visitor's choice, then the browser preference, then the default locale.
+- **UI elements and controls:** Header with skip-to-content link, role cards (links, not buttons), "Join" and "Sign in" buttons, featured-items carousels replaced by static grids (no auto-advance), FAQ accordion (button headers with `aria-expanded`), language selector, cookie banner. States: loading (skeleton for dynamic blocks), empty (a block with no items is hidden), error (a failed block is hidden; the page still renders), offline (the offline page of FR-PWA-019 when the page is not cached).
+- **Configuration options:** Platform: number of featured jobs and courses (default {6} each, range 3 to 12), which sections are shown, statistics block on or off (default off until certified metrics exist), cache freshness window. Content owners: all text, images and FAQ through FR-ADM-029. User: language only.
+- **Business rules:** BR-ADM-035, BR-ADM-036, BR-ADM-027
+- **Validation:** `as` in the allowlist; featured counts integer 3 to 12; CMS rules of FR-ADM-029 apply to content (title 10 to 70, description 50 to 160 characters, alt text required); every numeric claim field must carry a metric or consent reference.
+- **Inputs and outputs:** In: request, optional `as`, locale, session presence. Out: HTML page with content blocks, metadata and structured data; no personal data.
+- **Filters, sorting, search:** n/a — a fixed page; featured items are ordered by the public default ranking of their module, never by payment.
+- **Notifications and communication:** n/a — read-only public page; no message is sent.
+- **Error handling and edge cases:** CMS unavailable: the last published snapshot is served (stale-if-error window {24 h}). Dynamic block API fails: that block is hidden. Session lookup fails: the guest header is shown. Unsupported locale: default locale with a notice. A module is disabled by feature flag while the page is cached: next revalidation removes it, and its links return 404 meanwhile. Bot traffic receives the same content under public read rate limits. An `as` value that conflicts with a signed-in role is ignored.
+- **Dependencies:** FR-ADM-029, FR-ADM-030, FR-ADM-031, FR-ADM-038, FR-BIL-005, FR-IDN-001, FR-IDN-021, FR-JOB-001, FR-LRN-001, FR-EVD-018, FR-SET-009, FR-SET-020, FR-PLT-036, FR-ANL-007, ENT-ADM-16.
+- **Security and privacy:** No personal data is rendered or collected before consent; strict CSP with no inline scripts (FR-ADM-029); public reads are rate limited and cacheable; internal redirect parameters are validated against an allowlist to prevent open redirects; featured third-party content is never embedded.
+- **Acceptance criteria:**
+  - Given a guest opens `/?as=employer`, when they click "Join", then sign-up opens with the employer role preselected.
+  - Given a signed-in user opens `/`, when the page loads, then it is not redirected and the header offers "Go to dashboard".
+  - Given the `uploads` or `events` module is disabled by a feature flag, when the page renders, then no link, card or sitemap entry for it appears.
+  - Given a CMS draft contains the claim "95% of users get hired" without a metric reference, when the editor submits it for publish, then validation fails with `claim_unsupported` and the page is not published (negative).
+
 ## 5. Business rules
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-ADM-001 | Admin console access requires an active staff role, a phishing-resistant factor (passkey or security key) or SSO, and for any mutation a step-up authentication no older than 15 minutes. | Staff accounts are the highest-value target. | Admin authentication service; mutation middleware | [DER] [PROP] 15 minutes |
-| BR-ADM-002 | Every staff mutation carries a reason code (and free text where the catalogue requires) and writes one audit event with actor, role, target, before and after summary, reason, request id and session id. A mutation that cannot write its audit event does not execute. | Accountability; reversibility. | Action envelope (FR-ADM-004); audit API | [SRC: SSOT BR-29] |
-| BR-ADM-003 | A staff member cannot act on their own account, role assignment, grant, approval request or ticket as agent. The requester of a two-person action can never be its approver. | Separation of duties. | Policy layer on every admin action | [DER] |
-| BR-ADM-004 | Actions in the dangerous-action catalogue execute only after approval by a second authorized identity, against a frozen payload; approval expires after 24 hours. | Limits damage from error or compromise. | Approval engine (FR-ADM-010) | [SRC: SSOT BR-29] [DER] |
-| BR-ADM-005 | Personal data in admin views is masked by default. Unmasking requires an active privileged grant for that subject and data class. Lookups use exact identifiers; partial-match browsing of personal data is refused. | Least privilege; anti-enumeration. | Admin read projections; search | [DER] |
-| BR-ADM-006 | Support view-as sessions require the user's explicit, revocable consent, are read-only and time-boxed; non-consented sessions are limited to SAD with two-person approval and a stated legal or security basis. | Trust; privacy. | Impersonation service (FR-ADM-024) | [PROP] |
-| BR-ADM-007 | Break-glass access is limited to a named roster, requires an open P0 or P1 incident, lasts at most 60 minutes (one 30-minute extension), pages Security immediately and must be reviewed by a different person within 2 business days. | Emergency access without silent abuse. | Break-glass service (FR-ADM-011) | [DER] [PROP] parameters |
-| BR-ADM-008 | Privileged grants are scoped to one subject and data class, last at most 8 hours, expire server-side on every request, and end when their ticket closes. | Time-boxed access. | Grant service (FR-ADM-009) | [SRC: Yash 18 PROC-04] |
-| BR-ADM-009 | The audit log is append-only and tamper-evident (hash chain, external anchoring); no API deletes or edits an event; viewing it is audited; ingestion gaps and integrity failures raise alerts. | Evidence value. | Audit store (FR-ADM-032) | [SRC: SSOT §20.2] [DER] |
-| BR-ADM-010 | Every feature flag has a code-declared key, a type, an owner and an expiry (default 90 days); evaluation order is kill switch, explicit override, targeting rules, percentage, default; flags never hold secrets; authorization-relevant flags evaluate server-side only. | Flag sprawl and leakage control. | Flag service (FR-ADM-014) | [SRC: SSOT F-35] [PROP] expiry |
-| BR-ADM-011 | A kill switch overrides flags; each switch declares a degraded behavior and message before it can be activated; activation propagates within 15 seconds and call sites fail static (defined response, no unhandled error); switch state survives dependency outages. | Safe, fast containment. | Switch service (FR-ADM-015) | [DER] |
-| BR-ADM-012 | Configuration values are typed, schema-validated, versioned and reversible; secrets are never stored as configuration; security-class and financial-class keys require two-person approval; changes cannot be applied inside an active change freeze without an approved exception. | Safe operability. | Config service (FR-ADM-016, FR-ADM-019) | [DER] |
-| BR-ADM-013 | Critical and maintenance announcements are not dismissible; at most one critical banner is live; audience is resolved at display time; links must be https and allowlisted or marked external. | Reliable incident communication. | Announcement service | [PROP] |
-| BR-ADM-014 | Legal document versions are immutable once published and remain reachable at dated URLs; material changes require counsel reference, two-person approval and the minimum notice period (30 days default) before effect and trigger re-consent through SET. | Legal certainty. | Legal publishing (FR-ADM-030) | [DER] [PROP] notice |
-| BR-ADM-015 | SLA clocks start at ticket creation, follow the policy's business calendar, pause only in `pending_user` and `on_hold_external`, and are recomputed from event history; breaches are recorded with a cause. | Measurable service. | SLA service (FR-ADM-022) | [DER] |
-| BR-ADM-016 | Support never requests passwords, one-time codes or full card numbers; outbound replies are scanned for credential patterns and blocked; automatic technical details attached to tickets use a whitelist (no tokens, cookies or form contents); pasted secrets in notes are rejected. | Social-engineering and leakage prevention. | Composer validation; intake | [SRC: Yash 18 INV-T14] |
-| BR-ADM-017 | Sealed data classes (assessment answers and keys, message bodies, identity documents, background-check reports, health-class data) are never visible to SUP or FIN through any grant; access is only through the legal-process procedure with two-person approval. | Strong containment of the most sensitive data. | Projection layer; grant service | [DER] |
-| BR-ADM-018 | Erasure and retention in ADM records: tickets, notes and audit events about an erased subject are pseudonymized, not deleted, where needed for accountability; a legal hold blocks erasure; privacy requests are tracked against jurisdiction deadlines and cannot close with any module incomplete. | Compliance with accountability. | Data-request console; SET | [SRC: Yash 18 PROC-09] [DEC-REQ] |
-| BR-ADM-019 | Refunds and disputes are executed only through BIL, with idempotency keys; amounts above the FIN-L threshold require a second approver; the console labels provider state `live`, `inferred` or `degraded` and never edits billing truth directly. | Financial integrity. | Finance tooling (FR-ADM-035) | [SRC: SSOT BR-32, BR-28] |
-| BR-ADM-020 | Admin exports are reasoned, row-limited (5,000 without approval), watermarked with exporter identity, CSV-injection safe, encrypted, delivered by single-use signed link valid 24 hours, and audited. | Leak attribution. | Export service (FR-ADM-036) | [DER] [PROP] limits |
-| BR-ADM-021 | A dead job can be replayed only if its kind is flagged replay-safe; replay preserves the original idempotency key; payload views are redacted unless a grant applies; purge needs two-person approval and archives metadata. | No duplicate side effects. | Job console (FR-ADM-037) | [SRC: SSOT §13.5 DLQ] |
-| BR-ADM-022 | Incidents use severities P0 to P3 with response targets (10 minutes, 30 minutes, 4 hours, 1 business day) and update cadences; public updates contain no personal data and are never knowingly false or optimistic; a post-incident review follows P0 and P1. | Honest operations. | Incident tooling (FR-ADM-038) | [SRC: SSOT §20.5] |
-| BR-ADM-023 | A role assignment cannot grant a permission the assigner does not hold and have flagged delegable; PAD cannot assign SAD-tier roles; role expiry is mandatory (maximum 24 months). | No privilege escalation. | Role service (FR-ADM-007) | [DER] |
-| BR-ADM-024 | Bulk operations require a dry-run younger than one hour on the identical target set; over 500 records need two-person approval; the run stops automatically when more than 5% of attempted records fail; one run per operation type at a time. | Blast-radius control. | Bulk executor (FR-ADM-034) | [SRC: SSOT BR-31 dry-run default] |
-| BR-ADM-025 | The account holder is notified of administrative actions on their account through a verified channel, except when SAD records a legal or safety basis for non-disclosure with a review date. | Transparency with limited exceptions. | Notification step in action pipeline | [DER] [DEC-REQ] OD-ADM-08 |
-| BR-ADM-026 | Admin sessions: idle timeout 30 minutes, absolute lifetime 8 hours, at most 2 concurrent sessions, separate origin and cookies from end-user sessions, optional network allowlist, and impossible-travel blocking. | Session hijack resistance. | Admin session service | [DER] [PROP] values |
-| BR-ADM-027 | All staff-authored rich content (announcements, KB, CMS, macros, legal) is sanitized against an allowlist; scripts, inline event handlers and unknown embeds are removed; images require alt text; links follow the allowlist. | XSS and accessibility. | Sanitizer; publish validators | [DER] |
-| BR-ADM-028 | Internal notes are append-only, attributed and never shown to end users; they cannot be edited after 5 minutes (corrections are new notes). | Integrity of case history. | Notes service | [DER] |
-| BR-ADM-029 | Maintenance read-only mode keeps authentication, health endpoints, payment-provider webhooks, the admin console and status publishing available; all other writes return 503 with Retry-After. | Safe maintenance. | Request middleware | [DER] |
-| BR-ADM-030 | View-as sessions can never change passwords or MFA, make payments, send messages, accept terms, submit assessments or applications, export data, change notification preferences or view sealed content; the API enforces this independent of the UI. | Prevent abuse via impersonation. | View-as token scope | [PROP] |
-| BR-ADM-031 | Help articles have an owner and review date (180 days); overdue articles are labeled; retired articles redirect; audience-gated articles are not served to unauthorized visitors. | Content accuracy. | KB service | [PROP] |
-| BR-ADM-032 | Staff access is recertified quarterly; unreviewed roles unused for 90 days are removed at the deadline; at least two active SAD identities must exist; toxic role combinations need SAD-approved, time-limited exceptions. | Access hygiene. | Access review service | [SRC: Yash 18 PROC-07] [PROP] numbers |
-| BR-ADM-033 | Suspending an organization shows a cascade preview and pauses (never deletes) jobs, applications intake and org messaging; candidate data is untouched; reinstatement restores the prior state. | Non-destructive enforcement. | Org admin service | [DER] |
-| BR-ADM-034 | Ticket merges keep both ids and thread chronology; a ticket has at most one primary problem link; tickets reopen within 14 days, afterwards a linked new ticket is created. | Clean case history. | Ticket service | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                 | Rationale                                                                        | Enforced where                                    | Source                                                                                |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| BR-ADM-001 | Admin console access requires an active staff role, a phishing-resistant factor (passkey or security key) or SSO, and for any mutation a step-up authentication no older than 15 minutes.                                                                                                            | Staff accounts are the highest-value target.                                     | Admin authentication service; mutation middleware | [DER] [PROP] 15 minutes                                                               |
+| BR-ADM-002 | Every staff mutation carries a reason code (and free text where the catalogue requires) and writes one audit event with actor, role, target, before and after summary, reason, request id and session id. A mutation that cannot write its audit event does not execute.                             | Accountability; reversibility.                                                   | Action envelope (FR-ADM-004); audit API           | [SRC: SSOT BR-29]                                                                     |
+| BR-ADM-003 | A staff member cannot act on their own account, role assignment, grant, approval request or ticket as agent. The requester of a two-person action can never be its approver.                                                                                                                         | Separation of duties.                                                            | Policy layer on every admin action                | [DER]                                                                                 |
+| BR-ADM-004 | Actions in the dangerous-action catalogue execute only after approval by a second authorized identity, against a frozen payload; approval expires after 24 hours.                                                                                                                                    | Limits damage from error or compromise.                                          | Approval engine (FR-ADM-010)                      | [SRC: SSOT BR-29] [DER]                                                               |
+| BR-ADM-005 | Personal data in admin views is masked by default. Unmasking requires an active privileged grant for that subject and data class. Lookups use exact identifiers; partial-match browsing of personal data is refused.                                                                                 | Least privilege; anti-enumeration.                                               | Admin read projections; search                    | [DER]                                                                                 |
+| BR-ADM-006 | Support view-as sessions require the user's explicit, revocable consent, are read-only and time-boxed; non-consented sessions are limited to SAD with two-person approval and a stated legal or security basis.                                                                                      | Trust; privacy.                                                                  | Impersonation service (FR-ADM-024)                | [PROP]                                                                                |
+| BR-ADM-007 | Break-glass access is limited to a named roster, requires an open P0 or P1 incident, lasts at most 60 minutes (one 30-minute extension), pages Security immediately and must be reviewed by a different person within 2 business days.                                                               | Emergency access without silent abuse.                                           | Break-glass service (FR-ADM-011)                  | [DER] [PROP] parameters                                                               |
+| BR-ADM-008 | Privileged grants are scoped to one subject and data class, last at most 8 hours, expire server-side on every request, and end when their ticket closes.                                                                                                                                             | Time-boxed access.                                                               | Grant service (FR-ADM-009)                        | [SRC: Yash 18 PROC-04]                                                                |
+| BR-ADM-009 | The audit log is append-only and tamper-evident (hash chain, external anchoring); no API deletes or edits an event; viewing it is audited; ingestion gaps and integrity failures raise alerts.                                                                                                       | Evidence value.                                                                  | Audit store (FR-ADM-032)                          | [SRC: SSOT §20.2] [DER]                                                               |
+| BR-ADM-010 | Every feature flag has a code-declared key, a type, an owner and an expiry (default 90 days); evaluation order is kill switch, explicit override, targeting rules, percentage, default; flags never hold secrets; authorization-relevant flags evaluate server-side only.                            | Flag sprawl and leakage control.                                                 | Flag service (FR-ADM-014)                         | [SRC: SSOT F-35] [PROP] expiry                                                        |
+| BR-ADM-011 | A kill switch overrides flags; each switch declares a degraded behavior and message before it can be activated; activation propagates within 15 seconds and call sites fail static (defined response, no unhandled error); switch state survives dependency outages.                                 | Safe, fast containment.                                                          | Switch service (FR-ADM-015)                       | [DER]                                                                                 |
+| BR-ADM-012 | Configuration values are typed, schema-validated, versioned and reversible; secrets are never stored as configuration; security-class and financial-class keys require two-person approval; changes cannot be applied inside an active change freeze without an approved exception.                  | Safe operability.                                                                | Config service (FR-ADM-016, FR-ADM-019)           | [DER]                                                                                 |
+| BR-ADM-013 | Critical and maintenance announcements are not dismissible; at most one critical banner is live; audience is resolved at display time; links must be https and allowlisted or marked external.                                                                                                       | Reliable incident communication.                                                 | Announcement service                              | [PROP]                                                                                |
+| BR-ADM-014 | Legal document versions are immutable once published and remain reachable at dated URLs; material changes require counsel reference, two-person approval and the minimum notice period (30 days default) before effect and trigger re-consent through SET.                                           | Legal certainty.                                                                 | Legal publishing (FR-ADM-030)                     | [DER] [PROP] notice                                                                   |
+| BR-ADM-015 | SLA clocks start at ticket creation, follow the policy's business calendar, pause only in `pending_user` and `on_hold_external`, and are recomputed from event history; breaches are recorded with a cause.                                                                                          | Measurable service.                                                              | SLA service (FR-ADM-022)                          | [DER]                                                                                 |
+| BR-ADM-016 | Support never requests passwords, one-time codes or full card numbers; outbound replies are scanned for credential patterns and blocked; automatic technical details attached to tickets use a whitelist (no tokens, cookies or form contents); pasted secrets in notes are rejected.                | Social-engineering and leakage prevention.                                       | Composer validation; intake                       | [SRC: Yash 18 INV-T14]                                                                |
+| BR-ADM-017 | Sealed data classes (assessment answers and keys, message bodies, identity documents, background-check reports, health-class data) are never visible to SUP or FIN through any grant; access is only through the legal-process procedure with two-person approval.                                   | Strong containment of the most sensitive data.                                   | Projection layer; grant service                   | [DER]                                                                                 |
+| BR-ADM-018 | Erasure and retention in ADM records: tickets, notes and audit events about an erased subject are pseudonymized, not deleted, where needed for accountability; a legal hold blocks erasure; privacy requests are tracked against jurisdiction deadlines and cannot close with any module incomplete. | Compliance with accountability.                                                  | Data-request console; SET                         | [SRC: Yash 18 PROC-09] [DEC-REQ]                                                      |
+| BR-ADM-019 | Refunds and disputes are executed only through BIL, with idempotency keys; amounts above the FIN-L threshold require a second approver; the console labels provider state `live`, `inferred` or `degraded` and never edits billing truth directly.                                                   | Financial integrity.                                                             | Finance tooling (FR-ADM-035)                      | [SRC: SSOT BR-32, BR-28]                                                              |
+| BR-ADM-020 | Admin exports are reasoned, row-limited (5,000 without approval), watermarked with exporter identity, CSV-injection safe, encrypted, delivered by single-use signed link valid 24 hours, and audited.                                                                                                | Leak attribution.                                                                | Export service (FR-ADM-036)                       | [DER] [PROP] limits                                                                   |
+| BR-ADM-021 | A dead job can be replayed only if its kind is flagged replay-safe; replay preserves the original idempotency key; payload views are redacted unless a grant applies; purge needs two-person approval and archives metadata.                                                                         | No duplicate side effects.                                                       | Job console (FR-ADM-037)                          | [SRC: SSOT §13.5 DLQ]                                                                 |
+| BR-ADM-022 | Incidents use severities P0 to P3 with response targets (10 minutes, 30 minutes, 4 hours, 1 business day) and update cadences; public updates contain no personal data and are never knowingly false or optimistic; a post-incident review follows P0 and P1.                                        | Honest operations.                                                               | Incident tooling (FR-ADM-038)                     | [SRC: SSOT §20.5]                                                                     |
+| BR-ADM-023 | A role assignment cannot grant a permission the assigner does not hold and have flagged delegable; PAD cannot assign SAD-tier roles; role expiry is mandatory (maximum 24 months).                                                                                                                   | No privilege escalation.                                                         | Role service (FR-ADM-007)                         | [DER]                                                                                 |
+| BR-ADM-024 | Bulk operations require a dry-run younger than one hour on the identical target set; over 500 records need two-person approval; the run stops automatically when more than 5% of attempted records fail; one run per operation type at a time.                                                       | Blast-radius control.                                                            | Bulk executor (FR-ADM-034)                        | [SRC: SSOT BR-31 dry-run default]                                                     |
+| BR-ADM-025 | The account holder is notified of administrative actions on their account through a verified channel, except when SAD records a legal or safety basis for non-disclosure with a review date.                                                                                                         | Transparency with limited exceptions.                                            | Notification step in action pipeline              | [DER] [DEC-REQ] OD-ADM-08                                                             |
+| BR-ADM-026 | Admin sessions: idle timeout 30 minutes, absolute lifetime 8 hours, at most 2 concurrent sessions, separate origin and cookies from end-user sessions, optional network allowlist, and impossible-travel blocking.                                                                                   | Session hijack resistance.                                                       | Admin session service                             | [DER] [PROP] values                                                                   |
+| BR-ADM-027 | All staff-authored rich content (announcements, KB, CMS, macros, legal) is sanitized against an allowlist; scripts, inline event handlers and unknown embeds are removed; images require alt text; links follow the allowlist.                                                                       | XSS and accessibility.                                                           | Sanitizer; publish validators                     | [DER]                                                                                 |
+| BR-ADM-028 | Internal notes are append-only, attributed and never shown to end users; they cannot be edited after 5 minutes (corrections are new notes).                                                                                                                                                          | Integrity of case history.                                                       | Notes service                                     | [DER]                                                                                 |
+| BR-ADM-029 | Maintenance read-only mode keeps authentication, health endpoints, payment-provider webhooks, the admin console and status publishing available; all other writes return 503 with Retry-After.                                                                                                       | Safe maintenance.                                                                | Request middleware                                | [DER]                                                                                 |
+| BR-ADM-030 | View-as sessions can never change passwords or MFA, make payments, send messages, accept terms, submit assessments or applications, export data, change notification preferences or view sealed content; the API enforces this independent of the UI.                                                | Prevent abuse via impersonation.                                                 | View-as token scope                               | [PROP]                                                                                |
+| BR-ADM-031 | Help articles have an owner and review date (180 days); overdue articles are labeled; retired articles redirect; audience-gated articles are not served to unauthorized visitors.                                                                                                                    | Content accuracy.                                                                | KB service                                        | [PROP]                                                                                |
+| BR-ADM-032 | Staff access is recertified quarterly; unreviewed roles unused for 90 days are removed at the deadline; at least two active SAD identities must exist; toxic role combinations need SAD-approved, time-limited exceptions.                                                                           | Access hygiene.                                                                  | Access review service                             | [SRC: Yash 18 PROC-07] [PROP] numbers                                                 |
+| BR-ADM-033 | Suspending an organization shows a cascade preview and pauses (never deletes) jobs, applications intake and org messaging; candidate data is untouched; reinstatement restores the prior state.                                                                                                      | Non-destructive enforcement.                                                     | Org admin service                                 | [DER]                                                                                 |
+| BR-ADM-034 | Ticket merges keep both ids and thread chronology; a ticket has at most one primary problem link; tickets reopen within 14 days, afterwards a linked new ticket is created.                                                                                                                          | Clean case history.                                                              | Ticket service                                    | [PROP]                                                                                |
+| BR-ADM-035 | Every number, outcome claim, ranking or testimonial on a public marketing page cites a certified metric (with an "as of" date) or a recorded consent; claims of guaranteed jobs, salaries or placements are not publishable, and the CMS blocks publish when a numeric claim has no reference.       | Honest marketing; users are not promised outcomes the platform cannot guarantee. | CMS publish validator (FR-ADM-029, FR-ADM-040)    | [DER] [SRC: Yash 01 LEGACY_PRD out-of-scope list: guaranteed jobs or salary outcomes] |
+| BR-ADM-036 | The landing page, its navigation and the sitemap list only modules whose feature flag is on for the visitor's region; links to a disabled module return 404.                                                                                                                                         | Never advertise a capability that is not available.                              | Landing renderer; sitemap generator               | [DER]                                                                                 |
 
 ## 6. State machines
 
@@ -1149,18 +1183,18 @@ Common conventions used by every feature below (not repeated in each field):
 
 States: `new`, `open`, `pending_user`, `on_hold_external`, `solved`, `closed`, `merged`. Terminal: `closed`, `merged`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| new | open | agent assigned or first agent action | agent has queue access |
-| open | pending_user | agent reply requesting information | public reply sent |
-| pending_user | open | requester reply | — |
-| pending_user | solved | no reply for 7 days (auto) | policy auto-close on |
-| open | on_hold_external | engineering or vendor dependency | external reference present |
-| on_hold_external | open | dependency answered | — |
-| open | solved | agent resolves | resolution code set |
-| solved | open | requester reply or reopen | within 14 days |
-| solved | closed | 14 days elapse | no reopen |
-| new, open | merged | merge into another ticket | same requester or SUP-L override |
+| From             | To               | Trigger                              | Guard                            |
+| ---------------- | ---------------- | ------------------------------------ | -------------------------------- |
+| new              | open             | agent assigned or first agent action | agent has queue access           |
+| open             | pending_user     | agent reply requesting information   | public reply sent                |
+| pending_user     | open             | requester reply                      | —                                |
+| pending_user     | solved           | no reply for 7 days (auto)           | policy auto-close on             |
+| open             | on_hold_external | engineering or vendor dependency     | external reference present       |
+| on_hold_external | open             | dependency answered                  | —                                |
+| open             | solved           | agent resolves                       | resolution code set              |
+| solved           | open             | requester reply or reopen            | within 14 days                   |
+| solved           | closed           | 14 days elapse                       | no reopen                        |
+| new, open        | merged           | merge into another ticket            | same requester or SUP-L override |
 
 ```mermaid
 stateDiagram-v2
@@ -1184,14 +1218,14 @@ stateDiagram-v2
 
 States: `requested`, `active`, `denied`, `expired`, `revoked`, `under_review`, `review_justified`, `review_unjustified`. Terminal: `denied`, `expired` (standard), `revoked`, `review_justified`, `review_unjustified`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| requested | active | auto-approval or approver approves | approver ≠ requester; ticket open |
-| requested | denied | approver denies or 30 minutes lapse | — |
-| active | expired | duration elapses or ticket closes | standard grant |
-| active | revoked | requester or approver revokes | — |
-| active | under_review | break-glass ends or expires | break-glass flag |
-| under_review | review_justified / review_unjustified | reviewer decision | reviewer ≠ invoker; within 2 business days |
+| From         | To                                    | Trigger                             | Guard                                      |
+| ------------ | ------------------------------------- | ----------------------------------- | ------------------------------------------ |
+| requested    | active                                | auto-approval or approver approves  | approver ≠ requester; ticket open          |
+| requested    | denied                                | approver denies or 30 minutes lapse | —                                          |
+| active       | expired                               | duration elapses or ticket closes   | standard grant                             |
+| active       | revoked                               | requester or approver revokes       | —                                          |
+| active       | under_review                          | break-glass ends or expires         | break-glass flag                           |
+| under_review | review_justified / review_unjustified | reviewer decision                   | reviewer ≠ invoker; within 2 business days |
 
 ```mermaid
 stateDiagram-v2
@@ -1214,16 +1248,16 @@ stateDiagram-v2
 
 States: `pending`, `approved`, `executing`, `executed`, `rejected`, `withdrawn`, `expired`, `stale`, `failed`. Terminal: `executed`, `rejected`, `withdrawn`, `expired`, `stale`, `failed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| pending | approved | approver approves | approver ≠ requester; step-up fresh; payload hash unchanged |
-| pending | rejected | approver rejects | comment required |
-| pending | withdrawn | requester withdraws | — |
-| pending | expired | 24 hours elapse | — |
-| pending | stale | target version changed | expectedVersion mismatch |
-| approved | executing | executor starts | idempotent by request id |
-| executing | executed | success | — |
-| executing | failed | error | partial effects recorded |
+| From      | To        | Trigger                | Guard                                                       |
+| --------- | --------- | ---------------------- | ----------------------------------------------------------- |
+| pending   | approved  | approver approves      | approver ≠ requester; step-up fresh; payload hash unchanged |
+| pending   | rejected  | approver rejects       | comment required                                            |
+| pending   | withdrawn | requester withdraws    | —                                                           |
+| pending   | expired   | 24 hours elapse        | —                                                           |
+| pending   | stale     | target version changed | expectedVersion mismatch                                    |
+| approved  | executing | executor starts        | idempotent by request id                                    |
+| executing | executed  | success                | —                                                           |
+| executing | failed    | error                  | partial effects recorded                                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1248,14 +1282,14 @@ stateDiagram-v2
 
 States: `requested`, `consented`, `active`, `ended`, `denied`, `expired`, `revoked`. Terminal: `ended`, `denied`, `expired`, `revoked`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| requested | consented | user allows | within 10 minutes; token single-use |
-| requested | denied | user denies | — |
-| requested | expired | 10 minutes without answer | — |
-| consented | active | agent opens session | ticket open |
-| active | ended | agent or user ends; 30 minutes elapse; ticket closes | — |
-| active | revoked | user revokes in privacy settings | terminates within 5 seconds |
+| From      | To        | Trigger                                              | Guard                               |
+| --------- | --------- | ---------------------------------------------------- | ----------------------------------- |
+| requested | consented | user allows                                          | within 10 minutes; token single-use |
+| requested | denied    | user denies                                          | —                                   |
+| requested | expired   | 10 minutes without answer                            | —                                   |
+| consented | active    | agent opens session                                  | ticket open                         |
+| active    | ended     | agent or user ends; 30 minutes elapse; ticket closes | —                                   |
+| active    | revoked   | user revokes in privacy settings                     | terminates within 5 seconds         |
 
 ```mermaid
 stateDiagram-v2
@@ -1276,15 +1310,15 @@ stateDiagram-v2
 
 States: `declared`, `investigating`, `identified`, `monitoring`, `resolved`, `review_pending`, `closed`. Terminal: `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| declared | investigating | commander assigned | commander set |
-| investigating | identified | cause or mitigation identified | note required |
-| identified | monitoring | fix applied | — |
-| monitoring | investigating | regression | — |
-| monitoring | resolved | stable for the agreed period | root-cause category, impact summary |
-| resolved | review_pending | P0 or P1 | review scheduled |
-| resolved, review_pending | closed | review complete (P0, P1) or immediately (P2, P3) | action items assigned |
+| From                     | To             | Trigger                                          | Guard                               |
+| ------------------------ | -------------- | ------------------------------------------------ | ----------------------------------- |
+| declared                 | investigating  | commander assigned                               | commander set                       |
+| investigating            | identified     | cause or mitigation identified                   | note required                       |
+| identified               | monitoring     | fix applied                                      | —                                   |
+| monitoring               | investigating  | regression                                       | —                                   |
+| monitoring               | resolved       | stable for the agreed period                     | root-cause category, impact summary |
+| resolved                 | review_pending | P0 or P1                                         | review scheduled                    |
+| resolved, review_pending | closed         | review complete (P0, P1) or immediately (P2, P3) | action items assigned               |
 
 ```mermaid
 stateDiagram-v2
@@ -1304,14 +1338,14 @@ stateDiagram-v2
 
 States: `draft`, `in_review`, `scheduled`, `live`, `ended`, `cancelled`. Terminal: `ended`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | in_review | submit | validation passes |
-| in_review | draft | rejected | comment |
-| in_review | scheduled | approved | critical needs second approver |
-| scheduled | live | start time | — |
-| live | ended | end time or manual end | — |
-| draft, in_review, scheduled | cancelled | author cancels | — |
+| From                        | To        | Trigger                | Guard                          |
+| --------------------------- | --------- | ---------------------- | ------------------------------ |
+| draft                       | in_review | submit                 | validation passes              |
+| in_review                   | draft     | rejected               | comment                        |
+| in_review                   | scheduled | approved               | critical needs second approver |
+| scheduled                   | live      | start time             | —                              |
+| live                        | ended     | end time or manual end | —                              |
+| draft, in_review, scheduled | cancelled | author cancels         | —                              |
 
 ```mermaid
 stateDiagram-v2
@@ -1331,14 +1365,14 @@ stateDiagram-v2
 
 States: `draft`, `in_review`, `approved`, `published`, `superseded`, `retired`. Help articles add the computed flag `outdated` (not a state). Terminal: `superseded`, `retired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | in_review | author submits | validators pass |
-| in_review | draft | reviewer rejects | — |
-| in_review | approved | reviewer approves | legal: 2P and counsel reference |
-| approved | published | publish or schedule time | effective date rules |
-| published | superseded | newer version published | — |
-| published | retired | retire action | redirect target set (articles) |
+| From      | To         | Trigger                  | Guard                           |
+| --------- | ---------- | ------------------------ | ------------------------------- |
+| draft     | in_review  | author submits           | validators pass                 |
+| in_review | draft      | reviewer rejects         | —                               |
+| in_review | approved   | reviewer approves        | legal: 2P and counsel reference |
+| approved  | published  | publish or schedule time | effective date rules            |
+| published | superseded | newer version published  | —                               |
+| published | retired    | retire action            | redirect target set (articles)  |
 
 ```mermaid
 stateDiagram-v2
@@ -1357,18 +1391,18 @@ stateDiagram-v2
 
 States: `received`, `verifying`, `in_review`, `approved`, `executing`, `blocked`, `completed`, `rejected`, `withdrawn`. Terminal: `completed`, `rejected`, `withdrawn`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| received | verifying | intake complete | — |
-| verifying | in_review | verification passed | FR-ADM-028 passed |
-| verifying | rejected | verification failed or abandoned after 30 days | notice sent |
-| in_review | approved | decision | erasure: 2P and no hold |
-| in_review | rejected | lawful refusal | reason and legal basis recorded |
-| approved | executing | SET jobs enqueued | — |
-| executing | blocked | module failure | — |
-| blocked | executing | retry | — |
-| executing | completed | all modules done | response letter sent |
-| received, verifying, in_review | withdrawn | requester withdraws | — |
+| From                           | To        | Trigger                                        | Guard                           |
+| ------------------------------ | --------- | ---------------------------------------------- | ------------------------------- |
+| received                       | verifying | intake complete                                | —                               |
+| verifying                      | in_review | verification passed                            | FR-ADM-028 passed               |
+| verifying                      | rejected  | verification failed or abandoned after 30 days | notice sent                     |
+| in_review                      | approved  | decision                                       | erasure: 2P and no hold         |
+| in_review                      | rejected  | lawful refusal                                 | reason and legal basis recorded |
+| approved                       | executing | SET jobs enqueued                              | —                               |
+| executing                      | blocked   | module failure                                 | —                               |
+| blocked                        | executing | retry                                          | —                               |
+| executing                      | completed | all modules done                               | response letter sent            |
+| received, verifying, in_review | withdrawn | requester withdraws                            | —                               |
 
 ```mermaid
 stateDiagram-v2
@@ -1394,15 +1428,15 @@ stateDiagram-v2
 
 States: `proposed`, `active`, `rolling_out`, `fully_on`, `stale`, `archived`. Terminal: `archived`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| proposed | active | first environment enabled | key exists in code registry |
-| active | rolling_out | percentage between 1 and 99 | — |
-| rolling_out | fully_on | 100 percent | — |
-| rolling_out | active | rollback to 0 | — |
-| active, rolling_out, fully_on | stale | expiry date passes | — |
-| stale | archived | code removed and archive confirmed | no references in registry |
-| stale | active | expiry extended | owner justification |
+| From                          | To          | Trigger                            | Guard                       |
+| ----------------------------- | ----------- | ---------------------------------- | --------------------------- |
+| proposed                      | active      | first environment enabled          | key exists in code registry |
+| active                        | rolling_out | percentage between 1 and 99        | —                           |
+| rolling_out                   | fully_on    | 100 percent                        | —                           |
+| rolling_out                   | active      | rollback to 0                      | —                           |
+| active, rolling_out, fully_on | stale       | expiry date passes                 | —                           |
+| stale                         | archived    | code removed and archive confirmed | no references in registry   |
+| stale                         | active      | expiry extended                    | owner justification         |
 
 ```mermaid
 stateDiagram-v2
@@ -1423,14 +1457,14 @@ stateDiagram-v2
 
 This is the admin-imposed overlay on the account lifecycle owned by IDN. States: `active`, `suspended`, `deactivated`, `merged`, `erased`. Terminal: `merged` (after tombstone expiry), `erased`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| active | suspended | admin suspend | reason; not self; not staff unless SAD |
-| suspended | active | admin reinstate | reason |
-| active, suspended | deactivated | user request or admin on request | ticket |
-| deactivated | active | reactivation | identity verified |
-| active, suspended | merged | merge approved | 2P; no conflicts |
-| active, suspended, deactivated | erased | erasure executed | 2P; no legal hold |
+| From                           | To          | Trigger                          | Guard                                  |
+| ------------------------------ | ----------- | -------------------------------- | -------------------------------------- |
+| active                         | suspended   | admin suspend                    | reason; not self; not staff unless SAD |
+| suspended                      | active      | admin reinstate                  | reason                                 |
+| active, suspended              | deactivated | user request or admin on request | ticket                                 |
+| deactivated                    | active      | reactivation                     | identity verified                      |
+| active, suspended              | merged      | merge approved                   | 2P; no conflicts                       |
+| active, suspended, deactivated | erased      | erasure executed                 | 2P; no legal hold                      |
 
 ```mermaid
 stateDiagram-v2
@@ -1453,80 +1487,80 @@ stateDiagram-v2
 
 All admin screens live on the separate admin origin; routes below are paths on that origin. [PROP]
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-ADM-001 | Admin sign-in | `/login` | all staff | Passkey or SSO sign-in | default, SSO redirect, blocked, locked, device-clock error |
-| SCR-ADM-002 | Step-up dialog | modal | all staff | Re-authenticate for mutation | challenge, success, failed, timed out |
-| SCR-ADM-003 | Admin home | `/` | all staff | Role-specific overview, badges | loading, partial data, incident banner |
-| SCR-ADM-004 | Command palette | modal | all staff | Global search and jump | empty (recent), results, throttled, no access |
-| SCR-ADM-005 | User directory | `/people/users` | SUP, SUP-L, MOD, FIN, PAD, SAD | Exact-identifier lookup | empty, results, refused partial match |
-| SCR-ADM-006 | User detail | `/people/users/:id` | same | Masked account facts, actions | masked, unmasked (grant), tombstone, erased |
-| SCR-ADM-007 | Account action dialogs and merge wizard | modal, `/people/users/:id/merge` | SUP-L, PAD, SAD | Suspend, reinstate, merge | confirm, pending approval, executed, error |
-| SCR-ADM-008 | Organization and institution list and detail | `/people/orgs`, `/people/orgs/:id`, `/people/institutions/:id` | SUP-L, PAD, SAD (view: SUP, FIN) | Verification queue, suspension, ownership transfer, tenant config | queue empty, cascade preview, suspended |
-| SCR-ADM-009 | Staff and roles | `/settings/staff` | PAD, SAD | Invite, assign roles, effective permissions | list, invite, pending approval, expiring |
-| SCR-ADM-010 | Access reviews | `/settings/access-reviews` | SAD, SUP-L, FIN-L, PAD | Quarterly recertification | open, in progress, overdue, closed |
-| SCR-ADM-011 | Approvals inbox | `/approvals` | requesters and approvers | Review, approve, reject, withdraw | to approve, mine, history, stale, expired |
-| SCR-ADM-012 | Grant request and active-grant chip | modal and top bar | SUP, MOD, FIN, PAD | Request and monitor privileged access | requested, active, expiring, expired |
-| SCR-ADM-013 | Break-glass | `/incidents/:id/break-glass` | roster (PAD, SAD) | Invoke emergency access; review | not on roster (hidden), active, under review |
-| SCR-ADM-014 | Staff activity alerts | `/compliance/staff-activity` | SAD, PAD | Anomaly queue and rules | queue, rule editor, suppressed storm |
-| SCR-ADM-015 | Feature flags | `/controls/flags`, `/controls/flags/:key` | PAD, SAD (read: all) | Targeting, rollout, history | list, editing, pending approval, stale |
-| SCR-ADM-016 | Kill switches | `/controls/switches` | PAD, SAD, MOD (scoped) | Activate, deactivate, ramp back | inactive, active, partial propagation |
-| SCR-ADM-017 | Configuration | `/controls/config` | PAD, SAD | Typed settings, diff, rollback | editing, canary, halted, rolled back |
-| SCR-ADM-018 | Announcements | `/content/announcements` | PAD, SAD, SUP-L (draft) | Compose, target, schedule | draft, in review, live, ended |
-| SCR-ADM-019 | Maintenance and change calendar | `/ops/maintenance`, `/ops/calendar` | PAD, SAD (view: all) | Windows, freeze, exceptions | scheduled, active read-only, freeze |
-| SCR-ADM-020 | Support queue | `/support/queue` | SUP, SUP-L, PAD | Prioritized queues | empty, filtered, SLA breaching |
-| SCR-ADM-021 | Ticket workspace | `/support/tickets/:id` | SUP, SUP-L, PAD | Thread, context, macros, actions | collision warning, pending approval, merged |
-| SCR-ADM-022 | SLA policies and reports | `/support/sla` | SUP-L, PAD | Policies, calendars, attainment | editing, report, no data |
-| SCR-ADM-023 | Macros | `/support/macros` | SUP-L, PAD (use: SUP) | Library and editor | list, editor, retired |
-| SCR-ADM-024 | View-as session | `/support/viewas/:id` | SUP, SUP-L, PAD | Consented read-only view | awaiting consent, active, ended |
-| SCR-ADM-025 | Knowledge base editor and analytics | `/content/help`, `/content/help/:id` | SUP-L, PAD (draft: SUP) | Articles, review queue, misses | draft, in review, outdated |
-| SCR-ADM-026 | Support quality and CSAT | `/support/quality` | SUP-L, PAD | Ratings, rubric reviews | trend, review form, empty |
-| SCR-ADM-027 | Problems and known issues | `/support/problems` | SUP, SUP-L, PAD | Link tickets, known-issue messages | open, resolved, bulk send |
-| SCR-ADM-028 | Content pages (CMS) | `/content/pages` | PAD, SAD | Template-bound editing, preview, publish | draft, review, published, cache pending |
-| SCR-ADM-029 | Legal documents | `/content/legal` | PAD, SAD | Versions, effective dates, acceptance | draft, 2P pending, scheduled, live |
-| SCR-ADM-030 | Localization | `/content/locales` | PAD, SUP-L | Locale coverage and stale items | coverage matrix, stale, import errors |
-| SCR-ADM-031 | Audit log viewer | `/audit` | SAD, PAD, scoped others | Search and verify events | filtered, lagging banner, integrity result |
-| SCR-ADM-032 | Data requests | `/compliance/requests`, `/compliance/requests/:id` | SUP, SUP-L, PAD, SAD | Cases, deadlines, decisions | list, blocked, hold, completed |
-| SCR-ADM-033 | Bulk operations | `/ops/bulk` | PAD, SAD | Dry-run, execute, undo | dry-run report, running, stopped |
-| SCR-ADM-034 | Finance worklists | `/finance/refunds`, `/finance/disputes`, `/finance/reconciliation` | FIN, FIN-L (read: SAD) | Refunds, disputes, variance | queue, decision dialog, provider degraded |
-| SCR-ADM-035 | Exports and saved views | modal, `/me/exports` | PAD, SAD, leads | Export dialog and downloads | preparing, ready, expired |
-| SCR-ADM-036 | Jobs and dead letters | `/ops/jobs`, `/ops/jobs/:id` | PAD (view: SAD) | Queue health, retry, requeue | healthy, dead jobs, stuck |
-| SCR-ADM-037 | Incidents and incident room | `/incidents`, `/incidents/:id` | PAD, SAD, declarers | Declare, coordinate, communicate | active, resolved, review pending |
-| SCR-ADM-038 | Platform health | `/ops/health` | all staff | Service, queue, integration state | healthy, degraded, unknown, monitoring down |
-| SCR-ADM-039 | User-side: Contact support and My requests | `/help/contact`, `/help/requests` (product origin) | all signed-in roles, GUE (form) | Ticket intake and tracking | empty, submitted, attachment failed |
-| SCR-ADM-040 | User-side: Support access settings and consent prompt | `/settings/privacy/support-access` (product origin) | all signed-in roles | Consent, revoke, view past sessions | prompt, active session banner, history |
-| SCR-ADM-041 | Public help center | `/help`, `/help/:slug` (product origin) | GUE and all | Search, read, rate | home, article, no results, outdated label |
-| SCR-ADM-042 | Public status page | separate host | GUE and all | Component status and incidents | operational, degraded, maintenance |
+| ID          | Name                                                  | Route proposal                                                     | Roles                            | Purpose                                                           | Key states                                                 |
+| ----------- | ----------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| SCR-ADM-001 | Admin sign-in                                         | `/login`                                                           | all staff                        | Passkey or SSO sign-in                                            | default, SSO redirect, blocked, locked, device-clock error |
+| SCR-ADM-002 | Step-up dialog                                        | modal                                                              | all staff                        | Re-authenticate for mutation                                      | challenge, success, failed, timed out                      |
+| SCR-ADM-003 | Admin home                                            | `/`                                                                | all staff                        | Role-specific overview, badges                                    | loading, partial data, incident banner                     |
+| SCR-ADM-004 | Command palette                                       | modal                                                              | all staff                        | Global search and jump                                            | empty (recent), results, throttled, no access              |
+| SCR-ADM-005 | User directory                                        | `/people/users`                                                    | SUP, SUP-L, MOD, FIN, PAD, SAD   | Exact-identifier lookup                                           | empty, results, refused partial match                      |
+| SCR-ADM-006 | User detail                                           | `/people/users/:id`                                                | same                             | Masked account facts, actions                                     | masked, unmasked (grant), tombstone, erased                |
+| SCR-ADM-007 | Account action dialogs and merge wizard               | modal, `/people/users/:id/merge`                                   | SUP-L, PAD, SAD                  | Suspend, reinstate, merge                                         | confirm, pending approval, executed, error                 |
+| SCR-ADM-008 | Organization and institution list and detail          | `/people/orgs`, `/people/orgs/:id`, `/people/institutions/:id`     | SUP-L, PAD, SAD (view: SUP, FIN) | Verification queue, suspension, ownership transfer, tenant config | queue empty, cascade preview, suspended                    |
+| SCR-ADM-009 | Staff and roles                                       | `/settings/staff`                                                  | PAD, SAD                         | Invite, assign roles, effective permissions                       | list, invite, pending approval, expiring                   |
+| SCR-ADM-010 | Access reviews                                        | `/settings/access-reviews`                                         | SAD, SUP-L, FIN-L, PAD           | Quarterly recertification                                         | open, in progress, overdue, closed                         |
+| SCR-ADM-011 | Approvals inbox                                       | `/approvals`                                                       | requesters and approvers         | Review, approve, reject, withdraw                                 | to approve, mine, history, stale, expired                  |
+| SCR-ADM-012 | Grant request and active-grant chip                   | modal and top bar                                                  | SUP, MOD, FIN, PAD               | Request and monitor privileged access                             | requested, active, expiring, expired                       |
+| SCR-ADM-013 | Break-glass                                           | `/incidents/:id/break-glass`                                       | roster (PAD, SAD)                | Invoke emergency access; review                                   | not on roster (hidden), active, under review               |
+| SCR-ADM-014 | Staff activity alerts                                 | `/compliance/staff-activity`                                       | SAD, PAD                         | Anomaly queue and rules                                           | queue, rule editor, suppressed storm                       |
+| SCR-ADM-015 | Feature flags                                         | `/controls/flags`, `/controls/flags/:key`                          | PAD, SAD (read: all)             | Targeting, rollout, history                                       | list, editing, pending approval, stale                     |
+| SCR-ADM-016 | Kill switches                                         | `/controls/switches`                                               | PAD, SAD, MOD (scoped)           | Activate, deactivate, ramp back                                   | inactive, active, partial propagation                      |
+| SCR-ADM-017 | Configuration                                         | `/controls/config`                                                 | PAD, SAD                         | Typed settings, diff, rollback                                    | editing, canary, halted, rolled back                       |
+| SCR-ADM-018 | Announcements                                         | `/content/announcements`                                           | PAD, SAD, SUP-L (draft)          | Compose, target, schedule                                         | draft, in review, live, ended                              |
+| SCR-ADM-019 | Maintenance and change calendar                       | `/ops/maintenance`, `/ops/calendar`                                | PAD, SAD (view: all)             | Windows, freeze, exceptions                                       | scheduled, active read-only, freeze                        |
+| SCR-ADM-020 | Support queue                                         | `/support/queue`                                                   | SUP, SUP-L, PAD                  | Prioritized queues                                                | empty, filtered, SLA breaching                             |
+| SCR-ADM-021 | Ticket workspace                                      | `/support/tickets/:id`                                             | SUP, SUP-L, PAD                  | Thread, context, macros, actions                                  | collision warning, pending approval, merged                |
+| SCR-ADM-022 | SLA policies and reports                              | `/support/sla`                                                     | SUP-L, PAD                       | Policies, calendars, attainment                                   | editing, report, no data                                   |
+| SCR-ADM-023 | Macros                                                | `/support/macros`                                                  | SUP-L, PAD (use: SUP)            | Library and editor                                                | list, editor, retired                                      |
+| SCR-ADM-024 | View-as session                                       | `/support/viewas/:id`                                              | SUP, SUP-L, PAD                  | Consented read-only view                                          | awaiting consent, active, ended                            |
+| SCR-ADM-025 | Knowledge base editor and analytics                   | `/content/help`, `/content/help/:id`                               | SUP-L, PAD (draft: SUP)          | Articles, review queue, misses                                    | draft, in review, outdated                                 |
+| SCR-ADM-026 | Support quality and CSAT                              | `/support/quality`                                                 | SUP-L, PAD                       | Ratings, rubric reviews                                           | trend, review form, empty                                  |
+| SCR-ADM-027 | Problems and known issues                             | `/support/problems`                                                | SUP, SUP-L, PAD                  | Link tickets, known-issue messages                                | open, resolved, bulk send                                  |
+| SCR-ADM-028 | Content pages (CMS)                                   | `/content/pages`                                                   | PAD, SAD                         | Template-bound editing, preview, publish                          | draft, review, published, cache pending                    |
+| SCR-ADM-029 | Legal documents                                       | `/content/legal`                                                   | PAD, SAD                         | Versions, effective dates, acceptance                             | draft, 2P pending, scheduled, live                         |
+| SCR-ADM-030 | Localization                                          | `/content/locales`                                                 | PAD, SUP-L                       | Locale coverage and stale items                                   | coverage matrix, stale, import errors                      |
+| SCR-ADM-031 | Audit log viewer                                      | `/audit`                                                           | SAD, PAD, scoped others          | Search and verify events                                          | filtered, lagging banner, integrity result                 |
+| SCR-ADM-032 | Data requests                                         | `/compliance/requests`, `/compliance/requests/:id`                 | SUP, SUP-L, PAD, SAD             | Cases, deadlines, decisions                                       | list, blocked, hold, completed                             |
+| SCR-ADM-033 | Bulk operations                                       | `/ops/bulk`                                                        | PAD, SAD                         | Dry-run, execute, undo                                            | dry-run report, running, stopped                           |
+| SCR-ADM-034 | Finance worklists                                     | `/finance/refunds`, `/finance/disputes`, `/finance/reconciliation` | FIN, FIN-L (read: SAD)           | Refunds, disputes, variance                                       | queue, decision dialog, provider degraded                  |
+| SCR-ADM-035 | Exports and saved views                               | modal, `/me/exports`                                               | PAD, SAD, leads                  | Export dialog and downloads                                       | preparing, ready, expired                                  |
+| SCR-ADM-036 | Jobs and dead letters                                 | `/ops/jobs`, `/ops/jobs/:id`                                       | PAD (view: SAD)                  | Queue health, retry, requeue                                      | healthy, dead jobs, stuck                                  |
+| SCR-ADM-037 | Incidents and incident room                           | `/incidents`, `/incidents/:id`                                     | PAD, SAD, declarers              | Declare, coordinate, communicate                                  | active, resolved, review pending                           |
+| SCR-ADM-038 | Platform health                                       | `/ops/health`                                                      | all staff                        | Service, queue, integration state                                 | healthy, degraded, unknown, monitoring down                |
+| SCR-ADM-039 | User-side: Contact support and My requests            | `/help/contact`, `/help/requests` (product origin)                 | all signed-in roles, GUE (form)  | Ticket intake and tracking                                        | empty, submitted, attachment failed                        |
+| SCR-ADM-040 | User-side: Support access settings and consent prompt | `/settings/privacy/support-access` (product origin)                | all signed-in roles              | Consent, revoke, view past sessions                               | prompt, active session banner, history                     |
+| SCR-ADM-041 | Public help center                                    | `/help`, `/help/:slug` (product origin)                            | GUE and all                      | Search, read, rate                                                | home, article, no results, outdated label                  |
+| SCR-ADM-042 | Public status page                                    | separate host                                                      | GUE and all                      | Component status and incidents                                    | operational, degraded, maintenance                         |
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-ADM-01 | StaffIdentity | id, workEmail, status, createdBy, lastSignInAt, networkPolicyId | has many RoleAssignment; has many Session | Staff record: life of employment plus 7 years |
-| ENT-ADM-02 | AdminRole and RoleAssignment | roleCode, permissionSetVersion, delegable flags; assignment: staffId, roleCode, expiresAt, grantedBy | StaffIdentity | 7 years after removal |
-| ENT-ADM-03 | PrivilegedGrant | id, requesterId, approverId, subjectType, subjectId, dataClass, purpose, ticketRef, startsAt, expiresAt, state, breakGlass | Ticket, Incident, AuditEvent | 7 years (metadata only) |
-| ENT-ADM-04 | ApprovalRequest | id, actionClass, payloadHash, payloadBody (redacted), requesterId, approverIds, state, expiresAt, expectedVersion | AuditEvent | 7 years |
-| ENT-ADM-05 | AuditEvent | id, ts, actorId, actorRole, action, targetType, targetId, outcome, reasonCode, requestId, sessionId, summaryBefore, summaryAfter, prevHash, hash | all admin entities | 7 years security class; 24 months view-metadata class |
-| ENT-ADM-06 | FeatureFlag | key, type, owner, expiresAt, state, rulesVersion, clientVisible, securityClass | FlagVersion | Life of flag plus 2 years |
-| ENT-ADM-07 | KillSwitch | key, scope, degradedBehavior, messageRef, owner, p0Class, state, activatedBy, autoExpireAt | FeatureFlag (precedence), Incident | Life plus 2 years |
-| ENT-ADM-08 | ConfigEntry and ConfigVersion | key, class, schemaRef, value, version, appliedAt, applyMode | AuditEvent | 2 years of versions |
-| ENT-ADM-09 | Announcement | id, type, title, body, audience, surfaces, locales, startsAt, endsAt, state, metrics | CmsPage (messages) | 2 years |
-| ENT-ADM-10 | Ticket | id, requesterId or guestEmail, orgId, category, priority, state, assigneeId, queueId, slaPolicyId, tags, problemId, resolutionCode | TicketMessage, SlaPolicy, Problem | 24 months after close; pseudonymized on erasure |
-| ENT-ADM-11 | TicketMessage | id, ticketId, authorKind, authorId, channel, bodyRef, attachmentIds, isInternal, createdAt | Ticket, File (PLT) | Same as ticket |
-| ENT-ADM-12 | Macro | id, title, body, placeholders, actions, locales, version, status | Ticket usage stats | Life plus 1 year |
-| ENT-ADM-13 | SlaPolicy | id, conditions, firstResponseTarget, resolutionTarget, calendarId, escalationSteps | Ticket | Life plus 2 years |
-| ENT-ADM-14 | ImpersonationSession | id, agentId, subjectId, ticketId, state, consentAt, startsAt, endsAt, pageTrail | Ticket, AuditEvent | 24 months |
-| ENT-ADM-15 | KbArticle | id, slug, title, body blocks, audience, locale, ownerId, reviewDueAt, state, rating counts | CmsPage, Macro references | Life plus 1 year |
-| ENT-ADM-16 | CmsPage and ContentVersion | pageKey, templateId, fields, seo, version, state, publishedAt; legal: effectiveAt, changeClass, counselRef | Locale variants | Legal versions permanent; other 2 years |
-| ENT-ADM-17 | Incident | id, title, severity, state, components, commanderId, declaredAt, resolvedAt, rootCauseCategory, impactSummary | IncidentUpdate, Ticket, PrivilegedGrant | 7 years |
-| ENT-ADM-18 | IncidentUpdate | id, incidentId, kind (timeline, public), body, publishedAt, authorId | Incident | 7 years |
-| ENT-ADM-19 | DataRequestCase | id, subjectRef, type, jurisdiction, receivedAt, dueAt, state, holdFlag, moduleChecklist, decisionBy | SET request (planned), Ticket | 7 years metadata |
-| ENT-ADM-20 | AdminSavedView | id, ownerId, table, filter, columns, sharedWithRole | StaffIdentity | Life of owner |
-| ENT-ADM-21 | CsatResponse | id, ticketId, score, comment, agentId, macroIds | Ticket | 24 months |
-| ENT-ADM-22 | AccessReview | id, campaignId, reviewerId, staffId, decision, decidedAt, comment | StaffIdentity | 7 years |
-| ENT-ADM-23 | ProblemRecord | id, title, workaround, state, linkedIncidentId, ticketCount | Ticket, Incident | 2 years |
-| ENT-ADM-24 | BulkOperationRun | id, type, targetSetRef, dryRunId, params, state, counts, startedBy | AuditEvent | 2 years |
-| ENT-ADM-25 | AdminExport | id, requesterId, table, columns, rowCount, fileRef, expiresAt, downloadedAt | File (PLT) | File 24 hours; metadata 2 years |
+| ID         | Entity                        | Key attributes                                                                                                                                   | Relationships                             | Retention class                                       |
+| ---------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- | ----------------------------------------------------- |
+| ENT-ADM-01 | StaffIdentity                 | id, workEmail, status, createdBy, lastSignInAt, networkPolicyId                                                                                  | has many RoleAssignment; has many Session | Staff record: life of employment plus 7 years         |
+| ENT-ADM-02 | AdminRole and RoleAssignment  | roleCode, permissionSetVersion, delegable flags; assignment: staffId, roleCode, expiresAt, grantedBy                                             | StaffIdentity                             | 7 years after removal                                 |
+| ENT-ADM-03 | PrivilegedGrant               | id, requesterId, approverId, subjectType, subjectId, dataClass, purpose, ticketRef, startsAt, expiresAt, state, breakGlass                       | Ticket, Incident, AuditEvent              | 7 years (metadata only)                               |
+| ENT-ADM-04 | ApprovalRequest               | id, actionClass, payloadHash, payloadBody (redacted), requesterId, approverIds, state, expiresAt, expectedVersion                                | AuditEvent                                | 7 years                                               |
+| ENT-ADM-05 | AuditEvent                    | id, ts, actorId, actorRole, action, targetType, targetId, outcome, reasonCode, requestId, sessionId, summaryBefore, summaryAfter, prevHash, hash | all admin entities                        | 7 years security class; 24 months view-metadata class |
+| ENT-ADM-06 | FeatureFlag                   | key, type, owner, expiresAt, state, rulesVersion, clientVisible, securityClass                                                                   | FlagVersion                               | Life of flag plus 2 years                             |
+| ENT-ADM-07 | KillSwitch                    | key, scope, degradedBehavior, messageRef, owner, p0Class, state, activatedBy, autoExpireAt                                                       | FeatureFlag (precedence), Incident        | Life plus 2 years                                     |
+| ENT-ADM-08 | ConfigEntry and ConfigVersion | key, class, schemaRef, value, version, appliedAt, applyMode                                                                                      | AuditEvent                                | 2 years of versions                                   |
+| ENT-ADM-09 | Announcement                  | id, type, title, body, audience, surfaces, locales, startsAt, endsAt, state, metrics                                                             | CmsPage (messages)                        | 2 years                                               |
+| ENT-ADM-10 | Ticket                        | id, requesterId or guestEmail, orgId, category, priority, state, assigneeId, queueId, slaPolicyId, tags, problemId, resolutionCode               | TicketMessage, SlaPolicy, Problem         | 24 months after close; pseudonymized on erasure       |
+| ENT-ADM-11 | TicketMessage                 | id, ticketId, authorKind, authorId, channel, bodyRef, attachmentIds, isInternal, createdAt                                                       | Ticket, File (PLT)                        | Same as ticket                                        |
+| ENT-ADM-12 | Macro                         | id, title, body, placeholders, actions, locales, version, status                                                                                 | Ticket usage stats                        | Life plus 1 year                                      |
+| ENT-ADM-13 | SlaPolicy                     | id, conditions, firstResponseTarget, resolutionTarget, calendarId, escalationSteps                                                               | Ticket                                    | Life plus 2 years                                     |
+| ENT-ADM-14 | ImpersonationSession          | id, agentId, subjectId, ticketId, state, consentAt, startsAt, endsAt, pageTrail                                                                  | Ticket, AuditEvent                        | 24 months                                             |
+| ENT-ADM-15 | KbArticle                     | id, slug, title, body blocks, audience, locale, ownerId, reviewDueAt, state, rating counts                                                       | CmsPage, Macro references                 | Life plus 1 year                                      |
+| ENT-ADM-16 | CmsPage and ContentVersion    | pageKey, templateId, fields, seo, version, state, publishedAt; legal: effectiveAt, changeClass, counselRef                                       | Locale variants                           | Legal versions permanent; other 2 years               |
+| ENT-ADM-17 | Incident                      | id, title, severity, state, components, commanderId, declaredAt, resolvedAt, rootCauseCategory, impactSummary                                    | IncidentUpdate, Ticket, PrivilegedGrant   | 7 years                                               |
+| ENT-ADM-18 | IncidentUpdate                | id, incidentId, kind (timeline, public), body, publishedAt, authorId                                                                             | Incident                                  | 7 years                                               |
+| ENT-ADM-19 | DataRequestCase               | id, subjectRef, type, jurisdiction, receivedAt, dueAt, state, holdFlag, moduleChecklist, decisionBy                                              | SET request (planned), Ticket             | 7 years metadata                                      |
+| ENT-ADM-20 | AdminSavedView                | id, ownerId, table, filter, columns, sharedWithRole                                                                                              | StaffIdentity                             | Life of owner                                         |
+| ENT-ADM-21 | CsatResponse                  | id, ticketId, score, comment, agentId, macroIds                                                                                                  | Ticket                                    | 24 months                                             |
+| ENT-ADM-22 | AccessReview                  | id, campaignId, reviewerId, staffId, decision, decidedAt, comment                                                                                | StaffIdentity                             | 7 years                                               |
+| ENT-ADM-23 | ProblemRecord                 | id, title, workaround, state, linkedIncidentId, ticketCount                                                                                      | Ticket, Incident                          | 2 years                                               |
+| ENT-ADM-24 | BulkOperationRun              | id, type, targetSetRef, dryRunId, params, state, counts, startedBy                                                                               | AuditEvent                                | 2 years                                               |
+| ENT-ADM-25 | AdminExport                   | id, requesterId, table, columns, rowCount, fileRef, expiresAt, downloadedAt                                                                      | File (PLT)                                | File 24 hours; metadata 2 years                       |
 
 ```mermaid
 erDiagram
@@ -1548,178 +1582,178 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Name | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-ADM-001 | `admin.action.performed` | Any admin mutation (generic envelope) | actor, role, action, target, reasonCode, outcome, requestId | audit store, anomaly rules |
-| EVT-ADM-002 | `admin.session.started` | Staff sign-in success | staffId, method, network, deviceId | audit, anomaly rules |
-| EVT-ADM-003 | `admin.session.stepup_completed` | Step-up success | staffId, validUntil | audit |
-| EVT-ADM-004 | `admin.session.blocked` | Impossible travel, lockout, policy block | staffId, reason | SAD alerts, audit |
-| EVT-ADM-005 | `admin.staff.invited` | Staff invitation sent | email hash, role, expiry | audit |
-| EVT-ADM-006 | `admin.staff.role_changed` | Role assignment applied or removed | staffId, role, before, after | audit, access review |
-| EVT-ADM-007 | `admin.staff.disabled` | Staff identity disabled | staffId, reason | IDN (revoke sessions), audit |
-| EVT-ADM-008 | `admin.account.suspended` | Account suspended | accountId, reason, expectedUndoUntil | IDN, NTF, TSF, audit |
-| EVT-ADM-009 | `admin.account.reinstated` | Account reinstated | accountId | IDN, NTF, audit |
-| EVT-ADM-010 | `admin.account.merged` | Merge executed | survivorId, retiredId, counts | all owning modules, audit |
-| EVT-ADM-011 | `admin.account.force_logged_out` | Sessions revoked by staff | accountId | IDN, audit |
-| EVT-ADM-012 | `admin.org.approved` | Org approved | orgId | EMP, JOB, NTF |
-| EVT-ADM-013 | `admin.org.suspended` | Org suspended | orgId, reason class, cascade counts | EMP, JOB, ATS, MSG, NTF |
-| EVT-ADM-014 | `admin.org.ownership_transferred` | Ownership transfer executed | orgId, from, to | EMP, NTF |
-| EVT-ADM-015 | `admin.grant.requested` | Grant requested | grantId, class, subject type | approvers, audit |
-| EVT-ADM-016 | `admin.grant.activated` | Grant active | grantId, expiresAt | audit |
-| EVT-ADM-017 | `admin.grant.ended` | Grant expired or revoked | grantId, endReason | audit |
-| EVT-ADM-018 | `admin.pii.viewed` | Unmasked field read | grantId, subjectId, fields | audit, SET privacy center |
-| EVT-ADM-019 | `admin.approval.requested` | Two-person request created | requestId, actionClass | approvers, audit |
-| EVT-ADM-020 | `admin.approval.decided` | Approved, rejected, expired, stale, executed, failed | requestId, outcome | requester, audit |
-| EVT-ADM-021 | `admin.breakglass.invoked` | Break-glass started | grantId, incidentId, scope | SAD paging, audit |
-| EVT-ADM-022 | `admin.breakglass.reviewed` | Review decision | grantId, outcome | audit, SAD |
-| EVT-ADM-023 | `admin.flag.changed` | Flag version applied | key, env, versionBefore, versionAfter | flag SDKs, ANL, audit |
-| EVT-ADM-024 | `admin.killswitch.activated` | Switch on | key, reason, incidentId | all call sites, status, audit |
-| EVT-ADM-025 | `admin.killswitch.deactivated` | Switch off | key, ramp state | all call sites, audit |
-| EVT-ADM-026 | `admin.config.changed` | Config version applied | key, versionBefore, versionAfter, class | services, audit |
-| EVT-ADM-027 | `admin.announcement.published` | Announcement live | id, audience, type | NTF, web and PWA clients |
-| EVT-ADM-028 | `admin.maintenance.started` | Window begins | windowId, scope | all services, PWA |
-| EVT-ADM-029 | `admin.maintenance.ended` | Window ends | windowId | all services, PWA |
-| EVT-ADM-030 | `support.ticket.created` | Ticket created | ticketId, category, requesterKind | queue router, ANL |
-| EVT-ADM-031 | `support.ticket.replied` | Public reply | ticketId, direction | NTF, SLA |
-| EVT-ADM-032 | `support.ticket.resolved` | Resolved | ticketId, resolutionCode | CSAT, NTF |
-| EVT-ADM-033 | `support.ticket.sla_breached` | SLA target missed | ticketId, policyId, cause | SUP-L alerts, ANL |
-| EVT-ADM-034 | `support.viewas.started` | View-as active | sessionId, ticketId | user app banner, audit |
-| EVT-ADM-035 | `support.viewas.ended` | View-as ended | sessionId, reason, pageCount | NTF summary, audit |
-| EVT-ADM-036 | `support.csat.submitted` | Rating received | ticketId, score | SUP-L tasks, ANL |
-| EVT-ADM-037 | `support.problem.linked` | Ticket linked to problem | problemId, ticketId | problem counters |
-| EVT-ADM-038 | `admin.cms.published` | CMS page or article published | pageKey, version | CDN invalidation, search index |
-| EVT-ADM-039 | `legal.version.published` | Legal version scheduled or effective | docType, version, changeClass, effectiveAt | SET (re-consent), NTF |
-| EVT-ADM-040 | `admin.datarequest.opened` | Case created | caseId, type, dueAt | SET, SLA reminders |
-| EVT-ADM-041 | `admin.datarequest.completed` | Case completed | caseId, outcome | SET, audit |
-| EVT-ADM-042 | `admin.export.created` | Export generated | exportId, rowCount, table | anomaly rules, audit |
-| EVT-ADM-043 | `admin.bulk.completed` | Bulk run ended | runId, counts, outcome | audit |
-| EVT-ADM-044 | `admin.job.replayed` | Dead job replayed or cancelled | jobId, kind, action | PLT, audit |
-| EVT-ADM-045 | `admin.incident.declared` | Incident declared | incidentId, severity, components | paging, status page, banner |
-| EVT-ADM-046 | `admin.incident.resolved` | Incident resolved | incidentId, impact | status page, review scheduler |
-| EVT-ADM-047 | `admin.alert.anomaly_detected` | Anomaly rule triggered | ruleId, actorId, severity | SAD queue |
-| EVT-ADM-048 | `admin.accessreview.completed` | Campaign closed | campaignId, removals | audit |
-| EVT-ADM-049 | `admin.audit.integrity_failed` | Chain check fails or ingestion gap | range, firstMismatch | SAD paging |
-| EVT-ADM-050 | `admin.finance.refund_decided` | Refund approved or denied | orderId, amount, decision | BIL, NTF |
+| ID          | Name                              | Trigger                                              | Key payload                                                 | Consumers                      |
+| ----------- | --------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------- | ------------------------------ |
+| EVT-ADM-001 | `admin.action.performed`          | Any admin mutation (generic envelope)                | actor, role, action, target, reasonCode, outcome, requestId | audit store, anomaly rules     |
+| EVT-ADM-002 | `admin.session.started`           | Staff sign-in success                                | staffId, method, network, deviceId                          | audit, anomaly rules           |
+| EVT-ADM-003 | `admin.session.stepup_completed`  | Step-up success                                      | staffId, validUntil                                         | audit                          |
+| EVT-ADM-004 | `admin.session.blocked`           | Impossible travel, lockout, policy block             | staffId, reason                                             | SAD alerts, audit              |
+| EVT-ADM-005 | `admin.staff.invited`             | Staff invitation sent                                | email hash, role, expiry                                    | audit                          |
+| EVT-ADM-006 | `admin.staff.role_changed`        | Role assignment applied or removed                   | staffId, role, before, after                                | audit, access review           |
+| EVT-ADM-007 | `admin.staff.disabled`            | Staff identity disabled                              | staffId, reason                                             | IDN (revoke sessions), audit   |
+| EVT-ADM-008 | `admin.account.suspended`         | Account suspended                                    | accountId, reason, expectedUndoUntil                        | IDN, NTF, TSF, audit           |
+| EVT-ADM-009 | `admin.account.reinstated`        | Account reinstated                                   | accountId                                                   | IDN, NTF, audit                |
+| EVT-ADM-010 | `admin.account.merged`            | Merge executed                                       | survivorId, retiredId, counts                               | all owning modules, audit      |
+| EVT-ADM-011 | `admin.account.force_logged_out`  | Sessions revoked by staff                            | accountId                                                   | IDN, audit                     |
+| EVT-ADM-012 | `admin.org.approved`              | Org approved                                         | orgId                                                       | EMP, JOB, NTF                  |
+| EVT-ADM-013 | `admin.org.suspended`             | Org suspended                                        | orgId, reason class, cascade counts                         | EMP, JOB, ATS, MSG, NTF        |
+| EVT-ADM-014 | `admin.org.ownership_transferred` | Ownership transfer executed                          | orgId, from, to                                             | EMP, NTF                       |
+| EVT-ADM-015 | `admin.grant.requested`           | Grant requested                                      | grantId, class, subject type                                | approvers, audit               |
+| EVT-ADM-016 | `admin.grant.activated`           | Grant active                                         | grantId, expiresAt                                          | audit                          |
+| EVT-ADM-017 | `admin.grant.ended`               | Grant expired or revoked                             | grantId, endReason                                          | audit                          |
+| EVT-ADM-018 | `admin.pii.viewed`                | Unmasked field read                                  | grantId, subjectId, fields                                  | audit, SET privacy center      |
+| EVT-ADM-019 | `admin.approval.requested`        | Two-person request created                           | requestId, actionClass                                      | approvers, audit               |
+| EVT-ADM-020 | `admin.approval.decided`          | Approved, rejected, expired, stale, executed, failed | requestId, outcome                                          | requester, audit               |
+| EVT-ADM-021 | `admin.breakglass.invoked`        | Break-glass started                                  | grantId, incidentId, scope                                  | SAD paging, audit              |
+| EVT-ADM-022 | `admin.breakglass.reviewed`       | Review decision                                      | grantId, outcome                                            | audit, SAD                     |
+| EVT-ADM-023 | `admin.flag.changed`              | Flag version applied                                 | key, env, versionBefore, versionAfter                       | flag SDKs, ANL, audit          |
+| EVT-ADM-024 | `admin.killswitch.activated`      | Switch on                                            | key, reason, incidentId                                     | all call sites, status, audit  |
+| EVT-ADM-025 | `admin.killswitch.deactivated`    | Switch off                                           | key, ramp state                                             | all call sites, audit          |
+| EVT-ADM-026 | `admin.config.changed`            | Config version applied                               | key, versionBefore, versionAfter, class                     | services, audit                |
+| EVT-ADM-027 | `admin.announcement.published`    | Announcement live                                    | id, audience, type                                          | NTF, web and PWA clients       |
+| EVT-ADM-028 | `admin.maintenance.started`       | Window begins                                        | windowId, scope                                             | all services, PWA              |
+| EVT-ADM-029 | `admin.maintenance.ended`         | Window ends                                          | windowId                                                    | all services, PWA              |
+| EVT-ADM-030 | `support.ticket.created`          | Ticket created                                       | ticketId, category, requesterKind                           | queue router, ANL              |
+| EVT-ADM-031 | `support.ticket.replied`          | Public reply                                         | ticketId, direction                                         | NTF, SLA                       |
+| EVT-ADM-032 | `support.ticket.resolved`         | Resolved                                             | ticketId, resolutionCode                                    | CSAT, NTF                      |
+| EVT-ADM-033 | `support.ticket.sla_breached`     | SLA target missed                                    | ticketId, policyId, cause                                   | SUP-L alerts, ANL              |
+| EVT-ADM-034 | `support.viewas.started`          | View-as active                                       | sessionId, ticketId                                         | user app banner, audit         |
+| EVT-ADM-035 | `support.viewas.ended`            | View-as ended                                        | sessionId, reason, pageCount                                | NTF summary, audit             |
+| EVT-ADM-036 | `support.csat.submitted`          | Rating received                                      | ticketId, score                                             | SUP-L tasks, ANL               |
+| EVT-ADM-037 | `support.problem.linked`          | Ticket linked to problem                             | problemId, ticketId                                         | problem counters               |
+| EVT-ADM-038 | `admin.cms.published`             | CMS page or article published                        | pageKey, version                                            | CDN invalidation, search index |
+| EVT-ADM-039 | `legal.version.published`         | Legal version scheduled or effective                 | docType, version, changeClass, effectiveAt                  | SET (re-consent), NTF          |
+| EVT-ADM-040 | `admin.datarequest.opened`        | Case created                                         | caseId, type, dueAt                                         | SET, SLA reminders             |
+| EVT-ADM-041 | `admin.datarequest.completed`     | Case completed                                       | caseId, outcome                                             | SET, audit                     |
+| EVT-ADM-042 | `admin.export.created`            | Export generated                                     | exportId, rowCount, table                                   | anomaly rules, audit           |
+| EVT-ADM-043 | `admin.bulk.completed`            | Bulk run ended                                       | runId, counts, outcome                                      | audit                          |
+| EVT-ADM-044 | `admin.job.replayed`              | Dead job replayed or cancelled                       | jobId, kind, action                                         | PLT, audit                     |
+| EVT-ADM-045 | `admin.incident.declared`         | Incident declared                                    | incidentId, severity, components                            | paging, status page, banner    |
+| EVT-ADM-046 | `admin.incident.resolved`         | Incident resolved                                    | incidentId, impact                                          | status page, review scheduler  |
+| EVT-ADM-047 | `admin.alert.anomaly_detected`    | Anomaly rule triggered                               | ruleId, actorId, severity                                   | SAD queue                      |
+| EVT-ADM-048 | `admin.accessreview.completed`    | Campaign closed                                      | campaignId, removals                                        | audit                          |
+| EVT-ADM-049 | `admin.audit.integrity_failed`    | Chain check fails or ingestion gap                   | range, firstMismatch                                        | SAD paging                     |
+| EVT-ADM-050 | `admin.finance.refund_decided`    | Refund approved or denied                            | orderId, amount, decision                                   | BIL, NTF                       |
 
 ### 9.2 Consumed (owned by other modules; marked planned where the module is not yet specified)
 
-| Event | Owner | Used for |
-|---|---|---|
-| `plt.job.dead` | PLT (planned) | Dead-letter alerts (FR-ADM-037) |
-| `plt.integration.health_changed` | PLT (planned) | Health dashboard tiles (FR-ADM-039) |
-| `set.datarequest.submitted` | SET (planned) | Create data-request case (FR-ADM-033) |
-| `set.datarequest.module_completed` | SET (planned) | Module checklist progress |
-| `tsf.case.opened` | TSF (planned) | Link to tickets and org suspension context |
-| `bil.dispute.opened` | BIL (planned) | Dispute worklist |
-| `bil.payout.reconciled` | BIL (planned) | Reconciliation worklist |
-| `idn.login.failed` / `idn.account.locked` | IDN (planned) | Staff lockout alerts |
-| `ntf.delivery.failed` | NTF (planned) | Ticket `contact_failed` flag |
-| `emp.org.verification_submitted` | EMP (planned) | Verification queue |
+| Event                                     | Owner         | Used for                                   |
+| ----------------------------------------- | ------------- | ------------------------------------------ |
+| `plt.job.dead`                            | PLT (planned) | Dead-letter alerts (FR-ADM-037)            |
+| `plt.integration.health_changed`          | PLT (planned) | Health dashboard tiles (FR-ADM-039)        |
+| `set.datarequest.submitted`               | SET (planned) | Create data-request case (FR-ADM-033)      |
+| `set.datarequest.module_completed`        | SET (planned) | Module checklist progress                  |
+| `tsf.case.opened`                         | TSF (planned) | Link to tickets and org suspension context |
+| `bil.dispute.opened`                      | BIL (planned) | Dispute worklist                           |
+| `bil.payout.reconciled`                   | BIL (planned) | Reconciliation worklist                    |
+| `idn.login.failed` / `idn.account.locked` | IDN (planned) | Staff lockout alerts                       |
+| `ntf.delivery.failed`                     | NTF (planned) | Ticket `contact_failed` flag               |
+| `emp.org.verification_submitted`          | EMP (planned) | Verification queue                         |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Direction | Purpose | Notes |
-|---|---|---|---|
-| Identity provider for staff (OIDC or SAML) | Inbound | Staff SSO with passkey enforcement | via adapter, FR-PLT-021 |
-| Paging provider | Outbound | On-call paging for P0 and P1, break-glass | adapter; provider undecided |
-| Status page host | Outbound | Public status, subscribers | independent infrastructure; OD-ADM-11 |
-| Email provider | Outbound | Ticket mail, announcements | through NTF and FR-PLT-023 |
-| Object store with object-lock | Outbound | Audit anchoring, evidence | `[PROP]` |
-| Support desk vendor (optional) | Bidirectional | If OD-ADM-01 chooses buy over build | same ticket contract, adapter |
-| Payment provider | Bidirectional | Disputes, refunds (through BIL) | not accessed directly |
-| Observability stack | Inbound | Metrics, traces, alerts | read via API |
-| Translation vendor | Outbound | XLIFF exchange | optional |
-| Identity-verification vendor | Outbound | Requester verification fallback | via BGV |
+| Dependency                                 | Direction     | Purpose                                   | Notes                                 |
+| ------------------------------------------ | ------------- | ----------------------------------------- | ------------------------------------- |
+| Identity provider for staff (OIDC or SAML) | Inbound       | Staff SSO with passkey enforcement        | via adapter, FR-PLT-021               |
+| Paging provider                            | Outbound      | On-call paging for P0 and P1, break-glass | adapter; provider undecided           |
+| Status page host                           | Outbound      | Public status, subscribers                | independent infrastructure; OD-ADM-11 |
+| Email provider                             | Outbound      | Ticket mail, announcements                | through NTF and FR-PLT-023            |
+| Object store with object-lock              | Outbound      | Audit anchoring, evidence                 | `[PROP]`                              |
+| Support desk vendor (optional)             | Bidirectional | If OD-ADM-01 chooses buy over build       | same ticket contract, adapter         |
+| Payment provider                           | Bidirectional | Disputes, refunds (through BIL)           | not accessed directly                 |
+| Observability stack                        | Inbound       | Metrics, traces, alerts                   | read via API                          |
+| Translation vendor                         | Outbound      | XLIFF exchange                            | optional                              |
+| Identity-verification vendor               | Outbound      | Requester verification fallback           | via BGV                               |
 
 ## 11. Cross-module dependencies
 
-| ADM depends on | Why |
-|---|---|
-| IDN | Staff authentication, passkeys, session revoke, account state |
-| SET | Privacy requests execution, consent records, legal-hold flag, user privacy center |
-| NTF | Delivery of announcements, ticket mail, security notices |
-| PLT | Job engine, files, webhooks, rate limits, adapters, outbox |
-| BIL | Refunds, disputes, plan summaries |
-| TSF | Moderation cases, sanctions linkage |
-| EMP and INS | Org and institution records for administration |
-| BGV | Identity-document verification for requester checks |
-| ANL | Metrics storage and dashboards beyond health |
-| SRC | Search backend for help center and admin search |
+| ADM depends on | Why                                                                               |
+| -------------- | --------------------------------------------------------------------------------- |
+| IDN            | Staff authentication, passkeys, session revoke, account state                     |
+| SET            | Privacy requests execution, consent records, legal-hold flag, user privacy center |
+| NTF            | Delivery of announcements, ticket mail, security notices                          |
+| PLT            | Job engine, files, webhooks, rate limits, adapters, outbox                        |
+| BIL            | Refunds, disputes, plan summaries                                                 |
+| TSF            | Moderation cases, sanctions linkage                                               |
+| EMP and INS    | Org and institution records for administration                                    |
+| BGV            | Identity-document verification for requester checks                               |
+| ANL            | Metrics storage and dashboards beyond health                                      |
+| SRC            | Search backend for help center and admin search                                   |
 
-| Depends on ADM | Why |
-|---|---|
-| All modules | Audit API, feature flags, kill switches, configuration, maintenance mode, announcements |
-| PLT | Kill-switch and job-console surfaces |
-| PWA | Maintenance mode, update gating, admin-origin exclusion from caching |
-| SET | Legal version publication events |
-| TSF | Shared ticket and case linking |
+| Depends on ADM | Why                                                                                     |
+| -------------- | --------------------------------------------------------------------------------------- |
+| All modules    | Audit API, feature flags, kill switches, configuration, maintenance mode, announcements |
+| PLT            | Kill-switch and job-console surfaces                                                    |
+| PWA            | Maintenance mode, update gating, admin-origin exclusion from caching                    |
+| SET            | Legal version publication events                                                        |
+| TSF            | Shared ticket and case linking                                                          |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| First response time | Median and p90 of (first agent public reply time minus ticket creation) in business hours, by category | SUP-L |
-| Resolution time | Median and p90 of (resolved time minus created time) excluding paused time | SUP-L |
-| SLA attainment | Tickets meeting target ÷ tickets resolved, by policy and month | SUP-L |
-| Contact rate | Tickets created per 1,000 weekly active users, by category | SUP-L |
-| Deflection rate | Help article sessions from ticket form that did not end in a submission ÷ help sessions from ticket form | SUP-L |
-| CSAT | Mean score and share of 4 to 5 ratings among responses; response rate shown beside it | SUP-L |
-| Re-open rate | Tickets reopened within 14 days ÷ tickets resolved | SUP-L |
-| Privileged grant volume | Grants per week by class, share auto-approved, mean duration | SAD |
-| Break-glass rate | Break-glass invocations per quarter and share reviewed justified | SAD |
-| Approval latency | Median time from approval request to decision | PAD |
-| Stale flag count | Flags past expiry still active | PAD |
-| Change failure rate | Flag or config changes followed by rollback or incident within 24 hours ÷ changes | PAD |
-| Kill-switch propagation time | Median time from activation to all instances acknowledging | PAD |
-| DLQ depth and age | Dead jobs by kind and oldest age | PAD |
-| Data request on-time rate | Cases closed before statutory due date ÷ cases closed | SAD |
-| Audit completeness | Events ingested ÷ events produced, per day (target by OD) | SAD |
-| Incident MTTA and MTTR | Mean time to acknowledge and resolve by severity | PAD |
-| Access review completion | Rows decided by deadline ÷ rows in campaign | SAD |
+| Metric                       | Definition and formula                                                                                   | Owner role |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- | ---------- |
+| First response time          | Median and p90 of (first agent public reply time minus ticket creation) in business hours, by category   | SUP-L      |
+| Resolution time              | Median and p90 of (resolved time minus created time) excluding paused time                               | SUP-L      |
+| SLA attainment               | Tickets meeting target ÷ tickets resolved, by policy and month                                           | SUP-L      |
+| Contact rate                 | Tickets created per 1,000 weekly active users, by category                                               | SUP-L      |
+| Deflection rate              | Help article sessions from ticket form that did not end in a submission ÷ help sessions from ticket form | SUP-L      |
+| CSAT                         | Mean score and share of 4 to 5 ratings among responses; response rate shown beside it                    | SUP-L      |
+| Re-open rate                 | Tickets reopened within 14 days ÷ tickets resolved                                                       | SUP-L      |
+| Privileged grant volume      | Grants per week by class, share auto-approved, mean duration                                             | SAD        |
+| Break-glass rate             | Break-glass invocations per quarter and share reviewed justified                                         | SAD        |
+| Approval latency             | Median time from approval request to decision                                                            | PAD        |
+| Stale flag count             | Flags past expiry still active                                                                           | PAD        |
+| Change failure rate          | Flag or config changes followed by rollback or incident within 24 hours ÷ changes                        | PAD        |
+| Kill-switch propagation time | Median time from activation to all instances acknowledging                                               | PAD        |
+| DLQ depth and age            | Dead jobs by kind and oldest age                                                                         | PAD        |
+| Data request on-time rate    | Cases closed before statutory due date ÷ cases closed                                                    | SAD        |
+| Audit completeness           | Events ingested ÷ events produced, per day (target by OD)                                                | SAD        |
+| Incident MTTA and MTTR       | Mean time to acknowledge and resolve by severity                                                         | PAD        |
+| Access review completion     | Rows decided by deadline ÷ rows in campaign                                                              | SAD        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-ADM-01 | Build the support desk in-house or integrate a vendor desk behind an adapter? | A: build; B: vendor with adapter; C: vendor first, build later | C `[PROP]` | Product owner | FR-ADM-020 to FR-ADM-027 implementation shape |
-| OD-ADM-02 | Admin console on a separate origin, or a path on the product origin with stricter policy? | Separate origin; same origin | Separate origin `[PROP]` | Security and platform lead | FR-ADM-002, FR-PWA-008 |
-| OD-ADM-03 | Support service levels (first response, resolution) per plan and priority. | Values by tier | Defaults in FR-ADM-022 `[PROP]`; legacy OPEN-16 unresolved | Product owner with support lead | FR-ADM-022 enforcement |
-| OD-ADM-04 | May org admins disable support view-as for their members? | Yes; no; for institutions only | Yes for orgs and institutions | Product owner and legal | FR-ADM-024 |
-| OD-ADM-05 | Statutory deadlines and jurisdictions the platform commits to for privacy requests. | Per target markets | Table of jurisdictions with 30-day default `[PROP]` | Legal and privacy lead | FR-ADM-033 |
-| OD-ADM-06 | Are internal staff notes disclosed in data-subject access exports? | Include; include with redaction; exclude | Include with redaction pending counsel review | Legal | FR-ADM-004 |
-| OD-ADM-07 | Refund approval threshold requiring FIN-L. | Amount per currency | Parameter `admin.refund.secondApprovalAmount`, no default amount until decided | Finance owner | FR-ADM-035 |
-| OD-ADM-08 | Policy for non-notification of account actions (law enforcement, safety). | Never; with SAD basis and review date | With SAD basis and 30-day review `[PROP]` | Legal and security | BR-ADM-025 |
-| OD-ADM-09 | Staff monitoring disclosure and works-council or labor-law requirements. | Disclosed policy; consult | Disclosed policy | Legal | FR-ADM-013 |
-| OD-ADM-10 | Where may staff access production personal data from (regions, managed devices)? | Any; allowlisted regions; managed devices only | Managed devices plus allowlist `[PROP]` | Security lead | FR-ADM-002 |
-| OD-ADM-11 | Status page: build, or use a hosted provider? | Build; hosted | Hosted provider through adapter `[PROP]` | Platform lead | FR-ADM-038 |
-| OD-ADM-12 | May custom admin roles be created, or only the fixed catalogue? | Fixed; custom with SAD approval | Fixed catalogue `[PROP]` | Security lead | FR-ADM-007 |
-| OD-ADM-13 | Does staff-run support and finance tooling brush the SSOT §4.2 non-goal of generic HR or payroll (staff scheduling, performance scores)? | Keep strictly to operations tooling; allow agent scoring | Strictly operations; agent scoring only inside FR-ADM-026 rubric `[PROP]` | Product owner | FR-ADM-026 |
+| ID        | Question                                                                                                                                 | Options                                                        | Default proposal                                                               | Who decides                     | Blocking                                      |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------- | --------------------------------------------- |
+| OD-ADM-01 | Build the support desk in-house or integrate a vendor desk behind an adapter?                                                            | A: build; B: vendor with adapter; C: vendor first, build later | C `[PROP]`                                                                     | Product owner                   | FR-ADM-020 to FR-ADM-027 implementation shape |
+| OD-ADM-02 | Admin console on a separate origin, or a path on the product origin with stricter policy?                                                | Separate origin; same origin                                   | Separate origin `[PROP]`                                                       | Security and platform lead      | FR-ADM-002, FR-PWA-008                        |
+| OD-ADM-03 | Support service levels (first response, resolution) per plan and priority.                                                               | Values by tier                                                 | Defaults in FR-ADM-022 `[PROP]`; legacy OPEN-16 unresolved                     | Product owner with support lead | FR-ADM-022 enforcement                        |
+| OD-ADM-04 | May org admins disable support view-as for their members?                                                                                | Yes; no; for institutions only                                 | Yes for orgs and institutions                                                  | Product owner and legal         | FR-ADM-024                                    |
+| OD-ADM-05 | Statutory deadlines and jurisdictions the platform commits to for privacy requests.                                                      | Per target markets                                             | Table of jurisdictions with 30-day default `[PROP]`                            | Legal and privacy lead          | FR-ADM-033                                    |
+| OD-ADM-06 | Are internal staff notes disclosed in data-subject access exports?                                                                       | Include; include with redaction; exclude                       | Include with redaction pending counsel review                                  | Legal                           | FR-ADM-004                                    |
+| OD-ADM-07 | Refund approval threshold requiring FIN-L.                                                                                               | Amount per currency                                            | Parameter `admin.refund.secondApprovalAmount`, no default amount until decided | Finance owner                   | FR-ADM-035                                    |
+| OD-ADM-08 | Policy for non-notification of account actions (law enforcement, safety).                                                                | Never; with SAD basis and review date                          | With SAD basis and 30-day review `[PROP]`                                      | Legal and security              | BR-ADM-025                                    |
+| OD-ADM-09 | Staff monitoring disclosure and works-council or labor-law requirements.                                                                 | Disclosed policy; consult                                      | Disclosed policy                                                               | Legal                           | FR-ADM-013                                    |
+| OD-ADM-10 | Where may staff access production personal data from (regions, managed devices)?                                                         | Any; allowlisted regions; managed devices only                 | Managed devices plus allowlist `[PROP]`                                        | Security lead                   | FR-ADM-002                                    |
+| OD-ADM-11 | Status page: build, or use a hosted provider?                                                                                            | Build; hosted                                                  | Hosted provider through adapter `[PROP]`                                       | Platform lead                   | FR-ADM-038                                    |
+| OD-ADM-12 | May custom admin roles be created, or only the fixed catalogue?                                                                          | Fixed; custom with SAD approval                                | Fixed catalogue `[PROP]`                                                       | Security lead                   | FR-ADM-007                                    |
+| OD-ADM-13 | Does staff-run support and finance tooling brush the SSOT §4.2 non-goal of generic HR or payroll (staff scheduling, performance scores)? | Keep strictly to operations tooling; allow agent scoring       | Strictly operations; agent scoring only inside FR-ADM-026 rubric `[PROP]`      | Product owner                   | FR-ADM-026                                    |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-ADM-01 | Insider misuse of personal data through support access. | Medium / High | Masking, grants, anomaly rules, audit, quarterly reviews (FR-ADM-005, 009, 012, 013). |
-| RSK-ADM-02 | Compromise of an admin account yields platform-wide damage. | Low / Critical | Passkeys, separate origin, 2P, step-up, network allowlist, break-glass monitoring. |
-| RSK-ADM-03 | Kill switch fails to propagate during a real incident. | Low / High | Signed cached state, instance acknowledgements, drills, partial-propagation alerts. |
-| RSK-ADM-04 | Support service levels never defined, so the desk cannot be managed. | High / Medium | OD-ADM-03; defaults shown in tooling. |
-| RSK-ADM-05 | Admin scope grows into generic HR or payroll tooling, violating the SSOT non-goal. | Medium / Medium | OD-ADM-13; reviews of new admin features against §1.2. |
-| RSK-ADM-06 | Audit log volume and cost grow faster than planned. | Medium / Medium | Event class retention, summary-only payloads, tiered storage. |
-| RSK-ADM-07 | Impersonation erodes user trust. | Low / High | Consent by default, user-visible trail, org opt-out, read-only enforcement. |
-| RSK-ADM-08 | Flag and config debt makes behavior unpredictable. | High / Medium | Owner and expiry, stale reports, creation block for owners with stale flags. |
-| RSK-ADM-09 | Two-person approval slows incident response. | Medium / Medium | Break-glass, kill-switch single-person activation with review. |
-| RSK-ADM-10 | Staff time-zone coverage is insufficient for SLAs and statutory deadlines. | Medium / Medium | Business calendars, on-call rota outside platform, escalation to SAD. |
+| ID         | Risk                                                                               | Likelihood / impact | Mitigation                                                                            |
+| ---------- | ---------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------- |
+| RSK-ADM-01 | Insider misuse of personal data through support access.                            | Medium / High       | Masking, grants, anomaly rules, audit, quarterly reviews (FR-ADM-005, 009, 012, 013). |
+| RSK-ADM-02 | Compromise of an admin account yields platform-wide damage.                        | Low / Critical      | Passkeys, separate origin, 2P, step-up, network allowlist, break-glass monitoring.    |
+| RSK-ADM-03 | Kill switch fails to propagate during a real incident.                             | Low / High          | Signed cached state, instance acknowledgements, drills, partial-propagation alerts.   |
+| RSK-ADM-04 | Support service levels never defined, so the desk cannot be managed.               | High / Medium       | OD-ADM-03; defaults shown in tooling.                                                 |
+| RSK-ADM-05 | Admin scope grows into generic HR or payroll tooling, violating the SSOT non-goal. | Medium / Medium     | OD-ADM-13; reviews of new admin features against §1.2.                                |
+| RSK-ADM-06 | Audit log volume and cost grow faster than planned.                                | Medium / Medium     | Event class retention, summary-only payloads, tiered storage.                         |
+| RSK-ADM-07 | Impersonation erodes user trust.                                                   | Low / High          | Consent by default, user-visible trail, org opt-out, read-only enforcement.           |
+| RSK-ADM-08 | Flag and config debt makes behavior unpredictable.                                 | High / Medium       | Owner and expiry, stale reports, creation block for owners with stale flags.          |
+| RSK-ADM-09 | Two-person approval slows incident response.                                       | Medium / Medium     | Break-glass, kill-switch single-person activation with review.                        |
+| RSK-ADM-10 | Staff time-zone coverage is insufficient for SLAs and statutory deadlines.         | Medium / Medium     | Business calendars, on-call rota outside platform, escalation to SAD.                 |
 
 ## 15. Legacy source trace
 
-| Legacy source | Informed | Dropped or changed |
-|---|---|---|
-| SSOT F-17 Admin Console, F-35 Feature Flag Console, F-83 Admin Platform Expansion | Console, flags, expansion routes | Phase numbers dropped; all treated as unbuilt |
-| SSOT BR-28, BR-29 | Status honesty, confirmation + audit + rollback | Rollback generalized to undo windows and 2P |
-| SSOT §13.5 to §13.8, §20.2, §20.4 to §20.6 | Job console, health dashboard, severity targets | Cadences moved to PLT |
-| SSOT §10.18 BR-31 | Dry-run default for schedulers | Extended to bulk operations |
-| Yash 18 OPERATIONS_AND_SUPPORT_PROCESSES (PROC-01 to PROC-16) | Account admin, tickets, grants, access review, data rights, incident, maintenance, billing | Staffing and SLA numbers left open (OD-ADM-03) |
-| Yash 18 INCIDENT_MANAGEMENT, RUNBOOK_INDEX | Incident workflow | Runbook content out of scope |
-| docs/registries/FEATURE_REGISTRY.md F-17, F-35, F-83 | Existence of admin features | Registry status ignored |
-| Own knowledge of Zendesk, Intercom, Freshdesk, Okta admin consoles, PagerDuty and Statuspage | Macros, CSAT, problem linking, break-glass, status page, anomaly rules | Tagged `[PROP]` |
-| Dropped: any staff payroll, performance or scheduling tooling | Non-goal in SSOT §4.2 | See OD-ADM-13 |
+| Legacy source                                                                                | Informed                                                                                   | Dropped or changed                             |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| SSOT F-17 Admin Console, F-35 Feature Flag Console, F-83 Admin Platform Expansion            | Console, flags, expansion routes                                                           | Phase numbers dropped; all treated as unbuilt  |
+| SSOT BR-28, BR-29                                                                            | Status honesty, confirmation + audit + rollback                                            | Rollback generalized to undo windows and 2P    |
+| SSOT §13.5 to §13.8, §20.2, §20.4 to §20.6                                                   | Job console, health dashboard, severity targets                                            | Cadences moved to PLT                          |
+| SSOT §10.18 BR-31                                                                            | Dry-run default for schedulers                                                             | Extended to bulk operations                    |
+| Yash 18 OPERATIONS_AND_SUPPORT_PROCESSES (PROC-01 to PROC-16)                                | Account admin, tickets, grants, access review, data rights, incident, maintenance, billing | Staffing and SLA numbers left open (OD-ADM-03) |
+| Yash 18 INCIDENT_MANAGEMENT, RUNBOOK_INDEX                                                   | Incident workflow                                                                          | Runbook content out of scope                   |
+| docs/registries/FEATURE_REGISTRY.md F-17, F-35, F-83                                         | Existence of admin features                                                                | Registry status ignored                        |
+| Own knowledge of Zendesk, Intercom, Freshdesk, Okta admin consoles, PagerDuty and Statuspage | Macros, CSAT, problem linking, break-glass, status page, anomaly rules                     | Tagged `[PROP]`                                |
+| Dropped: any staff payroll, performance or scheduling tooling                                | Non-goal in SSOT §4.2                                                                      | See OD-ADM-13                                  |

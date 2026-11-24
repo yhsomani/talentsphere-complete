@@ -17,100 +17,100 @@ Each item has an id (`CHK-nn`), the requirement, and the evidence expected in th
 
 ### 2.1 Purpose and structure
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-01 | The screen has one stated purpose, one primary user task, and the role(s) it serves | Purpose line; primary action named |
-| CHK-02 | Route, workspace, shell chrome (`app`, `pub`, `focus`) and parent route (for Back and breadcrumb) are stated and fit `01` namespaces | Route table row |
-| CHK-03 | Page header defined: h1 text, status, at most one primary action, secondary actions, overflow | Header region spec |
-| CHK-04 | Layout described for phone, tablet and desktop, with region order equal to reading order | Three wireframes or a table plus one wireframe per class |
-| CHK-05 | Every region lists the components used (from `02`), with variants; any new component is proposed through the promotion rule | Region and component table |
-| CHK-06 | Document title, `h1`, and focus target on arrival are stated | Title format; focus target |
+| Id     | Requirement                                                                                                                          | Evidence                                                 |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| CHK-01 | The screen has one stated purpose, one primary user task, and the role(s) it serves                                                  | Purpose line; primary action named                       |
+| CHK-02 | Route, workspace, shell chrome (`app`, `pub`, `focus`) and parent route (for Back and breadcrumb) are stated and fit `01` namespaces | Route table row                                          |
+| CHK-03 | Page header defined: h1 text, status, at most one primary action, secondary actions, overflow                                        | Header region spec                                       |
+| CHK-04 | Layout described for phone, tablet and desktop, with region order equal to reading order                                             | Three wireframes or a table plus one wireframe per class |
+| CHK-05 | Every region lists the components used (from `02`), with variants; any new component is proposed through the promotion rule          | Region and component table                               |
+| CHK-06 | Document title, `h1`, and focus target on arrival are stated                                                                         | Title format; focus target                               |
 
 ### 2.2 Data
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-07 | Each displayed field names its source entity (`ENT-`), format, null display ("Not provided"), and privacy class | Data table |
+| Id     | Requirement                                                                                                          | Evidence          |
+| ------ | -------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| CHK-07 | Each displayed field names its source entity (`ENT-`), format, null display ("Not provided"), and privacy class      | Data table        |
 | CHK-08 | Freshness: how current the data must be, how it refreshes (on load, interval, real time, manual), and stale behavior | Data table column |
-| CHK-09 | Pagination or windowing rule (page size, cursor, virtualization) and maximum items | Data section |
-| CHK-10 | Sorting, filtering and search options with defaults and URL parameters | Filters section |
-| CHK-11 | Derived values state their formula and denominator, and small-sample suppression applies | Formula lines |
+| CHK-09 | Pagination or windowing rule (page size, cursor, virtualization) and maximum items                                   | Data section      |
+| CHK-10 | Sorting, filtering and search options with defaults and URL parameters                                               | Filters section   |
+| CHK-11 | Derived values state their formula and denominator, and small-sample suppression applies                             | Formula lines     |
 
 ### 2.3 States (all must be addressed; mark N/A with reason)
 
-| Id | State | Requirement |
-|---|---|---|
-| CHK-12 | Loading (initial) | Skeleton matching layout; height-stable |
-| CHK-13 | Loading (refresh, partial) | Existing content retained; per-region skeletons |
-| CHK-14 | Empty: first use | Copy per `06` section 4, one primary action |
-| CHK-15 | Empty: no results / filtered | Clear-filters path |
-| CHK-16 | Success | Inline or page; next best action |
-| CHK-17 | Error: recoverable | Retry, preserved input |
-| CHK-18 | Error: not recoverable / not found | Copy and exits |
-| CHK-19 | Partial failure | Region-level failure, operation summaries |
-| CHK-20 | Offline | Offline class per action (R, W, O, D), cached marker |
-| CHK-21 | Permission denied | In-shell state; no leak of existence for private resources |
-| CHK-22 | Rate limited | Notice and recovery |
-| CHK-23 | Maintenance and degraded | Banner behavior, disabled actions |
-| CHK-24 | Session expired | Resume in place |
-| CHK-25 | Entitlement locked | `EntitlementGate` where the feature is plan-gated |
-| CHK-26 | Conflict / stale | Where edits or concurrent changes occur |
-| CHK-27 | Read-only / archived | Where objects can be archived or locked |
-| CHK-28 | Long content and extremes | Very long names, 0, 1, many, 10,000 items, RTL, 40 percent text expansion |
+| Id     | State                              | Requirement                                                               |
+| ------ | ---------------------------------- | ------------------------------------------------------------------------- |
+| CHK-12 | Loading (initial)                  | Skeleton matching layout; height-stable                                   |
+| CHK-13 | Loading (refresh, partial)         | Existing content retained; per-region skeletons                           |
+| CHK-14 | Empty: first use                   | Copy per `06` section 4, one primary action                               |
+| CHK-15 | Empty: no results / filtered       | Clear-filters path                                                        |
+| CHK-16 | Success                            | Inline or page; next best action                                          |
+| CHK-17 | Error: recoverable                 | Retry, preserved input                                                    |
+| CHK-18 | Error: not recoverable / not found | Copy and exits                                                            |
+| CHK-19 | Partial failure                    | Region-level failure, operation summaries                                 |
+| CHK-20 | Offline                            | Offline class per action (R, W, O, D), cached marker                      |
+| CHK-21 | Permission denied                  | In-shell state; no leak of existence for private resources                |
+| CHK-22 | Rate limited                       | Notice and recovery                                                       |
+| CHK-23 | Maintenance and degraded           | Banner behavior, disabled actions                                         |
+| CHK-24 | Session expired                    | Resume in place                                                           |
+| CHK-25 | Entitlement locked                 | `EntitlementGate` where the feature is plan-gated                         |
+| CHK-26 | Conflict / stale                   | Where edits or concurrent changes occur                                   |
+| CHK-27 | Read-only / archived               | Where objects can be archived or locked                                   |
+| CHK-28 | Long content and extremes          | Very long names, 0, 1, many, 10,000 items, RTL, 40 percent text expansion |
 
 ### 2.4 Permissions and security
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-29 | Permission matrix: role x capability for view, create, edit, delete, export, each special action | Table |
-| CHK-30 | Server enforces every permission; the UI hides or disables per `01` `NFR-IAX-010` | Statement and negative test |
-| CHK-31 | Data classification of every field (public, member, private, sensitive, special category) and what each role sees | Data table |
-| CHK-32 | Abuse controls: rate limits, bulk caps, enumeration resistance, audit logging for sensitive reads and writes | Security section |
-| CHK-33 | Sensitive actions follow confirmation tiers (`03` section 9.2) and step-up where needed | Action table |
+| Id     | Requirement                                                                                                       | Evidence                    |
+| ------ | ----------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| CHK-29 | Permission matrix: role x capability for view, create, edit, delete, export, each special action                  | Table                       |
+| CHK-30 | Server enforces every permission; the UI hides or disables per `01` `NFR-IAX-010`                                 | Statement and negative test |
+| CHK-31 | Data classification of every field (public, member, private, sensitive, special category) and what each role sees | Data table                  |
+| CHK-32 | Abuse controls: rate limits, bulk caps, enumeration resistance, audit logging for sensitive reads and writes      | Security section            |
+| CHK-33 | Sensitive actions follow confirmation tiers (`03` section 9.2) and step-up where needed                           | Action table                |
 
 ### 2.5 Interaction
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-34 | Every action: trigger, pending state, success result, failure result, idempotency, undo or confirm tier | Action table |
-| CHK-35 | Validation timing per `03` section 3; messages from `06` section 3 | Form table |
-| CHK-36 | Autosave class (8.1) and conflict behavior | Interaction section |
-| CHK-37 | Drag and drop has non-drag alternative; bulk selection behaves per `03` section 5 | Where applicable |
-| CHK-38 | Real-time behavior and degradation per `03` section 11 | Where applicable |
-| CHK-39 | Leave-page protection where dirty | Where applicable |
-| CHK-40 | Notifications triggered or consumed by the screen (template names) | Notifications line |
+| Id     | Requirement                                                                                             | Evidence            |
+| ------ | ------------------------------------------------------------------------------------------------------- | ------------------- |
+| CHK-34 | Every action: trigger, pending state, success result, failure result, idempotency, undo or confirm tier | Action table        |
+| CHK-35 | Validation timing per `03` section 3; messages from `06` section 3                                      | Form table          |
+| CHK-36 | Autosave class (8.1) and conflict behavior                                                              | Interaction section |
+| CHK-37 | Drag and drop has non-drag alternative; bulk selection behaves per `03` section 5                       | Where applicable    |
+| CHK-38 | Real-time behavior and degradation per `03` section 11                                                  | Where applicable    |
+| CHK-39 | Leave-page protection where dirty                                                                       | Where applicable    |
+| CHK-40 | Notifications triggered or consumed by the screen (template names)                                      | Notifications line  |
 
 ### 2.6 Responsive and PWA
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-41 | Phone, tablet, desktop behavior stated; table-to-card or scroll choice stated | Layout section |
-| CHK-42 | Touch targets at least 44 px (coarse), gestures have alternatives | Statement |
-| CHK-43 | Offline class and queueing behavior; sync conflicts | Offline column |
-| CHK-44 | Data saver behavior (what is dropped) | Statement |
-| CHK-45 | Deep link and `returnTo` behavior; share target or push entry if any | Routing section |
+| Id     | Requirement                                                                   | Evidence        |
+| ------ | ----------------------------------------------------------------------------- | --------------- |
+| CHK-41 | Phone, tablet, desktop behavior stated; table-to-card or scroll choice stated | Layout section  |
+| CHK-42 | Touch targets at least 44 px (coarse), gestures have alternatives             | Statement       |
+| CHK-43 | Offline class and queueing behavior; sync conflicts                           | Offline column  |
+| CHK-44 | Data saver behavior (what is dropped)                                         | Statement       |
+| CHK-45 | Deep link and `returnTo` behavior; share target or push entry if any          | Routing section |
 
 ### 2.7 Accessibility
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-46 | Landmarks, heading outline, and focus order described | A11y section |
-| CHK-47 | Keyboard map for every custom widget on the screen | A11y section |
-| CHK-48 | Focus management for opens, closes, adds, removes, route arrival | A11y section |
-| CHK-49 | Live region announcements listed with text and politeness | A11y section |
-| CHK-50 | Non-color cues for every status and chart; text alternatives for charts | A11y section |
-| CHK-51 | Reduced motion and flashing behavior | Statement |
-| CHK-52 | Accommodations affecting the screen (assessments, interviews) | Where applicable |
-| CHK-53 | The component acceptance checklist (`04` section 12) passes | Test note |
+| Id     | Requirement                                                             | Evidence         |
+| ------ | ----------------------------------------------------------------------- | ---------------- |
+| CHK-46 | Landmarks, heading outline, and focus order described                   | A11y section     |
+| CHK-47 | Keyboard map for every custom widget on the screen                      | A11y section     |
+| CHK-48 | Focus management for opens, closes, adds, removes, route arrival        | A11y section     |
+| CHK-49 | Live region announcements listed with text and politeness               | A11y section     |
+| CHK-50 | Non-color cues for every status and chart; text alternatives for charts | A11y section     |
+| CHK-51 | Reduced motion and flashing behavior                                    | Statement        |
+| CHK-52 | Accommodations affecting the screen (assessments, interviews)           | Where applicable |
+| CHK-53 | The component acceptance checklist (`04` section 12) passes             | Test note        |
 
 ### 2.8 Content and analytics
 
-| Id | Requirement | Evidence |
-|---|---|---|
-| CHK-54 | All copy follows `06`; key strings listed with catalog keys | Copy table |
-| CHK-55 | Terms match the glossary | Lint |
-| CHK-56 | Analytics events listed with names, properties, privacy class, trigger | Analytics table |
-| CHK-57 | No personal data in analytics properties or URLs | Statement |
+| Id     | Requirement                                                                                             | Evidence           |
+| ------ | ------------------------------------------------------------------------------------------------------- | ------------------ |
+| CHK-54 | All copy follows `06`; key strings listed with catalog keys                                             | Copy table         |
+| CHK-55 | Terms match the glossary                                                                                | Lint               |
+| CHK-56 | Analytics events listed with names, properties, privacy class, trigger                                  | Analytics table    |
+| CHK-57 | No personal data in analytics properties or URLs                                                        | Statement          |
 | CHK-58 | Acceptance criteria: at least three Given/When/Then including one negative case, traceable to `FR-` ids | Acceptance section |
 
 ### 2.9 Scoring
@@ -134,43 +134,55 @@ Copy this block into a module's screen inventory for each screen that is more th
 **Exits and next best actions:** list
 
 ##### Layout (phone / tablet / desktop)
+
 Wireframe in text for each class, or one wireframe plus a table of deltas.
 
 ##### Regions and components
+
 | Region | Components (CMP-) | Variants and notes |
 
 ##### Data
+
 | Field or region | Entity (ENT-) | Format | Null display | Class | Freshness |
 Pagination, sort, filters, search parameters (URL keys).
 
 ##### Actions
+
 | Action | Trigger | Permission | Pending | Success | Failure | Undo or confirm tier | Idempotency | Offline class |
 
 ##### States
+
 | State | Behavior (layout, copy key, actions) | for each of CHK-12 to CHK-28 or N/A with reason
 
 ##### Permissions
+
 | Capability | Role: allowed / denied / scoped | Server rule (BR-) |
 
 ##### Real time and notifications
+
 Updates received; notifications triggered (template names, opt-out class).
 
 ##### Analytics events
+
 | Event | Trigger | Properties | Class |
 
 ##### Accessibility
+
 Landmarks and headings; keyboard map; focus management; live announcements; non-color cues; reduced motion; accommodations.
 
 ##### Copy
+
 | Key | Text | Notes |
 
 ##### Acceptance criteria
+
 - Given / When / Then (positive)
 - Given / When / Then (permission)
 - Given / When / Then (negative or failure)
 - Given / When / Then (accessibility)
 
 ##### Open items
+
 OD-, RSK- links
 ```
 
@@ -258,55 +270,55 @@ Conventions in the wireframes: `[ ]` button, `( )` radio, `[x]` checked box, `[v
 
 **Regions and components**
 
-| Region | Components | Notes |
-|---|---|---|
-| Page header | h1, greeting paragraph (time of day from device clock), `CMP-Menu` "New" | Greeting uses the first name only when the user set one; otherwise "Welcome back" |
-| Needs your attention | `CMP-List` of `CMP-NotificationItem`-style rows with inline primary action, `CMP-Notice` icon per severity | Max 3 shown, then "See all N" to `/notifications?filter=actions`; ordered by due time then severity; excludes informational items |
-| Profile strength | `CMP-ProgressBar` with text, `CMP-List` of checklist items (links) | Appears until all done or dismissed; the percentage derives from the checklist, not from a hidden score |
-| Applications | `CMP-StatTile` set (active, interview, offers) and a mini stage bar | Counts link to `/applications?status=...` |
-| Continue learning | `CMP-CourseCard` compact with `CMP-ProgressBar` | Shows the most recently active enrollment; hidden if none |
-| Recommended jobs | `CMP-JobCard` x4 (carousel replaced by a grid: 4 columns desktop, horizontal scroll list phone), `CMP-MatchExplanation`, AI marker | Hidden with a "Turn on recommendations" empty state if personalization off |
-| Verification and evidence | `CMP-StatTile` trio and link | Counts from EVD; "needs action" count also appears in nav badge |
-| Career goal | Goal summary and next step | From AIC and MKT; hidden if no goal, replaced by "Set a goal" card |
+| Region                    | Components                                                                                                                         | Notes                                                                                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Page header               | h1, greeting paragraph (time of day from device clock), `CMP-Menu` "New"                                                           | Greeting uses the first name only when the user set one; otherwise "Welcome back"                                                 |
+| Needs your attention      | `CMP-List` of `CMP-NotificationItem`-style rows with inline primary action, `CMP-Notice` icon per severity                         | Max 3 shown, then "See all N" to `/notifications?filter=actions`; ordered by due time then severity; excludes informational items |
+| Profile strength          | `CMP-ProgressBar` with text, `CMP-List` of checklist items (links)                                                                 | Appears until all done or dismissed; the percentage derives from the checklist, not from a hidden score                           |
+| Applications              | `CMP-StatTile` set (active, interview, offers) and a mini stage bar                                                                | Counts link to `/applications?status=...`                                                                                         |
+| Continue learning         | `CMP-CourseCard` compact with `CMP-ProgressBar`                                                                                    | Shows the most recently active enrollment; hidden if none                                                                         |
+| Recommended jobs          | `CMP-JobCard` x4 (carousel replaced by a grid: 4 columns desktop, horizontal scroll list phone), `CMP-MatchExplanation`, AI marker | Hidden with a "Turn on recommendations" empty state if personalization off                                                        |
+| Verification and evidence | `CMP-StatTile` trio and link                                                                                                       | Counts from EVD; "needs action" count also appears in nav badge                                                                   |
+| Career goal               | Goal summary and next step                                                                                                         | From AIC and MKT; hidden if no goal, replaced by "Set a goal" card                                                                |
 
 **Data**
 
-| Region | Source | Freshness | Pagination | Privacy |
-|---|---|---|---|---|
-| Needs attention | Aggregated tasks from JOB, INT, EVD, BGV, LRN (planned) | Real time (push) with refresh on focus; stale after 60 s | Top 3 | Private |
-| Profile strength | PRF checklist | On load | n/a | Private |
-| Applications | JOB application counts by stage | On load, refresh on focus | n/a | Private |
-| Continue learning | LRN enrollment progress | On load | n/a | Private |
-| Recommended jobs | AIC recommendations (planned) | Cached 1 hour | 4 | Private; features used listed in "Why these?" |
-| Evidence | EVD counts | On load | n/a | Private |
+| Region            | Source                                                  | Freshness                                                | Pagination | Privacy                                       |
+| ----------------- | ------------------------------------------------------- | -------------------------------------------------------- | ---------- | --------------------------------------------- |
+| Needs attention   | Aggregated tasks from JOB, INT, EVD, BGV, LRN (planned) | Real time (push) with refresh on focus; stale after 60 s | Top 3      | Private                                       |
+| Profile strength  | PRF checklist                                           | On load                                                  | n/a        | Private                                       |
+| Applications      | JOB application counts by stage                         | On load, refresh on focus                                | n/a        | Private                                       |
+| Continue learning | LRN enrollment progress                                 | On load                                                  | n/a        | Private                                       |
+| Recommended jobs  | AIC recommendations (planned)                           | Cached 1 hour                                            | 4          | Private; features used listed in "Why these?" |
+| Evidence          | EVD counts                                              | On load                                                  | n/a        | Private                                       |
 
 Each region loads independently; the page is interactive when the header and the first region resolve.
 
 **Actions**
 
-| Action | Permission | Pending | Success | Failure | Undo/confirm | Offline class |
-|---|---|---|---|---|---|---|
-| Inline task action (Choose a time) | CAN | Button loading | Item changes to "Confirmed", leaves list after 5 s with undo | Notice in row with Retry | Tier 0 (undo) | O |
-| Dismiss a checklist item | CAN | none | Item removed | Toast failure | Tier 0 | W |
-| Bookmark job | CAN | optimistic | Icon filled | Revert and toast | Tier 0 | W |
-| "Why these?" | CAN | popover | Explanation | Compact error | none | R |
-| Hide recommendations | CAN | | Region replaced by empty state | | Tier 0 | W |
+| Action                             | Permission | Pending        | Success                                                      | Failure                  | Undo/confirm  | Offline class |
+| ---------------------------------- | ---------- | -------------- | ------------------------------------------------------------ | ------------------------ | ------------- | ------------- |
+| Inline task action (Choose a time) | CAN        | Button loading | Item changes to "Confirmed", leaves list after 5 s with undo | Notice in row with Retry | Tier 0 (undo) | O             |
+| Dismiss a checklist item           | CAN        | none           | Item removed                                                 | Toast failure            | Tier 0        | W             |
+| Bookmark job                       | CAN        | optimistic     | Icon filled                                                  | Revert and toast         | Tier 0        | W             |
+| "Why these?"                       | CAN        | popover        | Explanation                                                  | Compact error            | none          | R             |
+| Hide recommendations               | CAN        |                | Region replaced by empty state                               |                          | Tier 0        | W             |
 
 **States**
 
-| State | Behavior |
-|---|---|
-| Loading | Regional skeletons; no spinner; header text appears immediately |
-| First run (new user) | Needs attention replaced by the onboarding checklist (`03` section 2); other regions show first-use empty states with one action each; no empty charts |
-| Empty "needs attention" | "You're all caught up." with next best action (Find jobs) |
-| Region error | Compact `ErrorState` in that region only with Retry; others unaffected |
-| Offline | Cached tiles with "Saved 12 minutes ago"; inline actions `aria-disabled` "Needs a connection"; banner global |
-| Restricted account | Single notice explaining restriction and allowed actions; other regions hidden (`01` as-built restricted nav) |
-| Stale | "Updated 20 minutes ago. Refresh" at the top of Needs attention if over limit |
-| Permission | Not applicable (own data); regions for capabilities not enabled are absent |
-| Long content | Titles clamp to 2 lines; company names to 1 line with title attribute |
-| 0/1/many | 0 interviews hides stage; 1 shows singular copy via ICU; counts over 99 show 99+ |
-| RTL and expansion | Layout uses logical properties; progress bars mirror |
+| State                   | Behavior                                                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Loading                 | Regional skeletons; no spinner; header text appears immediately                                                                                        |
+| First run (new user)    | Needs attention replaced by the onboarding checklist (`03` section 2); other regions show first-use empty states with one action each; no empty charts |
+| Empty "needs attention" | "You're all caught up." with next best action (Find jobs)                                                                                              |
+| Region error            | Compact `ErrorState` in that region only with Retry; others unaffected                                                                                 |
+| Offline                 | Cached tiles with "Saved 12 minutes ago"; inline actions `aria-disabled` "Needs a connection"; banner global                                           |
+| Restricted account      | Single notice explaining restriction and allowed actions; other regions hidden (`01` as-built restricted nav)                                          |
+| Stale                   | "Updated 20 minutes ago. Refresh" at the top of Needs attention if over limit                                                                          |
+| Permission              | Not applicable (own data); regions for capabilities not enabled are absent                                                                             |
+| Long content            | Titles clamp to 2 lines; company names to 1 line with title attribute                                                                                  |
+| 0/1/many                | 0 interviews hides stage; 1 shows singular copy via ICU; counts over 99 show 99+                                                                       |
+| RTL and expansion       | Layout uses logical properties; progress bars mirror                                                                                                   |
 
 **Permissions:** CAN family: all regions own data only. STD adds a Campus tile (deadlines, drives). INS adds Studio tile (to grade, unanswered). MNT adds Sessions tile. FRL adds Contracts tile. Server returns only the user's data; tile visibility from the manifest.
 
@@ -490,13 +502,13 @@ Phone: header block, match block, tabs "Overview / Company" or stacked sections;
 
 **Steps and fields**
 
-| Step | Fields | Required | Validation | Prefill |
-|---|---|---|---|---|
-| Contact | Full name, email (verified), phone (optional unless job requires), location (city, country), links (portfolio, optional up to 3) | Name, email | Email must be verified (else dialog "Verify your email to apply" with Resend); phone per `03` section 3.6 | From profile PRF |
-| Resume | Choose existing resume, upload new, or build from profile; include profile link toggle | One resume | Type PDF/DOCX, 10 MB; scan must be Ready before Submit | Last used resume |
-| Questions | Employer-defined: short text (max 500), long text (max 2000), single/multi choice, yes/no, number, date, file; knockout questions flagged internally (not visible to candidate as knockout) | Per question `required` flag | Per type; counters; no paste blocking | Reuse prior answers to identical standard questions (work authorization, notice period) with "Reuse" notice (`04` `NFR-AXS-044`) |
-| Documents | Cover letter (rich text light or upload), certificates, work samples (up to 5 files, 20 MB each) | Per job config | As upload table `03` section 13 | Evidence picker from EVD (attach verified items) |
-| Review | Summary per step with Edit links; consent checkbox for sharing profile data with employer (required, unticked); optional "Share demographic information" (voluntary section, separate, prefer not to say) | Consent | All previous steps valid | |
+| Step      | Fields                                                                                                                                                                                                    | Required                     | Validation                                                                                                | Prefill                                                                                                                          |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Contact   | Full name, email (verified), phone (optional unless job requires), location (city, country), links (portfolio, optional up to 3)                                                                          | Name, email                  | Email must be verified (else dialog "Verify your email to apply" with Resend); phone per `03` section 3.6 | From profile PRF                                                                                                                 |
+| Resume    | Choose existing resume, upload new, or build from profile; include profile link toggle                                                                                                                    | One resume                   | Type PDF/DOCX, 10 MB; scan must be Ready before Submit                                                    | Last used resume                                                                                                                 |
+| Questions | Employer-defined: short text (max 500), long text (max 2000), single/multi choice, yes/no, number, date, file; knockout questions flagged internally (not visible to candidate as knockout)               | Per question `required` flag | Per type; counters; no paste blocking                                                                     | Reuse prior answers to identical standard questions (work authorization, notice period) with "Reuse" notice (`04` `NFR-AXS-044`) |
+| Documents | Cover letter (rich text light or upload), certificates, work samples (up to 5 files, 20 MB each)                                                                                                          | Per job config               | As upload table `03` section 13                                                                           | Evidence picker from EVD (attach verified items)                                                                                 |
+| Review    | Summary per step with Edit links; consent checkbox for sharing profile data with employer (required, unticked); optional "Share demographic information" (voluntary section, separate, prefer not to say) | Consent                      | All previous steps valid                                                                                  |                                                                                                                                  |
 
 **Behavior:** autosave per step (class: draft, `03` section 8); `Continue` validates the current step only; Review shows a validity list; `Submit application` primary on Review; Back never loses data; deep link to a step with prior invalid steps redirects to the first incomplete; draft resumes from `/applications` ("Continue your application"); drafts expire after 90 days with a reminder at 7 days before [PROP]; Submit uses an idempotency key; duplicates blocked server side (one active application per job per user: second attempt shows "You've already applied. View application."); job closing during the draft shows banner "This job closed on {date}. Your draft is saved" and blocks submit; application edits after submit follow JOB rules (withdraw, update answers if employer allows).
 
@@ -685,7 +697,7 @@ Data Analyst - Berlin - Open       [Board | List]  [ Add candidate ]  [ ... ]
 | +--------------------------+ |
 | ...                          |
 +------------------------------+
-Selection mode: top bar shows "2 selected" [Move] [Message] [...] 
+Selection mode: top bar shows "2 selected" [Move] [Message] [...]
 ```
 
 **Card (CMP-CandidateCard compact):** avatar (or hidden in blind mode), name, headline or current role, match chip with explanation popover (words: Strong, Good, Partial), top three skills with verified marks, days in stage, source, assignee avatar, scorecard summary (n of m submitted), flags (needs action, duplicate), unread messages icon with text, checkbox. Whole card opens a drawer (`?open={applicationId}`), not a new page, on desktop; a full screen on phone.
@@ -814,18 +826,18 @@ Selection mode: top bar shows "2 selected" [Move] [Message] [...]
 
 **Settings and defaults (this screen)**
 
-| Setting | Control | Default | Effect | Confirm |
-|---|---|---|---|---|
-| Profile visibility | Radio group (Private, Recruiters, Public) | Private [PROP] | Controls profile discoverability and `/u/{handle}` access | Moving to Public shows a tier 1 dialog explaining search engine indexing and its delay in removal |
-| Field-level visibility (phone, current employer, salary, open to work) | Switches | Off for phone and salary, On for open to work (only if Recruiters or Public) | Per-field exposure; "Hide from my current employer" excludes the verified employer domain | none; Undo toast |
-| Hide from specific companies | Combobox adding companies to a block list (up to 100) | empty | Excludes them from seeing the profile | none |
-| Personalized recommendations | Switch | On [DEC-REQ `OD-SET-privacy`: consent-based default in some jurisdictions is Off] | Uses profile and activity for recommendations | Turning off explains the effect |
-| Improve with usage data | Switch | Off | Analytics beyond necessary | none |
-| Search history | Switch plus "Clear history" | On | Local and account search suggestions | Clear is tier 0 with Undo |
-| Message read receipts | Switch | Off | Visible read status | none |
-| Presence | Switch | On within conversations | | none |
-| Deactivate account | Button | n/a | Hides profile and pauses notifications, reversible by sign in | Tier 1 dialog |
-| Delete account | Button | n/a | Tier 3 typed confirm with 14-day cooling-off | Re-authentication required |
+| Setting                                                                | Control                                               | Default                                                                           | Effect                                                                                    | Confirm                                                                                           |
+| ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Profile visibility                                                     | Radio group (Private, Recruiters, Public)             | Private [PROP]                                                                    | Controls profile discoverability and `/u/{handle}` access                                 | Moving to Public shows a tier 1 dialog explaining search engine indexing and its delay in removal |
+| Field-level visibility (phone, current employer, salary, open to work) | Switches                                              | Off for phone and salary, On for open to work (only if Recruiters or Public)      | Per-field exposure; "Hide from my current employer" excludes the verified employer domain | none; Undo toast                                                                                  |
+| Hide from specific companies                                           | Combobox adding companies to a block list (up to 100) | empty                                                                             | Excludes them from seeing the profile                                                     | none                                                                                              |
+| Personalized recommendations                                           | Switch                                                | On [DEC-REQ `OD-SET-privacy`: consent-based default in some jurisdictions is Off] | Uses profile and activity for recommendations                                             | Turning off explains the effect                                                                   |
+| Improve with usage data                                                | Switch                                                | Off                                                                               | Analytics beyond necessary                                                                | none                                                                                              |
+| Search history                                                         | Switch plus "Clear history"                           | On                                                                                | Local and account search suggestions                                                      | Clear is tier 0 with Undo                                                                         |
+| Message read receipts                                                  | Switch                                                | Off                                                                               | Visible read status                                                                       | none                                                                                              |
+| Presence                                                               | Switch                                                | On within conversations                                                           |                                                                                           | none                                                                                              |
+| Deactivate account                                                     | Button                                                | n/a                                                                               | Hides profile and pauses notifications, reversible by sign in                             | Tier 1 dialog                                                                                     |
+| Delete account                                                         | Button                                                | n/a                                                                               | Tier 3 typed confirm with 14-day cooling-off                                              | Re-authentication required                                                                        |
 
 **Behavior:** every change saves immediately with `SaveIndicator` (Saving, Saved, Couldn't save. Retry); a failed save reverts the control to its previous state and announces the failure; changes made on another device are reflected on focus (stale values refresh; if the control is being edited, the conflict flow applies); a preview link opens `/profile/preview` showing exactly what a recruiter sees under the current settings; changes are audit logged for privacy-related fields (user-visible "Settings history" under Data and export). Consent-bearing switches show a consent version and date in the detail ("You agreed on 12 Mar 2026 to version 3"), and withdrawal is as easy as granting.
 
@@ -883,17 +895,17 @@ Row click or Enter on case id opens a right drawer (?open=4821) with evidence, h
 
 **Permissions (role x capability)**
 
-| Capability | MOD | PAD | SAD | SUP |
-|---|---|---|---|---|
-| View queue and cases in assigned scope | allow | allow (all) | read | deny |
-| Assign to self | allow | allow | deny | deny |
-| Assign to others | MOD lead only | allow | deny | deny |
-| Change status | allow | allow | deny | deny |
-| Enforcement action in drawer | allow with reason | allow | deny | deny |
-| Account-level enforcement (suspend, ban) | request (two-person) | approve | deny | deny |
-| View sensitive evidence (unblurred) | allow, logged | allow, logged | allow, logged | deny |
-| Export | lead only | allow | deny | deny |
-| View audit trail of a case | allow | allow | allow | deny |
+| Capability                               | MOD                  | PAD           | SAD           | SUP  |
+| ---------------------------------------- | -------------------- | ------------- | ------------- | ---- |
+| View queue and cases in assigned scope   | allow                | allow (all)   | read          | deny |
+| Assign to self                           | allow                | allow         | deny          | deny |
+| Assign to others                         | MOD lead only        | allow         | deny          | deny |
+| Change status                            | allow                | allow         | deny          | deny |
+| Enforcement action in drawer             | allow with reason    | allow         | deny          | deny |
+| Account-level enforcement (suspend, ban) | request (two-person) | approve       | deny          | deny |
+| View sensitive evidence (unblurred)      | allow, logged        | allow, logged | allow, logged | deny |
+| Export                                   | lead only            | allow         | deny          | deny |
+| View audit trail of a case               | allow                | allow         | allow         | deny |
 
 **Analytics:** console analytics are operational and internal: `ui.console_cases.view`; `ui.console_cases.filter.change`; `ui.console_cases.bulk.complete` (action, count_bucket); `ui.console_cases.drawer.open`; `ui.console_cases.error`. Content of cases is never in analytics; reviewer activity metrics derive from domain events (`EVT-TSF`, planned), not UI events.
 
@@ -909,46 +921,46 @@ Row click or Enter on case id opens a right drawer (?open=4821) with evidence, h
 
 ## 5. How module screens relate to the reference screens
 
-| Module screen type | Pattern | Differences to specify |
-|---|---|---|
-| Home or dashboard of any workspace | REFSCR-01 | Tiles, data sources, role-specific actions |
+| Module screen type                                                                                          | Pattern                             | Differences to specify                                 |
+| ----------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------ |
+| Home or dashboard of any workspace                                                                          | REFSCR-01                           | Tiles, data sources, role-specific actions             |
 | Search or browse lists (courses, mentors, gigs, events, candidates, students, applications, tickets, users) | REFSCR-02 (or REFSCR-10 in Console) | Filters, card or row design, sort options, permissions |
-| Object pages (course landing, company, candidate profile, application, mentor, gig, event) | REFSCR-03 | Regions, actions, closed or restricted states |
-| Creation or submission wizards (create job, create course, mentor application, checkout, import) | REFSCR-04 | Steps, fields, review, draft rules |
-| Content consumption (lesson, article, recording, webinar) | REFSCR-05 | Completion rule, content types |
-| Timed or integrity sensitive tasks (assessment, coding challenge, exam) | REFSCR-06 | Question types, integrity rules, accommodations |
-| Stage-based workflow (pipeline, mentoring requests, gig proposals, drives) | REFSCR-07 | Stages, gates, card content, roles |
-| Conversation features (messages, mentor chat, support thread, comment threads) | REFSCR-08 | Who can start, retention, safety |
-| Settings, preferences and consent | REFSCR-09 | Settings table, defaults, confirmations |
-| Admin and operational tables | REFSCR-10 | Columns, bulk limits, audit, step-up |
+| Object pages (course landing, company, candidate profile, application, mentor, gig, event)                  | REFSCR-03                           | Regions, actions, closed or restricted states          |
+| Creation or submission wizards (create job, create course, mentor application, checkout, import)            | REFSCR-04                           | Steps, fields, review, draft rules                     |
+| Content consumption (lesson, article, recording, webinar)                                                   | REFSCR-05                           | Completion rule, content types                         |
+| Timed or integrity sensitive tasks (assessment, coding challenge, exam)                                     | REFSCR-06                           | Question types, integrity rules, accommodations        |
+| Stage-based workflow (pipeline, mentoring requests, gig proposals, drives)                                  | REFSCR-07                           | Stages, gates, card content, roles                     |
+| Conversation features (messages, mentor chat, support thread, comment threads)                              | REFSCR-08                           | Who can start, retention, safety                       |
+| Settings, preferences and consent                                                                           | REFSCR-09                           | Settings table, defaults, confirmations                |
+| Admin and operational tables                                                                                | REFSCR-10                           | Columns, bulk limits, audit, step-up                   |
 
 ## 6. Consolidated rules
 
-| Id | Rule | Test |
-|---|---|---|
-| NFR-SCR-001 | No screen enters build planning with an unresolved checklist item (CHK-01 to CHK-58) | Review gate |
-| NFR-SCR-002 | Every screen emits `ui.{screen}.view` once per arrival and an `error` event for each error state | Analytics test |
+| Id          | Rule                                                                                                                                                                                   | Test                 |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| NFR-SCR-001 | No screen enters build planning with an unresolved checklist item (CHK-01 to CHK-58)                                                                                                   | Review gate          |
+| NFR-SCR-002 | Every screen emits `ui.{screen}.view` once per arrival and an `error` event for each error state                                                                                       | Analytics test       |
 | NFR-SCR-003 | Enforcement, deletion of other people's data, payments and publication are never bulk actions on phone and require explicit per-item confirmation or tiered approval where bulk exists | Spec review and test |
-| NFR-SCR-004 | Every list, board and chart screen offers a table or list equivalent (`02` `NFR-DSY-018`) | Screen spec |
-| NFR-SCR-005 | Every action lists its offline class (R, W, O, D) | Spec lint |
-| NFR-SCR-006 | Every screen spec states focus on arrival, landmark structure and live announcements | Spec lint |
-| NFR-SCR-007 | Each screen defines its null display and error copy keys per `06` | Copy lint |
-| NFR-SCR-008 | Permission matrix entries map to `BR-` rules enforced server-side | Security test |
+| NFR-SCR-004 | Every list, board and chart screen offers a table or list equivalent (`02` `NFR-DSY-018`)                                                                                              | Screen spec          |
+| NFR-SCR-005 | Every action lists its offline class (R, W, O, D)                                                                                                                                      | Spec lint            |
+| NFR-SCR-006 | Every screen spec states focus on arrival, landmark structure and live announcements                                                                                                   | Spec lint            |
+| NFR-SCR-007 | Each screen defines its null display and error copy keys per `06`                                                                                                                      | Copy lint            |
+| NFR-SCR-008 | Permission matrix entries map to `BR-` rules enforced server-side                                                                                                                      | Security test        |
 
 ## 7. Open decisions and risks
 
-| Id | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-SCR-01 | Draft expiry for applications | 30, 90, 180 days | 90 days with reminder | Product owner | JOB |
-| OD-SCR-02 | Employer view of candidate contact details before an application advances | Always; after Screen; after candidate consent | After Screen stage, org setting | Product owner and privacy officer | ATS |
-| OD-SCR-03 | Read receipts defaults for candidates and recruiters | Off for candidates, on for recruiters; off for both | Off for both, opt-in | Privacy officer | MSG |
-| OD-SCR-04 | Reject message delay option | Immediate only; delay options | Immediate default, 24-hour delay optional | Product owner | ATS |
-| OD-SCR-05 | Single-key shortcuts inside console drawers | Allowed; disallowed | Allowed, disableable | Security and accessibility lead | ADM |
+| Id        | Question                                                                  | Options                                             | Default proposal                          | Decides                           | Blocks |
+| --------- | ------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------- | --------------------------------- | ------ |
+| OD-SCR-01 | Draft expiry for applications                                             | 30, 90, 180 days                                    | 90 days with reminder                     | Product owner                     | JOB    |
+| OD-SCR-02 | Employer view of candidate contact details before an application advances | Always; after Screen; after candidate consent       | After Screen stage, org setting           | Product owner and privacy officer | ATS    |
+| OD-SCR-03 | Read receipts defaults for candidates and recruiters                      | Off for candidates, on for recruiters; off for both | Off for both, opt-in                      | Privacy officer                   | MSG    |
+| OD-SCR-04 | Reject message delay option                                               | Immediate only; delay options                       | Immediate default, 24-hour delay optional | Product owner                     | ATS    |
+| OD-SCR-05 | Single-key shortcuts inside console drawers                               | Allowed; disallowed                                 | Allowed, disableable                      | Security and accessibility lead   | ADM    |
 
 ### 7.1 Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
-| RSK-SCR-01 | Screen specs become inconsistent across authors | Checklist gate and reference screens as patterns; periodic spec audit |
-| RSK-SCR-02 | Reference screens are treated as pixel designs | They are behavior and structure patterns; visual design follows `02` tokens and components |
-| RSK-SCR-03 | Spec effort too heavy for trivial screens | Template permits "n/a, reason"; trivial variations cite the pattern and list deltas only |
+| Id         | Risk                                            | Mitigation                                                                                 |
+| ---------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| RSK-SCR-01 | Screen specs become inconsistent across authors | Checklist gate and reference screens as patterns; periodic spec audit                      |
+| RSK-SCR-02 | Reference screens are treated as pixel designs  | They are behavior and structure patterns; visual design follows `02` tokens and components |
+| RSK-SCR-03 | Spec effort too heavy for trivial screens       | Template permits "n/a, reason"; trivial variations cite the pattern and list deltas only   |

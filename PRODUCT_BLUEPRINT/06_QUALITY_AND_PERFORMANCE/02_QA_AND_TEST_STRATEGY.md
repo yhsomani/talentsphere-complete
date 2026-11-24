@@ -15,21 +15,21 @@ Evidence tags follow [CONVENTIONS](../00_START_HERE/CONVENTIONS.md). Numeric thr
 
 ## 2. Stack mapping
 
-| Layer | Tooling for this stack | Location (proposed) | Runs in |
-|---|---|---|---|
-| Unit / domain | Vitest | `packages/domain/**/*.test.ts` | local, CI PR |
-| Component | Vitest + Testing Library (jsdom) | `apps/web/src/**/*.test.tsx` | local, CI PR |
-| Contract | Vitest + Zod schemas from `packages/contracts` | `packages/contracts/**/*.test.ts` | CI PR |
-| API integration (in-memory) | Vitest + Fastify `inject` | `apps/api/**/*.test.ts` | CI PR |
-| Integration with Postgres | Vitest `test:pg` using `TEST_DATABASE_URL` | `apps/api/**/*.pg.test.ts` | CI PR (service container) |
-| Migration | Ledger helper suite + apply-from-empty + upgrade-from-previous | `supabase/migrations`, `database-migrations` suite | CI PR |
-| Security | Vitest security suite + SAST + dependency audit + DAST | `tests/security` | CI PR, nightly |
-| End to end | Playwright | `tests/e2e` | CI merge, nightly, preview |
-| Accessibility | axe via Playwright + manual audit | `tests/e2e/a11y` | CI merge |
-| Performance | k6 or equivalent HTTP load; Lighthouse CI; web-vitals RUM | `tests/perf` | nightly, pre-release |
-| Visual | Playwright screenshot comparison | `tests/e2e/visual` | CI merge |
-| Chaos / resilience | Fault injection scripts against staging | `tests/resilience` | scheduled, pre-release |
-| AI evaluation | Offline eval harness with golden sets | `tests/ai-eval` | per prompt/model change, nightly |
+| Layer                       | Tooling for this stack                                         | Location (proposed)                                | Runs in                          |
+| --------------------------- | -------------------------------------------------------------- | -------------------------------------------------- | -------------------------------- |
+| Unit / domain               | Vitest                                                         | `packages/domain/**/*.test.ts`                     | local, CI PR                     |
+| Component                   | Vitest + Testing Library (jsdom)                               | `apps/web/src/**/*.test.tsx`                       | local, CI PR                     |
+| Contract                    | Vitest + Zod schemas from `packages/contracts`                 | `packages/contracts/**/*.test.ts`                  | CI PR                            |
+| API integration (in-memory) | Vitest + Fastify `inject`                                      | `apps/api/**/*.test.ts`                            | CI PR                            |
+| Integration with Postgres   | Vitest `test:pg` using `TEST_DATABASE_URL`                     | `apps/api/**/*.pg.test.ts`                         | CI PR (service container)        |
+| Migration                   | Ledger helper suite + apply-from-empty + upgrade-from-previous | `supabase/migrations`, `database-migrations` suite | CI PR                            |
+| Security                    | Vitest security suite + SAST + dependency audit + DAST         | `tests/security`                                   | CI PR, nightly                   |
+| End to end                  | Playwright                                                     | `tests/e2e`                                        | CI merge, nightly, preview       |
+| Accessibility               | axe via Playwright + manual audit                              | `tests/e2e/a11y`                                   | CI merge                         |
+| Performance                 | k6 or equivalent HTTP load; Lighthouse CI; web-vitals RUM      | `tests/perf`                                       | nightly, pre-release             |
+| Visual                      | Playwright screenshot comparison                               | `tests/e2e/visual`                                 | CI merge                         |
+| Chaos / resilience          | Fault injection scripts against staging                        | `tests/resilience`                                 | scheduled, pre-release           |
+| AI evaluation               | Offline eval harness with golden sets                          | `tests/ai-eval`                                    | per prompt/model change, nightly |
 
 Tool names are `[PROP]` and replaceable through an ADR; the layer set is the requirement. Adding a test dependency touches `package.json` and is therefore an "ask first" action under the build-files rule. [SRC: AGENTS.md via CLAUDE.md]
 
@@ -134,18 +134,18 @@ Target shape `[PROP]`: unit and domain roughly 60 percent of test count, contrac
 
 Executed in staging (never production without an approved game day). Each experiment has a hypothesis, blast radius, abort condition and expected observable behavior.
 
-| Experiment | Expected behavior |
-|---|---|
-| Kill the API process mid-request | In-flight non-idempotent writes either commit once or not at all; client retry with idempotency key is safe |
-| Kill a worker mid-job | Job lease expires and exactly one other worker completes it; side effects (email, webhook) not duplicated |
-| Postgres primary failover or connection saturation | API returns canonical 503 with retry hint; no data corruption; recovery without restart |
-| Email provider down or 429 | Messages queue with backoff and dead-letter; user-facing action unaffected; operator alert fires |
-| Payment webhook delivered twice, out of order, or delayed | Entitlement state converges correctly; no double grant |
-| Search index unavailable | Degrades to database search or shows labelled degraded state |
-| Object storage error on upload and download | Resumable upload; no orphan metadata; clear error state |
-| AI provider timeout or policy refusal | Feature falls back to non-AI path with honest label; cost cap respected |
-| Clock skew between nodes | Tokens and scheduled jobs behave within defined tolerance |
-| Region or zone loss (if multi-zone) | Restore within RPO and RTO targets (doc 07/01 section 17) |
+| Experiment                                                | Expected behavior                                                                                           |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Kill the API process mid-request                          | In-flight non-idempotent writes either commit once or not at all; client retry with idempotency key is safe |
+| Kill a worker mid-job                                     | Job lease expires and exactly one other worker completes it; side effects (email, webhook) not duplicated   |
+| Postgres primary failover or connection saturation        | API returns canonical 503 with retry hint; no data corruption; recovery without restart                     |
+| Email provider down or 429                                | Messages queue with backoff and dead-letter; user-facing action unaffected; operator alert fires            |
+| Payment webhook delivered twice, out of order, or delayed | Entitlement state converges correctly; no double grant                                                      |
+| Search index unavailable                                  | Degrades to database search or shows labelled degraded state                                                |
+| Object storage error on upload and download               | Resumable upload; no orphan metadata; clear error state                                                     |
+| AI provider timeout or policy refusal                     | Feature falls back to non-AI path with honest label; cost cap respected                                     |
+| Clock skew between nodes                                  | Tokens and scheduled jobs behave within defined tolerance                                                   |
+| Region or zone loss (if multi-zone)                       | Restore within RPO and RTO targets (doc 07/01 section 17)                                                   |
 
 ### 4.12 Compatibility, localization and offline tests
 
@@ -166,13 +166,13 @@ Executed in staging (never production without an approved game day). Each experi
 
 ## 6. Environments
 
-| Environment | Purpose | Data | Who deploys | Tests run |
-|---|---|---|---|---|
-| local | developer loop | seed:minimal/standard | developer | unit, component, API, pg on demand |
-| CI | every PR and merge | ephemeral Postgres, seed per suite | pipeline | all automated layers per gate |
-| preview | per-PR full stack for review, UAT-lite, E2E | seed:standard, auto-destroyed | pipeline | E2E smoke, a11y, DAST baseline |
-| staging | production-like, release candidate soak | seed:volume plus synthetic traffic | pipeline on release branch | full regression, performance, chaos, UAT |
-| production | live | real | pipeline with approval | synthetic probes, canary checks, post-deploy smoke |
+| Environment | Purpose                                     | Data                               | Who deploys                | Tests run                                          |
+| ----------- | ------------------------------------------- | ---------------------------------- | -------------------------- | -------------------------------------------------- |
+| local       | developer loop                              | seed:minimal/standard              | developer                  | unit, component, API, pg on demand                 |
+| CI          | every PR and merge                          | ephemeral Postgres, seed per suite | pipeline                   | all automated layers per gate                      |
+| preview     | per-PR full stack for review, UAT-lite, E2E | seed:standard, auto-destroyed      | pipeline                   | E2E smoke, a11y, DAST baseline                     |
+| staging     | production-like, release candidate soak     | seed:volume plus synthetic traffic | pipeline on release branch | full regression, performance, chaos, UAT           |
+| production  | live                                        | real                               | pipeline with approval     | synthetic probes, canary checks, post-deploy smoke |
 
 Staging parity rules: same Postgres major version, same worker count ratio, same CDN and auth settings, provider sandboxes, and feature flags mirroring the intended production flag state. Differences are listed in a parity register reviewed at each release.
 
@@ -180,13 +180,13 @@ Staging parity rules: same Postgres major version, same worker count ratio, same
 
 ### 7.1 Severity (impact)
 
-| Severity | Definition | Examples |
-|---|---|---|
+| Severity    | Definition                                                                                                                                       | Examples                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
 | S1 Critical | Data loss or corruption, security or privacy breach, cross-tenant exposure, payment error, total outage of a core flow, legal-compliance failure | Candidate sees another candidate's private evidence; double charge; deletion request ignored |
-| S2 Major | Core flow broken for a user class with no workaround; wrong business-rule outcome | Applications cannot be submitted on mobile; assessment score miscomputed |
-| S3 Moderate | Feature impaired, workaround exists; degraded performance within 2x budget | Filter returns wrong order; slow report |
-| S4 Minor | Cosmetic or low-impact; copy errors; minor a11y issues that do not block use | Misaligned icon; typo |
-| S5 Trivial | Suggestions, polish | Spacing tweak |
+| S2 Major    | Core flow broken for a user class with no workaround; wrong business-rule outcome                                                                | Applications cannot be submitted on mobile; assessment score miscomputed                     |
+| S3 Moderate | Feature impaired, workaround exists; degraded performance within 2x budget                                                                       | Filter returns wrong order; slow report                                                      |
+| S4 Minor    | Cosmetic or low-impact; copy errors; minor a11y issues that do not block use                                                                     | Misaligned icon; typo                                                                        |
+| S5 Trivial  | Suggestions, polish                                                                                                                              | Spacing tweak                                                                                |
 
 ### 7.2 Priority (urgency)
 
@@ -246,10 +246,10 @@ A story or feature is ready for build only when all hold:
 
 ### 10.2 Traceability matrix format
 
-| AC id | Rule ids | Layer | Test location | Type | Last result | Last build |
-|---|---|---|---|---|---|---|
-| FR-JOB-012.AC1 | BR-JOB-004 | integration | `apps/api/jobs/apply.pg.test.ts` | positive | pass | build id |
-| FR-JOB-012.AC3- | BR-JOB-004 | integration | same | negative | pass | build id |
+| AC id           | Rule ids   | Layer       | Test location                    | Type     | Last result | Last build |
+| --------------- | ---------- | ----------- | -------------------------------- | -------- | ----------- | ---------- |
+| FR-JOB-012.AC1  | BR-JOB-004 | integration | `apps/api/jobs/apply.pg.test.ts` | positive | pass        | build id   |
+| FR-JOB-012.AC3- | BR-JOB-004 | integration | same                             | negative | pass        | build id   |
 
 Release gate G6 (section 13) requires 100 percent of `Must` ACs for features in the release tier to be mapped and passing, `Should` ACs mapped, and any gap on `Could` disclosed.
 
@@ -274,32 +274,32 @@ Release gate G6 (section 13) requires 100 percent of `Must` ACs for features in 
 
 Each gate is binary; override requires the named approver and is logged in the release record.
 
-| Gate | Stage | Criteria | Override authority |
-|---|---|---|---|
-| G1 Commit | pre-merge PR | lint, format check, typecheck, unit, component, contract, in-memory API tests green; secret scan clean; no new `any`/ts-ignore without justification comment | none (blocking) |
-| G2 Integration | pre-merge PR | `test:pg` green; migration suite green; RLS tests green; dependency audit has no new high/critical | engineering lead for audit false positives only, with record |
-| G3 Merge | post-merge main | E2E smoke and tagged tier suite green on preview; axe has no serious violations; visual diffs approved; contract diff clean | engineering lead |
-| G4 Candidate | release candidate on staging | full regression green; performance within budget (section 14); security DAST has no high; chaos set passed for changed areas; migration upgrade test on production-shaped data passed | QA lead and engineering lead jointly |
-| G5 Readiness | pre-production | no open S1/S2; S3 list reviewed; UAT sign-off; runbooks updated; rollback plan and flag plan present; on-call briefed; change record approved | release manager |
-| G6 Traceability | G4 or G5 | AC traceability complete per section 10 for the release scope | product owner for explicit waivers |
-| G7 Post-deploy | after production deploy | synthetic probes green, canary metrics within thresholds, error budget not burning abnormally for the observation window | automatic rollback if breached |
+| Gate            | Stage                        | Criteria                                                                                                                                                                              | Override authority                                           |
+| --------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| G1 Commit       | pre-merge PR                 | lint, format check, typecheck, unit, component, contract, in-memory API tests green; secret scan clean; no new `any`/ts-ignore without justification comment                          | none (blocking)                                              |
+| G2 Integration  | pre-merge PR                 | `test:pg` green; migration suite green; RLS tests green; dependency audit has no new high/critical                                                                                    | engineering lead for audit false positives only, with record |
+| G3 Merge        | post-merge main              | E2E smoke and tagged tier suite green on preview; axe has no serious violations; visual diffs approved; contract diff clean                                                           | engineering lead                                             |
+| G4 Candidate    | release candidate on staging | full regression green; performance within budget (section 14); security DAST has no high; chaos set passed for changed areas; migration upgrade test on production-shaped data passed | QA lead and engineering lead jointly                         |
+| G5 Readiness    | pre-production               | no open S1/S2; S3 list reviewed; UAT sign-off; runbooks updated; rollback plan and flag plan present; on-call briefed; change record approved                                         | release manager                                              |
+| G6 Traceability | G4 or G5                     | AC traceability complete per section 10 for the release scope                                                                                                                         | product owner for explicit waivers                           |
+| G7 Post-deploy  | after production deploy      | synthetic probes green, canary metrics within thresholds, error budget not burning abnormally for the observation window                                                              | automatic rollback if breached                               |
 
 AI-feature release adds gate G8 (section 16). Any release touching auth, billing, privacy or tenant isolation adds a mandatory security review sign-off (SAD).
 
 ## 14. Performance budgets (initial `[PROP]`, finalized by `OD-QA-08`)
 
-| Area | Metric | Initial budget |
-|---|---|---|
-| API read endpoints | p95 latency at expected peak | 300 ms |
-| API write endpoints | p95 latency | 600 ms |
-| Search | p95 latency | 800 ms |
-| Page | LCP p75 on mid-tier mobile over 4G profile | 2.5 s |
-| Page | INP p75 | 200 ms |
-| Page | CLS p75 | 0.1 |
-| Initial JS per route | compressed | budget set per route in Lighthouse CI config |
-| Worker | job queue age p95 for transactional email | 60 s |
-| Error rate | 5xx share of requests | below 0.5 percent during load test |
-| Availability | per `OD-` set SLO | defined in doc 07/01 |
+| Area                 | Metric                                     | Initial budget                               |
+| -------------------- | ------------------------------------------ | -------------------------------------------- |
+| API read endpoints   | p95 latency at expected peak               | 300 ms                                       |
+| API write endpoints  | p95 latency                                | 600 ms                                       |
+| Search               | p95 latency                                | 800 ms                                       |
+| Page                 | LCP p75 on mid-tier mobile over 4G profile | 2.5 s                                        |
+| Page                 | INP p75                                    | 200 ms                                       |
+| Page                 | CLS p75                                    | 0.1                                          |
+| Initial JS per route | compressed                                 | budget set per route in Lighthouse CI config |
+| Worker               | job queue age p95 for transactional email  | 60 s                                         |
+| Error rate           | 5xx share of requests                      | below 0.5 percent during load test           |
+| Availability         | per `OD-` set SLO                          | defined in doc 07/01                         |
 
 Expected peak is a parameter, not a number we invent: `PERF_PEAK_RPS`, `PERF_CONCURRENT_USERS` are set by `OD-QA-08` from stakeholder volume assumptions.
 
@@ -309,175 +309,175 @@ Test-case ids: `TC-<GRP>-nnn`. Groups mirror the module groups in CONVENTIONS se
 
 ### 15.1 Foundation (IDN, SET, NTF)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-FND-001 | Register with email, verify email link once; reusing the link fails | E, I | Smoke |
-| TC-FND-002 | Login lockout after repeated failures, unlock path, no user enumeration in messages | S, I | Core |
-| TC-FND-003 | Session token tamper, expiry and post-logout replay all rejected | S, U | Core |
-| TC-FND-004 | Password reset invalidates all existing sessions | I | Core |
-| TC-FND-005 | Two-factor enrollment, challenge, recovery code single use | E, S | Core |
-| TC-FND-006 | Role switch and tenant switch never leak previous context data | S, E | Core |
-| TC-FND-007 | Consent withdrawal stops the dependent processing and emails within the defined window | I | Core |
-| TC-FND-008 | Data export contains every personal-data entity in the export map; deletion request removes or anonymizes all and is idempotent | I | Core |
-| TC-FND-009 | Notification preference opt-out suppresses marketing but never mandatory security notices | I, U | Core |
-| TC-FND-010 | Email provider failure queues and retries without duplicate sends | R, I | Core |
-| TC-FND-011 | Account deletion during an in-progress application keeps recruiter-side records per retention rule | I | Extended |
-| TC-FND-012 | Age/minor restriction blocks restricted features | U, E | Core |
+| Id         | Scenario                                                                                                                        | Layer | Tier     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-FND-001 | Register with email, verify email link once; reusing the link fails                                                             | E, I  | Smoke    |
+| TC-FND-002 | Login lockout after repeated failures, unlock path, no user enumeration in messages                                             | S, I  | Core     |
+| TC-FND-003 | Session token tamper, expiry and post-logout replay all rejected                                                                | S, U  | Core     |
+| TC-FND-004 | Password reset invalidates all existing sessions                                                                                | I     | Core     |
+| TC-FND-005 | Two-factor enrollment, challenge, recovery code single use                                                                      | E, S  | Core     |
+| TC-FND-006 | Role switch and tenant switch never leak previous context data                                                                  | S, E  | Core     |
+| TC-FND-007 | Consent withdrawal stops the dependent processing and emails within the defined window                                          | I     | Core     |
+| TC-FND-008 | Data export contains every personal-data entity in the export map; deletion request removes or anonymizes all and is idempotent | I     | Core     |
+| TC-FND-009 | Notification preference opt-out suppresses marketing but never mandatory security notices                                       | I, U  | Core     |
+| TC-FND-010 | Email provider failure queues and retries without duplicate sends                                                               | R, I  | Core     |
+| TC-FND-011 | Account deletion during an in-progress application keeps recruiter-side records per retention rule                              | I     | Extended |
+| TC-FND-012 | Age/minor restriction blocks restricted features                                                                                | U, E  | Core     |
 
 ### 15.2 Career identity (PRF, EVD, BGV)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-CID-001 | Create profile, add work history and skills, completeness score updates per rule | E, U | Smoke |
-| TC-CID-002 | Visibility settings: private, recruiter-only and public views each show exactly the permitted fields | S, I | Smoke |
-| TC-CID-003 | Employer verification request emails the verifier; one-time link verifies once; expiry rejected | I, S | Core |
-| TC-CID-004 | Verified claim cannot be edited without reverting to unverified | U, I | Core |
-| TC-CID-005 | Upload evidence file: type sniffing, size limit, malware verdict quarantine | S, I | Core |
-| TC-CID-006 | Resume export renders all sections and respects hidden fields | E, I | Core |
-| TC-CID-007 | Background check consent required before order; revoked consent blocks results display | I, S | Core |
-| TC-CID-008 | Credential share link revoked takes effect immediately and expires on time | S, I | Core |
-| TC-CID-009 | Duplicate employer or institution entity merge keeps verifications | I | Extended |
-| TC-CID-010 | Profile with 2,000 items renders within the performance budget | P | Extended |
+| Id         | Scenario                                                                                             | Layer | Tier     |
+| ---------- | ---------------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-CID-001 | Create profile, add work history and skills, completeness score updates per rule                     | E, U  | Smoke    |
+| TC-CID-002 | Visibility settings: private, recruiter-only and public views each show exactly the permitted fields | S, I  | Smoke    |
+| TC-CID-003 | Employer verification request emails the verifier; one-time link verifies once; expiry rejected      | I, S  | Core     |
+| TC-CID-004 | Verified claim cannot be edited without reverting to unverified                                      | U, I  | Core     |
+| TC-CID-005 | Upload evidence file: type sniffing, size limit, malware verdict quarantine                          | S, I  | Core     |
+| TC-CID-006 | Resume export renders all sections and respects hidden fields                                        | E, I  | Core     |
+| TC-CID-007 | Background check consent required before order; revoked consent blocks results display               | I, S  | Core     |
+| TC-CID-008 | Credential share link revoked takes effect immediately and expires on time                           | S, I  | Core     |
+| TC-CID-009 | Duplicate employer or institution entity merge keeps verifications                                   | I     | Extended |
+| TC-CID-010 | Profile with 2,000 items renders within the performance budget                                       | P     | Extended |
 
 ### 15.3 Platform (SRC, ANL, PWA, PLT)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-PLT-001 | Search ranks exact and fuzzy matches per fixture; filters combine correctly | I | Smoke |
-| TC-PLT-002 | Search results never include records the viewer may not see (visibility and block lists) | S, I | Smoke |
-| TC-PLT-003 | Public API key scope enforcement and per-key rate limit | S, I | Core |
-| TC-PLT-004 | Outbound webhook signed, retried with backoff, dead-lettered, replay by id idempotent | I, R | Core |
-| TC-PLT-005 | Offline queue replays writes after reconnect with conflict resolution | E | Core |
-| TC-PLT-006 | Service worker update does not strand users on an old incompatible API version | E | Core |
-| TC-PLT-007 | Analytics report excludes data beyond viewer's tenant and applies k-anonymity threshold | S, U | Core |
-| TC-PLT-008 | Large file upload resumes after interruption; orphan cleanup job removes abandoned parts | R, I | Extended |
-| TC-PLT-009 | Search index outage degrades to labelled fallback | R | Core |
-| TC-PLT-010 | Browser extension requests only declared permissions and clears data on sign-out | S, E | Extended |
+| Id         | Scenario                                                                                 | Layer | Tier     |
+| ---------- | ---------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-PLT-001 | Search ranks exact and fuzzy matches per fixture; filters combine correctly              | I     | Smoke    |
+| TC-PLT-002 | Search results never include records the viewer may not see (visibility and block lists) | S, I  | Smoke    |
+| TC-PLT-003 | Public API key scope enforcement and per-key rate limit                                  | S, I  | Core     |
+| TC-PLT-004 | Outbound webhook signed, retried with backoff, dead-lettered, replay by id idempotent    | I, R  | Core     |
+| TC-PLT-005 | Offline queue replays writes after reconnect with conflict resolution                    | E     | Core     |
+| TC-PLT-006 | Service worker update does not strand users on an old incompatible API version           | E     | Core     |
+| TC-PLT-007 | Analytics report excludes data beyond viewer's tenant and applies k-anonymity threshold  | S, U  | Core     |
+| TC-PLT-008 | Large file upload resumes after interruption; orphan cleanup job removes abandoned parts | R, I  | Extended |
+| TC-PLT-009 | Search index outage degrades to labelled fallback                                        | R     | Core     |
+| TC-PLT-010 | Browser extension requests only declared permissions and clears data on sign-out         | S, E  | Extended |
 
 ### 15.4 Learning (LRN, STU, ASM)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-LRN-001 | Enroll, consume lessons, progress persists across devices, completion triggers certificate once | E, I | Smoke |
-| TC-LRN-002 | Enrollment entitlement enforced: unpaid or unassigned learner cannot fetch protected media | S, I | Smoke |
-| TC-LRN-003 | Instructor publishes course: validation blocks publish with missing required lesson content | E, U | Core |
-| TC-LRN-004 | Assessment timer enforces server-side deadline regardless of client clock | U, S | Core |
-| TC-LRN-005 | Auto-graded scoring matches golden answer set; simulated scoring is labelled and cannot issue credentials | U, I | Smoke |
-| TC-LRN-006 | Integrity signals (tab switch, copy-paste, plagiarism similarity) create review items, never silently fail a candidate | I, U | Core |
-| TC-LRN-007 | Accommodation (extra time) applies to timer and is audit logged | U, I | Core |
-| TC-LRN-008 | Code challenge runner sandbox blocks network and resource abuse, enforces CPU and memory limits | S, R | Core |
-| TC-LRN-009 | Campus-wide simultaneous assessment start meets queue and latency budget | P | Extended |
-| TC-LRN-010 | Course player works with keyboard only and with captions on | A, E | Core |
-| TC-LRN-011 | Retake rule and attempt cap enforced concurrently (two tabs) | I | Core |
+| Id         | Scenario                                                                                                               | Layer | Tier     |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-LRN-001 | Enroll, consume lessons, progress persists across devices, completion triggers certificate once                        | E, I  | Smoke    |
+| TC-LRN-002 | Enrollment entitlement enforced: unpaid or unassigned learner cannot fetch protected media                             | S, I  | Smoke    |
+| TC-LRN-003 | Instructor publishes course: validation blocks publish with missing required lesson content                            | E, U  | Core     |
+| TC-LRN-004 | Assessment timer enforces server-side deadline regardless of client clock                                              | U, S  | Core     |
+| TC-LRN-005 | Auto-graded scoring matches golden answer set; simulated scoring is labelled and cannot issue credentials              | U, I  | Smoke    |
+| TC-LRN-006 | Integrity signals (tab switch, copy-paste, plagiarism similarity) create review items, never silently fail a candidate | I, U  | Core     |
+| TC-LRN-007 | Accommodation (extra time) applies to timer and is audit logged                                                        | U, I  | Core     |
+| TC-LRN-008 | Code challenge runner sandbox blocks network and resource abuse, enforces CPU and memory limits                        | S, R  | Core     |
+| TC-LRN-009 | Campus-wide simultaneous assessment start meets queue and latency budget                                               | P     | Extended |
+| TC-LRN-010 | Course player works with keyboard only and with captions on                                                            | A, E  | Core     |
+| TC-LRN-011 | Retake rule and attempt cap enforced concurrently (two tabs)                                                           | I     | Core     |
 
 ### 15.5 Hiring (JOB, ATS, INT, EMP)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-HIR-001 | Employer posts a job, moderation passes, job appears in search and detail within the indexing budget | E, I | Smoke |
-| TC-HIR-002 | Candidate applies once; duplicate and concurrent apply produce a single application | I | Smoke |
-| TC-HIR-003 | Pipeline stage moves obey the state machine; invalid transition rejected with typed error | U, I | Smoke |
-| TC-HIR-004 | Recruiter of employer A cannot read applications of employer B (IDOR) | S | Smoke |
-| TC-HIR-005 | Candidate withdrawal while recruiter moves stage resolves to one consistent outcome | I | Core |
-| TC-HIR-006 | Interview scheduling avoids double booking across calendars and timezones, DST boundary included | U, I | Core |
-| TC-HIR-007 | Interview reschedule and cancel notify all parties once, update calendar invites | I | Core |
-| TC-HIR-008 | Scorecard blind-review mode hides candidate identity fields until reveal | S, E | Core |
-| TC-HIR-009 | Offer creation, approval chain, candidate accept and decline each emit the expected events | I | Core |
-| TC-HIR-010 | Rejection email respects templates, opt-out class and does not leak other candidates | I, S | Core |
-| TC-HIR-011 | Bulk action on 500 applications completes asynchronously with partial-failure report | I, P | Extended |
-| TC-HIR-012 | Employer team role changes take effect immediately and are audited | S, I | Core |
+| Id         | Scenario                                                                                             | Layer | Tier     |
+| ---------- | ---------------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-HIR-001 | Employer posts a job, moderation passes, job appears in search and detail within the indexing budget | E, I  | Smoke    |
+| TC-HIR-002 | Candidate applies once; duplicate and concurrent apply produce a single application                  | I     | Smoke    |
+| TC-HIR-003 | Pipeline stage moves obey the state machine; invalid transition rejected with typed error            | U, I  | Smoke    |
+| TC-HIR-004 | Recruiter of employer A cannot read applications of employer B (IDOR)                                | S     | Smoke    |
+| TC-HIR-005 | Candidate withdrawal while recruiter moves stage resolves to one consistent outcome                  | I     | Core     |
+| TC-HIR-006 | Interview scheduling avoids double booking across calendars and timezones, DST boundary included     | U, I  | Core     |
+| TC-HIR-007 | Interview reschedule and cancel notify all parties once, update calendar invites                     | I     | Core     |
+| TC-HIR-008 | Scorecard blind-review mode hides candidate identity fields until reveal                             | S, E  | Core     |
+| TC-HIR-009 | Offer creation, approval chain, candidate accept and decline each emit the expected events           | I     | Core     |
+| TC-HIR-010 | Rejection email respects templates, opt-out class and does not leak other candidates                 | I, S  | Core     |
+| TC-HIR-011 | Bulk action on 500 applications completes asynchronously with partial-failure report                 | I, P  | Extended |
+| TC-HIR-012 | Employer team role changes take effect immediately and are audited                                   | S, I  | Core     |
 
 ### 15.6 Social (NET, MSG)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-SOC-001 | Connection request, accept, withdraw and block produce consistent visibility everywhere | I, S | Smoke |
-| TC-SOC-002 | Blocked user cannot message, view or find the blocker | S | Smoke |
-| TC-SOC-003 | Message delivered in real time to two contexts, ordering preserved, offline delivery on reconnect | E, I | Core |
-| TC-SOC-004 | Message report enters moderation queue with evidence snapshot | I | Core |
-| TC-SOC-005 | Referral request, referral submission and attribution tracked once | I | Core |
-| TC-SOC-006 | Message attachment passes malware scan before delivery | S, I | Core |
-| TC-SOC-007 | Spam rate limit throttles repeated connection requests and DMs | S | Core |
-| TC-SOC-008 | Community post edit and delete propagates to feeds and caches | I | Extended |
-| TC-SOC-009 | Notification fan-out for a popular post stays within queue budget | P | Extended |
+| Id         | Scenario                                                                                          | Layer | Tier     |
+| ---------- | ------------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-SOC-001 | Connection request, accept, withdraw and block produce consistent visibility everywhere           | I, S  | Smoke    |
+| TC-SOC-002 | Blocked user cannot message, view or find the blocker                                             | S     | Smoke    |
+| TC-SOC-003 | Message delivered in real time to two contexts, ordering preserved, offline delivery on reconnect | E, I  | Core     |
+| TC-SOC-004 | Message report enters moderation queue with evidence snapshot                                     | I     | Core     |
+| TC-SOC-005 | Referral request, referral submission and attribution tracked once                                | I     | Core     |
+| TC-SOC-006 | Message attachment passes malware scan before delivery                                            | S, I  | Core     |
+| TC-SOC-007 | Spam rate limit throttles repeated connection requests and DMs                                    | S     | Core     |
+| TC-SOC-008 | Community post edit and delete propagates to feeds and caches                                     | I     | Extended |
+| TC-SOC-009 | Notification fan-out for a popular post stays within queue budget                                 | P     | Extended |
 
 ### 15.7 Intelligence (AIC, MKT)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-ITL-001 | Recommendations exclude blocked, ineligible and already-applied jobs | I, U | Core |
-| TC-ITL-002 | Matching explanation lists only factors actually used and omits protected attributes | U, S | Smoke |
-| TC-ITL-003 | AI assistant refuses out-of-policy requests and shows the honest AI label | S, E | Core |
-| TC-ITL-004 | Prompt injection in a resume or job description does not alter system behavior or exfiltrate other users' data | S | Smoke |
-| TC-ITL-005 | AI provider timeout falls back to non-AI behavior with label, within latency budget | R | Core |
-| TC-ITL-006 | Per-user and per-tenant AI cost caps stop calls and show a clear message | I, U | Core |
-| TC-ITL-007 | Bias evaluation set shows score parity within threshold across demographic proxies | AI eval | Core |
-| TC-ITL-008 | Market salary insight hides cells below minimum sample size | U | Core |
-| TC-ITL-009 | Human override of an AI-assisted ranking is logged and respected on re-rank | I | Core |
+| Id         | Scenario                                                                                                       | Layer   | Tier  |
+| ---------- | -------------------------------------------------------------------------------------------------------------- | ------- | ----- |
+| TC-ITL-001 | Recommendations exclude blocked, ineligible and already-applied jobs                                           | I, U    | Core  |
+| TC-ITL-002 | Matching explanation lists only factors actually used and omits protected attributes                           | U, S    | Smoke |
+| TC-ITL-003 | AI assistant refuses out-of-policy requests and shows the honest AI label                                      | S, E    | Core  |
+| TC-ITL-004 | Prompt injection in a resume or job description does not alter system behavior or exfiltrate other users' data | S       | Smoke |
+| TC-ITL-005 | AI provider timeout falls back to non-AI behavior with label, within latency budget                            | R       | Core  |
+| TC-ITL-006 | Per-user and per-tenant AI cost caps stop calls and show a clear message                                       | I, U    | Core  |
+| TC-ITL-007 | Bias evaluation set shows score parity within threshold across demographic proxies                             | AI eval | Core  |
+| TC-ITL-008 | Market salary insight hides cells below minimum sample size                                                    | U       | Core  |
+| TC-ITL-009 | Human override of an AI-assisted ranking is logged and respected on re-rank                                    | I       | Core  |
 
 ### 15.8 Governance (TSF, ADM)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-GOV-001 | Report content, moderator action, appeal and reversal follow the state machine and audit trail | I, E | Core |
-| TC-GOV-002 | Support agent impersonation requires reason and consent, is time-boxed and fully audited | S, I | Smoke |
-| TC-GOV-003 | Admin role cannot grant itself a higher role (no self-escalation) | S | Smoke |
-| TC-GOV-004 | Admin audit log is append-only and tamper-evident | S, I | Core |
-| TC-GOV-005 | Fraud signal (fake employer, duplicate identity) quarantines listing and notifies reviewers | I | Core |
-| TC-GOV-006 | Feature flag and kill switch take effect within the propagation budget | I, E | Core |
-| TC-GOV-007 | Legal hold prevents deletion sweep for the held subject | I | Core |
-| TC-GOV-008 | Bulk admin action requires two-person approval where configured | S, I | Core |
+| Id         | Scenario                                                                                       | Layer | Tier  |
+| ---------- | ---------------------------------------------------------------------------------------------- | ----- | ----- |
+| TC-GOV-001 | Report content, moderator action, appeal and reversal follow the state machine and audit trail | I, E  | Core  |
+| TC-GOV-002 | Support agent impersonation requires reason and consent, is time-boxed and fully audited       | S, I  | Smoke |
+| TC-GOV-003 | Admin role cannot grant itself a higher role (no self-escalation)                              | S     | Smoke |
+| TC-GOV-004 | Admin audit log is append-only and tamper-evident                                              | S, I  | Core  |
+| TC-GOV-005 | Fraud signal (fake employer, duplicate identity) quarantines listing and notifies reviewers    | I     | Core  |
+| TC-GOV-006 | Feature flag and kill switch take effect within the propagation budget                         | I, E  | Core  |
+| TC-GOV-007 | Legal hold prevents deletion sweep for the held subject                                        | I     | Core  |
+| TC-GOV-008 | Bulk admin action requires two-person approval where configured                                | S, I  | Core  |
 
 ### 15.9 Institutions (INS)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-INS-001 | Bulk roster import validates rows, reports per-row errors, is idempotent on re-upload | I, E | Smoke |
-| TC-INS-002 | Student sees only own institution cohorts; placement officer sees only permitted students | S | Smoke |
-| TC-INS-003 | Cohort assignment of a course grants entitlements and removal revokes them | I | Core |
-| TC-INS-004 | Placement drive: eligibility rules apply and ineligible students are excluded with reasons | U, I | Core |
-| TC-INS-005 | Institution analytics respect minimum cohort size and student consent | S, U | Core |
-| TC-INS-006 | Institution SSO and SCIM-style provisioning create, update and deactivate users correctly | I | Core |
-| TC-INS-007 | Graduate transition keeps student data under personal ownership and detaches institution access | I | Extended |
+| Id         | Scenario                                                                                        | Layer | Tier     |
+| ---------- | ----------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-INS-001 | Bulk roster import validates rows, reports per-row errors, is idempotent on re-upload           | I, E  | Smoke    |
+| TC-INS-002 | Student sees only own institution cohorts; placement officer sees only permitted students       | S     | Smoke    |
+| TC-INS-003 | Cohort assignment of a course grants entitlements and removal revokes them                      | I     | Core     |
+| TC-INS-004 | Placement drive: eligibility rules apply and ineligible students are excluded with reasons      | U, I  | Core     |
+| TC-INS-005 | Institution analytics respect minimum cohort size and student consent                           | S, U  | Core     |
+| TC-INS-006 | Institution SSO and SCIM-style provisioning create, update and deactivate users correctly       | I     | Core     |
+| TC-INS-007 | Graduate transition keeps student data under personal ownership and detaches institution access | I     | Extended |
 
 ### 15.10 Commercial (BIL)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-BIL-001 | Checkout success webhook grants entitlement exactly once | I | Smoke |
-| TC-BIL-002 | Duplicate, out-of-order and delayed webhooks converge to the same state | I, R | Smoke |
-| TC-BIL-003 | Webhook with bad signature or stale timestamp rejected | S | Smoke |
-| TC-BIL-004 | Plan upgrade, downgrade and cancel apply proration and entitlement changes at the specified moment | U, I | Core |
-| TC-BIL-005 | Failed payment follows the dunning state machine and restricts features only after grace period | I | Core |
-| TC-BIL-006 | Refund reverses entitlements and ledger entries | I | Core |
-| TC-BIL-007 | Tax and currency rounding match fixtures | U | Core |
-| TC-BIL-008 | Billing disabled mode (`BILLING_MODE=disabled`) shows no purchase paths and honest labeling | E | Smoke |
-| TC-BIL-009 | Invoice access limited to billing admins of that organization | S | Core |
+| Id         | Scenario                                                                                           | Layer | Tier  |
+| ---------- | -------------------------------------------------------------------------------------------------- | ----- | ----- |
+| TC-BIL-001 | Checkout success webhook grants entitlement exactly once                                           | I     | Smoke |
+| TC-BIL-002 | Duplicate, out-of-order and delayed webhooks converge to the same state                            | I, R  | Smoke |
+| TC-BIL-003 | Webhook with bad signature or stale timestamp rejected                                             | S     | Smoke |
+| TC-BIL-004 | Plan upgrade, downgrade and cancel apply proration and entitlement changes at the specified moment | U, I  | Core  |
+| TC-BIL-005 | Failed payment follows the dunning state machine and restricts features only after grace period    | I     | Core  |
+| TC-BIL-006 | Refund reverses entitlements and ledger entries                                                    | I     | Core  |
+| TC-BIL-007 | Tax and currency rounding match fixtures                                                           | U     | Core  |
+| TC-BIL-008 | Billing disabled mode (`BILLING_MODE=disabled`) shows no purchase paths and honest labeling        | E     | Smoke |
+| TC-BIL-009 | Invoice access limited to billing admins of that organization                                      | S     | Core  |
 
 ### 15.11 OS expansion (MEN, GIG, EVT, MKT, ENT)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-OSX-001 | Mentor session booking respects availability, timezones and cancellation window | U, E | Core |
-| TC-OSX-002 | Mentor payout or fee flow reconciles with ledger (if enabled) | I | Core |
-| TC-OSX-003 | Gig contract milestone, escrow-like hold and release follow the state machine | U, I | Core |
-| TC-OSX-004 | Gig dispute freezes release and routes to moderators with evidence | I | Core |
-| TC-OSX-005 | Hackathon registration cap, team formation rules and submission deadline enforced server-side | U, I | Core |
-| TC-OSX-006 | Event ticketing waitlist promotion under concurrent cancellations | I | Core |
-| TC-OSX-007 | Internal mobility posting visible only to eligible employees; manager consent rules enforced | S, I | Core |
-| TC-OSX-008 | Skills inference for enterprise is opt-in and employee-visible | S, E | Core |
-| TC-OSX-009 | Career path recommendation cites sources and shows sample size caveat | U | Extended |
+| Id         | Scenario                                                                                      | Layer | Tier     |
+| ---------- | --------------------------------------------------------------------------------------------- | ----- | -------- |
+| TC-OSX-001 | Mentor session booking respects availability, timezones and cancellation window               | U, E  | Core     |
+| TC-OSX-002 | Mentor payout or fee flow reconciles with ledger (if enabled)                                 | I     | Core     |
+| TC-OSX-003 | Gig contract milestone, escrow-like hold and release follow the state machine                 | U, I  | Core     |
+| TC-OSX-004 | Gig dispute freezes release and routes to moderators with evidence                            | I     | Core     |
+| TC-OSX-005 | Hackathon registration cap, team formation rules and submission deadline enforced server-side | U, I  | Core     |
+| TC-OSX-006 | Event ticketing waitlist promotion under concurrent cancellations                             | I     | Core     |
+| TC-OSX-007 | Internal mobility posting visible only to eligible employees; manager consent rules enforced  | S, I  | Core     |
+| TC-OSX-008 | Skills inference for enterprise is opt-in and employee-visible                                | S, E  | Core     |
+| TC-OSX-009 | Career path recommendation cites sources and shows sample size caveat                         | U     | Extended |
 
 ### 15.12 Engagement (REP)
 
-| Id | Scenario | Layer | Tier |
-|---|---|---|---|
-| TC-ENG-001 | Points are awarded once per qualifying event even under retries | I | Smoke |
-| TC-ENG-002 | Reputation cannot be inflated by self-referral or reciprocal farming patterns | U, S | Core |
-| TC-ENG-003 | Badge award and revocation are audited and reflected on profile | I | Core |
-| TC-ENG-004 | Leaderboards respect opt-out and privacy setting | S, E | Core |
-| TC-ENG-005 | Streak calculation handles timezone change and DST | U | Core |
-| TC-ENG-006 | Recognition cannot be bought where the rule forbids it | U, I | Core |
+| Id         | Scenario                                                                      | Layer | Tier  |
+| ---------- | ----------------------------------------------------------------------------- | ----- | ----- |
+| TC-ENG-001 | Points are awarded once per qualifying event even under retries               | I     | Smoke |
+| TC-ENG-002 | Reputation cannot be inflated by self-referral or reciprocal farming patterns | U, S  | Core  |
+| TC-ENG-003 | Badge award and revocation are audited and reflected on profile               | I     | Core  |
+| TC-ENG-004 | Leaderboards respect opt-out and privacy setting                              | S, E  | Core  |
+| TC-ENG-005 | Streak calculation handles timezone change and DST                            | U     | Core  |
+| TC-ENG-006 | Recognition cannot be bought where the rule forbids it                        | U, I  | Core  |
 
 ## 16. AI evaluation testing
 
@@ -518,69 +518,69 @@ Applies to every AI-backed capability (matching, recommendations, assistant, res
 
 ## 20. Roles in quality
 
-| Role | Responsibility |
-|---|---|
-| QA lead | owns this strategy, gates, metrics, flaky policy, release quality sign-off |
-| Feature developer | unit, component, contract, integration tests for own change; DoD |
-| Module owner | scenario catalogue for the module, AC traceability, exploratory charters |
-| Security officer (`SAD`) | security test plan, DAST, pen-test coordination, security sign-off |
-| Product owner | UAT sign-off, waiver decisions |
-| Release manager | gate enforcement and release record |
-| SRE/DevOps | performance and resilience environments, synthetic probes |
+| Role                     | Responsibility                                                             |
+| ------------------------ | -------------------------------------------------------------------------- |
+| QA lead                  | owns this strategy, gates, metrics, flaky policy, release quality sign-off |
+| Feature developer        | unit, component, contract, integration tests for own change; DoD           |
+| Module owner             | scenario catalogue for the module, AC traceability, exploratory charters   |
+| Security officer (`SAD`) | security test plan, DAST, pen-test coordination, security sign-off         |
+| Product owner            | UAT sign-off, waiver decisions                                             |
+| Release manager          | gate enforcement and release record                                        |
+| SRE/DevOps               | performance and resilience environments, synthetic probes                  |
 
 Team sizes are not specified here; one person may hold several roles.
 
 ## 21. Quality metrics
 
-| Metric | Definition / formula | Use |
-|---|---|---|
-| AC coverage | ACs with at least one passing mapped test / total ACs in release scope | G6 |
-| BR coverage | BR ids referenced by at least one passing test / total BR ids | health |
-| SM transition coverage | tested transitions / total defined transitions | health |
-| Test pass rate (main) | passing runs / total runs on main, excluding quarantined | health |
-| Flake rate | flake events / total test executions per suite | policy |
-| Mean time to detect (MTTD) | time from defect introduction (commit) to detection | process |
-| Defect escape rate | production defects S1-S3 / (all defects found S1-S3) in the release | quality |
-| Defect density | open defects by severity per module | triage |
-| Defect age | median and p90 age of open defects by severity | process |
-| Change failure rate | production changes needing rollback, hotfix or flag-off / total production changes | DORA |
-| Lead time for changes | merge to production | DORA |
-| Deployment frequency | production deploys per cadence period | DORA |
-| Mean time to restore | detection to recovery for S1/S2 incidents | DORA |
-| Pyramid ratio | test counts per layer | shape monitoring |
-| Pipeline duration | p50 and p90 per gate | developer experience |
-| Accessibility debt | open axe and manual a11y defects by severity | a11y |
-| Mutation score `[PROP]` | killed mutants / total on `packages/domain` sample | test strength |
-| Escape analysis completion | S1/S2 production defects with a regression test and root-cause note / total | learning |
+| Metric                     | Definition / formula                                                               | Use                  |
+| -------------------------- | ---------------------------------------------------------------------------------- | -------------------- |
+| AC coverage                | ACs with at least one passing mapped test / total ACs in release scope             | G6                   |
+| BR coverage                | BR ids referenced by at least one passing test / total BR ids                      | health               |
+| SM transition coverage     | tested transitions / total defined transitions                                     | health               |
+| Test pass rate (main)      | passing runs / total runs on main, excluding quarantined                           | health               |
+| Flake rate                 | flake events / total test executions per suite                                     | policy               |
+| Mean time to detect (MTTD) | time from defect introduction (commit) to detection                                | process              |
+| Defect escape rate         | production defects S1-S3 / (all defects found S1-S3) in the release                | quality              |
+| Defect density             | open defects by severity per module                                                | triage               |
+| Defect age                 | median and p90 age of open defects by severity                                     | process              |
+| Change failure rate        | production changes needing rollback, hotfix or flag-off / total production changes | DORA                 |
+| Lead time for changes      | merge to production                                                                | DORA                 |
+| Deployment frequency       | production deploys per cadence period                                              | DORA                 |
+| Mean time to restore       | detection to recovery for S1/S2 incidents                                          | DORA                 |
+| Pyramid ratio              | test counts per layer                                                              | shape monitoring     |
+| Pipeline duration          | p50 and p90 per gate                                                               | developer experience |
+| Accessibility debt         | open axe and manual a11y defects by severity                                       | a11y                 |
+| Mutation score `[PROP]`    | killed mutants / total on `packages/domain` sample                                 | test strength        |
+| Escape analysis completion | S1/S2 production defects with a regression test and root-cause note / total        | learning             |
 
 Targets for these metrics are not invented here; baselines are measured over the first release cycle and then proposed via `OD-QA-11`.
 
 ## 22. Open decisions
 
-| Id | Question | Options | Default proposal `[PROP]` | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-QA-01 | Pyramid ratio as monitored shape or enforced gate | monitor only / enforce | monitor only | QA lead, engineering lead | metric design |
-| OD-QA-02 | Coverage floors | none / per package | 90 percent branch for domain; reported elsewhere | engineering lead | G1 |
-| OD-QA-03 | Browser and device matrix | Chromium only / plus Firefox, WebKit, mobile | Chromium merge; others nightly | product owner, QA lead | E2E setup |
-| OD-QA-04 | Accessibility conformance target | WCAG 2.1 AA / 2.2 AA | WCAG 2.2 AA | product owner, legal | a11y gates |
-| OD-QA-05 | Launch locale set | English only / multiple | English first, i18n-ready | product owner | localization tests |
-| OD-QA-06 | Defect SLAs and stale-report window | as proposed / custom | section 7.4 | QA lead, engineering lead | triage process |
-| OD-QA-07 | UAT cohort composition and exit threshold | internal / external beta | internal plus consented beta, all complete core loop | product owner | UAT |
-| OD-QA-08 | Performance budgets and expected peak load | section 14 / custom | section 14, peak set from stakeholder volumes | product owner, SRE | perf gates |
-| OD-QA-09 | AI fairness tolerance and statistical test | as proposed / custom | agreed significance, parity within tolerance | AI lead, legal | G8 |
-| OD-QA-10 | Flake thresholds and quarantine duration | as proposed / custom | one release cycle quarantine; threshold set after baseline | QA lead | flaky policy |
-| OD-QA-11 | Targets for quality metrics | after baseline | propose after first release cycle | engineering lead | dashboards |
+| Id       | Question                                          | Options                                      | Default proposal `[PROP]`                                  | Decides                   | Blocks             |
+| -------- | ------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------- | ------------------------- | ------------------ |
+| OD-QA-01 | Pyramid ratio as monitored shape or enforced gate | monitor only / enforce                       | monitor only                                               | QA lead, engineering lead | metric design      |
+| OD-QA-02 | Coverage floors                                   | none / per package                           | 90 percent branch for domain; reported elsewhere           | engineering lead          | G1                 |
+| OD-QA-03 | Browser and device matrix                         | Chromium only / plus Firefox, WebKit, mobile | Chromium merge; others nightly                             | product owner, QA lead    | E2E setup          |
+| OD-QA-04 | Accessibility conformance target                  | WCAG 2.1 AA / 2.2 AA                         | WCAG 2.2 AA                                                | product owner, legal      | a11y gates         |
+| OD-QA-05 | Launch locale set                                 | English only / multiple                      | English first, i18n-ready                                  | product owner             | localization tests |
+| OD-QA-06 | Defect SLAs and stale-report window               | as proposed / custom                         | section 7.4                                                | QA lead, engineering lead | triage process     |
+| OD-QA-07 | UAT cohort composition and exit threshold         | internal / external beta                     | internal plus consented beta, all complete core loop       | product owner             | UAT                |
+| OD-QA-08 | Performance budgets and expected peak load        | section 14 / custom                          | section 14, peak set from stakeholder volumes              | product owner, SRE        | perf gates         |
+| OD-QA-09 | AI fairness tolerance and statistical test        | as proposed / custom                         | agreed significance, parity within tolerance               | AI lead, legal            | G8                 |
+| OD-QA-10 | Flake thresholds and quarantine duration          | as proposed / custom                         | one release cycle quarantine; threshold set after baseline | QA lead                   | flaky policy       |
+| OD-QA-11 | Targets for quality metrics                       | after baseline                               | propose after first release cycle                          | engineering lead          | dashboards         |
 
 ## 23. Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
+| Id        | Risk                                                                                                        | Mitigation                                                       |
+| --------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | RSK-QA-01 | Tests pass while features are simulated or ephemeral (as the legacy baseline showed for assessment scoring) | honesty tests, labelled stubs, G8 and persistence honesty checks |
-| RSK-QA-02 | Tenant-isolation regressions across many modules | generated authz matrix tests and RLS coverage check |
-| RSK-QA-03 | E2E suite slow and flaky as product grows to 30 modules | pyramid discipline, tiering, flaky policy |
-| RSK-QA-04 | AC traceability decays into paperwork | generated matrix, orphan checks, gate G6 |
-| RSK-QA-05 | AI evaluation sets go stale or are biased | owners, weekly human sampling, fairness sets |
-| RSK-QA-06 | Build-file restriction slows adding test tooling | batch tooling requests through an ADR and ask-first step |
+| RSK-QA-02 | Tenant-isolation regressions across many modules                                                            | generated authz matrix tests and RLS coverage check              |
+| RSK-QA-03 | E2E suite slow and flaky as product grows to 30 modules                                                     | pyramid discipline, tiering, flaky policy                        |
+| RSK-QA-04 | AC traceability decays into paperwork                                                                       | generated matrix, orphan checks, gate G6                         |
+| RSK-QA-05 | AI evaluation sets go stale or are biased                                                                   | owners, weekly human sampling, fairness sets                     |
+| RSK-QA-06 | Build-file restriction slows adding test tooling                                                            | batch tooling requests through an ADR and ask-first step         |
 
 ## 24. Legacy trace
 

@@ -12,13 +12,13 @@ LRN is the learner-facing half of the learning product. It lets a person find a 
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A learner reaches a relevant course within three interactions of arriving | Catalog funnel events `learning.catalog.course_opened` per `learning.catalog.viewed` |
-| A learner who starts a course can finish it on any device, including poor networks | Completion rate by cohort; progress-sync failure rate |
-| Completion produces trusted evidence, not a PDF the learner must describe | Share of completed enrollments with exactly one evidence item (target 100%) |
+| Outcome                                                                                  | How the system knows                                                                             |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| A learner reaches a relevant course within three interactions of arriving                | Catalog funnel events `learning.catalog.course_opened` per `learning.catalog.viewed`             |
+| A learner who starts a course can finish it on any device, including poor networks       | Completion rate by cohort; progress-sync failure rate                                            |
+| Completion produces trusted evidence, not a PDF the learner must describe                | Share of completed enrollments with exactly one evidence item (target 100%)                      |
 | Learning is honest: no completion, grade, certificate or evidence the rules did not earn | Reconciliation job `completed enrollments = rule satisfied at pinned version` reports zero drift |
-| Learning is accessible and usable offline where policy allows | Accessibility audit results; offline replay success rate |
+| Learning is accessible and usable offline where policy allows                            | Accessibility audit results; offline replay success rate                                         |
 
 No numeric targets are set here; thresholds are `[PROP]` defaults listed in the metrics section and need owner decisions.
 
@@ -28,18 +28,18 @@ Course catalog, taxonomy, discovery (search, filter, sort, skill and goal browse
 
 ### 1.4 Out of scope (owned elsewhere)
 
-| Capability | Owner | Boundary |
-|---|---|---|
-| Authoring, versioning, media processing, pricing, coupons, instructor payouts | STU | LRN consumes a published, immutable course version and its rendition manifest |
-| Assessment engine (questions, attempts, timers, grading, integrity, proctoring) | ASM | LRN embeds quizzes and exams and consumes `assessment.attempt.passed/failed` results |
-| Payment capture, invoices, tax, refunds execution, plan catalog | BIL (planned) | LRN requests checkout and consumes verified payment and entitlement events |
-| Evidence ledger, credential rungs, issuer classes | EVD (planned) | LRN calls the issuer API; it never writes evidence rows itself |
-| XP, levels, badges engine | REP (planned) | LRN emits learning events; REP decides awards |
-| Global search index and ranking infrastructure | SRC (planned) | LRN defines catalog documents and facets; SRC runs the index |
-| Notification delivery, channels, preferences | NTF (planned) | LRN names templates and triggers |
-| Institution cohorts, seat licences, faculty roles | INS (planned) | LRN honors institution assignments and visibility scopes |
-| Review and discussion abuse handling, takedown policy | TSF (planned) | LRN raises reports and applies decisions |
-| Video chat or live-stream infrastructure | PLT (planned) | LRN schedules and presents sessions; the room provider is an adapter (see OD-LRN-06) |
+| Capability                                                                      | Owner         | Boundary                                                                             |
+| ------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------ |
+| Authoring, versioning, media processing, pricing, coupons, instructor payouts   | STU           | LRN consumes a published, immutable course version and its rendition manifest        |
+| Assessment engine (questions, attempts, timers, grading, integrity, proctoring) | ASM           | LRN embeds quizzes and exams and consumes `assessment.attempt.passed/failed` results |
+| Payment capture, invoices, tax, refunds execution, plan catalog                 | BIL (planned) | LRN requests checkout and consumes verified payment and entitlement events           |
+| Evidence ledger, credential rungs, issuer classes                               | EVD (planned) | LRN calls the issuer API; it never writes evidence rows itself                       |
+| XP, levels, badges engine                                                       | REP (planned) | LRN emits learning events; REP decides awards                                        |
+| Global search index and ranking infrastructure                                  | SRC (planned) | LRN defines catalog documents and facets; SRC runs the index                         |
+| Notification delivery, channels, preferences                                    | NTF (planned) | LRN names templates and triggers                                                     |
+| Institution cohorts, seat licences, faculty roles                               | INS (planned) | LRN honors institution assignments and visibility scopes                             |
+| Review and discussion abuse handling, takedown policy                           | TSF (planned) | LRN raises reports and applies decisions                                             |
+| Video chat or live-stream infrastructure                                        | PLT (planned) | LRN schedules and presents sessions; the room provider is an adapter (see OD-LRN-06) |
 
 ### 1.5 Owned versus consumed
 
@@ -49,28 +49,28 @@ Owned by LRN: catalog read model, taxonomy, enrollments, progress, playback posi
 
 Cell legend: **R** read, **C** create, **U** update own, **D** delete own, **M** moderate, **A** administer, **-** none, **S** scoped (see note).
 
-| Capability | GUE | CAN | STD | INS | IAD/PLO | MOD | SUP | FIN | PAD |
-|---|---|---|---|---|---|---|---|---|---|
-| Browse catalog, search, compare | R | R | R | R | R | R | R | R | R |
-| See institution-private courses | - | - | R (own institution) | R (own) | R (own institution) | R | R | - | R |
-| View course detail and preview lessons | R | R | R | R | R | R | R | R | R |
-| Save courses, build plans, goals | - | C U D | C U D | C U D | - | - | - | - | - |
-| Enroll (free or invite) | - | C | C | C (as learner) | assign: C (S) | - | grant: C (S) | - | override: C (audit) |
-| Pay and enroll | - | C | C | C | - | - | - | - | - |
-| Access lessons and media | preview only | R (enrolled) | R (enrolled) | R (own courses, no progress) | - | R (case-scoped) | R (grant-scoped) | - | R (audit) |
-| Submit assignments, projects, quizzes | - | C U | C U | - | - | - | - | - | - |
-| Peer review | - | C | C | - | - | - | - | - | - |
-| Post Q&A and discussion | - | C U D | C U D | C U D M (own course) | - | M | - | - | M |
-| Private notes and bookmarks | - | C U D | C U D | C U D | - | - | - | - | - |
-| Rate and review | - | C U D | C U D | - (own course barred) | - | M | - | - | M |
-| Reply to reviews | - | - | - | C (once per review) | - | - | - | - | - |
-| View learner-level progress | - | own | own | S (own course) | S (cohort, aggregate default) | S (case) | S (grant) | - | S (audit) |
-| Override completion or grade | - | - | - | A (own course, reason) | A (institution course, reason) | - | - | - | A (audit) |
-| Issue, revoke certificate | - | - | - | revoke S (own course, reason) | revoke S | - | - | - | A |
-| Verify certificate (public) | R | R | R | R | R | R | R | R | R |
-| Approve refund | - | request | request | - | - | - | approve S | approve | A |
-| Manage taxonomy and rails | - | - | - | - | - | - | - | - | A |
-| View aggregate learning analytics | - | own | own | S (own course, k-threshold) | S (cohort, k-threshold) | - | - | - | R |
+| Capability                             | GUE          | CAN          | STD                 | INS                           | IAD/PLO                        | MOD             | SUP              | FIN     | PAD                 |
+| -------------------------------------- | ------------ | ------------ | ------------------- | ----------------------------- | ------------------------------ | --------------- | ---------------- | ------- | ------------------- |
+| Browse catalog, search, compare        | R            | R            | R                   | R                             | R                              | R               | R                | R       | R                   |
+| See institution-private courses        | -            | -            | R (own institution) | R (own)                       | R (own institution)            | R               | R                | -       | R                   |
+| View course detail and preview lessons | R            | R            | R                   | R                             | R                              | R               | R                | R       | R                   |
+| Save courses, build plans, goals       | -            | C U D        | C U D               | C U D                         | -                              | -               | -                | -       | -                   |
+| Enroll (free or invite)                | -            | C            | C                   | C (as learner)                | assign: C (S)                  | -               | grant: C (S)     | -       | override: C (audit) |
+| Pay and enroll                         | -            | C            | C                   | C                             | -                              | -               | -                | -       | -                   |
+| Access lessons and media               | preview only | R (enrolled) | R (enrolled)        | R (own courses, no progress)  | -                              | R (case-scoped) | R (grant-scoped) | -       | R (audit)           |
+| Submit assignments, projects, quizzes  | -            | C U          | C U                 | -                             | -                              | -               | -                | -       | -                   |
+| Peer review                            | -            | C            | C                   | -                             | -                              | -               | -                | -       | -                   |
+| Post Q&A and discussion                | -            | C U D        | C U D               | C U D M (own course)          | -                              | M               | -                | -       | M                   |
+| Private notes and bookmarks            | -            | C U D        | C U D               | C U D                         | -                              | -               | -                | -       | -                   |
+| Rate and review                        | -            | C U D        | C U D               | - (own course barred)         | -                              | M               | -                | -       | M                   |
+| Reply to reviews                       | -            | -            | -                   | C (once per review)           | -                              | -               | -                | -       | -                   |
+| View learner-level progress            | -            | own          | own                 | S (own course)                | S (cohort, aggregate default)  | S (case)        | S (grant)        | -       | S (audit)           |
+| Override completion or grade           | -            | -            | -                   | A (own course, reason)        | A (institution course, reason) | -               | -                | -       | A (audit)           |
+| Issue, revoke certificate              | -            | -            | -                   | revoke S (own course, reason) | revoke S                       | -               | -                | -       | A                   |
+| Verify certificate (public)            | R            | R            | R                   | R                             | R                              | R               | R                | R       | R                   |
+| Approve refund                         | -            | request      | request             | -                             | -                              | -               | approve S        | approve | A                   |
+| Manage taxonomy and rails              | -            | -            | -                   | -                             | -                              | -               | -                | -       | A                   |
+| View aggregate learning analytics      | -            | own          | own                 | S (own course, k-threshold)   | S (cohort, k-threshold)        | -               | -                | -       | R                   |
 
 `SAD` and `API` hold no direct learner capabilities; `API` principals read catalog and verify certificates through the public API (PLT, planned). Permissions are resolved server-side on every request; hiding a control is never the control.
 
@@ -92,19 +92,19 @@ flowchart LR
     K --> J
 ```
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Catalog and discovery | FR-LRN-001 to 007 |
-| B | Course detail | FR-LRN-008 to 012 |
-| C | Enrollment and access | FR-LRN-013 to 021 |
-| D | Paths and tracks | FR-LRN-022 to 025 |
-| E | Player and media | FR-LRN-026 to 040 |
-| F | Lesson types | FR-LRN-041 to 049 |
-| G | Social learning | FR-LRN-050 to 054 |
-| H | Progress and credentials | FR-LRN-055 to 062 |
-| I | Reviews | FR-LRN-063 to 065 |
-| J | Personalization and engagement | FR-LRN-066 to 070 |
-| K | Skills and analytics | FR-LRN-071 to 075 |
+| Code | Sub-module                     | Features                      |
+| ---- | ------------------------------ | ----------------------------- |
+| A    | Catalog and discovery          | FR-LRN-001 to 007, FR-LRN-076 |
+| B    | Course detail                  | FR-LRN-008 to 012             |
+| C    | Enrollment and access          | FR-LRN-013 to 021             |
+| D    | Paths and tracks               | FR-LRN-022 to 025             |
+| E    | Player and media               | FR-LRN-026 to 040             |
+| F    | Lesson types                   | FR-LRN-041 to 049             |
+| G    | Social learning                | FR-LRN-050 to 054             |
+| H    | Progress and credentials       | FR-LRN-055 to 062             |
+| I    | Reviews                        | FR-LRN-063 to 065             |
+| J    | Personalization and engagement | FR-LRN-066 to 070             |
+| K    | Skills and analytics           | FR-LRN-071 to 075             |
 
 ## 4. Feature specifications
 
@@ -733,7 +733,7 @@ Notification opt-out classes used below (owned by NTF, planned): `TRANSACTIONAL`
 
 - **Sub-module:** D. Paths and tracks
 - **Priority / tier:** Should · R3
-- **Source:** [SRC: SSOT §7 F-70; WF-31] [PROP] for the track level above paths
+- **Source:** [SRC: SSOT §7 F-70; WF-31] [PROP] for the track level above paths · also [SRC: SSOT §7 F-129 Leadership Development (as a role-based track)]
 - **Purpose and outcome:** Learners browse curated sequences of courses (paths) and role-based groupings of paths (tracks) and see total effort and outcome before starting. Success is path enrollments per catalog view.
 - **Roles and permissions:** `GUE, CAN, STD: view` · `INS, IAD: author paths via STU` · `PAD: curate tracks`
 - **Preconditions and entry points:** `/learn/paths`, `/learn/paths/:slug`, `/learn/tracks/:slug`; links from skill, goal and course pages.
@@ -1517,7 +1517,7 @@ Notification opt-out classes used below (owned by NTF, planned): `TRANSACTIONAL`
 
 - **Sub-module:** F. Lesson types
 - **Priority / tier:** Should · R3
-- **Source:** [DER] [PROP] for drip release
+- **Source:** [DER] [PROP] for drip release · also [SRC: SSOT §7 F-136 Micro-Learning (as daily drip release of short lessons)]
 - **Purpose and outcome:** Authors control when content unlocks and when work is due; learners always see what is due. Success is fewer missed deadlines and clear expectations.
 - **Roles and permissions:** `CAN, STD: view and follow schedule` · `INS: configure (STU)`
 - **Preconditions and entry points:** Course or run with schedule rules; "Due soon" list on dashboard.
@@ -2292,73 +2292,106 @@ Notification opt-out classes used below (owned by NTF, planned): `TRANSACTIONAL`
   2. Given 3 reports on the same lesson, when aggregated, then priority is raised and the count shows to the author.
   3. Negative: Given a reporter who is not signed in for a safety category, when submitting, then they are asked to sign in or provide a contact email for follow-up.
 
+### FR-LRN-076 — Industry learning hubs
+
+- **Sub-module:** A. Catalog and discovery
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.1 F-111 Industry-Specific Learning Hubs (priority 4, Ph8; dependencies F-07, F-55); SSOT §10.35 BR-196 "Industry hubs must have at least 3 active contributors to display"] [PROP] for hub content and behavior
+- **Purpose and outcome:** Learners and career changers enter one learning space per industry that brings together curated paths and courses, community discussion, events and market signals. The system knows it works when enrollments and group joins originate from hubs and no hub is shown without real contributor activity.
+- **Roles and permissions:** `GUE: view public hubs` · `CAN, STD: view, follow, contribute resources and answers` · `INS, MNT: contribute; may be designated steward` · `PAD: create hubs, designate and remove stewards, hide a hub` · `MOD: moderate contributions`
+- **Preconditions and entry points:** A hub exists for an industry in the market taxonomy (FR-MKT-007 industry values) and has at least {3} active contributors (BR-LRN-062). Entry: `/learn/industries/:slug`, industry chips on skill pages (FR-LRN-005), course cards and goal pages.
+- **User interactions and actions:**
+  1. Open a hub. See the industry description, a "Follow" button, and tabs: Start here (curated path or paths and beginner courses), Courses (catalog filtered to the industry, FR-LRN-004), Community (the linked group and latest questions, FR-NET-025), Events (FR-EVT-006 filtered), Market snapshot (demand for the hub's skills, FR-MKT-012, shown only above `min_cohort_k`), Resources (contributed links and articles).
+  2. Press "Follow" to receive an optional weekly hub digest.
+  3. Press "Suggest a resource": enter title, link or course, why it helps (up to 500 characters), tags, and tick "I am affiliated with this resource" where true. Submit to the steward and moderator queue.
+  4. Stewards review pending resources (approve, edit, reject with a reason) and pin up to {5} items to Start here.
+  5. Any viewer can report a resource (FR-TSF-001).
+- **System behaviour:** An active contributor is an account with at least {1} approved contribution to the hub in the last {90} days (OD-LRN-16). The count is recomputed daily; the hub is public and listed only while the count is at least {3}; otherwise it is hidden from catalog, search and sitemap, its URL shows "This hub isn't available yet" with links to the general catalog, and stewards see a warning with tools to invite contributors. Courses appear in the hub when tagged with the hub's industry tag (FR-LRN-002) or when at least {60} percent of their declared skills belong to the hub's skill set `[PROP]`; courses are listed from the catalog, never copied. Contributed links pass safe-link validation and SSRF-safe previews (FR-PLT-043); affiliated items carry an "Affiliated" label (BR-LRN-063). Ordering is by editorial pin, then relevance and rating; payment never changes order. Steward changes are audited.
+- **UI elements and controls:** Hub header with follow button and steward names, tab list, resource cards with an "Affiliated" chip and a report menu, "Suggest a resource" dialog, steward queue (approve, edit, reject), contributor-count warning banner for stewards. States: hidden (below threshold), loading, empty tab ("No resources yet, be the first to suggest one"), error with Retry.
+- **Configuration options:** Platform: active-contributor definition (default 1 approved contribution in 90 days), minimum active contributors (default 3), course inclusion skill share (default 60 percent), pinned limit. User: follow and digest on or off.
+- **Business rules:** BR-LRN-062, BR-LRN-063, BR-LRN-001
+- **Validation:** Resource title 5 to 120 characters; reason up to 500; link must be https and on a valid provider or domain (FR-PLT-043); at most 10 suggestions per user per day; tags from the taxonomy (up to 5).
+- **Inputs and outputs:** In: hub slug, resource suggestions, steward decisions, follow state. Out: hub view model (tabs, items, counts), moderation outcomes.
+- **Filters, sorting, search:** Courses tab uses the catalog facets of FR-LRN-004; Resources filter by type (article, video, tool, community) and tag, sorted by pinned then newest; hub directory searchable by industry name.
+- **Notifications and communication:** Contributor receives `learning.hub.contribution_decided` (in-app, class engagement); followers receive the optional weekly hub digest (class engagement, opt-out); stewards receive the below-threshold warning (in-app).
+- **Error handling and edge cases:** The count drops below the threshold: hub hidden within 24 hours, follows kept, and the hub reappears when the threshold is met. A steward leaves or is removed: PAD is notified when none remain. A linked resource becomes unavailable: flagged by link health check and hidden after 3 failed checks. Duplicate suggestion of the same link: merged with a note. A contributor is suspended: their approved resources stay unless moderators remove them.
+- **Dependencies:** FR-LRN-001, FR-LRN-002, FR-LRN-004, FR-LRN-005, FR-LRN-022, FR-NET-025, FR-EVT-006, FR-MKT-007, FR-MKT-012, FR-TSF-001, FR-PLT-043, ENT-LRN-32, ENT-LRN-33.
+- **Security and privacy:** Contributor names are shown only if the contributor's profile visibility allows; follow lists are private; stewards cannot see follower identities, only counts; contributions are moderated before display; no paid placement.
+- **Acceptance criteria:**
+  - Given a hub with 3 active contributors, when a guest opens its URL, then the hub page is shown.
+  - Given the third contributor's last approved contribution ages past 90 days, when the daily job runs, then the hub is hidden from catalog and search and shows "This hub isn't available yet".
+  - Given a contributor submits a resource marked "I am affiliated", when it is approved, then it displays the "Affiliated" label.
+  - Given a user pastes a link that fails safe-link validation, when submitting, then the system rejects it with `link_not_allowed` and nothing is queued (negative).
+
 ## 5. Business rules
 
 Parameters in braces are `[PROP]` defaults pending the decisions in section 13.
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-LRN-001 | Only courses in state `published` appear in the public catalog, search and sitemap. `unlisted` courses are reachable only by direct link or invite. Drafts, in-review, unpublished, archived and taken-down courses never appear. | Learners must not see unfinished or removed content. | Catalog read model, search index, API | [SRC: SSOT §10.22 BR-093] [DER] |
-| BR-LRN-002 | Visibility is decided server-side for every list, count, facet and direct read: institution-private, region-blocked and sanctioned items are excluded, and counts exclude them too. | Prevent leakage of private catalog and counts. | API and index filters | [DER] |
-| BR-LRN-003 | Each course has one primary category, up to 3 secondary categories, up to 10 tags, exactly one level from {beginner, intermediate, advanced, all_levels} and one primary language. | Reliable filtering and navigation. | Publish check (STU), taxonomy service | [SRC: SSOT BR-096] [DER] |
-| BR-LRN-004 | Prerequisites marked `required` block enrollment with an explanation; `recommended` ones only warn. Free-text items are never evaluated. | Avoid false blocks; keep honesty. | Eligibility gate | [SRC: SSOT §9.2 F-07 step 7; BR-022] [DER] |
-| BR-LRN-005 | At most one active enrollment per (account, course). Enroll is idempotent on this natural key. | Prevent duplicates and double charges. | DB unique index, enroll service | [SRC: SSOT BR-046] |
-| BR-LRN-006 | An enrollment is pinned to one published course version; completion is judged on that version. Moving to a newer version is optional and never forced; completed enrollments are never reopened. | Fair rules for the learner who started. | Enrollment service | [SRC: SSOT BR-105; YASH-G3 SPEC-06 §3.4] |
-| BR-LRN-007 | Paid access begins only after a verified payment event from BIL (planned); returning from checkout grants nothing. Activation is idempotent on the payment event id. | Redirects can be forged. | Enrollment consumer | [SRC: SSOT BR-115; YASH-G3 SPEC-06 INV-T17] |
-| BR-LRN-008 | Anonymous and non-enrolled viewers can reach only lessons flagged `preview`; every other lesson, manifest and resource returns 403. | Protect paid content. | Content API | [SRC: SSOT BR-094] [DER] |
-| BR-LRN-009 | Every lesson content, media-token and resource request is authorized against the enrollment state (`active`, or `completed` within retention) and lock state at request time. | Zero unauthorized access. | Content API, edge | [SRC: SSOT §9.2 F-07 security] |
-| BR-LRN-010 | Refund eligibility: full refund when requested within `refundWindowDays` {30} of purchase and progress is at most `refundProgressThresholdPct` {20}; otherwise pro-rated per BIL policy; after completion only by human exception with a recorded reason. | Fairness and abuse control. | Refund service, BIL | [SRC: SSOT BR-100; OD-29] [DEC-REQ] OD-LRN-03 |
-| BR-LRN-011 | Access expiry ends access to lessons but preserves progress and never revokes credentials already earned. | Learners keep what they earned. | Expiry sweep | [DER] |
-| BR-LRN-012 | After `dropped` or `expired`, progress is retained {90} days; re-enrollment within that time restores it, after that starts fresh. | Allow return without indefinite storage. | Enrollment service | [SRC: YASH-G3 SPEC-06 §3.2] |
-| BR-LRN-013 | Progress events are idempotent on (enrollmentId, lessonKey, kind, clientSeq); the server keeps the highest `clientSeq`; `completed` is sticky and never reverted by later `started` or `position` events. | Offline replay, out-of-order delivery. | Progress service | [SRC: SSOT BR-021; YASH-G3 SPEC-06 §3.3] |
-| BR-LRN-014 | Completion of lessons graded by rule, and of courses, is decided only by server-side rule evaluation on the pinned version. The client can never assert completion except for lessons whose rule is `manual`. | Trustworthy credentials. | Rule evaluator | [SRC: YASH-G3 SPEC-06 §3.4] |
-| BR-LRN-015 | A video lesson with rule `watch` completes when unique watched time is at least `videoCompletionThresholdPct` {90} of duration; seek-skipped time beyond `seekSkipCreditCapPct` {25} is not credited; media time, not wall time, is used. | Honest completion. | Progress service | [SRC: YASH-G3 SPEC-06 §3.3] [DEC-REQ] OD-LRN-04 |
-| BR-LRN-016 | Resume is offered when the saved position is at least 5 seconds and below 95 percent of duration; the latest server timestamp wins across devices. | Predictable continuity. | Player, progress service | [SRC: YASH-MICRO FEAT-08-03.1] |
-| BR-LRN-017 | Quiz lessons complete on a passing result from ASM; graded quizzes count toward the course grade, practice quizzes are unlimited and ungraded; attempts are bounded by the configured maximum. | Consistent assessment semantics. | Lesson rules, ASM consumer | [SRC: SSOT BR-107, BR-108] |
-| BR-LRN-018 | When a section or course is `sequential`, lesson N+1 is locked until lesson N is complete; default is free navigation. | Author-intended order. | Content API | [SRC: SSOT BR-047] |
-| BR-LRN-019 | An instructor or co-instructor of a course cannot rate or review it and cannot sign off their own enrollment; any learner enrollment they hold never yields ratings or instructor-class evidence for themselves. | Conflict of interest. | Review and sign-off services | [SRC: SSOT BR-104; YASH-MICRO AC-05-04-53] |
-| BR-LRN-020 | A review requires a verified enrollment (active or completed, not refunded) and at least {20} percent progress. One review per learner per course, editable. Reviews on refunded enrollments are excluded from aggregates. | Authentic reviews. | Review service | [SRC: SSOT BR-095] [DER] |
-| BR-LRN-021 | A numeric average rating is shown publicly only when at least {5} eligible reviews exist; before that the course shows "New" and the count. | Avoid misleading small samples. | Catalog and review read models | [PROP] OD-LRN-08 |
-| BR-LRN-022 | Reviews publish immediately unless auto-moderation holds them; instructors may reply once publicly (no edit after 24 hours) and can never edit, hide or delete a learner review; removals follow moderation with appeal. | Fair, tamper-resistant reviews. | Review and moderation services | [DER] |
-| BR-LRN-023 | One certificate is issued per completed enrollment (or per program completion), only after rule-based completion; it has an unguessable id and a reproducible SHA-256 hash of its canonical payload. | Verifiable and non-duplicable. | Certificate service | [SRC: SSOT §9.2 F-07 acceptance; F-52] |
-| BR-LRN-024 | Revoked, expired and superseded certificates remain verifiable with their status and reason class; they are never silently deleted. | Auditability. | Certificate service, verify page | [DER] |
-| BR-LRN-025 | Evidence hand-off happens exactly once per completed enrollment (idempotent on enrollmentId). Authority-verified evidence requires at least one graded integrity-protected assessment passed or an independent instructor sign-off (class `instructor`); watch-only completion yields none. | No inflated authority. | Evidence consumer | [SRC: YASH-G3 SPEC-06 §3.4; V61-17] [DEC-REQ] OD-LRN-02 |
-| BR-LRN-026 | At most {3} non-transactional learning nudges per learner per week; inactivity nudges only at 7, 14 and 30 days once per gap; quiet hours and opt-outs are honored. | Avoid nagging. | Nudge scheduler | [SRC: SSOT §9.2 F-07 notifications] [PROP] |
-| BR-LRN-027 | A streak day counts when at least one qualifying activity (a lesson completed or {5} or more minutes of media watched) occurs in the learner's local day; one freeze per week; streaks never gate access. | Gentle consistency. | Streak service | [PROP] |
-| BR-LRN-028 | Instructors see learner-level data only for their own course and only fields needed (progress, scores, Q&A); aggregate outcome analytics require at least 30 learners with measurable outcomes; individual outcomes are never exposed without consent; analytics are labeled correlational. | Privacy and honest analytics. | Analytics API | [SRC: SSOT BR-189 to BR-193] |
-| BR-LRN-029 | Notes, bookmarks, highlights, flashcards and saved lists are private to the learner and never visible to instructors, institutions or recruiters. | Safe personal study space. | API authorization | [DER] |
-| BR-LRN-030 | Only learners with an active or completed enrollment (and course staff) can post in Q&A and discussions; rate limits {5 questions and 20 answers per hour}; links limited for new accounts. | Quality and spam control. | Social service | [DER] |
-| BR-LRN-031 | Course announcements are limited to 1 per day per course; learners can mute emails and push per course. | Avoid noise. | Announcement service | [SRC: SSOT BR-102] |
-| BR-LRN-032 | Offline downloads only for lessons the author allowed, active enrollments, at most {3} devices, license TTL {30} days renewed online, revoked on drop, expiry, refund and takedown; completion is still decided online. | Protect content and rights. | License service | [PROP] OD-LRN-05 |
-| BR-LRN-033 | External-provider lessons expose only controls the provider's declared capabilities support; unsupported providers are rejected at authoring; embeds come only from allowlisted domains; protected content is never downloaded or proxied. | Honest, safe embeds. | Player, CSP, authoring | [SRC: SSOT BR-084, BR-085, BR-088, BR-090] |
-| BR-LRN-034 | A failing media provider or asset affects only its lesson; the course stays usable and the learner can report the problem. | Containment. | Player | [SRC: SSOT BR-086] |
-| BR-LRN-035 | Every published video lesson has captions or a transcript available to learners; auto-generated text is labeled until the author reviews it. | Accessibility. | Publish check (STU), player | [SRC: YASH-MICRO FEAT-08-03.3] |
-| BR-LRN-036 | At most {2} concurrent playback sessions per account; a newer session evicts the oldest with a message; patterns of sharing are flagged for review, not auto-banned. | Limit account sharing. | Playback session service | [PROP] OD-LRN-09 |
-| BR-LRN-037 | Playback and download authorization uses signed tokens with a TTL of {5} minutes, bound to enrollment, lesson and device session; tokens are never logged or placed in analytics. | Prevent link sharing. | Media edge | [SRC: SSOT §9.2 F-07 security] |
-| BR-LRN-038 | Cohort runs have enrollment open and close times, start, end and a grace period; deadlines are soft or hard; late submissions are flagged and treated per the author's policy; extensions are per learner, audited. | Predictable schedules. | Cohort and assignment services | [SRC: SSOT BR-111] [DER] |
-| BR-LRN-039 | A submission snapshot is immutable once submitted; resubmission creates a new revision within the allowed count; grades attach to a revision. | Fair, auditable grading. | Submission service | [DER] |
-| BR-LRN-040 | Each peer-reviewed submission needs at least 2 completed reviews; reviewers cannot review their own or their group's work; reviews are anonymous to reviewees by default. | Reliable peer grades. | Peer review service | [SRC: SSOT BR-103] |
-| BR-LRN-041 | Live-session attendance is recorded when the learner is present at least {50} percent of the scheduled duration; the recording notice is shown before joining. | Fair attendance and consent. | Live session service | [PROP] |
-| BR-LRN-042 | Sequenced paths unlock courses in the declared order; a program certificate is issued only when all required path courses are complete and any capstone is passed; path progress is derived from member enrollments. | Program integrity. | Path service | [SRC: SSOT BR-106, BR-110] |
-| BR-LRN-043 | Personal learning plans hold at most 50 items and never gate enrollment or access; learning goals are limited to 3 active. | Planning aid, not a lock. | Plan service | [DER] |
-| BR-LRN-044 | Recommendations carry a reason, exclude completed, enrolled and dismissed items, use only data covered by the learner's personalization consent, use no protected attributes, and never mix unlabeled sponsored items. | Trust and fairness. | Recommendation service | [SRC: SSOT BR-184 to BR-188] |
-| BR-LRN-045 | Prerequisites are evaluated at enrollment time only and not re-evaluated afterwards. | Stable enrollments. | Eligibility gate | [SRC: YASH-G3 SPEC-06 §9] |
-| BR-LRN-046 | Skills declared by authors are claims until completion; evidence is created only at rule-based completion, never from partial progress, and is tied to the course version. | Honest skill evidence. | Evidence consumer | [DER] |
-| BR-LRN-047 | Unpublishing or archiving a course blocks new enrollments but preserves access for existing enrollees; safety or legal takedown can revoke access. | Fair treatment of learners. | Catalog and content API | [SRC: SSOT BR-114; YASH-G3 SPEC-06 §3.5] |
-| BR-LRN-048 | Course grade = sum of item weight times score over graded items, rounded half up to 1 decimal; ungraded items are pending; instructor overrides require a reason and are audited and visible to the learner. | Transparent grading. | Gradebook service | [SRC: SSOT BR-108] [DER] |
-| BR-LRN-049 | Moderators and instructors hide posts, never hard-delete them, with a reason and audit; the author sees the placeholder and reason. | Accountable moderation. | Social service | [DER] |
-| BR-LRN-050 | Study groups are opt-in, limited to {8} members; members choose what they share; no default sharing. | Privacy. | Group service | [PROP] |
-| BR-LRN-051 | Adaptive review and spaced repetition are suggestions only; they never gate access or completion and never mint evidence. | Avoid hidden gates. | Review service | [DER] |
-| BR-LRN-052 | Public course pages carry only published catalog data (with structured data and canonical URLs); no learner data appears in public HTML. | Privacy and SEO. | Page rendering | [DER] |
-| BR-LRN-053 | Wishlist holds at most 200 items; comparison holds at most 3 courses. | Bounded lists. | Wishlist API, compare view | [PROP] |
-| BR-LRN-054 | Institution assignments may override advisory prerequisites and, if institution policy permits, enforced ones (recorded); institutions see learner data only within the visibility scope shown to the learner before the first lesson, and never notes or discussions. | Respect learner and institution needs. | Enrollment and analytics services | [SRC: SSOT §10.20 BR-072..BR-082] [DER] |
-| BR-LRN-055 | Access and discount codes are random, stored hashed, and have a use limit and expiry; redemption is atomic and idempotent per (code, account); more than 5 failures in 10 minutes triggers delays, 20 a one-hour lock. | Prevent guessing and over-use. | Redemption service | [PROP] |
-| BR-LRN-056 | Plan-entitled enrollments end after a grace period {7 days} when the entitlement ends; progress and credentials are kept; re-subscription restores access within retention. | Fair subscription behavior. | Entitlement consumer | [SRC: SSOT §9.2 F-07 step 3] [DER] |
-| BR-LRN-057 | Days and weeks for goals and streaks use the learner's profile time zone; time zone changes take effect at the next period boundary. | Consistent counting. | Goal and streak services | [PROP] |
-| BR-LRN-058 | Pause is allowed once per enrollment for at most {90} days on self-paced courses only (not cohort-bound or institution-assigned), and freezes the access clock. | Fair breaks. | Enrollment service | [PROP] |
-| BR-LRN-059 | The certificate name is the learner's chosen legal or display name set before first issuance; corrections need a reason and create a superseding version while the original stays verifiable. | Accurate credentials. | Certificate service | [DER] |
-| BR-LRN-060 | On export or erasure, learning records are exported fully; erasure removes personal content and leaves a tombstone certificate record verifying as "Record removed at the holder's request" without personal data. | Privacy with credential integrity. | Data-rights service | [SRC: SSOT Appendix E V61-19] [DER] |
-| BR-LRN-061 | Search queries linked to an account are retained at most {90} days, used only for relevance and gap reporting, never for advertising; zero-result queries are logged without account ids. | Privacy. | Search logging | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                        | Rationale                                                    | Enforced where                        | Source                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------- | ------------------------------------------------------------- |
+| BR-LRN-001 | Only courses in state `published` appear in the public catalog, search and sitemap. `unlisted` courses are reachable only by direct link or invite. Drafts, in-review, unpublished, archived and taken-down courses never appear.                                                           | Learners must not see unfinished or removed content.         | Catalog read model, search index, API | [SRC: SSOT §10.22 BR-093] [DER]                               |
+| BR-LRN-002 | Visibility is decided server-side for every list, count, facet and direct read: institution-private, region-blocked and sanctioned items are excluded, and counts exclude them too.                                                                                                         | Prevent leakage of private catalog and counts.               | API and index filters                 | [DER]                                                         |
+| BR-LRN-003 | Each course has one primary category, up to 3 secondary categories, up to 10 tags, exactly one level from {beginner, intermediate, advanced, all_levels} and one primary language.                                                                                                          | Reliable filtering and navigation.                           | Publish check (STU), taxonomy service | [SRC: SSOT BR-096] [DER]                                      |
+| BR-LRN-004 | Prerequisites marked `required` block enrollment with an explanation; `recommended` ones only warn. Free-text items are never evaluated.                                                                                                                                                    | Avoid false blocks; keep honesty.                            | Eligibility gate                      | [SRC: SSOT §9.2 F-07 step 7; BR-022] [DER]                    |
+| BR-LRN-005 | At most one active enrollment per (account, course). Enroll is idempotent on this natural key.                                                                                                                                                                                              | Prevent duplicates and double charges.                       | DB unique index, enroll service       | [SRC: SSOT BR-046]                                            |
+| BR-LRN-006 | An enrollment is pinned to one published course version; completion is judged on that version. Moving to a newer version is optional and never forced; completed enrollments are never reopened.                                                                                            | Fair rules for the learner who started.                      | Enrollment service                    | [SRC: SSOT BR-105; YASH-G3 SPEC-06 §3.4]                      |
+| BR-LRN-007 | Paid access begins only after a verified payment event from BIL (planned); returning from checkout grants nothing. Activation is idempotent on the payment event id.                                                                                                                        | Redirects can be forged.                                     | Enrollment consumer                   | [SRC: SSOT BR-115; YASH-G3 SPEC-06 INV-T17]                   |
+| BR-LRN-008 | Anonymous and non-enrolled viewers can reach only lessons flagged `preview`; every other lesson, manifest and resource returns 403.                                                                                                                                                         | Protect paid content.                                        | Content API                           | [SRC: SSOT BR-094] [DER]                                      |
+| BR-LRN-009 | Every lesson content, media-token and resource request is authorized against the enrollment state (`active`, or `completed` within retention) and lock state at request time.                                                                                                               | Zero unauthorized access.                                    | Content API, edge                     | [SRC: SSOT §9.2 F-07 security]                                |
+| BR-LRN-010 | Refund eligibility: full refund when requested within `refundWindowDays` {30} of purchase and progress is at most `refundProgressThresholdPct` {20}; otherwise pro-rated per BIL policy; after completion only by human exception with a recorded reason.                                   | Fairness and abuse control.                                  | Refund service, BIL                   | [SRC: SSOT BR-100; OD-29] [DEC-REQ] OD-LRN-03                 |
+| BR-LRN-011 | Access expiry ends access to lessons but preserves progress and never revokes credentials already earned.                                                                                                                                                                                   | Learners keep what they earned.                              | Expiry sweep                          | [DER]                                                         |
+| BR-LRN-012 | After `dropped` or `expired`, progress is retained {90} days; re-enrollment within that time restores it, after that starts fresh.                                                                                                                                                          | Allow return without indefinite storage.                     | Enrollment service                    | [SRC: YASH-G3 SPEC-06 §3.2]                                   |
+| BR-LRN-013 | Progress events are idempotent on (enrollmentId, lessonKey, kind, clientSeq); the server keeps the highest `clientSeq`; `completed` is sticky and never reverted by later `started` or `position` events.                                                                                   | Offline replay, out-of-order delivery.                       | Progress service                      | [SRC: SSOT BR-021; YASH-G3 SPEC-06 §3.3]                      |
+| BR-LRN-014 | Completion of lessons graded by rule, and of courses, is decided only by server-side rule evaluation on the pinned version. The client can never assert completion except for lessons whose rule is `manual`.                                                                               | Trustworthy credentials.                                     | Rule evaluator                        | [SRC: YASH-G3 SPEC-06 §3.4]                                   |
+| BR-LRN-015 | A video lesson with rule `watch` completes when unique watched time is at least `videoCompletionThresholdPct` {90} of duration; seek-skipped time beyond `seekSkipCreditCapPct` {25} is not credited; media time, not wall time, is used.                                                   | Honest completion.                                           | Progress service                      | [SRC: YASH-G3 SPEC-06 §3.3] [DEC-REQ] OD-LRN-04               |
+| BR-LRN-016 | Resume is offered when the saved position is at least 5 seconds and below 95 percent of duration; the latest server timestamp wins across devices.                                                                                                                                          | Predictable continuity.                                      | Player, progress service              | [SRC: YASH-MICRO FEAT-08-03.1]                                |
+| BR-LRN-017 | Quiz lessons complete on a passing result from ASM; graded quizzes count toward the course grade, practice quizzes are unlimited and ungraded; attempts are bounded by the configured maximum.                                                                                              | Consistent assessment semantics.                             | Lesson rules, ASM consumer            | [SRC: SSOT BR-107, BR-108]                                    |
+| BR-LRN-018 | When a section or course is `sequential`, lesson N+1 is locked until lesson N is complete; default is free navigation.                                                                                                                                                                      | Author-intended order.                                       | Content API                           | [SRC: SSOT BR-047]                                            |
+| BR-LRN-019 | An instructor or co-instructor of a course cannot rate or review it and cannot sign off their own enrollment; any learner enrollment they hold never yields ratings or instructor-class evidence for themselves.                                                                            | Conflict of interest.                                        | Review and sign-off services          | [SRC: SSOT BR-104; YASH-MICRO AC-05-04-53]                    |
+| BR-LRN-020 | A review requires a verified enrollment (active or completed, not refunded) and at least {20} percent progress. One review per learner per course, editable. Reviews on refunded enrollments are excluded from aggregates.                                                                  | Authentic reviews.                                           | Review service                        | [SRC: SSOT BR-095] [DER]                                      |
+| BR-LRN-021 | A numeric average rating is shown publicly only when at least {5} eligible reviews exist; before that the course shows "New" and the count.                                                                                                                                                 | Avoid misleading small samples.                              | Catalog and review read models        | [PROP] OD-LRN-08                                              |
+| BR-LRN-022 | Reviews publish immediately unless auto-moderation holds them; instructors may reply once publicly (no edit after 24 hours) and can never edit, hide or delete a learner review; removals follow moderation with appeal.                                                                    | Fair, tamper-resistant reviews.                              | Review and moderation services        | [DER]                                                         |
+| BR-LRN-023 | One certificate is issued per completed enrollment (or per program completion), only after rule-based completion; it has an unguessable id and a reproducible SHA-256 hash of its canonical payload.                                                                                        | Verifiable and non-duplicable.                               | Certificate service                   | [SRC: SSOT §9.2 F-07 acceptance; F-52]                        |
+| BR-LRN-024 | Revoked, expired and superseded certificates remain verifiable with their status and reason class; they are never silently deleted.                                                                                                                                                         | Auditability.                                                | Certificate service, verify page      | [DER]                                                         |
+| BR-LRN-025 | Evidence hand-off happens exactly once per completed enrollment (idempotent on enrollmentId). Authority-verified evidence requires at least one graded integrity-protected assessment passed or an independent instructor sign-off (class `instructor`); watch-only completion yields none. | No inflated authority.                                       | Evidence consumer                     | [SRC: YASH-G3 SPEC-06 §3.4; V61-17] [DEC-REQ] OD-LRN-02       |
+| BR-LRN-026 | At most {3} non-transactional learning nudges per learner per week; inactivity nudges only at 7, 14 and 30 days once per gap; quiet hours and opt-outs are honored.                                                                                                                         | Avoid nagging.                                               | Nudge scheduler                       | [SRC: SSOT §9.2 F-07 notifications] [PROP]                    |
+| BR-LRN-027 | A streak day counts when at least one qualifying activity (a lesson completed or {5} or more minutes of media watched) occurs in the learner's local day; one freeze per week; streaks never gate access.                                                                                   | Gentle consistency.                                          | Streak service                        | [PROP]                                                        |
+| BR-LRN-028 | Instructors see learner-level data only for their own course and only fields needed (progress, scores, Q&A); aggregate outcome analytics require at least 30 learners with measurable outcomes; individual outcomes are never exposed without consent; analytics are labeled correlational. | Privacy and honest analytics.                                | Analytics API                         | [SRC: SSOT BR-189 to BR-193]                                  |
+| BR-LRN-029 | Notes, bookmarks, highlights, flashcards and saved lists are private to the learner and never visible to instructors, institutions or recruiters.                                                                                                                                           | Safe personal study space.                                   | API authorization                     | [DER]                                                         |
+| BR-LRN-030 | Only learners with an active or completed enrollment (and course staff) can post in Q&A and discussions; rate limits {5 questions and 20 answers per hour}; links limited for new accounts.                                                                                                 | Quality and spam control.                                    | Social service                        | [DER]                                                         |
+| BR-LRN-031 | Course announcements are limited to 1 per day per course; learners can mute emails and push per course.                                                                                                                                                                                     | Avoid noise.                                                 | Announcement service                  | [SRC: SSOT BR-102]                                            |
+| BR-LRN-032 | Offline downloads only for lessons the author allowed, active enrollments, at most {3} devices, license TTL {30} days renewed online, revoked on drop, expiry, refund and takedown; completion is still decided online.                                                                     | Protect content and rights.                                  | License service                       | [PROP] OD-LRN-05                                              |
+| BR-LRN-033 | External-provider lessons expose only controls the provider's declared capabilities support; unsupported providers are rejected at authoring; embeds come only from allowlisted domains; protected content is never downloaded or proxied.                                                  | Honest, safe embeds.                                         | Player, CSP, authoring                | [SRC: SSOT BR-084, BR-085, BR-088, BR-090]                    |
+| BR-LRN-034 | A failing media provider or asset affects only its lesson; the course stays usable and the learner can report the problem.                                                                                                                                                                  | Containment.                                                 | Player                                | [SRC: SSOT BR-086]                                            |
+| BR-LRN-035 | Every published video lesson has captions or a transcript available to learners; auto-generated text is labeled until the author reviews it.                                                                                                                                                | Accessibility.                                               | Publish check (STU), player           | [SRC: YASH-MICRO FEAT-08-03.3]                                |
+| BR-LRN-036 | At most {2} concurrent playback sessions per account; a newer session evicts the oldest with a message; patterns of sharing are flagged for review, not auto-banned.                                                                                                                        | Limit account sharing.                                       | Playback session service              | [PROP] OD-LRN-09                                              |
+| BR-LRN-037 | Playback and download authorization uses signed tokens with a TTL of {5} minutes, bound to enrollment, lesson and device session; tokens are never logged or placed in analytics.                                                                                                           | Prevent link sharing.                                        | Media edge                            | [SRC: SSOT §9.2 F-07 security]                                |
+| BR-LRN-038 | Cohort runs have enrollment open and close times, start, end and a grace period; deadlines are soft or hard; late submissions are flagged and treated per the author's policy; extensions are per learner, audited.                                                                         | Predictable schedules.                                       | Cohort and assignment services        | [SRC: SSOT BR-111] [DER]                                      |
+| BR-LRN-039 | A submission snapshot is immutable once submitted; resubmission creates a new revision within the allowed count; grades attach to a revision.                                                                                                                                               | Fair, auditable grading.                                     | Submission service                    | [DER]                                                         |
+| BR-LRN-040 | Each peer-reviewed submission needs at least 2 completed reviews; reviewers cannot review their own or their group's work; reviews are anonymous to reviewees by default.                                                                                                                   | Reliable peer grades.                                        | Peer review service                   | [SRC: SSOT BR-103]                                            |
+| BR-LRN-041 | Live-session attendance is recorded when the learner is present at least {50} percent of the scheduled duration; the recording notice is shown before joining.                                                                                                                              | Fair attendance and consent.                                 | Live session service                  | [PROP]                                                        |
+| BR-LRN-042 | Sequenced paths unlock courses in the declared order; a program certificate is issued only when all required path courses are complete and any capstone is passed; path progress is derived from member enrollments.                                                                        | Program integrity.                                           | Path service                          | [SRC: SSOT BR-106, BR-110]                                    |
+| BR-LRN-043 | Personal learning plans hold at most 50 items and never gate enrollment or access; learning goals are limited to 3 active.                                                                                                                                                                  | Planning aid, not a lock.                                    | Plan service                          | [DER]                                                         |
+| BR-LRN-044 | Recommendations carry a reason, exclude completed, enrolled and dismissed items, use only data covered by the learner's personalization consent, use no protected attributes, and never mix unlabeled sponsored items.                                                                      | Trust and fairness.                                          | Recommendation service                | [SRC: SSOT BR-184 to BR-188]                                  |
+| BR-LRN-045 | Prerequisites are evaluated at enrollment time only and not re-evaluated afterwards.                                                                                                                                                                                                        | Stable enrollments.                                          | Eligibility gate                      | [SRC: YASH-G3 SPEC-06 §9]                                     |
+| BR-LRN-046 | Skills declared by authors are claims until completion; evidence is created only at rule-based completion, never from partial progress, and is tied to the course version.                                                                                                                  | Honest skill evidence.                                       | Evidence consumer                     | [DER]                                                         |
+| BR-LRN-047 | Unpublishing or archiving a course blocks new enrollments but preserves access for existing enrollees; safety or legal takedown can revoke access.                                                                                                                                          | Fair treatment of learners.                                  | Catalog and content API               | [SRC: SSOT BR-114; YASH-G3 SPEC-06 §3.5]                      |
+| BR-LRN-048 | Course grade = sum of item weight times score over graded items, rounded half up to 1 decimal; ungraded items are pending; instructor overrides require a reason and are audited and visible to the learner.                                                                                | Transparent grading.                                         | Gradebook service                     | [SRC: SSOT BR-108] [DER]                                      |
+| BR-LRN-049 | Moderators and instructors hide posts, never hard-delete them, with a reason and audit; the author sees the placeholder and reason.                                                                                                                                                         | Accountable moderation.                                      | Social service                        | [DER]                                                         |
+| BR-LRN-050 | Study groups are opt-in, limited to {8} members; members choose what they share; no default sharing.                                                                                                                                                                                        | Privacy.                                                     | Group service                         | [PROP]                                                        |
+| BR-LRN-051 | Adaptive review and spaced repetition are suggestions only; they never gate access or completion and never mint evidence.                                                                                                                                                                   | Avoid hidden gates.                                          | Review service                        | [DER]                                                         |
+| BR-LRN-052 | Public course pages carry only published catalog data (with structured data and canonical URLs); no learner data appears in public HTML.                                                                                                                                                    | Privacy and SEO.                                             | Page rendering                        | [DER]                                                         |
+| BR-LRN-053 | Wishlist holds at most 200 items; comparison holds at most 3 courses.                                                                                                                                                                                                                       | Bounded lists.                                               | Wishlist API, compare view            | [PROP]                                                        |
+| BR-LRN-054 | Institution assignments may override advisory prerequisites and, if institution policy permits, enforced ones (recorded); institutions see learner data only within the visibility scope shown to the learner before the first lesson, and never notes or discussions.                      | Respect learner and institution needs.                       | Enrollment and analytics services     | [SRC: SSOT §10.20 BR-072..BR-082] [DER]                       |
+| BR-LRN-055 | Access and discount codes are random, stored hashed, and have a use limit and expiry; redemption is atomic and idempotent per (code, account); more than 5 failures in 10 minutes triggers delays, 20 a one-hour lock.                                                                      | Prevent guessing and over-use.                               | Redemption service                    | [PROP]                                                        |
+| BR-LRN-056 | Plan-entitled enrollments end after a grace period {7 days} when the entitlement ends; progress and credentials are kept; re-subscription restores access within retention.                                                                                                                 | Fair subscription behavior.                                  | Entitlement consumer                  | [SRC: SSOT §9.2 F-07 step 3] [DER]                            |
+| BR-LRN-057 | Days and weeks for goals and streaks use the learner's profile time zone; time zone changes take effect at the next period boundary.                                                                                                                                                        | Consistent counting.                                         | Goal and streak services              | [PROP]                                                        |
+| BR-LRN-058 | Pause is allowed once per enrollment for at most {90} days on self-paced courses only (not cohort-bound or institution-assigned), and freezes the access clock.                                                                                                                             | Fair breaks.                                                 | Enrollment service                    | [PROP]                                                        |
+| BR-LRN-059 | The certificate name is the learner's chosen legal or display name set before first issuance; corrections need a reason and create a superseding version while the original stays verifiable.                                                                                               | Accurate credentials.                                        | Certificate service                   | [DER]                                                         |
+| BR-LRN-060 | On export or erasure, learning records are exported fully; erasure removes personal content and leaves a tombstone certificate record verifying as "Record removed at the holder's request" without personal data.                                                                          | Privacy with credential integrity.                           | Data-rights service                   | [SRC: SSOT Appendix E V61-19] [DER]                           |
+| BR-LRN-061 | Search queries linked to an account are retained at most {90} days, used only for relevance and gap reporting, never for advertising; zero-result queries are logged without account ids.                                                                                                   | Privacy.                                                     | Search logging                        | [PROP]                                                        |
+| BR-LRN-062 | An industry hub is public and listed only while it has at least {3} active contributors, where active means at least {1} approved contribution in the last {90} days; below that it is hidden from catalog, search and sitemap.                                                             | Prevents empty or abandoned hubs from looking authoritative. | Hub visibility job (FR-LRN-076)       | [SRC: SSOT BR-196]; definition of "active" [PROP] `OD-LRN-16` |
+| BR-LRN-063 | Hub contributions are moderated before display; contributors affiliated with a resource must disclose it and affiliated items are labelled; no payment, sponsorship or affiliate arrangement influences hub ordering.                                                                       | Trust and honest curation.                                   | Hub moderation queue; ranking         | [DER] [SRC: SSOT BR-202 spirit; BR-SRC-038]                   |
 
 ## 6. State machines
 
@@ -2389,16 +2422,16 @@ stateDiagram-v2
     refunded --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | `pending_payment` | Buy | Gate allows; quote valid (BR-LRN-007) |
-| `pending_payment` | `active` | `billing.purchase.fulfilled` | Event verified and not previously applied |
-| `pending_payment` | `expired` | Sweep | 24 hours elapsed |
-| `active` | `completed` | Rule evaluation | Rule satisfied at pinned version; sign-off done if required |
-| `active` | `paused` | Learner | Self-paced, no prior pause (BR-LRN-058) |
-| `active` | `expired` | Sweep | End instant reached and not paused |
-| `completed` | `refunded` | Human exception | Reason recorded; evidence revoked by human issuer |
-| `suspended` | `active` | Moderator or support | Reason recorded |
+| From              | To                | Trigger                      | Guard                                                       |
+| ----------------- | ----------------- | ---------------------------- | ----------------------------------------------------------- |
+| (new)             | `pending_payment` | Buy                          | Gate allows; quote valid (BR-LRN-007)                       |
+| `pending_payment` | `active`          | `billing.purchase.fulfilled` | Event verified and not previously applied                   |
+| `pending_payment` | `expired`         | Sweep                        | 24 hours elapsed                                            |
+| `active`          | `completed`       | Rule evaluation              | Rule satisfied at pinned version; sign-off done if required |
+| `active`          | `paused`          | Learner                      | Self-paced, no prior pause (BR-LRN-058)                     |
+| `active`          | `expired`         | Sweep                        | End instant reached and not paused                          |
+| `completed`       | `refunded`        | Human exception              | Reason recorded; evidence revoked by human issuer           |
+| `suspended`       | `active`          | Moderator or support         | Reason recorded                                             |
 
 Forbidden: `completed -> active`; any state to `active` from a payment redirect alone; `refunded -> active` (a new enrollment is created).
 
@@ -2417,11 +2450,11 @@ stateDiagram-v2
     completed --> completed: replay, no regression
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `locked` | `available` | Prior lesson completion or release time | BR-LRN-018 |
-| `available` or `in_progress` | `completed` | Rule event | BR-LRN-014; sticky |
-| `completed` | `in_progress` | none | Forbidden: completion never reverts (BR-LRN-013) |
+| From                         | To            | Trigger                                 | Guard                                            |
+| ---------------------------- | ------------- | --------------------------------------- | ------------------------------------------------ |
+| `locked`                     | `available`   | Prior lesson completion or release time | BR-LRN-018                                       |
+| `available` or `in_progress` | `completed`   | Rule event                              | BR-LRN-014; sticky                               |
+| `completed`                  | `in_progress` | none                                    | Forbidden: completion never reverts (BR-LRN-013) |
 
 ### SM-LRN-03 Certificate
 
@@ -2441,11 +2474,11 @@ stateDiagram-v2
     tombstoned --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `pending_render` | `issued` | Worker | Hash computed; one per enrollment |
-| `issued` | `revoked` | Instructor or admin | Reason class and actor recorded |
-| `issued` | `superseded` | Correction approved | New version issued atomically |
+| From             | To           | Trigger             | Guard                             |
+| ---------------- | ------------ | ------------------- | --------------------------------- |
+| `pending_render` | `issued`     | Worker              | Hash computed; one per enrollment |
+| `issued`         | `revoked`    | Instructor or admin | Reason class and actor recorded   |
+| `issued`         | `superseded` | Correction approved | New version issued atomically     |
 
 ### SM-LRN-04 Assignment submission
 
@@ -2464,10 +2497,10 @@ stateDiagram-v2
     withdrawn --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `draft` | `submitted` | Submit | Declaration ticked; deadline policy (BR-LRN-038) |
-| `returned` | `submitted` | Resubmit | Revisions remaining (BR-LRN-039) |
+| From       | To          | Trigger  | Guard                                            |
+| ---------- | ----------- | -------- | ------------------------------------------------ |
+| `draft`    | `submitted` | Submit   | Declaration ticked; deadline policy (BR-LRN-038) |
+| `returned` | `submitted` | Resubmit | Revisions remaining (BR-LRN-039)                 |
 
 ### SM-LRN-05 Review
 
@@ -2487,10 +2520,10 @@ stateDiagram-v2
     removed --> published: appeal upheld
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `removed` | `published` | Appeal upheld | Second moderator (FR-LRN-065) |
-| `published` | `reported` | Reports | Threshold {3 distinct reporters} |
+| From        | To          | Trigger       | Guard                            |
+| ----------- | ----------- | ------------- | -------------------------------- |
+| `removed`   | `published` | Appeal upheld | Second moderator (FR-LRN-065)    |
+| `published` | `reported`  | Reports       | Threshold {3 distinct reporters} |
 
 ### SM-LRN-06 Path enrollment
 
@@ -2507,8 +2540,8 @@ stateDiagram-v2
     expired --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From     | To          | Trigger              | Guard      |
+| -------- | ----------- | -------------------- | ---------- |
 | `active` | `completed` | Derived from members | BR-LRN-042 |
 
 ### SM-LRN-07 Offline license
@@ -2529,10 +2562,10 @@ stateDiagram-v2
     revoked --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `requested` | `active` | Server | Device count at most cap (BR-LRN-032) |
-| `active` | `revoked` | Enrollment ends | Applied on next reconnect and by server record |
+| From        | To        | Trigger         | Guard                                          |
+| ----------- | --------- | --------------- | ---------------------------------------------- |
+| `requested` | `active`  | Server          | Device count at most cap (BR-LRN-032)          |
+| `active`    | `revoked` | Enrollment ends | Applied on next reconnect and by server record |
 
 ### SM-LRN-08 Live session attendance
 
@@ -2551,8 +2584,8 @@ stateDiagram-v2
     cancelled --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From     | To         | Trigger     | Guard                                       |
+| -------- | ---------- | ----------- | ------------------------------------------- |
 | `joined` | `attended` | Session end | Presence at least {50} percent (BR-LRN-041) |
 
 ### SM-LRN-09 Q&A thread
@@ -2571,9 +2604,9 @@ stateDiagram-v2
     hidden --> open: restored
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| any | `hidden` | Moderator or instructor | Reason recorded (BR-LRN-049) |
+| From | To       | Trigger                 | Guard                        |
+| ---- | -------- | ----------------------- | ---------------------------- |
+| any  | `hidden` | Moderator or instructor | Reason recorded (BR-LRN-049) |
 
 ### SM-LRN-10 Playback session
 
@@ -2594,93 +2627,95 @@ stateDiagram-v2
     ended --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From      | To        | Trigger                | Guard                  |
+| --------- | --------- | ---------------------- | ---------------------- |
 | `playing` | `evicted` | Third concurrent start | Limit {2} (BR-LRN-036) |
-| `paused` | `ended` | Idle | {30} minutes [PROP] |
+| `paused`  | `ended`   | Idle                   | {30} minutes [PROP]    |
 
 ## 7. Screen inventory
 
 Key states for every screen include loading (skeleton), empty, error with retry, offline (where cached) and forbidden. Only screen-specific states are listed.
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-LRN-001 | Learn home | `/learn` | GUE, CAN, STD | Curated rails and entry to catalog | rails loading per rail, personalized vs generic |
-| SCR-LRN-002 | Course catalog and search results | `/learn/courses` | GUE, CAN, STD | List, search, filter, sort (FR-LRN-001 to 004) | zero results, filter conflict, index behind |
-| SCR-LRN-003 | Category page | `/learn/c/:slug` | GUE, CAN, STD | Category description and courses | retired category redirect |
-| SCR-LRN-004 | Skill and goal page | `/learn/skills/:skill`, `/learn/goals/:goalSlug` | GUE, CAN, STD | Skill-based browse and gap view | consent missing, no courses |
-| SCR-LRN-005 | Course comparison | `/learn/compare` | GUE, CAN, STD | Side-by-side compare | course unavailable column |
-| SCR-LRN-006 | Saved courses | `/learn/saved` | CAN, STD | Wishlist | list full, price dropped, unavailable |
-| SCR-LRN-007 | Course detail | `/learn/courses/:slug` | GUE, CAN, STD, INS | Detail, curriculum, reviews, action | not enrolled, enrolled, locked with reason, 410 |
-| SCR-LRN-008 | Enroll confirmation | `/learn/courses/:slug/enroll` | CAN, STD | Confirm free or invite enrollment | gate blocked, success |
-| SCR-LRN-009 | Payment status | `/learn/enrollments/:id/status` | CAN, STD | Pending payment confirmation | processing, failed, succeeded, expired |
-| SCR-LRN-010 | Redeem code | `/learn/redeem` | CAN, STD | Access and discount codes | invalid, exhausted, rate limited |
-| SCR-LRN-011 | Path and track catalog | `/learn/paths` | GUE, CAN, STD | Browse paths and tracks | empty track |
-| SCR-LRN-012 | Path or track detail | `/learn/paths/:slug`, `/learn/tracks/:slug` | GUE, CAN, STD | Path structure and enrollment | sequenced locked members, unavailable member |
-| SCR-LRN-013 | Learner dashboard | `/learn/home` | CAN, STD | What to do next | first-steps, card error |
-| SCR-LRN-014 | My courses and history | `/me/learning/courses` | CAN, STD | Enrollments by state and transcript | tabs with counts, expiring, assigned |
-| SCR-LRN-015 | Learning player | `/learn/courses/:slug/lessons/:lessonKey` | CAN, STD, GUE (preview) | All lesson types, panels, drawer | locked, preview, expired read-only, sync pending |
-| SCR-LRN-016 | Assignment workspace | `/learn/courses/:slug/assignments/:id` | CAN, STD | Brief, draft, submit, feedback | draft, submitted, in review, graded, late |
-| SCR-LRN-017 | Peer review workspace | `/learn/courses/:slug/reviews/:id` | CAN, STD | Review queue and forms | queue empty, overdue |
-| SCR-LRN-018 | Project workspace | `/learn/courses/:slug/projects/:id` | CAN, STD | Milestones and team | team unconfirmed, milestone due |
-| SCR-LRN-019 | Live session lobby and room | `/learn/courses/:slug/live/:id` | CAN, STD | Join live session | too early, open, full, ended, recording |
-| SCR-LRN-020 | Cohort schedule | `/learn/courses/:slug/schedule` | CAN, STD | Calendar and deadlines | no schedule, past |
-| SCR-LRN-021 | Course Q&A | `/learn/courses/:slug/qa` | CAN, STD | Questions and answers | no answers, rate limited |
-| SCR-LRN-022 | Discussion forum | `/learn/courses/:slug/discuss` | CAN, STD | Threads and categories | locked thread, hidden post |
-| SCR-LRN-023 | Notes and bookmarks | `/me/learning/notes` | CAN, STD | Search and export notes | none, quota near |
-| SCR-LRN-024 | Announcements | `/learn/courses/:slug/announcements` | CAN, STD | Instructor updates | none, muted |
-| SCR-LRN-025 | Gradebook | `/learn/courses/:slug/grades` | CAN, STD | Scores, weights, what-if | pending items, disputed |
-| SCR-LRN-026 | Course completion | `/learn/courses/:slug/complete` | CAN, STD | Completion summary and next steps | awaiting sign-off, evidence pending |
-| SCR-LRN-027 | Certificates | `/me/certificates`, `/me/certificates/:id` | CAN, STD | View, download, share | pending render, revoked, superseded |
-| SCR-LRN-028 | Certificate verification | `/verify/:certId` | GUE, all | Public verification | valid, revoked, expired, private, not found |
-| SCR-LRN-029 | Review composer | `/learn/courses/:slug/review` | CAN, STD | Write or edit review | ineligible, held |
-| SCR-LRN-030 | Goals and learning plan | `/me/learning/plan` | CAN, STD | Goals, plan, study blocks | over capacity, paused goal |
-| SCR-LRN-031 | Learning insights | `/me/learning/insights` | CAN, STD | Learner analytics | insufficient data |
-| SCR-LRN-032 | Achievements | `/me/learning/achievements` | CAN, STD | Earned and locked | engine delayed |
-| SCR-LRN-033 | Downloads manager | `/me/learning/downloads` | CAN, STD | Offline lessons and devices | device limit, expiring, storage full |
-| SCR-LRN-034 | Study groups | `/learn/groups` | CAN, STD | Groups and check-ins | full group, no matches |
-| SCR-LRN-035 | Learning settings | `/settings/learning` | CAN, STD | Player, reminders, personalization, accessibility, data export | export in progress |
-| SCR-LRN-036 | Refund request | `/me/learning/orders/:id/refund` | CAN, STD | Refund eligibility and request | eligible, pro-rated, not eligible, processing |
-| SCR-LRN-037 | Report a problem dialog | modal (no route) | GUE, CAN, STD | Content problem report | submitted, duplicate |
-| SCR-LRN-038 | Daily review | `/me/learning/review` | CAN, STD | Spaced repetition session | none due, backlog capped |
+| ID          | Name                              | Route proposal                                   | Roles                   | Purpose                                                        | Key states                                       |
+| ----------- | --------------------------------- | ------------------------------------------------ | ----------------------- | -------------------------------------------------------------- | ------------------------------------------------ |
+| SCR-LRN-001 | Learn home                        | `/learn`                                         | GUE, CAN, STD           | Curated rails and entry to catalog                             | rails loading per rail, personalized vs generic  |
+| SCR-LRN-002 | Course catalog and search results | `/learn/courses`                                 | GUE, CAN, STD           | List, search, filter, sort (FR-LRN-001 to 004)                 | zero results, filter conflict, index behind      |
+| SCR-LRN-003 | Category page                     | `/learn/c/:slug`                                 | GUE, CAN, STD           | Category description and courses                               | retired category redirect                        |
+| SCR-LRN-004 | Skill and goal page               | `/learn/skills/:skill`, `/learn/goals/:goalSlug` | GUE, CAN, STD           | Skill-based browse and gap view                                | consent missing, no courses                      |
+| SCR-LRN-005 | Course comparison                 | `/learn/compare`                                 | GUE, CAN, STD           | Side-by-side compare                                           | course unavailable column                        |
+| SCR-LRN-006 | Saved courses                     | `/learn/saved`                                   | CAN, STD                | Wishlist                                                       | list full, price dropped, unavailable            |
+| SCR-LRN-007 | Course detail                     | `/learn/courses/:slug`                           | GUE, CAN, STD, INS      | Detail, curriculum, reviews, action                            | not enrolled, enrolled, locked with reason, 410  |
+| SCR-LRN-008 | Enroll confirmation               | `/learn/courses/:slug/enroll`                    | CAN, STD                | Confirm free or invite enrollment                              | gate blocked, success                            |
+| SCR-LRN-009 | Payment status                    | `/learn/enrollments/:id/status`                  | CAN, STD                | Pending payment confirmation                                   | processing, failed, succeeded, expired           |
+| SCR-LRN-010 | Redeem code                       | `/learn/redeem`                                  | CAN, STD                | Access and discount codes                                      | invalid, exhausted, rate limited                 |
+| SCR-LRN-011 | Path and track catalog            | `/learn/paths`                                   | GUE, CAN, STD           | Browse paths and tracks                                        | empty track                                      |
+| SCR-LRN-012 | Path or track detail              | `/learn/paths/:slug`, `/learn/tracks/:slug`      | GUE, CAN, STD           | Path structure and enrollment                                  | sequenced locked members, unavailable member     |
+| SCR-LRN-013 | Learner dashboard                 | `/learn/home`                                    | CAN, STD                | What to do next                                                | first-steps, card error                          |
+| SCR-LRN-014 | My courses and history            | `/me/learning/courses`                           | CAN, STD                | Enrollments by state and transcript                            | tabs with counts, expiring, assigned             |
+| SCR-LRN-015 | Learning player                   | `/learn/courses/:slug/lessons/:lessonKey`        | CAN, STD, GUE (preview) | All lesson types, panels, drawer                               | locked, preview, expired read-only, sync pending |
+| SCR-LRN-016 | Assignment workspace              | `/learn/courses/:slug/assignments/:id`           | CAN, STD                | Brief, draft, submit, feedback                                 | draft, submitted, in review, graded, late        |
+| SCR-LRN-017 | Peer review workspace             | `/learn/courses/:slug/reviews/:id`               | CAN, STD                | Review queue and forms                                         | queue empty, overdue                             |
+| SCR-LRN-018 | Project workspace                 | `/learn/courses/:slug/projects/:id`              | CAN, STD                | Milestones and team                                            | team unconfirmed, milestone due                  |
+| SCR-LRN-019 | Live session lobby and room       | `/learn/courses/:slug/live/:id`                  | CAN, STD                | Join live session                                              | too early, open, full, ended, recording          |
+| SCR-LRN-020 | Cohort schedule                   | `/learn/courses/:slug/schedule`                  | CAN, STD                | Calendar and deadlines                                         | no schedule, past                                |
+| SCR-LRN-021 | Course Q&A                        | `/learn/courses/:slug/qa`                        | CAN, STD                | Questions and answers                                          | no answers, rate limited                         |
+| SCR-LRN-022 | Discussion forum                  | `/learn/courses/:slug/discuss`                   | CAN, STD                | Threads and categories                                         | locked thread, hidden post                       |
+| SCR-LRN-023 | Notes and bookmarks               | `/me/learning/notes`                             | CAN, STD                | Search and export notes                                        | none, quota near                                 |
+| SCR-LRN-024 | Announcements                     | `/learn/courses/:slug/announcements`             | CAN, STD                | Instructor updates                                             | none, muted                                      |
+| SCR-LRN-025 | Gradebook                         | `/learn/courses/:slug/grades`                    | CAN, STD                | Scores, weights, what-if                                       | pending items, disputed                          |
+| SCR-LRN-026 | Course completion                 | `/learn/courses/:slug/complete`                  | CAN, STD                | Completion summary and next steps                              | awaiting sign-off, evidence pending              |
+| SCR-LRN-027 | Certificates                      | `/me/certificates`, `/me/certificates/:id`       | CAN, STD                | View, download, share                                          | pending render, revoked, superseded              |
+| SCR-LRN-028 | Certificate verification          | `/verify/:certId`                                | GUE, all                | Public verification                                            | valid, revoked, expired, private, not found      |
+| SCR-LRN-029 | Review composer                   | `/learn/courses/:slug/review`                    | CAN, STD                | Write or edit review                                           | ineligible, held                                 |
+| SCR-LRN-030 | Goals and learning plan           | `/me/learning/plan`                              | CAN, STD                | Goals, plan, study blocks                                      | over capacity, paused goal                       |
+| SCR-LRN-031 | Learning insights                 | `/me/learning/insights`                          | CAN, STD                | Learner analytics                                              | insufficient data                                |
+| SCR-LRN-032 | Achievements                      | `/me/learning/achievements`                      | CAN, STD                | Earned and locked                                              | engine delayed                                   |
+| SCR-LRN-033 | Downloads manager                 | `/me/learning/downloads`                         | CAN, STD                | Offline lessons and devices                                    | device limit, expiring, storage full             |
+| SCR-LRN-034 | Study groups                      | `/learn/groups`                                  | CAN, STD                | Groups and check-ins                                           | full group, no matches                           |
+| SCR-LRN-035 | Learning settings                 | `/settings/learning`                             | CAN, STD                | Player, reminders, personalization, accessibility, data export | export in progress                               |
+| SCR-LRN-036 | Refund request                    | `/me/learning/orders/:id/refund`                 | CAN, STD                | Refund eligibility and request                                 | eligible, pro-rated, not eligible, processing    |
+| SCR-LRN-037 | Report a problem dialog           | modal (no route)                                 | GUE, CAN, STD           | Content problem report                                         | submitted, duplicate                             |
+| SCR-LRN-038 | Daily review                      | `/me/learning/review`                            | CAN, STD                | Spaced repetition session                                      | none due, backlog capped                         |
 
 ## 8. Data entities owned
 
 Retention classes: `ACCT` deleted or anonymized with the account; `TXN` financial record, {7 years} [PROP] OD-LRN-10; `CRED` credential record kept as tombstone after erasure (BR-LRN-060); `LOG90` {90 days}; `AGG` anonymized aggregate; `PUBLIC` published catalog data.
 
-| ID | Entity | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-LRN-01 | CatalogEntry | courseId, versionId, slug, title, summary, categoryIds, tags, level, language, subtitleLanguages, durationMinutes, skills[], priceRef, entitlementKinds, ratingAvg, ratingCount, accessibilityFlags, state, updatedAt | Projection of STU course version; 1..n TaxonomyNode | PUBLIC |
-| ENT-LRN-02 | TaxonomyNode | id, kind (category, tag), name, slug, parentId, state, aliases[], redirectFrom[] | Parent-child; used by CatalogEntry | PUBLIC |
-| ENT-LRN-03 | Enrollment | id, accountId, courseId, versionId, route (self, invite, plan, institution, paid), state, activatedAt, accessEndsAt, completedAt, completionPendingSignoff, certificateId, evidenceRef, assignmentId, cohortRunId, orderRef, restoredFrom | n LessonProgress, 1 Certificate, 0..1 CohortRun | ACCT; order refs TXN |
-| ENT-LRN-04 | EnrollmentEvent | enrollmentId, from, to, trigger, actor, reason, at | Append-only history of Enrollment | CRED (history without personal data after erasure) |
-| ENT-LRN-05 | LessonProgress | enrollmentId, lessonKey, status, watchedSegments, maxClientSeq, completedAt, ruleVersion | Belongs to Enrollment | ACCT |
-| ENT-LRN-06 | PlaybackPosition | enrollmentId, lessonKey, positionSeconds, serverTime, clientSeq, deviceId | Belongs to Enrollment | ACCT |
-| ENT-LRN-07 | OfflineLicense | id, enrollmentId, lessonKey, deviceId, state, issuedAt, expiresAt, revokedReason | Belongs to Enrollment | LOG90 after end |
-| ENT-LRN-08 | AccessCode | id, courseId, type, codeHash, usesAllowed, usesCount, expiresAt, domainRestriction, createdBy | Redemptions per account | ACCT of creator; redemption log LOG90 |
-| ENT-LRN-09 | Certificate | id, enrollmentId or pathEnrollmentId, type (course, program), version, state, payloadHash, nameUsed, issuedAt, expiresAt, revokedReason, supersededBy | 1 Enrollment | CRED |
-| ENT-LRN-10 | LearningPath | id, version, slug, courseRefs[], sequenced, capstone, programRule, state | Many courses | PUBLIC |
-| ENT-LRN-11 | PathEnrollment | id, accountId, pathId, pathVersion, state, progressCache | n Enrollment | ACCT |
-| ENT-LRN-12 | LearningPlan | id, accountId, items[{targetType, targetId, order, targetDate, status}], sharedWith | Items to catalog | ACCT |
-| ENT-LRN-13 | LearningGoal | id, accountId, goalRef, weeklyCommitmentMinutes, days, state | Optional link to plan | ACCT |
-| ENT-LRN-14 | StreakRecord | accountId, current, longest, lastActiveDate, freezeUsedWeek, timezone | One per account | ACCT |
-| ENT-LRN-15 | Note | id, accountId, enrollmentId, lessonKey, type (note, highlight, flashcard), position, body, versionHistory | Belongs to Enrollment | ACCT |
-| ENT-LRN-16 | Bookmark | id, accountId, enrollmentId, lessonKey, position, label | Belongs to Enrollment | ACCT |
-| ENT-LRN-17 | DiscussionThread and Post | id, courseId, cohortRunId, lessonKey, kind (qa, forum), title, state, authorId, anonymousToPeers, acceptedPostId, posts[] | Course | ACCT content becomes "Former learner" on erasure |
-| ENT-LRN-18 | SavedItem | accountId, targetType, targetId, savedAt, priceAtSave | Catalog | ACCT |
-| ENT-LRN-19 | Review | id, accountId, courseId, versionRange, rating, subRatings, title, body, displayMode, state, instructorReply, history | Enrollment | ACCT content; aggregate AGG |
-| ENT-LRN-20 | Submission | id, enrollmentId, assignmentId, revision, content, files[], state, submittedAt, late, grade, rubricScores, feedback | Enrollment | ACCT; grade record CRED if evidence minted |
-| ENT-LRN-21 | PeerReview | id, submissionId, reviewerEnrollmentId, scores, comments, state, helpful | Submission | ACCT |
-| ENT-LRN-22 | LiveAttendance | sessionId, enrollmentId, state, joinedAt, leftAt, presenceSeconds | Session (STU) | LOG90 after grading period |
-| ENT-LRN-23 | CohortRun | id, courseId, start, end, enrollOpen, enrollClose, capacity, waitlist[], timezone, graceDays | Enrollments | ACCT-free (course data) |
-| ENT-LRN-24 | Achievement | accountId, type, awardedAt, sourceEvent, revokedAt | REP (planned) | ACCT |
-| ENT-LRN-25 | RecommendationImpression | accountId, itemId, reason, shownAt, action | Feedback loop | LOG90 |
-| ENT-LRN-26 | StudyGroup | id, name, courseId or pathId, ownerId, members[{accountId, shares[]}], state | Course | ACCT |
-| ENT-LRN-27 | ContentReport | id, reporterId, targetType, targetId, lessonKey, time, category, note, diagnostics, state, outcome | Course, TSF case | ACCT; outcome kept AGG |
-| ENT-LRN-28 | GradeRecord | enrollmentId, itemRef, weight, rawScore, penalties, finalScore, override{by, reason}, at | Enrollment | ACCT |
-| ENT-LRN-29 | RefundRequest | id, enrollmentId, orderRef, reason, eligibility, state, decidedBy, decidedAt | Enrollment, BIL order | TXN |
-| ENT-LRN-30 | PlaybackSession | id, accountId, enrollmentId, lessonKey, deviceSessionId, state, startedAt, lastSeenAt | Enrollment | LOG90 |
-| ENT-LRN-31 | NudgeSchedule | accountId, type, lastSentAt, weekCount, quietHours, calendarFeedSecretHash | Account | ACCT |
+| ID         | Entity                    | Key attributes                                                                                                                                                                                                                            | Relationships                                       | Retention                                                                          |
+| ---------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| ENT-LRN-01 | CatalogEntry              | courseId, versionId, slug, title, summary, categoryIds, tags, level, language, subtitleLanguages, durationMinutes, skills[], priceRef, entitlementKinds, ratingAvg, ratingCount, accessibilityFlags, state, updatedAt                     | Projection of STU course version; 1..n TaxonomyNode | PUBLIC                                                                             |
+| ENT-LRN-02 | TaxonomyNode              | id, kind (category, tag), name, slug, parentId, state, aliases[], redirectFrom[]                                                                                                                                                          | Parent-child; used by CatalogEntry                  | PUBLIC                                                                             |
+| ENT-LRN-03 | Enrollment                | id, accountId, courseId, versionId, route (self, invite, plan, institution, paid), state, activatedAt, accessEndsAt, completedAt, completionPendingSignoff, certificateId, evidenceRef, assignmentId, cohortRunId, orderRef, restoredFrom | n LessonProgress, 1 Certificate, 0..1 CohortRun     | ACCT; order refs TXN                                                               |
+| ENT-LRN-04 | EnrollmentEvent           | enrollmentId, from, to, trigger, actor, reason, at                                                                                                                                                                                        | Append-only history of Enrollment                   | CRED (history without personal data after erasure)                                 |
+| ENT-LRN-05 | LessonProgress            | enrollmentId, lessonKey, status, watchedSegments, maxClientSeq, completedAt, ruleVersion                                                                                                                                                  | Belongs to Enrollment                               | ACCT                                                                               |
+| ENT-LRN-06 | PlaybackPosition          | enrollmentId, lessonKey, positionSeconds, serverTime, clientSeq, deviceId                                                                                                                                                                 | Belongs to Enrollment                               | ACCT                                                                               |
+| ENT-LRN-07 | OfflineLicense            | id, enrollmentId, lessonKey, deviceId, state, issuedAt, expiresAt, revokedReason                                                                                                                                                          | Belongs to Enrollment                               | LOG90 after end                                                                    |
+| ENT-LRN-08 | AccessCode                | id, courseId, type, codeHash, usesAllowed, usesCount, expiresAt, domainRestriction, createdBy                                                                                                                                             | Redemptions per account                             | ACCT of creator; redemption log LOG90                                              |
+| ENT-LRN-09 | Certificate               | id, enrollmentId or pathEnrollmentId, type (course, program), version, state, payloadHash, nameUsed, issuedAt, expiresAt, revokedReason, supersededBy                                                                                     | 1 Enrollment                                        | CRED                                                                               |
+| ENT-LRN-10 | LearningPath              | id, version, slug, courseRefs[], sequenced, capstone, programRule, state                                                                                                                                                                  | Many courses                                        | PUBLIC                                                                             |
+| ENT-LRN-11 | PathEnrollment            | id, accountId, pathId, pathVersion, state, progressCache                                                                                                                                                                                  | n Enrollment                                        | ACCT                                                                               |
+| ENT-LRN-12 | LearningPlan              | id, accountId, items[{targetType, targetId, order, targetDate, status}], sharedWith                                                                                                                                                       | Items to catalog                                    | ACCT                                                                               |
+| ENT-LRN-13 | LearningGoal              | id, accountId, goalRef, weeklyCommitmentMinutes, days, state                                                                                                                                                                              | Optional link to plan                               | ACCT                                                                               |
+| ENT-LRN-14 | StreakRecord              | accountId, current, longest, lastActiveDate, freezeUsedWeek, timezone                                                                                                                                                                     | One per account                                     | ACCT                                                                               |
+| ENT-LRN-15 | Note                      | id, accountId, enrollmentId, lessonKey, type (note, highlight, flashcard), position, body, versionHistory                                                                                                                                 | Belongs to Enrollment                               | ACCT                                                                               |
+| ENT-LRN-16 | Bookmark                  | id, accountId, enrollmentId, lessonKey, position, label                                                                                                                                                                                   | Belongs to Enrollment                               | ACCT                                                                               |
+| ENT-LRN-17 | DiscussionThread and Post | id, courseId, cohortRunId, lessonKey, kind (qa, forum), title, state, authorId, anonymousToPeers, acceptedPostId, posts[]                                                                                                                 | Course                                              | ACCT content becomes "Former learner" on erasure                                   |
+| ENT-LRN-18 | SavedItem                 | accountId, targetType, targetId, savedAt, priceAtSave                                                                                                                                                                                     | Catalog                                             | ACCT                                                                               |
+| ENT-LRN-19 | Review                    | id, accountId, courseId, versionRange, rating, subRatings, title, body, displayMode, state, instructorReply, history                                                                                                                      | Enrollment                                          | ACCT content; aggregate AGG                                                        |
+| ENT-LRN-20 | Submission                | id, enrollmentId, assignmentId, revision, content, files[], state, submittedAt, late, grade, rubricScores, feedback                                                                                                                       | Enrollment                                          | ACCT; grade record CRED if evidence minted                                         |
+| ENT-LRN-21 | PeerReview                | id, submissionId, reviewerEnrollmentId, scores, comments, state, helpful                                                                                                                                                                  | Submission                                          | ACCT                                                                               |
+| ENT-LRN-22 | LiveAttendance            | sessionId, enrollmentId, state, joinedAt, leftAt, presenceSeconds                                                                                                                                                                         | Session (STU)                                       | LOG90 after grading period                                                         |
+| ENT-LRN-23 | CohortRun                 | id, courseId, start, end, enrollOpen, enrollClose, capacity, waitlist[], timezone, graceDays                                                                                                                                              | Enrollments                                         | ACCT-free (course data)                                                            |
+| ENT-LRN-24 | Achievement               | accountId, type, awardedAt, sourceEvent, revokedAt                                                                                                                                                                                        | REP (planned)                                       | ACCT                                                                               |
+| ENT-LRN-25 | RecommendationImpression  | accountId, itemId, reason, shownAt, action                                                                                                                                                                                                | Feedback loop                                       | LOG90                                                                              |
+| ENT-LRN-26 | StudyGroup                | id, name, courseId or pathId, ownerId, members[{accountId, shares[]}], state                                                                                                                                                              | Course                                              | ACCT                                                                               |
+| ENT-LRN-27 | ContentReport             | id, reporterId, targetType, targetId, lessonKey, time, category, note, diagnostics, state, outcome                                                                                                                                        | Course, TSF case                                    | ACCT; outcome kept AGG                                                             |
+| ENT-LRN-28 | GradeRecord               | enrollmentId, itemRef, weight, rawScore, penalties, finalScore, override{by, reason}, at                                                                                                                                                  | Enrollment                                          | ACCT                                                                               |
+| ENT-LRN-29 | RefundRequest             | id, enrollmentId, orderRef, reason, eligibility, state, decidedBy, decidedAt                                                                                                                                                              | Enrollment, BIL order                               | TXN                                                                                |
+| ENT-LRN-30 | PlaybackSession           | id, accountId, enrollmentId, lessonKey, deviceSessionId, state, startedAt, lastSeenAt                                                                                                                                                     | Enrollment                                          | LOG90                                                                              |
+| ENT-LRN-31 | NudgeSchedule             | accountId, type, lastSentAt, weekCount, quietHours, calendarFeedSecretHash                                                                                                                                                                | Account                                             | ACCT                                                                               |
+| ENT-LRN-32 | IndustryHub               | id, slug, industryRef, name, description, state (hidden, public), stewardIds[], skillSetRef, activeContributorCount, evaluatedAt                                                                                                          | Links TaxonomyNode (industry tag) and a NET group   | PUBLIC                                                                             |
+| ENT-LRN-33 | HubContribution           | id, hubId, contributorId, kind (resource, pinned item), payload, affiliationDeclared, state (pending, approved, rejected, removed), decidedBy, decidedAt                                                                                  | Belongs to IndustryHub                              | ACCT while contributor exists; approved items kept as anonymous content on erasure |
 
 ```mermaid
 erDiagram
@@ -2702,161 +2737,164 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event name | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-LRN-001 | `learning.catalog.viewed` | Catalog list or search shown | anonymous session id, filters, result count | ANL |
-| EVT-LRN-002 | `learning.course.viewed` | Course detail opened | courseId, source | ANL, AIC |
-| EVT-LRN-003 | `learning.enrollment.created` | Enrollment row created | enrollmentId, courseId, versionId, route | NTF, INS, ANL, REP |
-| EVT-LRN-004 | `learning.enrollment.activated` | Enrollment becomes active | enrollmentId, accessEndsAt | NTF, STU analytics |
-| EVT-LRN-005 | `learning.enrollment.paused` | Learner pauses | enrollmentId, resumeAt | NTF |
-| EVT-LRN-006 | `learning.enrollment.resumed` | Resume | enrollmentId | NTF |
-| EVT-LRN-007 | `learning.enrollment.dropped` | Learner drops | enrollmentId, reasonCode | STU analytics, INS |
-| EVT-LRN-008 | `learning.enrollment.expired` | Window ends or unpaid | enrollmentId, cause | NTF, INS |
-| EVT-LRN-009 | `learning.enrollment.refunded` | Refund completed | enrollmentId | EVD, STU, REP |
-| EVT-LRN-010 | `learning.enrollment.migrated` | Learner switches version | enrollmentId, fromVersion, toVersion | ANL |
-| EVT-LRN-011 | `learning.lesson.started` | First lesson event | enrollmentId, lessonKey | ANL |
-| EVT-LRN-012 | `learning.lesson.completed` | Lesson rule met | enrollmentId, lessonKey, ruleKind | REP, ANL, AIC |
-| EVT-LRN-013 | `learning.course.completed` | Completion rule met | enrollmentId, courseId, versionId, gradeFinal | EVD, REP, NTF, INS, AIC |
-| EVT-LRN-014 | `learning.certificate.issued` | Certificate issued | certificateId, enrollmentId, type | NTF, PRF |
-| EVT-LRN-015 | `learning.certificate.revoked` | Revocation | certificateId, reasonClass | EVD, PRF |
-| EVT-LRN-016 | `learning.evidence.requested` | Evidence hand-off | issuerRef, sourceRef, skills[] | EVD |
-| EVT-LRN-017 | `learning.path.enrolled` | Path enrollment | pathEnrollmentId, pathId | ANL |
-| EVT-LRN-018 | `learning.path.completed` | Program rule met | pathEnrollmentId | EVD, NTF, REP |
-| EVT-LRN-019 | `learning.submission.submitted` | Submission | submissionId, assignmentId, late | STU inbox |
-| EVT-LRN-020 | `learning.submission.graded` | Grade saved | submissionId, score | NTF, gradebook |
-| EVT-LRN-021 | `learning.peerreview.completed` | Review submitted | peerReviewId | gradebook |
-| EVT-LRN-022 | `learning.review.published` | Review visible | reviewId, rating | STU, ANL |
-| EVT-LRN-023 | `learning.review.reported` | Report threshold | reviewId, reasons | TSF |
-| EVT-LRN-024 | `learning.qa.question_posted` | Question posted | threadId, lessonKey | STU inbox |
-| EVT-LRN-025 | `learning.live.attended` | Attendance finalized | sessionId, enrollmentId | completion rules |
-| EVT-LRN-026 | `learning.download.licensed` | Offline license issued | licenseId, deviceId | ANL |
-| EVT-LRN-027 | `learning.goal.updated` | Goal or plan changed | goalRef | AIC |
-| EVT-LRN-028 | `learning.streak.updated` | Streak day counted or lost | streak | REP |
-| EVT-LRN-029 | `learning.recommendation.dismissed` | Not interested | itemId, reason | AIC |
-| EVT-LRN-030 | `learning.report.filed` | Content problem filed | reportId, category | STU, TSF |
-| EVT-LRN-031 | `learning.access.extended` | Extension granted | enrollmentId, newEnd | NTF |
+| ID          | Event name                          | Trigger                               | Key payload                                   | Consumers               |
+| ----------- | ----------------------------------- | ------------------------------------- | --------------------------------------------- | ----------------------- |
+| EVT-LRN-001 | `learning.catalog.viewed`           | Catalog list or search shown          | anonymous session id, filters, result count   | ANL                     |
+| EVT-LRN-002 | `learning.course.viewed`            | Course detail opened                  | courseId, source                              | ANL, AIC                |
+| EVT-LRN-003 | `learning.enrollment.created`       | Enrollment row created                | enrollmentId, courseId, versionId, route      | NTF, INS, ANL, REP      |
+| EVT-LRN-004 | `learning.enrollment.activated`     | Enrollment becomes active             | enrollmentId, accessEndsAt                    | NTF, STU analytics      |
+| EVT-LRN-005 | `learning.enrollment.paused`        | Learner pauses                        | enrollmentId, resumeAt                        | NTF                     |
+| EVT-LRN-006 | `learning.enrollment.resumed`       | Resume                                | enrollmentId                                  | NTF                     |
+| EVT-LRN-007 | `learning.enrollment.dropped`       | Learner drops                         | enrollmentId, reasonCode                      | STU analytics, INS      |
+| EVT-LRN-008 | `learning.enrollment.expired`       | Window ends or unpaid                 | enrollmentId, cause                           | NTF, INS                |
+| EVT-LRN-009 | `learning.enrollment.refunded`      | Refund completed                      | enrollmentId                                  | EVD, STU, REP           |
+| EVT-LRN-010 | `learning.enrollment.migrated`      | Learner switches version              | enrollmentId, fromVersion, toVersion          | ANL                     |
+| EVT-LRN-011 | `learning.lesson.started`           | First lesson event                    | enrollmentId, lessonKey                       | ANL                     |
+| EVT-LRN-012 | `learning.lesson.completed`         | Lesson rule met                       | enrollmentId, lessonKey, ruleKind             | REP, ANL, AIC           |
+| EVT-LRN-013 | `learning.course.completed`         | Completion rule met                   | enrollmentId, courseId, versionId, gradeFinal | EVD, REP, NTF, INS, AIC |
+| EVT-LRN-014 | `learning.certificate.issued`       | Certificate issued                    | certificateId, enrollmentId, type             | NTF, PRF                |
+| EVT-LRN-015 | `learning.certificate.revoked`      | Revocation                            | certificateId, reasonClass                    | EVD, PRF                |
+| EVT-LRN-016 | `learning.evidence.requested`       | Evidence hand-off                     | issuerRef, sourceRef, skills[]                | EVD                     |
+| EVT-LRN-017 | `learning.path.enrolled`            | Path enrollment                       | pathEnrollmentId, pathId                      | ANL                     |
+| EVT-LRN-018 | `learning.path.completed`           | Program rule met                      | pathEnrollmentId                              | EVD, NTF, REP           |
+| EVT-LRN-019 | `learning.submission.submitted`     | Submission                            | submissionId, assignmentId, late              | STU inbox               |
+| EVT-LRN-020 | `learning.submission.graded`        | Grade saved                           | submissionId, score                           | NTF, gradebook          |
+| EVT-LRN-021 | `learning.peerreview.completed`     | Review submitted                      | peerReviewId                                  | gradebook               |
+| EVT-LRN-022 | `learning.review.published`         | Review visible                        | reviewId, rating                              | STU, ANL                |
+| EVT-LRN-023 | `learning.review.reported`          | Report threshold                      | reviewId, reasons                             | TSF                     |
+| EVT-LRN-024 | `learning.qa.question_posted`       | Question posted                       | threadId, lessonKey                           | STU inbox               |
+| EVT-LRN-025 | `learning.live.attended`            | Attendance finalized                  | sessionId, enrollmentId                       | completion rules        |
+| EVT-LRN-026 | `learning.download.licensed`        | Offline license issued                | licenseId, deviceId                           | ANL                     |
+| EVT-LRN-027 | `learning.goal.updated`             | Goal or plan changed                  | goalRef                                       | AIC                     |
+| EVT-LRN-028 | `learning.streak.updated`           | Streak day counted or lost            | streak                                        | REP                     |
+| EVT-LRN-029 | `learning.recommendation.dismissed` | Not interested                        | itemId, reason                                | AIC                     |
+| EVT-LRN-030 | `learning.report.filed`             | Content problem filed                 | reportId, category                            | STU, TSF                |
+| EVT-LRN-031 | `learning.access.extended`          | Extension granted                     | enrollmentId, newEnd                          | NTF                     |
+| EVT-LRN-032 | `learning.hub.visibility_changed`   | Hub crosses the contributor threshold | hubId, state                                  | NTF, ANL                |
+| EVT-LRN-033 | `learning.hub.contribution_decided` | Contribution approved or rejected     | hubId, contributionId, decision               | NTF, REP                |
 
 ### 9.2 Consumed
 
-| Event (producer) | Used by | Effect |
-|---|---|---|
-| `studio.course.published`, `studio.course.unpublished`, `studio.course.taken_down` (STU) | FR-LRN-001, 008, 022 | Update catalog read model and visibility |
-| `assessment.attempt.graded`, `assessment.attempt.voided` (ASM) | FR-LRN-042, 057, 058, 062 | Lesson completion, grade, completion re-evaluation |
-| `billing.purchase.fulfilled`, `billing.refund.completed`, `billing.entitlement.ended` (BIL, planned) | FR-LRN-015, 018, 021 | Activate, refund, expire enrollments |
-| `institution.assignment.created`, `institution.assignment.removed` (INS, planned) | FR-LRN-016 | Create or end institution enrollments |
-| `evidence.item.revoked` (EVD, planned) | FR-LRN-071 | Mark dependent achievements and show status |
-| `trust.case.decided` (TSF, planned) | FR-LRN-065, 075 | Apply review and content decisions |
-| `identity.account.erased` (IDN, planned) | FR-LRN-074 | Run erasure rules |
+| Event (producer)                                                                                     | Used by                   | Effect                                             |
+| ---------------------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------- |
+| `studio.course.published`, `studio.course.unpublished`, `studio.course.taken_down` (STU)             | FR-LRN-001, 008, 022      | Update catalog read model and visibility           |
+| `assessment.attempt.graded`, `assessment.attempt.voided` (ASM)                                       | FR-LRN-042, 057, 058, 062 | Lesson completion, grade, completion re-evaluation |
+| `billing.purchase.fulfilled`, `billing.refund.completed`, `billing.entitlement.ended` (BIL, planned) | FR-LRN-015, 018, 021      | Activate, refund, expire enrollments               |
+| `institution.assignment.created`, `institution.assignment.removed` (INS, planned)                    | FR-LRN-016                | Create or end institution enrollments              |
+| `evidence.item.revoked` (EVD, planned)                                                               | FR-LRN-071                | Mark dependent achievements and show status        |
+| `trust.case.decided` (TSF, planned)                                                                  | FR-LRN-065, 075           | Apply review and content decisions                 |
+| `identity.account.erased` (IDN, planned)                                                             | FR-LRN-074                | Run erasure rules                                  |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Direction | Purpose | Failure behavior |
-|---|---|---|---|
-| Media delivery and CDN (PLT planned, STU pipeline) | Outbound | HLS or DASH, signed tokens, DRM licenses | Fallback CDN; lesson-level containment (BR-LRN-034) |
-| Video providers (YouTube, Vimeo and others per allowlist) | Outbound embed | External lessons | Fallback link (FR-LRN-040) |
-| Payment provider via BIL (planned) | Via BIL | Checkout and webhooks | Purchases disabled with banner |
-| Live room provider (adapter, OD-LRN-06) | Outbound | Live sessions | Reschedule flow |
-| Search index (SRC planned) | Outbound | Catalog search | Category browse fallback |
-| Recommendation service (AIC planned) | Outbound | Rails | Popular fallback |
-| Evidence issuer API (EVD planned) | Outbound | Evidence hand-off | Retry, "evidence pending" |
-| Notification service (NTF planned) | Outbound | Templates and channels | Queue and retry |
-| Calendar clients (ICS feed) | Outbound feed | Study and deadline events | Feed reset |
-| LinkedIn "Add to profile" link | Outbound link | Share certificate | Link only; no data pushed |
-| Virus scanning, file storage (PLT planned) | Outbound | Submissions and resources | Hold upload until scanned |
+| Dependency                                                | Direction      | Purpose                                  | Failure behavior                                    |
+| --------------------------------------------------------- | -------------- | ---------------------------------------- | --------------------------------------------------- |
+| Media delivery and CDN (PLT planned, STU pipeline)        | Outbound       | HLS or DASH, signed tokens, DRM licenses | Fallback CDN; lesson-level containment (BR-LRN-034) |
+| Video providers (YouTube, Vimeo and others per allowlist) | Outbound embed | External lessons                         | Fallback link (FR-LRN-040)                          |
+| Payment provider via BIL (planned)                        | Via BIL        | Checkout and webhooks                    | Purchases disabled with banner                      |
+| Live room provider (adapter, OD-LRN-06)                   | Outbound       | Live sessions                            | Reschedule flow                                     |
+| Search index (SRC planned)                                | Outbound       | Catalog search                           | Category browse fallback                            |
+| Recommendation service (AIC planned)                      | Outbound       | Rails                                    | Popular fallback                                    |
+| Evidence issuer API (EVD planned)                         | Outbound       | Evidence hand-off                        | Retry, "evidence pending"                           |
+| Notification service (NTF planned)                        | Outbound       | Templates and channels                   | Queue and retry                                     |
+| Calendar clients (ICS feed)                               | Outbound feed  | Study and deadline events                | Feed reset                                          |
+| LinkedIn "Add to profile" link                            | Outbound link  | Share certificate                        | Link only; no data pushed                           |
+| Virus scanning, file storage (PLT planned)                | Outbound       | Submissions and resources                | Hold upload until scanned                           |
 
 ## 11. Cross-module dependencies
 
-| Depends on | What LRN needs |
-|---|---|
-| STU | Published immutable course versions, curriculum, rendition manifests, rules, preview flags, announcements |
-| ASM | Assessment attempts and results inside lessons; sandbox; accommodations |
-| EVD (planned) | Evidence issuer API, skills ontology reads, revocation notices |
-| BIL (planned) | Quotes, checkout, entitlements, refunds |
-| INS (planned) | Assignments, seat control, visibility scopes |
-| IDN (planned) | Accounts, sessions, age and sanctions |
-| SET (planned) | Consent flags, data rights workflow |
-| NTF (planned) | Templates, channels, preferences |
-| SRC (planned) | Index and ranking |
-| AIC (planned) | Recommendations and gap analysis |
-| TSF (planned) | Moderation cases |
-| REP (planned) | XP, badges |
-| PLT (planned) | Media, files, public API |
+| Depends on    | What LRN needs                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------- |
+| STU           | Published immutable course versions, curriculum, rendition manifests, rules, preview flags, announcements |
+| ASM           | Assessment attempts and results inside lessons; sandbox; accommodations                                   |
+| EVD (planned) | Evidence issuer API, skills ontology reads, revocation notices                                            |
+| BIL (planned) | Quotes, checkout, entitlements, refunds                                                                   |
+| INS (planned) | Assignments, seat control, visibility scopes                                                              |
+| IDN (planned) | Accounts, sessions, age and sanctions                                                                     |
+| SET (planned) | Consent flags, data rights workflow                                                                       |
+| NTF (planned) | Templates, channels, preferences                                                                          |
+| SRC (planned) | Index and ranking                                                                                         |
+| AIC (planned) | Recommendations and gap analysis                                                                          |
+| TSF (planned) | Moderation cases                                                                                          |
+| REP (planned) | XP, badges                                                                                                |
+| PLT (planned) | Media, files, public API                                                                                  |
 
-| Depended on by | What they use |
-|---|---|
-| EVD (planned) | `learning.course.completed` evidence requests |
-| PRF (planned) | Certificates and completed courses on profiles |
-| AIC, MKT (planned) | Learning signals, gap-to-course mapping |
+| Depended on by     | What they use                                                            |
+| ------------------ | ------------------------------------------------------------------------ |
+| EVD (planned)      | `learning.course.completed` evidence requests                            |
+| PRF (planned)      | Certificates and completed courses on profiles                           |
+| AIC, MKT (planned) | Learning signals, gap-to-course mapping                                  |
 | JOB, ATS (planned) | Verified course and certificate evidence on candidate profiles (via EVD) |
-| INS (planned) | Completion and progress reports within scope |
-| STU | Enrollments, reviews, Q&A, analytics events |
-| ANL (planned) | Learning events for reporting |
+| INS (planned)      | Completion and progress reports within scope                             |
+| STU                | Enrollments, reviews, Q&A, analytics events                              |
+| ANL (planned)      | Learning events for reporting                                            |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Catalog to detail rate | Course detail views from catalog sessions divided by catalog sessions | Learning product owner |
-| Enrollment conversion | Enrollments divided by course detail views, by route | Learning product owner |
-| Time to first lesson | Median minutes from enrollment to first lesson started | Learning product owner |
-| Course completion rate | Completed enrollments divided by enrollments older than the expected duration (cohort-based) | Learning product owner |
-| Weekly active learners | Distinct learners with a qualifying learning activity in a week | Learning product owner |
-| Progress sync failure rate | Failed or retried progress batches divided by batches | Engineering lead |
-| Playback start p95 | 95th percentile ms from Play to first frame (target defined in NFR-PERF, planned) | Engineering lead |
-| Rebuffer ratio | Rebuffering seconds divided by watch seconds | Engineering lead |
-| Evidence integrity | Completed enrollments with exactly one evidence item (when evidence-eligible) divided by evidence-eligible completions | Trust owner |
-| Completion drift | Completed enrollments whose recomputed rule result differs from stored state (target zero) | Engineering lead |
-| Certificate verification success | Verification requests resolving to a valid or definitive status divided by requests | Trust owner |
-| Review authenticity | Removed or flagged reviews divided by published reviews | Trust and safety owner |
-| Refund rate | Refunded enrollments divided by paid enrollments | Finance owner |
-| Accessibility defects open | Count of open accessibility barrier reports older than SLA | Accessibility owner |
-| Nudge opt-out rate | Learners disabling learning reminders divided by learners receiving them | Learning product owner |
+| Metric                           | Definition and formula                                                                                                 | Owner role             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Catalog to detail rate           | Course detail views from catalog sessions divided by catalog sessions                                                  | Learning product owner |
+| Enrollment conversion            | Enrollments divided by course detail views, by route                                                                   | Learning product owner |
+| Time to first lesson             | Median minutes from enrollment to first lesson started                                                                 | Learning product owner |
+| Course completion rate           | Completed enrollments divided by enrollments older than the expected duration (cohort-based)                           | Learning product owner |
+| Weekly active learners           | Distinct learners with a qualifying learning activity in a week                                                        | Learning product owner |
+| Progress sync failure rate       | Failed or retried progress batches divided by batches                                                                  | Engineering lead       |
+| Playback start p95               | 95th percentile ms from Play to first frame (target defined in NFR-PERF, planned)                                      | Engineering lead       |
+| Rebuffer ratio                   | Rebuffering seconds divided by watch seconds                                                                           | Engineering lead       |
+| Evidence integrity               | Completed enrollments with exactly one evidence item (when evidence-eligible) divided by evidence-eligible completions | Trust owner            |
+| Completion drift                 | Completed enrollments whose recomputed rule result differs from stored state (target zero)                             | Engineering lead       |
+| Certificate verification success | Verification requests resolving to a valid or definitive status divided by requests                                    | Trust owner            |
+| Review authenticity              | Removed or flagged reviews divided by published reviews                                                                | Trust and safety owner |
+| Refund rate                      | Refunded enrollments divided by paid enrollments                                                                       | Finance owner          |
+| Accessibility defects open       | Count of open accessibility barrier reports older than SLA                                                             | Accessibility owner    |
+| Nudge opt-out rate               | Learners disabling learning reminders divided by learners receiving them                                               | Learning product owner |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocks |
-|---|---|---|---|---|---|
-| OD-LRN-01 | When do paid courses ship and in what form: first-party only first, or an instructor marketplace? | First-party only; marketplace later; both | First-party paid courses first (SSOT V61-21); third-party marketplace gated by a separate decision on seller of record, tax and payouts | Founder, Finance | FR-LRN-015, 018, 021 |
-| OD-LRN-02 | Which evidence rung and issuer class does a completion of a third-party instructor course earn? | Always claimed; authority_verified with instructor class only with graded assessment or independent sign-off; platform class only for platform-authored | Authority-verified with instructor class only with a graded protected assessment or independent sign-off; none for watch-only | Product, Trust | FR-LRN-071 |
-| OD-LRN-03 | Refund window and progress threshold | 14 or 30 days; thresholds 10, 20, 50 percent | 30 days and 20 percent (SSOT OD-29) | Founder, Finance, Legal | FR-LRN-021 |
-| OD-LRN-04 | Video completion threshold and seek-skip cap | 80, 90, 100 percent; cap 10, 25, 50 percent | 90 percent and 25 percent | Product | FR-LRN-036 |
-| OD-LRN-05 | Does downloadable video ship, and with which DRM? | None, text only, DRM video | Text and transcripts first; DRM video when media cost model accepted | Founder, Engineering | FR-LRN-037 |
-| OD-LRN-06 | Live session provider | Build, vendor adapter, defer | Defer; vendor adapter behind an interface (SSOT OD-33) | Founder | FR-LRN-047 |
-| OD-LRN-07 | Certificate validity and legal-name policy | Perpetual or timed; legal or display name | Perpetual default, timed for compliance courses; learner chooses name before first issue (SSOT OD-18) | Product, Legal | FR-LRN-059 |
-| OD-LRN-08 | Minimum reviews before public rating and incentivized review policy | 3, 5, 10 | 5; incentivized reviews prohibited and declared | Product, Trust | FR-LRN-063, 064 |
-| OD-LRN-09 | Concurrent stream limit and account-sharing enforcement | 1, 2, 3; flag only or block | 2 and flag only | Product, Security | FR-LRN-039 |
-| OD-LRN-10 | Retention periods | progress 90 days, notes 365 days, financial 7 years | As proposed; Legal confirms by jurisdiction | Legal | BR-LRN-012, FR-LRN-052 |
-| OD-LRN-11 | Gamification split between LRN and REP | LRN emits events only; or LRN keeps streaks | LRN keeps streak computation and emits events; REP owns XP, badges | Product | FR-LRN-061, 069 |
-| OD-LRN-12 | Default institution visibility of learner data | completion only; completion and scores; full | Completion and scores, with learner disclosure before first lesson | Product, Legal, institutions | FR-LRN-016 |
-| OD-LRN-13 | Personalization consent default | opt-in or opt-out by region | Opt-in for behavioral personalization; generic rails otherwise | Legal, Product | FR-LRN-066 |
-| OD-LRN-14 | "Popular" badge and ranking fairness for new instructors | Pure popularity; blend with quality; exploration slots | Blend with quality and reserve exploration slots for new courses | Product | FR-LRN-001, 004 |
-| OD-LRN-15 | Minors in discussions and live sessions | Block, restrict, allow with guardian rules | Restrict by age band per IDN policy | Legal, Trust | FR-LRN-047, 051 |
+| ID        | Question                                                                                                               | Options                                                                                                                                                 | Default proposal                                                                                                                        | Who decides                  | Blocks                 |
+| --------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ---------------------- |
+| OD-LRN-01 | When do paid courses ship and in what form: first-party only first, or an instructor marketplace?                      | First-party only; marketplace later; both                                                                                                               | First-party paid courses first (SSOT V61-21); third-party marketplace gated by a separate decision on seller of record, tax and payouts | Founder, Finance             | FR-LRN-015, 018, 021   |
+| OD-LRN-02 | Which evidence rung and issuer class does a completion of a third-party instructor course earn?                        | Always claimed; authority_verified with instructor class only with graded assessment or independent sign-off; platform class only for platform-authored | Authority-verified with instructor class only with a graded protected assessment or independent sign-off; none for watch-only           | Product, Trust               | FR-LRN-071             |
+| OD-LRN-03 | Refund window and progress threshold                                                                                   | 14 or 30 days; thresholds 10, 20, 50 percent                                                                                                            | 30 days and 20 percent (SSOT OD-29)                                                                                                     | Founder, Finance, Legal      | FR-LRN-021             |
+| OD-LRN-04 | Video completion threshold and seek-skip cap                                                                           | 80, 90, 100 percent; cap 10, 25, 50 percent                                                                                                             | 90 percent and 25 percent                                                                                                               | Product                      | FR-LRN-036             |
+| OD-LRN-05 | Does downloadable video ship, and with which DRM?                                                                      | None, text only, DRM video                                                                                                                              | Text and transcripts first; DRM video when media cost model accepted                                                                    | Founder, Engineering         | FR-LRN-037             |
+| OD-LRN-06 | Live session provider                                                                                                  | Build, vendor adapter, defer                                                                                                                            | Defer; vendor adapter behind an interface (SSOT OD-33)                                                                                  | Founder                      | FR-LRN-047             |
+| OD-LRN-07 | Certificate validity and legal-name policy                                                                             | Perpetual or timed; legal or display name                                                                                                               | Perpetual default, timed for compliance courses; learner chooses name before first issue (SSOT OD-18)                                   | Product, Legal               | FR-LRN-059             |
+| OD-LRN-08 | Minimum reviews before public rating and incentivized review policy                                                    | 3, 5, 10                                                                                                                                                | 5; incentivized reviews prohibited and declared                                                                                         | Product, Trust               | FR-LRN-063, 064        |
+| OD-LRN-09 | Concurrent stream limit and account-sharing enforcement                                                                | 1, 2, 3; flag only or block                                                                                                                             | 2 and flag only                                                                                                                         | Product, Security            | FR-LRN-039             |
+| OD-LRN-10 | Retention periods                                                                                                      | progress 90 days, notes 365 days, financial 7 years                                                                                                     | As proposed; Legal confirms by jurisdiction                                                                                             | Legal                        | BR-LRN-012, FR-LRN-052 |
+| OD-LRN-11 | Gamification split between LRN and REP                                                                                 | LRN emits events only; or LRN keeps streaks                                                                                                             | LRN keeps streak computation and emits events; REP owns XP, badges                                                                      | Product                      | FR-LRN-061, 069        |
+| OD-LRN-12 | Default institution visibility of learner data                                                                         | completion only; completion and scores; full                                                                                                            | Completion and scores, with learner disclosure before first lesson                                                                      | Product, Legal, institutions | FR-LRN-016             |
+| OD-LRN-13 | Personalization consent default                                                                                        | opt-in or opt-out by region                                                                                                                             | Opt-in for behavioral personalization; generic rails otherwise                                                                          | Legal, Product               | FR-LRN-066             |
+| OD-LRN-14 | "Popular" badge and ranking fairness for new instructors                                                               | Pure popularity; blend with quality; exploration slots                                                                                                  | Blend with quality and reserve exploration slots for new courses                                                                        | Product                      | FR-LRN-001, 004        |
+| OD-LRN-15 | Minors in discussions and live sessions                                                                                | Block, restrict, allow with guardian rules                                                                                                              | Restrict by age band per IDN policy                                                                                                     | Legal, Trust                 | FR-LRN-047, 051        |
+| OD-LRN-16 | SSOT BR-196 requires at least 3 active contributors for an industry hub but does not define "active" or a time window. | 1 approved contribution in 90 days; 2 in 180 days; any activity including comments                                                                      | 1 approved contribution in 90 days `[PROP]`                                                                                             | Product owner                | FR-LRN-076             |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-LRN-01 | Completion credentials inflated by watch-only courses, reducing employer trust | Medium, high | BR-LRN-025 rung policy; evidence integrity metric; OD-LRN-02 |
-| RSK-LRN-02 | Media cost (storage, egress, DRM) grows faster than revenue | Medium, high | Adaptive ladder, data saver, download gating, cost dashboards (OD-LRN-05) |
-| RSK-LRN-03 | Progress loss or double counting on poor networks | Medium, high | Idempotent events, queue, reconciliation job, chaos tests |
-| RSK-LRN-04 | Fake or incentivized reviews distort ratings | High, medium | Eligibility rules, moderation, burst detection, review authenticity metric |
-| RSK-LRN-05 | Account sharing and content piracy | High, medium | Tokens, concurrency limits, sharing flags, DRM where justified |
-| RSK-LRN-06 | Accessibility gaps (captions missing, player barriers) | Medium, high | Publish gates (STU), accessibility audit gate, barrier reports with priority |
-| RSK-LRN-07 | Recommendations amplify bias or reveal sensitive inferences | Medium, high | Consent, no protected attributes, explanations, evaluation by AIC (planned) |
-| RSK-LRN-08 | Payment webhook ordering and delays create wrong access | Medium, high | Event-owned activation, idempotency, sweeps, reconciliation |
-| RSK-LRN-09 | Notification fatigue drives opt-outs and lost deliverability | Medium, medium | BR-LRN-026 caps, quiet hours, opt-out metric |
-| RSK-LRN-10 | Scope creep from commerce and live features into a full marketplace | Medium, medium | Tier gating (R5), OD-LRN-01, boundary with STU and BIL |
-| RSK-LRN-11 | Version migration corrupts progress mapping | Low, high | Atomic mapping, preview, tests on lessonKey stability, rollback |
-| RSK-LRN-12 | Privacy exposure of learner data to institutions or instructors | Medium, high | Scope disclosure, field-level authorization, audits, k-thresholds |
+| ID         | Risk                                                                           | Likelihood and impact | Mitigation                                                                   |
+| ---------- | ------------------------------------------------------------------------------ | --------------------- | ---------------------------------------------------------------------------- |
+| RSK-LRN-01 | Completion credentials inflated by watch-only courses, reducing employer trust | Medium, high          | BR-LRN-025 rung policy; evidence integrity metric; OD-LRN-02                 |
+| RSK-LRN-02 | Media cost (storage, egress, DRM) grows faster than revenue                    | Medium, high          | Adaptive ladder, data saver, download gating, cost dashboards (OD-LRN-05)    |
+| RSK-LRN-03 | Progress loss or double counting on poor networks                              | Medium, high          | Idempotent events, queue, reconciliation job, chaos tests                    |
+| RSK-LRN-04 | Fake or incentivized reviews distort ratings                                   | High, medium          | Eligibility rules, moderation, burst detection, review authenticity metric   |
+| RSK-LRN-05 | Account sharing and content piracy                                             | High, medium          | Tokens, concurrency limits, sharing flags, DRM where justified               |
+| RSK-LRN-06 | Accessibility gaps (captions missing, player barriers)                         | Medium, high          | Publish gates (STU), accessibility audit gate, barrier reports with priority |
+| RSK-LRN-07 | Recommendations amplify bias or reveal sensitive inferences                    | Medium, high          | Consent, no protected attributes, explanations, evaluation by AIC (planned)  |
+| RSK-LRN-08 | Payment webhook ordering and delays create wrong access                        | Medium, high          | Event-owned activation, idempotency, sweeps, reconciliation                  |
+| RSK-LRN-09 | Notification fatigue drives opt-outs and lost deliverability                   | Medium, medium        | BR-LRN-026 caps, quiet hours, opt-out metric                                 |
+| RSK-LRN-10 | Scope creep from commerce and live features into a full marketplace            | Medium, medium        | Tier gating (R5), OD-LRN-01, boundary with STU and BIL                       |
+| RSK-LRN-11 | Version migration corrupts progress mapping                                    | Low, high             | Atomic mapping, preview, tests on lessonKey stability, rollback              |
+| RSK-LRN-12 | Privacy exposure of learner data to institutions or instructors                | Medium, high          | Scope disclosure, field-level authorization, audits, k-thresholds            |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed and why |
-|---|---|---|
-| `SSOT.md` §9.2 F-07 (LMS), §10.17, §10.21, §10.22 (BR-091..BR-115), §10.34 (BR-189..BR-193), §13.12 to §13.16 (media model), §19 (PWA) | Catalog, detail, enrollment, player, progress, completion, certificate, reviews rules, provider capability model, offline contract | "Sequential module progress" (BR-047) became author-configurable because free navigation is a common learner expectation; the 70 percent final-assessment rule became author-configured because a fixed value is a policy decision (OD) |
-| `SSOT.md` §7 feature rows F-66..F-74, F-82, F-100, F-106, F-107, F-136, F-137, F-155 | Feature coverage list (study groups, Q&A, adaptive learning, micro-learning ideas) | F-66, F-73 and F-74 detail (authoring, commerce, instructor platform) moved to STU; F-136 micro-learning is covered by short lessons, reading and daily review rather than a separate feature |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-06 | Enrollment state machine, idempotency, progress events, version pinning, completion rule, evidence hand-off, refund after completion | Offline video marked open; video threshold values kept as proposals |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` FEAT-08-03.1 to .3 | Resume rule, offline lesson cache, captions and transcript requirement | Cached video excluded by REVW-15 is reopened as a decision (OD-LRN-05) |
-| `docs/registries/FEATURE_REGISTRY.md` F-07, F-52, F-67 to F-72, F-114, F-116 | Cross-check of scope | Registry status is not treated as built |
-| `docs/product/PRD.md`, `docs/experience/JOURNEY_REGISTRY.md` (J-01, J-19, J-20) | Journey framing: learn, prove, showcase; self-paced learner; path with capstone | Journeys are targets, not tests |
-| Own knowledge of Coursera, Udemy, edX, LinkedIn Learning, Khan Academy, YouTube player conventions | Player controls, shortcuts, chapters, streaks, notes, calendar feeds, study groups | Tagged `[PROP]` where used |
+| Legacy source                                                                                                                          | Used for                                                                                                                             | Dropped or changed and why                                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` §9.2 F-07 (LMS), §10.17, §10.21, §10.22 (BR-091..BR-115), §10.34 (BR-189..BR-193), §13.12 to §13.16 (media model), §19 (PWA) | Catalog, detail, enrollment, player, progress, completion, certificate, reviews rules, provider capability model, offline contract   | "Sequential module progress" (BR-047) became author-configurable because free navigation is a common learner expectation; the 70 percent final-assessment rule became author-configured because a fixed value is a policy decision (OD) |
+| `SSOT.md` §7 feature rows F-66..F-74, F-82, F-100, F-106, F-107, F-136, F-137, F-155                                                   | Feature coverage list (study groups, Q&A, adaptive learning, micro-learning ideas)                                                   | F-66, F-73 and F-74 detail (authoring, commerce, instructor platform) moved to STU; F-136 micro-learning is covered by short lessons, reading and daily review rather than a separate feature                                           |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-06                                     | Enrollment state machine, idempotency, progress events, version pinning, completion rule, evidence hand-off, refund after completion | Offline video marked open; video threshold values kept as proposals                                                                                                                                                                     |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` FEAT-08-03.1 to .3                                      | Resume rule, offline lesson cache, captions and transcript requirement                                                               | Cached video excluded by REVW-15 is reopened as a decision (OD-LRN-05)                                                                                                                                                                  |
+| `docs/registries/FEATURE_REGISTRY.md` F-07, F-52, F-67 to F-72, F-114, F-116                                                           | Cross-check of scope                                                                                                                 | Registry status is not treated as built                                                                                                                                                                                                 |
+| `docs/product/PRD.md`, `docs/experience/JOURNEY_REGISTRY.md` (J-01, J-19, J-20)                                                        | Journey framing: learn, prove, showcase; self-paced learner; path with capstone                                                      | Journeys are targets, not tests                                                                                                                                                                                                         |
+| Own knowledge of Coursera, Udemy, edX, LinkedIn Learning, Khan Academy, YouTube player conventions                                     | Player controls, shortcuts, chapters, streaks, notes, calendar feeds, study groups                                                   | Tagged `[PROP]` where used                                                                                                                                                                                                              |

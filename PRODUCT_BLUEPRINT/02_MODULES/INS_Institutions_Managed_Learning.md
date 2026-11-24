@@ -12,15 +12,15 @@ INS lets a school, college, university, bootcamp, training provider or workforce
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| An institution is verified and operating in its own tenant | Tenant reaches `verified` (SM-INS-01) and at least one `IAD` is active |
-| A roster of students is provisioned without cross-tenant leakage or silent partial imports | Import batch reaches `completed` with a row-level report (SM-INS-02) |
-| Students learn managed courses under seats that are never oversold | Seat counters reconcile to assignments in `ENT-INS-12` at all times (BR-INS-009) |
-| Faculty see who is falling behind and act on it | Intervention cases are opened, actioned and resolved (SM-INS-07) |
-| Placement officers run drives and record outcomes that students confirm | Drive applications and outcome records reach terminal states (SM-INS-05, SM-INS-06, SM-INS-10) |
-| Leaders get reproducible accreditation-style figures | Report runs store parameters and as-of time (BR-INS-024) |
-| A graduating student keeps all verified signals and loses nothing they earned | Graduation transition `completed` (SM-INS-09) and the independent profile is active |
+| Outcome                                                                                    | How the system knows                                                                           |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| An institution is verified and operating in its own tenant                                 | Tenant reaches `verified` (SM-INS-01) and at least one `IAD` is active                         |
+| A roster of students is provisioned without cross-tenant leakage or silent partial imports | Import batch reaches `completed` with a row-level report (SM-INS-02)                           |
+| Students learn managed courses under seats that are never oversold                         | Seat counters reconcile to assignments in `ENT-INS-12` at all times (BR-INS-009)               |
+| Faculty see who is falling behind and act on it                                            | Intervention cases are opened, actioned and resolved (SM-INS-07)                               |
+| Placement officers run drives and record outcomes that students confirm                    | Drive applications and outcome records reach terminal states (SM-INS-05, SM-INS-06, SM-INS-10) |
+| Leaders get reproducible accreditation-style figures                                       | Report runs store parameters and as-of time (BR-INS-024)                                       |
+| A graduating student keeps all verified signals and loses nothing they earned              | Graduation transition `completed` (SM-INS-09) and the independent profile is active            |
 
 ### 1.3 Boundaries
 
@@ -28,20 +28,20 @@ INS lets a school, college, university, bootcamp, training provider or workforce
 
 **Out of scope (owned elsewhere):**
 
-| Capability | Owner | How INS uses it |
-|---|---|---|
-| Course content, lessons, enrollment mechanics, progress events, certificate rendering | LRN (planned) | INS assigns courses and reads progress events |
-| Course authoring tools | STU (planned) | INS creates institution-private courses through STU |
-| Grading, assessments, integrity | ASM (planned) | INS reads results for dashboards |
-| Payment, invoices, tax, seat purchase checkout, price books | BIL (this batch) | INS consumes seat pools created by BIL and shows balance |
-| Authentication, sessions, SSO protocol handling, MFA | IDN (planned) | INS configures an institution's IdP; IDN executes the sign-in |
-| Consent ledger and data-rights requests | SET (planned) | INS registers purposes and shows student consent state |
-| Job postings, applications, pipelines | JOB, ATS (planned) | A placement drive can link to a job; applications live in ATS |
-| Interview scheduling | INT (planned) | Drive rounds hand off to INT |
-| Notifications delivery | NTF (planned) | INS emits events; NTF sends |
-| Alumni networks, groups, referrals | NET (planned) | INS provides affiliation and graduation signals |
-| Verification of evidence by institutions | EVD, BGV (planned) | INS supplies the `institution_verified` actors |
-| Moderation of institution content | TSF (planned) | INS reports content |
+| Capability                                                                            | Owner              | How INS uses it                                               |
+| ------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------- |
+| Course content, lessons, enrollment mechanics, progress events, certificate rendering | LRN (planned)      | INS assigns courses and reads progress events                 |
+| Course authoring tools                                                                | STU (planned)      | INS creates institution-private courses through STU           |
+| Grading, assessments, integrity                                                       | ASM (planned)      | INS reads results for dashboards                              |
+| Payment, invoices, tax, seat purchase checkout, price books                           | BIL (this batch)   | INS consumes seat pools created by BIL and shows balance      |
+| Authentication, sessions, SSO protocol handling, MFA                                  | IDN (planned)      | INS configures an institution's IdP; IDN executes the sign-in |
+| Consent ledger and data-rights requests                                               | SET (planned)      | INS registers purposes and shows student consent state        |
+| Job postings, applications, pipelines                                                 | JOB, ATS (planned) | A placement drive can link to a job; applications live in ATS |
+| Interview scheduling                                                                  | INT (planned)      | Drive rounds hand off to INT                                  |
+| Notifications delivery                                                                | NTF (planned)      | INS emits events; NTF sends                                   |
+| Alumni networks, groups, referrals                                                    | NET (planned)      | INS provides affiliation and graduation signals               |
+| Verification of evidence by institutions                                              | EVD, BGV (planned) | INS supplies the `institution_verified` actors                |
+| Moderation of institution content                                                     | TSF (planned)      | INS reports content                                           |
 
 **Non-goal brushes (SSOT §4.2):** a student information system, a payroll or HR system and a general LMS replacement are out of scope. INS holds only the academic data TalentSphere needs to run managed learning and placement (roster, program, batch, term, progress, outcomes). Employer relations is a placement-contact list with consented sharing, not a sales-prospecting tool. Recorded as `OD-INS-02` and `OD-INS-03`. [SRC: SSOT §4.2]
 
@@ -55,46 +55,47 @@ Scoped grants: a role is held at one scope level (institution, department, progr
 
 Legend: C create, R read, U update, D delete or deactivate, A approve or act, `own` own record only, `scope` only within assigned scope, `—` none.
 
-| Capability | IAD | PLO | INS (faculty) | STD | CAN | REC/HMG | EAD | PAD | SUP | FIN |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Submit institution application | C | — | — | — | — | — | — | — | — | — |
-| Approve institution verification | — | — | — | — | — | — | — | A | — | — |
-| Edit institution profile and branding | U | — | — | — | — | — | — | U (audit) | — | — |
-| Invite staff, change staff scope | C, U, D | — | — | — | — | — | — | override (audit) | — | — |
-| Departments, programs, terms | C, U, D | R | R scope | R own | — | — | — | R | R | — |
-| Batches | C, U, D | R, U placement tags | R scope | R own | — | — | — | R | R | — |
-| Invite or import students | C | — | C scope (invite only, if granted) | — | — | — | — | — | — | — |
-| Roster read | R | R (placement fields) | R scope | R own | — | — | — | R (audit) | R (audit) | — |
-| Roster edit, suspend, withdraw | U, D | — | — | — | — | — | — | override (audit) | — | — |
-| Assign courses to batches | A | — | A scope (if granted) | — | — | — | — | — | — | — |
-| Buy seats, change seat pool | A (billing role) | — | — | — | — | — | — | — | — | R, A |
-| Assign, revoke, reassign seats | A | — | — | — | — | — | — | override (audit) | — | — |
-| Progress dashboard | R | R | R scope | R own | — | — | — | R | R | — |
-| Interventions | R, A | R | C, U scope | R shared | — | — | — | R | — | — |
-| Placement drives | R | C, U, A | R scope | R eligible, respond | R | R shared by consent | — | R | — | — |
-| Employer relations contacts | R | C, U, D | — | — | — | — | R own org | R | — | — |
-| Consent for showcase | — | R (state only) | — | C, U, D own | — | R granted | — | R | R | — |
-| Placement outcomes | R | C, U | R scope (aggregate) | confirm own | — | — | — | R | — | — |
-| Dashboards and reports | R, export | R placement | R scope | — | — | — | — | R | — | — |
-| SSO, LTI, roster sync config | C, U, D | — | — | — | — | — | — | R, override (audit) | R | — |
-| Guardian consent | R state | — | — | R own | — | — | — | R | R | — |
-| Disclosure log, record access | R | — | — | R own | — | — | — | R | R | — |
-| Offboard institution, export data | A | — | — | — | — | — | — | A (audit) | — | — |
+| Capability                            | IAD              | PLO                  | INS (faculty)                     | STD                 | CAN | REC/HMG             | EAD       | PAD                 | SUP       | FIN  |
+| ------------------------------------- | ---------------- | -------------------- | --------------------------------- | ------------------- | --- | ------------------- | --------- | ------------------- | --------- | ---- |
+| Submit institution application        | C                | —                    | —                                 | —                   | —   | —                   | —         | —                   | —         | —    |
+| Approve institution verification      | —                | —                    | —                                 | —                   | —   | —                   | —         | A                   | —         | —    |
+| Edit institution profile and branding | U                | —                    | —                                 | —                   | —   | —                   | —         | U (audit)           | —         | —    |
+| Invite staff, change staff scope      | C, U, D          | —                    | —                                 | —                   | —   | —                   | —         | override (audit)    | —         | —    |
+| Departments, programs, terms          | C, U, D          | R                    | R scope                           | R own               | —   | —                   | —         | R                   | R         | —    |
+| Batches                               | C, U, D          | R, U placement tags  | R scope                           | R own               | —   | —                   | —         | R                   | R         | —    |
+| Invite or import students             | C                | —                    | C scope (invite only, if granted) | —                   | —   | —                   | —         | —                   | —         | —    |
+| Roster read                           | R                | R (placement fields) | R scope                           | R own               | —   | —                   | —         | R (audit)           | R (audit) | —    |
+| Roster edit, suspend, withdraw        | U, D             | —                    | —                                 | —                   | —   | —                   | —         | override (audit)    | —         | —    |
+| Assign courses to batches             | A                | —                    | A scope (if granted)              | —                   | —   | —                   | —         | —                   | —         | —    |
+| Buy seats, change seat pool           | A (billing role) | —                    | —                                 | —                   | —   | —                   | —         | —                   | —         | R, A |
+| Assign, revoke, reassign seats        | A                | —                    | —                                 | —                   | —   | —                   | —         | override (audit)    | —         | —    |
+| Progress dashboard                    | R                | R                    | R scope                           | R own               | —   | —                   | —         | R                   | R         | —    |
+| Interventions                         | R, A             | R                    | C, U scope                        | R shared            | —   | —                   | —         | R                   | —         | —    |
+| Placement drives                      | R                | C, U, A              | R scope                           | R eligible, respond | R   | R shared by consent | —         | R                   | —         | —    |
+| Employer relations contacts           | R                | C, U, D              | —                                 | —                   | —   | —                   | R own org | R                   | —         | —    |
+| Consent for showcase                  | —                | R (state only)       | —                                 | C, U, D own         | —   | R granted           | —         | R                   | R         | —    |
+| Placement outcomes                    | R                | C, U                 | R scope (aggregate)               | confirm own         | —   | —                   | —         | R                   | —         | —    |
+| Dashboards and reports                | R, export        | R placement          | R scope                           | —                   | —   | —                   | —         | R                   | —         | —    |
+| SSO, LTI, roster sync config          | C, U, D          | —                    | —                                 | —                   | —   | —                   | —         | R, override (audit) | R         | —    |
+| Guardian consent                      | R state          | —                    | —                                 | R own               | —   | —                   | —         | R                   | R         | —    |
+| Disclosure log, record access         | R                | —                    | —                                 | R own               | —   | —                   | —         | R                   | R         | —    |
+| Offboard institution, export data     | A                | —                    | —                                 | —                   | —   | —                   | —         | A (audit)           | —         | —    |
 
 Notes: `PLO` and `INS` hold no billing, seat-purchase or user-management privileges. [SRC: BR-078] `REC`, `HMG`, `EAD` never read a roster; they see only consented showcase or drive-application data. [SRC: BR-079]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Institution onboarding and verification | FR-INS-001 to 005 |
-| B | Cohorts, roster and bulk import | FR-INS-006 to 009 |
-| C | Managed courses and seats | FR-INS-010 to 014 |
-| D | Progress and interventions | FR-INS-015 to 017 |
-| E | Placement office and employer relations | FR-INS-018 to 022 |
-| F | Dashboards and accreditation reports | FR-INS-023 to 024 |
-| G | Graduation and alumni transition | FR-INS-025 to 026 |
-| H | Integrations, consent and data governance | FR-INS-027 to 032 |
+| Code | Sub-module                                | Features          |
+| ---- | ----------------------------------------- | ----------------- |
+| A    | Institution onboarding and verification   | FR-INS-001 to 005 |
+| B    | Cohorts, roster and bulk import           | FR-INS-006 to 009 |
+| C    | Managed courses and seats                 | FR-INS-010 to 014 |
+| D    | Progress and interventions                | FR-INS-015 to 017 |
+| E    | Placement office and employer relations   | FR-INS-018 to 022 |
+| F    | Dashboards and accreditation reports      | FR-INS-023 to 024 |
+| G    | Graduation and alumni transition          | FR-INS-025 to 026 |
+| H    | Integrations, consent and data governance | FR-INS-027 to 032 |
+| I    | Funding and scholarships                  | FR-INS-033        |
 
 ## 4. Feature specifications
 
@@ -914,48 +915,81 @@ Notes: `PLO` and `INS` hold no billing, seat-purchase or user-management privile
   - Given a student with verified evidence, when the institution offboards, then the student's account and evidence remain.
   - Given a legal hold on a record, when the purge runs, then that record remains and the hold is logged.
 
+### FR-INS-033 — Scholarship and funding discovery
+
+- **Sub-module:** I. Funding and scholarships
+- **Priority / tier:** Could · R5
+- **Source:** [SRC: SSOT §7.2 F-132 Scholarship Discovery (priority 3, Ph6; dependencies F-40, F-07)] [PROP] for behavior; scope in `OD-INS-13`
+- **Purpose and outcome:** Students and learners find scholarships, grants, fee waivers and employer-sponsored learning awards that fit a course, program or certification, and track deadlines; institutions and verified organizations publish their own awards. The system knows it works when learners find and track eligible funding. The platform lists and tracks only: it does not adjudicate, hold or pay out funds.
+- **Roles and permissions:** `GUE: view public listings` · `CAN, STD: browse, match, save, track` · `IAD, PLO: publish and edit own institution's awards` · `EAD: publish own organization's learning awards` · `PAD: approve public listings from external providers, remove listings`
+- **Preconditions and entry points:** Listing published and not past its deadline. Entry: `/learn/funding`, "Funding" on course and program pages (FR-LRN-008), institution student home.
+- **User interactions and actions:**
+  1. Browse the funding list with filters: type (scholarship, grant, fee waiver, employer-sponsored award, public scheme), field or skill, level, country, institution, amount band, deadline window, provider.
+  2. Press "Match to me" (signed in): the system shows "Likely eligible", "Check the criteria" or "Not eligible by the listed criteria" with the reason, using only the profile fields the student consents to share (education level, country, institution membership, enrolled program).
+  3. Open a listing: provider, description, eligibility, amount, deadline, required documents, apply link (external). Press "Save", set a reminder (FR-NTF-028), and set a status in "My funding" (interested, applied, awarded, declined).
+  4. Institution or organization staff: press "New award", enter title, provider, type, amount range and currency, eligibility fields, deadline, apply URL, description, visibility (public or institution only), and submit. Institution-only awards publish immediately to that institution's students; public awards from external providers go to PAD review.
+  5. Any viewer can report a listing (FR-TSF-001).
+- **System behaviour:** Listings archive 30 days after the deadline and are hidden from lists on the deadline. Provider verification uses the organization or institution verification status (FR-INS-002, FR-EMP-002); other providers are labelled "Unverified provider" and need PAD approval. Matching uses descriptive structured fields only and never income, disability, ethnicity, religion or other sensitive attributes (BR-INS-039). Apply links open externally with a leaving-site notice. Listings that ask for fees, bank details or national identifiers are blocked, and the platform takes no fee for listing or placement (BR-INS-040). No payment or sponsorship affects order (BR-SRC-038). Records of a student's tracker are private to them and never shared with institutions or employers unless the student shares them.
+- **UI elements and controls:** Filter panel, listing cards with deadline badge and provider label, eligibility match chip with text reason, apply button (external), save, reminder, status select, "My funding" list, staff award form, report menu. States: empty ("No funding matches these filters" with a broadening hint), expired, loading, error with Retry.
+- **Configuration options:** Institution: default visibility for new awards, whether to show institution-only awards to alumni. Platform: type list, archive delay (default {30} days), review policy for external providers. User: reminder offsets.
+- **Business rules:** BR-INS-039, BR-INS-040, BR-INS-008
+- **Validation:** Title 5 to 150 characters; description up to 3,000; amount min at most max, non-negative, ISO currency; deadline in the future at creation; apply URL https; eligibility fields from the allowed list; at most 20 active awards per institution unless PAD raises the limit.
+- **Inputs and outputs:** In: listing fields, filters, match consent, tracker status. Out: listing views, match result with reasons, tracker entries.
+- **Filters, sorting, search:** Filters above; sort by deadline (default), amount, newest; keyword search on title and provider.
+- **Notifications and communication:** Deadline reminders to the student through FR-NTF-028 (class time-critical when the student set a time, otherwise engagement); `ins.funding.listing_published` to followers of the institution (in-app, class engagement, opt-out); staff are told when PAD approves or rejects a public listing (in-app).
+- **Error handling and edge cases:** Deadline passes while the student is viewing: banner "This deadline has passed". Provider withdraws: staff mark the listing withdrawn, trackers show "Withdrawn by provider". Student lacks profile data for matching: "Add your education details to see matches" without blocking browsing. Duplicate listing from the same provider and title: warning before submit. A listing is reported as a scam: hidden pending review (FR-TSF-008).
+- **Dependencies:** FR-INS-002, FR-INS-003, FR-INS-007, FR-LRN-008, FR-NTF-028, FR-TSF-001, FR-TSF-008, FR-EMP-002, FR-SET-005, ENT-INS-32, ENT-INS-33.
+- **Security and privacy:** Matching reads consented profile fields only and logs the use; trackers are private; provider contact data is kept out of public pages; listing content is sanitized and moderated; audit entries for publish and removal.
+- **Acceptance criteria:**
+  - Given a public award for students in a given country, when an eligible student presses "Match to me", then the listing shows "Likely eligible" with the matching criteria listed.
+  - Given a listing's deadline passed 1 day ago, when a student opens the funding list, then it does not appear in the default view.
+  - Given a staff member enters an award asking applicants for a bank account number, when submitting, then it is blocked with `prohibited_request`.
+  - Given a student's tracker, when institution staff request it by user id, then the system returns 404 (negative).
+
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-INS-001 | Every institution-owned record carries `institution_id`; cross-tenant reads and writes are denied server-side and by row-level security. | Tenant isolation is the core safety property of B2B2C. | Data layer policies, API middleware, tests for every table | [SRC: BR-080; HDN-018; §23.4 exit 5] |
-| BR-INS-002 | A tenant not yet `verified` runs in sandbox: at most 25 students, no certificates, no public page, no drives, no employer sharing. | Prevents abuse by fake institutions. | Tenant guard on create/issue actions | [DER] |
-| BR-INS-003 | Verification needs proof of domain control and one proof of legal existence; the reviewer must be independent of the applicant and decisions are immutable. | Trust in institution-issued credentials. | Verification workflow, ADM queue | [DER] |
-| BR-INS-004 | Staff roles are scoped grants; faculty and placement officers have no billing, seat purchase or user-management rights; the last active `IAD` cannot be removed or downgraded. | Least privilege, no orphan tenant. | Authorization layer | [SRC: BR-078] [DER] |
-| BR-INS-005 | A user has at most one active membership per institution; a user may hold memberships at several institutions; one primary program per membership. | Avoids duplicate seats and records. | Unique constraint | [DER] |
-| BR-INS-006 | Bulk imports and sync runs require a dry-run preview and explicit confirmation; no silent partial import; excluded rows are listed. | Data integrity. | Import service state machine | [SRC: BR-077] |
-| BR-INS-007 | Imports are idempotent on (import batch id, row hash) and sync on (source id, external id). | Retries never duplicate. | Unique keys | [SRC: SCI-10] |
-| BR-INS-008 | The institution sees only institution-scope data and data the student shared by consent; it cannot read applications, messages, private evidence or personal profile fields. | Student sovereignty. | Query layer field allowlists | [DER] |
-| BR-INS-009 | Seat consumption is atomic; assigned seats never exceed total; no overselling under concurrency. | Revenue and fairness. | Row lock plus check constraint | [SRC: BR-074] |
-| BR-INS-010 | Course access is decided server-side from institution status, membership, seat validity, enrollment and validity window on every request. | Prevents UI-only gating. | Course access service | [SRC: BR-072, BR-082] |
-| BR-INS-011 | Seat revocation gives a 7-day grace (configurable 0-30); in-progress assessments are never interrupted; progress and certificates are retained; seats return to the pool. | Student fairness. | Seat service, ASM hook | [SRC: BR-073, BR-075] |
-| BR-INS-012 | Institutional pricing is configured per course or package in BIL, never hard-coded in INS. | Pricing is OD-gated. | Reads from BIL price book | [SRC: BR-081] |
-| BR-INS-013 | Employer-facing student showcases need recorded, revocable, purpose-bound consent; default is no sharing. | Privacy and trust. | Showcase service | [SRC: BR-079] |
-| BR-INS-014 | Students below the age of majority need guardian consent before profile creation; minors have private-by-default profiles, restricted outreach, no employer showcase or drives without a guardian-granted purpose; the age floor is a platform parameter. | Child safety and legal compliance. | Membership activation guard, discovery filters | [SRC: BR-128] [DEC-REQ] OD-INS-05 |
-| BR-INS-015 | Education records are classed Restricted; every identity-bearing disclosure creates a log entry; students can request access and correction. | FERPA-style accountability. | Disclosure service, export layer | [DER] OD-INS-05 |
-| BR-INS-016 | Graduation or leaving retains all verified signals on the student's account, severs institution-restricted records from the student's profile and ends tenant access to non-institution data; alumni network joining is opt-in. | Flywheel without capturing the student. | Transition service | [SRC: BR-076, BR-247] |
-| BR-INS-017 | Institutional student records are retained 7 years after last activity by default, configurable within platform bounds, and purged afterwards unless on legal hold. | Compliance and storage limitation. | Retention job | [SRC: OD-19] |
-| BR-INS-018 | Intervention notes and at-risk flags are internal; the student sees only items marked shared; employers and external parties never see them. | Student dignity and legal exposure. | Case visibility field and query filters | [DER] |
-| BR-INS-019 | At-risk flags are produced by declared rules with listed signals; no unexplained score may raise a flag; flags never trigger automatic adverse action. | Explainability and fairness. | Flag generator schema | [DER] |
-| BR-INS-020 | Drive eligibility uses an allowlist of job-relevant criteria; protected attributes are refused. | Non-discrimination. | Drive validation | [DER] |
-| BR-INS-021 | Drive participation is voluntary; the institution's one-offer policy (if on) blocks further registration after acceptance; dream-offer exception is configurable. | Fairness and student autonomy. | Registration guard | [PROP] |
-| BR-INS-022 | Placement outcomes are student-confirmed or verified before they enter public or accreditation outputs; unconfirmed are labeled institution-reported. | Honest statistics. | Reporting filters | [DER] |
-| BR-INS-023 | Any aggregate shown outside direct in-tenant per-student views suppresses cells with fewer than `min_cohort_k` students (default 10). | Re-identification risk. | Report engine | [SRC: V61-04, OD-38] |
-| BR-INS-024 | Every report run stores its parameters, query version and as-of time and can be reproduced. | Auditability. | Report run record | [DER] |
-| BR-INS-025 | Certificate branding is snapshotted at issuance; certificates are verifiable by a public unguessable code; revocation propagates to linked evidence. | Credential trust. | Certificate service | [SRC: SCI-17; CF-41] |
-| BR-INS-026 | SSO may only provision or sign in users whose asserted email domain is verified for the tenant and who match a roster entry (or domain claim is enabled). | Prevents takeover of tenant membership. | SSO callback | [DER] |
-| BR-INS-027 | LTI launches validate signature, nonce, state, issuer, audience, deployment id and expiry; each registration belongs to one tenant. | Standard LTI 1.3 security. | LTI endpoint | [PROP] |
-| BR-INS-028 | A user may hold one open institution application; a verified domain belongs to exactly one tenant. | Impersonation protection. | Unique constraints | [DER] |
-| BR-INS-029 | Invitations and guardian links are single-use bearer tokens, stored hashed, expiring (default 14 days); claiming requires control of the invited email. | Account takeover prevention. | Token service | [DER] |
-| BR-INS-030 | Structure nodes (departments, programs, batches) cannot be archived while active children exist; history is retained; institution-private courses never appear in public search without STU review. | Referential integrity and privacy. | Service guards | [DER] |
-| BR-INS-031 | Faculty read and grade only batches and courses they are assigned to. | Least privilege. | Scope filter | [SRC: BR-078] |
-| BR-INS-032 | Offboarding gives a 30-day export window, transitions students as independents, purges institution-scoped data after the window unless on hold or unpaid items block it. | Fair exit. | Offboarding workflow | [DER] |
-| BR-INS-033 | Employer relations is a partnership list with consented sharing only: no scraping, sequences, lead scoring or bulk cold outreach; invite volume is capped. | Stays inside SSOT non-goal. | Invite service | [SRC: §4.2] [DEC-REQ] OD-INS-03 |
-| BR-INS-034 | Employers see only students who registered for that drive and consented; access ends when the drive closes plus 30 days. | Purpose limitation. | Drive view builder | [SRC: BR-079] |
-| BR-INS-035 | Mandatory academic notices cannot be opted out; opportunity and coaching messages follow opt-out classes. | Clarity of obligations. | NTF template classes | [DER] |
-| BR-INS-036 | A student may leave an institution at any time; their independent account continues and institution access ends per FR-INS-025 rules. | Student ownership. | Membership service | [DER] |
-| BR-INS-037 | Roster sources are authoritative only for institution-scope fields and never overwrite student-owned profile fields. | Data ownership. | Sync mapper | [DER] |
-| BR-INS-038 | Destructive bulk actions on more than 50 students need typed confirmation and are undoable for 24 hours; sync guard stops withdrawals above 10 percent of the roster per run. | Prevent mass accidents. | Bulk action service | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                      | Rationale                                                                | Enforced where                                             | Source                                    |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------- | ----------------------------------------- |
+| BR-INS-001 | Every institution-owned record carries `institution_id`; cross-tenant reads and writes are denied server-side and by row-level security.                                                                                                                  | Tenant isolation is the core safety property of B2B2C.                   | Data layer policies, API middleware, tests for every table | [SRC: BR-080; HDN-018; §23.4 exit 5]      |
+| BR-INS-002 | A tenant not yet `verified` runs in sandbox: at most 25 students, no certificates, no public page, no drives, no employer sharing.                                                                                                                        | Prevents abuse by fake institutions.                                     | Tenant guard on create/issue actions                       | [DER]                                     |
+| BR-INS-003 | Verification needs proof of domain control and one proof of legal existence; the reviewer must be independent of the applicant and decisions are immutable.                                                                                               | Trust in institution-issued credentials.                                 | Verification workflow, ADM queue                           | [DER]                                     |
+| BR-INS-004 | Staff roles are scoped grants; faculty and placement officers have no billing, seat purchase or user-management rights; the last active `IAD` cannot be removed or downgraded.                                                                            | Least privilege, no orphan tenant.                                       | Authorization layer                                        | [SRC: BR-078] [DER]                       |
+| BR-INS-005 | A user has at most one active membership per institution; a user may hold memberships at several institutions; one primary program per membership.                                                                                                        | Avoids duplicate seats and records.                                      | Unique constraint                                          | [DER]                                     |
+| BR-INS-006 | Bulk imports and sync runs require a dry-run preview and explicit confirmation; no silent partial import; excluded rows are listed.                                                                                                                       | Data integrity.                                                          | Import service state machine                               | [SRC: BR-077]                             |
+| BR-INS-007 | Imports are idempotent on (import batch id, row hash) and sync on (source id, external id).                                                                                                                                                               | Retries never duplicate.                                                 | Unique keys                                                | [SRC: SCI-10]                             |
+| BR-INS-008 | The institution sees only institution-scope data and data the student shared by consent; it cannot read applications, messages, private evidence or personal profile fields.                                                                              | Student sovereignty.                                                     | Query layer field allowlists                               | [DER]                                     |
+| BR-INS-009 | Seat consumption is atomic; assigned seats never exceed total; no overselling under concurrency.                                                                                                                                                          | Revenue and fairness.                                                    | Row lock plus check constraint                             | [SRC: BR-074]                             |
+| BR-INS-010 | Course access is decided server-side from institution status, membership, seat validity, enrollment and validity window on every request.                                                                                                                 | Prevents UI-only gating.                                                 | Course access service                                      | [SRC: BR-072, BR-082]                     |
+| BR-INS-011 | Seat revocation gives a 7-day grace (configurable 0-30); in-progress assessments are never interrupted; progress and certificates are retained; seats return to the pool.                                                                                 | Student fairness.                                                        | Seat service, ASM hook                                     | [SRC: BR-073, BR-075]                     |
+| BR-INS-012 | Institutional pricing is configured per course or package in BIL, never hard-coded in INS.                                                                                                                                                                | Pricing is OD-gated.                                                     | Reads from BIL price book                                  | [SRC: BR-081]                             |
+| BR-INS-013 | Employer-facing student showcases need recorded, revocable, purpose-bound consent; default is no sharing.                                                                                                                                                 | Privacy and trust.                                                       | Showcase service                                           | [SRC: BR-079]                             |
+| BR-INS-014 | Students below the age of majority need guardian consent before profile creation; minors have private-by-default profiles, restricted outreach, no employer showcase or drives without a guardian-granted purpose; the age floor is a platform parameter. | Child safety and legal compliance.                                       | Membership activation guard, discovery filters             | [SRC: BR-128] [DEC-REQ] OD-INS-05         |
+| BR-INS-015 | Education records are classed Restricted; every identity-bearing disclosure creates a log entry; students can request access and correction.                                                                                                              | FERPA-style accountability.                                              | Disclosure service, export layer                           | [DER] OD-INS-05                           |
+| BR-INS-016 | Graduation or leaving retains all verified signals on the student's account, severs institution-restricted records from the student's profile and ends tenant access to non-institution data; alumni network joining is opt-in.                           | Flywheel without capturing the student.                                  | Transition service                                         | [SRC: BR-076, BR-247]                     |
+| BR-INS-017 | Institutional student records are retained 7 years after last activity by default, configurable within platform bounds, and purged afterwards unless on legal hold.                                                                                       | Compliance and storage limitation.                                       | Retention job                                              | [SRC: OD-19]                              |
+| BR-INS-018 | Intervention notes and at-risk flags are internal; the student sees only items marked shared; employers and external parties never see them.                                                                                                              | Student dignity and legal exposure.                                      | Case visibility field and query filters                    | [DER]                                     |
+| BR-INS-019 | At-risk flags are produced by declared rules with listed signals; no unexplained score may raise a flag; flags never trigger automatic adverse action.                                                                                                    | Explainability and fairness.                                             | Flag generator schema                                      | [DER]                                     |
+| BR-INS-020 | Drive eligibility uses an allowlist of job-relevant criteria; protected attributes are refused.                                                                                                                                                           | Non-discrimination.                                                      | Drive validation                                           | [DER]                                     |
+| BR-INS-021 | Drive participation is voluntary; the institution's one-offer policy (if on) blocks further registration after acceptance; dream-offer exception is configurable.                                                                                         | Fairness and student autonomy.                                           | Registration guard                                         | [PROP]                                    |
+| BR-INS-022 | Placement outcomes are student-confirmed or verified before they enter public or accreditation outputs; unconfirmed are labeled institution-reported.                                                                                                     | Honest statistics.                                                       | Reporting filters                                          | [DER]                                     |
+| BR-INS-023 | Any aggregate shown outside direct in-tenant per-student views suppresses cells with fewer than `min_cohort_k` students (default 10).                                                                                                                     | Re-identification risk.                                                  | Report engine                                              | [SRC: V61-04, OD-38]                      |
+| BR-INS-024 | Every report run stores its parameters, query version and as-of time and can be reproduced.                                                                                                                                                               | Auditability.                                                            | Report run record                                          | [DER]                                     |
+| BR-INS-025 | Certificate branding is snapshotted at issuance; certificates are verifiable by a public unguessable code; revocation propagates to linked evidence.                                                                                                      | Credential trust.                                                        | Certificate service                                        | [SRC: SCI-17; CF-41]                      |
+| BR-INS-026 | SSO may only provision or sign in users whose asserted email domain is verified for the tenant and who match a roster entry (or domain claim is enabled).                                                                                                 | Prevents takeover of tenant membership.                                  | SSO callback                                               | [DER]                                     |
+| BR-INS-027 | LTI launches validate signature, nonce, state, issuer, audience, deployment id and expiry; each registration belongs to one tenant.                                                                                                                       | Standard LTI 1.3 security.                                               | LTI endpoint                                               | [PROP]                                    |
+| BR-INS-028 | A user may hold one open institution application; a verified domain belongs to exactly one tenant.                                                                                                                                                        | Impersonation protection.                                                | Unique constraints                                         | [DER]                                     |
+| BR-INS-029 | Invitations and guardian links are single-use bearer tokens, stored hashed, expiring (default 14 days); claiming requires control of the invited email.                                                                                                   | Account takeover prevention.                                             | Token service                                              | [DER]                                     |
+| BR-INS-030 | Structure nodes (departments, programs, batches) cannot be archived while active children exist; history is retained; institution-private courses never appear in public search without STU review.                                                       | Referential integrity and privacy.                                       | Service guards                                             | [DER]                                     |
+| BR-INS-031 | Faculty read and grade only batches and courses they are assigned to.                                                                                                                                                                                     | Least privilege.                                                         | Scope filter                                               | [SRC: BR-078]                             |
+| BR-INS-032 | Offboarding gives a 30-day export window, transitions students as independents, purges institution-scoped data after the window unless on hold or unpaid items block it.                                                                                  | Fair exit.                                                               | Offboarding workflow                                       | [DER]                                     |
+| BR-INS-033 | Employer relations is a partnership list with consented sharing only: no scraping, sequences, lead scoring or bulk cold outreach; invite volume is capped.                                                                                                | Stays inside SSOT non-goal.                                              | Invite service                                             | [SRC: §4.2] [DEC-REQ] OD-INS-03           |
+| BR-INS-034 | Employers see only students who registered for that drive and consented; access ends when the drive closes plus 30 days.                                                                                                                                  | Purpose limitation.                                                      | Drive view builder                                         | [SRC: BR-079]                             |
+| BR-INS-035 | Mandatory academic notices cannot be opted out; opportunity and coaching messages follow opt-out classes.                                                                                                                                                 | Clarity of obligations.                                                  | NTF template classes                                       | [DER]                                     |
+| BR-INS-036 | A student may leave an institution at any time; their independent account continues and institution access ends per FR-INS-025 rules.                                                                                                                     | Student ownership.                                                       | Membership service                                         | [DER]                                     |
+| BR-INS-037 | Roster sources are authoritative only for institution-scope fields and never overwrite student-owned profile fields.                                                                                                                                      | Data ownership.                                                          | Sync mapper                                                | [DER]                                     |
+| BR-INS-038 | Destructive bulk actions on more than 50 students need typed confirmation and are undoable for 24 hours; sync guard stops withdrawals above 10 percent of the roster per run.                                                                             | Prevent mass accidents.                                                  | Bulk action service                                        | [PROP]                                    |
+| BR-INS-039 | Funding matching uses only descriptive, consented profile fields (education level, country, institution membership, enrolled program) and never income, disability, ethnicity, religion or other sensitive attributes; the match shows its reasons.       | Fairness and privacy.                                                    | Matching service (FR-INS-033)                              | [DER]                                     |
+| BR-INS-040 | Funding listings may not request fees, bank details or national identifiers from applicants; the platform charges no fee for listing or placement and never holds, disburses or adjudicates funds; apply links lead outside the platform.                 | Prevents scams and keeps the feature outside payments and payroll scope. | Listing validators; moderation                             | [DER] [SRC: SSOT §4.2; BR-JOB-028 analog] |
 
 ## 6. State machines
 
@@ -963,19 +997,19 @@ Notes: `PLO` and `INS` hold no billing, seat-purchase or user-management privile
 
 States: `draft`, `submitted`, `under_review`, `changes_requested`, `verified`, `rejected`, `suspended`, `offboarding`, `closed`. Terminal: `closed`, `rejected` (resubmission creates a new case, not a reopen).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | submitted | Applicant submits | Form valid, terms accepted |
-| submitted | under_review | Reviewer claims | Reviewer independent |
-| under_review | changes_requested | Reviewer requests | Message present |
-| changes_requested | under_review | Applicant responds | Evidence added |
-| under_review | verified | Reviewer approves | Domain proof and legal proof passed |
-| under_review | rejected | Reviewer rejects | Reason code |
-| verified | suspended | `PAD` suspends | Reason, audit |
-| suspended | verified | `PAD` lifts | Audit |
-| verified | offboarding | `IAD` requests, `PAD` approves | Typed confirmation |
-| offboarding | verified | `IAD` cancels | Within export window |
-| offboarding | closed | Purge completes | No hold, no unpaid items |
+| From              | To                | Trigger                        | Guard                               |
+| ----------------- | ----------------- | ------------------------------ | ----------------------------------- |
+| draft             | submitted         | Applicant submits              | Form valid, terms accepted          |
+| submitted         | under_review      | Reviewer claims                | Reviewer independent                |
+| under_review      | changes_requested | Reviewer requests              | Message present                     |
+| changes_requested | under_review      | Applicant responds             | Evidence added                      |
+| under_review      | verified          | Reviewer approves              | Domain proof and legal proof passed |
+| under_review      | rejected          | Reviewer rejects               | Reason code                         |
+| verified          | suspended         | `PAD` suspends                 | Reason, audit                       |
+| suspended         | verified          | `PAD` lifts                    | Audit                               |
+| verified          | offboarding       | `IAD` requests, `PAD` approves | Typed confirmation                  |
+| offboarding       | verified          | `IAD` cancels                  | Within export window                |
+| offboarding       | closed            | Purge completes                | No hold, no unpaid items            |
 
 ```mermaid
 stateDiagram-v2
@@ -999,17 +1033,17 @@ stateDiagram-v2
 
 States: `uploaded`, `validating`, `preview_ready`, `confirmed`, `processing`, `completed`, `failed`, `cancelled`, `expired`. Terminal: `completed`, `cancelled`, `expired`; `failed` can resume.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| uploaded | validating | Worker picks up | File passes type and size checks |
-| validating | preview_ready | Validation done | Row results stored |
-| preview_ready | confirmed | `IAD` confirms | Rows within cap, not expired |
-| preview_ready | expired | 24 hours elapse | No confirm |
-| preview_ready, uploaded | cancelled | `IAD` cancels | n/a |
-| confirmed | processing | Worker starts | n/a |
-| processing | completed | All confirmed rows handled | Report generated |
-| processing | failed | Unrecoverable error | Partial progress recorded |
-| failed | processing | `IAD` resumes | Idempotent |
+| From                    | To            | Trigger                    | Guard                            |
+| ----------------------- | ------------- | -------------------------- | -------------------------------- |
+| uploaded                | validating    | Worker picks up            | File passes type and size checks |
+| validating              | preview_ready | Validation done            | Row results stored               |
+| preview_ready           | confirmed     | `IAD` confirms             | Rows within cap, not expired     |
+| preview_ready           | expired       | 24 hours elapse            | No confirm                       |
+| preview_ready, uploaded | cancelled     | `IAD` cancels              | n/a                              |
+| confirmed               | processing    | Worker starts              | n/a                              |
+| processing              | completed     | All confirmed rows handled | Report generated                 |
+| processing              | failed        | Unrecoverable error        | Partial progress recorded        |
+| failed                  | processing    | `IAD` resumes              | Idempotent                       |
 
 ```mermaid
 stateDiagram-v2
@@ -1033,16 +1067,16 @@ stateDiagram-v2
 
 States: `invited`, `active`, `suspended`, `withdrawn`, `graduated`, `invitation_expired`, `declined`. Terminal: `graduated`, `declined`, `invitation_expired` (re-invite creates a new invitation, same membership may be reused).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| invited | active | Student accepts | Email control proven; guardian consent if minor |
-| invited | invitation_expired | Token expires | n/a |
-| invited | declined | Student declines | n/a |
-| active | suspended | `IAD` suspends | Reason |
-| suspended | active | `IAD` restores | n/a |
-| active, suspended | withdrawn | `IAD` withdraws or student leaves | Reason |
-| withdrawn | active | `IAD` restores | Within retention |
-| active | graduated | Graduation transition completes | SM-INS-09 completed |
+| From              | To                 | Trigger                           | Guard                                           |
+| ----------------- | ------------------ | --------------------------------- | ----------------------------------------------- |
+| invited           | active             | Student accepts                   | Email control proven; guardian consent if minor |
+| invited           | invitation_expired | Token expires                     | n/a                                             |
+| invited           | declined           | Student declines                  | n/a                                             |
+| active            | suspended          | `IAD` suspends                    | Reason                                          |
+| suspended         | active             | `IAD` restores                    | n/a                                             |
+| active, suspended | withdrawn          | `IAD` withdraws or student leaves | Reason                                          |
+| withdrawn         | active             | `IAD` restores                    | Within retention                                |
+| active            | graduated          | Graduation transition completes   | SM-INS-09 completed                             |
 
 ```mermaid
 stateDiagram-v2
@@ -1065,14 +1099,14 @@ stateDiagram-v2
 
 States: `active`, `revoked_grace`, `released`, `expired`. Terminal: `released`, `expired`. (Unassigned seats are free capacity in the pool, not rows.)
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | Assign | Pool has free seat, atomic |
-| active | revoked_grace | `IAD` revokes | Reason |
-| revoked_grace | active | `IAD` undoes | Within grace |
-| revoked_grace | released | Grace ends | No in-progress assessment |
-| active | expired | Pool validity ends | n/a |
-| revoked_grace | expired | Pool validity ends first | n/a |
+| From          | To            | Trigger                  | Guard                      |
+| ------------- | ------------- | ------------------------ | -------------------------- |
+| (new)         | active        | Assign                   | Pool has free seat, atomic |
+| active        | revoked_grace | `IAD` revokes            | Reason                     |
+| revoked_grace | active        | `IAD` undoes             | Within grace               |
+| revoked_grace | released      | Grace ends               | No in-progress assessment  |
+| active        | expired       | Pool validity ends       | n/a                        |
+| revoked_grace | expired       | Pool validity ends first | n/a                        |
 
 ```mermaid
 stateDiagram-v2
@@ -1090,15 +1124,15 @@ stateDiagram-v2
 
 States: `draft`, `published`, `registration_open`, `registration_closed`, `in_rounds`, `completed`, `archived`, `cancelled`. Terminal: `archived`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | published | `PLO` publishes | Eligibility valid, partner active, eligible count at least 1 |
-| published | registration_open | Open date reached | n/a |
-| registration_open | registration_closed | Close date or manual | n/a |
-| registration_closed | in_rounds | First round starts | At least 1 shared candidate |
-| in_rounds | completed | Last round result recorded | n/a |
-| completed | archived | 90 days or manual | n/a |
-| draft, published, registration_open, registration_closed, in_rounds | cancelled | `PLO` cancels | Reason; shares revoked |
+| From                                                                | To                  | Trigger                    | Guard                                                        |
+| ------------------------------------------------------------------- | ------------------- | -------------------------- | ------------------------------------------------------------ |
+| draft                                                               | published           | `PLO` publishes            | Eligibility valid, partner active, eligible count at least 1 |
+| published                                                           | registration_open   | Open date reached          | n/a                                                          |
+| registration_open                                                   | registration_closed | Close date or manual       | n/a                                                          |
+| registration_closed                                                 | in_rounds           | First round starts         | At least 1 shared candidate                                  |
+| in_rounds                                                           | completed           | Last round result recorded | n/a                                                          |
+| completed                                                           | archived            | 90 days or manual          | n/a                                                          |
+| draft, published, registration_open, registration_closed, in_rounds | cancelled           | `PLO` cancels              | Reason; shares revoked                                       |
 
 ```mermaid
 stateDiagram-v2
@@ -1122,17 +1156,17 @@ stateDiagram-v2
 
 States: `registered`, `shared`, `shortlisted`, `in_round`, `offered`, `accepted`, `declined`, `rejected`, `withdrawn`. Terminal: `accepted`, `declined`, `rejected`, `withdrawn`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | registered | Student registers | Eligible, before cut-off, not blocked by one-offer policy |
-| registered | shared | Student consent recorded | Consent active |
-| shared | shortlisted | Employer shortlists | n/a |
-| shortlisted | in_round | Round starts | n/a |
-| in_round | offered | Employer offers | n/a |
-| offered | accepted | Student accepts | n/a |
-| offered | declined | Student declines | n/a |
-| registered, shared, shortlisted, in_round | rejected | Employer or `PLO` rejects | n/a |
-| registered, shared, shortlisted | withdrawn | Student withdraws | Before cut-off; consent revoked |
+| From                                      | To          | Trigger                   | Guard                                                     |
+| ----------------------------------------- | ----------- | ------------------------- | --------------------------------------------------------- |
+| (new)                                     | registered  | Student registers         | Eligible, before cut-off, not blocked by one-offer policy |
+| registered                                | shared      | Student consent recorded  | Consent active                                            |
+| shared                                    | shortlisted | Employer shortlists       | n/a                                                       |
+| shortlisted                               | in_round    | Round starts              | n/a                                                       |
+| in_round                                  | offered     | Employer offers           | n/a                                                       |
+| offered                                   | accepted    | Student accepts           | n/a                                                       |
+| offered                                   | declined    | Student declines          | n/a                                                       |
+| registered, shared, shortlisted, in_round | rejected    | Employer or `PLO` rejects | n/a                                                       |
+| registered, shared, shortlisted           | withdrawn   | Student withdraws         | Before cut-off; consent revoked                           |
 
 ```mermaid
 stateDiagram-v2
@@ -1160,15 +1194,15 @@ stateDiagram-v2
 
 States: `opened`, `assigned`, `in_progress`, `resolved`, `escalated`, `dismissed`, `auto_closed`. Terminal: `resolved`, `dismissed`, `auto_closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| opened | assigned | Owner set | Owner holds scope |
-| assigned | in_progress | First action logged | n/a |
-| in_progress | resolved | Owner closes | Outcome given |
-| in_progress, assigned | escalated | Owner or SLA breach | n/a |
-| escalated | in_progress | `IAD` reassigns | n/a |
-| opened, assigned, in_progress, escalated | dismissed | Owner dismisses | Reason |
-| any open | auto_closed | Student withdrawn | n/a |
+| From                                     | To          | Trigger             | Guard             |
+| ---------------------------------------- | ----------- | ------------------- | ----------------- |
+| opened                                   | assigned    | Owner set           | Owner holds scope |
+| assigned                                 | in_progress | First action logged | n/a               |
+| in_progress                              | resolved    | Owner closes        | Outcome given     |
+| in_progress, assigned                    | escalated   | Owner or SLA breach | n/a               |
+| escalated                                | in_progress | `IAD` reassigns     | n/a               |
+| opened, assigned, in_progress, escalated | dismissed   | Owner dismisses     | Reason            |
+| any open                                 | auto_closed | Student withdrawn   | n/a               |
 
 ```mermaid
 stateDiagram-v2
@@ -1196,12 +1230,12 @@ stateDiagram-v2
 
 States: `requested`, `granted`, `declined`, `expired`, `revoked`. Terminal: `declined`, `expired`, `revoked` (a new request starts a new record).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| requested | granted | Guardian grants | Identity step passed |
-| requested | declined | Guardian declines | n/a |
-| requested | expired | Link TTL ends | n/a |
-| granted | revoked | Guardian or `PAD` revokes | n/a |
+| From      | To       | Trigger                   | Guard                |
+| --------- | -------- | ------------------------- | -------------------- |
+| requested | granted  | Guardian grants           | Identity step passed |
+| requested | declined | Guardian declines         | n/a                  |
+| requested | expired  | Link TTL ends             | n/a                  |
+| granted   | revoked  | Guardian or `PAD` revokes | n/a                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1219,12 +1253,12 @@ stateDiagram-v2
 
 States: `scheduled`, `prompted`, `completed`, `reverted`, `not_applicable`. Terminal: `completed`, `reverted`, `not_applicable`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| scheduled | prompted | Graduation date reached | Student account active |
-| prompted | completed | Student confirms or 30 days elapse (defaults) | Retained-signals report generated |
-| completed | reverted | `IAD` reverts | Within 30 days |
-| scheduled | not_applicable | Student account closed | n/a |
+| From      | To             | Trigger                                       | Guard                             |
+| --------- | -------------- | --------------------------------------------- | --------------------------------- |
+| scheduled | prompted       | Graduation date reached                       | Student account active            |
+| prompted  | completed      | Student confirms or 30 days elapse (defaults) | Retained-signals report generated |
+| completed | reverted       | `IAD` reverts                                 | Within 30 days                    |
+| scheduled | not_applicable | Student account closed                        | n/a                               |
 
 ```mermaid
 stateDiagram-v2
@@ -1242,14 +1276,14 @@ stateDiagram-v2
 
 States: `reported`, `student_confirmed`, `disputed`, `verified`, `withdrawn`. Terminal: `verified`, `withdrawn`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | reported | `PLO` records | Required fields |
-| reported | student_confirmed | Student confirms | n/a |
-| reported | disputed | Student disputes | Reason |
-| disputed | reported | `PLO` corrects | Re-request sent |
-| student_confirmed | verified | Employer or document verification | n/a |
-| reported, disputed | withdrawn | `PLO` withdraws | Reason |
+| From               | To                | Trigger                           | Guard           |
+| ------------------ | ----------------- | --------------------------------- | --------------- |
+| (new)              | reported          | `PLO` records                     | Required fields |
+| reported           | student_confirmed | Student confirms                  | n/a             |
+| reported           | disputed          | Student disputes                  | Reason          |
+| disputed           | reported          | `PLO` corrects                    | Re-request sent |
+| student_confirmed  | verified          | Employer or document verification | n/a             |
+| reported, disputed | withdrawn         | `PLO` withdraws                   | Reason          |
 
 ```mermaid
 stateDiagram-v2
@@ -1266,47 +1300,47 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-INS-001 | Institution application | `/institutions/apply` | CAN | Create and submit tenant | draft, validation errors, submitted |
-| SCR-INS-002 | Verification status | `/institution/verification` | IAD | Provide proofs, see status | pending, passed, failed, changes requested |
-| SCR-INS-003 | Verification review queue | `/admin/institutions/verification` | PAD | Review cases | empty, list, case detail, conflict |
-| SCR-INS-004 | Institution profile and branding | `/institution/settings/profile` | IAD | Edit profile, preview | saved, contrast error, conflict |
-| SCR-INS-005 | Public institution page | `/i/:slug` | GUE, CAN | Public face | off, on, unverified |
-| SCR-INS-006 | Staff and roles | `/institution/staff` | IAD | Manage grants | empty, list, invite modal |
-| SCR-INS-007 | Structure | `/institution/structure` | IAD, PLO | Departments, programs, terms | tree, archive blocked |
-| SCR-INS-008 | Batches list and detail | `/institution/batches`, `/institution/batches/:id` | IAD, PLO, INS | Batch management | list, tabs, full |
-| SCR-INS-009 | Roster | `/institution/roster` | IAD, PLO, INS | Search and act on students | empty, filtered, bulk selected, undo |
-| SCR-INS-010 | Student detail drawer | `/institution/roster/:id` | IAD, PLO, INS | Per-student view | tabs, restricted |
-| SCR-INS-011 | Invitation acceptance | `/join/:token` | CAN | Accept membership | valid, expired, wrong email |
-| SCR-INS-012 | Bulk import wizard | `/institution/import` | IAD | Import students | each step, errors, processing, done |
-| SCR-INS-013 | Seats and pools | `/institution/seats` | IAD, FIN | Pools, assignments | low, expiring, mismatch |
-| SCR-INS-014 | Course assignments | `/institution/batches/:id/courses` | IAD, INS | Assign courses | insufficient seats, ok |
-| SCR-INS-015 | Faculty assignments | `/institution/faculty` | IAD | Teaching matrix | empty, populated |
-| SCR-INS-016 | Certificate settings and issued list | `/institution/settings/certificates` | IAD | Template and revoke | preview, revoked |
-| SCR-INS-017 | Certificate verification | `/verify/:code` | GUE | Public check | valid, revoked, expired, not found |
-| SCR-INS-018 | Progress dashboard | `/institution/progress` | IAD, INS, PLO | Monitor progress | stale, empty |
-| SCR-INS-019 | At-risk rules and flags | `/institution/settings/at-risk` | IAD, INS | Configure, review | list, dismissed |
-| SCR-INS-020 | Intervention board | `/institution/interventions` | IAD, INS | Cases | board columns, case detail |
-| SCR-INS-021 | Placement workspace | `/institution/placement` | PLO, IAD | Readiness and tags | not shared, nudge cooldown |
-| SCR-INS-022 | Drives list and wizard | `/institution/placement/drives` | PLO | Create and run drives | draft, published, in rounds |
-| SCR-INS-023 | Employer partners | `/institution/placement/employers` | PLO | Partnership list | invited, active, paused |
-| SCR-INS-024 | Drive student view | `/me/institution/drives` | STD | See and register | eligible, blocked, registered |
-| SCR-INS-025 | Showcase sharing settings | `/me/institution/sharing` | STD | Consent management | off, on, revoked, minor blocked |
-| SCR-INS-026 | Employer drive view | `/employer/drives/:id` | REC, EAD | Candidate review | loading, no candidates, closed |
-| SCR-INS-027 | Placement outcomes | `/institution/placement/outcomes` | PLO | Record and track | reported, disputed |
-| SCR-INS-028 | Institution dashboard | `/institution` | IAD | KPIs | suppressed, stale, empty |
-| SCR-INS-029 | Reports | `/institution/reports` | IAD, PLO | Templates and runs | running, ready, restated |
-| SCR-INS-030 | Graduation (admin) | `/institution/graduation` | IAD | Schedule and monitor | preview, running |
-| SCR-INS-031 | Graduation (student) | `/me/institution/graduation` | STD | Choose what stays | prompted, completed |
-| SCR-INS-032 | Alumni outcomes and surveys | `/institution/alumni/outcomes` | PLO | Surveys | draft, sent, responses |
-| SCR-INS-033 | SSO settings | `/institution/settings/sso` | IAD | Configure SSO | test passed, failed |
-| SCR-INS-034 | LTI settings | `/institution/settings/lti` | IAD | Platforms and mappings | launch log |
-| SCR-INS-035 | Roster sync | `/institution/settings/roster-sync` | IAD | Sync runs | guard tripped |
-| SCR-INS-036 | Guardian consent page | `/guardian/:token` | Guardian | Grant per purpose | pending, granted, expired |
-| SCR-INS-037 | Privacy and disclosures | `/institution/privacy` | IAD | Requests and log | deadline near |
-| SCR-INS-038 | My records | `/me/institution/records` | STD | See, request copy | request open |
-| SCR-INS-039 | Data and offboarding | `/institution/settings/data` | IAD | Export, offboard | countdown |
+| ID          | Name                                 | Route proposal                                     | Roles         | Purpose                      | Key states                                 |
+| ----------- | ------------------------------------ | -------------------------------------------------- | ------------- | ---------------------------- | ------------------------------------------ |
+| SCR-INS-001 | Institution application              | `/institutions/apply`                              | CAN           | Create and submit tenant     | draft, validation errors, submitted        |
+| SCR-INS-002 | Verification status                  | `/institution/verification`                        | IAD           | Provide proofs, see status   | pending, passed, failed, changes requested |
+| SCR-INS-003 | Verification review queue            | `/admin/institutions/verification`                 | PAD           | Review cases                 | empty, list, case detail, conflict         |
+| SCR-INS-004 | Institution profile and branding     | `/institution/settings/profile`                    | IAD           | Edit profile, preview        | saved, contrast error, conflict            |
+| SCR-INS-005 | Public institution page              | `/i/:slug`                                         | GUE, CAN      | Public face                  | off, on, unverified                        |
+| SCR-INS-006 | Staff and roles                      | `/institution/staff`                               | IAD           | Manage grants                | empty, list, invite modal                  |
+| SCR-INS-007 | Structure                            | `/institution/structure`                           | IAD, PLO      | Departments, programs, terms | tree, archive blocked                      |
+| SCR-INS-008 | Batches list and detail              | `/institution/batches`, `/institution/batches/:id` | IAD, PLO, INS | Batch management             | list, tabs, full                           |
+| SCR-INS-009 | Roster                               | `/institution/roster`                              | IAD, PLO, INS | Search and act on students   | empty, filtered, bulk selected, undo       |
+| SCR-INS-010 | Student detail drawer                | `/institution/roster/:id`                          | IAD, PLO, INS | Per-student view             | tabs, restricted                           |
+| SCR-INS-011 | Invitation acceptance                | `/join/:token`                                     | CAN           | Accept membership            | valid, expired, wrong email                |
+| SCR-INS-012 | Bulk import wizard                   | `/institution/import`                              | IAD           | Import students              | each step, errors, processing, done        |
+| SCR-INS-013 | Seats and pools                      | `/institution/seats`                               | IAD, FIN      | Pools, assignments           | low, expiring, mismatch                    |
+| SCR-INS-014 | Course assignments                   | `/institution/batches/:id/courses`                 | IAD, INS      | Assign courses               | insufficient seats, ok                     |
+| SCR-INS-015 | Faculty assignments                  | `/institution/faculty`                             | IAD           | Teaching matrix              | empty, populated                           |
+| SCR-INS-016 | Certificate settings and issued list | `/institution/settings/certificates`               | IAD           | Template and revoke          | preview, revoked                           |
+| SCR-INS-017 | Certificate verification             | `/verify/:code`                                    | GUE           | Public check                 | valid, revoked, expired, not found         |
+| SCR-INS-018 | Progress dashboard                   | `/institution/progress`                            | IAD, INS, PLO | Monitor progress             | stale, empty                               |
+| SCR-INS-019 | At-risk rules and flags              | `/institution/settings/at-risk`                    | IAD, INS      | Configure, review            | list, dismissed                            |
+| SCR-INS-020 | Intervention board                   | `/institution/interventions`                       | IAD, INS      | Cases                        | board columns, case detail                 |
+| SCR-INS-021 | Placement workspace                  | `/institution/placement`                           | PLO, IAD      | Readiness and tags           | not shared, nudge cooldown                 |
+| SCR-INS-022 | Drives list and wizard               | `/institution/placement/drives`                    | PLO           | Create and run drives        | draft, published, in rounds                |
+| SCR-INS-023 | Employer partners                    | `/institution/placement/employers`                 | PLO           | Partnership list             | invited, active, paused                    |
+| SCR-INS-024 | Drive student view                   | `/me/institution/drives`                           | STD           | See and register             | eligible, blocked, registered              |
+| SCR-INS-025 | Showcase sharing settings            | `/me/institution/sharing`                          | STD           | Consent management           | off, on, revoked, minor blocked            |
+| SCR-INS-026 | Employer drive view                  | `/employer/drives/:id`                             | REC, EAD      | Candidate review             | loading, no candidates, closed             |
+| SCR-INS-027 | Placement outcomes                   | `/institution/placement/outcomes`                  | PLO           | Record and track             | reported, disputed                         |
+| SCR-INS-028 | Institution dashboard                | `/institution`                                     | IAD           | KPIs                         | suppressed, stale, empty                   |
+| SCR-INS-029 | Reports                              | `/institution/reports`                             | IAD, PLO      | Templates and runs           | running, ready, restated                   |
+| SCR-INS-030 | Graduation (admin)                   | `/institution/graduation`                          | IAD           | Schedule and monitor         | preview, running                           |
+| SCR-INS-031 | Graduation (student)                 | `/me/institution/graduation`                       | STD           | Choose what stays            | prompted, completed                        |
+| SCR-INS-032 | Alumni outcomes and surveys          | `/institution/alumni/outcomes`                     | PLO           | Surveys                      | draft, sent, responses                     |
+| SCR-INS-033 | SSO settings                         | `/institution/settings/sso`                        | IAD           | Configure SSO                | test passed, failed                        |
+| SCR-INS-034 | LTI settings                         | `/institution/settings/lti`                        | IAD           | Platforms and mappings       | launch log                                 |
+| SCR-INS-035 | Roster sync                          | `/institution/settings/roster-sync`                | IAD           | Sync runs                    | guard tripped                              |
+| SCR-INS-036 | Guardian consent page                | `/guardian/:token`                                 | Guardian      | Grant per purpose            | pending, granted, expired                  |
+| SCR-INS-037 | Privacy and disclosures              | `/institution/privacy`                             | IAD           | Requests and log             | deadline near                              |
+| SCR-INS-038 | My records                           | `/me/institution/records`                          | STD           | See, request copy            | request open                               |
+| SCR-INS-039 | Data and offboarding                 | `/institution/settings/data`                       | IAD           | Export, offboard             | countdown                                  |
 
 Accessibility notes for all screens: WCAG 2.2 AA; tables have captions and sortable headers with `aria-sort`; bulk actions announce selection counts through a live region; wizards keep focus on the step heading; guardian and join pages work without JavaScript for the primary action where feasible and are translated.
 
@@ -1314,39 +1348,41 @@ Accessibility notes for all screens: WCAG 2.2 AA; tables have captions and sorta
 
 Retention classes: `R-tenant` retained for the institution's retention policy (default 7 years after last activity), `R-audit` 7 years, `R-short` 90 days, `R-session` 30 days.
 
-| ID | Name | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-INS-01 | Institution | id, slug, legal name, display name, type, country, domains[], status (SM-INS-01), includes_minors, settings | has many staff, programs, batches | R-tenant |
-| ENT-INS-02 | VerificationCase | id, institution_id, status, domain_proof, legal_proofs[], reviewer_id, decision, reason_code | belongs to Institution | R-audit |
-| ENT-INS-03 | StaffGrant | id, institution_id, user_id, role, scope_type, scope_id, expires_at, status | Institution, user | R-audit |
-| ENT-INS-04 | Department | id, institution_id, name, code, status | has many Program | R-tenant |
-| ENT-INS-05 | Program | id, department_id, name, code, level, duration_terms, status | has many Batch | R-tenant |
-| ENT-INS-06 | AcademicTerm | id, institution_id, name, start, end | referenced by Batch | R-tenant |
-| ENT-INS-07 | Batch | id, program_id, term_id, name, code, owner_id, capacity, hard_cap, join_code_hash, status | has many Membership | R-tenant |
-| ENT-INS-08 | StudentInvitation | id, institution_id, email, token_hash, expires_at, status, source (manual, import, sync) | Membership | R-short after resolution |
-| ENT-INS-09 | StudentMembership | id, institution_id, user_id, identifier, program_id, batch_ids[], status (SM-INS-03), affiliation_verified, placement_tags[] | Institution, user | R-tenant |
-| ENT-INS-10 | ImportBatch | id, institution_id, file_hash, state (SM-INS-02), counts, uploader_id | has many ImportRow | R-short (file), R-audit (report) |
-| ENT-INS-11 | ImportRow | id, import_batch_id, row_number, row_hash, result, error_code, membership_id | ImportBatch | R-short |
-| ENT-INS-12 | SeatAssignment | id, pool_ref, membership_id, state (SM-INS-04), assigned_at, grace_ends_at, valid_until | BIL seat pool (planned), Membership | R-tenant |
-| ENT-INS-13 | CourseAssignment | id, batch_id, course_ref, path_ref, pool_ref, start, due, access_end, mandatory, auto_assign | Batch, LRN course | R-tenant |
-| ENT-INS-14 | SeatPolicy | institution_id, low_threshold, expiry_warnings[], auto_assign_default, grace_days | Institution | R-tenant |
-| ENT-INS-15 | TeachingAssignment | id, staff_grant_id, batch_id, course_ref, role, can_issue_certificates | StaffGrant, Batch | R-tenant |
-| ENT-INS-16 | CertificateTemplate | id, institution_id, branding snapshot, signatory, validity_months, version | Institution; LRN certificate (planned) | R-tenant |
-| ENT-INS-17 | ProgressSnapshot | membership_id, course_ref, completion_pct, last_active, assessment_summary, as_of | Membership | R-tenant |
-| ENT-INS-18 | AtRiskFlag | id, membership_id, rule, signals (json), state, dismissed_until, raised_at | Membership | R-tenant |
-| ENT-INS-19 | InterventionCase | id, membership_id, owner_id, state (SM-INS-07), reason, actions[], notes[] (visibility) | Membership | R-tenant (Restricted) |
-| ENT-INS-20 | ShowcaseConsent | id, user_id, institution_id, scope, fields[], notice_version, granted_at, revoked_at | Membership | R-audit |
-| ENT-INS-21 | EmployerPartnership | id, institution_id, employer_org_ref, contact, status, notes | Institution, EMP org | R-tenant |
-| ENT-INS-22 | PlacementDrive | id, institution_id, partnership_id, roles[], eligibility (allowlist json), rounds[], dates, state (SM-INS-05) | Institution, EmployerPartnership | R-tenant |
-| ENT-INS-23 | PlacementOutcome | id, membership_id, drive_id?, employer, role, type, date, comp_minor, currency, state (SM-INS-10) | Membership, Drive | R-tenant |
-| ENT-INS-24 | ReportRun | id, institution_id, template, params, query_version, as_of, artifact_ref, schedule | Institution | R-audit |
-| ENT-INS-25 | GraduationTransition | id, membership_id, batch_id, state (SM-INS-09), choices, retained_summary | Membership | R-audit |
-| ENT-INS-26 | AlumniSurvey | id, institution_id, wave, questions[], responses[] (anonymous flag) | Institution | R-tenant |
-| ENT-INS-27 | DriveApplication | id, drive_id, membership_id, state (SM-INS-06), consent_id, round_results[] | Drive, Membership, ShowcaseConsent | R-tenant |
-| ENT-INS-28 | GuardianConsent | id, membership_id, guardian_email_hash, purposes[], state (SM-INS-08), method, granted_at | Membership | R-audit |
-| ENT-INS-29 | DisclosureLogEntry | id, institution_id, subject_user_id, category, recipient, basis, actor, at | Institution | R-audit (append-only) |
-| ENT-INS-30 | IntegrationConnection | id, institution_id, kind (sso, lti, sync), config (secrets by reference), status, last_run | Institution | R-tenant |
-| ENT-INS-31 | OffboardingRequest | id, institution_id, state, export_refs[], purge_certificate_ref, hold_flags | Institution | R-audit |
+| ID         | Name                  | Key attributes                                                                                                                                                                                                                                                    | Relationships                               | Retention                        |
+| ---------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------- |
+| ENT-INS-01 | Institution           | id, slug, legal name, display name, type, country, domains[], status (SM-INS-01), includes_minors, settings                                                                                                                                                       | has many staff, programs, batches           | R-tenant                         |
+| ENT-INS-02 | VerificationCase      | id, institution_id, status, domain_proof, legal_proofs[], reviewer_id, decision, reason_code                                                                                                                                                                      | belongs to Institution                      | R-audit                          |
+| ENT-INS-03 | StaffGrant            | id, institution_id, user_id, role, scope_type, scope_id, expires_at, status                                                                                                                                                                                       | Institution, user                           | R-audit                          |
+| ENT-INS-04 | Department            | id, institution_id, name, code, status                                                                                                                                                                                                                            | has many Program                            | R-tenant                         |
+| ENT-INS-05 | Program               | id, department_id, name, code, level, duration_terms, status                                                                                                                                                                                                      | has many Batch                              | R-tenant                         |
+| ENT-INS-06 | AcademicTerm          | id, institution_id, name, start, end                                                                                                                                                                                                                              | referenced by Batch                         | R-tenant                         |
+| ENT-INS-07 | Batch                 | id, program_id, term_id, name, code, owner_id, capacity, hard_cap, join_code_hash, status                                                                                                                                                                         | has many Membership                         | R-tenant                         |
+| ENT-INS-08 | StudentInvitation     | id, institution_id, email, token_hash, expires_at, status, source (manual, import, sync)                                                                                                                                                                          | Membership                                  | R-short after resolution         |
+| ENT-INS-09 | StudentMembership     | id, institution_id, user_id, identifier, program_id, batch_ids[], status (SM-INS-03), affiliation_verified, placement_tags[]                                                                                                                                      | Institution, user                           | R-tenant                         |
+| ENT-INS-10 | ImportBatch           | id, institution_id, file_hash, state (SM-INS-02), counts, uploader_id                                                                                                                                                                                             | has many ImportRow                          | R-short (file), R-audit (report) |
+| ENT-INS-11 | ImportRow             | id, import_batch_id, row_number, row_hash, result, error_code, membership_id                                                                                                                                                                                      | ImportBatch                                 | R-short                          |
+| ENT-INS-12 | SeatAssignment        | id, pool_ref, membership_id, state (SM-INS-04), assigned_at, grace_ends_at, valid_until                                                                                                                                                                           | BIL seat pool (planned), Membership         | R-tenant                         |
+| ENT-INS-13 | CourseAssignment      | id, batch_id, course_ref, path_ref, pool_ref, start, due, access_end, mandatory, auto_assign                                                                                                                                                                      | Batch, LRN course                           | R-tenant                         |
+| ENT-INS-14 | SeatPolicy            | institution_id, low_threshold, expiry_warnings[], auto_assign_default, grace_days                                                                                                                                                                                 | Institution                                 | R-tenant                         |
+| ENT-INS-15 | TeachingAssignment    | id, staff_grant_id, batch_id, course_ref, role, can_issue_certificates                                                                                                                                                                                            | StaffGrant, Batch                           | R-tenant                         |
+| ENT-INS-16 | CertificateTemplate   | id, institution_id, branding snapshot, signatory, validity_months, version                                                                                                                                                                                        | Institution; LRN certificate (planned)      | R-tenant                         |
+| ENT-INS-17 | ProgressSnapshot      | membership_id, course_ref, completion_pct, last_active, assessment_summary, as_of                                                                                                                                                                                 | Membership                                  | R-tenant                         |
+| ENT-INS-18 | AtRiskFlag            | id, membership_id, rule, signals (json), state, dismissed_until, raised_at                                                                                                                                                                                        | Membership                                  | R-tenant                         |
+| ENT-INS-19 | InterventionCase      | id, membership_id, owner_id, state (SM-INS-07), reason, actions[], notes[] (visibility)                                                                                                                                                                           | Membership                                  | R-tenant (Restricted)            |
+| ENT-INS-20 | ShowcaseConsent       | id, user_id, institution_id, scope, fields[], notice_version, granted_at, revoked_at                                                                                                                                                                              | Membership                                  | R-audit                          |
+| ENT-INS-21 | EmployerPartnership   | id, institution_id, employer_org_ref, contact, status, notes                                                                                                                                                                                                      | Institution, EMP org                        | R-tenant                         |
+| ENT-INS-22 | PlacementDrive        | id, institution_id, partnership_id, roles[], eligibility (allowlist json), rounds[], dates, state (SM-INS-05)                                                                                                                                                     | Institution, EmployerPartnership            | R-tenant                         |
+| ENT-INS-23 | PlacementOutcome      | id, membership_id, drive_id?, employer, role, type, date, comp_minor, currency, state (SM-INS-10)                                                                                                                                                                 | Membership, Drive                           | R-tenant                         |
+| ENT-INS-24 | ReportRun             | id, institution_id, template, params, query_version, as_of, artifact_ref, schedule                                                                                                                                                                                | Institution                                 | R-audit                          |
+| ENT-INS-25 | GraduationTransition  | id, membership_id, batch_id, state (SM-INS-09), choices, retained_summary                                                                                                                                                                                         | Membership                                  | R-audit                          |
+| ENT-INS-26 | AlumniSurvey          | id, institution_id, wave, questions[], responses[] (anonymous flag)                                                                                                                                                                                               | Institution                                 | R-tenant                         |
+| ENT-INS-27 | DriveApplication      | id, drive_id, membership_id, state (SM-INS-06), consent_id, round_results[]                                                                                                                                                                                       | Drive, Membership, ShowcaseConsent          | R-tenant                         |
+| ENT-INS-28 | GuardianConsent       | id, membership_id, guardian_email_hash, purposes[], state (SM-INS-08), method, granted_at                                                                                                                                                                         | Membership                                  | R-audit                          |
+| ENT-INS-29 | DisclosureLogEntry    | id, institution_id, subject_user_id, category, recipient, basis, actor, at                                                                                                                                                                                        | Institution                                 | R-audit (append-only)            |
+| ENT-INS-30 | IntegrationConnection | id, institution_id, kind (sso, lti, sync), config (secrets by reference), status, last_run                                                                                                                                                                        | Institution                                 | R-tenant                         |
+| ENT-INS-31 | OffboardingRequest    | id, institution_id, state, export_refs[], purge_certificate_ref, hold_flags                                                                                                                                                                                       | Institution                                 | R-audit                          |
+| ENT-INS-32 | FundingListing        | id, providerRef, providerKind (institution, employer, external), type, title, description, amount min and max, currency, eligibility (structured), deadline, applyUrl, visibility (public, institution), state (draft, in_review, published, archived, withdrawn) | Optional Institution; provider organization | 24 months after deadline         |
+| ENT-INS-33 | FundingTracker        | id, user_id, listing_id, status (interested, applied, awarded, declined), remind_at, notes                                                                                                                                                                        | Belongs to user and listing                 | ACCT                             |
 
 ```mermaid
 erDiagram
@@ -1370,48 +1406,49 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Emitted when | Key payload | Consumers (planned) |
-|---|---|---|---|---|
-| EVT-INS-001 | `ins.institution.created` | Application tenant created | institution_id, applicant | ADM, ANL |
-| EVT-INS-002 | `ins.institution.submitted` | Application submitted | institution_id, case_id | ADM, NTF |
-| EVT-INS-003 | `ins.institution.verified` | Verification approved | institution_id | NTF, BIL, ANL |
-| EVT-INS-004 | `ins.institution.rejected` | Verification rejected | institution_id, reason_code | NTF |
-| EVT-INS-005 | `ins.institution.suspended` | Suspended by platform | institution_id, reason | NTF, LRN |
-| EVT-INS-006 | `ins.staff.invited` | Staff invited | grant_id, role, scope | NTF |
-| EVT-INS-007 | `ins.staff.joined` | Staff accepted | grant_id | NTF |
-| EVT-INS-008 | `ins.staff.deactivated` | Grant deactivated | grant_id | IDN, NTF |
-| EVT-INS-009 | `ins.batch.created` | Batch created | batch_id, program_id | ANL |
-| EVT-INS-010 | `ins.student.invited` | Invitation created | invitation_id, source | NTF |
-| EVT-INS-011 | `ins.student.activated` | Membership active | membership_id, affiliation_verified | NTF, NET, PRF |
-| EVT-INS-012 | `ins.student.suspended` | Suspended | membership_id, reason | LRN, NTF |
-| EVT-INS-013 | `ins.student.withdrawn` | Withdrawn | membership_id, reason | LRN, NTF |
-| EVT-INS-014 | `ins.import.confirmed` | Import confirmed | import_id, counts | ANL |
-| EVT-INS-015 | `ins.import.completed` | Import finished | import_id, report_ref | NTF |
-| EVT-INS-016 | `ins.course.assigned` | Course assigned to batch | assignment_id, batch_id, course_ref | LRN, NTF |
-| EVT-INS-017 | `ins.seat.assigned` | Seat assigned | seat_id, membership_id | LRN, BIL |
-| EVT-INS-018 | `ins.seat.revoked` | Seat revoked | seat_id, grace_ends_at | LRN, NTF |
-| EVT-INS-019 | `ins.seat.released` | Seat released to pool | seat_id | BIL, LRN |
-| EVT-INS-020 | `ins.seats.low` | Free seats under threshold | pool_ref, free | NTF |
-| EVT-INS-021 | `ins.certificate.issued` | Certificate issued | certificate_id, membership_id | EVD, NTF, PRF |
-| EVT-INS-022 | `ins.certificate.revoked` | Certificate revoked | certificate_id, reason | EVD, NTF |
-| EVT-INS-023 | `ins.atrisk.flagged` | Flag raised | flag_id, rule | NTF |
-| EVT-INS-024 | `ins.case.opened` | Intervention opened | case_id | NTF |
-| EVT-INS-025 | `ins.case.resolved` | Case resolved | case_id, outcome | ANL |
-| EVT-INS-026 | `ins.drive.published` | Drive published | drive_id, eligible_count | NTF, JOB |
-| EVT-INS-027 | `ins.drive.cancelled` | Drive cancelled | drive_id | NTF |
-| EVT-INS-028 | `ins.drive.application_status_changed` | Application state change | application_id, from, to | NTF, ATS |
-| EVT-INS-029 | `ins.consent.granted` | Showcase consent granted | consent_id, scope | SET, NTF |
-| EVT-INS-030 | `ins.consent.revoked` | Showcase consent revoked | consent_id | SET, NTF |
-| EVT-INS-031 | `ins.outcome.reported` | Outcome recorded | outcome_id | NTF |
-| EVT-INS-032 | `ins.outcome.confirmed` | Student confirmed | outcome_id | ANL, PRF |
-| EVT-INS-033 | `ins.report.generated` | Report run ready | run_id | NTF |
-| EVT-INS-034 | `ins.graduation.completed` | Transition done | transition_id, retained_summary | NET, PRF, EVD, ANL |
-| EVT-INS-035 | `ins.guardian.consent_changed` | Guardian choice changes | consent_id, state | SET, LRN |
-| EVT-INS-036 | `ins.records.disclosed` | Disclosure logged | entry_id | audit |
-| EVT-INS-037 | `ins.offboarding.started` | Offboarding began | request_id | BIL, NTF |
-| EVT-INS-038 | `ins.offboarding.completed` | Purge finished | request_id | ADM |
-| EVT-INS-039 | `ins.sync.run_completed` | Sync run done | run counts | ANL |
-| EVT-INS-040 | `ins.employer.partnered` | Partnership accepted | partnership_id | NTF |
+| ID          | Event                                  | Emitted when               | Key payload                            | Consumers (planned) |
+| ----------- | -------------------------------------- | -------------------------- | -------------------------------------- | ------------------- |
+| EVT-INS-001 | `ins.institution.created`              | Application tenant created | institution_id, applicant              | ADM, ANL            |
+| EVT-INS-002 | `ins.institution.submitted`            | Application submitted      | institution_id, case_id                | ADM, NTF            |
+| EVT-INS-003 | `ins.institution.verified`             | Verification approved      | institution_id                         | NTF, BIL, ANL       |
+| EVT-INS-004 | `ins.institution.rejected`             | Verification rejected      | institution_id, reason_code            | NTF                 |
+| EVT-INS-005 | `ins.institution.suspended`            | Suspended by platform      | institution_id, reason                 | NTF, LRN            |
+| EVT-INS-006 | `ins.staff.invited`                    | Staff invited              | grant_id, role, scope                  | NTF                 |
+| EVT-INS-007 | `ins.staff.joined`                     | Staff accepted             | grant_id                               | NTF                 |
+| EVT-INS-008 | `ins.staff.deactivated`                | Grant deactivated          | grant_id                               | IDN, NTF            |
+| EVT-INS-009 | `ins.batch.created`                    | Batch created              | batch_id, program_id                   | ANL                 |
+| EVT-INS-010 | `ins.student.invited`                  | Invitation created         | invitation_id, source                  | NTF                 |
+| EVT-INS-011 | `ins.student.activated`                | Membership active          | membership_id, affiliation_verified    | NTF, NET, PRF       |
+| EVT-INS-012 | `ins.student.suspended`                | Suspended                  | membership_id, reason                  | LRN, NTF            |
+| EVT-INS-013 | `ins.student.withdrawn`                | Withdrawn                  | membership_id, reason                  | LRN, NTF            |
+| EVT-INS-014 | `ins.import.confirmed`                 | Import confirmed           | import_id, counts                      | ANL                 |
+| EVT-INS-015 | `ins.import.completed`                 | Import finished            | import_id, report_ref                  | NTF                 |
+| EVT-INS-016 | `ins.course.assigned`                  | Course assigned to batch   | assignment_id, batch_id, course_ref    | LRN, NTF            |
+| EVT-INS-017 | `ins.seat.assigned`                    | Seat assigned              | seat_id, membership_id                 | LRN, BIL            |
+| EVT-INS-018 | `ins.seat.revoked`                     | Seat revoked               | seat_id, grace_ends_at                 | LRN, NTF            |
+| EVT-INS-019 | `ins.seat.released`                    | Seat released to pool      | seat_id                                | BIL, LRN            |
+| EVT-INS-020 | `ins.seats.low`                        | Free seats under threshold | pool_ref, free                         | NTF                 |
+| EVT-INS-021 | `ins.certificate.issued`               | Certificate issued         | certificate_id, membership_id          | EVD, NTF, PRF       |
+| EVT-INS-022 | `ins.certificate.revoked`              | Certificate revoked        | certificate_id, reason                 | EVD, NTF            |
+| EVT-INS-023 | `ins.atrisk.flagged`                   | Flag raised                | flag_id, rule                          | NTF                 |
+| EVT-INS-024 | `ins.case.opened`                      | Intervention opened        | case_id                                | NTF                 |
+| EVT-INS-025 | `ins.case.resolved`                    | Case resolved              | case_id, outcome                       | ANL                 |
+| EVT-INS-026 | `ins.drive.published`                  | Drive published            | drive_id, eligible_count               | NTF, JOB            |
+| EVT-INS-027 | `ins.drive.cancelled`                  | Drive cancelled            | drive_id                               | NTF                 |
+| EVT-INS-028 | `ins.drive.application_status_changed` | Application state change   | application_id, from, to               | NTF, ATS            |
+| EVT-INS-029 | `ins.consent.granted`                  | Showcase consent granted   | consent_id, scope                      | SET, NTF            |
+| EVT-INS-030 | `ins.consent.revoked`                  | Showcase consent revoked   | consent_id                             | SET, NTF            |
+| EVT-INS-031 | `ins.outcome.reported`                 | Outcome recorded           | outcome_id                             | NTF                 |
+| EVT-INS-032 | `ins.outcome.confirmed`                | Student confirmed          | outcome_id                             | ANL, PRF            |
+| EVT-INS-033 | `ins.report.generated`                 | Report run ready           | run_id                                 | NTF                 |
+| EVT-INS-034 | `ins.graduation.completed`             | Transition done            | transition_id, retained_summary        | NET, PRF, EVD, ANL  |
+| EVT-INS-035 | `ins.guardian.consent_changed`         | Guardian choice changes    | consent_id, state                      | SET, LRN            |
+| EVT-INS-036 | `ins.records.disclosed`                | Disclosure logged          | entry_id                               | audit               |
+| EVT-INS-037 | `ins.offboarding.started`              | Offboarding began          | request_id                             | BIL, NTF            |
+| EVT-INS-038 | `ins.offboarding.completed`            | Purge finished             | request_id                             | ADM                 |
+| EVT-INS-039 | `ins.sync.run_completed`               | Sync run done              | run counts                             | ANL                 |
+| EVT-INS-040 | `ins.employer.partnered`               | Partnership accepted       | partnership_id                         | NTF                 |
+| EVT-INS-041 | `ins.funding.listing_published`        | Funding listing published  | listing_id, visibility, institution_id | NTF, SRC            |
 
 ### 9.2 Consumed (events from other modules, planned)
 
@@ -1419,93 +1456,94 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| System | Direction | Purpose | Notes |
-|---|---|---|---|
-| DNS (TXT lookup) | Outbound | Domain proof | Resolver timeouts 5 seconds, retries |
-| Identity providers (Entra, Google Workspace, Okta, generic SAML/OIDC) | Inbound | SSO | Via IDN |
-| LMS (Canvas, Moodle, Blackboard, Brightspace) | Both | LTI 1.3 launches and grade services | Per-tenant keys |
-| SIS (OneRoster, SCIM, SFTP) | Inbound | Roster sync | Tenant-scoped tokens |
-| Email and in-app delivery | Outbound | Invitations, notices | Via NTF |
-| Object storage and malware scan | Outbound | Evidence and import files | Via PLT |
-| Payment and invoicing | Both | Seat pools | Via BIL |
-| Proctoring vendor | Outbound | Exams, vendor-gated (SSOT OD-35, Ph10) | Out of this module's first release |
+| System                                                                | Direction | Purpose                                | Notes                                |
+| --------------------------------------------------------------------- | --------- | -------------------------------------- | ------------------------------------ |
+| DNS (TXT lookup)                                                      | Outbound  | Domain proof                           | Resolver timeouts 5 seconds, retries |
+| Identity providers (Entra, Google Workspace, Okta, generic SAML/OIDC) | Inbound   | SSO                                    | Via IDN                              |
+| LMS (Canvas, Moodle, Blackboard, Brightspace)                         | Both      | LTI 1.3 launches and grade services    | Per-tenant keys                      |
+| SIS (OneRoster, SCIM, SFTP)                                           | Inbound   | Roster sync                            | Tenant-scoped tokens                 |
+| Email and in-app delivery                                             | Outbound  | Invitations, notices                   | Via NTF                              |
+| Object storage and malware scan                                       | Outbound  | Evidence and import files              | Via PLT                              |
+| Payment and invoicing                                                 | Both      | Seat pools                             | Via BIL                              |
+| Proctoring vendor                                                     | Outbound  | Exams, vendor-gated (SSOT OD-35, Ph10) | Out of this module's first release   |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| IDN (planned) | Accounts, SSO execution, MFA, sessions | ADM (institution queue), ANL |
-| SET (planned) | Consent ledger, data rights | LRN (managed access), NET (alumni) |
-| LRN (planned) | Enrollment, progress, certificates | ANL (institution KPIs) |
-| STU (planned) | Private course authoring | BIL (institutional packages) |
-| ASM (planned) | Assessment results, integrity | ANL |
-| BIL (this batch) | Seat pools, invoices, price books (FR-BIL-024 to FR-BIL-027) | — |
-| JOB, ATS, INT (planned) | Drives link to jobs, applications, interviews | ANL |
-| EMP (planned) | Employer organization directory and verification | — |
-| NET (planned) | Alumni network | — |
-| EVD (planned) | Evidence revocation cascade, institution verification actors | BGV |
-| NTF (planned) | Delivery | all |
-| ANL (planned) | Metric pipelines | — |
-| ADM (planned) | Verification queue, support access | — |
-| PLT (planned) | Files, public API, webhooks | — |
+| Depends on              | For                                                          | Depended on by                     |
+| ----------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| IDN (planned)           | Accounts, SSO execution, MFA, sessions                       | ADM (institution queue), ANL       |
+| SET (planned)           | Consent ledger, data rights                                  | LRN (managed access), NET (alumni) |
+| LRN (planned)           | Enrollment, progress, certificates                           | ANL (institution KPIs)             |
+| STU (planned)           | Private course authoring                                     | BIL (institutional packages)       |
+| ASM (planned)           | Assessment results, integrity                                | ANL                                |
+| BIL (this batch)        | Seat pools, invoices, price books (FR-BIL-024 to FR-BIL-027) | —                                  |
+| JOB, ATS, INT (planned) | Drives link to jobs, applications, interviews                | ANL                                |
+| EMP (planned)           | Employer organization directory and verification             | —                                  |
+| NET (planned)           | Alumni network                                               | —                                  |
+| EVD (planned)           | Evidence revocation cascade, institution verification actors | BGV                                |
+| NTF (planned)           | Delivery                                                     | all                                |
+| ANL (planned)           | Metric pipelines                                             | —                                  |
+| ADM (planned)           | Verification queue, support access                           | —                                  |
+| PLT (planned)           | Files, public API, webhooks                                  | —                                  |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| Time to verification | Submission to `verified` | median(verified_at - submitted_at) | PAD |
-| Roster activation rate | Invited students who activate | active / invited per import batch | IAD |
-| Import clean rate | Rows valid at first validation | valid rows / total rows | IAD |
-| Seat utilization | Seats assigned over seats purchased | active assignments / total seats | IAD |
-| Course completion rate (managed) | Students completing assigned courses by due date | completed / assigned | INS |
-| At-risk resolution rate | Flags resolved within SLA | resolved within SLA / opened | IAD |
-| Drive participation | Registered / eligible | registered / eligible | PLO |
-| Confirmed placement rate | Confirmed or verified outcomes over graduates | confirmed positive outcomes / graduating students | PLO |
-| Graduation retention | Graduates keeping an active independent account 90 days later | active at +90d / completed transitions | PAD |
-| Consent revocation rate | Showcase consents revoked | revoked / granted | PAD |
+| Metric                           | Definition                                                    | Formula                                           | Owner role |
+| -------------------------------- | ------------------------------------------------------------- | ------------------------------------------------- | ---------- |
+| Time to verification             | Submission to `verified`                                      | median(verified_at - submitted_at)                | PAD        |
+| Roster activation rate           | Invited students who activate                                 | active / invited per import batch                 | IAD        |
+| Import clean rate                | Rows valid at first validation                                | valid rows / total rows                           | IAD        |
+| Seat utilization                 | Seats assigned over seats purchased                           | active assignments / total seats                  | IAD        |
+| Course completion rate (managed) | Students completing assigned courses by due date              | completed / assigned                              | INS        |
+| At-risk resolution rate          | Flags resolved within SLA                                     | resolved within SLA / opened                      | IAD        |
+| Drive participation              | Registered / eligible                                         | registered / eligible                             | PLO        |
+| Confirmed placement rate         | Confirmed or verified outcomes over graduates                 | confirmed positive outcomes / graduating students | PLO        |
+| Graduation retention             | Graduates keeping an active independent account 90 days later | active at +90d / completed transitions            | PAD        |
+| Consent revocation rate          | Showcase consents revoked                                     | revoked / granted                                 | PAD        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocks |
-|---|---|---|---|---|---|
-| OD-INS-01 | Which institution types launch first: higher education, bootcamps and training providers only (18+), or also schools with minors? | A: 18+ only; B: add minors with guardian flow | A for first release, B after OD-INS-05 | Founder, Legal | FR-INS-030, tenant minors flag |
-| OD-INS-02 | How far may INS go toward a student information system (grades, attendance, fees)? SSOT §4.2 forbids generic HR/payroll, not SIS, but breadth is undecided. | A: managed-learning data only; B: add attendance and grades import | A | Founder | Scope of ENT-INS-09, FR-INS-015 |
-| OD-INS-03 | Employer relations breadth: partner list and drives only, or a CRM with pipelines. | A: list and drives; B: lightweight CRM | A (BR-INS-033) | Founder | FR-INS-020 |
-| OD-INS-04 | Retention period and purge policy for student records by region. | 7 years default (SSOT OD-19) vs shorter or per-country | 7 years, configurable within bounds | Legal | FR-INS-032 |
-| OD-INS-05 | Legal regime for minors and education records per country (age floor, guardian verification strength, FERPA-style response window, directory information). | Country table with counsel input | Age floor 16, response window 30 days, email-plus-DOB guardian check | Legal | FR-INS-030, FR-INS-031 |
-| OD-INS-06 | Verification review SLA and who staffs it. | No SLA vs stated SLA | No promise in UI until staffing is decided | Ops | FR-INS-002 |
-| OD-INS-07 | Import row cap and file size. | 5,000 rows (SSOT OD-21) vs larger | 5,000 rows, 10 MB | Eng | FR-INS-008 |
-| OD-INS-08 | White-label scope. | Co-branded only; full white-label enterprise-only (SSOT OD-20) | Co-branded in this module | Founder | FR-INS-003 |
-| OD-INS-09 | Timing of institutional SSO and LTI relative to R3. SSOT OD-16 says SSOT Ph6; large institutions often need SSO at purchase. | R3 vs R5 | R5 (tier already set), revisit with first institutional customer | Founder | FR-INS-027, FR-INS-028 |
-| OD-INS-10 | At-risk detection: rules only, or ML-assisted ranking beside rules. | Rules only; rules plus ranked suggestion | Rules only | Product, AI governance | FR-INS-016 |
-| OD-INS-11 | Can institutions buy seats before BIL commercial scale (SSOT §23.4 exit 2 says Ph3, F-41 says Ph6)? | Manual invoicing by `FIN` first; self-serve checkout later | Manual pools created by `FIN` until BIL R5 | Founder | FR-INS-011 timing |
-| OD-INS-12 | One-offer placement policy defaults and any regional restrictions on student participation requirements. | Default off; allow institution to enable | Default off | Product, Legal | FR-INS-019 |
+| ID        | Question                                                                                                                                                    | Options                                                                                                                          | Default proposal                                                     | Who decides             | Blocks                          |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------- | ------------------------------- |
+| OD-INS-01 | Which institution types launch first: higher education, bootcamps and training providers only (18+), or also schools with minors?                           | A: 18+ only; B: add minors with guardian flow                                                                                    | A for first release, B after OD-INS-05                               | Founder, Legal          | FR-INS-030, tenant minors flag  |
+| OD-INS-02 | How far may INS go toward a student information system (grades, attendance, fees)? SSOT §4.2 forbids generic HR/payroll, not SIS, but breadth is undecided. | A: managed-learning data only; B: add attendance and grades import                                                               | A                                                                    | Founder                 | Scope of ENT-INS-09, FR-INS-015 |
+| OD-INS-03 | Employer relations breadth: partner list and drives only, or a CRM with pipelines.                                                                          | A: list and drives; B: lightweight CRM                                                                                           | A (BR-INS-033)                                                       | Founder                 | FR-INS-020                      |
+| OD-INS-04 | Retention period and purge policy for student records by region.                                                                                            | 7 years default (SSOT OD-19) vs shorter or per-country                                                                           | 7 years, configurable within bounds                                  | Legal                   | FR-INS-032                      |
+| OD-INS-05 | Legal regime for minors and education records per country (age floor, guardian verification strength, FERPA-style response window, directory information).  | Country table with counsel input                                                                                                 | Age floor 16, response window 30 days, email-plus-DOB guardian check | Legal                   | FR-INS-030, FR-INS-031          |
+| OD-INS-06 | Verification review SLA and who staffs it.                                                                                                                  | No SLA vs stated SLA                                                                                                             | No promise in UI until staffing is decided                           | Ops                     | FR-INS-002                      |
+| OD-INS-07 | Import row cap and file size.                                                                                                                               | 5,000 rows (SSOT OD-21) vs larger                                                                                                | 5,000 rows, 10 MB                                                    | Eng                     | FR-INS-008                      |
+| OD-INS-08 | White-label scope.                                                                                                                                          | Co-branded only; full white-label enterprise-only (SSOT OD-20)                                                                   | Co-branded in this module                                            | Founder                 | FR-INS-003                      |
+| OD-INS-09 | Timing of institutional SSO and LTI relative to R3. SSOT OD-16 says SSOT Ph6; large institutions often need SSO at purchase.                                | R3 vs R5                                                                                                                         | R5 (tier already set), revisit with first institutional customer     | Founder                 | FR-INS-027, FR-INS-028          |
+| OD-INS-10 | At-risk detection: rules only, or ML-assisted ranking beside rules.                                                                                         | Rules only; rules plus ranked suggestion                                                                                         | Rules only                                                           | Product, AI governance  | FR-INS-016                      |
+| OD-INS-11 | Can institutions buy seats before BIL commercial scale (SSOT §23.4 exit 2 says Ph3, F-41 says Ph6)?                                                         | Manual invoicing by `FIN` first; self-serve checkout later                                                                       | Manual pools created by `FIN` until BIL R5                           | Founder                 | FR-INS-011 timing               |
+| OD-INS-12 | One-offer placement policy defaults and any regional restrictions on student participation requirements.                                                    | Default off; allow institution to enable                                                                                         | Default off                                                          | Product, Legal          | FR-INS-019                      |
+| OD-INS-13 | Scope of funding: listing and tracking only, or also in-platform applications, document upload and award decisions?                                         | A: listing and tracking only (FR-INS-033); B: add application forms and document upload; C: add award decisions and disbursement | A `[PROP]`                                                           | Product owner and Legal | FR-INS-033                      |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-INS-01 | Cross-tenant data leak through a missed policy or admin tooling. | Low likelihood, severe | Isolation tests per table, mandatory tenant filter in repository layer, support access audited |
-| RSK-INS-02 | Fake institutions use verified status to issue credible-looking certificates. | Medium, high | Two-proof verification, independent reviewer, re-verification interval, revocation propagation |
-| RSK-INS-03 | Seat overselling or counter drift under concurrency. | Medium, high | Row locks, constraints, nightly reconcile with write pause |
-| RSK-INS-04 | Minors' data processed without valid guardian consent. | Low, severe | Activation guard, age floor, OD-INS-05 before enabling minors |
-| RSK-INS-05 | Placement drives become a channel for discrimination or pressure on students. | Medium, high | Eligibility allowlist, voluntary participation, student consent per drive |
-| RSK-INS-06 | Institutions treat the dashboard as a ranking or punishment tool for students. | Medium, medium | Explainable flags, no adverse automation, student visibility of shared items |
-| RSK-INS-07 | Bulk import mistakes disrupt thousands of students. | Medium, medium | Dry-run, typed confirmation, 24-hour undo, sync guard |
-| RSK-INS-08 | Employer data retained after a student revokes consent. | Medium, medium | Warning at consent time, watermarking, drive-scoped time-boxed access |
-| RSK-INS-09 | SSO or LTI misconfiguration locks out an entire institution. | Medium, high | Break-glass `IAD` path, test sign-in before enforce, cert expiry warnings |
-| RSK-INS-10 | Scope creep toward SIS and CRM against SSOT non-goals. | Medium, medium | OD-INS-02, OD-INS-03, BR-INS-033, quarterly scope review |
+| ID         | Risk                                                                           | Likelihood and impact  | Mitigation                                                                                     |
+| ---------- | ------------------------------------------------------------------------------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| RSK-INS-01 | Cross-tenant data leak through a missed policy or admin tooling.               | Low likelihood, severe | Isolation tests per table, mandatory tenant filter in repository layer, support access audited |
+| RSK-INS-02 | Fake institutions use verified status to issue credible-looking certificates.  | Medium, high           | Two-proof verification, independent reviewer, re-verification interval, revocation propagation |
+| RSK-INS-03 | Seat overselling or counter drift under concurrency.                           | Medium, high           | Row locks, constraints, nightly reconcile with write pause                                     |
+| RSK-INS-04 | Minors' data processed without valid guardian consent.                         | Low, severe            | Activation guard, age floor, OD-INS-05 before enabling minors                                  |
+| RSK-INS-05 | Placement drives become a channel for discrimination or pressure on students.  | Medium, high           | Eligibility allowlist, voluntary participation, student consent per drive                      |
+| RSK-INS-06 | Institutions treat the dashboard as a ranking or punishment tool for students. | Medium, medium         | Explainable flags, no adverse automation, student visibility of shared items                   |
+| RSK-INS-07 | Bulk import mistakes disrupt thousands of students.                            | Medium, medium         | Dry-run, typed confirmation, 24-hour undo, sync guard                                          |
+| RSK-INS-08 | Employer data retained after a student revokes consent.                        | Medium, medium         | Warning at consent time, watermarking, drive-scoped time-boxed access                          |
+| RSK-INS-09 | SSO or LTI misconfiguration locks out an entire institution.                   | Medium, high           | Break-glass `IAD` path, test sign-in before enforce, cert expiry warnings                      |
+| RSK-INS-10 | Scope creep toward SIS and CRM against SSOT non-goals.                         | Medium, medium         | OD-INS-02, OD-INS-03, BR-INS-033, quarterly scope review                                       |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed and why |
-|---|---|---|
-| SSOT.md §4.2, §10.20 (BR-072 to BR-082), §23.4, §9 F-40/F-41/F-43/F-46/F-47/F-50, SCI-09 to SCI-12, SCI-17, SCI-18, WF-16 to WF-23, OD-15 to OD-21, OD-23 | Seat rules, import rules, graduation, exit criteria, open decisions | Pricing figures not carried (SSOT fixes none); F-41 phase conflict recorded as OD-INS-11 |
-| SSOT.md §10.24 BR-128, §10.39 BR-241 to BR-248, F-125 | Minors, affiliation, alumni | Alumni network features owned by NET; only the graduation hand-off lives here |
-| docs/registries/FEATURE_REGISTRY.md F-40 to F-50, F-56, F-90, F-125, F-131 | Feature inventory | F-45 proctoring excluded (vendor-gated, SSOT Ph10); F-131 apprenticeship matching belongs to JOB |
-| docs/registries/BUSINESS_RULE_REGISTRY.md BR-072 to BR-082, BR-241 to BR-248 | Rule text | Merged into BR-INS table with new ids |
-| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md | Awareness that the institution flow is not built | No status copied |
-| Yash_Final_Project_Document 30_PRIOR_IMPLEMENTATION_REFERENCE/04-FEATURES-AND-WORKFLOWS.md | Existing institution-level verification actor rules (`institution_verified` evidence level) | Prior alumni API is in memory and not carried |
-| Own domain knowledge (Canvas, Handshake, Symplicity, Credly, Workday Student) | Placement drives, roster sync, LTI, accreditation reports, guardian consent, record disclosure log | Tagged [PROP] |
+| Source                                                                                                                                                    | Used for                                                                                           | Dropped or changed and why                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| SSOT.md §4.2, §10.20 (BR-072 to BR-082), §23.4, §9 F-40/F-41/F-43/F-46/F-47/F-50, SCI-09 to SCI-12, SCI-17, SCI-18, WF-16 to WF-23, OD-15 to OD-21, OD-23 | Seat rules, import rules, graduation, exit criteria, open decisions                                | Pricing figures not carried (SSOT fixes none); F-41 phase conflict recorded as OD-INS-11         |
+| SSOT.md §10.24 BR-128, §10.39 BR-241 to BR-248, F-125                                                                                                     | Minors, affiliation, alumni                                                                        | Alumni network features owned by NET; only the graduation hand-off lives here                    |
+| docs/registries/FEATURE_REGISTRY.md F-40 to F-50, F-56, F-90, F-125, F-131                                                                                | Feature inventory                                                                                  | F-45 proctoring excluded (vendor-gated, SSOT Ph10); F-131 apprenticeship matching belongs to JOB |
+| docs/registries/BUSINESS_RULE_REGISTRY.md BR-072 to BR-082, BR-241 to BR-248                                                                              | Rule text                                                                                          | Merged into BR-INS table with new ids                                                            |
+| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md                                                                                                | Awareness that the institution flow is not built                                                   | No status copied                                                                                 |
+| Yash_Final_Project_Document 30_PRIOR_IMPLEMENTATION_REFERENCE/04-FEATURES-AND-WORKFLOWS.md                                                                | Existing institution-level verification actor rules (`institution_verified` evidence level)        | Prior alumni API is in memory and not carried                                                    |
+| Own domain knowledge (Canvas, Handshake, Symplicity, Credly, Workday Student)                                                                             | Placement drives, roster sync, LTI, accreditation reports, guardian consent, record disclosure log | Tagged [PROP]                                                                                    |
 
 **Conflicts recorded:** (1) SSOT F-41 Ph6 versus §23.4 exit 2 Ph3 on seat purchase: OD-INS-11. (2) SSOT §5 lists "Department Admin" and "Faculty/Proctor" with no canonical short code: modeled as scoped `IAD` and `INS` grants (FR-INS-004). (3) OS ambition versus §4.2: employer relations kept narrow (OD-INS-03). (4) OD-16 SSO Ph6 versus common institutional expectation: OD-INS-09.

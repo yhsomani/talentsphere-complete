@@ -23,17 +23,17 @@ Direct and group conversations; message composition, edit, delete, reactions, re
 
 ### 1.4 Out of scope (owned elsewhere)
 
-| Capability | Owner |
-|---|---|
-| Notification delivery channels, templates, preferences hub | NTF (planned) |
-| Report intake UI behaviour, moderation decisions, sanctions | TSF |
-| Block and privacy settings storage | NET (`FR-NET-006`, `FR-NET-007`) |
-| Interview scheduling and video rooms | INT (planned) |
-| Application stage changes and automated pipeline emails | ATS (planned) |
-| Plan prices, outreach credit purchase | BIL (planned) |
-| AI drafting and translation models | AIC |
-| Media storage and virus scanning pipeline | PLT (planned) |
-| Mentor sessions | MEN (planned) |
+| Capability                                                  | Owner                            |
+| ----------------------------------------------------------- | -------------------------------- |
+| Notification delivery channels, templates, preferences hub  | NTF (planned)                    |
+| Report intake UI behaviour, moderation decisions, sanctions | TSF                              |
+| Block and privacy settings storage                          | NET (`FR-NET-006`, `FR-NET-007`) |
+| Interview scheduling and video rooms                        | INT (planned)                    |
+| Application stage changes and automated pipeline emails     | ATS (planned)                    |
+| Plan prices, outreach credit purchase                       | BIL (planned)                    |
+| AI drafting and translation models                          | AIC                              |
+| Media storage and virus scanning pipeline                   | PLT (planned)                    |
+| Mentor sessions                                             | MEN (planned)                    |
 
 ### 1.5 Boundary with the non-goal "sales-prospecting suite"
 
@@ -47,32 +47,32 @@ Owned: conversations, messages, attachments, message requests, outreach records 
 
 Legend: Y allowed, O own conversations only, S scoped by rule, R by rule, N not allowed.
 
-| Capability | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD | SAD |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Message a connection | N | Y | R | Y | Y | Y | Y | Y | Y | Y | N | N | N | N |
-| Send a message request | N | Y | R | Y | Y | Y | Y | Y | Y | Y | N | N | N | N |
-| Send recruiter outreach | N | N | N | N | N | S | S | S | N | N | N | N | N | N |
-| Receive recruiter outreach | N | Y | R | Y | Y | Y | Y | Y | N | N | N | N | N | N |
-| Create group conversation | N | Y | R | Y | Y | Y | Y | Y | Y | Y | N | N | N | N |
-| Send attachments | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | N | N | N | N |
-| Send broadcast | N | N | N | S | S | S | N | S | S | S | N | N | N | N |
-| Read message content of others | N | O | O | O | O | O | O | O | O | O | R | R | N | R |
-| Export own conversations | N | O | O | O | O | O | O | O | O | O | N | N | N | N |
-| Configure messaging policy (platform) | N | N | N | N | N | N | N | N | N | N | N | N | Y | Y |
-| View messaging audit log | N | N | N | N | N | N | N | N | N | N | N | R | Y | Y |
+| Capability                            | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD | SAD |
+| ------------------------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Message a connection                  | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   | N   |
+| Send a message request                | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   | N   |
+| Send recruiter outreach               | N   | N   | N   | N   | N   | S   | S   | S   | N   | N   | N   | N   | N   | N   |
+| Receive recruiter outreach            | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   | N   | N   | N   |
+| Create group conversation             | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   | N   |
+| Send attachments                      | N   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   | N   |
+| Send broadcast                        | N   | N   | N   | S   | S   | S   | N   | S   | S   | S   | N   | N   | N   | N   |
+| Read message content of others        | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | R   | R   | N   | R   |
+| Export own conversations              | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | N   | N   | N   | N   |
+| Configure messaging policy (platform) | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | Y   | Y   |
+| View messaging audit log              | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | R   | Y   | Y   |
 
 Notes. `MOD` read access applies only to messages attached to a report, with the report's context window (`BR-MSG-022`). `SUP` read access requires a support ticket and the member's explicit in-ticket consent, limited to the named conversation (`BR-MSG-019`). `SAD` access is for legal orders and security incidents under dual approval (`BR-MSG-019`). `STD` follows institution policy (`IAD` can restrict messaging to enrolled peers and staff). `HMG` may send outreach only on jobs where they are a named hiring manager. Minors follow `BR-MSG-008`. `API` principals have no MSG write access in this blueprint; any integration is a PLT (planned) decision.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| MSG-A | Conversations | FR-MSG-001 to 008 |
+| Code  | Sub-module                              | Features          |
+| ----- | --------------------------------------- | ----------------- |
+| MSG-A | Conversations                           | FR-MSG-001 to 008 |
 | MSG-B | Message requests and recruiter outreach | FR-MSG-009 to 016 |
-| MSG-C | Safety and abuse controls | FR-MSG-017 to 021 |
-| MSG-D | Realtime, delivery and notifications | FR-MSG-022 to 026 |
-| MSG-E | Data governance and access | FR-MSG-027 to 030 |
-| MSG-F | Experience and accessibility | FR-MSG-031 to 033 |
+| MSG-C | Safety and abuse controls               | FR-MSG-017 to 021 |
+| MSG-D | Realtime, delivery and notifications    | FR-MSG-022 to 026 |
+| MSG-E | Data governance and access              | FR-MSG-027 to 030 |
+| MSG-F | Experience and accessibility            | FR-MSG-031 to 033 |
 
 ```mermaid
 flowchart LR
@@ -297,7 +297,6 @@ flowchart LR
   - Given a legal hold, when the member deletes, then the thread disappears for them but is retained.
 
 ### 4.2 MSG-B Message requests and recruiter outreach
-
 
 ### FR-MSG-009 — Message requests inbox
 
@@ -937,43 +936,43 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-MSG-001 | A direct conversation can be started only between two active members who are connected and not blocked. A non-connection can send only a message request, and only if the recipient's setting allows requests. If the recipient chose Everyone, the message goes to the main inbox. | Strangers never reach the main inbox by default. | Messaging service at conversation create and send | [DER] from [SRC: SSOT BR-129] |
-| BR-MSG-002 | A message request is one message of 1 to 500 characters with no attachments or links. One pending request per sender and recipient. After Decline or Ignore the sender waits 30 days; after 2 declines or expiries the sender cannot request that person again. Declines are silent. Requests expire after 30 days. A sender may send at most 20 requests per day. | Limits unsolicited contact without revealing refusals. | Messaging service | [PROP] |
-| BR-MSG-003 | Recruiter outreach requires a verified organization, a stated purpose (specific open job, talent pool, or interview request), a message of 50 to 1,500 characters, no phone numbers, emails or external links, and a candidate who allows outreach. No bulk sends or automated sequences. | Accountable, hiring-only contact; keeps the product out of sales prospecting (SSOT §4.2). | Outreach service | [DER] [PROP] `OD-MSG-01` |
-| BR-MSG-004 | An outreach credit is consumed on send to a non-connection and refunded if the candidate replies within 7 days. No refund for decline or silence. | Rewards relevant outreach. | Credit ledger service | [SRC: SSOT BR-129] |
-| BR-MSG-005 | Outreach is capped per rolling 7 days at 20 (Pro), 50 (Team) or a custom number (Enterprise). A second outreach to the same candidate for the same purpose is blocked for 14 days unless the candidate replied. Org daily cap default 200. | Volume control. | Outreach service, BIL entitlements | [SRC: SSOT BR-130] caps; repeat and org cap [PROP] |
-| BR-MSG-006 | Candidate preferences are binding: outreach is blocked for excluded companies, excluded industries, candidates with outreach Off, and quiet hours defer notifications. The recruiter is never told which preference blocked the send. Preferences such as minimum compensation are never disclosed. | Candidate control and privacy. | Outreach service | [DER] |
-| BR-MSG-007 | Introduction messages are separate from cold outreach, use no outreach credit and do not count against caps. | Dignified warm intros. | Context thread service | [SRC: SSOT BR-214] |
-| BR-MSG-008 | Members aged 16 and 17 cannot receive recruiter outreach, message requests from non-connections or broadcasts from non-institution senders; they can message connections and institution staff and peers allowed by their institution; groups with unconnected adults are not allowed. | Protects minors. | Messaging service using age claim from IDN | [SRC: SSOT BR-128] `OD-MSG-06` |
-| BR-MSG-009 | A message is 1 to 5,000 characters; up to 10 attachments, 25 MB each, 100 MB per message; allowed types only; content sniffing decides type; attachments are unavailable until scanned. | Abuse and cost control. | Messaging and media services | [PROP] |
-| BR-MSG-010 | Each send carries a client message id. The server persists before acknowledging, dedupes on (conversation, sender, client id), assigns a per-conversation sequence, and delivery is at least once with exactly-once display. Order is by sequence. | Reliability on poor networks. | Messaging service | [SRC: SSOT WF-10 clientMessageId dedupe] |
-| BR-MSG-011 | Edit within 15 minutes with an Edited marker and kept revisions. Delete for me anytime. Delete for everyone within 60 minutes leaves a tombstone. Reported or flagged content is preserved for TSF regardless of deletion. | Accountability. | Messaging service | [PROP] |
-| BR-MSG-012 | Read receipts are reciprocal and member-controlled; none in requests or outreach before reply or acceptance; recruiters see Read on outreach only after a reply. Group receipts show counts unless the group has at most 8 members. | Privacy and pressure reduction. | Messaging service | [PROP] |
-| BR-MSG-013 | Typing indicators are ephemeral and only in accepted conversations. Presence is off by default and visible only to connections when on. | Privacy. | Realtime service | [PROP] |
-| BR-MSG-014 | Groups have 2 to 50 members; only the creator's connections can be added directly; others must accept an invitation; new members see history only from their join time; groups with unconnected adults are not allowed for minors. | Safety and privacy. | Messaging service | [PROP] `OD-MSG-02` |
-| BR-MSG-015 | Search is server-side, scoped to the member's accessible messages and join times; deleted messages leave the index within 5 minutes. | No leakage through search. | Search service | [PROP] |
-| BR-MSG-016 | Direct messages are retained while at least one participant's copy exists. Deleting for self removes that copy. When all participants have deleted, content purges after 30 days. Members may set auto-delete of their own copy (12, 24, 60 months). | Data minimization with member control. | Retention job | [DER] |
-| BR-MSG-017 | Application-context threads are retained for the employer's retention period (default 24 months, bounded 6 to 84) for hiring records; the candidate may hide but not force deletion before then unless law requires; the candidate is told at the first message. | Hiring record obligations. | Retention job, ATS | [PROP] `OD-MSG-05` |
-| BR-MSG-018 | Messages are encrypted with TLS 1.2 or higher in transit and AES-256 at rest. End-to-end encryption is not provided in v1. | Server access is required for safety, search and legal duties. | Platform | [DER] `OD-MSG-04` |
-| BR-MSG-019 | Staff cannot read message content except: reported content (scope limited), member consent in a ticket (scoped, time-boxed), valid legal order, or security incident break-glass with two approvers. Every access is logged and visible to the member after any legal bar lapses. | Privacy by design. | Access service, audit log | [DER] from [SRC: SSOT §5.9] |
-| BR-MSG-020 | Message content is never used for advertising, recruiter ranking, profiling or model training. Scanning is limited to malware, illegal-content hashes, link reputation, and rate and scam patterns. AIC features read a conversation only on the member's per-use request. | Trust. | Delivery pipeline, AI gateway | [DER] [SRC: SSOT §16.5] |
-| BR-MSG-021 | Rate limits: 30 messages per minute and 600 per hour per member; new accounts limited to 10 new conversations or requests per day and no links in first messages; group creation 10 per day; duplicate text to more than 5 recipients per hour triggers throttle and TSF flag. | Abuse resistance. | Rate limiter | [PROP] |
-| BR-MSG-022 | A report shares with TSF only the selected messages and attachments (default the reported message and 20 around it). | Data minimization. | Report service | [DER] |
-| BR-MSG-023 | After a block, the blocked sender's messages are accepted but not delivered, and the sender sees the normal Sent state; nothing reveals the block. Groups hide each other's messages. | Safety without retaliation. | Messaging service, NET block state | [DER] from [SRC: SSOT BR-238; NET `BR-NET-008`] |
-| BR-MSG-024 | Scam and off-platform warnings are advisory banners; they never delete or hide messages; high-severity banners cannot be disabled by users. | Protects job seekers. | Delivery pipeline | [PROP] |
-| BR-MSG-025 | Realtime uses the ladder WebSocket, SSE, long polling, interval polling; reconnect with jitter and resume by last seen sequence; sessions revoked disconnect within 60 seconds; at most 5 devices connected per member. | Works on every network. | Realtime gateway | [DER] |
-| BR-MSG-026 | Push notifications show no message text by default; muted conversations send none; quiet hours defer non-safety notifications; no push when active in the conversation. | Privacy and noise control. | Notification adapter | [PROP] |
-| BR-MSG-027 | Employer messages show the organization name and verified badge; the candidate is told when team members can read the thread; the disclosure cannot be disabled; internal notes are never visible to candidates. | Transparency. | Messaging service, EMP | [PROP] |
-| BR-MSG-028 | Broadcasts are one-way, limited to audiences the sender administers, at most 2 per day and 1,000 recipients, no promotional content; recipients can mute except mandatory notices. | No spam. | Broadcast service | [PROP] |
-| BR-MSG-029 | Export contains only what the requester could see, excludes internal notes, is limited to 3 per day, expires after 7 days. | Data rights without leakage. | Export service | [DER] |
-| BR-MSG-030 | Messaging meets WCAG 2.1 AA: keyboard operation, live-region announcements, text status labels, reduced motion, 200 percent zoom. | Accessibility. | UI and QA | [DER] |
-| BR-MSG-031 | Links are scanned at send and click; shorteners are expanded; unknown domains show an interstitial; `javascript:` and `data:` links are refused; previews only for allowlisted domains and never for requests before acceptance. | Phishing defense. | Link service | [DER] |
-| BR-MSG-032 | Plans may bound attachment storage, group size, broadcasts and outreach, but plain messaging between connections, receiving, replying, reporting, blocking and export are never paywalled. | Safety is not a feature tier. | BIL entitlements, Messaging | [PROP] |
-| BR-MSG-033 | Offline: cached conversations for 30 days encrypted on device, cleared at sign-out; queued sends expire after 24 hours; the server re-validates every rule on replay; no offline requests, outreach, edits or deletes. | Server authority. | PWA and Messaging service | [SRC: SSOT §19] [DER] |
-| BR-MSG-034 | Response-time badges use a 90-day median of recruiter first replies and are shown only with at least 10 replied threads. | Fair, non-misleading signal. | Analytics job | [PROP] |
-| BR-MSG-035 | When an account is deleted, the owner's copy is removed; other participants keep received messages with the sender shown as "Former member". | Data rights balanced with recipient records. | Lifecycle job | [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                               | Rationale                                                                                 | Enforced where                                    | Source                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------- |
+| BR-MSG-001 | A direct conversation can be started only between two active members who are connected and not blocked. A non-connection can send only a message request, and only if the recipient's setting allows requests. If the recipient chose Everyone, the message goes to the main inbox.                                                                                | Strangers never reach the main inbox by default.                                          | Messaging service at conversation create and send | [DER] from [SRC: SSOT BR-129]                      |
+| BR-MSG-002 | A message request is one message of 1 to 500 characters with no attachments or links. One pending request per sender and recipient. After Decline or Ignore the sender waits 30 days; after 2 declines or expiries the sender cannot request that person again. Declines are silent. Requests expire after 30 days. A sender may send at most 20 requests per day. | Limits unsolicited contact without revealing refusals.                                    | Messaging service                                 | [PROP]                                             |
+| BR-MSG-003 | Recruiter outreach requires a verified organization, a stated purpose (specific open job, talent pool, or interview request), a message of 50 to 1,500 characters, no phone numbers, emails or external links, and a candidate who allows outreach. No bulk sends or automated sequences.                                                                          | Accountable, hiring-only contact; keeps the product out of sales prospecting (SSOT §4.2). | Outreach service                                  | [DER] [PROP] `OD-MSG-01`                           |
+| BR-MSG-004 | An outreach credit is consumed on send to a non-connection and refunded if the candidate replies within 7 days. No refund for decline or silence.                                                                                                                                                                                                                  | Rewards relevant outreach.                                                                | Credit ledger service                             | [SRC: SSOT BR-129]                                 |
+| BR-MSG-005 | Outreach is capped per rolling 7 days at 20 (Pro), 50 (Team) or a custom number (Enterprise). A second outreach to the same candidate for the same purpose is blocked for 14 days unless the candidate replied. Org daily cap default 200.                                                                                                                         | Volume control.                                                                           | Outreach service, BIL entitlements                | [SRC: SSOT BR-130] caps; repeat and org cap [PROP] |
+| BR-MSG-006 | Candidate preferences are binding: outreach is blocked for excluded companies, excluded industries, candidates with outreach Off, and quiet hours defer notifications. The recruiter is never told which preference blocked the send. Preferences such as minimum compensation are never disclosed.                                                                | Candidate control and privacy.                                                            | Outreach service                                  | [DER]                                              |
+| BR-MSG-007 | Introduction messages are separate from cold outreach, use no outreach credit and do not count against caps.                                                                                                                                                                                                                                                       | Dignified warm intros.                                                                    | Context thread service                            | [SRC: SSOT BR-214]                                 |
+| BR-MSG-008 | Members aged 16 and 17 cannot receive recruiter outreach, message requests from non-connections or broadcasts from non-institution senders; they can message connections and institution staff and peers allowed by their institution; groups with unconnected adults are not allowed.                                                                             | Protects minors.                                                                          | Messaging service using age claim from IDN        | [SRC: SSOT BR-128] `OD-MSG-06`                     |
+| BR-MSG-009 | A message is 1 to 5,000 characters; up to 10 attachments, 25 MB each, 100 MB per message; allowed types only; content sniffing decides type; attachments are unavailable until scanned.                                                                                                                                                                            | Abuse and cost control.                                                                   | Messaging and media services                      | [PROP]                                             |
+| BR-MSG-010 | Each send carries a client message id. The server persists before acknowledging, dedupes on (conversation, sender, client id), assigns a per-conversation sequence, and delivery is at least once with exactly-once display. Order is by sequence.                                                                                                                 | Reliability on poor networks.                                                             | Messaging service                                 | [SRC: SSOT WF-10 clientMessageId dedupe]           |
+| BR-MSG-011 | Edit within 15 minutes with an Edited marker and kept revisions. Delete for me anytime. Delete for everyone within 60 minutes leaves a tombstone. Reported or flagged content is preserved for TSF regardless of deletion.                                                                                                                                         | Accountability.                                                                           | Messaging service                                 | [PROP]                                             |
+| BR-MSG-012 | Read receipts are reciprocal and member-controlled; none in requests or outreach before reply or acceptance; recruiters see Read on outreach only after a reply. Group receipts show counts unless the group has at most 8 members.                                                                                                                                | Privacy and pressure reduction.                                                           | Messaging service                                 | [PROP]                                             |
+| BR-MSG-013 | Typing indicators are ephemeral and only in accepted conversations. Presence is off by default and visible only to connections when on.                                                                                                                                                                                                                            | Privacy.                                                                                  | Realtime service                                  | [PROP]                                             |
+| BR-MSG-014 | Groups have 2 to 50 members; only the creator's connections can be added directly; others must accept an invitation; new members see history only from their join time; groups with unconnected adults are not allowed for minors.                                                                                                                                 | Safety and privacy.                                                                       | Messaging service                                 | [PROP] `OD-MSG-02`                                 |
+| BR-MSG-015 | Search is server-side, scoped to the member's accessible messages and join times; deleted messages leave the index within 5 minutes.                                                                                                                                                                                                                               | No leakage through search.                                                                | Search service                                    | [PROP]                                             |
+| BR-MSG-016 | Direct messages are retained while at least one participant's copy exists. Deleting for self removes that copy. When all participants have deleted, content purges after 30 days. Members may set auto-delete of their own copy (12, 24, 60 months).                                                                                                               | Data minimization with member control.                                                    | Retention job                                     | [DER]                                              |
+| BR-MSG-017 | Application-context threads are retained for the employer's retention period (default 24 months, bounded 6 to 84) for hiring records; the candidate may hide but not force deletion before then unless law requires; the candidate is told at the first message.                                                                                                   | Hiring record obligations.                                                                | Retention job, ATS                                | [PROP] `OD-MSG-05`                                 |
+| BR-MSG-018 | Messages are encrypted with TLS 1.2 or higher in transit and AES-256 at rest. End-to-end encryption is not provided in v1.                                                                                                                                                                                                                                         | Server access is required for safety, search and legal duties.                            | Platform                                          | [DER] `OD-MSG-04`                                  |
+| BR-MSG-019 | Staff cannot read message content except: reported content (scope limited), member consent in a ticket (scoped, time-boxed), valid legal order, or security incident break-glass with two approvers. Every access is logged and visible to the member after any legal bar lapses.                                                                                  | Privacy by design.                                                                        | Access service, audit log                         | [DER] from [SRC: SSOT §5.9]                        |
+| BR-MSG-020 | Message content is never used for advertising, recruiter ranking, profiling or model training. Scanning is limited to malware, illegal-content hashes, link reputation, and rate and scam patterns. AIC features read a conversation only on the member's per-use request.                                                                                         | Trust.                                                                                    | Delivery pipeline, AI gateway                     | [DER] [SRC: SSOT §16.5]                            |
+| BR-MSG-021 | Rate limits: 30 messages per minute and 600 per hour per member; new accounts limited to 10 new conversations or requests per day and no links in first messages; group creation 10 per day; duplicate text to more than 5 recipients per hour triggers throttle and TSF flag.                                                                                     | Abuse resistance.                                                                         | Rate limiter                                      | [PROP]                                             |
+| BR-MSG-022 | A report shares with TSF only the selected messages and attachments (default the reported message and 20 around it).                                                                                                                                                                                                                                               | Data minimization.                                                                        | Report service                                    | [DER]                                              |
+| BR-MSG-023 | After a block, the blocked sender's messages are accepted but not delivered, and the sender sees the normal Sent state; nothing reveals the block. Groups hide each other's messages.                                                                                                                                                                              | Safety without retaliation.                                                               | Messaging service, NET block state                | [DER] from [SRC: SSOT BR-238; NET `BR-NET-008`]    |
+| BR-MSG-024 | Scam and off-platform warnings are advisory banners; they never delete or hide messages; high-severity banners cannot be disabled by users.                                                                                                                                                                                                                        | Protects job seekers.                                                                     | Delivery pipeline                                 | [PROP]                                             |
+| BR-MSG-025 | Realtime uses the ladder WebSocket, SSE, long polling, interval polling; reconnect with jitter and resume by last seen sequence; sessions revoked disconnect within 60 seconds; at most 5 devices connected per member.                                                                                                                                            | Works on every network.                                                                   | Realtime gateway                                  | [DER]                                              |
+| BR-MSG-026 | Push notifications show no message text by default; muted conversations send none; quiet hours defer non-safety notifications; no push when active in the conversation.                                                                                                                                                                                            | Privacy and noise control.                                                                | Notification adapter                              | [PROP]                                             |
+| BR-MSG-027 | Employer messages show the organization name and verified badge; the candidate is told when team members can read the thread; the disclosure cannot be disabled; internal notes are never visible to candidates.                                                                                                                                                   | Transparency.                                                                             | Messaging service, EMP                            | [PROP]                                             |
+| BR-MSG-028 | Broadcasts are one-way, limited to audiences the sender administers, at most 2 per day and 1,000 recipients, no promotional content; recipients can mute except mandatory notices.                                                                                                                                                                                 | No spam.                                                                                  | Broadcast service                                 | [PROP]                                             |
+| BR-MSG-029 | Export contains only what the requester could see, excludes internal notes, is limited to 3 per day, expires after 7 days.                                                                                                                                                                                                                                         | Data rights without leakage.                                                              | Export service                                    | [DER]                                              |
+| BR-MSG-030 | Messaging meets WCAG 2.1 AA: keyboard operation, live-region announcements, text status labels, reduced motion, 200 percent zoom.                                                                                                                                                                                                                                  | Accessibility.                                                                            | UI and QA                                         | [DER]                                              |
+| BR-MSG-031 | Links are scanned at send and click; shorteners are expanded; unknown domains show an interstitial; `javascript:` and `data:` links are refused; previews only for allowlisted domains and never for requests before acceptance.                                                                                                                                   | Phishing defense.                                                                         | Link service                                      | [DER]                                              |
+| BR-MSG-032 | Plans may bound attachment storage, group size, broadcasts and outreach, but plain messaging between connections, receiving, replying, reporting, blocking and export are never paywalled.                                                                                                                                                                         | Safety is not a feature tier.                                                             | BIL entitlements, Messaging                       | [PROP]                                             |
+| BR-MSG-033 | Offline: cached conversations for 30 days encrypted on device, cleared at sign-out; queued sends expire after 24 hours; the server re-validates every rule on replay; no offline requests, outreach, edits or deletes.                                                                                                                                             | Server authority.                                                                         | PWA and Messaging service                         | [SRC: SSOT §19] [DER]                              |
+| BR-MSG-034 | Response-time badges use a 90-day median of recruiter first replies and are shown only with at least 10 replied threads.                                                                                                                                                                                                                                           | Fair, non-misleading signal.                                                              | Analytics job                                     | [PROP]                                             |
+| BR-MSG-035 | When an account is deleted, the owner's copy is removed; other participants keep received messages with the sender shown as "Former member".                                                                                                                                                                                                                       | Data rights balanced with recipient records.                                              | Lifecycle job                                     | [DER]                                              |
 
 ## 6. State machines
 
@@ -981,19 +980,19 @@ flowchart LR
 
 States: `composing` (client only), `queued`, `sending`, `sent`, `delivered`, `read`, `failed`, `not_delivered_silent`, `edited`, `deleted_for_everyone`, `purged`. Terminal: `purged`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| composing | queued | Send while offline | queue has room |
-| composing, queued | sending | Send with connectivity | rate limit pass |
-| sending | sent | Server commit and ack | validation, scan pass |
-| sending | failed | Rejected or timeout | retryable |
-| failed | sending | Retry | same client id |
-| sending | not_delivered_silent | Recipient has blocked sender | `BR-MSG-023` |
-| sent | delivered | Recipient device or inbox receives | n/a |
-| delivered | read | Recipient views | receipts allowed |
-| sent, delivered, read | edited | Sender edits | within 15 minutes |
-| sent, delivered, read, edited | deleted_for_everyone | Sender deletes | within 60 minutes |
-| deleted_for_everyone | purged | Retention job | 30 days and no hold |
+| From                          | To                   | Trigger                            | Guard                 |
+| ----------------------------- | -------------------- | ---------------------------------- | --------------------- |
+| composing                     | queued               | Send while offline                 | queue has room        |
+| composing, queued             | sending              | Send with connectivity             | rate limit pass       |
+| sending                       | sent                 | Server commit and ack              | validation, scan pass |
+| sending                       | failed               | Rejected or timeout                | retryable             |
+| failed                        | sending              | Retry                              | same client id        |
+| sending                       | not_delivered_silent | Recipient has blocked sender       | `BR-MSG-023`          |
+| sent                          | delivered            | Recipient device or inbox receives | n/a                   |
+| delivered                     | read                 | Recipient views                    | receipts allowed      |
+| sent, delivered, read         | edited               | Sender edits                       | within 15 minutes     |
+| sent, delivered, read, edited | deleted_for_everyone | Sender deletes                     | within 60 minutes     |
+| deleted_for_everyone          | purged               | Retention job                      | 30 days and no hold   |
 
 ```mermaid
 stateDiagram-v2
@@ -1019,17 +1018,17 @@ stateDiagram-v2
 
 States: `active`, `muted`, `archived`, `closed`, `deleted_for_me`, `purged`. Terminal: `purged`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | First message | permission check |
-| active | muted | Member mutes | n/a |
-| muted | active | Unmute or expiry | n/a |
-| active, muted | archived | Member archives | n/a |
-| archived | active | Member unarchives or new message | not muted |
-| active, muted, archived | closed | Context ends, or either party ends | context thread |
-| closed | active | Reopen by closer within 30 days | no block |
-| any | deleted_for_me | Member deletes | n/a |
-| deleted_for_me | purged | All participants deleted and 30 days | no hold |
+| From                    | To             | Trigger                              | Guard            |
+| ----------------------- | -------------- | ------------------------------------ | ---------------- |
+| (new)                   | active         | First message                        | permission check |
+| active                  | muted          | Member mutes                         | n/a              |
+| muted                   | active         | Unmute or expiry                     | n/a              |
+| active, muted           | archived       | Member archives                      | n/a              |
+| archived                | active         | Member unarchives or new message     | not muted        |
+| active, muted, archived | closed         | Context ends, or either party ends   | context thread   |
+| closed                  | active         | Reopen by closer within 30 days      | no block         |
+| any                     | deleted_for_me | Member deletes                       | n/a              |
+| deleted_for_me          | purged         | All participants deleted and 30 days | no hold          |
 
 ```mermaid
 stateDiagram-v2
@@ -1052,14 +1051,14 @@ stateDiagram-v2
 
 States: `pending`, `accepted`, `declined`, `ignored`, `expired`, `blocked`. Terminal: all except `pending`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | pending | Sender sends | `BR-MSG-002` |
-| pending | accepted | Recipient accepts | not blocked |
-| pending | declined | Recipient declines | n/a |
-| pending | ignored | Recipient ignores | n/a |
-| pending | expired | Job at 30 days | n/a |
-| pending | blocked | Recipient blocks | n/a |
+| From    | To       | Trigger            | Guard        |
+| ------- | -------- | ------------------ | ------------ |
+| (new)   | pending  | Sender sends       | `BR-MSG-002` |
+| pending | accepted | Recipient accepts  | not blocked  |
+| pending | declined | Recipient declines | n/a          |
+| pending | ignored  | Recipient ignores  | n/a          |
+| pending | expired  | Job at 30 days     | n/a          |
+| pending | blocked  | Recipient blocks   | n/a          |
 
 ```mermaid
 stateDiagram-v2
@@ -1080,15 +1079,15 @@ stateDiagram-v2
 
 States: `draft`, `sent`, `replied`, `declined`, `expired`, `cancelled`, `refunded`. Terminal: `replied` with credit finalized, `declined`, `expired`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | draft | Recruiter composes | n/a |
-| draft | sent | Send | `BR-MSG-003`, `BR-MSG-005`, credit available |
-| sent | replied | Candidate replies | n/a |
-| replied | refunded | Reply within 7 days | credit consumed |
-| sent | declined | Candidate declines or auto-decline | n/a (not shown to recruiter) |
-| sent | expired | 30 days | n/a |
-| sent | cancelled | Job closed, org unverified, block | refund if never opened |
+| From    | To        | Trigger                            | Guard                                        |
+| ------- | --------- | ---------------------------------- | -------------------------------------------- |
+| (new)   | draft     | Recruiter composes                 | n/a                                          |
+| draft   | sent      | Send                               | `BR-MSG-003`, `BR-MSG-005`, credit available |
+| sent    | replied   | Candidate replies                  | n/a                                          |
+| replied | refunded  | Reply within 7 days                | credit consumed                              |
+| sent    | declined  | Candidate declines or auto-decline | n/a (not shown to recruiter)                 |
+| sent    | expired   | 30 days                            | n/a                                          |
+| sent    | cancelled | Job closed, org unverified, block  | refund if never opened                       |
 
 ```mermaid
 stateDiagram-v2
@@ -1109,14 +1108,14 @@ stateDiagram-v2
 
 States: `invited`, `active`, `left`, `removed`. Terminal: `left`, `removed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | Admin adds a connection of the creator | size at most 50 |
-| (new) | invited | Admin invites a non-connection | n/a |
-| invited | active | Invitee accepts | not expired |
-| invited | removed | Decline or 14 days | n/a |
-| active | left | Member leaves | n/a |
-| active | removed | Admin removes | n/a |
+| From    | To      | Trigger                                | Guard           |
+| ------- | ------- | -------------------------------------- | --------------- |
+| (new)   | active  | Admin adds a connection of the creator | size at most 50 |
+| (new)   | invited | Admin invites a non-connection         | n/a             |
+| invited | active  | Invitee accepts                        | not expired     |
+| invited | removed | Decline or 14 days                     | n/a             |
+| active  | left    | Member leaves                          | n/a             |
+| active  | removed | Admin removes                          | n/a             |
 
 ```mermaid
 stateDiagram-v2
@@ -1134,15 +1133,15 @@ stateDiagram-v2
 
 States: `connecting`, `websocket`, `sse`, `long_poll`, `polling`, `offline`. No terminal state.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| connecting | websocket | Handshake succeeds | n/a |
-| connecting, websocket | sse | WebSocket fails | SSE available |
-| sse | long_poll | SSE fails | n/a |
-| long_poll | polling | Long poll fails twice | n/a |
-| any | offline | No network | n/a |
-| offline | connecting | Network returns | backoff elapsed |
-| sse, long_poll, polling | websocket | Upgrade probe succeeds | every 5 minutes |
+| From                    | To         | Trigger                | Guard           |
+| ----------------------- | ---------- | ---------------------- | --------------- |
+| connecting              | websocket  | Handshake succeeds     | n/a             |
+| connecting, websocket   | sse        | WebSocket fails        | SSE available   |
+| sse                     | long_poll  | SSE fails              | n/a             |
+| long_poll               | polling    | Long poll fails twice  | n/a             |
+| any                     | offline    | No network             | n/a             |
+| offline                 | connecting | Network returns        | backoff elapsed |
+| sse, long_poll, polling | websocket  | Upgrade probe succeeds | every 5 minutes |
 
 ```mermaid
 stateDiagram-v2
@@ -1162,55 +1161,55 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-MSG-001 | Messages home | `/messages` | members | Conversation list and tabs | loading, empty, degraded-connection |
-| SCR-MSG-002 | Conversation view | `/messages/:id` | participants | Thread and composer | sending, failed, closed, scanning |
-| SCR-MSG-003 | New message | `/messages/new` | members | Pick recipient | request-mode, unavailable |
-| SCR-MSG-004 | Message requests | `/messages/requests` | members | Accept, decline, ignore | empty, bulk-select |
-| SCR-MSG-005 | Outreach tab | `/messages/outreach` | REC, HMG, EAD | Sent outreach and states | empty, cap-reached |
-| SCR-MSG-006 | Outreach composer | modal or `/messages/outreach/new` | REC, HMG, EAD | Compose outreach | preference-warning, refused |
-| SCR-MSG-007 | Outreach usage | `/org/:id/outreach/usage` | EAD, FIN | Cap, credits, ledger | low-balance |
-| SCR-MSG-008 | Messaging preferences | `/settings/messaging` | members | Who can message, outreach controls | institution-locked |
-| SCR-MSG-009 | Messaging privacy | `/settings/messaging/privacy` | members | Receipts, typing, presence, access log | none |
-| SCR-MSG-010 | Notification settings (messages) | `/settings/notifications/messages` | members | Channels and quiet hours | push-denied |
-| SCR-MSG-011 | Group create and settings | `/messages/groups/new`, `/messages/:id/settings` | admins | Group management | cap-reached |
-| SCR-MSG-012 | Search results | `/messages/search` | members | Search messages | no-results, index-degraded |
-| SCR-MSG-013 | Media and files | `/messages/:id/media` | participants | Attachments in a conversation | empty |
-| SCR-MSG-014 | Saved replies | `/settings/messaging/templates` | senders | Manage templates | empty |
-| SCR-MSG-015 | Org shared inbox | `/org/:id/messages` | REC, HMG, EAD | Assigned threads and notes | unassigned |
-| SCR-MSG-016 | Announcements | `/messages/announcements` | members | Read broadcasts | muted |
-| SCR-MSG-017 | Broadcast composer | `/messages/announcements/new` | senders | Send announcements | audience-too-large |
-| SCR-MSG-018 | Report dialog | modal | participants | Report messages | submitted |
-| SCR-MSG-019 | Export | `/settings/data/messages` | members | Request and download export | processing, ready, expired |
-| SCR-MSG-020 | Staff access viewer | `/admin/messaging/access` | SUP, SAD, PAD | Scoped content view and audit | consent-pending, expired |
-| SCR-MSG-021 | Messaging admin | `/admin/messaging` | PAD | Thresholds, kill switches, health | degraded |
-| SCR-MSG-022 | Link interstitial | modal | members | Leaving site warning | blocked |
+| ID          | Name                             | Route proposal                                   | Roles         | Purpose                                | Key states                          |
+| ----------- | -------------------------------- | ------------------------------------------------ | ------------- | -------------------------------------- | ----------------------------------- |
+| SCR-MSG-001 | Messages home                    | `/messages`                                      | members       | Conversation list and tabs             | loading, empty, degraded-connection |
+| SCR-MSG-002 | Conversation view                | `/messages/:id`                                  | participants  | Thread and composer                    | sending, failed, closed, scanning   |
+| SCR-MSG-003 | New message                      | `/messages/new`                                  | members       | Pick recipient                         | request-mode, unavailable           |
+| SCR-MSG-004 | Message requests                 | `/messages/requests`                             | members       | Accept, decline, ignore                | empty, bulk-select                  |
+| SCR-MSG-005 | Outreach tab                     | `/messages/outreach`                             | REC, HMG, EAD | Sent outreach and states               | empty, cap-reached                  |
+| SCR-MSG-006 | Outreach composer                | modal or `/messages/outreach/new`                | REC, HMG, EAD | Compose outreach                       | preference-warning, refused         |
+| SCR-MSG-007 | Outreach usage                   | `/org/:id/outreach/usage`                        | EAD, FIN      | Cap, credits, ledger                   | low-balance                         |
+| SCR-MSG-008 | Messaging preferences            | `/settings/messaging`                            | members       | Who can message, outreach controls     | institution-locked                  |
+| SCR-MSG-009 | Messaging privacy                | `/settings/messaging/privacy`                    | members       | Receipts, typing, presence, access log | none                                |
+| SCR-MSG-010 | Notification settings (messages) | `/settings/notifications/messages`               | members       | Channels and quiet hours               | push-denied                         |
+| SCR-MSG-011 | Group create and settings        | `/messages/groups/new`, `/messages/:id/settings` | admins        | Group management                       | cap-reached                         |
+| SCR-MSG-012 | Search results                   | `/messages/search`                               | members       | Search messages                        | no-results, index-degraded          |
+| SCR-MSG-013 | Media and files                  | `/messages/:id/media`                            | participants  | Attachments in a conversation          | empty                               |
+| SCR-MSG-014 | Saved replies                    | `/settings/messaging/templates`                  | senders       | Manage templates                       | empty                               |
+| SCR-MSG-015 | Org shared inbox                 | `/org/:id/messages`                              | REC, HMG, EAD | Assigned threads and notes             | unassigned                          |
+| SCR-MSG-016 | Announcements                    | `/messages/announcements`                        | members       | Read broadcasts                        | muted                               |
+| SCR-MSG-017 | Broadcast composer               | `/messages/announcements/new`                    | senders       | Send announcements                     | audience-too-large                  |
+| SCR-MSG-018 | Report dialog                    | modal                                            | participants  | Report messages                        | submitted                           |
+| SCR-MSG-019 | Export                           | `/settings/data/messages`                        | members       | Request and download export            | processing, ready, expired          |
+| SCR-MSG-020 | Staff access viewer              | `/admin/messaging/access`                        | SUP, SAD, PAD | Scoped content view and audit          | consent-pending, expired            |
+| SCR-MSG-021 | Messaging admin                  | `/admin/messaging`                               | PAD           | Thresholds, kill switches, health      | degraded                            |
+| SCR-MSG-022 | Link interstitial                | modal                                            | members       | Leaving site warning                   | blocked                             |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-MSG-01 | Conversation | id, type (direct, group, context), context_type, context_id, state, head_sequence | Participant, Message | Per `BR-MSG-016`, `BR-MSG-017` |
-| ENT-MSG-02 | Participant | conversation_id, member, role, joined_at, left_at, state, labels | Conversation, Member | With conversation |
-| ENT-MSG-03 | Message | id, conversation_id, sequence, sender, client_message_id, body, type (user, system, internal_note), state, reply_to | Conversation, Attachment | Per `BR-MSG-016` |
-| ENT-MSG-04 | MessageRevision | message_id, revision, body, edited_at | Message | 90 days or hold |
-| ENT-MSG-05 | Attachment | id, message_id, type, size, scan_state, storage_ref | Message | With message |
-| ENT-MSG-06 | MessageRequest | id, sender, recipient, text, state, expires_at | Member x2 | 30 days after terminal |
-| ENT-MSG-07 | OutreachMessage | id, sender, org, candidate, purpose, job_ref, state, credit_ref | Org, Member | 24 months after terminal [PROP] |
-| ENT-MSG-08 | OutreachCreditLedger | id, org, user, type, amount, ref, at | Org | 7 years [PROP] |
-| ENT-MSG-09 | MessagingPreference | member, who_can_message, outreach_mode, roles, locations, exclusions, quiet_hours | Member | Life of account |
-| ENT-MSG-10 | ReadState | participant, last_read_sequence, draft | Participant | With conversation |
-| ENT-MSG-11 | MessageReaction | message_id, member, emoji | Message | With message |
-| ENT-MSG-12 | SavedReply | id, owner (member or org), title, text, variables, version | Member, Org | Life of owner |
-| ENT-MSG-13 | Broadcast | id, sender, audience_ref, title, body, sent_at, recipient_count | Group, Course | 12 months |
-| ENT-MSG-14 | DeliveryReceipt | message_id, participant, delivered_at, read_at | Message | With message |
-| ENT-MSG-15 | MessagingNotificationPref | member, class, channels, previews | Member | Life of account |
-| ENT-MSG-16 | SearchIndexEntry | message_id, member_scope, tokens | Message | Derived; purged within 5 minutes of delete |
-| ENT-MSG-17 | ExportJob | id, member, scope, state, expires_at | Member | 7 days after ready |
-| ENT-MSG-18 | RetentionPolicy | scope (member, org), months, effective_from | Org, Member | Permanent |
-| ENT-MSG-19 | AccessAuditEntry | id, actor, basis, conversation_ref, at, approvers | Conversation | 3 years [PROP] |
-| ENT-MSG-20 | PresenceSignal | member, state, at | Member | Ephemeral, 5 minutes |
+| ID         | Name                      | Key attributes                                                                                                      | Relationships            | Retention class                            |
+| ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------ |
+| ENT-MSG-01 | Conversation              | id, type (direct, group, context), context_type, context_id, state, head_sequence                                   | Participant, Message     | Per `BR-MSG-016`, `BR-MSG-017`             |
+| ENT-MSG-02 | Participant               | conversation_id, member, role, joined_at, left_at, state, labels                                                    | Conversation, Member     | With conversation                          |
+| ENT-MSG-03 | Message                   | id, conversation_id, sequence, sender, client_message_id, body, type (user, system, internal_note), state, reply_to | Conversation, Attachment | Per `BR-MSG-016`                           |
+| ENT-MSG-04 | MessageRevision           | message_id, revision, body, edited_at                                                                               | Message                  | 90 days or hold                            |
+| ENT-MSG-05 | Attachment                | id, message_id, type, size, scan_state, storage_ref                                                                 | Message                  | With message                               |
+| ENT-MSG-06 | MessageRequest            | id, sender, recipient, text, state, expires_at                                                                      | Member x2                | 30 days after terminal                     |
+| ENT-MSG-07 | OutreachMessage           | id, sender, org, candidate, purpose, job_ref, state, credit_ref                                                     | Org, Member              | 24 months after terminal [PROP]            |
+| ENT-MSG-08 | OutreachCreditLedger      | id, org, user, type, amount, ref, at                                                                                | Org                      | 7 years [PROP]                             |
+| ENT-MSG-09 | MessagingPreference       | member, who_can_message, outreach_mode, roles, locations, exclusions, quiet_hours                                   | Member                   | Life of account                            |
+| ENT-MSG-10 | ReadState                 | participant, last_read_sequence, draft                                                                              | Participant              | With conversation                          |
+| ENT-MSG-11 | MessageReaction           | message_id, member, emoji                                                                                           | Message                  | With message                               |
+| ENT-MSG-12 | SavedReply                | id, owner (member or org), title, text, variables, version                                                          | Member, Org              | Life of owner                              |
+| ENT-MSG-13 | Broadcast                 | id, sender, audience_ref, title, body, sent_at, recipient_count                                                     | Group, Course            | 12 months                                  |
+| ENT-MSG-14 | DeliveryReceipt           | message_id, participant, delivered_at, read_at                                                                      | Message                  | With message                               |
+| ENT-MSG-15 | MessagingNotificationPref | member, class, channels, previews                                                                                   | Member                   | Life of account                            |
+| ENT-MSG-16 | SearchIndexEntry          | message_id, member_scope, tokens                                                                                    | Message                  | Derived; purged within 5 minutes of delete |
+| ENT-MSG-17 | ExportJob                 | id, member, scope, state, expires_at                                                                                | Member                   | 7 days after ready                         |
+| ENT-MSG-18 | RetentionPolicy           | scope (member, org), months, effective_from                                                                         | Org, Member              | Permanent                                  |
+| ENT-MSG-19 | AccessAuditEntry          | id, actor, basis, conversation_ref, at, approvers                                                                   | Conversation             | 3 years [PROP]                             |
+| ENT-MSG-20 | PresenceSignal            | member, state, at                                                                                                   | Member                   | Ephemeral, 5 minutes                       |
 
 ```mermaid
 erDiagram
@@ -1228,148 +1227,148 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-MSG-001 | msg.conversation.created | FR-MSG-001 | conversation id, type | ANL |
-| EVT-MSG-002 | msg.message.sent | FR-MSG-002 | message id, conversation id (no body) | NTF, TSF |
-| EVT-MSG-003 | msg.message.edited | FR-MSG-002 | message id, revision | TSF |
-| EVT-MSG-004 | msg.message.deleted | FR-MSG-002 | message id, scope | SRC, TSF |
-| EVT-MSG-005 | msg.attachment.scanned | FR-MSG-003 | attachment id, verdict | TSF |
-| EVT-MSG-006 | msg.group.created | FR-MSG-004 | conversation id, size | TSF |
-| EVT-MSG-007 | msg.group.member_added | FR-MSG-004 | conversation id, member | NTF |
-| EVT-MSG-008 | msg.message.read | FR-MSG-007 | message id, reader | ANL |
-| EVT-MSG-009 | msg.conversation.closed | FR-MSG-008 | conversation id, reason | ATS, MEN |
-| EVT-MSG-010 | msg.request.sent | FR-MSG-009 | request id | NTF, TSF |
-| EVT-MSG-011 | msg.request.accepted | FR-MSG-009 | request id, conversation id | ANL |
-| EVT-MSG-012 | msg.request.declined | FR-MSG-009 | request id (internal only) | TSF |
-| EVT-MSG-013 | msg.outreach.sent | FR-MSG-010 | outreach id, org, job | ATS, ANL, TSF |
-| EVT-MSG-014 | msg.credit.consumed | FR-MSG-011 | ledger id | BIL |
-| EVT-MSG-015 | msg.credit.refunded | FR-MSG-011 | ledger id | BIL |
-| EVT-MSG-016 | msg.preferences.updated | FR-MSG-012 | member | SRC, ATS |
-| EVT-MSG-017 | msg.context_thread.created | FR-MSG-013 | conversation id, context | ATS, MEN |
-| EVT-MSG-018 | msg.thread.assigned | FR-MSG-014 | conversation id, assignee | ATS |
-| EVT-MSG-019 | msg.broadcast.sent | FR-MSG-016 | broadcast id, count | ANL, TSF |
-| EVT-MSG-020 | msg.spam.flagged | FR-MSG-017 | member, signal | TSF |
-| EVT-MSG-021 | msg.report.created | FR-MSG-018 | report ref | TSF |
-| EVT-MSG-022 | msg.scam_warning.shown | FR-MSG-019 | conversation id, pattern id | TSF |
-| EVT-MSG-023 | msg.scan.verdict | FR-MSG-021 | message or attachment id, verdict | TSF |
-| EVT-MSG-024 | msg.notification.requested | FR-MSG-024 | member, class | NTF |
-| EVT-MSG-025 | msg.retention.purged | FR-MSG-027 | scope, counts | SET, ADM |
-| EVT-MSG-026 | msg.export.requested | FR-MSG-028 | job id | SET |
-| EVT-MSG-027 | msg.export.ready | FR-MSG-028 | job id | NTF |
-| EVT-MSG-028 | msg.access.granted | FR-MSG-029 | audit id | ADM, SAD |
-| EVT-MSG-029 | msg.access.viewed | FR-MSG-029 | audit id | ADM |
-| EVT-MSG-030 | msg.link.blocked | FR-MSG-031 | domain, reason | TSF |
-| EVT-MSG-031 | msg.schedule_card.sent | FR-MSG-033 | conversation id | INT |
-| EVT-MSG-032 | msg.search.performed | FR-MSG-006 | member (no query text) | ANL |
+| ID          | Event                      | Trigger    | Key payload                           | Consumers     |
+| ----------- | -------------------------- | ---------- | ------------------------------------- | ------------- |
+| EVT-MSG-001 | msg.conversation.created   | FR-MSG-001 | conversation id, type                 | ANL           |
+| EVT-MSG-002 | msg.message.sent           | FR-MSG-002 | message id, conversation id (no body) | NTF, TSF      |
+| EVT-MSG-003 | msg.message.edited         | FR-MSG-002 | message id, revision                  | TSF           |
+| EVT-MSG-004 | msg.message.deleted        | FR-MSG-002 | message id, scope                     | SRC, TSF      |
+| EVT-MSG-005 | msg.attachment.scanned     | FR-MSG-003 | attachment id, verdict                | TSF           |
+| EVT-MSG-006 | msg.group.created          | FR-MSG-004 | conversation id, size                 | TSF           |
+| EVT-MSG-007 | msg.group.member_added     | FR-MSG-004 | conversation id, member               | NTF           |
+| EVT-MSG-008 | msg.message.read           | FR-MSG-007 | message id, reader                    | ANL           |
+| EVT-MSG-009 | msg.conversation.closed    | FR-MSG-008 | conversation id, reason               | ATS, MEN      |
+| EVT-MSG-010 | msg.request.sent           | FR-MSG-009 | request id                            | NTF, TSF      |
+| EVT-MSG-011 | msg.request.accepted       | FR-MSG-009 | request id, conversation id           | ANL           |
+| EVT-MSG-012 | msg.request.declined       | FR-MSG-009 | request id (internal only)            | TSF           |
+| EVT-MSG-013 | msg.outreach.sent          | FR-MSG-010 | outreach id, org, job                 | ATS, ANL, TSF |
+| EVT-MSG-014 | msg.credit.consumed        | FR-MSG-011 | ledger id                             | BIL           |
+| EVT-MSG-015 | msg.credit.refunded        | FR-MSG-011 | ledger id                             | BIL           |
+| EVT-MSG-016 | msg.preferences.updated    | FR-MSG-012 | member                                | SRC, ATS      |
+| EVT-MSG-017 | msg.context_thread.created | FR-MSG-013 | conversation id, context              | ATS, MEN      |
+| EVT-MSG-018 | msg.thread.assigned        | FR-MSG-014 | conversation id, assignee             | ATS           |
+| EVT-MSG-019 | msg.broadcast.sent         | FR-MSG-016 | broadcast id, count                   | ANL, TSF      |
+| EVT-MSG-020 | msg.spam.flagged           | FR-MSG-017 | member, signal                        | TSF           |
+| EVT-MSG-021 | msg.report.created         | FR-MSG-018 | report ref                            | TSF           |
+| EVT-MSG-022 | msg.scam_warning.shown     | FR-MSG-019 | conversation id, pattern id           | TSF           |
+| EVT-MSG-023 | msg.scan.verdict           | FR-MSG-021 | message or attachment id, verdict     | TSF           |
+| EVT-MSG-024 | msg.notification.requested | FR-MSG-024 | member, class                         | NTF           |
+| EVT-MSG-025 | msg.retention.purged       | FR-MSG-027 | scope, counts                         | SET, ADM      |
+| EVT-MSG-026 | msg.export.requested       | FR-MSG-028 | job id                                | SET           |
+| EVT-MSG-027 | msg.export.ready           | FR-MSG-028 | job id                                | NTF           |
+| EVT-MSG-028 | msg.access.granted         | FR-MSG-029 | audit id                              | ADM, SAD      |
+| EVT-MSG-029 | msg.access.viewed          | FR-MSG-029 | audit id                              | ADM           |
+| EVT-MSG-030 | msg.link.blocked           | FR-MSG-031 | domain, reason                        | TSF           |
+| EVT-MSG-031 | msg.schedule_card.sent     | FR-MSG-033 | conversation id                       | INT           |
+| EVT-MSG-032 | msg.search.performed       | FR-MSG-006 | member (no query text)                | ANL           |
 
 ### 9.2 Consumed
 
-| Event | From | Use |
-|---|---|---|
-| net.connection.created, net.connection.removed (EVT-NET-002, EVT-NET-003) | NET | Permission to message |
-| net.block.created (EVT-NET-005) | NET | Hide conversations, apply `BR-MSG-023` |
-| net.privacy.changed (EVT-NET-006) | NET | Re-evaluate who can message |
-| net.introduction approved (planned name in NET `SM-NET-07`) | NET | Create introduction thread |
-| tsf.sanction.applied (EVT-TSF-013) | TSF | Restrict messaging |
-| tsf.content.actioned (EVT-TSF-010) | TSF | Hide or restore reported messages |
-| tsf.evidence.preserved (EVT-TSF-017) | TSF | Hold retention |
-| ats.application.created, ats.application.closed (planned) | ATS | Application threads |
-| emp.org.verified, emp.org.unverified (planned) | EMP | Outreach eligibility |
-| bil.entitlement.changed (planned) | BIL | Caps and quotas |
-| idn.account.deleted (planned) | IDN, SET | `BR-MSG-035` |
-| int.meeting.booked (planned) | INT | Update schedule cards |
+| Event                                                                     | From     | Use                                    |
+| ------------------------------------------------------------------------- | -------- | -------------------------------------- |
+| net.connection.created, net.connection.removed (EVT-NET-002, EVT-NET-003) | NET      | Permission to message                  |
+| net.block.created (EVT-NET-005)                                           | NET      | Hide conversations, apply `BR-MSG-023` |
+| net.privacy.changed (EVT-NET-006)                                         | NET      | Re-evaluate who can message            |
+| net.introduction approved (planned name in NET `SM-NET-07`)               | NET      | Create introduction thread             |
+| tsf.sanction.applied (EVT-TSF-013)                                        | TSF      | Restrict messaging                     |
+| tsf.content.actioned (EVT-TSF-010)                                        | TSF      | Hide or restore reported messages      |
+| tsf.evidence.preserved (EVT-TSF-017)                                      | TSF      | Hold retention                         |
+| ats.application.created, ats.application.closed (planned)                 | ATS      | Application threads                    |
+| emp.org.verified, emp.org.unverified (planned)                            | EMP      | Outreach eligibility                   |
+| bil.entitlement.changed (planned)                                         | BIL      | Caps and quotas                        |
+| idn.account.deleted (planned)                                             | IDN, SET | `BR-MSG-035`                           |
+| int.meeting.booked (planned)                                              | INT      | Update schedule cards                  |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behaviour |
-|---|---|---|
-| Realtime gateway (WebSocket, SSE) | Live delivery | Fallback ladder to polling |
-| Object storage and malware scanner (PLT planned) | Attachments | Text delivers; attachments held |
-| Illegal-content hash lists (via TSF) | Hash matching | Attachments held and TSF alerted if the service is down for more than 15 minutes |
-| Link reputation provider | Phishing defense | Generic warning |
-| Push services (Web Push, APNs and FCM via PWA planned) | Wake-ups | In-app and email fallback if enabled |
-| Email provider (NTF planned) | Digests | Retry and suppression |
-| Search index (PLT planned) | Message search | Title and name search fallback |
-| Key management service | Encryption | Messaging goes read-only on outage |
+| Dependency                                             | Purpose          | Failure behaviour                                                                |
+| ------------------------------------------------------ | ---------------- | -------------------------------------------------------------------------------- |
+| Realtime gateway (WebSocket, SSE)                      | Live delivery    | Fallback ladder to polling                                                       |
+| Object storage and malware scanner (PLT planned)       | Attachments      | Text delivers; attachments held                                                  |
+| Illegal-content hash lists (via TSF)                   | Hash matching    | Attachments held and TSF alerted if the service is down for more than 15 minutes |
+| Link reputation provider                               | Phishing defense | Generic warning                                                                  |
+| Push services (Web Push, APNs and FCM via PWA planned) | Wake-ups         | In-app and email fallback if enabled                                             |
+| Email provider (NTF planned)                           | Digests          | Retry and suppression                                                            |
+| Search index (PLT planned)                             | Message search   | Title and name search fallback                                                   |
+| Key management service                                 | Encryption       | Messaging goes read-only on outage                                               |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For |
-|---|---|
-| IDN (planned) | Account state, age claim, sessions, devices |
-| NET | Connections, blocks, privacy settings |
-| EMP (planned) | Org verification, roster, badges |
-| ATS, JOB (planned) | Job and application context, hire state |
-| BIL (planned) | Plans, credits, caps |
-| TSF | Reports, scanning verdicts, sanctions, holds |
-| NTF (planned) | Delivery channels |
-| PWA, PLT (planned) | Service worker, push, storage, realtime |
-| INT (planned) | Scheduling cards |
-| SET (planned) | Data rights |
-| AIC | Optional summaries and translation with per-use consent |
+| Depends on         | For                                                     |
+| ------------------ | ------------------------------------------------------- |
+| IDN (planned)      | Account state, age claim, sessions, devices             |
+| NET                | Connections, blocks, privacy settings                   |
+| EMP (planned)      | Org verification, roster, badges                        |
+| ATS, JOB (planned) | Job and application context, hire state                 |
+| BIL (planned)      | Plans, credits, caps                                    |
+| TSF                | Reports, scanning verdicts, sanctions, holds            |
+| NTF (planned)      | Delivery channels                                       |
+| PWA, PLT (planned) | Service worker, push, storage, realtime                 |
+| INT (planned)      | Scheduling cards                                        |
+| SET (planned)      | Data rights                                             |
+| AIC                | Optional summaries and translation with per-use consent |
 
-| Depended on by | Uses |
-|---|---|
-| NET | Introduction threads and referral conversations |
-| ATS (planned) | Candidate communication |
-| MEN (planned) | Mentor threads |
-| INT (planned) | Meeting coordination |
-| TSF | Evidence of abuse and scam patterns |
-| INS (planned) | Announcements to cohorts |
+| Depended on by | Uses                                            |
+| -------------- | ----------------------------------------------- |
+| NET            | Introduction threads and referral conversations |
+| ATS (planned)  | Candidate communication                         |
+| MEN (planned)  | Mentor threads                                  |
+| INT (planned)  | Meeting coordination                            |
+| TSF            | Evidence of abuse and scam patterns             |
+| INS (planned)  | Announcements to cohorts                        |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner |
-|---|---|---|---|
-| Delivery success rate | Messages acked and delivered at least once | delivered / acked | Platform |
-| p95 send-to-delivery latency (online) | Time from ack to recipient receipt | p95(delivered_at - acked_at) | Platform |
-| Fallback share | Sessions not on WebSocket | non-WS sessions / sessions | Platform |
-| Request accept rate | Accepted requests | accepted / resolved requests | Product |
-| Outreach reply rate | Replied outreach | replied / sent | Product |
-| Outreach report rate | Reports per 1,000 outreach | reports / outreach x 1,000 | TSF lead |
-| Spam flag precision | Confirmed spam among flags | confirmed / flagged | TSF lead |
-| Scam warning precision | Banners not dismissed as wrong plus confirmed | true positives / banners | TSF lead |
-| Abuse report time to action | Median report to first moderation action | median(action_at - report_at) | TSF lead |
-| Staff content access count | Content views by staff per 10,000 conversations | views / conversations x 10,000 | Security officer |
-| Export completion time | p95 time from request to ready | p95(ready - requested) | Platform |
-| Accessibility defects open | Open WCAG AA defects in MSG | count | QA lead |
+| Metric                                | Definition                                      | Formula                        | Owner            |
+| ------------------------------------- | ----------------------------------------------- | ------------------------------ | ---------------- |
+| Delivery success rate                 | Messages acked and delivered at least once      | delivered / acked              | Platform         |
+| p95 send-to-delivery latency (online) | Time from ack to recipient receipt              | p95(delivered_at - acked_at)   | Platform         |
+| Fallback share                        | Sessions not on WebSocket                       | non-WS sessions / sessions     | Platform         |
+| Request accept rate                   | Accepted requests                               | accepted / resolved requests   | Product          |
+| Outreach reply rate                   | Replied outreach                                | replied / sent                 | Product          |
+| Outreach report rate                  | Reports per 1,000 outreach                      | reports / outreach x 1,000     | TSF lead         |
+| Spam flag precision                   | Confirmed spam among flags                      | confirmed / flagged            | TSF lead         |
+| Scam warning precision                | Banners not dismissed as wrong plus confirmed   | true positives / banners       | TSF lead         |
+| Abuse report time to action           | Median report to first moderation action        | median(action_at - report_at)  | TSF lead         |
+| Staff content access count            | Content views by staff per 10,000 conversations | views / conversations x 10,000 | Security officer |
+| Export completion time                | p95 time from request to ready                  | p95(ready - requested)         | Platform         |
+| Accessibility defects open            | Open WCAG AA defects in MSG                     | count                          | QA lead          |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-MSG-01 | How much recruiter volume is acceptable without becoming a sales-prospecting suite? | One-to-one only; small batches up to N; bulk campaigns | One-to-one only, caps per `BR-MSG-005` | Owner | FR-MSG-010, FR-MSG-011 |
-| OD-MSG-02 | Maximum group conversation size and whether group chats exist in v1 | 50; 100; none | 50, R2 | Product | FR-MSG-004 |
-| OD-MSG-03 | Plan values for outreach credits, weekly caps beyond the SSOT figures, storage quotas | Set per plan by BIL | SSOT caps (20, 50, custom), credits TBD with BIL | Owner and BIL lead | FR-MSG-011, FR-MSG-030 |
-| OD-MSG-04 | Is end-to-end encryption required? | Not in v1; optional for direct chats; default | Not in v1 (`BR-MSG-018`) | Owner and security officer | FR-MSG-020 |
-| OD-MSG-05 | Retention period of application-related messages and whether candidates can delete them | 12 months; 24 months; jurisdiction-based | 24 months bounded 6 to 84, legal review | Counsel | FR-MSG-027 |
-| OD-MSG-06 | Minors' messaging scope | Connections only; institution staff allowed; no messaging | Connections and institution staff | Owner and counsel | `BR-MSG-008` |
-| OD-MSG-07 | Voice notes and transcription in v1 | Yes; later; never | Later (R3) | Product | FR-MSG-003, FR-MSG-032 |
-| OD-MSG-08 | Show candidates a recruiter response-time badge | Yes; no | Yes with minimum sample | Product | FR-MSG-014 |
+| ID        | Question                                                                                | Options                                                   | Default proposal                                                           | Who decides                | Blocking               |
+| --------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------- | ---------------------- |
+| OD-MSG-01 | How much recruiter volume is acceptable without becoming a sales-prospecting suite?     | One-to-one only; small batches up to N; bulk campaigns    | One-to-one only, caps per `BR-MSG-005`                                     | Owner                      | FR-MSG-010, FR-MSG-011 |
+| OD-MSG-02 | Maximum group conversation size and whether group chats exist in v1                     | 50; 100; none                                             | 50, R2                                                                     | Product                    | FR-MSG-004             |
+| OD-MSG-03 | Plan values for outreach credits, weekly caps beyond the SSOT figures, storage quotas   | Set per plan by BIL                                       | SSOT caps (20, 50, custom), credits to be set with BIL under this decision | Owner and BIL lead         | FR-MSG-011, FR-MSG-030 |
+| OD-MSG-04 | Is end-to-end encryption required?                                                      | Not in v1; optional for direct chats; default             | Not in v1 (`BR-MSG-018`)                                                   | Owner and security officer | FR-MSG-020             |
+| OD-MSG-05 | Retention period of application-related messages and whether candidates can delete them | 12 months; 24 months; jurisdiction-based                  | 24 months bounded 6 to 84, legal review                                    | Counsel                    | FR-MSG-027             |
+| OD-MSG-06 | Minors' messaging scope                                                                 | Connections only; institution staff allowed; no messaging | Connections and institution staff                                          | Owner and counsel          | `BR-MSG-008`           |
+| OD-MSG-07 | Voice notes and transcription in v1                                                     | Yes; later; never                                         | Later (R3)                                                                 | Product                    | FR-MSG-003, FR-MSG-032 |
+| OD-MSG-08 | Show candidates a recruiter response-time badge                                         | Yes; no                                                   | Yes with minimum sample                                                    | Product                    | FR-MSG-014             |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-MSG-01 | Recruitment and fake-job scams delivered via messages | H / H | Verified orgs, caps, scam banners, TSF signals, no external contact info in first messages |
-| RSK-MSG-02 | Harassment and unsolicited sexual content | M / H | Message requests, block, report, hash matching, rate limits |
-| RSK-MSG-03 | Message leak through staff access or support tooling | L / H | Metadata default, consent, break-glass, audit, member-visible log |
-| RSK-MSG-04 | Realtime outage degrades trust | M / M | Fallback ladder, polling kill switch, status chip |
-| RSK-MSG-05 | Candidate frustration from unsolicited outreach volume | M / M | Preferences binding, caps, credit refund model, silent decline |
-| RSK-MSG-06 | Retention rules conflict with data-protection law across jurisdictions | M / H | Counsel review, per-region config, `OD-MSG-05` |
-| RSK-MSG-07 | Block leaks via delivery behavior | M / H | Silent not-delivered, uniform responses, tests |
-| RSK-MSG-08 | Cost of attachments and storage | M / M | Quotas, scanning limits, lifecycle rules |
+| ID         | Risk                                                                   | Likelihood and impact | Mitigation                                                                                 |
+| ---------- | ---------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------ |
+| RSK-MSG-01 | Recruitment and fake-job scams delivered via messages                  | H / H                 | Verified orgs, caps, scam banners, TSF signals, no external contact info in first messages |
+| RSK-MSG-02 | Harassment and unsolicited sexual content                              | M / H                 | Message requests, block, report, hash matching, rate limits                                |
+| RSK-MSG-03 | Message leak through staff access or support tooling                   | L / H                 | Metadata default, consent, break-glass, audit, member-visible log                          |
+| RSK-MSG-04 | Realtime outage degrades trust                                         | M / M                 | Fallback ladder, polling kill switch, status chip                                          |
+| RSK-MSG-05 | Candidate frustration from unsolicited outreach volume                 | M / M                 | Preferences binding, caps, credit refund model, silent decline                             |
+| RSK-MSG-06 | Retention rules conflict with data-protection law across jurisdictions | M / H                 | Counsel review, per-region config, `OD-MSG-05`                                             |
+| RSK-MSG-07 | Block leaks via delivery behavior                                      | M / H                 | Silent not-delivered, uniform responses, tests                                             |
+| RSK-MSG-08 | Cost of attachments and storage                                        | M / M                 | Quotas, scanning limits, lifecycle rules                                                   |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §7 F-10, F-59, WF-10 | Messaging and outreach scope, clientMessageId dedupe, persisted ack | Phase label Ph0 dropped (tier R1) |
-| SSOT §10.24 (BR-129, BR-130), §10.36 (BR-214) | Outreach credit, caps, intro separation | Renamed `BR-MSG-004`, `-005`, `-007` |
-| SSOT BR-128 | Minors restrictions | `BR-MSG-008` |
-| SSOT §4.2 | No sales-prospecting; no unnecessary realtime | `OD-MSG-01`, fallback ladder |
-| SSOT §19 and App D M-42 | Offline queue contract | `FR-MSG-025` fills the open contract |
-| SSOT §15.10, §16.5 | AI and data boundary | `BR-MSG-020` |
-| docs/registries/BUSINESS_RULE_REGISTRY.md | Cross-check | n/a |
-| Added by this blueprint [PROP] | Message requests, candidate preferences, shared inbox disclosure, scam warnings, staff access and break-glass, export, accessibility, broadcasts, availability cards | n/a |
+| Legacy source                                 | Used for                                                                                                                                                             | Dropped or changed                   |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| SSOT §7 F-10, F-59, WF-10                     | Messaging and outreach scope, clientMessageId dedupe, persisted ack                                                                                                  | Phase label Ph0 dropped (tier R1)    |
+| SSOT §10.24 (BR-129, BR-130), §10.36 (BR-214) | Outreach credit, caps, intro separation                                                                                                                              | Renamed `BR-MSG-004`, `-005`, `-007` |
+| SSOT BR-128                                   | Minors restrictions                                                                                                                                                  | `BR-MSG-008`                         |
+| SSOT §4.2                                     | No sales-prospecting; no unnecessary realtime                                                                                                                        | `OD-MSG-01`, fallback ladder         |
+| SSOT §19 and App D M-42                       | Offline queue contract                                                                                                                                               | `FR-MSG-025` fills the open contract |
+| SSOT §15.10, §16.5                            | AI and data boundary                                                                                                                                                 | `BR-MSG-020`                         |
+| docs/registries/BUSINESS_RULE_REGISTRY.md     | Cross-check                                                                                                                                                          | n/a                                  |
+| Added by this blueprint [PROP]                | Message requests, candidate preferences, shared inbox disclosure, scam warnings, staff access and break-glass, export, accessibility, broadcasts, availability cards | n/a                                  |

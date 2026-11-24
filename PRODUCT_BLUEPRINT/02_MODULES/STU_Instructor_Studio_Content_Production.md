@@ -12,13 +12,13 @@ STU is the production side of learning: everything an instructor, an institution
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A verified instructor can publish a good course without asking support how | Share of submitted courses published within the review SLA; first-time publish success rate |
-| Learners never meet an unfinished, inaccessible, infringing or misleading course | Publish gate pass rate; post-publish defect and takedown rates |
-| Media is processed reliably and securely, whatever the video provider | Media processing success rate and p95 time-to-ready |
-| Instructors know how their course performs and are paid correctly (when payouts are enabled) | Analytics freshness; payout reconciliation drift (target zero) |
-| Course content is owned, licensed and attributable | Attestation coverage 100 percent of published versions |
+| Outcome                                                                                      | How the system knows                                                                        |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| A verified instructor can publish a good course without asking support how                   | Share of submitted courses published within the review SLA; first-time publish success rate |
+| Learners never meet an unfinished, inaccessible, infringing or misleading course             | Publish gate pass rate; post-publish defect and takedown rates                              |
+| Media is processed reliably and securely, whatever the video provider                        | Media processing success rate and p95 time-to-ready                                         |
+| Instructors know how their course performs and are paid correctly (when payouts are enabled) | Analytics freshness; payout reconciliation drift (target zero)                              |
+| Course content is owned, licensed and attributable                                           | Attestation coverage 100 percent of published versions                                      |
 
 ### 1.3 In scope
 
@@ -26,16 +26,16 @@ Instructor application, identity and expertise verification, agreements, public 
 
 ### 1.4 Out of scope (owned elsewhere)
 
-| Capability | Owner | Boundary |
-|---|---|---|
-| Learner experience (catalog, enrollment, playback, progress, certificates, reviews as seen by learners) | LRN | STU publishes an immutable course version and its media manifest; LRN renders and runs it |
-| Assessment engine: question types, attempts, timers, grading, integrity, proctoring, certification | ASM | STU embeds ASM's authoring components for in-course quizzes and owns only the course context (placement, weight, completion rule) |
-| Payment capture, tax calculation, invoices, payout execution, price tiers, currency | BIL (planned) | STU holds the instructor-facing views and settings; BIL moves money |
-| Evidence issuing | EVD (planned) | STU sign-off feeds the rung policy; STU never writes evidence |
-| Moderation case workflow and policy | TSF (planned) | STU raises and applies decisions, shows strike status |
-| Institution licensing and seats | INS (planned) | Institution-owned courses use STU authoring with institution ownership |
-| Object storage, CDN, virus scanning, queue infrastructure | PLT (planned) | STU defines the pipeline behavior; PLT supplies the engine |
-| Notification delivery | NTF (planned) | STU names templates |
+| Capability                                                                                              | Owner         | Boundary                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Learner experience (catalog, enrollment, playback, progress, certificates, reviews as seen by learners) | LRN           | STU publishes an immutable course version and its media manifest; LRN renders and runs it                                         |
+| Assessment engine: question types, attempts, timers, grading, integrity, proctoring, certification      | ASM           | STU embeds ASM's authoring components for in-course quizzes and owns only the course context (placement, weight, completion rule) |
+| Payment capture, tax calculation, invoices, payout execution, price tiers, currency                     | BIL (planned) | STU holds the instructor-facing views and settings; BIL moves money                                                               |
+| Evidence issuing                                                                                        | EVD (planned) | STU sign-off feeds the rung policy; STU never writes evidence                                                                     |
+| Moderation case workflow and policy                                                                     | TSF (planned) | STU raises and applies decisions, shows strike status                                                                             |
+| Institution licensing and seats                                                                         | INS (planned) | Institution-owned courses use STU authoring with institution ownership                                                            |
+| Object storage, CDN, virus scanning, queue infrastructure                                               | PLT (planned) | STU defines the pipeline behavior; PLT supplies the engine                                                                        |
+| Notification delivery                                                                                   | NTF (planned) | STU names templates                                                                                                               |
 
 ### 1.5 Owned versus consumed
 
@@ -45,25 +45,25 @@ Owned: instructor profiles and applications, courses, versions, sections, lesson
 
 Instructor-side roles inside one course: `Owner` (exactly one), `Co-instructor` (edit content, answer, grade), `Assistant` (answer Q&A and grade only), `Viewer` (analytics only). All are `INS` accounts with course-scoped role. Cell legend: **R** read, **C** create, **U** update, **D** delete, **P** publish, **M** moderate, **A** administer, **-** none.
 
-| Capability | CAN (applicant) | INS Owner | INS Co-instructor | INS Assistant | INS Viewer | IAD (institution course) | MOD | SUP | FIN | PAD |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Apply and verify as instructor | C U | - | - | - | - | - | - | R | - | A |
-| Edit public instructor profile | - | U (own) | U (own) | U (own) | U (own) | - | R | R | - | A |
-| Create course draft | - | C | - | - | - | C (institution-owned) | - | - | - | C |
-| Edit content, media, curriculum | - | U | U | - | - | U | - | - | - | U (audit) |
-| Author quizzes and assignments | - | C U | C U | - | - | C U | - | - | - | - |
-| Grade, give feedback | - | U | U | U | - | U | - | - | - | - |
-| Set price, coupons | - | C U | - | - | - | C U | - | - | R | A |
-| Submit for review | - | C | C (if owner delegates) | - | - | C | - | - | - | - |
-| Review and decide on submissions | - | - | - | - | - | - | decide (course reviewer pool) | - | - | A |
-| Publish, unpublish, archive | - | P | - | - | - | P | takedown | - | - | A |
-| Invite and manage co-instructors | - | C U D | - | - | - | C U D | - | - | - | A |
-| View learner roster and progress | - | R | R | R | R (aggregate) | R (scope) | R (case) | R (grant) | - | R (audit) |
-| Answer Q&A, post announcements | - | C | C | C (Q&A only) | - | C | M | - | - | M |
-| Respond to reviews | - | C | C | - | - | C | M | - | - | M |
-| View earnings and payouts | - | R | R (own share) | - | - | R (institution) | - | R | A | R |
-| Handle copyright notices | - | R U | - | - | - | R U | A | - | - | A |
-| Moderate content, apply strikes | - | - | - | - | - | - | A | R | - | A |
+| Capability                       | CAN (applicant) | INS Owner | INS Co-instructor      | INS Assistant | INS Viewer    | IAD (institution course) | MOD                           | SUP       | FIN | PAD       |
+| -------------------------------- | --------------- | --------- | ---------------------- | ------------- | ------------- | ------------------------ | ----------------------------- | --------- | --- | --------- |
+| Apply and verify as instructor   | C U             | -         | -                      | -             | -             | -                        | -                             | R         | -   | A         |
+| Edit public instructor profile   | -               | U (own)   | U (own)                | U (own)       | U (own)       | -                        | R                             | R         | -   | A         |
+| Create course draft              | -               | C         | -                      | -             | -             | C (institution-owned)    | -                             | -         | -   | C         |
+| Edit content, media, curriculum  | -               | U         | U                      | -             | -             | U                        | -                             | -         | -   | U (audit) |
+| Author quizzes and assignments   | -               | C U       | C U                    | -             | -             | C U                      | -                             | -         | -   | -         |
+| Grade, give feedback             | -               | U         | U                      | U             | -             | U                        | -                             | -         | -   | -         |
+| Set price, coupons               | -               | C U       | -                      | -             | -             | C U                      | -                             | -         | R   | A         |
+| Submit for review                | -               | C         | C (if owner delegates) | -             | -             | C                        | -                             | -         | -   | -         |
+| Review and decide on submissions | -               | -         | -                      | -             | -             | -                        | decide (course reviewer pool) | -         | -   | A         |
+| Publish, unpublish, archive      | -               | P         | -                      | -             | -             | P                        | takedown                      | -         | -   | A         |
+| Invite and manage co-instructors | -               | C U D     | -                      | -             | -             | C U D                    | -                             | -         | -   | A         |
+| View learner roster and progress | -               | R         | R                      | R             | R (aggregate) | R (scope)                | R (case)                      | R (grant) | -   | R (audit) |
+| Answer Q&A, post announcements   | -               | C         | C                      | C (Q&A only)  | -             | C                        | M                             | -         | -   | M         |
+| Respond to reviews               | -               | C         | C                      | -             | -             | C                        | M                             | -         | -   | M         |
+| View earnings and payouts        | -               | R         | R (own share)          | -             | -             | R (institution)          | -                             | R         | A   | R         |
+| Handle copyright notices         | -               | R U       | -                      | -             | -             | R U                      | A                             | -         | -   | A         |
+| Moderate content, apply strikes  | -               | -         | -                      | -             | -             | -                        | A                             | R         | -   | A         |
 
 `SAD` has audit access only; `API` principals may read published course metadata through the public API (PLT, planned). Authorization is enforced server-side on every request; course-scoped role is always checked against the course, never inferred from the account type.
 
@@ -84,16 +84,16 @@ flowchart LR
     F --> H
 ```
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Instructor onboarding and identity | FR-STU-001 to 006 |
-| B | Course authoring | FR-STU-007 to 020 |
-| C | Media production pipeline | FR-STU-021 to 028 |
-| D | Assessment authoring and grading | FR-STU-029 to 032 |
-| E | Commerce | FR-STU-033 to 037 |
-| F | Publishing workflow | FR-STU-038 to 042 |
-| G | Learner interaction | FR-STU-043 to 047 |
-| H | Analytics and governance | FR-STU-048 to 053 |
+| Code | Sub-module                         | Features          |
+| ---- | ---------------------------------- | ----------------- |
+| A    | Instructor onboarding and identity | FR-STU-001 to 006 |
+| B    | Course authoring                   | FR-STU-007 to 020 |
+| C    | Media production pipeline          | FR-STU-021 to 028 |
+| D    | Assessment authoring and grading   | FR-STU-029 to 032 |
+| E    | Commerce                           | FR-STU-033 to 037 |
+| F    | Publishing workflow                | FR-STU-038 to 042 |
+| G    | Learner interaction                | FR-STU-043 to 047 |
+| H    | Analytics and governance           | FR-STU-048 to 053 |
 
 ## 4. Feature specifications
 
@@ -843,7 +843,7 @@ Notification opt-out classes (owned by NTF, planned): `TRANSACTIONAL` (cannot be
 
 - **Sub-module:** C. Media production pipeline
 - **Priority / tier:** Must · R3
-- **Source:** [SRC: SSOT §13.15 failure branch; §20 observability] [DER]
+- **Source:** [SRC: SSOT §13.15 failure branch; §20 observability] [DER] · also [SRC: SSOT §7 F-51 Media Health Monitoring]
 - **Purpose and outcome:** Instructors and operators see exactly where each media item is, why it failed and what to do. Success is low support tickets about "stuck video".
 - **Roles and permissions:** `INS: view and retry own` · `SUP: view, retry` · `PAD: bulk retry, tune`
 - **Preconditions and entry points:** Asset detail; lesson status chip; ops console (ADM, planned).
@@ -872,7 +872,7 @@ Notification opt-out classes (owned by NTF, planned): `TRANSACTIONAL` (cannot be
 
 - **Sub-module:** C. Media production pipeline
 - **Priority / tier:** Should · R3
-- **Source:** [SRC: SSOT §13.13 modes B to E; BR-083, BR-084, BR-088, BR-089, BR-090] [DER]
+- **Source:** [SRC: SSOT §13.13 modes B to E; BR-083, BR-084, BR-088, BR-089, BR-090] [DER] · also [SRC: SSOT §7 F-51 Media Health Monitoring]
 - **Purpose and outcome:** Instructors can use content hosted on allowed providers, and the system checks it before publication. Success is no silent broken embeds.
 - **Roles and permissions:** `INS Owner, Co-instructor: add external media` · `PAD: manage provider registry`
 - **Preconditions and entry points:** Lesson media picker "External link"; playlist import.
@@ -1672,61 +1672,61 @@ Notification opt-out classes (owned by NTF, planned): `TRANSACTIONAL` (cannot be
 
 Parameters in braces are `[PROP]` defaults pending the decisions in section 13.
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-STU-001 | Only an instructor with an approved application, accepted current agreement and the verification level required for the action may submit a course for review or publish. | Quality and accountability. | Submission and publish services | [SRC: SSOT BR-097] |
-| BR-STU-002 | Only a version in state `approved` (or a patch passing automated checks) can be published; publishing records actor, time and version. | No unreviewed structural content. | Publish service | [SRC: SSOT WF-24] [DER] |
-| BR-STU-003 | Submission minimums: at least 5 lessons and 30 minutes of content, at least one video or text lesson (no quiz-only courses), category and level assigned, at least 3 outcomes, one primary skill. | Minimum useful course. | Quality checks | [SRC: SSOT BR-091, BR-092, BR-096] |
-| BR-STU-004 | Published versions are immutable. Structural changes (add or remove lessons or sections, change rules, prerequisites, skills, weights, replace media content) need a new version and review; patches (typos, caption corrections, resource replacement, description and image edits) publish with automated checks only and are logged. `lessonKey` is permanent. | Protect learner progress and rules. | Version service | [SRC: SSOT BR-093, BR-105] |
-| BR-STU-005 | Free-preview lessons may total at most 20 percent of course content duration. | Protect paid content. | Quality checks | [SRC: SSOT BR-094] |
-| BR-STU-006 | Course image at least 750 by 422 pixels and at most 4 MB. | Consistent catalog display. | Landing editor | [SRC: SSOT BR-098] |
-| BR-STU-007 | Every video lesson needs at least one caption track and a transcript before publish; auto-generated tracks require the author's review confirmation and carry a label until reviewed. | Accessibility. | Quality checks | [SRC: YASH-MICRO FEAT-08-03.3] |
-| BR-STU-008 | The owner attests to rights for all content per version (including AI-generated disclosure); the record is immutable and a prerequisite for review. | Ownership trail. | Submission service | [SRC: SSOT BR-089] |
-| BR-STU-009 | External media must pass provider validation (allowlisted provider, embeddable, public) before publication; protected third-party content is never downloaded or proxied; unsupported providers are rejected explicitly. | Safe embeds. | Media validator | [SRC: SSOT BR-083, BR-084, BR-088, BR-090] |
-| BR-STU-010 | Uploads are checksum-verified, virus scanned and probed; no asset is served to learners before state `ready`; infected or corrupt assets are quarantined. | Safety and correctness. | Upload and pipeline services | [DER] |
-| BR-STU-011 | Media jobs are idempotent per (asset, profile version), retried at most 3 times for transient errors with backoff, and a failed asset never blocks others. | Reliability. | Pipeline orchestrator | [DER] |
-| BR-STU-012 | Protected media and resources are served only through short-lived signed tokens bound to an authorized session; storage is private. | Zero unauthorized access. | Media edge | [SRC: SSOT §13.16] |
-| BR-STU-013 | Each course has exactly one owner; roles are Owner, Co-instructor, Assistant, Viewer; ownership transfer needs the target's acceptance; organization-owned courses belong to the organization. | Clear accountability. | Membership service | [PROP] |
-| BR-STU-014 | Co-instructor revenue shares must total 100 percent of the instructor share and be accepted by each member; changes apply to future earnings only. | Fair splits. | Membership and BIL | [PROP] |
-| BR-STU-015 | An instructor cannot grade, sign off or review their own enrollment; sign-off is held for human review when conflict declarations or shared device or payment signals exist. | Independence of verification. | Sign-off and grading services | [SRC: YASH-MICRO AC-05-04-53, AC-05-04-54] |
-| BR-STU-016 | Coupons may not reduce a paid price below the platform minimum except approved free-access coupons within a monthly allowance {20 redemptions}; no stacking; coupons are validated server-side. | Price integrity. | Coupon and BIL services | [SRC: SSOT BR-099] |
-| BR-STU-017 | Price changes apply to new purchases only; paid to free keeps existing access; free to paid never charges existing enrollees; scheduled changes need at least 24 hours notice. | No surprise charges. | Pricing service | [DER] |
-| BR-STU-018 | Instructor earnings = share percent {70} of net revenue after payment fees, taxes and refunds, split by member shares; computed by BIL. | Transparent revenue. | BIL | [SRC: SSOT BR-101] [DEC-REQ] OD-STU-01 |
-| BR-STU-019 | Payouts occur only for verified payout profiles above a threshold {50} after the hold period; failures return funds to balance; execution is idempotent. | Safe payouts. | BIL and payout service | [PROP] OD-STU-01 |
-| BR-STU-020 | Refunds and chargebacks reverse earnings in the period they occur; negative balances carry forward. | Accurate accounting. | Earnings service | [DER] |
-| BR-STU-021 | Reviewers cannot review their own courses or those of their organization or related accounts; response SLA {72 hours} with escalation. | Fair, timely review. | Review assignment | [SRC: SSOT OD-42] [PROP] |
-| BR-STU-022 | Review decisions need reasons tied to checklist items; authors may appeal once to a different reviewer; high-risk categories need a second reviewer. | Fair process. | Review service | [PROP] |
-| BR-STU-023 | Automated checks classify findings as blocking (cannot submit or publish), warning (dismissible with logged reason) and info; blocking items cannot be dismissed. | Consistent quality gate. | Quality check service | [DER] |
-| BR-STU-024 | Unpublish and archive block new enrollments and preserve access for enrolled learners; safety or legal takedown can revoke access; every state change is audited. | Learner protection. | Publish service | [SRC: SSOT BR-114] |
-| BR-STU-025 | A scheduled publish re-runs checks and attestation at execution time and does not publish on failure. | No stale approvals. | Scheduler | [DER] |
-| BR-STU-026 | At most 1 announcement per day per course. | Avoid noise. | Announcement service | [SRC: SSOT BR-102] |
-| BR-STU-027 | Instructors communicate with learners only through platform tools; solicitation of off-platform payments or personal contact collection is prohibited and blocked or flagged. | Safety and commerce integrity. | Content scanners | [PROP] |
-| BR-STU-028 | An instructor may reply once publicly to a review, may not edit it after 24 hours, and may never edit, hide or delete a learner review. | Review integrity. | Review service | [DER] |
-| BR-STU-029 | Instructors see learner-level data only for their course and only needed fields; aggregates hide groups under 10; outcome analytics need at least 30 learners and are labeled correlational. | Privacy. | Analytics API | [SRC: SSOT BR-189 to BR-193] |
-| BR-STU-030 | Strikes: warnings and strikes accumulate; {3 strikes in 12 months} opens a suspension review; severe violations may be immediate; every action has a reason and an appeal. | Proportionate enforcement. | Moderation service | [PROP] OD-STU-08 |
-| BR-STU-031 | Valid copyright notices disable the identified content promptly; counter-notices start a waiting window {10 to 14 business days}; repeat infringers ({3 upheld in 24 months}) face termination review. | Legal compliance. | Copyright service | [PROP] OD-STU-04 |
-| BR-STU-032 | Translations are tracks tied to a version and source hash; machine translations and auto captions are labeled until reviewed; outdated tracks fall back to the source language. | Honest localization. | Localization service | [DER] |
-| BR-STU-033 | Quality scores are shown with their inputs, only to the instructor and staff, never as a public ranking, and are not used to pressure lower standards. | Avoid perverse incentives. | Quality service | [SRC: SSOT BR-191, BR-192] |
-| BR-STU-034 | Grades reference rubric criteria; rubric edits create a new rubric version; post-release grade changes need a reason and notify the learner; all are audited. | Transparent grading. | Grading service | [DER] |
-| BR-STU-035 | Quiz and question versions are snapshotted at publish; later bank edits never alter past attempts or pinned versions. | Fair assessment history. | Assessment link | [SRC: SSOT BR-113] |
-| BR-STU-036 | Every editable entity has a version token; stale saves fail with a conflict and merge view; soft edit locks are leases of 5 minutes. | No silent overwrites. | API | [SRC: SSOT §19.3] |
-| BR-STU-037 | Instructor verification levels: `email`, `identity` (required for paid courses and payouts), `expertise` (optional badge, valid {24 months}). | Trust signals. | Verification service | [PROP] OD-STU-06 |
-| BR-STU-038 | Instructors must be adults ({18} or older) and pass sanctions screening. | Legal and safety. | Application service | [PROP] |
-| BR-STU-039 | Organization-owned courses persist when an individual instructor leaves; the organization appoints a new owner. | Continuity. | Membership service | [DER] |
-| BR-STU-040 | Imported content becomes draft content owned by the instructor; imports never auto-publish and are idempotent per source hash. | Safe migration. | Import service | [SRC: SSOT MIG-01..MIG-03] |
-| BR-STU-041 | Duplicating a course never copies enrollments, reviews, ratings, coupons, announcements or analytics; a new attestation is required. | Clean copies. | Duplication service | [DER] |
-| BR-STU-042 | A media asset referenced by any published version cannot be deleted; deletion is soft for {30 days}. | Prevent broken courses. | Library service | [DER] |
-| BR-STU-043 | Source media is retained while any version references it; derived renditions can be regenerated; orphaned uploads and partial parts expire after 7 days. | Storage cost control. | Storage lifecycle | [PROP] |
-| BR-STU-044 | Media quality thresholds are advisory warnings (resolution under 720p, loudness outside target, silence over 3 seconds) except hard limits (unplayable, no audio when required). | Quality without over-blocking. | Pipeline probe | [PROP] |
-| BR-STU-045 | Live sessions on cohort courses need {24 hours} notice; recording requires attendee notice; hosts no-show for 15 minutes cancels the session. | Predictability and consent. | Live service | [PROP] |
-| BR-STU-046 | Sign-off reminders at 3 and 7 days, then escalation to the course owner or PAD. | Timely credentials. | Sign-off service | [SRC: YASH-G3 SPEC-06 §9] |
-| BR-STU-047 | The instructor retains IP; the platform holds a non-exclusive license to host and distribute; the license continues for enrolled learners after termination for {the access period}. | Rights clarity. | Agreement | [PROP] OD-STU-03 |
-| BR-STU-048 | Payouts require a completed tax profile and verified payout method as per jurisdiction. | Compliance. | BIL | [PROP] OD-STU-01 |
-| BR-STU-049 | A course has at most one working draft version at a time. | Avoid divergent drafts. | Version service | [DER] |
-| BR-STU-050 | Course pages, announcements and messages may not promise employment, salary or guaranteed outcomes. | Honest marketing. | Claims linter | [PROP] |
-| BR-STU-051 | A rejected applicant may reapply after {30 days}. | Prevent churn. | Application service | [PROP] |
-| BR-STU-052 | Publishing requires alt text or a decorative mark for every image and accessible-format checks for resources; catalog accessibility badges derive from real assets. | Accessibility. | Quality checks | [SRC: SSOT §21.7] |
-| BR-STU-053 | Instructor names and photos are displayed publicly only with the member's consent and verified account. | Consent and trust. | Course page rendering | [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                              | Rationale                           | Enforced where                  | Source                                     |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------- | ------------------------------------------ |
+| BR-STU-001 | Only an instructor with an approved application, accepted current agreement and the verification level required for the action may submit a course for review or publish.                                                                                                                                                                                         | Quality and accountability.         | Submission and publish services | [SRC: SSOT BR-097]                         |
+| BR-STU-002 | Only a version in state `approved` (or a patch passing automated checks) can be published; publishing records actor, time and version.                                                                                                                                                                                                                            | No unreviewed structural content.   | Publish service                 | [SRC: SSOT WF-24] [DER]                    |
+| BR-STU-003 | Submission minimums: at least 5 lessons and 30 minutes of content, at least one video or text lesson (no quiz-only courses), category and level assigned, at least 3 outcomes, one primary skill.                                                                                                                                                                 | Minimum useful course.              | Quality checks                  | [SRC: SSOT BR-091, BR-092, BR-096]         |
+| BR-STU-004 | Published versions are immutable. Structural changes (add or remove lessons or sections, change rules, prerequisites, skills, weights, replace media content) need a new version and review; patches (typos, caption corrections, resource replacement, description and image edits) publish with automated checks only and are logged. `lessonKey` is permanent. | Protect learner progress and rules. | Version service                 | [SRC: SSOT BR-093, BR-105]                 |
+| BR-STU-005 | Free-preview lessons may total at most 20 percent of course content duration.                                                                                                                                                                                                                                                                                     | Protect paid content.               | Quality checks                  | [SRC: SSOT BR-094]                         |
+| BR-STU-006 | Course image at least 750 by 422 pixels and at most 4 MB.                                                                                                                                                                                                                                                                                                         | Consistent catalog display.         | Landing editor                  | [SRC: SSOT BR-098]                         |
+| BR-STU-007 | Every video lesson needs at least one caption track and a transcript before publish; auto-generated tracks require the author's review confirmation and carry a label until reviewed.                                                                                                                                                                             | Accessibility.                      | Quality checks                  | [SRC: YASH-MICRO FEAT-08-03.3]             |
+| BR-STU-008 | The owner attests to rights for all content per version (including AI-generated disclosure); the record is immutable and a prerequisite for review.                                                                                                                                                                                                               | Ownership trail.                    | Submission service              | [SRC: SSOT BR-089]                         |
+| BR-STU-009 | External media must pass provider validation (allowlisted provider, embeddable, public) before publication; protected third-party content is never downloaded or proxied; unsupported providers are rejected explicitly.                                                                                                                                          | Safe embeds.                        | Media validator                 | [SRC: SSOT BR-083, BR-084, BR-088, BR-090] |
+| BR-STU-010 | Uploads are checksum-verified, virus scanned and probed; no asset is served to learners before state `ready`; infected or corrupt assets are quarantined.                                                                                                                                                                                                         | Safety and correctness.             | Upload and pipeline services    | [DER]                                      |
+| BR-STU-011 | Media jobs are idempotent per (asset, profile version), retried at most 3 times for transient errors with backoff, and a failed asset never blocks others.                                                                                                                                                                                                        | Reliability.                        | Pipeline orchestrator           | [DER]                                      |
+| BR-STU-012 | Protected media and resources are served only through short-lived signed tokens bound to an authorized session; storage is private.                                                                                                                                                                                                                               | Zero unauthorized access.           | Media edge                      | [SRC: SSOT §13.16]                         |
+| BR-STU-013 | Each course has exactly one owner; roles are Owner, Co-instructor, Assistant, Viewer; ownership transfer needs the target's acceptance; organization-owned courses belong to the organization.                                                                                                                                                                    | Clear accountability.               | Membership service              | [PROP]                                     |
+| BR-STU-014 | Co-instructor revenue shares must total 100 percent of the instructor share and be accepted by each member; changes apply to future earnings only.                                                                                                                                                                                                                | Fair splits.                        | Membership and BIL              | [PROP]                                     |
+| BR-STU-015 | An instructor cannot grade, sign off or review their own enrollment; sign-off is held for human review when conflict declarations or shared device or payment signals exist.                                                                                                                                                                                      | Independence of verification.       | Sign-off and grading services   | [SRC: YASH-MICRO AC-05-04-53, AC-05-04-54] |
+| BR-STU-016 | Coupons may not reduce a paid price below the platform minimum except approved free-access coupons within a monthly allowance {20 redemptions}; no stacking; coupons are validated server-side.                                                                                                                                                                   | Price integrity.                    | Coupon and BIL services         | [SRC: SSOT BR-099]                         |
+| BR-STU-017 | Price changes apply to new purchases only; paid to free keeps existing access; free to paid never charges existing enrollees; scheduled changes need at least 24 hours notice.                                                                                                                                                                                    | No surprise charges.                | Pricing service                 | [DER]                                      |
+| BR-STU-018 | Instructor earnings = share percent {70} of net revenue after payment fees, taxes and refunds, split by member shares; computed by BIL.                                                                                                                                                                                                                           | Transparent revenue.                | BIL                             | [SRC: SSOT BR-101] [DEC-REQ] OD-STU-01     |
+| BR-STU-019 | Payouts occur only for verified payout profiles above a threshold {50} after the hold period; failures return funds to balance; execution is idempotent.                                                                                                                                                                                                          | Safe payouts.                       | BIL and payout service          | [PROP] OD-STU-01                           |
+| BR-STU-020 | Refunds and chargebacks reverse earnings in the period they occur; negative balances carry forward.                                                                                                                                                                                                                                                               | Accurate accounting.                | Earnings service                | [DER]                                      |
+| BR-STU-021 | Reviewers cannot review their own courses or those of their organization or related accounts; response SLA {72 hours} with escalation.                                                                                                                                                                                                                            | Fair, timely review.                | Review assignment               | [SRC: SSOT OD-42] [PROP]                   |
+| BR-STU-022 | Review decisions need reasons tied to checklist items; authors may appeal once to a different reviewer; high-risk categories need a second reviewer.                                                                                                                                                                                                              | Fair process.                       | Review service                  | [PROP]                                     |
+| BR-STU-023 | Automated checks classify findings as blocking (cannot submit or publish), warning (dismissible with logged reason) and info; blocking items cannot be dismissed.                                                                                                                                                                                                 | Consistent quality gate.            | Quality check service           | [DER]                                      |
+| BR-STU-024 | Unpublish and archive block new enrollments and preserve access for enrolled learners; safety or legal takedown can revoke access; every state change is audited.                                                                                                                                                                                                 | Learner protection.                 | Publish service                 | [SRC: SSOT BR-114]                         |
+| BR-STU-025 | A scheduled publish re-runs checks and attestation at execution time and does not publish on failure.                                                                                                                                                                                                                                                             | No stale approvals.                 | Scheduler                       | [DER]                                      |
+| BR-STU-026 | At most 1 announcement per day per course.                                                                                                                                                                                                                                                                                                                        | Avoid noise.                        | Announcement service            | [SRC: SSOT BR-102]                         |
+| BR-STU-027 | Instructors communicate with learners only through platform tools; solicitation of off-platform payments or personal contact collection is prohibited and blocked or flagged.                                                                                                                                                                                     | Safety and commerce integrity.      | Content scanners                | [PROP]                                     |
+| BR-STU-028 | An instructor may reply once publicly to a review, may not edit it after 24 hours, and may never edit, hide or delete a learner review.                                                                                                                                                                                                                           | Review integrity.                   | Review service                  | [DER]                                      |
+| BR-STU-029 | Instructors see learner-level data only for their course and only needed fields; aggregates hide groups under 10; outcome analytics need at least 30 learners and are labeled correlational.                                                                                                                                                                      | Privacy.                            | Analytics API                   | [SRC: SSOT BR-189 to BR-193]               |
+| BR-STU-030 | Strikes: warnings and strikes accumulate; {3 strikes in 12 months} opens a suspension review; severe violations may be immediate; every action has a reason and an appeal.                                                                                                                                                                                        | Proportionate enforcement.          | Moderation service              | [PROP] OD-STU-08                           |
+| BR-STU-031 | Valid copyright notices disable the identified content promptly; counter-notices start a waiting window {10 to 14 business days}; repeat infringers ({3 upheld in 24 months}) face termination review.                                                                                                                                                            | Legal compliance.                   | Copyright service               | [PROP] OD-STU-04                           |
+| BR-STU-032 | Translations are tracks tied to a version and source hash; machine translations and auto captions are labeled until reviewed; outdated tracks fall back to the source language.                                                                                                                                                                                   | Honest localization.                | Localization service            | [DER]                                      |
+| BR-STU-033 | Quality scores are shown with their inputs, only to the instructor and staff, never as a public ranking, and are not used to pressure lower standards.                                                                                                                                                                                                            | Avoid perverse incentives.          | Quality service                 | [SRC: SSOT BR-191, BR-192]                 |
+| BR-STU-034 | Grades reference rubric criteria; rubric edits create a new rubric version; post-release grade changes need a reason and notify the learner; all are audited.                                                                                                                                                                                                     | Transparent grading.                | Grading service                 | [DER]                                      |
+| BR-STU-035 | Quiz and question versions are snapshotted at publish; later bank edits never alter past attempts or pinned versions.                                                                                                                                                                                                                                             | Fair assessment history.            | Assessment link                 | [SRC: SSOT BR-113]                         |
+| BR-STU-036 | Every editable entity has a version token; stale saves fail with a conflict and merge view; soft edit locks are leases of 5 minutes.                                                                                                                                                                                                                              | No silent overwrites.               | API                             | [SRC: SSOT §19.3]                          |
+| BR-STU-037 | Instructor verification levels: `email`, `identity` (required for paid courses and payouts), `expertise` (optional badge, valid {24 months}).                                                                                                                                                                                                                     | Trust signals.                      | Verification service            | [PROP] OD-STU-06                           |
+| BR-STU-038 | Instructors must be adults ({18} or older) and pass sanctions screening.                                                                                                                                                                                                                                                                                          | Legal and safety.                   | Application service             | [PROP]                                     |
+| BR-STU-039 | Organization-owned courses persist when an individual instructor leaves; the organization appoints a new owner.                                                                                                                                                                                                                                                   | Continuity.                         | Membership service              | [DER]                                      |
+| BR-STU-040 | Imported content becomes draft content owned by the instructor; imports never auto-publish and are idempotent per source hash.                                                                                                                                                                                                                                    | Safe migration.                     | Import service                  | [SRC: SSOT MIG-01..MIG-03]                 |
+| BR-STU-041 | Duplicating a course never copies enrollments, reviews, ratings, coupons, announcements or analytics; a new attestation is required.                                                                                                                                                                                                                              | Clean copies.                       | Duplication service             | [DER]                                      |
+| BR-STU-042 | A media asset referenced by any published version cannot be deleted; deletion is soft for {30 days}.                                                                                                                                                                                                                                                              | Prevent broken courses.             | Library service                 | [DER]                                      |
+| BR-STU-043 | Source media is retained while any version references it; derived renditions can be regenerated; orphaned uploads and partial parts expire after 7 days.                                                                                                                                                                                                          | Storage cost control.               | Storage lifecycle               | [PROP]                                     |
+| BR-STU-044 | Media quality thresholds are advisory warnings (resolution under 720p, loudness outside target, silence over 3 seconds) except hard limits (unplayable, no audio when required).                                                                                                                                                                                  | Quality without over-blocking.      | Pipeline probe                  | [PROP]                                     |
+| BR-STU-045 | Live sessions on cohort courses need {24 hours} notice; recording requires attendee notice; hosts no-show for 15 minutes cancels the session.                                                                                                                                                                                                                     | Predictability and consent.         | Live service                    | [PROP]                                     |
+| BR-STU-046 | Sign-off reminders at 3 and 7 days, then escalation to the course owner or PAD.                                                                                                                                                                                                                                                                                   | Timely credentials.                 | Sign-off service                | [SRC: YASH-G3 SPEC-06 §9]                  |
+| BR-STU-047 | The instructor retains IP; the platform holds a non-exclusive license to host and distribute; the license continues for enrolled learners after termination for {the access period}.                                                                                                                                                                              | Rights clarity.                     | Agreement                       | [PROP] OD-STU-03                           |
+| BR-STU-048 | Payouts require a completed tax profile and verified payout method as per jurisdiction.                                                                                                                                                                                                                                                                           | Compliance.                         | BIL                             | [PROP] OD-STU-01                           |
+| BR-STU-049 | A course has at most one working draft version at a time.                                                                                                                                                                                                                                                                                                         | Avoid divergent drafts.             | Version service                 | [DER]                                      |
+| BR-STU-050 | Course pages, announcements and messages may not promise employment, salary or guaranteed outcomes.                                                                                                                                                                                                                                                               | Honest marketing.                   | Claims linter                   | [PROP]                                     |
+| BR-STU-051 | A rejected applicant may reapply after {30 days}.                                                                                                                                                                                                                                                                                                                 | Prevent churn.                      | Application service             | [PROP]                                     |
+| BR-STU-052 | Publishing requires alt text or a decorative mark for every image and accessible-format checks for resources; catalog accessibility badges derive from real assets.                                                                                                                                                                                               | Accessibility.                      | Quality checks                  | [SRC: SSOT §21.7]                          |
+| BR-STU-053 | Instructor names and photos are displayed publicly only with the member's consent and verified account.                                                                                                                                                                                                                                                           | Consent and trust.                  | Course page rendering           | [DER]                                      |
 
 ## 6. State machines
 
@@ -1756,12 +1756,12 @@ stateDiagram-v2
     archived --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `draft` | `in_review` | Submit | No blocking checks; attestation (BR-STU-008) |
-| `approved` | `scheduled` | Schedule | Time at least 15 minutes ahead (FR-STU-041) |
-| `scheduled` | `published` | Scheduler | Checks and attestation still pass (BR-STU-025) |
-| `published` | `taken_down` | Moderator or legal | Reason recorded (FR-STU-049) |
+| From        | To           | Trigger            | Guard                                          |
+| ----------- | ------------ | ------------------ | ---------------------------------------------- |
+| `draft`     | `in_review`  | Submit             | No blocking checks; attestation (BR-STU-008)   |
+| `approved`  | `scheduled`  | Schedule           | Time at least 15 minutes ahead (FR-STU-041)    |
+| `scheduled` | `published`  | Scheduler          | Checks and attestation still pass (BR-STU-025) |
+| `published` | `taken_down` | Moderator or legal | Reason recorded (FR-STU-049)                   |
 
 ### SM-STU-02 Course version
 
@@ -1782,10 +1782,10 @@ stateDiagram-v2
     retired --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `working` | `submitted` | Submit | BR-STU-023 passes |
-| `superseded` | `retired` | Owner | No active enrollments pinned |
+| From         | To          | Trigger | Guard                        |
+| ------------ | ----------- | ------- | ---------------------------- |
+| `working`    | `submitted` | Submit  | BR-STU-023 passes            |
+| `superseded` | `retired`   | Owner   | No active enrollments pinned |
 
 ### SM-STU-03 Instructor application
 
@@ -1809,10 +1809,10 @@ stateDiagram-v2
     withdrawn --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `in_verification` | `approved` | Reviewer | Sanctions clear, age gate passed (BR-STU-038) |
-| `rejected` | new application | Applicant | After {30 days} (BR-STU-051) |
+| From              | To              | Trigger   | Guard                                         |
+| ----------------- | --------------- | --------- | --------------------------------------------- |
+| `in_verification` | `approved`      | Reviewer  | Sanctions clear, age gate passed (BR-STU-038) |
+| `rejected`        | new application | Applicant | After {30 days} (BR-STU-051)                  |
 
 ### SM-STU-04 Media asset
 
@@ -1835,10 +1835,10 @@ stateDiagram-v2
     deleted --> ready: restored within 30 days
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `processing` | `ready` | Pipeline | All required renditions validated (FR-STU-022) |
-| `ready` | `deleted` | Owner | Not used by published versions (BR-STU-042) |
+| From         | To        | Trigger  | Guard                                          |
+| ------------ | --------- | -------- | ---------------------------------------------- |
+| `processing` | `ready`   | Pipeline | All required renditions validated (FR-STU-022) |
+| `ready`      | `deleted` | Owner    | Not used by published versions (BR-STU-042)    |
 
 ### SM-STU-05 Publish review case
 
@@ -1862,10 +1862,10 @@ stateDiagram-v2
     closed --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `queued` | `claimed` | Reviewer | No conflict (BR-STU-021) |
-| `decided_*` | `appealed` | Author | Once only; different reviewer (BR-STU-022) |
+| From        | To         | Trigger  | Guard                                      |
+| ----------- | ---------- | -------- | ------------------------------------------ |
+| `queued`    | `claimed`  | Reviewer | No conflict (BR-STU-021)                   |
+| `decided_*` | `appealed` | Author   | Once only; different reviewer (BR-STU-022) |
 
 ### SM-STU-06 Payout
 
@@ -1886,8 +1886,8 @@ stateDiagram-v2
     reversed --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From      | To          | Trigger      | Guard                                             |
+| --------- | ----------- | ------------ | ------------------------------------------------- |
 | `accrued` | `scheduled` | Payout cycle | Verified profile, threshold, no hold (BR-STU-019) |
 
 ### SM-STU-07 Coupon
@@ -1909,8 +1909,8 @@ stateDiagram-v2
     revoked --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From    | To       | Trigger    | Guard                             |
+| ------- | -------- | ---------- | --------------------------------- |
 | `draft` | `active` | Start time | Floor rule satisfied (BR-STU-016) |
 
 ### SM-STU-08 Copyright case
@@ -1933,8 +1933,8 @@ stateDiagram-v2
     closed --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From            | To         | Trigger        | Guard                               |
+| --------------- | ---------- | -------------- | ----------------------------------- |
 | `counter_filed` | `restored` | Window elapsed | No legal action notice (BR-STU-031) |
 
 ### SM-STU-09 Grading task
@@ -1953,10 +1953,10 @@ stateDiagram-v2
     regraded --> released
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| `claimed` | `graded_draft` | Grader | Not the learner (BR-STU-015) |
-| `released` | `disputed` | Learner | Within dispute window {7 days} |
+| From       | To             | Trigger | Guard                          |
+| ---------- | -------------- | ------- | ------------------------------ |
+| `claimed`  | `graded_draft` | Grader  | Not the learner (BR-STU-015)   |
+| `released` | `disputed`     | Learner | Within dispute window {7 days} |
 
 ### SM-STU-10 Co-instructor invitation
 
@@ -1975,98 +1975,98 @@ stateDiagram-v2
     expired --> [*]
 ```
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
+| From      | To         | Trigger | Guard                      |
+| --------- | ---------- | ------- | -------------------------- |
 | `invited` | `accepted` | Invitee | Eligible role (BR-STU-013) |
 
 ## 7. Screen inventory
 
 Key states for every screen include loading (skeleton), empty, error with retry, forbidden and, for editors, saving and conflict. Only screen-specific states are listed.
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-STU-001 | Instructor application | `/teach/apply` | CAN | Apply to teach (FR-STU-001) | draft, submitted, needs info, rejected with reapply date |
-| SCR-STU-002 | Application status | `/teach/application` | CAN | Track application | in verification, approved |
-| SCR-STU-003 | Verification center | `/studio/verification` | INS | Identity and expertise (FR-STU-002) | pending, failed, expiring |
-| SCR-STU-004 | Agreements | `/studio/agreements` | INS | Accept terms and declare conflicts (FR-STU-003) | update required, grace ending |
-| SCR-STU-005 | Instructor profile editor | `/studio/profile` | INS | Public teaching profile (FR-STU-004) | hidden by moderation |
-| SCR-STU-006 | Payout setup | `/studio/earnings/payout-setup` | INS Owner | Payout and tax profile (FR-STU-005) | incomplete, verified, restricted, feature off |
-| SCR-STU-007 | Studio home | `/studio` | INS, IAD | Courses and attention list (FR-STU-006) | no courses, attention items |
-| SCR-STU-008 | Course workspace overview | `/studio/courses/:id` | INS | Hub with checklist and status | draft, in review, live, taken down |
-| SCR-STU-009 | Course creation wizard | `/studio/courses/new` | INS, IAD | Start a course (FR-STU-007) | step errors, template pick |
-| SCR-STU-010 | Curriculum builder | `/studio/courses/:id/curriculum` | INS | Sections and lessons, drag and drop (FR-STU-008) | stale version conflict, bulk selection |
-| SCR-STU-011 | Lesson editor | `/studio/courses/:id/lessons/:lessonKey` | INS | Video, text, resource authoring (FR-STU-009 to 011) | media processing, locked by another editor |
-| SCR-STU-012 | Landing page editor | `/studio/courses/:id/landing` | INS | Public page and SEO (FR-STU-014) | image too small, claims warning |
-| SCR-STU-013 | Rules and prerequisites | `/studio/courses/:id/rules` | INS | Completion and navigation rules (FR-STU-013) | unsatisfiable rule, test result |
-| SCR-STU-014 | Skills and objectives | `/studio/courses/:id/skills` | INS | Skill tagging (FR-STU-012) | evidence preview gaps |
-| SCR-STU-015 | Team | `/studio/courses/:id/team` | INS Owner | Co-instructors and ownership (FR-STU-016) | invitation pending, split mismatch |
-| SCR-STU-016 | Versions | `/studio/courses/:id/versions` | INS Owner | Version list and diff (FR-STU-019) | draft exists, patch eligible |
-| SCR-STU-017 | Learner preview | `/studio/courses/:id/preview` | INS, reviewers | Preview as learner (FR-STU-020) | simulated day, media not ready |
-| SCR-STU-018 | Media library | `/studio/library` | INS | Assets and usage (FR-STU-025) | quota near, asset in use |
-| SCR-STU-019 | Asset detail and status | `/studio/library/:assetId` | INS, SUP | Pipeline status (FR-STU-026) | processing step, failed with reason |
-| SCR-STU-020 | Caption editor | `/studio/library/:assetId/captions` | INS | Edit captions (FR-STU-023) | low-confidence highlights, ASR pending |
-| SCR-STU-021 | Quiz settings | `/studio/courses/:id/quizzes/:lessonKey` | INS | Quiz placement and policy (FR-STU-029) | pool too small |
-| SCR-STU-022 | Assignment and rubric editor | `/studio/courses/:id/assignments/:lessonKey` | INS | Assignment authoring (FR-STU-030) | rubric total mismatch |
-| SCR-STU-023 | Grading queue | `/studio/grading` | INS, Assistant | Pending submissions (FR-STU-031) | claimed, late, flagged |
-| SCR-STU-024 | Grading workbench | `/studio/grading/:taskId` | INS, Assistant | Grade and feedback | draft, released, dispute |
-| SCR-STU-025 | Pricing | `/studio/courses/:id/pricing` | INS Owner, FIN | Price and schedule (FR-STU-033) | scheduled change, below minimum |
-| SCR-STU-026 | Promotions | `/studio/courses/:id/promotions` | INS Owner | Coupons (FR-STU-034) | exhausted, expiring |
-| SCR-STU-027 | Earnings and statements | `/studio/earnings` | INS (role-limited), FIN | Revenue views (FR-STU-035, 037) | ledger lag, feature off |
-| SCR-STU-028 | Payouts | `/studio/earnings/payouts` | INS, FIN | Schedule and history (FR-STU-036) | held, failed, paid |
-| SCR-STU-029 | Publish and submit | `/studio/courses/:id/publish` | INS Owner | Checklist, attestation, publish (FR-STU-038, 040, 041, 052) | blocking items, scheduled |
-| SCR-STU-030 | Review queue | `/staff/course-review` | MOD, PAD | Reviewer queue (FR-STU-039) | SLA warning, conflict |
-| SCR-STU-031 | Review workbench | `/staff/course-review/:caseId` | MOD, PAD | Checklist and decision | second reviewer required |
-| SCR-STU-032 | Q&A inbox | `/studio/qa` | INS, Assistant | Answer questions (FR-STU-043) | unanswered backlog |
-| SCR-STU-033 | Announcements | `/studio/courses/:id/announcements` | INS | Author announcements (FR-STU-044) | daily limit reached |
-| SCR-STU-034 | Reviews | `/studio/reviews` | INS | Read, reply, report (FR-STU-045) | reply exists |
-| SCR-STU-035 | Learners | `/studio/courses/:id/learners` | INS, Assistant, Viewer (aggregate) | Roster (FR-STU-046) | private learner, export |
-| SCR-STU-036 | Live schedule and host console | `/studio/courses/:id/live` | INS | Sessions (FR-STU-047) | live, ended, recording processing |
-| SCR-STU-037 | Analytics | `/studio/analytics` | INS, Viewer | Funnels and engagement (FR-STU-048) | insufficient data |
-| SCR-STU-038 | Content moderation console | `/staff/content-moderation` | MOD, PAD | Cases and strikes (FR-STU-049) | emergency takedown |
-| SCR-STU-039 | Copyright notice form | `/legal/copyright` | GUE, CAN | Submit notice (FR-STU-050) | incomplete, receipt |
-| SCR-STU-040 | Copyright case console | `/staff/copyright` | MOD, PAD | Handle notices | counter-notice window running |
-| SCR-STU-041 | Localization | `/studio/courses/:id/languages` | INS, Translator | Translations (FR-STU-051) | outdated track |
-| SCR-STU-042 | Quality | `/studio/quality` | INS | Quality components (FR-STU-053) | insufficient data |
-| SCR-STU-043 | Course import | `/studio/courses/:id/import` | INS | Import wizard (FR-STU-017) | mapping issues |
-| SCR-STU-044 | Sign-off queue | `/studio/signoff` | INS | Completion sign-off (FR-STU-042) | held for review |
+| ID          | Name                           | Route proposal                               | Roles                              | Purpose                                                     | Key states                                               |
+| ----------- | ------------------------------ | -------------------------------------------- | ---------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| SCR-STU-001 | Instructor application         | `/teach/apply`                               | CAN                                | Apply to teach (FR-STU-001)                                 | draft, submitted, needs info, rejected with reapply date |
+| SCR-STU-002 | Application status             | `/teach/application`                         | CAN                                | Track application                                           | in verification, approved                                |
+| SCR-STU-003 | Verification center            | `/studio/verification`                       | INS                                | Identity and expertise (FR-STU-002)                         | pending, failed, expiring                                |
+| SCR-STU-004 | Agreements                     | `/studio/agreements`                         | INS                                | Accept terms and declare conflicts (FR-STU-003)             | update required, grace ending                            |
+| SCR-STU-005 | Instructor profile editor      | `/studio/profile`                            | INS                                | Public teaching profile (FR-STU-004)                        | hidden by moderation                                     |
+| SCR-STU-006 | Payout setup                   | `/studio/earnings/payout-setup`              | INS Owner                          | Payout and tax profile (FR-STU-005)                         | incomplete, verified, restricted, feature off            |
+| SCR-STU-007 | Studio home                    | `/studio`                                    | INS, IAD                           | Courses and attention list (FR-STU-006)                     | no courses, attention items                              |
+| SCR-STU-008 | Course workspace overview      | `/studio/courses/:id`                        | INS                                | Hub with checklist and status                               | draft, in review, live, taken down                       |
+| SCR-STU-009 | Course creation wizard         | `/studio/courses/new`                        | INS, IAD                           | Start a course (FR-STU-007)                                 | step errors, template pick                               |
+| SCR-STU-010 | Curriculum builder             | `/studio/courses/:id/curriculum`             | INS                                | Sections and lessons, drag and drop (FR-STU-008)            | stale version conflict, bulk selection                   |
+| SCR-STU-011 | Lesson editor                  | `/studio/courses/:id/lessons/:lessonKey`     | INS                                | Video, text, resource authoring (FR-STU-009 to 011)         | media processing, locked by another editor               |
+| SCR-STU-012 | Landing page editor            | `/studio/courses/:id/landing`                | INS                                | Public page and SEO (FR-STU-014)                            | image too small, claims warning                          |
+| SCR-STU-013 | Rules and prerequisites        | `/studio/courses/:id/rules`                  | INS                                | Completion and navigation rules (FR-STU-013)                | unsatisfiable rule, test result                          |
+| SCR-STU-014 | Skills and objectives          | `/studio/courses/:id/skills`                 | INS                                | Skill tagging (FR-STU-012)                                  | evidence preview gaps                                    |
+| SCR-STU-015 | Team                           | `/studio/courses/:id/team`                   | INS Owner                          | Co-instructors and ownership (FR-STU-016)                   | invitation pending, split mismatch                       |
+| SCR-STU-016 | Versions                       | `/studio/courses/:id/versions`               | INS Owner                          | Version list and diff (FR-STU-019)                          | draft exists, patch eligible                             |
+| SCR-STU-017 | Learner preview                | `/studio/courses/:id/preview`                | INS, reviewers                     | Preview as learner (FR-STU-020)                             | simulated day, media not ready                           |
+| SCR-STU-018 | Media library                  | `/studio/library`                            | INS                                | Assets and usage (FR-STU-025)                               | quota near, asset in use                                 |
+| SCR-STU-019 | Asset detail and status        | `/studio/library/:assetId`                   | INS, SUP                           | Pipeline status (FR-STU-026)                                | processing step, failed with reason                      |
+| SCR-STU-020 | Caption editor                 | `/studio/library/:assetId/captions`          | INS                                | Edit captions (FR-STU-023)                                  | low-confidence highlights, ASR pending                   |
+| SCR-STU-021 | Quiz settings                  | `/studio/courses/:id/quizzes/:lessonKey`     | INS                                | Quiz placement and policy (FR-STU-029)                      | pool too small                                           |
+| SCR-STU-022 | Assignment and rubric editor   | `/studio/courses/:id/assignments/:lessonKey` | INS                                | Assignment authoring (FR-STU-030)                           | rubric total mismatch                                    |
+| SCR-STU-023 | Grading queue                  | `/studio/grading`                            | INS, Assistant                     | Pending submissions (FR-STU-031)                            | claimed, late, flagged                                   |
+| SCR-STU-024 | Grading workbench              | `/studio/grading/:taskId`                    | INS, Assistant                     | Grade and feedback                                          | draft, released, dispute                                 |
+| SCR-STU-025 | Pricing                        | `/studio/courses/:id/pricing`                | INS Owner, FIN                     | Price and schedule (FR-STU-033)                             | scheduled change, below minimum                          |
+| SCR-STU-026 | Promotions                     | `/studio/courses/:id/promotions`             | INS Owner                          | Coupons (FR-STU-034)                                        | exhausted, expiring                                      |
+| SCR-STU-027 | Earnings and statements        | `/studio/earnings`                           | INS (role-limited), FIN            | Revenue views (FR-STU-035, 037)                             | ledger lag, feature off                                  |
+| SCR-STU-028 | Payouts                        | `/studio/earnings/payouts`                   | INS, FIN                           | Schedule and history (FR-STU-036)                           | held, failed, paid                                       |
+| SCR-STU-029 | Publish and submit             | `/studio/courses/:id/publish`                | INS Owner                          | Checklist, attestation, publish (FR-STU-038, 040, 041, 052) | blocking items, scheduled                                |
+| SCR-STU-030 | Review queue                   | `/staff/course-review`                       | MOD, PAD                           | Reviewer queue (FR-STU-039)                                 | SLA warning, conflict                                    |
+| SCR-STU-031 | Review workbench               | `/staff/course-review/:caseId`               | MOD, PAD                           | Checklist and decision                                      | second reviewer required                                 |
+| SCR-STU-032 | Q&A inbox                      | `/studio/qa`                                 | INS, Assistant                     | Answer questions (FR-STU-043)                               | unanswered backlog                                       |
+| SCR-STU-033 | Announcements                  | `/studio/courses/:id/announcements`          | INS                                | Author announcements (FR-STU-044)                           | daily limit reached                                      |
+| SCR-STU-034 | Reviews                        | `/studio/reviews`                            | INS                                | Read, reply, report (FR-STU-045)                            | reply exists                                             |
+| SCR-STU-035 | Learners                       | `/studio/courses/:id/learners`               | INS, Assistant, Viewer (aggregate) | Roster (FR-STU-046)                                         | private learner, export                                  |
+| SCR-STU-036 | Live schedule and host console | `/studio/courses/:id/live`                   | INS                                | Sessions (FR-STU-047)                                       | live, ended, recording processing                        |
+| SCR-STU-037 | Analytics                      | `/studio/analytics`                          | INS, Viewer                        | Funnels and engagement (FR-STU-048)                         | insufficient data                                        |
+| SCR-STU-038 | Content moderation console     | `/staff/content-moderation`                  | MOD, PAD                           | Cases and strikes (FR-STU-049)                              | emergency takedown                                       |
+| SCR-STU-039 | Copyright notice form          | `/legal/copyright`                           | GUE, CAN                           | Submit notice (FR-STU-050)                                  | incomplete, receipt                                      |
+| SCR-STU-040 | Copyright case console         | `/staff/copyright`                           | MOD, PAD                           | Handle notices                                              | counter-notice window running                            |
+| SCR-STU-041 | Localization                   | `/studio/courses/:id/languages`              | INS, Translator                    | Translations (FR-STU-051)                                   | outdated track                                           |
+| SCR-STU-042 | Quality                        | `/studio/quality`                            | INS                                | Quality components (FR-STU-053)                             | insufficient data                                        |
+| SCR-STU-043 | Course import                  | `/studio/courses/:id/import`                 | INS                                | Import wizard (FR-STU-017)                                  | mapping issues                                           |
+| SCR-STU-044 | Sign-off queue                 | `/studio/signoff`                            | INS                                | Completion sign-off (FR-STU-042)                            | held for review                                          |
 
 ## 8. Data entities owned
 
 Retention classes: `ACCT` deleted or anonymized with the account; `TXN` financial record, {7 years} [PROP]; `LEGAL` kept for the legal period; `AUDIT` append-only audit trail; `LOG90` {90 days}; `PUBLIC` published course data (kept while any enrollment or certificate refers to the version).
 
-| ID | Entity | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-STU-01 | InstructorApplication | id, accountId, state, topics[], links[], sampleRef, declarations, decisionReasonCodes, submittedAt, decidedAt | 1 account | LEGAL for decision; materials {24 months} if rejected |
-| ENT-STU-02 | InstructorProfile | accountId, handle, displayName, headline, bio, visibility map, verificationLevels, badgeScopes, state | 1 account; n CourseMember | ACCT |
-| ENT-STU-03 | AgreementAcceptance | accountId, documentId, version, hash, acceptedAt, reauthResult, declarations[] | Account | LEGAL |
-| ENT-STU-04 | PayoutProfileRef | accountId, bilProfileRef, state, lastChangedAt | BIL profile | TXN |
-| ENT-STU-05 | Course | id, ownerType, ownerId, slug, state, currentLiveVersionId, workingVersionId, createdAt | n Version, n CourseMember | PUBLIC |
-| ENT-STU-06 | CourseVersion | id, courseId, number, kind (structural, patch), state, ruleJson, skills[], changeNote, attestationId, checksSnapshot, publishedAt | Course; n Section | PUBLIC; AUDIT of transitions |
-| ENT-STU-07 | Section | id, versionId, key, title, position, releaseRule | n Lesson | PUBLIC |
-| ENT-STU-08 | Lesson | id, versionId, sectionId, lessonKey, type, title, position, flags (preview, optional, downloadable), body or mediaRef, completionRule, estimatedMinutes | Section; MediaAsset | PUBLIC |
-| ENT-STU-09 | MediaAsset | id, ownerId, kind, sourceRef, checksum, state, durationMs, probe, providerRef, protectionLevel, deletedAt | n Rendition, n CaptionTrack | ACCT while referenced; renditions regenerable |
-| ENT-STU-10 | MediaRendition | assetId, profile, codec, bitrate, resolution, manifestRef, validatedAt | Asset | Regenerable |
-| ENT-STU-11 | CaptionTrack | assetId, language, kind (caption, transcript, description), autoGenerated, reviewed, vttRef, confidence | Asset | PUBLIC with asset |
-| ENT-STU-12 | Resource | id, lessonId, name, fileRef, scanState, downloadable | Lesson | PUBLIC with version |
-| ENT-STU-13 | QuizPlacement | lessonId, assessmentRef (ASM), weight, policyOverrides, snapshotVersion | Lesson; ASM assessment | PUBLIC |
-| ENT-STU-14 | AssignmentConfig | lessonId, brief, submissionTypes, dueRule, latePolicy, revisions, rubricRef, gradingMode, aiPolicyText | Lesson; ASM rubric | PUBLIC |
-| ENT-STU-15 | CourseMember | courseId, accountId, role, sharePercent, displayPublic, invitationState | Course; Account | ACCT; AUDIT |
-| ENT-STU-16 | PriceSetting | courseId, mode, tier, regionBands, scheduledChange, effectiveFrom | Course | TXN |
-| ENT-STU-17 | Coupon | id, courseId, type, codeOrHash, limits, window, state, redemptionCount | Course | TXN |
-| ENT-STU-18 | EarningsStatement | memberId, period, lines[], closedAt | BIL ledger | TXN |
-| ENT-STU-19 | PayoutRecord | id, memberId, amount, currency, state, runKey, providerRef | Statement | TXN |
-| ENT-STU-20 | PublishReviewCase | id, versionId, state, reviewerIds, checklistResults, decision, reasons, sla, appeal | Version | LEGAL |
-| ENT-STU-21 | QualityCheckResult | versionId, ruleVersion, findings[], runAt, dismissals[] | Version | LOG90 (latest per version kept) |
-| ENT-STU-22 | ModerationAction | id, targetType, targetId, severity, action, policyRef, reason, actorId, appealState | Course or account | LEGAL |
-| ENT-STU-23 | CopyrightCase | id, claimant, workDescription, targetRefs, state, notices, counterNotice, decisions | Course content | LEGAL |
-| ENT-STU-24 | LocalizationTrack | versionId, language, scope, state (draft, machine, reviewed, outdated), sourceHash | Version | PUBLIC |
-| ENT-STU-25 | LiveSessionPlan | id, courseId, runId, schedule, capacity, recordingFlag, providerRoomRef, state | Course | LOG90 after end; recording per policy |
-| ENT-STU-26 | AnnouncementPost | id, courseId, audience, body, sentAt, stats | Course | ACCT |
-| ENT-STU-27 | QualityScore | scopeId, components[], computedAt, inputs | Course or instructor | AGG private |
-| ENT-STU-28 | DraftRevision | entityId, token, authorId, snapshotRef, at | Lesson or course | {90 days}, last 20 |
-| ENT-STU-29 | RightsAttestation | id, versionId, ownerId, thirdPartyItems[], aiDisclosure, signedAt | Version | LEGAL |
-| ENT-STU-30 | ImportJob | id, courseId, sourceHash, mapping, state, report | Course | LOG90 |
-| ENT-STU-31 | GradingTask | id, submissionRef, graderId, leaseUntil, scores, state, releaseAt, disputes[] | LRN submission | ACCT of learner; AUDIT |
+| ID         | Entity                | Key attributes                                                                                                                                          | Relationships               | Retention                                             |
+| ---------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ----------------------------------------------------- |
+| ENT-STU-01 | InstructorApplication | id, accountId, state, topics[], links[], sampleRef, declarations, decisionReasonCodes, submittedAt, decidedAt                                           | 1 account                   | LEGAL for decision; materials {24 months} if rejected |
+| ENT-STU-02 | InstructorProfile     | accountId, handle, displayName, headline, bio, visibility map, verificationLevels, badgeScopes, state                                                   | 1 account; n CourseMember   | ACCT                                                  |
+| ENT-STU-03 | AgreementAcceptance   | accountId, documentId, version, hash, acceptedAt, reauthResult, declarations[]                                                                          | Account                     | LEGAL                                                 |
+| ENT-STU-04 | PayoutProfileRef      | accountId, bilProfileRef, state, lastChangedAt                                                                                                          | BIL profile                 | TXN                                                   |
+| ENT-STU-05 | Course                | id, ownerType, ownerId, slug, state, currentLiveVersionId, workingVersionId, createdAt                                                                  | n Version, n CourseMember   | PUBLIC                                                |
+| ENT-STU-06 | CourseVersion         | id, courseId, number, kind (structural, patch), state, ruleJson, skills[], changeNote, attestationId, checksSnapshot, publishedAt                       | Course; n Section           | PUBLIC; AUDIT of transitions                          |
+| ENT-STU-07 | Section               | id, versionId, key, title, position, releaseRule                                                                                                        | n Lesson                    | PUBLIC                                                |
+| ENT-STU-08 | Lesson                | id, versionId, sectionId, lessonKey, type, title, position, flags (preview, optional, downloadable), body or mediaRef, completionRule, estimatedMinutes | Section; MediaAsset         | PUBLIC                                                |
+| ENT-STU-09 | MediaAsset            | id, ownerId, kind, sourceRef, checksum, state, durationMs, probe, providerRef, protectionLevel, deletedAt                                               | n Rendition, n CaptionTrack | ACCT while referenced; renditions regenerable         |
+| ENT-STU-10 | MediaRendition        | assetId, profile, codec, bitrate, resolution, manifestRef, validatedAt                                                                                  | Asset                       | Regenerable                                           |
+| ENT-STU-11 | CaptionTrack          | assetId, language, kind (caption, transcript, description), autoGenerated, reviewed, vttRef, confidence                                                 | Asset                       | PUBLIC with asset                                     |
+| ENT-STU-12 | Resource              | id, lessonId, name, fileRef, scanState, downloadable                                                                                                    | Lesson                      | PUBLIC with version                                   |
+| ENT-STU-13 | QuizPlacement         | lessonId, assessmentRef (ASM), weight, policyOverrides, snapshotVersion                                                                                 | Lesson; ASM assessment      | PUBLIC                                                |
+| ENT-STU-14 | AssignmentConfig      | lessonId, brief, submissionTypes, dueRule, latePolicy, revisions, rubricRef, gradingMode, aiPolicyText                                                  | Lesson; ASM rubric          | PUBLIC                                                |
+| ENT-STU-15 | CourseMember          | courseId, accountId, role, sharePercent, displayPublic, invitationState                                                                                 | Course; Account             | ACCT; AUDIT                                           |
+| ENT-STU-16 | PriceSetting          | courseId, mode, tier, regionBands, scheduledChange, effectiveFrom                                                                                       | Course                      | TXN                                                   |
+| ENT-STU-17 | Coupon                | id, courseId, type, codeOrHash, limits, window, state, redemptionCount                                                                                  | Course                      | TXN                                                   |
+| ENT-STU-18 | EarningsStatement     | memberId, period, lines[], closedAt                                                                                                                     | BIL ledger                  | TXN                                                   |
+| ENT-STU-19 | PayoutRecord          | id, memberId, amount, currency, state, runKey, providerRef                                                                                              | Statement                   | TXN                                                   |
+| ENT-STU-20 | PublishReviewCase     | id, versionId, state, reviewerIds, checklistResults, decision, reasons, sla, appeal                                                                     | Version                     | LEGAL                                                 |
+| ENT-STU-21 | QualityCheckResult    | versionId, ruleVersion, findings[], runAt, dismissals[]                                                                                                 | Version                     | LOG90 (latest per version kept)                       |
+| ENT-STU-22 | ModerationAction      | id, targetType, targetId, severity, action, policyRef, reason, actorId, appealState                                                                     | Course or account           | LEGAL                                                 |
+| ENT-STU-23 | CopyrightCase         | id, claimant, workDescription, targetRefs, state, notices, counterNotice, decisions                                                                     | Course content              | LEGAL                                                 |
+| ENT-STU-24 | LocalizationTrack     | versionId, language, scope, state (draft, machine, reviewed, outdated), sourceHash                                                                      | Version                     | PUBLIC                                                |
+| ENT-STU-25 | LiveSessionPlan       | id, courseId, runId, schedule, capacity, recordingFlag, providerRoomRef, state                                                                          | Course                      | LOG90 after end; recording per policy                 |
+| ENT-STU-26 | AnnouncementPost      | id, courseId, audience, body, sentAt, stats                                                                                                             | Course                      | ACCT                                                  |
+| ENT-STU-27 | QualityScore          | scopeId, components[], computedAt, inputs                                                                                                               | Course or instructor        | AGG private                                           |
+| ENT-STU-28 | DraftRevision         | entityId, token, authorId, snapshotRef, at                                                                                                              | Lesson or course            | {90 days}, last 20                                    |
+| ENT-STU-29 | RightsAttestation     | id, versionId, ownerId, thirdPartyItems[], aiDisclosure, signedAt                                                                                       | Version                     | LEGAL                                                 |
+| ENT-STU-30 | ImportJob             | id, courseId, sourceHash, mapping, state, report                                                                                                        | Course                      | LOG90                                                 |
+| ENT-STU-31 | GradingTask           | id, submissionRef, graderId, leaseUntil, scores, state, releaseAt, disputes[]                                                                           | LRN submission              | ACCT of learner; AUDIT                                |
 
 ```mermaid
 erDiagram
@@ -2089,156 +2089,156 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event name | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-STU-001 | `studio.instructor.applied` | Application submitted | applicationId | ADM, NTF |
-| EVT-STU-002 | `studio.instructor.approved` | Application approved | accountId | NTF, LRN, ANL |
-| EVT-STU-003 | `studio.instructor.rejected` | Application rejected | accountId, reasonCodes | NTF |
-| EVT-STU-004 | `studio.instructor.verified` | Verification level reached | accountId, level, scope | EVD, LRN |
-| EVT-STU-005 | `studio.instructor.suspended` | Suspension | accountId, reason class | LRN, BIL, TSF |
-| EVT-STU-006 | `studio.course.created` | Course shell created | courseId, ownerType | ANL |
-| EVT-STU-007 | `studio.version.submitted` | Submit for review | versionId | ADM review queue |
-| EVT-STU-008 | `studio.version.approved` | Reviewer approves | versionId | NTF |
-| EVT-STU-009 | `studio.version.changes_requested` | Reviewer requests changes | versionId, items | NTF |
-| EVT-STU-010 | `studio.course.published` | Version goes live | courseId, versionId, snapshotRef | LRN, SRC, ANL |
-| EVT-STU-011 | `studio.course.patched` | Patch published | courseId, versionId, patchId | LRN |
-| EVT-STU-012 | `studio.course.unpublished` | Owner unpublishes | courseId | LRN, SRC |
-| EVT-STU-013 | `studio.course.archived` | Owner archives | courseId | LRN, SRC |
-| EVT-STU-014 | `studio.course.taken_down` | Moderation or legal takedown | courseId, scope, reasonClass | LRN, SRC, BIL |
-| EVT-STU-015 | `studio.media.uploaded` | Upload complete | assetId | pipeline |
-| EVT-STU-016 | `studio.media.ready` | Asset ready | assetId, durationMs | lessons, NTF |
-| EVT-STU-017 | `studio.media.failed` | Processing failed | assetId, reasonClass | NTF, ADM |
-| EVT-STU-018 | `studio.captions.published` | Track reviewed or uploaded | assetId, language | LRN |
-| EVT-STU-019 | `studio.coupon.created` | Coupon created | couponId | BIL |
-| EVT-STU-020 | `studio.coupon.revoked` | Coupon revoked | couponId | BIL |
-| EVT-STU-021 | `studio.price.changed` | Price set or scheduled | courseId, effectiveFrom | BIL, LRN |
-| EVT-STU-022 | `studio.team.changed` | Members, roles, splits | courseId | BIL, LRN |
-| EVT-STU-023 | `studio.signoff.granted` | Instructor sign-off | enrollmentId, signerId | LRN |
-| EVT-STU-024 | `studio.announcement.posted` | Announcement sent | courseId, announcementId | LRN, NTF |
-| EVT-STU-025 | `studio.grading.released` | Grades released | submissionRef | LRN, NTF |
-| EVT-STU-026 | `studio.moderation.action_taken` | Moderator action | targetRef, action | TSF, LRN |
-| EVT-STU-027 | `studio.copyright.content_disabled` | Notice accepted | targetRefs | LRN |
-| EVT-STU-028 | `studio.copyright.content_restored` | Counter-notice window ends | targetRefs | LRN |
-| EVT-STU-029 | `studio.live.scheduled` | Session scheduled | sessionId | LRN, NTF |
-| EVT-STU-030 | `studio.live.cancelled` | Session cancelled | sessionId | LRN, NTF |
-| EVT-STU-031 | `studio.quality.checked` | Checks run on submit | versionId, blockingCount | ANL |
+| ID          | Event name                          | Trigger                      | Key payload                      | Consumers        |
+| ----------- | ----------------------------------- | ---------------------------- | -------------------------------- | ---------------- |
+| EVT-STU-001 | `studio.instructor.applied`         | Application submitted        | applicationId                    | ADM, NTF         |
+| EVT-STU-002 | `studio.instructor.approved`        | Application approved         | accountId                        | NTF, LRN, ANL    |
+| EVT-STU-003 | `studio.instructor.rejected`        | Application rejected         | accountId, reasonCodes           | NTF              |
+| EVT-STU-004 | `studio.instructor.verified`        | Verification level reached   | accountId, level, scope          | EVD, LRN         |
+| EVT-STU-005 | `studio.instructor.suspended`       | Suspension                   | accountId, reason class          | LRN, BIL, TSF    |
+| EVT-STU-006 | `studio.course.created`             | Course shell created         | courseId, ownerType              | ANL              |
+| EVT-STU-007 | `studio.version.submitted`          | Submit for review            | versionId                        | ADM review queue |
+| EVT-STU-008 | `studio.version.approved`           | Reviewer approves            | versionId                        | NTF              |
+| EVT-STU-009 | `studio.version.changes_requested`  | Reviewer requests changes    | versionId, items                 | NTF              |
+| EVT-STU-010 | `studio.course.published`           | Version goes live            | courseId, versionId, snapshotRef | LRN, SRC, ANL    |
+| EVT-STU-011 | `studio.course.patched`             | Patch published              | courseId, versionId, patchId     | LRN              |
+| EVT-STU-012 | `studio.course.unpublished`         | Owner unpublishes            | courseId                         | LRN, SRC         |
+| EVT-STU-013 | `studio.course.archived`            | Owner archives               | courseId                         | LRN, SRC         |
+| EVT-STU-014 | `studio.course.taken_down`          | Moderation or legal takedown | courseId, scope, reasonClass     | LRN, SRC, BIL    |
+| EVT-STU-015 | `studio.media.uploaded`             | Upload complete              | assetId                          | pipeline         |
+| EVT-STU-016 | `studio.media.ready`                | Asset ready                  | assetId, durationMs              | lessons, NTF     |
+| EVT-STU-017 | `studio.media.failed`               | Processing failed            | assetId, reasonClass             | NTF, ADM         |
+| EVT-STU-018 | `studio.captions.published`         | Track reviewed or uploaded   | assetId, language                | LRN              |
+| EVT-STU-019 | `studio.coupon.created`             | Coupon created               | couponId                         | BIL              |
+| EVT-STU-020 | `studio.coupon.revoked`             | Coupon revoked               | couponId                         | BIL              |
+| EVT-STU-021 | `studio.price.changed`              | Price set or scheduled       | courseId, effectiveFrom          | BIL, LRN         |
+| EVT-STU-022 | `studio.team.changed`               | Members, roles, splits       | courseId                         | BIL, LRN         |
+| EVT-STU-023 | `studio.signoff.granted`            | Instructor sign-off          | enrollmentId, signerId           | LRN              |
+| EVT-STU-024 | `studio.announcement.posted`        | Announcement sent            | courseId, announcementId         | LRN, NTF         |
+| EVT-STU-025 | `studio.grading.released`           | Grades released              | submissionRef                    | LRN, NTF         |
+| EVT-STU-026 | `studio.moderation.action_taken`    | Moderator action             | targetRef, action                | TSF, LRN         |
+| EVT-STU-027 | `studio.copyright.content_disabled` | Notice accepted              | targetRefs                       | LRN              |
+| EVT-STU-028 | `studio.copyright.content_restored` | Counter-notice window ends   | targetRefs                       | LRN              |
+| EVT-STU-029 | `studio.live.scheduled`             | Session scheduled            | sessionId                        | LRN, NTF         |
+| EVT-STU-030 | `studio.live.cancelled`             | Session cancelled            | sessionId                        | LRN, NTF         |
+| EVT-STU-031 | `studio.quality.checked`            | Checks run on submit         | versionId, blockingCount         | ANL              |
 
 ### 9.2 Consumed
 
-| Event (producer) | Used by | Effect |
-|---|---|---|
-| `learning.enrollment.*`, `learning.course.completed`, `learning.lesson.completed` (LRN) | FR-STU-046, 048 | Roster, analytics, sign-off queue |
-| `learning.review.published`, `learning.qa.question_posted`, `learning.submission.submitted`, `learning.report.filed` (LRN) | FR-STU-031, 043, 045 | Inboxes and queues |
-| `assessment.attempt.graded`, `assessment.item.stats_updated` (ASM) | FR-STU-029, 048 | Quiz analytics and completion links |
-| `billing.purchase.fulfilled`, `billing.refund.completed`, `billing.payout.status_changed` (BIL, planned) | FR-STU-035 to 037 | Earnings, refunds, payouts |
-| `verification.result` (BGV, planned) | FR-STU-002 | Verification levels |
-| `trust.case.decided` (TSF, planned) | FR-STU-049 | Apply decisions |
-| `identity.account.erased` (IDN, planned) | all | Erasure rules |
+| Event (producer)                                                                                                           | Used by              | Effect                              |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------- | ----------------------------------- |
+| `learning.enrollment.*`, `learning.course.completed`, `learning.lesson.completed` (LRN)                                    | FR-STU-046, 048      | Roster, analytics, sign-off queue   |
+| `learning.review.published`, `learning.qa.question_posted`, `learning.submission.submitted`, `learning.report.filed` (LRN) | FR-STU-031, 043, 045 | Inboxes and queues                  |
+| `assessment.attempt.graded`, `assessment.item.stats_updated` (ASM)                                                         | FR-STU-029, 048      | Quiz analytics and completion links |
+| `billing.purchase.fulfilled`, `billing.refund.completed`, `billing.payout.status_changed` (BIL, planned)                   | FR-STU-035 to 037    | Earnings, refunds, payouts          |
+| `verification.result` (BGV, planned)                                                                                       | FR-STU-002           | Verification levels                 |
+| `trust.case.decided` (TSF, planned)                                                                                        | FR-STU-049           | Apply decisions                     |
+| `identity.account.erased` (IDN, planned)                                                                                   | all                  | Erasure rules                       |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Direction | Purpose | Failure behavior |
-|---|---|---|---|
-| Object storage and CDN (PLT, planned) | Outbound | Uploads, renditions, delivery | Resumable uploads; failover CDN |
-| Transcoding and packaging provider (`MediaProvider` interface; candidates in SSOT OD-03 and OD-14) | Outbound | HLS ladders, thumbnails, DRM packaging | Failover provider; `failed` with reason |
-| ASR and machine translation providers | Outbound | Captions, translations | Manual path; "pending" state |
-| DRM license servers (provider-specific) | Outbound | Premium protection | Block playback with message; ops alert |
-| Virus scanning service (PLT, planned) | Outbound | All uploads | Hold unserved until scanned |
-| Identity verification provider via BGV (planned) | Outbound | Instructor identity | Queue with honest status |
-| Payments, tax and payouts via BIL (planned) | Via BIL | Pricing, coupons, statements, payouts | Features disabled with banner |
-| Live room provider (LRN OD-LRN-06) | Outbound | Live sessions | Reschedule flow |
-| Video providers for external lessons | Outbound metadata | Validation and capabilities | Publish blocked until validated |
-| Email and notification service (NTF, planned) | Outbound | Templates | Retry |
+| Dependency                                                                                         | Direction         | Purpose                                | Failure behavior                        |
+| -------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------------- | --------------------------------------- |
+| Object storage and CDN (PLT, planned)                                                              | Outbound          | Uploads, renditions, delivery          | Resumable uploads; failover CDN         |
+| Transcoding and packaging provider (`MediaProvider` interface; candidates in SSOT OD-03 and OD-14) | Outbound          | HLS ladders, thumbnails, DRM packaging | Failover provider; `failed` with reason |
+| ASR and machine translation providers                                                              | Outbound          | Captions, translations                 | Manual path; "pending" state            |
+| DRM license servers (provider-specific)                                                            | Outbound          | Premium protection                     | Block playback with message; ops alert  |
+| Virus scanning service (PLT, planned)                                                              | Outbound          | All uploads                            | Hold unserved until scanned             |
+| Identity verification provider via BGV (planned)                                                   | Outbound          | Instructor identity                    | Queue with honest status                |
+| Payments, tax and payouts via BIL (planned)                                                        | Via BIL           | Pricing, coupons, statements, payouts  | Features disabled with banner           |
+| Live room provider (LRN OD-LRN-06)                                                                 | Outbound          | Live sessions                          | Reschedule flow                         |
+| Video providers for external lessons                                                               | Outbound metadata | Validation and capabilities            | Publish blocked until validated         |
+| Email and notification service (NTF, planned)                                                      | Outbound          | Templates                              | Retry                                   |
 
 ## 11. Cross-module dependencies
 
-| Depends on | What STU needs |
-|---|---|
-| LRN | Enrollments, progress, reviews, Q&A, submissions, certificates, player in preview mode |
-| ASM | Assessment builder, question bank, rubric engine, sandbox, item analytics |
-| BIL (planned) | Price tiers, quotes, coupons validation, statements, payouts, refunds |
-| BGV (planned) | Identity and sanctions checks |
-| EVD (planned) | Evidence rung policy, expertise evidence |
-| IDN (planned) | Accounts, re-authentication |
-| TSF (planned) | Moderation and copyright case workflow |
-| ADM (planned) | Staff console shell, queues, audit |
-| INS (planned) | Institution-owned course workspaces |
-| NTF (planned) | Templates and channels |
-| PLT (planned) | Storage, queue, scanning, ASR, scheduler |
-| ANL (planned) | Aggregations and dashboards |
+| Depends on    | What STU needs                                                                         |
+| ------------- | -------------------------------------------------------------------------------------- |
+| LRN           | Enrollments, progress, reviews, Q&A, submissions, certificates, player in preview mode |
+| ASM           | Assessment builder, question bank, rubric engine, sandbox, item analytics              |
+| BIL (planned) | Price tiers, quotes, coupons validation, statements, payouts, refunds                  |
+| BGV (planned) | Identity and sanctions checks                                                          |
+| EVD (planned) | Evidence rung policy, expertise evidence                                               |
+| IDN (planned) | Accounts, re-authentication                                                            |
+| TSF (planned) | Moderation and copyright case workflow                                                 |
+| ADM (planned) | Staff console shell, queues, audit                                                     |
+| INS (planned) | Institution-owned course workspaces                                                    |
+| NTF (planned) | Templates and channels                                                                 |
+| PLT (planned) | Storage, queue, scanning, ASR, scheduler                                               |
+| ANL (planned) | Aggregations and dashboards                                                            |
 
-| Depended on by | What they use |
-|---|---|
-| LRN | Immutable published versions, manifests, rules, announcements, grades, sign-off |
-| SRC (planned) | Catalog documents on publish events |
-| ASM | Course context for in-course assessments |
-| INS (planned) | Institution course authoring and licensing |
-| EVD (planned) | Course evidence declarations and sign-off events |
-| BIL (planned) | Price, coupon, member split and publish events |
-| ADM (planned) | Review, moderation and copyright queues |
+| Depended on by | What they use                                                                   |
+| -------------- | ------------------------------------------------------------------------------- |
+| LRN            | Immutable published versions, manifests, rules, announcements, grades, sign-off |
+| SRC (planned)  | Catalog documents on publish events                                             |
+| ASM            | Course context for in-course assessments                                        |
+| INS (planned)  | Institution course authoring and licensing                                      |
+| EVD (planned)  | Course evidence declarations and sign-off events                                |
+| BIL (planned)  | Price, coupon, member split and publish events                                  |
+| ADM (planned)  | Review, moderation and copyright queues                                         |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Application decision time | Median hours from application submit to decision | Instructor operations owner |
-| Instructor activation rate | Approved instructors who publish at least one course within a defined period divided by approved instructors | Learning product owner |
-| First-pass review rate | Submissions approved without a changes-requested round divided by submissions | Content quality owner |
-| Review SLA attainment | Cases decided within SLA divided by cases | Content quality owner |
-| Time to publish | Median days from course creation to first publish | Learning product owner |
-| Media time-to-ready p95 | 95th percentile minutes from upload complete to `ready` | Engineering lead |
-| Media failure rate | Assets ending `failed` divided by assets processed (platform-caused versus user-fixable split) | Engineering lead |
-| Caption coverage | Published video lessons with reviewed captions divided by published video lessons | Accessibility owner |
-| Post-publish defect rate | Learner content problem reports per 1,000 enrollments (LRN FR-LRN-075) | Content quality owner |
-| Q&A first-answer time | Median hours from question to first staff answer | Learning product owner |
-| Takedown and strike rate | Takedowns and strikes per 100 published courses | Trust and safety owner |
-| Copyright SLA attainment | Valid notices acted on within the stated time divided by valid notices | Legal operations owner |
-| Payout accuracy | Payouts matching ledger divided by payouts (target 100 percent) | Finance owner |
-| Earnings dispute rate | Disputed statements divided by statements | Finance owner |
+| Metric                     | Definition and formula                                                                                       | Owner role                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------- |
+| Application decision time  | Median hours from application submit to decision                                                             | Instructor operations owner |
+| Instructor activation rate | Approved instructors who publish at least one course within a defined period divided by approved instructors | Learning product owner      |
+| First-pass review rate     | Submissions approved without a changes-requested round divided by submissions                                | Content quality owner       |
+| Review SLA attainment      | Cases decided within SLA divided by cases                                                                    | Content quality owner       |
+| Time to publish            | Median days from course creation to first publish                                                            | Learning product owner      |
+| Media time-to-ready p95    | 95th percentile minutes from upload complete to `ready`                                                      | Engineering lead            |
+| Media failure rate         | Assets ending `failed` divided by assets processed (platform-caused versus user-fixable split)               | Engineering lead            |
+| Caption coverage           | Published video lessons with reviewed captions divided by published video lessons                            | Accessibility owner         |
+| Post-publish defect rate   | Learner content problem reports per 1,000 enrollments (LRN FR-LRN-075)                                       | Content quality owner       |
+| Q&A first-answer time      | Median hours from question to first staff answer                                                             | Learning product owner      |
+| Takedown and strike rate   | Takedowns and strikes per 100 published courses                                                              | Trust and safety owner      |
+| Copyright SLA attainment   | Valid notices acted on within the stated time divided by valid notices                                       | Legal operations owner      |
+| Payout accuracy            | Payouts matching ledger divided by payouts (target 100 percent)                                              | Finance owner               |
+| Earnings dispute rate      | Disputed statements divided by statements                                                                    | Finance owner               |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocks |
-|---|---|---|---|---|---|
-| OD-STU-01 | Is a third-party instructor marketplace with payouts in scope, and under what revenue share, seller of record, tax and payout rules? | First-party only; marketplace; both | First-party only first; marketplace behind a separate decision (SSOT V61-21); default share 70/30 as a starting proposal (OD-28) | Founder, Finance, Legal | FR-STU-005, 033, 035, 036 |
-| OD-STU-02 | Review model: all submissions human-reviewed, sampled for trusted instructors, or automated-only for low-risk topics | Full; risk-based sampling; automated | Full review for first course and structural versions; risk-based sampling afterwards; SLA 72 hours (SSOT OD-42) | Operations, Product | FR-STU-038, 039 |
-| OD-STU-03 | Content license and IP terms, including what happens to learner access if an instructor terminates | Perpetual for enrolled learners; limited; per-agreement | Learners keep access for their access period; platform license continues for that period | Legal | BR-STU-047 |
-| OD-STU-04 | Copyright process jurisdiction, windows and agent registration | US DMCA style; EU notice-and-action; both | Both, selected by claimant region, with windows set by Legal | Legal | FR-STU-050 |
-| OD-STU-05 | ASR and machine translation providers and the sensitive-content opt-out | Managed provider; self-hosted model; manual only | Managed provider behind an interface with opt-out for sensitive courses | Engineering, Legal | FR-STU-023, 051 |
-| OD-STU-06 | Verification levels required to publish free and paid courses | Email only; identity for paid; identity for all | Identity required for paid courses and payouts; email for free | Product, Trust | FR-STU-002, BR-STU-037 |
-| OD-STU-07 | Open instructor onboarding or curated invitation | Open application; invite only; mixed | Open application with review, institution invitations as a fast lane | Founder | FR-STU-001 |
-| OD-STU-08 | Strike thresholds and suspension rules | 3 in 12 months; 2; severity-weighted | 3 in 12 months with severity weighting | Trust and safety | FR-STU-049 |
-| OD-STU-09 | Policy on AI-generated or synthetic course content | Prohibit; allow with disclosure; allow with labeling to learners | Allow with mandatory disclosure and learner-visible label for synthetic voices or video | Product, Legal | FR-STU-038, 052 |
-| OD-STU-10 | Price tiers, minimum price and regional bands | Fixed tiers; free-form price | Fixed tiers owned by BIL | Finance, Product | FR-STU-033 |
-| OD-STU-11 | Free-coupon allowance | 0, 20 per month, unlimited | 20 redemptions per month | Product | FR-STU-034 |
-| OD-STU-12 | Media size limits and storage quotas per instructor | Fixed; tiered by status | 10 GB per video, quota by verification level | Product, Engineering | FR-STU-021, 025 |
-| OD-STU-13 | DRM level availability and provider | Signed URLs only; encrypted HLS; multi-DRM | Signed URLs and encrypted HLS first; DRM for premium courses when cost justified (SSOT OD-03, OD-14) | Founder, Engineering | FR-STU-024 |
+| ID        | Question                                                                                                                             | Options                                                          | Default proposal                                                                                                                 | Who decides             | Blocks                    |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------- |
+| OD-STU-01 | Is a third-party instructor marketplace with payouts in scope, and under what revenue share, seller of record, tax and payout rules? | First-party only; marketplace; both                              | First-party only first; marketplace behind a separate decision (SSOT V61-21); default share 70/30 as a starting proposal (OD-28) | Founder, Finance, Legal | FR-STU-005, 033, 035, 036 |
+| OD-STU-02 | Review model: all submissions human-reviewed, sampled for trusted instructors, or automated-only for low-risk topics                 | Full; risk-based sampling; automated                             | Full review for first course and structural versions; risk-based sampling afterwards; SLA 72 hours (SSOT OD-42)                  | Operations, Product     | FR-STU-038, 039           |
+| OD-STU-03 | Content license and IP terms, including what happens to learner access if an instructor terminates                                   | Perpetual for enrolled learners; limited; per-agreement          | Learners keep access for their access period; platform license continues for that period                                         | Legal                   | BR-STU-047                |
+| OD-STU-04 | Copyright process jurisdiction, windows and agent registration                                                                       | US DMCA style; EU notice-and-action; both                        | Both, selected by claimant region, with windows set by Legal                                                                     | Legal                   | FR-STU-050                |
+| OD-STU-05 | ASR and machine translation providers and the sensitive-content opt-out                                                              | Managed provider; self-hosted model; manual only                 | Managed provider behind an interface with opt-out for sensitive courses                                                          | Engineering, Legal      | FR-STU-023, 051           |
+| OD-STU-06 | Verification levels required to publish free and paid courses                                                                        | Email only; identity for paid; identity for all                  | Identity required for paid courses and payouts; email for free                                                                   | Product, Trust          | FR-STU-002, BR-STU-037    |
+| OD-STU-07 | Open instructor onboarding or curated invitation                                                                                     | Open application; invite only; mixed                             | Open application with review, institution invitations as a fast lane                                                             | Founder                 | FR-STU-001                |
+| OD-STU-08 | Strike thresholds and suspension rules                                                                                               | 3 in 12 months; 2; severity-weighted                             | 3 in 12 months with severity weighting                                                                                           | Trust and safety        | FR-STU-049                |
+| OD-STU-09 | Policy on AI-generated or synthetic course content                                                                                   | Prohibit; allow with disclosure; allow with labeling to learners | Allow with mandatory disclosure and learner-visible label for synthetic voices or video                                          | Product, Legal          | FR-STU-038, 052           |
+| OD-STU-10 | Price tiers, minimum price and regional bands                                                                                        | Fixed tiers; free-form price                                     | Fixed tiers owned by BIL                                                                                                         | Finance, Product        | FR-STU-033                |
+| OD-STU-11 | Free-coupon allowance                                                                                                                | 0, 20 per month, unlimited                                       | 20 redemptions per month                                                                                                         | Product                 | FR-STU-034                |
+| OD-STU-12 | Media size limits and storage quotas per instructor                                                                                  | Fixed; tiered by status                                          | 10 GB per video, quota by verification level                                                                                     | Product, Engineering    | FR-STU-021, 025           |
+| OD-STU-13 | DRM level availability and provider                                                                                                  | Signed URLs only; encrypted HLS; multi-DRM                       | Signed URLs and encrypted HLS first; DRM for premium courses when cost justified (SSOT OD-03, OD-14)                             | Founder, Engineering    | FR-STU-024                |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-STU-01 | Media pipeline cost and latency grow faster than revenue | Medium, high | Provider interface, ladder tuning, quotas, lazy re-processing, cost dashboards |
-| RSK-STU-02 | Low-quality or inaccurate courses reach learners | High, high | Review, quality checks, post-publish reports, quality components, takedown path |
-| RSK-STU-03 | Copyright infringement and unlicensed third-party material | High, high | Attestation, license matrix, notice process, repeat infringer policy |
-| RSK-STU-04 | Instructor fraud (fake credentials, self-sign-off, review manipulation) | Medium, high | Verification levels, independence checks (BR-STU-015), anomaly flags |
-| RSK-STU-05 | Payout errors or compliance gaps (tax, KYC) | Medium, high | Decision gating, BIL ledger source of truth, reconciliation, holds |
-| RSK-STU-06 | Review backlog slows publishing and discourages instructors | Medium, medium | SLA escalation, risk-based sampling, reviewer capacity metrics |
-| RSK-STU-07 | Version and `lessonKey` mistakes corrupt learner progress mapping | Low, high | Permanent keys, structural check, patch eligibility rules, tests |
-| RSK-STU-08 | Accessibility shortfalls (low-quality ASR captions published unreviewed) | Medium, high | Review confirmation, labeling, accessibility metrics, audits |
-| RSK-STU-09 | Instructor privacy overreach into learner data | Medium, medium | Scope limits, suppression thresholds, audits (BR-STU-029) |
-| RSK-STU-10 | Scope creep into a generic marketplace or CMS | Medium, medium | Tier gating, OD-STU-01, boundaries with BIL and PLT |
-| RSK-STU-11 | Provider lock-in for transcoding, ASR or DRM | Medium, medium | Provider-agnostic interfaces and conformance tests |
+| ID         | Risk                                                                     | Likelihood and impact | Mitigation                                                                      |
+| ---------- | ------------------------------------------------------------------------ | --------------------- | ------------------------------------------------------------------------------- |
+| RSK-STU-01 | Media pipeline cost and latency grow faster than revenue                 | Medium, high          | Provider interface, ladder tuning, quotas, lazy re-processing, cost dashboards  |
+| RSK-STU-02 | Low-quality or inaccurate courses reach learners                         | High, high            | Review, quality checks, post-publish reports, quality components, takedown path |
+| RSK-STU-03 | Copyright infringement and unlicensed third-party material               | High, high            | Attestation, license matrix, notice process, repeat infringer policy            |
+| RSK-STU-04 | Instructor fraud (fake credentials, self-sign-off, review manipulation)  | Medium, high          | Verification levels, independence checks (BR-STU-015), anomaly flags            |
+| RSK-STU-05 | Payout errors or compliance gaps (tax, KYC)                              | Medium, high          | Decision gating, BIL ledger source of truth, reconciliation, holds              |
+| RSK-STU-06 | Review backlog slows publishing and discourages instructors              | Medium, medium        | SLA escalation, risk-based sampling, reviewer capacity metrics                  |
+| RSK-STU-07 | Version and `lessonKey` mistakes corrupt learner progress mapping        | Low, high             | Permanent keys, structural check, patch eligibility rules, tests                |
+| RSK-STU-08 | Accessibility shortfalls (low-quality ASR captions published unreviewed) | Medium, high          | Review confirmation, labeling, accessibility metrics, audits                    |
+| RSK-STU-09 | Instructor privacy overreach into learner data                           | Medium, medium        | Scope limits, suppression thresholds, audits (BR-STU-029)                       |
+| RSK-STU-10 | Scope creep into a generic marketplace or CMS                            | Medium, medium        | Tier gating, OD-STU-01, boundaries with BIL and PLT                             |
+| RSK-STU-11 | Provider lock-in for transcoding, ASR or DRM                             | Medium, medium        | Provider-agnostic interfaces and conformance tests                              |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed and why |
-|---|---|---|
-| `SSOT.md` §7 F-66 (Course Creation Studio), F-73 (Course Commerce), F-74 (Instructor Platform), F-148 (Instructor Reputation) | Studio scope, commerce, quality | Detailed specs were absent in the SSOT, so behavior is derived from the rules below and standard practice |
-| `SSOT.md` §10.22 (BR-091..BR-115), §10.21 (BR-083..BR-090), §10.34 (BR-189..BR-193), §13.12 to §13.16 | Submission minimums, preview limit, image rules, versioning, external media rules, coupons, refunds, announcement limit, analytics privacy, media pipeline | Revenue share 70/30 kept as a proposal pending OD-STU-01 |
-| `SSOT.md` WF-24 (Course Publish Review), OD-42 (72 h), OD-28, OD-29, OD-03, OD-14 | Review workflow, SLA, defaults | All marked decisions pending |
-| `SSOT.md` Appendix E V61-21 | First-party-first commerce gating | Marketplace deferred to OD-STU-01 |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-06 §3.1, §3.4 | Completion rule, sign-off, evidence rung relation | Instructor sign-off class kept separate from platform-verified |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` FEAT-08-03.3, AC-05-04-51 to 54 | Captions gate, independence checks | None |
-| `docs/registries/FEATURE_REGISTRY.md` F-42, F-44, F-51, F-66 to F-74 | Cross-check | Registry status not treated as built |
-| Own knowledge of Udemy, Coursera, Teachable, Mux, YouTube Studio, Thinkific, Descript, DMCA practice | Curriculum builder behavior, media pipeline, coupons, copyright process, analytics | Tagged `[PROP]` where used |
+| Legacy source                                                                                                                 | Used for                                                                                                                                                   | Dropped or changed and why                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` §7 F-66 (Course Creation Studio), F-73 (Course Commerce), F-74 (Instructor Platform), F-148 (Instructor Reputation) | Studio scope, commerce, quality                                                                                                                            | Detailed specs were absent in the SSOT, so behavior is derived from the rules below and standard practice |
+| `SSOT.md` §10.22 (BR-091..BR-115), §10.21 (BR-083..BR-090), §10.34 (BR-189..BR-193), §13.12 to §13.16                         | Submission minimums, preview limit, image rules, versioning, external media rules, coupons, refunds, announcement limit, analytics privacy, media pipeline | Revenue share 70/30 kept as a proposal pending OD-STU-01                                                  |
+| `SSOT.md` WF-24 (Course Publish Review), OD-42 (72 h), OD-28, OD-29, OD-03, OD-14                                             | Review workflow, SLA, defaults                                                                                                                             | All marked decisions pending                                                                              |
+| `SSOT.md` Appendix E V61-21                                                                                                   | First-party-first commerce gating                                                                                                                          | Marketplace deferred to OD-STU-01                                                                         |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-06 §3.1, §3.4                 | Completion rule, sign-off, evidence rung relation                                                                                                          | Instructor sign-off class kept separate from platform-verified                                            |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` FEAT-08-03.3, AC-05-04-51 to 54                | Captions gate, independence checks                                                                                                                         | None                                                                                                      |
+| `docs/registries/FEATURE_REGISTRY.md` F-42, F-44, F-51, F-66 to F-74                                                          | Cross-check                                                                                                                                                | Registry status not treated as built                                                                      |
+| Own knowledge of Udemy, Coursera, Teachable, Mux, YouTube Studio, Thinkific, Descript, DMCA practice                          | Curriculum builder behavior, media pipeline, coupons, copyright process, analytics                                                                         | Tagged `[PROP]` where used                                                                                |

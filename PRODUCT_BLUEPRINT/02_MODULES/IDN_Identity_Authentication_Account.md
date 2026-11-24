@@ -12,18 +12,19 @@ IDN answers three questions for every request the platform ever serves: who is t
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A new person reaches a verified, usable account in one sitting | Registration-to-verified conversion measured by `IDN-M01`; time to verified by `IDN-M02` |
+| Outcome                                                            | How the system knows                                                                                                                      |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| A new person reaches a verified, usable account in one sitting     | Registration-to-verified conversion measured by `IDN-M01`; time to verified by `IDN-M02`                                                  |
 | Credentials and sessions cannot be stolen by script in the browser | No access or refresh token is ever readable by page script, URL, body or log (BR-IDN-008); security test suite in the acceptance criteria |
-| A stolen or lost credential is contained fast | Refresh reuse revokes the whole session family (BR-IDN-009); revocation effective on every request ≤ 60 s p95 (BR-IDN-035) |
-| Account recovery never becomes an attack path | Recovery has a mandatory hold and multi-channel notice (BR-IDN-019); support cannot bypass it |
-| Privileged access is rare, time-boxed and audited | Privileged roles have mandatory MFA and short sessions (BR-IDN-011); impersonation is grant-bound (BR-IDN-028) |
-| People can always leave | Deactivation and deletion are always reachable, with honest consequences (FR-IDN-026, FR-IDN-027) |
+| A stolen or lost credential is contained fast                      | Refresh reuse revokes the whole session family (BR-IDN-009); revocation effective on every request ≤ 60 s p95 (BR-IDN-035)                |
+| Account recovery never becomes an attack path                      | Recovery has a mandatory hold and multi-channel notice (BR-IDN-019); support cannot bypass it                                             |
+| Privileged access is rare, time-boxed and audited                  | Privileged roles have mandatory MFA and short sessions (BR-IDN-011); impersonation is grant-bound (BR-IDN-028)                            |
+| People can always leave                                            | Deactivation and deletion are always reachable, with honest consequences (FR-IDN-026, FR-IDN-027)                                         |
 
 ### 1.3 Scope
 
 **In scope**
+
 - Registration with email and password, social sign-in, enterprise SSO, passkeys, email-code and magic-link sign-in.
 - Email and phone verification; email change; password change and reset; account recovery.
 - Session and token model, refresh rotation, device and session listing, new-device alerts.
@@ -34,6 +35,7 @@ IDN answers three questions for every request the platform ever serves: who is t
 - The authentication step of service principals (token validation contract only).
 
 **Out of scope (owned elsewhere)**
+
 - Profile content, résumé, portfolio: `PRF` (planned).
 - Consent scopes, data export, erasure execution, DSAR queue, retention: `SET` (this blueprint). IDN owns only the account-state side of erasure.
 - Notification delivery and templates for security emails: `NTF`. IDN raises the events; NTF delivers.
@@ -45,13 +47,13 @@ IDN answers three questions for every request the platform ever serves: who is t
 
 ### 1.4 Owned versus consumed
 
-| Owned by IDN | Consumed by IDN |
-|---|---|
+| Owned by IDN                                                                                                                                                                                          | Consumed by IDN                                                                                                                                                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Account, credential, session family, token, MFA factor, recovery code, one-time code, invitation, role grant, role context, impersonation grant, login attempt, device record, policy-acceptance link | Email, SMS and push delivery (`NTF`); consent ledger and policy text versions (`SET`); organization and institution records (`EMP`, `INS` planned); moderation and legal-hold decisions (`TSF`, `SET`); breach-password list and bot-risk services (external) |
 
 ### 1.5 Design stance
 
-1. Mechanism-agnostic. The legacy SSOT assumes a managed auth vendor issuing a script-visible JWT; the target proposes first-party same-origin cookie sessions. This blueprint specifies behavior and invariants, not the vendor, and records the conflict as OD-IDN-01. [SRC: SSOT §12.8, V61-13] 
+1. Mechanism-agnostic. The legacy SSOT assumes a managed auth vendor issuing a script-visible JWT; the target proposes first-party same-origin cookie sessions. This blueprint specifies behavior and invariants, not the vendor, and records the conflict as OD-IDN-01. [SRC: SSOT §12.8, V61-13]
 2. Deny by default. A principal without an explicit grant has no access. [SRC: SSOT §5.4]
 3. No account enumeration anywhere. [SRC: Yash SPEC-01 §3.2]
 4. Online-only authentication. Offline mode never authenticates; it only reads cached data of an already authenticated session (see `PWA` planned). [SRC: Yash SPEC-01 §4]
@@ -62,39 +64,39 @@ Canonical role codes are defined in CONVENTIONS §5. IDN also distinguishes the 
 
 Legend: `S` self only · `O` own organization scope · `G` grant-bound (time-boxed, ticketed) · `Y` yes · `—` no.
 
-| Capability | GUE | CAN/STD | INS/MNT/FRL | REC/HMG | EAD | IAD/PLO/EXA | MOD | SUP | FIN | PAD | SAD | API |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Register, verify, sign in | Y | — | — | — | — | — | — | — | — | — | — | — |
-| Manage own credentials (password, passkey, TOTP, email, phone) | — | S | S | S | S | S | S | S | S | S | S | — |
-| View and revoke own sessions | — | S | S | S | S | S | S | S | S | S | S | — |
-| Add a self-service role (INS, MNT, FRL) | — | S (application) | S | — | — | — | — | — | — | — | — | — |
-| Accept organization invitation | — | S | S | S | S | S | S | S | S | S | S | — |
-| Send organization invitation | — | — | — | — | O | O | — | — | — | — | — | — |
-| Grant or remove a membership role in own org | — | — | — | — | O | O | — | — | — | — | — | — |
-| Grant privileged platform roles (MOD, SUP, FIN, PAD) | — | — | — | — | — | — | — | — | — | — | Y (dual control) | — |
-| Revoke any user's sessions | — | — | — | — | O (members) | O (members) | — | G | — | Y (audited) | Y | — |
-| Suspend / restore account | — | — | — | — | — | — | Y (via TSF case) | — | — | Y | Y | — |
-| Impersonate a user (view-as) | — | — | — | — | — | — | — | G | — | G | Y (break-glass) | — |
-| Configure SSO for an org | — | — | — | — | O | O | — | — | — | — | — | — |
-| Configure platform auth policy (lifetimes, throttles, providers) | — | — | — | — | — | — | — | — | — | Y (change-controlled) | Y | — |
-| Read auth audit log | — | S (own security log) | S | S | O | O | — | G | — | Y | Y | — |
-| Authenticate with machine credential | — | — | — | — | — | — | — | — | — | — | — | Y |
+| Capability                                                       | GUE | CAN/STD              | INS/MNT/FRL | REC/HMG | EAD         | IAD/PLO/EXA | MOD              | SUP | FIN | PAD                   | SAD              | API |
+| ---------------------------------------------------------------- | --- | -------------------- | ----------- | ------- | ----------- | ----------- | ---------------- | --- | --- | --------------------- | ---------------- | --- |
+| Register, verify, sign in                                        | Y   | —                    | —           | —       | —           | —           | —                | —   | —   | —                     | —                | —   |
+| Manage own credentials (password, passkey, TOTP, email, phone)   | —   | S                    | S           | S       | S           | S           | S                | S   | S   | S                     | S                | —   |
+| View and revoke own sessions                                     | —   | S                    | S           | S       | S           | S           | S                | S   | S   | S                     | S                | —   |
+| Add a self-service role (INS, MNT, FRL)                          | —   | S (application)      | S           | —       | —           | —           | —                | —   | —   | —                     | —                | —   |
+| Accept organization invitation                                   | —   | S                    | S           | S       | S           | S           | S                | S   | S   | S                     | S                | —   |
+| Send organization invitation                                     | —   | —                    | —           | —       | O           | O           | —                | —   | —   | —                     | —                | —   |
+| Grant or remove a membership role in own org                     | —   | —                    | —           | —       | O           | O           | —                | —   | —   | —                     | —                | —   |
+| Grant privileged platform roles (MOD, SUP, FIN, PAD)             | —   | —                    | —           | —       | —           | —           | —                | —   | —   | —                     | Y (dual control) | —   |
+| Revoke any user's sessions                                       | —   | —                    | —           | —       | O (members) | O (members) | —                | G   | —   | Y (audited)           | Y                | —   |
+| Suspend / restore account                                        | —   | —                    | —           | —       | —           | —           | Y (via TSF case) | —   | —   | Y                     | Y                | —   |
+| Impersonate a user (view-as)                                     | —   | —                    | —           | —       | —           | —           | —                | G   | —   | G                     | Y (break-glass)  | —   |
+| Configure SSO for an org                                         | —   | —                    | —           | —       | O           | O           | —                | —   | —   | —                     | —                | —   |
+| Configure platform auth policy (lifetimes, throttles, providers) | —   | —                    | —           | —       | —           | —           | —                | —   | —   | Y (change-controlled) | Y                | —   |
+| Read auth audit log                                              | —   | S (own security log) | S           | S       | O           | O           | —                | G   | —   | Y                     | Y                | —   |
+| Authenticate with machine credential                             | —   | —                    | —           | —       | —           | —           | —                | —   | —   | —                     | —                | Y   |
 
 Permission rules: no role can read another person's password hash, TOTP secret, recovery codes, passkey private material or refresh token (they do not exist in readable form to any role). `SUP` and `PAD` never see credential or session secrets; they act only through the operations specified in this module. [DER]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| IDN-A | Registration and verification | FR-IDN-001, 002, 003, 029, 032 |
-| IDN-B | Sign-in methods | FR-IDN-004, 005, 006, 007, 008 |
-| IDN-C | Session and token model | FR-IDN-009, 010, 011, 012 |
-| IDN-D | MFA and step-up | FR-IDN-013, 014, 015, 016 |
-| IDN-E | Credential change and recovery | FR-IDN-017, 018, 019, 020 |
-| IDN-F | Roles, onboarding, membership | FR-IDN-021, 022, 023, 025 |
-| IDN-G | Account linking | FR-IDN-024 |
-| IDN-H | Account lifecycle | FR-IDN-026, 027, 031 |
-| IDN-I | Support access and abuse defense | FR-IDN-028, 030 |
+| Code  | Sub-module                       | Features                       |
+| ----- | -------------------------------- | ------------------------------ |
+| IDN-A | Registration and verification    | FR-IDN-001, 002, 003, 029, 032 |
+| IDN-B | Sign-in methods                  | FR-IDN-004, 005, 006, 007, 008 |
+| IDN-C | Session and token model          | FR-IDN-009, 010, 011, 012      |
+| IDN-D | MFA and step-up                  | FR-IDN-013, 014, 015, 016      |
+| IDN-E | Credential change and recovery   | FR-IDN-017, 018, 019, 020      |
+| IDN-F | Roles, onboarding, membership    | FR-IDN-021, 022, 023, 025      |
+| IDN-G | Account linking                  | FR-IDN-024                     |
+| IDN-H | Account lifecycle                | FR-IDN-026, 027, 031           |
+| IDN-I | Support access and abuse defense | FR-IDN-028, 030                |
 
 ```mermaid
 flowchart LR
@@ -527,7 +529,7 @@ Parameter notation: values in `{braces}` are policy parameters with a `[PROP]` d
   1. See the second-step screen (SCR-IDN-007) with the available methods.
   2. Enter the 6-digit TOTP code, or use a passkey, or press "Use a recovery code" and enter one.
   3. Optionally tick "Trust this device for {30 days}" (not offered to privileged roles).
-- **System behavior:** The first factor creates a *pending* session context valid for 5 minutes; no cookies granting access are issued until the second factor passes. TOTP verification as in FR-IDN-013. A recovery code is single use, compared by hash; using one marks it consumed, notifies the holder and prompts to regenerate if ≤ 3 remain. Regenerating produces 10 new codes and invalidates all earlier ones (step-up required). Trusted-device cookie bypasses the TOTP prompt only for the same account on the same browser for `{trust.days}`; revoked by password change, MFA changes, or "sign out all".
+- **System behavior:** The first factor creates a _pending_ session context valid for 5 minutes; no cookies granting access are issued until the second factor passes. TOTP verification as in FR-IDN-013. A recovery code is single use, compared by hash; using one marks it consumed, notifies the holder and prompts to regenerate if ≤ 3 remain. Regenerating produces 10 new codes and invalidates all earlier ones (step-up required). Trusted-device cookie bypasses the TOTP prompt only for the same account on the same browser for `{trust.days}`; revoked by password change, MFA changes, or "sign out all".
 - **UI elements and controls:** Method tabs (Authenticator, Passkey, Recovery code), code input, "Verify", trust checkbox, "Having trouble?" link to FR-IDN-020. States: input, verifying, wrong code with attempts, locked (30 s), expired (returns to first step).
 - **Configuration options:** Platform: `{trust.days}` 30 (0 disables); `{recovery.count}` 10; `{mfa.pendingMinutes}` 5.
 - **Business rules:** BR-IDN-013, BR-IDN-006, BR-IDN-011.
@@ -1091,48 +1093,48 @@ Parameter notation: values in `{braces}` are policy parameters with a `[PROP]` d
 
 Rule text is authoritative here; features cite ids. Parameters in `{braces}` are `[PROP]` defaults unless a source is cited. Legacy `BR-001..248` are a separate namespace.
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-IDN-001 | Email is normalized (trim, NFKC, lower-cased domain; local part compared case-insensitively) and unique among non-erased accounts; concurrent registrations differing by case yield one account. | Prevents duplicate identities and enumeration by case. | Domain layer + unique index on normalized email | [SRC: Yash SPEC-01 §3.1] |
-| BR-IDN-002 | A password is 12–128 characters, any Unicode, not on a breached list, not equal to the email local part; no composition rules; hashed with a memory-hard function. If the breach service is unavailable, accept only ≥ 14 characters and schedule a re-check. | Length beats composition; fail safe. | Domain layer + breach port | [SRC: Yash BR-T051] |
-| BR-IDN-003 | Registration, sign-in, reset, magic-link and recovery responses (status, body, and latency within tolerance) never depend on whether an email has an account. | Blocks account enumeration. | API layer + dummy hash path | [SRC: Yash SPEC-01 §3.2] |
-| BR-IDN-004 | Verification and sign-in codes are 6 digits, TTL {15 min}, ≤ 5 attempts, single use, hashed at rest; a new code invalidates earlier ones. | Bounded guessing. | Domain layer | [SRC: Yash BR-T053, CONST-S08] |
-| BR-IDN-005 | A `pending_verification` account has no profile visibility, cannot apply, message, or hold roles beyond onboarding progress, and is purged after {7 days}. | Limits abuse by unverified accounts. | Account state guard + worker | [SRC: Yash SM-ACCOUNT t2] |
-| BR-IDN-006 | After {5} consecutive failures per (normalized email, IP bucket) a progressive delay applies, doubling from {15 s} up to {15 min}; during a delay even correct credentials return `429`; per-IP limits apply across accounts; the same curve covers MFA, step-up and magic-link code failures. | Stops stuffing without an oracle. | Rate-limit layer | [SRC: Yash BR-T052; SSOT HDN-008] |
-| BR-IDN-007 | Session lifetimes: access {15 min}; idle {14 d}; absolute {30 d}; remember-me absolute {90 d}; privileged roles idle 30 min and absolute 8 h; org policy may shorten but never lengthen. | Bounded exposure. | Session service | [SRC: Yash CONST-S01..S05] |
-| BR-IDN-008 | Access and refresh credentials live only in `Secure; HttpOnly` cookies; never in script-readable storage, URLs, bodies or logs; unsafe requests need a per-session CSRF header and an allowed `Origin`. | Removes script-theft and CSRF. | Edge + API | [SRC: SSOT §12.8 V61-13] |
-| BR-IDN-009 | Refresh credentials rotate each use; reuse of a superseded generation beyond a {5 s} leeway revokes the whole session family and notifies the holder; refresh for a non-`active` account is refused. | Detects theft. | Session service | [SRC: Yash BR-T050, CONST-S07] |
-| BR-IDN-010 | Sensitive actions require re-authentication no older than {300 s}: change email, phone, password, passkey, MFA; deactivate; delete; download export; create API token; billing change; SSO config; privileged role grant; revoke-all-others when MFA is on. | Contains session hijack. | Policy layer | [SRC: Yash BR-T057, CONST-S06] |
-| BR-IDN-011 | Privileged roles (MOD, SUP, FIN, PAD, SAD) require MFA or passkey with user verification; no remember-me, no trusted-device bypass, no magic-link sign-in; org admins may require MFA for members with a grace period. | Staff accounts are the highest-value target. | Role-context resolver | [SRC: Yash BR-T044] |
-| BR-IDN-012 | An account has ≤ {10} passkeys; the last remaining sign-in method cannot be removed; a counter regression marks the credential `suspect` and notifies the holder. | Prevent lockout and cloning. | Domain layer | [SRC: Yash BR-T055] |
-| BR-IDN-013 | TOTP uses a 30 s step with ±1 window, and a used step cannot repeat; 10 single-use recovery codes are hashed, shown once, and regeneration invalidates the old set. | Standard TOTP safety. | Domain layer | [PROP] |
-| BR-IDN-014 | MFA cannot be turned off while a platform or org policy requires it for any of the account's roles. | Policy cannot be undone by the user. | Domain layer | [DER] |
-| BR-IDN-015 | A password change revokes all other session families and trusted-device cookies; a password reset revokes all sessions including the current one. | Eliminates attacker persistence. | Session service | [SRC: Yash BR-T054] |
-| BR-IDN-016 | Reset tokens are ≥ 128-bit random, hashed, TTL {30 min}, single use; at most {3} per recipient per hour and {5} per minute per IP; expired, used and unknown share one error. | Bounded abuse of email as a channel. | Domain + rate limit | [SRC: SSOT §9.1 step 7; Yash BR-T054] |
-| BR-IDN-017 | An email change needs step-up, confirmation at the new address, a notice to the old address, and an undo window of {7 days}. | Recoverability from takeover. | Domain layer | [SRC: Yash BR-T058] |
-| BR-IDN-018 | Sign-in from an unrecognized device emails the holder with a revoke link, at most once per device per 24 h; suppressed for the first sign-in after registration. | Early warning. | Worker | [SRC: Yash BR-T059] |
-| BR-IDN-019 | Self-service recovery (all factors lost) requires proof of control of every verified contact channel, a {24 h} hold, notices on all channels with cancel links, removal of all factors on completion, and a {72 h} elevated watch; support cannot shorten the hold; privileged accounts need second approval by SAD. | Recovery must not be the weakest link. | Recovery service | [DER from Yash FEAT-01-06.3] |
-| BR-IDN-020 | Roles are resolved on the server from active grants; the client never supplies a role; authorization is deny by default; privileged platform grants need dual control, a reason and review monthly, and expire after {60 days} unused. | No role forgery. | Role-context resolver | [SRC: SSOT §5.4; Yash BR-T049] |
-| BR-IDN-021 | Self-service grants are limited to `CAN`, `FRL` (toggle) and `STD` (with institution code or invitation); `INS`, `MNT`, `REC`, `HMG`, `EAD`, `IAD`, `PLO`, `EXA` come from review, organization creation or membership grants; staff roles come only from BR-IDN-020. | Limits privilege creep. | Onboarding service | [DER] |
-| BR-IDN-022 | A session has exactly one active role context `(role, scopeType, scopeId)`; permissions are those of that context only; there is no union of roles; a person cannot review their own application in any context. | Prevents conflict of interest and confused-deputy. | Role-context resolver + policy | [DER] (conflicts with SSOT "highest wins", OD-IDN-02) |
-| BR-IDN-023 | Invitation tokens are ≥ 128-bit, hashed, bound to the invited email, TTL {7 d}, single use; acceptance needs a verified email equal to the invited one; the last `EAD` cannot be removed or leave; invitations never grant platform staff roles. | Prevents hijacking invitations and orphaned orgs. | Domain layer | [DER] |
-| BR-IDN-024 | An external identity is linked only after proof of control of the target account (existing session with step-up or fresh sign-in); a provider email is trusted only if the provider asserts it verified; a provider subject links to one account; matching emails never merge silently; a verified provider identity overrides an unverified local registration of the same email. | Prevents takeover and pre-registration hijack. | Linking service | [SRC: SSOT §9.1 step 8] + [DER] |
-| BR-IDN-025 | A sign-in method cannot be removed if it is the last one; a user must add another first. | Prevents lockout. | Domain layer | [SRC: Yash BR-T055] |
-| BR-IDN-026 | Deactivation is reversible, requires step-up, ends all sessions, hides the profile, keeps data for {12 months} (open), and notifies 30 and 7 days before the retention end; a sole org owner must transfer first. | Honest pause. | Account service | [SRC: Yash FEAT-01-10]; value [DEC-REQ] OD-IDN-04 |
-| BR-IDN-027 | An erasure request needs step-up and typed email, moves the account to `pending_erasure` (sessions ended), allows cancel in cooling-off ({7 d}), and is parked `on_hold` if the account is suspended, under a moderation case, or under legal hold. | Reversibility and evidence preservation. | Account service + SET | [SRC: Yash BR-T066, BR-T124] |
-| BR-IDN-028 | Impersonation requires a ticket, a reason code, a scoped time-boxed grant (≤ {4 h}), is read-only, never exposes credentials or secrets, is fully audited, and the subject is notified unless notice is prohibited; targets cannot be PAD or SAD. | Support access without risk. | Support-access service + policy | [SRC: Yash BR-T041..T043] |
-| BR-IDN-029 | Registration requires an age attestation at or above the regional minimum age ({16} default); the date of birth is not stored, only an `isOfAge` result; a failed attempt blocks retry on that device for {24 h}. | Compliance with data minimization. | Registration service | [SRC: SSOT AUTH-017, V61-24]; value [DEC-REQ] OD-IDN-11 |
-| BR-IDN-030 | Bot defenses are risk-based and layered; authentication never requires a cognitive test; passkey sign-in is never challenged; the risk provider failing means stricter static limits, not open access. | Security with accessibility. | Edge + API | [PROP] |
-| BR-IDN-031 | A `suspended` account may sign in only to a restricted appeal session (notice, appeal, data rights). | Due process. | Session service | [SRC: Yash AC-01-02-05] |
-| BR-IDN-032 | Authentication failures use generic wording; secrets, tokens, codes and credentials never appear in logs, analytics or error messages. | No leakage. | All layers | [SRC: SSOT HDN-010] |
-| BR-IDN-033 | Registration and sign-in after a material policy change require acceptance of the current policy versions, recorded in an append-only ledger; acceptance is separate from other consents and never pre-ticked. | Auditable lawful basis. | Registration + gate | [SRC: Yash FEAT-01-13] |
-| BR-IDN-034 | SSO domains need DNS proof; JIT provisioning only for verified domains; SSO mappings can never grant `EAD` or platform roles; enforced SSO blocks password and social sign-in for that domain except two break-glass admins. | Safe federation. | SSO service | [PROP] |
-| BR-IDN-035 | Session revocation, role revocation and account-state changes take effect on every request within {60 s} p95; if the revocation store is unavailable, requests are denied (fail closed). | Timely containment. | Session service | [SRC: Yash SPEC-01 §3.4] |
-| BR-IDN-036 | A verified phone number belongs to one account at a time, is encrypted at rest, masked in UI, and is never the sole recovery factor; SMS sends are capped per account, IP and prefix. | SIM-swap and pumping defense. | Domain + rate limit | [PROP] |
-| BR-IDN-037 | An org may send ≤ {50} invitations per request and ≤ {200} per day; complaints suspend sending for that org. | Prevents spam via invitations. | Invitation service | [PROP] |
-| BR-IDN-038 | Credential, session, role, MFA, recovery, support-access and state-change events are written to the tamper-evident audit log with actor, subject, time and outcome, and subjects can read their own. | Accountability and subject transparency. | Audit service | [SRC: SSOT HDN-009; Yash INV-T18] |
-| BR-IDN-039 | Magic-link and email-code sign-in bind the request to the requesting browser, require a confirm step on the landing page (GET consumes nothing), are single use, TTL {15 min}, and are unavailable for privileged roles and SSO-enforced domains. | Defeats link scanners and phishing relays. | Sign-in service | [PROP] |
-| BR-IDN-040 | A machine principal authenticates only with a scoped, revocable credential issued by `PLT`; it has no cookie session, no refresh, no role switching, and is rate limited per credential. | Least privilege automation. | API gateway | [SRC: SSOT HDN-015] + [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                               | Rationale                                              | Enforced where                                  | Source                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------- |
+| BR-IDN-001 | Email is normalized (trim, NFKC, lower-cased domain; local part compared case-insensitively) and unique among non-erased accounts; concurrent registrations differing by case yield one account.                                                                                                                                                                                   | Prevents duplicate identities and enumeration by case. | Domain layer + unique index on normalized email | [SRC: Yash SPEC-01 §3.1]                                |
+| BR-IDN-002 | A password is 12–128 characters, any Unicode, not on a breached list, not equal to the email local part; no composition rules; hashed with a memory-hard function. If the breach service is unavailable, accept only ≥ 14 characters and schedule a re-check.                                                                                                                      | Length beats composition; fail safe.                   | Domain layer + breach port                      | [SRC: Yash BR-T051]                                     |
+| BR-IDN-003 | Registration, sign-in, reset, magic-link and recovery responses (status, body, and latency within tolerance) never depend on whether an email has an account.                                                                                                                                                                                                                      | Blocks account enumeration.                            | API layer + dummy hash path                     | [SRC: Yash SPEC-01 §3.2]                                |
+| BR-IDN-004 | Verification and sign-in codes are 6 digits, TTL {15 min}, ≤ 5 attempts, single use, hashed at rest; a new code invalidates earlier ones.                                                                                                                                                                                                                                          | Bounded guessing.                                      | Domain layer                                    | [SRC: Yash BR-T053, CONST-S08]                          |
+| BR-IDN-005 | A `pending_verification` account has no profile visibility, cannot apply, message, or hold roles beyond onboarding progress, and is purged after {7 days}.                                                                                                                                                                                                                         | Limits abuse by unverified accounts.                   | Account state guard + worker                    | [SRC: Yash SM-ACCOUNT t2]                               |
+| BR-IDN-006 | After {5} consecutive failures per (normalized email, IP bucket) a progressive delay applies, doubling from {15 s} up to {15 min}; during a delay even correct credentials return `429`; per-IP limits apply across accounts; the same curve covers MFA, step-up and magic-link code failures.                                                                                     | Stops stuffing without an oracle.                      | Rate-limit layer                                | [SRC: Yash BR-T052; SSOT HDN-008]                       |
+| BR-IDN-007 | Session lifetimes: access {15 min}; idle {14 d}; absolute {30 d}; remember-me absolute {90 d}; privileged roles idle 30 min and absolute 8 h; org policy may shorten but never lengthen.                                                                                                                                                                                           | Bounded exposure.                                      | Session service                                 | [SRC: Yash CONST-S01..S05]                              |
+| BR-IDN-008 | Access and refresh credentials live only in `Secure; HttpOnly` cookies; never in script-readable storage, URLs, bodies or logs; unsafe requests need a per-session CSRF header and an allowed `Origin`.                                                                                                                                                                            | Removes script-theft and CSRF.                         | Edge + API                                      | [SRC: SSOT §12.8 V61-13]                                |
+| BR-IDN-009 | Refresh credentials rotate each use; reuse of a superseded generation beyond a {5 s} leeway revokes the whole session family and notifies the holder; refresh for a non-`active` account is refused.                                                                                                                                                                               | Detects theft.                                         | Session service                                 | [SRC: Yash BR-T050, CONST-S07]                          |
+| BR-IDN-010 | Sensitive actions require re-authentication no older than {300 s}: change email, phone, password, passkey, MFA; deactivate; delete; download export; create API token; billing change; SSO config; privileged role grant; revoke-all-others when MFA is on.                                                                                                                        | Contains session hijack.                               | Policy layer                                    | [SRC: Yash BR-T057, CONST-S06]                          |
+| BR-IDN-011 | Privileged roles (MOD, SUP, FIN, PAD, SAD) require MFA or passkey with user verification; no remember-me, no trusted-device bypass, no magic-link sign-in; org admins may require MFA for members with a grace period.                                                                                                                                                             | Staff accounts are the highest-value target.           | Role-context resolver                           | [SRC: Yash BR-T044]                                     |
+| BR-IDN-012 | An account has ≤ {10} passkeys; the last remaining sign-in method cannot be removed; a counter regression marks the credential `suspect` and notifies the holder.                                                                                                                                                                                                                  | Prevent lockout and cloning.                           | Domain layer                                    | [SRC: Yash BR-T055]                                     |
+| BR-IDN-013 | TOTP uses a 30 s step with ±1 window, and a used step cannot repeat; 10 single-use recovery codes are hashed, shown once, and regeneration invalidates the old set.                                                                                                                                                                                                                | Standard TOTP safety.                                  | Domain layer                                    | [PROP]                                                  |
+| BR-IDN-014 | MFA cannot be turned off while a platform or org policy requires it for any of the account's roles.                                                                                                                                                                                                                                                                                | Policy cannot be undone by the user.                   | Domain layer                                    | [DER]                                                   |
+| BR-IDN-015 | A password change revokes all other session families and trusted-device cookies; a password reset revokes all sessions including the current one.                                                                                                                                                                                                                                  | Eliminates attacker persistence.                       | Session service                                 | [SRC: Yash BR-T054]                                     |
+| BR-IDN-016 | Reset tokens are ≥ 128-bit random, hashed, TTL {30 min}, single use; at most {3} per recipient per hour and {5} per minute per IP; expired, used and unknown share one error.                                                                                                                                                                                                      | Bounded abuse of email as a channel.                   | Domain + rate limit                             | [SRC: SSOT §9.1 step 7; Yash BR-T054]                   |
+| BR-IDN-017 | An email change needs step-up, confirmation at the new address, a notice to the old address, and an undo window of {7 days}.                                                                                                                                                                                                                                                       | Recoverability from takeover.                          | Domain layer                                    | [SRC: Yash BR-T058]                                     |
+| BR-IDN-018 | Sign-in from an unrecognized device emails the holder with a revoke link, at most once per device per 24 h; suppressed for the first sign-in after registration.                                                                                                                                                                                                                   | Early warning.                                         | Worker                                          | [SRC: Yash BR-T059]                                     |
+| BR-IDN-019 | Self-service recovery (all factors lost) requires proof of control of every verified contact channel, a {24 h} hold, notices on all channels with cancel links, removal of all factors on completion, and a {72 h} elevated watch; support cannot shorten the hold; privileged accounts need second approval by SAD.                                                               | Recovery must not be the weakest link.                 | Recovery service                                | [DER from Yash FEAT-01-06.3]                            |
+| BR-IDN-020 | Roles are resolved on the server from active grants; the client never supplies a role; authorization is deny by default; privileged platform grants need dual control, a reason and review monthly, and expire after {60 days} unused.                                                                                                                                             | No role forgery.                                       | Role-context resolver                           | [SRC: SSOT §5.4; Yash BR-T049]                          |
+| BR-IDN-021 | Self-service grants are limited to `CAN`, `FRL` (toggle) and `STD` (with institution code or invitation); `INS`, `MNT`, `REC`, `HMG`, `EAD`, `IAD`, `PLO`, `EXA` come from review, organization creation or membership grants; staff roles come only from BR-IDN-020.                                                                                                              | Limits privilege creep.                                | Onboarding service                              | [DER]                                                   |
+| BR-IDN-022 | A session has exactly one active role context `(role, scopeType, scopeId)`; permissions are those of that context only; there is no union of roles; a person cannot review their own application in any context.                                                                                                                                                                   | Prevents conflict of interest and confused-deputy.     | Role-context resolver + policy                  | [DER] (conflicts with SSOT "highest wins", OD-IDN-02)   |
+| BR-IDN-023 | Invitation tokens are ≥ 128-bit, hashed, bound to the invited email, TTL {7 d}, single use; acceptance needs a verified email equal to the invited one; the last `EAD` cannot be removed or leave; invitations never grant platform staff roles.                                                                                                                                   | Prevents hijacking invitations and orphaned orgs.      | Domain layer                                    | [DER]                                                   |
+| BR-IDN-024 | An external identity is linked only after proof of control of the target account (existing session with step-up or fresh sign-in); a provider email is trusted only if the provider asserts it verified; a provider subject links to one account; matching emails never merge silently; a verified provider identity overrides an unverified local registration of the same email. | Prevents takeover and pre-registration hijack.         | Linking service                                 | [SRC: SSOT §9.1 step 8] + [DER]                         |
+| BR-IDN-025 | A sign-in method cannot be removed if it is the last one; a user must add another first.                                                                                                                                                                                                                                                                                           | Prevents lockout.                                      | Domain layer                                    | [SRC: Yash BR-T055]                                     |
+| BR-IDN-026 | Deactivation is reversible, requires step-up, ends all sessions, hides the profile, keeps data for {12 months} (open), and notifies 30 and 7 days before the retention end; a sole org owner must transfer first.                                                                                                                                                                  | Honest pause.                                          | Account service                                 | [SRC: Yash FEAT-01-10]; value [DEC-REQ] OD-IDN-04       |
+| BR-IDN-027 | An erasure request needs step-up and typed email, moves the account to `pending_erasure` (sessions ended), allows cancel in cooling-off ({7 d}), and is parked `on_hold` if the account is suspended, under a moderation case, or under legal hold.                                                                                                                                | Reversibility and evidence preservation.               | Account service + SET                           | [SRC: Yash BR-T066, BR-T124]                            |
+| BR-IDN-028 | Impersonation requires a ticket, a reason code, a scoped time-boxed grant (≤ {4 h}), is read-only, never exposes credentials or secrets, is fully audited, and the subject is notified unless notice is prohibited; targets cannot be PAD or SAD.                                                                                                                                  | Support access without risk.                           | Support-access service + policy                 | [SRC: Yash BR-T041..T043]                               |
+| BR-IDN-029 | Registration requires an age attestation at or above the regional minimum age ({16} default); the date of birth is not stored, only an `isOfAge` result; a failed attempt blocks retry on that device for {24 h}.                                                                                                                                                                  | Compliance with data minimization.                     | Registration service                            | [SRC: SSOT AUTH-017, V61-24]; value [DEC-REQ] OD-IDN-11 |
+| BR-IDN-030 | Bot defenses are risk-based and layered; authentication never requires a cognitive test; passkey sign-in is never challenged; the risk provider failing means stricter static limits, not open access.                                                                                                                                                                             | Security with accessibility.                           | Edge + API                                      | [PROP]                                                  |
+| BR-IDN-031 | A `suspended` account may sign in only to a restricted appeal session (notice, appeal, data rights).                                                                                                                                                                                                                                                                               | Due process.                                           | Session service                                 | [SRC: Yash AC-01-02-05]                                 |
+| BR-IDN-032 | Authentication failures use generic wording; secrets, tokens, codes and credentials never appear in logs, analytics or error messages.                                                                                                                                                                                                                                             | No leakage.                                            | All layers                                      | [SRC: SSOT HDN-010]                                     |
+| BR-IDN-033 | Registration and sign-in after a material policy change require acceptance of the current policy versions, recorded in an append-only ledger; acceptance is separate from other consents and never pre-ticked.                                                                                                                                                                     | Auditable lawful basis.                                | Registration + gate                             | [SRC: Yash FEAT-01-13]                                  |
+| BR-IDN-034 | SSO domains need DNS proof; JIT provisioning only for verified domains; SSO mappings can never grant `EAD` or platform roles; enforced SSO blocks password and social sign-in for that domain except two break-glass admins.                                                                                                                                                       | Safe federation.                                       | SSO service                                     | [PROP]                                                  |
+| BR-IDN-035 | Session revocation, role revocation and account-state changes take effect on every request within {60 s} p95; if the revocation store is unavailable, requests are denied (fail closed).                                                                                                                                                                                           | Timely containment.                                    | Session service                                 | [SRC: Yash SPEC-01 §3.4]                                |
+| BR-IDN-036 | A verified phone number belongs to one account at a time, is encrypted at rest, masked in UI, and is never the sole recovery factor; SMS sends are capped per account, IP and prefix.                                                                                                                                                                                              | SIM-swap and pumping defense.                          | Domain + rate limit                             | [PROP]                                                  |
+| BR-IDN-037 | An org may send ≤ {50} invitations per request and ≤ {200} per day; complaints suspend sending for that org.                                                                                                                                                                                                                                                                       | Prevents spam via invitations.                         | Invitation service                              | [PROP]                                                  |
+| BR-IDN-038 | Credential, session, role, MFA, recovery, support-access and state-change events are written to the tamper-evident audit log with actor, subject, time and outcome, and subjects can read their own.                                                                                                                                                                               | Accountability and subject transparency.               | Audit service                                   | [SRC: SSOT HDN-009; Yash INV-T18]                       |
+| BR-IDN-039 | Magic-link and email-code sign-in bind the request to the requesting browser, require a confirm step on the landing page (GET consumes nothing), are single use, TTL {15 min}, and are unavailable for privileged roles and SSO-enforced domains.                                                                                                                                  | Defeats link scanners and phishing relays.             | Sign-in service                                 | [PROP]                                                  |
+| BR-IDN-040 | A machine principal authenticates only with a scoped, revocable credential issued by `PLT`; it has no cookie session, no refresh, no role switching, and is rate limited per credential.                                                                                                                                                                                           | Least privilege automation.                            | API gateway                                     | [SRC: SSOT HDN-015] + [DER]                             |
 
 ## 6. State machines
 
@@ -1140,19 +1142,19 @@ Rule text is authoritative here; features cite ids. Parameters in `{braces}` are
 
 States: `pending_verification`, `active`, `suspended`, `deactivated`, `pending_erasure`, `erased`, `purged`. Terminal: `erased`, `purged`. Source: [SRC: Yash SM-ACCOUNT]; names reconcile SSOT's differing vocabulary (V61-11, V61-18); the SSOT state `registered` is the same as `pending_verification` and `terminated` is represented as `suspended` followed by erasure, an open point recorded in OD-IDN-12.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → pending_verification | registration (email) | BR-IDN-001, age pass |
-| t1b | [*] → active | registration through provider-verified email | provider verified, age pass, policy accepted |
-| t2 | pending_verification → active | code verified | BR-IDN-004 |
-| t3 | pending_verification → purged | {7 d} elapsed | still unverified |
-| t4 | active → suspended | moderation or admin decision (TSF case) | case id and reason |
-| t5 | suspended → active | appeal upheld or sanction end | decision recorded |
-| t6 | active → deactivated | holder request | step-up |
-| t7 | deactivated → active | holder signs in | within retention |
-| t8 | active, deactivated, suspended → pending_erasure | verified erasure request | no legal hold (else parked) |
-| t9 | pending_erasure → previous state | holder cancels | within cooling-off |
-| t10 | pending_erasure → erased | SET completion signal | all contributors complete |
+| t   | From → To                                        | Trigger                                      | Guard                                        |
+| --- | ------------------------------------------------ | -------------------------------------------- | -------------------------------------------- |
+| t1  | [*] → pending_verification                       | registration (email)                         | BR-IDN-001, age pass                         |
+| t1b | [*] → active                                     | registration through provider-verified email | provider verified, age pass, policy accepted |
+| t2  | pending_verification → active                    | code verified                                | BR-IDN-004                                   |
+| t3  | pending_verification → purged                    | {7 d} elapsed                                | still unverified                             |
+| t4  | active → suspended                               | moderation or admin decision (TSF case)      | case id and reason                           |
+| t5  | suspended → active                               | appeal upheld or sanction end                | decision recorded                            |
+| t6  | active → deactivated                             | holder request                               | step-up                                      |
+| t7  | deactivated → active                             | holder signs in                              | within retention                             |
+| t8  | active, deactivated, suspended → pending_erasure | verified erasure request                     | no legal hold (else parked)                  |
+| t9  | pending_erasure → previous state                 | holder cancels                               | within cooling-off                           |
+| t10 | pending_erasure → erased                         | SET completion signal                        | all contributors complete                    |
 
 Forbidden: any state from `erased` or `purged`; `pending_verification → suspended | deactivated`; `suspended → deactivated`; any state back to `pending_verification`.
 
@@ -1179,14 +1181,14 @@ stateDiagram-v2
 
 States: `active`, `expired`, `revoked`. Terminal: `expired`, `revoked`. Source: [SRC: Yash SM-SESSION].
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → active | successful authentication | account `active` |
-| t2 | active → active | refresh (generation +1) | generation current or within leeway |
-| t3 | active → expired | idle or absolute limit | server clock |
-| t4 | active → revoked | refresh reuse detected | superseded generation beyond leeway |
-| t5 | active → revoked | user, admin or password change revokes | actor authorized |
-| t6 | active → revoked | account leaves `active` | state guard |
+| t   | From → To        | Trigger                                | Guard                               |
+| --- | ---------------- | -------------------------------------- | ----------------------------------- |
+| t1  | [*] → active     | successful authentication              | account `active`                    |
+| t2  | active → active  | refresh (generation +1)                | generation current or within leeway |
+| t3  | active → expired | idle or absolute limit                 | server clock                        |
+| t4  | active → revoked | refresh reuse detected                 | superseded generation beyond leeway |
+| t5  | active → revoked | user, admin or password change revokes | actor authorized                    |
+| t6  | active → revoked | account leaves `active`                | state guard                         |
 
 Forbidden: `revoked → active`, `expired → active`.
 
@@ -1206,14 +1208,14 @@ stateDiagram-v2
 
 States: `held`, `ready`, `completed`, `cancelled`, `expired`. Terminal: `completed`, `cancelled`, `expired`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → held | proofs of control accepted | one active per account |
-| t2 | held → cancelled | holder cancel link or authenticated session | any time before ready |
-| t3 | held → ready | `releaseAt` reached | not cancelled; privileged accounts need second approval |
-| t4 | ready → completed | token used with valid new password | within {24 h} |
-| t5 | ready → expired | token TTL passed | unused |
-| t6 | ready → cancelled | holder cancel | before completion |
+| t   | From → To         | Trigger                                     | Guard                                                   |
+| --- | ----------------- | ------------------------------------------- | ------------------------------------------------------- |
+| t1  | [*] → held        | proofs of control accepted                  | one active per account                                  |
+| t2  | held → cancelled  | holder cancel link or authenticated session | any time before ready                                   |
+| t3  | held → ready      | `releaseAt` reached                         | not cancelled; privileged accounts need second approval |
+| t4  | ready → completed | token used with valid new password          | within {24 h}                                           |
+| t5  | ready → expired   | token TTL passed                            | unused                                                  |
+| t6  | ready → cancelled | holder cancel                               | before completion                                       |
 
 ```mermaid
 stateDiagram-v2
@@ -1232,13 +1234,13 @@ stateDiagram-v2
 
 States: `pending`, `accepted`, `declined`, `expired`, `revoked`. Terminal: all but `pending`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → pending | admin sends | caps BR-IDN-037 |
-| t2 | pending → accepted | invitee accepts | verified email equals invited |
-| t3 | pending → declined | invitee declines | — |
-| t4 | pending → expired | {7 d} elapsed | — |
-| t5 | pending → revoked | admin revokes or inviter loses role (setting) | — |
+| t   | From → To          | Trigger                                       | Guard                         |
+| --- | ------------------ | --------------------------------------------- | ----------------------------- |
+| t1  | [*] → pending      | admin sends                                   | caps BR-IDN-037               |
+| t2  | pending → accepted | invitee accepts                               | verified email equals invited |
+| t3  | pending → declined | invitee declines                              | —                             |
+| t4  | pending → expired  | {7 d} elapsed                                 | —                             |
+| t5  | pending → revoked  | admin revokes or inviter loses role (setting) | —                             |
 
 ```mermaid
 stateDiagram-v2
@@ -1257,15 +1259,15 @@ stateDiagram-v2
 
 States: `requested`, `approved`, `active`, `ended`, `expired`, `revoked`, `denied`. Terminal: `ended`, `expired`, `revoked`, `denied`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → requested | agent files request | ticket open, reason code |
-| t2 | requested → approved | approver approves (auto for basic scope) | approver ≠ requester |
-| t3 | requested → denied | approver denies | — |
-| t4 | approved → active | agent starts view-as | within {1 h} of approval |
-| t5 | active → ended | agent ends or ticket closes | — |
-| t6 | active → expired | max duration reached | server clock |
-| t7 | approved, active → revoked | SAD or subject-protection rule | audited |
+| t   | From → To                  | Trigger                                  | Guard                    |
+| --- | -------------------------- | ---------------------------------------- | ------------------------ |
+| t1  | [*] → requested            | agent files request                      | ticket open, reason code |
+| t2  | requested → approved       | approver approves (auto for basic scope) | approver ≠ requester     |
+| t3  | requested → denied         | approver denies                          | —                        |
+| t4  | approved → active          | agent starts view-as                     | within {1 h} of approval |
+| t5  | active → ended             | agent ends or ticket closes              | —                        |
+| t6  | active → expired           | max duration reached                     | server clock             |
+| t7  | approved, active → revoked | SAD or subject-protection rule           | audited                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1285,64 +1287,64 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-IDN-001 | Sign in | `/login` | GUE | Email/password, passkey autofill, social, SSO routing | idle, submitting, throttled, MFA required, provider down |
-| SCR-IDN-002 | Create account | `/register` | GUE | Registration form | idle, validating, success, error |
-| SCR-IDN-003 | Check your email | `/verify-email` | GUE | Code entry and resend | waiting, wrong code, locked, expired, verified |
-| SCR-IDN-004 | Provider return and collision | `/auth/callback`, `/auth/link` | GUE | Handle provider return; collision prompt | redirecting, collision, cancelled, error |
-| SCR-IDN-005 | SSO routing | `/login/sso` | GUE | Org domain detection and IdP redirect | detecting, redirecting, failed |
-| SCR-IDN-006 | Passkey prompt | `/welcome/passkey` | CAN+ | Offer passkey after first password login | offer, in progress, done, dismissed |
-| SCR-IDN-007 | Second step | `/login/mfa` | GUE | TOTP, passkey, recovery code | input, wrong, locked, expired |
-| SCR-IDN-008 | Email sign-in code | `/login/code` | GUE | Request and enter code; landing confirm | request, waiting, confirm, expired |
-| SCR-IDN-009 | Reset password | `/forgot-password`, `/reset-password` | GUE | Request and set | request, sent, invalid token, success |
-| SCR-IDN-010 | Can't sign in | `/recover` | GUE | Start account recovery | start, held status, ready, complete, cancelled |
-| SCR-IDN-011 | Onboarding wizard | `/welcome` | CAN+ | Goal selection and steps | per step states, resume |
-| SCR-IDN-012 | Context switcher | top-bar component | CAN+ | Switch active role context | single (hidden), multiple, step-up |
-| SCR-IDN-013 | Invitation landing | `/invite/:token` | GUE, any | Accept or decline org invitation | valid, wrong account, expired, accepted |
-| SCR-IDN-014 | Security settings | `/settings/security` | all authed | Password, passkeys, TOTP, phone, linked methods, deactivate | per card states |
-| SCR-IDN-015 | Where you're signed in | `/settings/security/sessions` | all authed | Sessions and devices | loading, list, empty, error |
-| SCR-IDN-016 | Security activity | `/settings/security/activity` | all authed | Personal security log | loading, empty, list |
-| SCR-IDN-017 | Two-step verification | `/settings/security/mfa` | all authed | Enroll, manage, recovery codes | off, pending, on, policy-required |
-| SCR-IDN-018 | Cancel deletion | `/account/pending-deletion` | pending_erasure holder | Cancel erasure in cooling-off | countdown date, cancelled, final |
-| SCR-IDN-019 | Appeal | `/account/appeal` | suspended holder | Notice and appeal | no appeal, drafting, submitted, decided |
-| SCR-IDN-020 | Org security and SSO | `/org/:id/settings/security` | EAD, IAD | SSO, MFA requirement, domains | unconfigured, tested, enforced |
-| SCR-IDN-021 | Members and invitations | `/org/:id/members` | EAD, IAD | Members, roles, invitations, join requests | empty, list, last-admin blocked |
-| SCR-IDN-022 | Re-authentication modal | overlay | all authed | Step-up | prompt, verifying, failed |
-| SCR-IDN-023 | Policy update gate | `/policy-update` | all authed | Re-accept policies | grace, blocking |
-| SCR-IDN-024 | Reactivate account | `/account/reactivate` | deactivated holder | Reactivation offer | offer, done |
-| SCR-IDN-025 | Age block | `/register/age` | GUE | Under-age message | blocked |
-| SCR-IDN-026 | Support grant request | `/support/access` | SUP, PAD | Request and approve impersonation | requested, awaiting approval, active |
-| SCR-IDN-027 | View-as banner | overlay | SUP, PAD | Persistent read-only banner | active, expiring |
-| SCR-IDN-028 | Staff grants | `/admin/roles` | SAD | Dual-control staff grants and review | requested, approved, expired |
-| SCR-IDN-029 | Session expired interstitial | `/signed-out` | GUE | Explain sign-out reason | expired, revoked, reuse |
-| SCR-IDN-030 | Abuse dashboard | `/admin/auth-abuse` | PAD, SAD | Thresholds and attack view | normal, attack, provider down |
+| ID          | Name                          | Route proposal                        | Roles                  | Purpose                                                     | Key states                                               |
+| ----------- | ----------------------------- | ------------------------------------- | ---------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| SCR-IDN-001 | Sign in                       | `/login`                              | GUE                    | Email/password, passkey autofill, social, SSO routing       | idle, submitting, throttled, MFA required, provider down |
+| SCR-IDN-002 | Create account                | `/register`                           | GUE                    | Registration form                                           | idle, validating, success, error                         |
+| SCR-IDN-003 | Check your email              | `/verify-email`                       | GUE                    | Code entry and resend                                       | waiting, wrong code, locked, expired, verified           |
+| SCR-IDN-004 | Provider return and collision | `/auth/callback`, `/auth/link`        | GUE                    | Handle provider return; collision prompt                    | redirecting, collision, cancelled, error                 |
+| SCR-IDN-005 | SSO routing                   | `/login/sso`                          | GUE                    | Org domain detection and IdP redirect                       | detecting, redirecting, failed                           |
+| SCR-IDN-006 | Passkey prompt                | `/welcome/passkey`                    | CAN+                   | Offer passkey after first password login                    | offer, in progress, done, dismissed                      |
+| SCR-IDN-007 | Second step                   | `/login/mfa`                          | GUE                    | TOTP, passkey, recovery code                                | input, wrong, locked, expired                            |
+| SCR-IDN-008 | Email sign-in code            | `/login/code`                         | GUE                    | Request and enter code; landing confirm                     | request, waiting, confirm, expired                       |
+| SCR-IDN-009 | Reset password                | `/forgot-password`, `/reset-password` | GUE                    | Request and set                                             | request, sent, invalid token, success                    |
+| SCR-IDN-010 | Can't sign in                 | `/recover`                            | GUE                    | Start account recovery                                      | start, held status, ready, complete, cancelled           |
+| SCR-IDN-011 | Onboarding wizard             | `/welcome`                            | CAN+                   | Goal selection and steps                                    | per step states, resume                                  |
+| SCR-IDN-012 | Context switcher              | top-bar component                     | CAN+                   | Switch active role context                                  | single (hidden), multiple, step-up                       |
+| SCR-IDN-013 | Invitation landing            | `/invite/:token`                      | GUE, any               | Accept or decline org invitation                            | valid, wrong account, expired, accepted                  |
+| SCR-IDN-014 | Security settings             | `/settings/security`                  | all authed             | Password, passkeys, TOTP, phone, linked methods, deactivate | per card states                                          |
+| SCR-IDN-015 | Where you're signed in        | `/settings/security/sessions`         | all authed             | Sessions and devices                                        | loading, list, empty, error                              |
+| SCR-IDN-016 | Security activity             | `/settings/security/activity`         | all authed             | Personal security log                                       | loading, empty, list                                     |
+| SCR-IDN-017 | Two-step verification         | `/settings/security/mfa`              | all authed             | Enroll, manage, recovery codes                              | off, pending, on, policy-required                        |
+| SCR-IDN-018 | Cancel deletion               | `/account/pending-deletion`           | pending_erasure holder | Cancel erasure in cooling-off                               | countdown date, cancelled, final                         |
+| SCR-IDN-019 | Appeal                        | `/account/appeal`                     | suspended holder       | Notice and appeal                                           | no appeal, drafting, submitted, decided                  |
+| SCR-IDN-020 | Org security and SSO          | `/org/:id/settings/security`          | EAD, IAD               | SSO, MFA requirement, domains                               | unconfigured, tested, enforced                           |
+| SCR-IDN-021 | Members and invitations       | `/org/:id/members`                    | EAD, IAD               | Members, roles, invitations, join requests                  | empty, list, last-admin blocked                          |
+| SCR-IDN-022 | Re-authentication modal       | overlay                               | all authed             | Step-up                                                     | prompt, verifying, failed                                |
+| SCR-IDN-023 | Policy update gate            | `/policy-update`                      | all authed             | Re-accept policies                                          | grace, blocking                                          |
+| SCR-IDN-024 | Reactivate account            | `/account/reactivate`                 | deactivated holder     | Reactivation offer                                          | offer, done                                              |
+| SCR-IDN-025 | Age block                     | `/register/age`                       | GUE                    | Under-age message                                           | blocked                                                  |
+| SCR-IDN-026 | Support grant request         | `/support/access`                     | SUP, PAD               | Request and approve impersonation                           | requested, awaiting approval, active                     |
+| SCR-IDN-027 | View-as banner                | overlay                               | SUP, PAD               | Persistent read-only banner                                 | active, expiring                                         |
+| SCR-IDN-028 | Staff grants                  | `/admin/roles`                        | SAD                    | Dual-control staff grants and review                        | requested, approved, expired                             |
+| SCR-IDN-029 | Session expired interstitial  | `/signed-out`                         | GUE                    | Explain sign-out reason                                     | expired, revoked, reuse                                  |
+| SCR-IDN-030 | Abuse dashboard               | `/admin/auth-abuse`                   | PAD, SAD               | Thresholds and attack view                                  | normal, attack, provider down                            |
 
 Accessibility notes for all screens: WCAG 2.2 AA; labels and error summary with focus to first error; 3.3.8 accessible authentication (paste and password managers always allowed); touch targets ≥ 24 px; no reliance on color; status changes announced in live regions; `autocomplete` tokens set (`username`, `current-password`, `new-password`, `one-time-code`, `webauthn`). [SRC: Yash SPEC-01 §4]
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-IDN-01 | Account | id, normalized email, email_verified_at, state, display name, locale, timezone, created_at, version | has many credentials, sessions, role grants | Until erasure; opaque subject ref survives in audit |
-| ENT-IDN-02 | PasswordCredential | account_id, hash and parameters, changed_at, breach_recheck_at | belongs to Account | Until erasure or replacement |
-| ENT-IDN-03 | OneTimeCode | id, account_id or email_hash, purpose, code_hash, expires_at, attempts, consumed_at | Account | 30 days after expiry |
-| ENT-IDN-04 | ContactChannel | account_id, type (email_secondary, phone), value (encrypted), verified_at, status | Account | Until removal or erasure |
-| ENT-IDN-05 | PasskeyCredential | credential_id, account_id, public_key, sign_count, transports, name, status, created_at, last_used_at | Account | Until removal |
-| ENT-IDN-06 | MfaFactor | id, account_id, type (totp), secret (encrypted), status, last_used_step | Account | Until removal |
-| ENT-IDN-07 | LoginAttempt | account_key_hash, ip_bucket, outcome, method, at | none | 30 days |
-| ENT-IDN-08 | SessionFamily | id, account_id, state, reason, idle_expires_at, abs_expires_at, assurance, active_context, device_id, ua_label, ip_prefix, created_at, last_seen_at | Account, DeviceRecord | 90 days after end |
-| ENT-IDN-09 | RefreshToken | id, family_id, generation, token_hash, issued_at, used_at | SessionFamily | With the family |
-| ENT-IDN-10 | RecoveryCode | account_id, code_hash, consumed_at, set_id | Account | Until regeneration or erasure |
-| ENT-IDN-11 | DeviceRecord | id, account_id, cookie_hash, ua_label, first_seen, last_seen, trusted_until | Account | 13 months since last seen |
-| ENT-IDN-12 | SsoConnection | id, org_id, protocol, issuer, config (encrypted), domains, mode, status | Organization (EMP planned) | While org exists |
-| ENT-IDN-13 | LinkedIdentity | id, account_id, provider, subject_id, email_at_link, linked_at, last_used_at | Account | Until unlink or erasure |
-| ENT-IDN-14 | RoleGrant | id, account_id, role_code, scope_type, scope_id, granted_by, granted_at, expires_at, last_used_at, status | Account, Organization | Grant history permanent (opaque ref after erasure) |
-| ENT-IDN-15 | Invitation | id, org_id, email_hash, role, token_hash, state, invited_by, expires_at | Organization | 90 days after terminal |
-| ENT-IDN-16 | ImpersonationGrant | id, agent_id, subject_ref, scope, reason_code, ticket_id, approver_id, state, starts_at, ends_at | Account | Permanent audit |
-| ENT-IDN-17 | SecurityEvent | id, subject_ref, actor_ref, event_type, outcome, device_label, region, at, hash_chain_ref | Account | Permanent, tamper-evident; subject mapping deleted on erasure |
-| ENT-IDN-18 | AgeAttestation | account_id, region_rule, minimum_age, is_of_age, checked_at, policy_version | Account | Until erasure |
-| ENT-IDN-19 | RecoveryRequest | id, account_id, state, release_at, token_hash, approved_by, completed_at | Account | 90 days after terminal |
+| ID         | Entity             | Key attributes                                                                                                                                      | Relationships                               | Retention class                                               |
+| ---------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------- |
+| ENT-IDN-01 | Account            | id, normalized email, email_verified_at, state, display name, locale, timezone, created_at, version                                                 | has many credentials, sessions, role grants | Until erasure; opaque subject ref survives in audit           |
+| ENT-IDN-02 | PasswordCredential | account_id, hash and parameters, changed_at, breach_recheck_at                                                                                      | belongs to Account                          | Until erasure or replacement                                  |
+| ENT-IDN-03 | OneTimeCode        | id, account_id or email_hash, purpose, code_hash, expires_at, attempts, consumed_at                                                                 | Account                                     | 30 days after expiry                                          |
+| ENT-IDN-04 | ContactChannel     | account_id, type (email_secondary, phone), value (encrypted), verified_at, status                                                                   | Account                                     | Until removal or erasure                                      |
+| ENT-IDN-05 | PasskeyCredential  | credential_id, account_id, public_key, sign_count, transports, name, status, created_at, last_used_at                                               | Account                                     | Until removal                                                 |
+| ENT-IDN-06 | MfaFactor          | id, account_id, type (totp), secret (encrypted), status, last_used_step                                                                             | Account                                     | Until removal                                                 |
+| ENT-IDN-07 | LoginAttempt       | account_key_hash, ip_bucket, outcome, method, at                                                                                                    | none                                        | 30 days                                                       |
+| ENT-IDN-08 | SessionFamily      | id, account_id, state, reason, idle_expires_at, abs_expires_at, assurance, active_context, device_id, ua_label, ip_prefix, created_at, last_seen_at | Account, DeviceRecord                       | 90 days after end                                             |
+| ENT-IDN-09 | RefreshToken       | id, family_id, generation, token_hash, issued_at, used_at                                                                                           | SessionFamily                               | With the family                                               |
+| ENT-IDN-10 | RecoveryCode       | account_id, code_hash, consumed_at, set_id                                                                                                          | Account                                     | Until regeneration or erasure                                 |
+| ENT-IDN-11 | DeviceRecord       | id, account_id, cookie_hash, ua_label, first_seen, last_seen, trusted_until                                                                         | Account                                     | 13 months since last seen                                     |
+| ENT-IDN-12 | SsoConnection      | id, org_id, protocol, issuer, config (encrypted), domains, mode, status                                                                             | Organization (EMP planned)                  | While org exists                                              |
+| ENT-IDN-13 | LinkedIdentity     | id, account_id, provider, subject_id, email_at_link, linked_at, last_used_at                                                                        | Account                                     | Until unlink or erasure                                       |
+| ENT-IDN-14 | RoleGrant          | id, account_id, role_code, scope_type, scope_id, granted_by, granted_at, expires_at, last_used_at, status                                           | Account, Organization                       | Grant history permanent (opaque ref after erasure)            |
+| ENT-IDN-15 | Invitation         | id, org_id, email_hash, role, token_hash, state, invited_by, expires_at                                                                             | Organization                                | 90 days after terminal                                        |
+| ENT-IDN-16 | ImpersonationGrant | id, agent_id, subject_ref, scope, reason_code, ticket_id, approver_id, state, starts_at, ends_at                                                    | Account                                     | Permanent audit                                               |
+| ENT-IDN-17 | SecurityEvent      | id, subject_ref, actor_ref, event_type, outcome, device_label, region, at, hash_chain_ref                                                           | Account                                     | Permanent, tamper-evident; subject mapping deleted on erasure |
+| ENT-IDN-18 | AgeAttestation     | account_id, region_rule, minimum_age, is_of_age, checked_at, policy_version                                                                         | Account                                     | Until erasure                                                 |
+| ENT-IDN-19 | RecoveryRequest    | id, account_id, state, release_at, token_hash, approved_by, completed_at                                                                            | Account                                     | 90 days after terminal                                        |
 
 ```mermaid
 erDiagram
@@ -1369,143 +1371,143 @@ Events are written through a transactional outbox. Names follow `module.entity.a
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload (no secrets) |
-|---|---|---|---|
-| EVT-IDN-001 | idn.account.registered | t1 / t1b | account id, method, region |
-| EVT-IDN-002 | idn.account.verified | t2 | account id |
-| EVT-IDN-003 | idn.account.purged | t3 | event-only, no row remains |
-| EVT-IDN-004 | idn.account.suspended | t4 | account id, case ref |
-| EVT-IDN-005 | idn.account.restored | t5 | account id |
-| EVT-IDN-006 | idn.account.deactivated | t6 | account id |
-| EVT-IDN-007 | idn.account.reactivated | t7 | account id |
-| EVT-IDN-008 | idn.account.erasure_pending | t8 | account id, request ref |
-| EVT-IDN-009 | idn.account.erased | t10 | opaque subject ref |
-| EVT-IDN-010 | idn.session.created | t1 session | session id, assurance, method |
-| EVT-IDN-011 | idn.session.revoked | revoke | session id, reason, actor |
-| EVT-IDN-012 | idn.session.reuse_detected | BR-IDN-009 | family id |
-| EVT-IDN-013 | idn.login.failed | failed attempt | account key hash, bucket |
-| EVT-IDN-014 | idn.credential.password_changed | change or reset | account id |
-| EVT-IDN-015 | idn.credential.passkey_added | add | account id, credential name |
-| EVT-IDN-016 | idn.credential.passkey_removed | remove | account id |
-| EVT-IDN-017 | idn.credential.passkey_suspect | counter regression | account id |
-| EVT-IDN-018 | idn.mfa.enabled | enroll | account id, type |
-| EVT-IDN-019 | idn.mfa.disabled | disable | account id |
-| EVT-IDN-020 | idn.mfa.recovery_code_used | use | account id |
-| EVT-IDN-021 | idn.email.changed | change | account id |
-| EVT-IDN-022 | idn.phone.verified | verify | account id |
-| EVT-IDN-023 | idn.device.new_sign_in | unrecognized device | account id, device label |
-| EVT-IDN-024 | idn.recovery.requested | recovery t1 | request ref |
-| EVT-IDN-025 | idn.recovery.completed | recovery t4 | request ref |
-| EVT-IDN-026 | idn.role.granted | grant | account, role, scope |
-| EVT-IDN-027 | idn.role.revoked | revoke | account, role, scope |
-| EVT-IDN-028 | idn.role.switched | switch | account, from, to |
-| EVT-IDN-029 | idn.invitation.sent | send | org, role |
-| EVT-IDN-030 | idn.invitation.accepted | accept | org, account |
-| EVT-IDN-031 | idn.identity.linked | link | account, provider |
-| EVT-IDN-032 | idn.identity.unlinked | unlink | account, provider |
-| EVT-IDN-033 | idn.sso.enforced | enforce | org |
-| EVT-IDN-034 | idn.support.access_started | impersonation t4 | agent ref, subject ref, scope, ticket |
-| EVT-IDN-035 | idn.support.access_ended | impersonation end | grant id |
-| EVT-IDN-036 | idn.abuse.attack_detected | BR-IDN-030 | endpoint, range |
-| EVT-IDN-037 | idn.policy.accepted | acceptance | account, policy, version |
-| EVT-IDN-038 | idn.age.attestation_failed | failed age gate | no personal data |
+| ID          | Event                           | Trigger             | Key payload (no secrets)              |
+| ----------- | ------------------------------- | ------------------- | ------------------------------------- |
+| EVT-IDN-001 | idn.account.registered          | t1 / t1b            | account id, method, region            |
+| EVT-IDN-002 | idn.account.verified            | t2                  | account id                            |
+| EVT-IDN-003 | idn.account.purged              | t3                  | event-only, no row remains            |
+| EVT-IDN-004 | idn.account.suspended           | t4                  | account id, case ref                  |
+| EVT-IDN-005 | idn.account.restored            | t5                  | account id                            |
+| EVT-IDN-006 | idn.account.deactivated         | t6                  | account id                            |
+| EVT-IDN-007 | idn.account.reactivated         | t7                  | account id                            |
+| EVT-IDN-008 | idn.account.erasure_pending     | t8                  | account id, request ref               |
+| EVT-IDN-009 | idn.account.erased              | t10                 | opaque subject ref                    |
+| EVT-IDN-010 | idn.session.created             | t1 session          | session id, assurance, method         |
+| EVT-IDN-011 | idn.session.revoked             | revoke              | session id, reason, actor             |
+| EVT-IDN-012 | idn.session.reuse_detected      | BR-IDN-009          | family id                             |
+| EVT-IDN-013 | idn.login.failed                | failed attempt      | account key hash, bucket              |
+| EVT-IDN-014 | idn.credential.password_changed | change or reset     | account id                            |
+| EVT-IDN-015 | idn.credential.passkey_added    | add                 | account id, credential name           |
+| EVT-IDN-016 | idn.credential.passkey_removed  | remove              | account id                            |
+| EVT-IDN-017 | idn.credential.passkey_suspect  | counter regression  | account id                            |
+| EVT-IDN-018 | idn.mfa.enabled                 | enroll              | account id, type                      |
+| EVT-IDN-019 | idn.mfa.disabled                | disable             | account id                            |
+| EVT-IDN-020 | idn.mfa.recovery_code_used      | use                 | account id                            |
+| EVT-IDN-021 | idn.email.changed               | change              | account id                            |
+| EVT-IDN-022 | idn.phone.verified              | verify              | account id                            |
+| EVT-IDN-023 | idn.device.new_sign_in          | unrecognized device | account id, device label              |
+| EVT-IDN-024 | idn.recovery.requested          | recovery t1         | request ref                           |
+| EVT-IDN-025 | idn.recovery.completed          | recovery t4         | request ref                           |
+| EVT-IDN-026 | idn.role.granted                | grant               | account, role, scope                  |
+| EVT-IDN-027 | idn.role.revoked                | revoke              | account, role, scope                  |
+| EVT-IDN-028 | idn.role.switched               | switch              | account, from, to                     |
+| EVT-IDN-029 | idn.invitation.sent             | send                | org, role                             |
+| EVT-IDN-030 | idn.invitation.accepted         | accept              | org, account                          |
+| EVT-IDN-031 | idn.identity.linked             | link                | account, provider                     |
+| EVT-IDN-032 | idn.identity.unlinked           | unlink              | account, provider                     |
+| EVT-IDN-033 | idn.sso.enforced                | enforce             | org                                   |
+| EVT-IDN-034 | idn.support.access_started      | impersonation t4    | agent ref, subject ref, scope, ticket |
+| EVT-IDN-035 | idn.support.access_ended        | impersonation end   | grant id                              |
+| EVT-IDN-036 | idn.abuse.attack_detected       | BR-IDN-030          | endpoint, range                       |
+| EVT-IDN-037 | idn.policy.accepted             | acceptance          | account, policy, version              |
+| EVT-IDN-038 | idn.age.attestation_failed      | failed age gate     | no personal data                      |
 
 ### 9.2 Consumed
 
-| Event | From | Used for |
-|---|---|---|
-| set.dsr.erasure_released | SET (planned name) | Move account `pending_erasure → erased` (t10) |
-| set.policy.published | SET | Mark policy gate required |
-| tsf.case.suspension_decided | TSF (planned) | Apply t4 / t5 |
-| tsf.appeal.decided | TSF (planned) | Restore or uphold |
-| emp.org.verified / emp.org.closed | EMP (planned) | Enable SSO, close memberships |
-| ntf.delivery.bounced | NTF | Mark invitation or verification delivery failed |
-| bil.entitlement.changed | BIL (planned) | Enable or disable SSO feature |
+| Event                             | From               | Used for                                        |
+| --------------------------------- | ------------------ | ----------------------------------------------- |
+| set.dsr.erasure_released          | SET (planned name) | Move account `pending_erasure → erased` (t10)   |
+| set.policy.published              | SET                | Mark policy gate required                       |
+| tsf.case.suspension_decided       | TSF (planned)      | Apply t4 / t5                                   |
+| tsf.appeal.decided                | TSF (planned)      | Restore or uphold                               |
+| emp.org.verified / emp.org.closed | EMP (planned)      | Enable SSO, close memberships                   |
+| ntf.delivery.bounced              | NTF                | Mark invitation or verification delivery failed |
+| bil.entitlement.changed           | BIL (planned)      | Enable or disable SSO feature                   |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behavior |
-|---|---|---|
-| Identity providers (Google, GitHub; proposed Microsoft, Apple, LinkedIn) | Social sign-in | Provider banner; email path works |
-| Enterprise IdPs (SAML, OIDC) | Org SSO | Break-glass admins; banner |
-| Email provider via `NTF` | Codes, notices | Outbox retry; resend; in-app log still written |
-| SMS provider via `NTF` | Phone codes | Disabled when unavailable; no counter consumed |
-| Breached-password range service | Password check | Fail safe: longer password required, re-check |
-| Bot-risk provider | Abuse scoring | Stricter static limits |
-| WebAuthn library | Passkeys | Feature-detect; password path remains |
-| Key management service | Encrypting secrets (phone, TOTP, SSO config) | Writes fail closed; reads cached by key id |
-| Session and revocation store | Fast revocation | Fail closed |
+| Dependency                                                               | Purpose                                      | Failure behavior                               |
+| ------------------------------------------------------------------------ | -------------------------------------------- | ---------------------------------------------- |
+| Identity providers (Google, GitHub; proposed Microsoft, Apple, LinkedIn) | Social sign-in                               | Provider banner; email path works              |
+| Enterprise IdPs (SAML, OIDC)                                             | Org SSO                                      | Break-glass admins; banner                     |
+| Email provider via `NTF`                                                 | Codes, notices                               | Outbox retry; resend; in-app log still written |
+| SMS provider via `NTF`                                                   | Phone codes                                  | Disabled when unavailable; no counter consumed |
+| Breached-password range service                                          | Password check                               | Fail safe: longer password required, re-check  |
+| Bot-risk provider                                                        | Abuse scoring                                | Stricter static limits                         |
+| WebAuthn library                                                         | Passkeys                                     | Feature-detect; password path remains          |
+| Key management service                                                   | Encrypting secrets (phone, TOTP, SSO config) | Writes fail closed; reads cached by key id     |
+| Session and revocation store                                             | Fast revocation                              | Fail closed                                    |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by | For |
-|---|---|---|---|
-| NTF | Delivering all security notices | All modules | Authenticated principal, role context, assurance |
-| SET | Consent, policy versions, DSR orchestration, access log | SET | Account state, re-authentication, credential removal on erasure |
-| EMP (planned) | Organization record, domain verification | EMP | Membership grants, invitations, SSO |
-| TSF (planned) | Suspension and appeal decisions | TSF | Account suspension operation |
-| BIL (planned) | SSO entitlement | ADM (planned) | Support impersonation, staff grants, session revoke |
-| PRF, SRC (planned) | Hide profile on deactivation | PLT (planned) | Token validation for machine principals |
-| INS, STU, MEN (planned) | Review of role applications | PWA (planned) | Session behavior in installed PWA |
+| Depends on              | For                                                     | Depended on by | For                                                             |
+| ----------------------- | ------------------------------------------------------- | -------------- | --------------------------------------------------------------- |
+| NTF                     | Delivering all security notices                         | All modules    | Authenticated principal, role context, assurance                |
+| SET                     | Consent, policy versions, DSR orchestration, access log | SET            | Account state, re-authentication, credential removal on erasure |
+| EMP (planned)           | Organization record, domain verification                | EMP            | Membership grants, invitations, SSO                             |
+| TSF (planned)           | Suspension and appeal decisions                         | TSF            | Account suspension operation                                    |
+| BIL (planned)           | SSO entitlement                                         | ADM (planned)  | Support impersonation, staff grants, session revoke             |
+| PRF, SRC (planned)      | Hide profile on deactivation                            | PLT (planned)  | Token validation for machine principals                         |
+| INS, STU, MEN (planned) | Review of role applications                             | PWA (planned)  | Session behavior in installed PWA                               |
 
 ## 12. Module-level metrics
 
-| ID | Metric | Definition / formula | Owner |
-|---|---|---|---|
-| IDN-M01 | Registration-to-verified rate | verified accounts within 24 h ÷ registrations | Product (identity) |
-| IDN-M02 | Time to verified | median minutes from t1 to t2 | Product (identity) |
-| IDN-M03 | Sign-in success rate | successful sign-ins ÷ sign-in attempts excluding throttled | Product (identity) |
-| IDN-M04 | Passkey adoption | active accounts with ≥ 1 passkey ÷ active accounts | Product (identity) |
-| IDN-M05 | MFA coverage (privileged) | privileged accounts with MFA ÷ privileged accounts (target 100%) | SAD |
-| IDN-M06 | Account takeover reports | confirmed takeovers per 10,000 active accounts per month | SAD |
-| IDN-M07 | Refresh reuse detections | count per day, split confirmed theft vs false positive | SAD |
-| IDN-M08 | Recovery requests cancelled by holder | cancelled ÷ held (high ratio signals attack attempts) | SAD |
-| IDN-M09 | Revocation latency | p95 seconds from revoke to first denied request (target ≤ 60) | Platform engineering |
-| IDN-M10 | Challenge rate and false positive | challenged sign-ins ÷ sign-ins; support complaints ÷ challenges | PAD |
-| IDN-M11 | Impersonation grants | grants per month, average duration, percent with subject notice | SAD |
-| IDN-M12 | Invitation acceptance rate | accepted ÷ sent within 7 days | Product (identity) |
+| ID      | Metric                                | Definition / formula                                             | Owner                |
+| ------- | ------------------------------------- | ---------------------------------------------------------------- | -------------------- |
+| IDN-M01 | Registration-to-verified rate         | verified accounts within 24 h ÷ registrations                    | Product (identity)   |
+| IDN-M02 | Time to verified                      | median minutes from t1 to t2                                     | Product (identity)   |
+| IDN-M03 | Sign-in success rate                  | successful sign-ins ÷ sign-in attempts excluding throttled       | Product (identity)   |
+| IDN-M04 | Passkey adoption                      | active accounts with ≥ 1 passkey ÷ active accounts               | Product (identity)   |
+| IDN-M05 | MFA coverage (privileged)             | privileged accounts with MFA ÷ privileged accounts (target 100%) | SAD                  |
+| IDN-M06 | Account takeover reports              | confirmed takeovers per 10,000 active accounts per month         | SAD                  |
+| IDN-M07 | Refresh reuse detections              | count per day, split confirmed theft vs false positive           | SAD                  |
+| IDN-M08 | Recovery requests cancelled by holder | cancelled ÷ held (high ratio signals attack attempts)            | SAD                  |
+| IDN-M09 | Revocation latency                    | p95 seconds from revoke to first denied request (target ≤ 60)    | Platform engineering |
+| IDN-M10 | Challenge rate and false positive     | challenged sign-ins ÷ sign-ins; support complaints ÷ challenges  | PAD                  |
+| IDN-M11 | Impersonation grants                  | grants per month, average duration, percent with subject notice  | SAD                  |
+| IDN-M12 | Invitation acceptance rate            | accepted ÷ sent within 7 days                                    | Product (identity)   |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-IDN-01 | Which mechanism issues sessions: managed auth vendor (script-visible JWT) or first-party same-origin cookie sessions? | (a) vendor JWT, (b) first-party cookies | (b) per SSOT V61-13 and this blueprint (no script-readable token) | Owner and security lead | FR-IDN-009, 010 |
-| OD-IDN-02 | Role resolution: legacy "highest wins" or explicit active role context? | (a) highest wins, (b) single active context | (b) because union of roles causes conflicts of interest | Product director | FR-IDN-022 |
-| OD-IDN-03 | Allow passkey-only signup in the first release? | yes, no | no (email-code verification first) | Product director | FR-IDN-006 |
-| OD-IDN-04 | Erasure cooling-off length and deactivation retention. | 7 or 30 days; 12 months or 24 months | 7 days cooling-off with completion ≤ 30 days; 12 months deactivation | Owner and counsel | FR-IDN-026, 027 |
-| OD-IDN-05 | Recovery for accounts with no verified email or phone. | support identity check, none | human identity check with SAD approval, never shortened | Security lead | FR-IDN-020 |
-| OD-IDN-06 | Step-up freshness window. | 300, 600, 900 seconds | 300 s | Security lead | FR-IDN-015 |
-| OD-IDN-07 | SMS provider and enabling phone verification. | none, vendor A, vendor B | disabled until chosen | Owner | FR-IDN-003 |
-| OD-IDN-08 | Block password reuse of last N? | off, N=5 | off (no composition rules; breach check suffices) | Security lead | FR-IDN-017 |
-| OD-IDN-09 | Merge two accounts of one person. | not supported, support-assisted | support-assisted with both identities' proof, deferred | Product director | FR-IDN-024 |
-| OD-IDN-10 | Notify the subject when support views their account? | always, unless legally prohibited, never | always unless legally prohibited | Owner and counsel | FR-IDN-028 |
-| OD-IDN-11 | Minimum age and guardian-consented minors. | 13, 16, 18; guardian flow yes/no | 16, attestation only, no guardian flow | Owner and counsel | FR-IDN-029 |
-| OD-IDN-12 | Is there a terminal `terminated` account state distinct from suspended-then-erased? | add state, no | no, use suspended then erasure by TSF | Product director | SM-IDN-01 |
-| OD-IDN-13 | SSO and SCIM plan tier. | all paid, enterprise only | enterprise only (R4) | Owner | FR-IDN-005 |
-| OD-IDN-14 | Session idle and absolute lifetimes (source docs disagree: 14/30 days, 30/90 days). | 14/30, 30/90 | 14/30 with remember-me 90 | Security lead | FR-IDN-009 |
+| ID        | Question                                                                                                              | Options                                     | Default proposal                                                     | Who decides             | Blocking        |
+| --------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------- | ----------------------- | --------------- |
+| OD-IDN-01 | Which mechanism issues sessions: managed auth vendor (script-visible JWT) or first-party same-origin cookie sessions? | (a) vendor JWT, (b) first-party cookies     | (b) per SSOT V61-13 and this blueprint (no script-readable token)    | Owner and security lead | FR-IDN-009, 010 |
+| OD-IDN-02 | Role resolution: legacy "highest wins" or explicit active role context?                                               | (a) highest wins, (b) single active context | (b) because union of roles causes conflicts of interest              | Product director        | FR-IDN-022      |
+| OD-IDN-03 | Allow passkey-only signup in the first release?                                                                       | yes, no                                     | no (email-code verification first)                                   | Product director        | FR-IDN-006      |
+| OD-IDN-04 | Erasure cooling-off length and deactivation retention.                                                                | 7 or 30 days; 12 months or 24 months        | 7 days cooling-off with completion ≤ 30 days; 12 months deactivation | Owner and counsel       | FR-IDN-026, 027 |
+| OD-IDN-05 | Recovery for accounts with no verified email or phone.                                                                | support identity check, none                | human identity check with SAD approval, never shortened              | Security lead           | FR-IDN-020      |
+| OD-IDN-06 | Step-up freshness window.                                                                                             | 300, 600, 900 seconds                       | 300 s                                                                | Security lead           | FR-IDN-015      |
+| OD-IDN-07 | SMS provider and enabling phone verification.                                                                         | none, vendor A, vendor B                    | disabled until chosen                                                | Owner                   | FR-IDN-003      |
+| OD-IDN-08 | Block password reuse of last N?                                                                                       | off, N=5                                    | off (no composition rules; breach check suffices)                    | Security lead           | FR-IDN-017      |
+| OD-IDN-09 | Merge two accounts of one person.                                                                                     | not supported, support-assisted             | support-assisted with both identities' proof, deferred               | Product director        | FR-IDN-024      |
+| OD-IDN-10 | Notify the subject when support views their account?                                                                  | always, unless legally prohibited, never    | always unless legally prohibited                                     | Owner and counsel       | FR-IDN-028      |
+| OD-IDN-11 | Minimum age and guardian-consented minors.                                                                            | 13, 16, 18; guardian flow yes/no            | 16, attestation only, no guardian flow                               | Owner and counsel       | FR-IDN-029      |
+| OD-IDN-12 | Is there a terminal `terminated` account state distinct from suspended-then-erased?                                   | add state, no                               | no, use suspended then erasure by TSF                                | Product director        | SM-IDN-01       |
+| OD-IDN-13 | SSO and SCIM plan tier.                                                                                               | all paid, enterprise only                   | enterprise only (R4)                                                 | Owner                   | FR-IDN-005      |
+| OD-IDN-14 | Session idle and absolute lifetimes (source docs disagree: 14/30 days, 30/90 days).                                   | 14/30, 30/90                                | 14/30 with remember-me 90                                            | Security lead           | FR-IDN-009      |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-IDN-01 | Account takeover through recovery or support channels | M / H | Hold, multi-channel notice, no support bypass (BR-IDN-019, 028) |
-| RSK-IDN-02 | Credential stuffing at scale degrades login or locks real users | H / M | Layered throttle by account and IP, passkeys, risk challenge (FR-IDN-030) |
-| RSK-IDN-03 | Cookie-based sessions break in installed PWAs or third-party-cookie restrictions | M / M | Same-origin design, platform test matrix (`PWA` planned) |
-| RSK-IDN-04 | Auth outage takes down the whole product (tier-0) | L / H | Fail-closed design with honest maintenance page, no vendor lock-in decision recorded (OD-IDN-01) |
-| RSK-IDN-05 | SMS pumping fraud and SIM-swap | M / M | Caps, risk service, phone never the sole recovery factor (BR-IDN-036) |
-| RSK-IDN-06 | Pre-registration or linking account takeover | M / H | BR-IDN-024 override rule |
-| RSK-IDN-07 | Support impersonation abused as insider threat | L / H | Grants, read-only, anomaly alerts, subject-visible log |
-| RSK-IDN-08 | Age rules unresolved create legal exposure | M / H | Attestation-only default with OD-IDN-11 before launch |
-| RSK-IDN-09 | Mandatory MFA for org members drives churn | M / L | Grace period and adoption reporting |
+| ID         | Risk                                                                             | Likelihood / impact | Mitigation                                                                                       |
+| ---------- | -------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| RSK-IDN-01 | Account takeover through recovery or support channels                            | M / H               | Hold, multi-channel notice, no support bypass (BR-IDN-019, 028)                                  |
+| RSK-IDN-02 | Credential stuffing at scale degrades login or locks real users                  | H / M               | Layered throttle by account and IP, passkeys, risk challenge (FR-IDN-030)                        |
+| RSK-IDN-03 | Cookie-based sessions break in installed PWAs or third-party-cookie restrictions | M / M               | Same-origin design, platform test matrix (`PWA` planned)                                         |
+| RSK-IDN-04 | Auth outage takes down the whole product (tier-0)                                | L / H               | Fail-closed design with honest maintenance page, no vendor lock-in decision recorded (OD-IDN-01) |
+| RSK-IDN-05 | SMS pumping fraud and SIM-swap                                                   | M / M               | Caps, risk service, phone never the sole recovery factor (BR-IDN-036)                            |
+| RSK-IDN-06 | Pre-registration or linking account takeover                                     | M / H               | BR-IDN-024 override rule                                                                         |
+| RSK-IDN-07 | Support impersonation abused as insider threat                                   | L / H               | Grants, read-only, anomaly alerts, subject-visible log                                           |
+| RSK-IDN-08 | Age rules unresolved create legal exposure                                       | M / H               | Attestation-only default with OD-IDN-11 before launch                                            |
+| RSK-IDN-09 | Mandatory MFA for org members drives churn                                       | M / L               | Grace period and adoption reporting                                                              |
 
 ## 15. Legacy source trace
 
-| Legacy source | What was used | What was dropped or changed and why |
-|---|---|---|
-| `SSOT.md` §9.1 F-01, §12.8, §15.4–§15.9, §5.3–§5.4, V61-05/07/11/13/18/24 | Registration, verification, login, reset, OAuth, rate limits, state machine, erasure clocks, age gate, scoped roles | Managed auth vendor JWT replaced by mechanism-agnostic behavior (OD-IDN-01); 30-day sliding refresh and 1 h access replaced by 15 min access (Yash CONST); "highest wins" replaced (OD-IDN-02); `ROLE_USER/RECRUITER/ADMIN` tier-1 roles replaced by canonical role codes |
-| `docs/registries/FEATURE_REGISTRY.md` F-01 | Feature identity | F-01 split into 32 features; MFA, passkeys, SSO, recovery are additions |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G1_IDENTITY_AND_PROFILE.md` SPEC-01 | Cookie names and flags, throttle curve, rotation, passkey rules, acceptance criteria | Provisional endpoint paths not copied (API groups are defined by `PLT` and the architecture files) |
-| `…/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T041..T059 and constants CONST-S01..S09 | Lifetimes, step-up, privileged MFA, support grants, email change, new-device notice | Values kept as `[PROP]` parameters because the source marks them open |
-| `…/06_BUSINESS_PROCESSES/STATE_MACHINES.md` SM-ACCOUNT, SM-SESSION | Account and session state machines | Renamed to `SM-IDN-01`, `SM-IDN-02`; `SM-IDN-01` t1b added for provider-verified sign-up |
-| `…/14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md` | Privileged access grants, audit scope | — |
-| Industry products (LinkedIn, Workday, Greenhouse, Okta-style SSO) | Context switching, SSO, invitations, recovery hold | Tagged `[PROP]` where no legacy source exists: FR-IDN-003, 005, 007, 013, 014 (recovery codes), 025 (domain join), 028 UX |
+| Legacy source                                                                                   | What was used                                                                                                       | What was dropped or changed and why                                                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` §9.1 F-01, §12.8, §15.4–§15.9, §5.3–§5.4, V61-05/07/11/13/18/24                       | Registration, verification, login, reset, OAuth, rate limits, state machine, erasure clocks, age gate, scoped roles | Managed auth vendor JWT replaced by mechanism-agnostic behavior (OD-IDN-01); 30-day sliding refresh and 1 h access replaced by 15 min access (Yash CONST); "highest wins" replaced (OD-IDN-02); `ROLE_USER/RECRUITER/ADMIN` tier-1 roles replaced by canonical role codes |
+| `docs/registries/FEATURE_REGISTRY.md` F-01                                                      | Feature identity                                                                                                    | F-01 split into 32 features; MFA, passkeys, SSO, recovery are additions                                                                                                                                                                                                   |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G1_IDENTITY_AND_PROFILE.md` SPEC-01 | Cookie names and flags, throttle curve, rotation, passkey rules, acceptance criteria                                | Provisional endpoint paths not copied (API groups are defined by `PLT` and the architecture files)                                                                                                                                                                        |
+| `…/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T041..T059 and constants CONST-S01..S09 | Lifetimes, step-up, privileged MFA, support grants, email change, new-device notice                                 | Values kept as `[PROP]` parameters because the source marks them open                                                                                                                                                                                                     |
+| `…/06_BUSINESS_PROCESSES/STATE_MACHINES.md` SM-ACCOUNT, SM-SESSION                              | Account and session state machines                                                                                  | Renamed to `SM-IDN-01`, `SM-IDN-02`; `SM-IDN-01` t1b added for provider-verified sign-up                                                                                                                                                                                  |
+| `…/14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md`                                     | Privileged access grants, audit scope                                                                               | —                                                                                                                                                                                                                                                                         |
+| Industry products (LinkedIn, Workday, Greenhouse, Okta-style SSO)                               | Context switching, SSO, invitations, recovery hold                                                                  | Tagged `[PROP]` where no legacy source exists: FR-IDN-003, 005, 007, 013, 014 (recovery codes), 025 (domain join), 028 UX                                                                                                                                                 |

@@ -10,69 +10,69 @@ Everything here describes the **intended complete product**. Nothing in this fol
 
 Every non-obvious statement carries one tag:
 
-| Tag | Meaning |
-|---|---|
-| `[SRC]` | Taken from a legacy document or the code. Cite it: `[SRC: SSOT §9.7]`. |
-| `[DER]` | Derived: a logical consequence of sourced intent plus standard practice for this kind of product. |
-| `[PROP]` | Proposed: a capability a complete product should have that no source mentions. Stands until a stakeholder rejects it. |
-| `[DEC-REQ]` | Needs a stakeholder decision. Always paired with an `OD-` id. Never silently resolved. |
+| Tag         | Meaning                                                                                                               |
+| ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| `[SRC]`     | Taken from a legacy document or the code. Cite it: `[SRC: SSOT §9.7]`.                                                |
+| `[DER]`     | Derived: a logical consequence of sourced intent plus standard practice for this kind of product.                     |
+| `[PROP]`    | Proposed: a capability a complete product should have that no source mentions. Stands until a stakeholder rejects it. |
+| `[DEC-REQ]` | Needs a stakeholder decision. Always paired with an `OD-` id. Never silently resolved.                                |
 
 Do not invent business objectives, prices, targets, volumes, deadlines or headcount. When a number is needed and unknown, write the parameter name, give a **default proposal** marked `[PROP]`, and open an `OD-`.
 
 ## 3. Identifier scheme
 
-| Prefix | Meaning | Format | Example |
-|---|---|---|---|
-| Module | Product module | 3-letter code (table in §4) | `LRN` |
-| `FR-` | Feature | `FR-<MOD>-<nnn>` | `FR-LRN-014` |
-| `BR-` | Business rule (new namespace; legacy `BR-001…248` are separate) | `BR-<MOD>-<nnn>` | `BR-LRN-007` |
-| `SM-` | State machine | `SM-<MOD>-<nn>` | `SM-LRN-02` |
-| `SCR-` | Screen | `SCR-<MOD>-<nnn>` | `SCR-LRN-011` |
-| `EVT-` | Domain event | `EVT-<MOD>-<nnn>` (name `module.entity.action`) | `EVT-LRN-003` |
-| `ENT-` | Data entity | `ENT-<MOD>-<nn>` | `ENT-LRN-04` |
-| `JRN-` | User journey | `JRN-<ROLE>-<nn>` | `JRN-CAN-03` |
-| `NFR-` | Non-functional requirement | `NFR-<AREA>-<nnn>` | `NFR-PERF-004` |
-| `OD-` | Open decision (stakeholder input) | `OD-<MOD or AREA>-<nn>` | `OD-LRN-02` |
-| `RSK-` | Risk | `RSK-<MOD or AREA>-<nn>` | `RSK-ASM-01` |
-| `DEC-` | Recorded decision | `DEC-<nnn>` | `DEC-001` |
-| `API-` | API capability group | `API-<MOD>-<nn>` | `API-JOB-03` |
+| Prefix | Meaning                                                         | Format                                          | Example        |
+| ------ | --------------------------------------------------------------- | ----------------------------------------------- | -------------- |
+| Module | Product module                                                  | 3-letter code (table in §4)                     | `LRN`          |
+| `FR-`  | Feature                                                         | `FR-<MOD>-<nnn>`                                | `FR-LRN-014`   |
+| `BR-`  | Business rule (new namespace; legacy `BR-001…248` are separate) | `BR-<MOD>-<nnn>`                                | `BR-LRN-007`   |
+| `SM-`  | State machine                                                   | `SM-<MOD>-<nn>`                                 | `SM-LRN-02`    |
+| `SCR-` | Screen                                                          | `SCR-<MOD>-<nnn>`                               | `SCR-LRN-011`  |
+| `EVT-` | Domain event                                                    | `EVT-<MOD>-<nnn>` (name `module.entity.action`) | `EVT-LRN-003`  |
+| `ENT-` | Data entity                                                     | `ENT-<MOD>-<nn>`                                | `ENT-LRN-04`   |
+| `JRN-` | User journey                                                    | `JRN-<ROLE>-<nn>`                               | `JRN-CAN-03`   |
+| `NFR-` | Non-functional requirement                                      | `NFR-<AREA>-<nnn>`                              | `NFR-PERF-004` |
+| `OD-`  | Open decision (stakeholder input)                               | `OD-<MOD or AREA>-<nn>`                         | `OD-LRN-02`    |
+| `RSK-` | Risk                                                            | `RSK-<MOD or AREA>-<nn>`                        | `RSK-ASM-01`   |
+| `DEC-` | Recorded decision                                               | `DEC-<nnn>`                                     | `DEC-001`      |
+| `API-` | API capability group                                            | `API-<MOD>-<nn>`                                | `API-JOB-03`   |
 
 Ids are never reused. A removed item keeps its id with status `Withdrawn`.
 
 ## 4. Module codes
 
-| Code | Module | Group |
-|---|---|---|
-| IDN | Identity, Authentication & Account | Foundation |
-| SET | Settings, Privacy, Consent & Data Rights | Foundation |
-| NTF | Notifications & Communication Channels | Foundation |
-| REP | Gamification, Reputation & Recognition | Engagement |
-| PRF | Profile, Resume & Portfolio | Career identity |
-| EVD | Evidence, Work History & Credentials | Career identity |
-| BGV | Verification & Background Checks | Career identity |
-| SRC | Search & Discovery | Platform |
-| LRN | Learning & Course Experience | Learning |
-| STU | Instructor Studio & Content Production | Learning |
-| ASM | Assessments, Challenges & Integrity | Learning |
-| JOB | Job Marketplace & Candidate Applications | Hiring |
-| ATS | Recruiter Workspace & Hiring Pipeline | Hiring |
-| INT | Interviews & Scheduling | Hiring |
-| EMP | Employer Organisation, Teams & Brand | Hiring |
-| NET | Networking, Community & Referrals | Social |
-| MSG | Messaging & Real-time Communication | Social |
-| AIC | AI Career Assistant, Matching & Recommendations | Intelligence |
-| TSF | Trust, Safety & Moderation | Governance |
-| INS | Institutions & Managed Learning | Institutions |
-| BIL | Billing, Plans & Entitlements | Commercial |
-| MEN | Mentorship, Coaching & Career Services | OS expansion |
-| GIG | Freelance, Contract & Project Work | OS expansion |
-| EVT | Events, Hackathons & Community Programmes | OS expansion |
-| MKT | Market Intelligence & Career Pathing | OS expansion |
-| ENT | Enterprise Talent: Internal Mobility, Skills & L&D | OS expansion |
-| ANL | Analytics, Reporting & Insights | Platform |
-| ADM | Admin Console, Support & Operations | Governance |
-| PWA | PWA, Offline, Mobile & Browser Extension | Platform |
-| PLT | Platform: Public API, Webhooks, Integrations, Media & Files | Platform |
+| Code | Module                                                      | Group           |
+| ---- | ----------------------------------------------------------- | --------------- |
+| IDN  | Identity, Authentication & Account                          | Foundation      |
+| SET  | Settings, Privacy, Consent & Data Rights                    | Foundation      |
+| NTF  | Notifications & Communication Channels                      | Foundation      |
+| REP  | Gamification, Reputation & Recognition                      | Engagement      |
+| PRF  | Profile, Resume & Portfolio                                 | Career identity |
+| EVD  | Evidence, Work History & Credentials                        | Career identity |
+| BGV  | Verification & Background Checks                            | Career identity |
+| SRC  | Search & Discovery                                          | Platform        |
+| LRN  | Learning & Course Experience                                | Learning        |
+| STU  | Instructor Studio & Content Production                      | Learning        |
+| ASM  | Assessments, Challenges & Integrity                         | Learning        |
+| JOB  | Job Marketplace & Candidate Applications                    | Hiring          |
+| ATS  | Recruiter Workspace & Hiring Pipeline                       | Hiring          |
+| INT  | Interviews & Scheduling                                     | Hiring          |
+| EMP  | Employer Organisation, Teams & Brand                        | Hiring          |
+| NET  | Networking, Community & Referrals                           | Social          |
+| MSG  | Messaging & Real-time Communication                         | Social          |
+| AIC  | AI Career Assistant, Matching & Recommendations             | Intelligence    |
+| TSF  | Trust, Safety & Moderation                                  | Governance      |
+| INS  | Institutions & Managed Learning                             | Institutions    |
+| BIL  | Billing, Plans & Entitlements                               | Commercial      |
+| MEN  | Mentorship, Coaching & Career Services                      | OS expansion    |
+| GIG  | Freelance, Contract & Project Work                          | OS expansion    |
+| EVT  | Events, Hackathons & Community Programmes                   | OS expansion    |
+| MKT  | Market Intelligence & Career Pathing                        | OS expansion    |
+| ENT  | Enterprise Talent: Internal Mobility, Skills & L&D          | OS expansion    |
+| ANL  | Analytics, Reporting & Insights                             | Platform        |
+| ADM  | Admin Console, Support & Operations                         | Governance      |
+| PWA  | PWA, Offline, Mobile & Browser Extension                    | Platform        |
+| PLT  | Platform: Public API, Webhooks, Integrations, Media & Files | Platform        |
 
 "OS expansion" modules are **proposed scope** (the stakeholder goal is an "operating system" for the whole career domain, which exceeds `SSOT.md` §4.2). They are specified fully but gated by `DEC-002` / an `OD-` before any build.
 

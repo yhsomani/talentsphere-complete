@@ -12,18 +12,19 @@ REP gives people honest feedback on effort and standing, and gives the platform 
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| Learners and candidates keep coming back to finish meaningful work | Streak continuity, goal completion, weekly active learners (`REP-M01`..`REP-M04`) |
-| XP and badges mean something | Awards only for verified milestones (BR-REP-001, BR-REP-008); integrity flag rate and clawback rate stay low (`REP-M07`) |
-| Reputation is explainable, fair and private | Every score has an explanation view; zero individual signal leakage; deterministic nightly computation (BR-REP-018, BR-REP-021) |
-| Nobody is pressured or shamed | Opt-out and intensity controls used without penalty; no loss-aversion copy (BR-REP-014, BR-REP-027) |
-| Gaming does not pay | Velocity limits, collusion discounts, sanctions with appeal (BR-REP-025, BR-REP-026) |
-| Recruiters are never misled | XP, level and badges are labeled engagement indicators, never evidence (BR-REP-034) |
+| Outcome                                                            | How the system knows                                                                                                            |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Learners and candidates keep coming back to finish meaningful work | Streak continuity, goal completion, weekly active learners (`REP-M01`..`REP-M04`)                                               |
+| XP and badges mean something                                       | Awards only for verified milestones (BR-REP-001, BR-REP-008); integrity flag rate and clawback rate stay low (`REP-M07`)        |
+| Reputation is explainable, fair and private                        | Every score has an explanation view; zero individual signal leakage; deterministic nightly computation (BR-REP-018, BR-REP-021) |
+| Nobody is pressured or shamed                                      | Opt-out and intensity controls used without penalty; no loss-aversion copy (BR-REP-014, BR-REP-027)                             |
+| Gaming does not pay                                                | Velocity limits, collusion discounts, sanctions with appeal (BR-REP-025, BR-REP-026)                                            |
+| Recruiters are never misled                                        | XP, level and badges are labeled engagement indicators, never evidence (BR-REP-034)                                             |
 
 ### 1.3 Scope
 
 **In scope**
+
 - XP rule catalog, award engine, append-only ledger, reversals and clawbacks, daily caps.
 - Levels, progress UI, dashboard widgets.
 - Badge catalog, issuance, display, revocation and expiry, verifiable (Open Badges) export, peer recognition.
@@ -33,6 +34,7 @@ REP gives people honest feedback on effort and standing, and gives the platform 
 - Anti-gaming detection, review queue and sanctions; opt-out and intensity; share cards; admin rule tuning; fairness and ethics audit.
 
 **Out of scope (owned elsewhere)**
+
 - Verified credentials, evidence rungs, certificates and their revocation: `EVD`, `BGV` (planned). REP consumes completion events and never issues credentials of record.
 - Course, lesson and challenge completion and grading: `LRN`, `ASM` (planned). They emit milestone events.
 - Endorsements, reviews, community contributions as content: `NET`, `LRN`, `MEN` (planned). They emit signals.
@@ -43,13 +45,13 @@ REP gives people honest feedback on effort and standing, and gives the platform 
 
 ### 1.4 Owned versus consumed
 
-| Owned by REP | Consumed by REP |
-|---|---|
+| Owned by REP                                                                                                                                                                                                                                                       | Consumed by REP                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | XP rule, ledger entry, balance and level projection, badge definition and award, streak, goal, leaderboard snapshot and preference, season, recognition (kudos), reputation signal, score and config, integrity flag and case, gamification preference, share card | Milestone and activity events from `LRN`, `ASM`, `PRF`, `EVD`, `JOB`, `NET`, `MEN`, `EVT`, `INS`; consent and visibility from `SET`; time zone and locale from `SET`; delivery from `NTF`; account state from `IDN` |
 
 ### 1.5 Design stance
 
-1. Effort is not evidence. XP, levels and badges describe engagement; verified work history and credentials live in `EVD`. [SRC: SSOT §6 evidence semantics] 
+1. Effort is not evidence. XP, levels and badges describe engagement; verified work history and credentials live in `EVD`. [SRC: SSOT §6 evidence semantics]
 2. Honest incentives. No paid XP or badges, no dark patterns, no shaming, easy opt-out. [SRC: SSOT BR-202]
 3. Derived, never set. Scores are computed from auditable signals; nobody edits a score by hand. [SRC: SSOT BR-164]
 4. Private by default. Reputation and leaderboard identity are visible to others only with consent or an application context. [SRC: SSOT BR-167]
@@ -59,38 +61,38 @@ REP gives people honest feedback on effort and standing, and gives the platform 
 
 Legend: `S` self only · `C` cohort or org scope as configured · `O` own organization · `G` grant-bound audited · `Y` yes · `R` read-only · `—` no.
 
-| Capability | GUE | CAN/STD | INS/MNT/FRL | REC/HMG | EAD | IAD/PLO/EXA | MOD | SUP | FIN | PAD | SAD | API |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| See own XP, level, streak, badges, goals | — | S | S | S (if participating) | S | S | — | — | — | — | — | — |
-| Opt out or set intensity | — | S | S | S | S | S | S | S | S | S | S | — |
-| View public badge page of another user | Y (if public) | Y | Y | Y | Y | Y | — | — | — | — | — | — |
-| Join leaderboards (visible identity) | — | S (opt-in) | S (opt-in) | — | — | — | — | — | — | — | — | — |
-| View global and skill leaderboards | — | Y (aliases or opted-in names) | Y | R (aggregate only) | — | — | — | — | — | Y | Y | — |
-| View institution cohort leaderboard | — | C (members) | C (instructors of cohort) | — | — | C (policy) | — | — | — | — | — | — |
-| Enable enterprise internal boards | — | — | — | — | O | O (EXA) | — | — | — | — | — | — |
-| Give recognition (kudos) | — | S | S | S | S | S | — | — | — | — | — | — |
-| View own reputation and explanation | — | S | S | S | S | S | — | — | — | — | — | — |
-| View another person's reputation | — | consent-gated | consent-gated | consent or active application | — | institution policy (aggregate) | — | G | — | G | G | — |
-| Define badges for own org or course | — | — | O (course badges) | O (org culture badges, `Could`) | O | O | — | — | — | Y | Y | — |
-| Review integrity cases | — | — | — | — | — | — | Y | G | — | Y | Y | — |
-| Tune XP rules, levels, reputation config | — | — | — | — | — | — | — | — | — | Y (change-controlled) | Y | — |
-| Read ledgers of a subject | — | S | S | S | S | S | G | G | — | G | G | — |
-| Emit milestone events | — | — | — | — | — | — | — | — | — | — | — | Y (platform module service principals) |
+| Capability                               | GUE           | CAN/STD                       | INS/MNT/FRL               | REC/HMG                         | EAD | IAD/PLO/EXA                    | MOD | SUP | FIN | PAD                   | SAD | API                                    |
+| ---------------------------------------- | ------------- | ----------------------------- | ------------------------- | ------------------------------- | --- | ------------------------------ | --- | --- | --- | --------------------- | --- | -------------------------------------- |
+| See own XP, level, streak, badges, goals | —             | S                             | S                         | S (if participating)            | S   | S                              | —   | —   | —   | —                     | —   | —                                      |
+| Opt out or set intensity                 | —             | S                             | S                         | S                               | S   | S                              | S   | S   | S   | S                     | S   | —                                      |
+| View public badge page of another user   | Y (if public) | Y                             | Y                         | Y                               | Y   | Y                              | —   | —   | —   | —                     | —   | —                                      |
+| Join leaderboards (visible identity)     | —             | S (opt-in)                    | S (opt-in)                | —                               | —   | —                              | —   | —   | —   | —                     | —   | —                                      |
+| View global and skill leaderboards       | —             | Y (aliases or opted-in names) | Y                         | R (aggregate only)              | —   | —                              | —   | —   | —   | Y                     | Y   | —                                      |
+| View institution cohort leaderboard      | —             | C (members)                   | C (instructors of cohort) | —                               | —   | C (policy)                     | —   | —   | —   | —                     | —   | —                                      |
+| Enable enterprise internal boards        | —             | —                             | —                         | —                               | O   | O (EXA)                        | —   | —   | —   | —                     | —   | —                                      |
+| Give recognition (kudos)                 | —             | S                             | S                         | S                               | S   | S                              | —   | —   | —   | —                     | —   | —                                      |
+| View own reputation and explanation      | —             | S                             | S                         | S                               | S   | S                              | —   | —   | —   | —                     | —   | —                                      |
+| View another person's reputation         | —             | consent-gated                 | consent-gated             | consent or active application   | —   | institution policy (aggregate) | —   | G   | —   | G                     | G   | —                                      |
+| Define badges for own org or course      | —             | —                             | O (course badges)         | O (org culture badges, `Could`) | O   | O                              | —   | —   | —   | Y                     | Y   | —                                      |
+| Review integrity cases                   | —             | —                             | —                         | —                               | —   | —                              | Y   | G   | —   | Y                     | Y   | —                                      |
+| Tune XP rules, levels, reputation config | —             | —                             | —                         | —                               | —   | —                              | —   | —   | —   | Y (change-controlled) | Y   | —                                      |
+| Read ledgers of a subject                | —             | S                             | S                         | S                               | S   | S                              | G   | G   | —   | G                     | G   | —                                      |
+| Emit milestone events                    | —             | —                             | —                         | —                               | —   | —                              | —   | —   | —   | —                     | —   | Y (platform module service principals) |
 
 Rules: recruiters and employers never see XP totals, levels or streaks of candidates by default; badge visibility follows the holder's choice; reputation visibility follows BR-REP-020. [DER; SRC: SSOT BR-167]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| REP-A | XP and ledger | FR-REP-001, 002, 003 |
-| REP-B | Levels | FR-REP-004, 005 |
-| REP-C | Badges and recognition | FR-REP-006, 007, 008, 009, 010, 028 |
-| REP-D | Streaks and goals | FR-REP-011, 012, 013 |
-| REP-E | Leaderboards | FR-REP-014, 015, 016, 017, 027 |
-| REP-F | Reputation | FR-REP-018, 019, 020, 021, 022, 023, 031 |
-| REP-G | Integrity | FR-REP-024, 025 |
-| REP-H | Controls and governance | FR-REP-026, 029, 030 |
+| Code  | Sub-module              | Features                                 |
+| ----- | ----------------------- | ---------------------------------------- |
+| REP-A | XP and ledger           | FR-REP-001, 002, 003                     |
+| REP-B | Levels                  | FR-REP-004, 005                          |
+| REP-C | Badges and recognition  | FR-REP-006, 007, 008, 009, 010, 028      |
+| REP-D | Streaks and goals       | FR-REP-011, 012, 013                     |
+| REP-E | Leaderboards            | FR-REP-014, 015, 016, 017, 027           |
+| REP-F | Reputation              | FR-REP-018, 019, 020, 021, 022, 023, 031 |
+| REP-G | Integrity               | FR-REP-024, 025                          |
+| REP-H | Controls and governance | FR-REP-026, 029, 030                     |
 
 ```mermaid
 flowchart LR
@@ -713,7 +715,7 @@ Parameter notation: `{braces}` mark `[PROP]` defaults unless a source is cited; 
 
 - **Sub-module:** REP-F Reputation
 - **Priority / tier:** Should · R2
-- **Source:** [SRC: SSOT F-144 "Signal Aggregation: credentials + endorsements + reviews + contributions + peer feedback", "Time Decay: configurable half-life", BR-166 older than 24 months count less]
+- **Source:** [SRC: SSOT F-144 "Signal Aggregation: credentials + endorsements + reviews + contributions + peer feedback", "Time Decay: configurable half-life", BR-166 older than 24 months count less] · also [SRC: SSOT §7 F-146 Activity & Contribution Tracking]
 - **Purpose and outcome:** Only registered, verifiable signal types feed reputation, and old signals fade. The system knows by a registry of signal types and a signal row per qualifying event.
 - **Roles and permissions:** `API (platform modules): emit signals` · `PAD: manage registry (FR-REP-029)`.
 - **Preconditions and entry points:** Source modules emit signals: verified credential issued or revoked (`EVD`), skill endorsement from a verified connection (`NET`), course review quality or instructor rating (`LRN`), accepted contribution (`NET`), mentor session feedback (`MEN`), peer recognition (FR-REP-010), challenge performance relative to difficulty (`ASM`), hire outcome confirmation with consent (`ATS`, `BGV`), employer-side signals in the employer context (FR-REP-023).
@@ -823,7 +825,7 @@ Parameter notation: `{braces}` mark `[PROP]` defaults unless a source is cited; 
 
 - **Sub-module:** REP-F Reputation
 - **Priority / tier:** Should · R3 (instructor, mentor); Could · R6 (employer brand)
-- **Source:** [SRC: SSOT F-148 Instructor Reputation, F-149 Employer Reputation & Brand, F-150 Peer Credibility Networks, F-144 context-specific scoring]
+- **Source:** [SRC: SSOT F-148 Instructor Reputation, F-149 Employer Reputation & Brand, F-150 Peer Credibility Networks, F-144 context-specific scoring] · also [SRC: SSOT §7 F-169 Community Contribution Scoring & Recognition]
 - **Purpose and outcome:** Different roles earn their own standing from signals suited to that role, so learners, candidates and employers can judge who to trust. The system knows by separate score rows per context.
 - **Roles and permissions:** `INS, MNT: view own and public` · `EAD: view own org's` · `CAN: view public labels` · `PAD: configure`.
 - **Preconditions and entry points:** Instructor profile and course pages (`STU`, `LRN` planned), mentor profiles (`MEN` planned), employer pages (`EMP` planned), community profiles (`NET` planned).
@@ -1032,45 +1034,45 @@ Parameter notation: `{braces}` mark `[PROP]` defaults unless a source is cited; 
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-REP-001 | XP is awarded only by rules in the catalog for verified qualifying events from platform modules; self-reported claims and client-submitted amounts never earn XP. | XP must mean something. | Award engine | [SRC: SSOT BR-053 spirit; F-22] |
-| BR-REP-002 | An XP award is idempotent by `(subject, referenceType, referenceId, kind)`; one source event yields at most one award. | No double credit. | Database unique key + engine | [SRC: SSOT BR-25] |
-| BR-REP-003 | Positive XP per subject per local day is capped at {200} with cap groups per rule category; excess is recorded in a cap note and not carried over. | Bound farming. | Ledger service | [SRC: SSOT BR-25 daily cap 200] |
-| BR-REP-004 | The XP ledger is append-only; balance and level are rebuildable projections; corrections are reversing or adjusting rows with reasons. | Auditability. | Database privileges + domain | [SRC: SSOT table `xp_transactions`] |
-| BR-REP-005 | Challenge XP is {20–100} by difficulty, awarded only on a pass, once per challenge for life; practice mode and failed attempts earn nothing. | Meaningful effort. | Rule catalog | [SRC: SSOT F-08 step 7, BR-25] |
-| BR-REP-006 | Level is a deterministic function of total XP using a versioned threshold table; it decreases only through reversal or sanction; table changes never lower existing levels. | Predictability and fairness. | Level service | [SRC: SSOT WF-11]; thresholds [PROP] |
-| BR-REP-007 | XP, levels and badges have no monetary value, cannot be purchased, sold, transferred or gifted, and no badge criterion includes payment. | Honest incentives. | Rule validation | [SRC: SSOT BR-202] |
-| BR-REP-008 | A badge is minted only when verified milestone criteria hold; criteria are declarative, versioned and reference only verified events; instructor and institution badges show their issuer class. | Trustworthy badges. | Badge evaluator | [SRC: SSOT BR-053; Yash BR-T118] |
-| BR-REP-009 | A reversal references one original entry, executes at most once and up to its amount; derived awards are re-evaluated; the subject is told the reason. | Transparent corrections. | Ledger service | [DER] |
-| BR-REP-010 | Badges expire or are revoked only for stated reasons (expiry policy, invalid basis, sanction), with notice and an appeal path for sanctions; revoked state is reflected in public verification. | Fair removal. | Badge service | [DER from Yash BR-T012] |
-| BR-REP-011 | Verifiable badge export is holder-controlled, signed by the platform, includes only holder-approved data, and reports valid, expired or revoked truthfully. | Portability with integrity. | Export service | [PROP] |
-| BR-REP-012 | Peer recognition gives no XP; it is limited to {5} per giver per day, once per giver per target, never to self or blocked parties, and enters reputation only as a weighted signal. | Prevents kudos farming. | Recognition service | [PROP] |
-| BR-REP-013 | A streak day or week is evaluated in the user's time zone, DST-safe; it needs a qualifying activity; protection and vacation mode are earned or user-set, never purchased; the longest streak is kept. | Fair habit tracking. | Streak service | [SRC: SSOT §13.6 `streak.rollover`; DOR-010 open] |
-| BR-REP-014 | Gamification messages never use loss-aversion, guilt or shaming wording; streak reminders are nudges under NTF caps and quiet hours; at most one reminder per day. | Humane design. | Template review + NTF | [PROP]; [SRC: Yash BR-T087] |
-| BR-REP-015 | Goals are user-chosen or suggested, max {5} active, carry no penalty for missing, and cannot be public failures. | No pressure. | Goal service | [PROP] |
-| BR-REP-016 | A person appears on a leaderboard only after opting in; default is not included; display is name or alias; users under integrity review, sanctioned, deactivated, suspended or erased are excluded; boards under {10} participants show no percentiles. | Privacy and integrity. | Leaderboard service | [DER from SSOT §15.2, BR-167] |
-| BR-REP-017 | Boards are computed from ledger entries in the period; the default tabs are weekly and all-time; ties share a rank; reversals adjust ranks at the next snapshot. | Deterministic ranking. | Leaderboard service | [SRC: SSOT F-08, OD-06] |
-| BR-REP-018 | A reputation score is derived from signals and configuration, never manually set; computation is deterministic and nightly; corrections change signals. | Integrity of scores. | Reputation engine | [SRC: SSOT BR-164, F-144] |
-| BR-REP-019 | Reputation is domain-specific (skill) and context-specific; signals older than the half-life (default {24 months}) count less; labels need ≥ {3} distinct sources. | Relevance and robustness. | Reputation engine | [SRC: SSOT BR-165, BR-166] |
-| BR-REP-020 | Reputation is private by default; others see labels only with the subject's consent or within an application the subject submitted; revocation is effective on next read. | Privacy. | Decision function (SET) | [SRC: SSOT BR-167] |
-| BR-REP-021 | Reputation signals are auditable by authorized staff; individual signals and their sources are never exposed to the subject or third parties; explanations aggregate by category with a minimum of {3} sources. | Accountability without leakage. | Reputation + explanation service | [SRC: SSOT BR-168, F-144] |
-| BR-REP-022 | Signal weight combines base, source credibility (capped), difficulty, proximity and independence; self-signals are excluded; reciprocal and ring patterns are discounted. | Resist collusion. | Reputation engine | [SRC: SSOT F-144 weighting]; discounts [PROP] |
-| BR-REP-023 | Negative signals expire after a recovery period (default {12 months} of clean history) or on plan completion; recovery never inflates positive signals. | Second chances. | Reputation engine | [SRC: SSOT F-144 recovery]; values [PROP] |
-| BR-REP-024 | XP, levels, streaks, badges and reputation are advisory indicators: they are never the sole basis of an employment, admission or assessment decision, never trigger automated rejection, and enter matching only through the allowlisted inputs of the matching rules. | Human gate. | Policy + matching allowlist | [SRC: SSOT §15.10.1; Yash BR-T070]; OD-REP-07 |
-| BR-REP-025 | Suspicious activity is discounted, held or blocked by server-side rules (velocity, repetition, duplication, collusion, identity, automation); holds auto-release after {14 days} unless a case is opened. | Gaming does not pay. | Detector | [SRC: SSOT BR-052]; thresholds [PROP] |
-| BR-REP-026 | Sanctions are decided by humans, proportionate, with notice, reason code, and an appeal reviewed by a different person; clawbacks over {500 XP} and bans over {30 days} need a second reviewer. | Due process. | Case workflow | [SRC: Yash BR-T045..T047] |
-| BR-REP-027 | Users may set gamification intensity Standard, Minimal or Off and choose to keep or stop tracking; opting out never affects access, eligibility, matching, search visibility or recruiter evaluation. | No coercion. | Preference service + policy | [PROP] |
-| BR-REP-028 | Seasons have fixed dates, cannot be changed after start except a notified extension ≤ {7 days}, and finalize results into archives; rank-band badges need a participating cohort ≥ {50}. | Fair competition. | Season service | [PROP] |
-| BR-REP-029 | Rule, threshold and weight changes are versioned, simulated, approved by a different person, effective-dated (≥ {7 days} ahead for user-visible changes) and not retroactive except documented fixes approved by SAD. | Safe change. | Config service | [DER] |
-| BR-REP-030 | Gamification and reputation logic uses no protected attributes or proxies, no emotion or sentiment analysis, and no biometric behavior; quarterly fairness review is required. | Fairness. | Rule validation + audit | [SRC: SSOT §15.10.2, §15.9.2] |
-| BR-REP-031 | Ledgers, streaks, badges, reputation data and preferences are personal data: included in export, removed or anonymized on erasure, and boards remove the person within {15 min} of erasure start. | Data rights. | SET contributors | [SRC: SSOT §15.9.1] |
-| BR-REP-032 | Minors are excluded from public leaderboards, share cards and competitive seasons; their gamification is private and minimal. | Child protection. | Preference + board service | [PROP]; OD-IDN-11 |
-| BR-REP-033 | Institutional boards require student opt-in for identity, exclude grade data, never influence grading or honors, and are anonymized or deleted at graduation severance. | FERPA-aware design. | Cohort board service | [SRC: SSOT §15.9.2, §15.9.4] |
-| BR-REP-034 | XP, level, badges, streaks and leaderboard rank are engagement indicators and are labeled as such; they never substitute for verified evidence, credentials or rungs. | No misleading signals. | UI + API labeling | [DER from SSOT §6] |
-| BR-REP-035 | Enterprise internal boards are opt-in, show only team aggregates to managers, are never used for performance, pay, promotion or termination decisions, and cannot be exported to HR systems. | Narrow scope near the HR non-goal. | Enterprise board service | [PROP]; OD-REP-04 |
-| BR-REP-036 | Share cards contain only holder-selected fields, use revocable high-entropy links with `noindex`, and make no claim beyond the facts (for example "earned a badge" not "certified"). | Safe sharing. | Share service | [PROP] |
-| BR-REP-037 | Reputation contexts (candidate, instructor, mentor, employer, community) have separate signal sets and never blend; public employer or instructor aggregates need a minimum sample of {10} and anonymized sources. | Context integrity. | Reputation engine | [SRC: SSOT F-144, F-148, F-149, HDN-026] |
+| ID         | Rule                                                                                                                                                                                                                                                                   | Rationale                          | Enforced where                   | Source                                            |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------------------- | ------------------------------------------------- |
+| BR-REP-001 | XP is awarded only by rules in the catalog for verified qualifying events from platform modules; self-reported claims and client-submitted amounts never earn XP.                                                                                                      | XP must mean something.            | Award engine                     | [SRC: SSOT BR-053 spirit; F-22]                   |
+| BR-REP-002 | An XP award is idempotent by `(subject, referenceType, referenceId, kind)`; one source event yields at most one award.                                                                                                                                                 | No double credit.                  | Database unique key + engine     | [SRC: SSOT BR-25]                                 |
+| BR-REP-003 | Positive XP per subject per local day is capped at {200} with cap groups per rule category; excess is recorded in a cap note and not carried over.                                                                                                                     | Bound farming.                     | Ledger service                   | [SRC: SSOT BR-25 daily cap 200]                   |
+| BR-REP-004 | The XP ledger is append-only; balance and level are rebuildable projections; corrections are reversing or adjusting rows with reasons.                                                                                                                                 | Auditability.                      | Database privileges + domain     | [SRC: SSOT table `xp_transactions`]               |
+| BR-REP-005 | Challenge XP is {20–100} by difficulty, awarded only on a pass, once per challenge for life; practice mode and failed attempts earn nothing.                                                                                                                           | Meaningful effort.                 | Rule catalog                     | [SRC: SSOT F-08 step 7, BR-25]                    |
+| BR-REP-006 | Level is a deterministic function of total XP using a versioned threshold table; it decreases only through reversal or sanction; table changes never lower existing levels.                                                                                            | Predictability and fairness.       | Level service                    | [SRC: SSOT WF-11]; thresholds [PROP]              |
+| BR-REP-007 | XP, levels and badges have no monetary value, cannot be purchased, sold, transferred or gifted, and no badge criterion includes payment.                                                                                                                               | Honest incentives.                 | Rule validation                  | [SRC: SSOT BR-202]                                |
+| BR-REP-008 | A badge is minted only when verified milestone criteria hold; criteria are declarative, versioned and reference only verified events; instructor and institution badges show their issuer class.                                                                       | Trustworthy badges.                | Badge evaluator                  | [SRC: SSOT BR-053; Yash BR-T118]                  |
+| BR-REP-009 | A reversal references one original entry, executes at most once and up to its amount; derived awards are re-evaluated; the subject is told the reason.                                                                                                                 | Transparent corrections.           | Ledger service                   | [DER]                                             |
+| BR-REP-010 | Badges expire or are revoked only for stated reasons (expiry policy, invalid basis, sanction), with notice and an appeal path for sanctions; revoked state is reflected in public verification.                                                                        | Fair removal.                      | Badge service                    | [DER from Yash BR-T012]                           |
+| BR-REP-011 | Verifiable badge export is holder-controlled, signed by the platform, includes only holder-approved data, and reports valid, expired or revoked truthfully.                                                                                                            | Portability with integrity.        | Export service                   | [PROP]                                            |
+| BR-REP-012 | Peer recognition gives no XP; it is limited to {5} per giver per day, once per giver per target, never to self or blocked parties, and enters reputation only as a weighted signal.                                                                                    | Prevents kudos farming.            | Recognition service              | [PROP]                                            |
+| BR-REP-013 | A streak day or week is evaluated in the user's time zone, DST-safe; it needs a qualifying activity; protection and vacation mode are earned or user-set, never purchased; the longest streak is kept.                                                                 | Fair habit tracking.               | Streak service                   | [SRC: SSOT §13.6 `streak.rollover`; DOR-010 open] |
+| BR-REP-014 | Gamification messages never use loss-aversion, guilt or shaming wording; streak reminders are nudges under NTF caps and quiet hours; at most one reminder per day.                                                                                                     | Humane design.                     | Template review + NTF            | [PROP]; [SRC: Yash BR-T087]                       |
+| BR-REP-015 | Goals are user-chosen or suggested, max {5} active, carry no penalty for missing, and cannot be public failures.                                                                                                                                                       | No pressure.                       | Goal service                     | [PROP]                                            |
+| BR-REP-016 | A person appears on a leaderboard only after opting in; default is not included; display is name or alias; users under integrity review, sanctioned, deactivated, suspended or erased are excluded; boards under {10} participants show no percentiles.                | Privacy and integrity.             | Leaderboard service              | [DER from SSOT §15.2, BR-167]                     |
+| BR-REP-017 | Boards are computed from ledger entries in the period; the default tabs are weekly and all-time; ties share a rank; reversals adjust ranks at the next snapshot.                                                                                                       | Deterministic ranking.             | Leaderboard service              | [SRC: SSOT F-08, OD-06]                           |
+| BR-REP-018 | A reputation score is derived from signals and configuration, never manually set; computation is deterministic and nightly; corrections change signals.                                                                                                                | Integrity of scores.               | Reputation engine                | [SRC: SSOT BR-164, F-144]                         |
+| BR-REP-019 | Reputation is domain-specific (skill) and context-specific; signals older than the half-life (default {24 months}) count less; labels need ≥ {3} distinct sources.                                                                                                     | Relevance and robustness.          | Reputation engine                | [SRC: SSOT BR-165, BR-166]                        |
+| BR-REP-020 | Reputation is private by default; others see labels only with the subject's consent or within an application the subject submitted; revocation is effective on next read.                                                                                              | Privacy.                           | Decision function (SET)          | [SRC: SSOT BR-167]                                |
+| BR-REP-021 | Reputation signals are auditable by authorized staff; individual signals and their sources are never exposed to the subject or third parties; explanations aggregate by category with a minimum of {3} sources.                                                        | Accountability without leakage.    | Reputation + explanation service | [SRC: SSOT BR-168, F-144]                         |
+| BR-REP-022 | Signal weight combines base, source credibility (capped), difficulty, proximity and independence; self-signals are excluded; reciprocal and ring patterns are discounted.                                                                                              | Resist collusion.                  | Reputation engine                | [SRC: SSOT F-144 weighting]; discounts [PROP]     |
+| BR-REP-023 | Negative signals expire after a recovery period (default {12 months} of clean history) or on plan completion; recovery never inflates positive signals.                                                                                                                | Second chances.                    | Reputation engine                | [SRC: SSOT F-144 recovery]; values [PROP]         |
+| BR-REP-024 | XP, levels, streaks, badges and reputation are advisory indicators: they are never the sole basis of an employment, admission or assessment decision, never trigger automated rejection, and enter matching only through the allowlisted inputs of the matching rules. | Human gate.                        | Policy + matching allowlist      | [SRC: SSOT §15.10.1; Yash BR-T070]; OD-REP-07     |
+| BR-REP-025 | Suspicious activity is discounted, held or blocked by server-side rules (velocity, repetition, duplication, collusion, identity, automation); holds auto-release after {14 days} unless a case is opened.                                                              | Gaming does not pay.               | Detector                         | [SRC: SSOT BR-052]; thresholds [PROP]             |
+| BR-REP-026 | Sanctions are decided by humans, proportionate, with notice, reason code, and an appeal reviewed by a different person; clawbacks over {500 XP} and bans over {30 days} need a second reviewer.                                                                        | Due process.                       | Case workflow                    | [SRC: Yash BR-T045..T047]                         |
+| BR-REP-027 | Users may set gamification intensity Standard, Minimal or Off and choose to keep or stop tracking; opting out never affects access, eligibility, matching, search visibility or recruiter evaluation.                                                                  | No coercion.                       | Preference service + policy      | [PROP]                                            |
+| BR-REP-028 | Seasons have fixed dates, cannot be changed after start except a notified extension ≤ {7 days}, and finalize results into archives; rank-band badges need a participating cohort ≥ {50}.                                                                               | Fair competition.                  | Season service                   | [PROP]                                            |
+| BR-REP-029 | Rule, threshold and weight changes are versioned, simulated, approved by a different person, effective-dated (≥ {7 days} ahead for user-visible changes) and not retroactive except documented fixes approved by SAD.                                                  | Safe change.                       | Config service                   | [DER]                                             |
+| BR-REP-030 | Gamification and reputation logic uses no protected attributes or proxies, no emotion or sentiment analysis, and no biometric behavior; quarterly fairness review is required.                                                                                         | Fairness.                          | Rule validation + audit          | [SRC: SSOT §15.10.2, §15.9.2]                     |
+| BR-REP-031 | Ledgers, streaks, badges, reputation data and preferences are personal data: included in export, removed or anonymized on erasure, and boards remove the person within {15 min} of erasure start.                                                                      | Data rights.                       | SET contributors                 | [SRC: SSOT §15.9.1]                               |
+| BR-REP-032 | Minors are excluded from public leaderboards, share cards and competitive seasons; their gamification is private and minimal.                                                                                                                                          | Child protection.                  | Preference + board service       | [PROP]; OD-IDN-11                                 |
+| BR-REP-033 | Institutional boards require student opt-in for identity, exclude grade data, never influence grading or honors, and are anonymized or deleted at graduation severance.                                                                                                | FERPA-aware design.                | Cohort board service             | [SRC: SSOT §15.9.2, §15.9.4]                      |
+| BR-REP-034 | XP, level, badges, streaks and leaderboard rank are engagement indicators and are labeled as such; they never substitute for verified evidence, credentials or rungs.                                                                                                  | No misleading signals.             | UI + API labeling                | [DER from SSOT §6]                                |
+| BR-REP-035 | Enterprise internal boards are opt-in, show only team aggregates to managers, are never used for performance, pay, promotion or termination decisions, and cannot be exported to HR systems.                                                                           | Narrow scope near the HR non-goal. | Enterprise board service         | [PROP]; OD-REP-04                                 |
+| BR-REP-036 | Share cards contain only holder-selected fields, use revocable high-entropy links with `noindex`, and make no claim beyond the facts (for example "earned a badge" not "certified").                                                                                   | Safe sharing.                      | Share service                    | [PROP]                                            |
+| BR-REP-037 | Reputation contexts (candidate, instructor, mentor, employer, community) have separate signal sets and never blend; public employer or instructor aggregates need a minimum sample of {10} and anonymized sources.                                                     | Context integrity.                 | Reputation engine                | [SRC: SSOT F-144, F-148, F-149, HDN-026]          |
 
 ## 6. State machines
 
@@ -1078,17 +1080,17 @@ Parameter notation: `{braces}` mark `[PROP]` defaults unless a source is cited; 
 
 States: `received`, `posted`, `capped`, `duplicate`, `ineligible`, `held`, `opted_out`, `released`, `rejected`. Terminal: all except `held`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → received | milestone event arrives | schema valid |
-| t2 | received → posted | rule matches and caps allow | not duplicate, not held |
-| t3 | received → capped | daily cap reached | partial or none posted |
-| t4 | received → duplicate | reference key exists | — |
-| t5 | received → ineligible | no matching rule or conditions fail | — |
-| t6 | received → opted_out | subject stopped tracking | FR-REP-026 |
-| t7 | received → held | detector hold | FR-REP-024 |
-| t8 | held → released | auto-release after 14 days or reviewer clear | no upheld case |
-| t9 | held → rejected | case upheld | sanction executed |
+| t   | From → To             | Trigger                                      | Guard                   |
+| --- | --------------------- | -------------------------------------------- | ----------------------- |
+| t1  | [*] → received        | milestone event arrives                      | schema valid            |
+| t2  | received → posted     | rule matches and caps allow                  | not duplicate, not held |
+| t3  | received → capped     | daily cap reached                            | partial or none posted  |
+| t4  | received → duplicate  | reference key exists                         | —                       |
+| t5  | received → ineligible | no matching rule or conditions fail          | —                       |
+| t6  | received → opted_out  | subject stopped tracking                     | FR-REP-026              |
+| t7  | received → held       | detector hold                                | FR-REP-024              |
+| t8  | held → released       | auto-release after 14 days or reviewer clear | no upheld case          |
+| t9  | held → rejected       | case upheld                                  | sanction executed       |
 
 ```mermaid
 stateDiagram-v2
@@ -1114,15 +1116,15 @@ stateDiagram-v2
 
 States: `eligible`, `issued`, `expiring`, `expired`, `revoked`, `renewed`. Terminal: `revoked`; `expired` can renew.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → issued | criteria met | verified events, unique per definition |
-| t2 | issued → expiring | 30 days before expiry | expiry policy set |
-| t3 | expiring → expired | expiry date reached | not renewed |
-| t4 | expiring, expired → renewed | renewal criteria met | — |
-| t5 | renewed → issued | state refresh | new expiry set |
-| t6 | issued, expiring, expired → revoked | invalid basis or sanction | reason code |
-| t7 | revoked → issued | appeal upheld | original date restored |
+| t   | From → To                           | Trigger                   | Guard                                  |
+| --- | ----------------------------------- | ------------------------- | -------------------------------------- |
+| t1  | [*] → issued                        | criteria met              | verified events, unique per definition |
+| t2  | issued → expiring                   | 30 days before expiry     | expiry policy set                      |
+| t3  | expiring → expired                  | expiry date reached       | not renewed                            |
+| t4  | expiring, expired → renewed         | renewal criteria met      | —                                      |
+| t5  | renewed → issued                    | state refresh             | new expiry set                         |
+| t6  | issued, expiring, expired → revoked | invalid basis or sanction | reason code                            |
+| t7  | revoked → issued                    | appeal upheld             | original date restored                 |
 
 ```mermaid
 stateDiagram-v2
@@ -1142,17 +1144,17 @@ stateDiagram-v2
 
 States: `none`, `active`, `at_risk`, `protected`, `vacation`, `broken`. Terminal: none (a broken streak restarts at `active`).
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | none, broken → active | first qualifying period | activity credited |
-| t2 | active → active | next qualifying period | — |
-| t3 | active → at_risk | period nearing end with no activity | streak ≥ 3 |
-| t4 | at_risk → active | qualifying activity | — |
-| t5 | at_risk → protected | period closes without activity and a token exists | token consumed |
-| t6 | protected → active | next period | — |
-| t7 | at_risk → broken | period closes with no activity and no token | — |
-| t8 | active → vacation | user sets vacation | limits |
-| t9 | vacation → active | vacation ends | — |
+| t   | From → To             | Trigger                                           | Guard             |
+| --- | --------------------- | ------------------------------------------------- | ----------------- |
+| t1  | none, broken → active | first qualifying period                           | activity credited |
+| t2  | active → active       | next qualifying period                            | —                 |
+| t3  | active → at_risk      | period nearing end with no activity               | streak ≥ 3        |
+| t4  | at_risk → active      | qualifying activity                               | —                 |
+| t5  | at_risk → protected   | period closes without activity and a token exists | token consumed    |
+| t6  | protected → active    | next period                                       | —                 |
+| t7  | at_risk → broken      | period closes with no activity and no token       | —                 |
+| t8  | active → vacation     | user sets vacation                                | limits            |
+| t9  | vacation → active     | vacation ends                                     | —                 |
 
 ```mermaid
 stateDiagram-v2
@@ -1173,15 +1175,15 @@ stateDiagram-v2
 
 States: `new`, `in_review`, `decided`, `appealed`, `closed`. Terminal: `closed`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → new | detector, report, contest | — |
-| t2 | new → in_review | reviewer assigns | no conflict |
-| t3 | in_review → closed | outcome Clear | reason |
-| t4 | in_review → decided | sanction chosen | second reviewer if thresholds |
-| t5 | decided → appealed | subject appeals | once per case, within {30 days} |
-| t6 | appealed → decided | appeal decided | different reviewer |
-| t7 | decided → closed | appeal window ends or decision executed | — |
+| t   | From → To           | Trigger                                 | Guard                           |
+| --- | ------------------- | --------------------------------------- | ------------------------------- |
+| t1  | [*] → new           | detector, report, contest               | —                               |
+| t2  | new → in_review     | reviewer assigns                        | no conflict                     |
+| t3  | in_review → closed  | outcome Clear                           | reason                          |
+| t4  | in_review → decided | sanction chosen                         | second reviewer if thresholds   |
+| t5  | decided → appealed  | subject appeals                         | once per case, within {30 days} |
+| t6  | appealed → decided  | appeal decided                          | different reviewer              |
+| t7  | decided → closed    | appeal window ends or decision executed | —                               |
 
 ```mermaid
 stateDiagram-v2
@@ -1199,12 +1201,12 @@ stateDiagram-v2
 
 States: `scheduled`, `active`, `closing`, `archived`. Terminal: `archived`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → scheduled | definition approved | dates valid |
-| t2 | scheduled → active | start time | — |
-| t3 | active → closing | end time | — |
-| t4 | closing → archived | ranks finalized, awards issued | integrity check passed |
+| t   | From → To          | Trigger                        | Guard                  |
+| --- | ------------------ | ------------------------------ | ---------------------- |
+| t1  | [*] → scheduled    | definition approved            | dates valid            |
+| t2  | scheduled → active | start time                     | —                      |
+| t3  | active → closing   | end time                       | —                      |
+| t4  | closing → archived | ranks finalized, awards issued | integrity check passed |
 
 ```mermaid
 stateDiagram-v2
@@ -1219,14 +1221,14 @@ stateDiagram-v2
 
 States: `draft`, `simulated`, `approved`, `active`, `superseded`, `rejected`. Terminal: `superseded`, `rejected`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → draft | proposer edits | one draft per area |
-| t2 | draft → simulated | simulation run | no live writes |
-| t3 | simulated → approved | approver approves | approver differs; guardrails satisfied |
-| t4 | simulated → rejected | approver rejects | reason |
-| t5 | approved → active | effective date | ≥ 7 days notice for visible changes |
-| t6 | active → superseded | newer version active or rollback | — |
+| t   | From → To            | Trigger                          | Guard                                  |
+| --- | -------------------- | -------------------------------- | -------------------------------------- |
+| t1  | [*] → draft          | proposer edits                   | one draft per area                     |
+| t2  | draft → simulated    | simulation run                   | no live writes                         |
+| t3  | simulated → approved | approver approves                | approver differs; guardrails satisfied |
+| t4  | simulated → rejected | approver rejects                 | reason                                 |
+| t5  | approved → active    | effective date                   | ≥ 7 days notice for visible changes    |
+| t6  | active → superseded  | newer version active or rollback | —                                      |
 
 ```mermaid
 stateDiagram-v2
@@ -1242,62 +1244,62 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-REP-001 | Progress overview | `/progress` | participating roles | Level, XP, streak, goals, badges summary | loading, loaded, empty, hidden (opted out) |
-| SCR-REP-002 | XP history | `/progress/xp` | same | Ledger table | list, empty, error |
-| SCR-REP-003 | How XP works | `/progress/rules` | same, GUE | Rule list and limits | loaded |
-| SCR-REP-004 | Levels | `/progress/levels` | same | Threshold table | loaded |
-| SCR-REP-005 | Badges | `/progress/badges` | same | Earned and locked badges, visibility | list, locked with progress |
-| SCR-REP-006 | Badge catalog and detail | `/badges`, `/badges/:id` | all authenticated | Criteria and rarity | catalog, detail |
-| SCR-REP-007 | Public badge page and verification | `/b/:token` | GUE | Verify a badge | valid, expired, revoked, not found |
-| SCR-REP-008 | Streaks and goals | `/progress/streaks` | participating roles | Streak, protection, vacation, goals | active, at risk, protected, vacation, broken |
-| SCR-REP-009 | Leaderboards | `/progress/leaderboards` | participating roles | Boards and invitation | list, small board, not participating, error |
-| SCR-REP-010 | Leaderboard privacy | `/settings/privacy/leaderboards` | participating roles | Name, alias or exclude | not chosen, name, alias, excluded |
-| SCR-REP-011 | Cohort board | `/cohorts/:id/board` | STD, INS, IAD | Institution board | disabled, enabled, closed |
-| SCR-REP-012 | Organization challenge | `/org/:id/learning/challenges/:cid` | employees, EXA | Enterprise board | draft, active, closed |
-| SCR-REP-013 | Reputation overview | `/progress/reputation` | participating roles | Labels per domain and context | not enough signals, computed |
-| SCR-REP-014 | Reputation explanation | `/progress/reputation/:domain` | subject | Breakdown and tips | computed, recalculating |
-| SCR-REP-015 | Reputation visibility | `/settings/privacy/reputation` | subject | Who can see | private, shared |
-| SCR-REP-016 | Gamification configuration | `/admin/gamification` | PAD, SAD | Rules, thresholds, simulations | draft, simulated, active |
-| SCR-REP-017 | Badge administration | `/admin/gamification/badges` | PAD | Badge definitions | draft, in review, active |
-| SCR-REP-018 | Signal registry | `/admin/gamification/signals` | PAD | Reputation signal types | list, edit |
-| SCR-REP-019 | Integrity queue | `/admin/gamification/cases` | MOD, PAD | Cases and decisions | queue, case, appeal |
-| SCR-REP-020 | Seasons | `/admin/gamification/seasons` | PAD | Define and monitor | scheduled, active, archived |
-| SCR-REP-021 | Fairness report | `/admin/gamification/fairness` | SAD, PAD | Audit reports and actions | ready, actions open |
-| SCR-REP-022 | Progress and rewards settings | `/settings/privacy/progress` | all authenticated | Intensity and data choices | standard, minimal, off |
-| SCR-REP-023 | Share card dialog and list | overlay, `/progress/shared` | participating roles | Create, revoke share cards | preview, generated, revoked |
-| SCR-REP-024 | Recognition inbox | `/progress/recognition` | participating roles | Recognitions given and received | list, empty |
-| SCR-REP-025 | Recovery plan | `/progress/reputation/recovery` | subject | Steps and dates | none, in progress, completed |
-| SCR-REP-026 | Sanction notice and appeal | `/progress/notice/:id` | subject | Notice and appeal form | notice, drafting, submitted, decided |
-| SCR-REP-027 | What changed | `/progress/changes` | all | Published rule changes | list |
+| ID          | Name                               | Route proposal                      | Roles               | Purpose                                  | Key states                                   |
+| ----------- | ---------------------------------- | ----------------------------------- | ------------------- | ---------------------------------------- | -------------------------------------------- |
+| SCR-REP-001 | Progress overview                  | `/progress`                         | participating roles | Level, XP, streak, goals, badges summary | loading, loaded, empty, hidden (opted out)   |
+| SCR-REP-002 | XP history                         | `/progress/xp`                      | same                | Ledger table                             | list, empty, error                           |
+| SCR-REP-003 | How XP works                       | `/progress/rules`                   | same, GUE           | Rule list and limits                     | loaded                                       |
+| SCR-REP-004 | Levels                             | `/progress/levels`                  | same                | Threshold table                          | loaded                                       |
+| SCR-REP-005 | Badges                             | `/progress/badges`                  | same                | Earned and locked badges, visibility     | list, locked with progress                   |
+| SCR-REP-006 | Badge catalog and detail           | `/badges`, `/badges/:id`            | all authenticated   | Criteria and rarity                      | catalog, detail                              |
+| SCR-REP-007 | Public badge page and verification | `/b/:token`                         | GUE                 | Verify a badge                           | valid, expired, revoked, not found           |
+| SCR-REP-008 | Streaks and goals                  | `/progress/streaks`                 | participating roles | Streak, protection, vacation, goals      | active, at risk, protected, vacation, broken |
+| SCR-REP-009 | Leaderboards                       | `/progress/leaderboards`            | participating roles | Boards and invitation                    | list, small board, not participating, error  |
+| SCR-REP-010 | Leaderboard privacy                | `/settings/privacy/leaderboards`    | participating roles | Name, alias or exclude                   | not chosen, name, alias, excluded            |
+| SCR-REP-011 | Cohort board                       | `/cohorts/:id/board`                | STD, INS, IAD       | Institution board                        | disabled, enabled, closed                    |
+| SCR-REP-012 | Organization challenge             | `/org/:id/learning/challenges/:cid` | employees, EXA      | Enterprise board                         | draft, active, closed                        |
+| SCR-REP-013 | Reputation overview                | `/progress/reputation`              | participating roles | Labels per domain and context            | not enough signals, computed                 |
+| SCR-REP-014 | Reputation explanation             | `/progress/reputation/:domain`      | subject             | Breakdown and tips                       | computed, recalculating                      |
+| SCR-REP-015 | Reputation visibility              | `/settings/privacy/reputation`      | subject             | Who can see                              | private, shared                              |
+| SCR-REP-016 | Gamification configuration         | `/admin/gamification`               | PAD, SAD            | Rules, thresholds, simulations           | draft, simulated, active                     |
+| SCR-REP-017 | Badge administration               | `/admin/gamification/badges`        | PAD                 | Badge definitions                        | draft, in review, active                     |
+| SCR-REP-018 | Signal registry                    | `/admin/gamification/signals`       | PAD                 | Reputation signal types                  | list, edit                                   |
+| SCR-REP-019 | Integrity queue                    | `/admin/gamification/cases`         | MOD, PAD            | Cases and decisions                      | queue, case, appeal                          |
+| SCR-REP-020 | Seasons                            | `/admin/gamification/seasons`       | PAD                 | Define and monitor                       | scheduled, active, archived                  |
+| SCR-REP-021 | Fairness report                    | `/admin/gamification/fairness`      | SAD, PAD            | Audit reports and actions                | ready, actions open                          |
+| SCR-REP-022 | Progress and rewards settings      | `/settings/privacy/progress`        | all authenticated   | Intensity and data choices               | standard, minimal, off                       |
+| SCR-REP-023 | Share card dialog and list         | overlay, `/progress/shared`         | participating roles | Create, revoke share cards               | preview, generated, revoked                  |
+| SCR-REP-024 | Recognition inbox                  | `/progress/recognition`             | participating roles | Recognitions given and received          | list, empty                                  |
+| SCR-REP-025 | Recovery plan                      | `/progress/reputation/recovery`     | subject             | Steps and dates                          | none, in progress, completed                 |
+| SCR-REP-026 | Sanction notice and appeal         | `/progress/notice/:id`              | subject             | Notice and appeal form                   | notice, drafting, submitted, decided         |
+| SCR-REP-027 | What changed                       | `/progress/changes`                 | all                 | Published rule changes                   | list                                         |
 
 Accessibility notes for all screens: WCAG 2.2 AA; progress and ranks always have text values (not color or position alone); celebrations respect reduced motion and never rely on confetti or sound; focus management in dialogs; leaderboards are data tables with headers; rank changes announced as text; no timed controls.
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-REP-01 | XpRule and RuleVersion | id, version, event_type, amount_fn, cap_group, effective_from, effective_to, description, status | Config version | Permanent |
-| ENT-REP-02 | XpLedgerEntry | id, subject_ref, amount, rule_id, rule_version, reference_type, reference_id, kind, reason, occurred_at, posted_at, source_event_id | Subject, XpRule | Permanent with opaque ref; mapping deleted on erasure |
-| ENT-REP-03 | XpBalance (projection) | subject_ref, xp_total, xp_week, xp_by_skill, level, as_of | Ledger | Rebuildable |
-| ENT-REP-04 | LevelDefinition | version, level, threshold, name | Config version | Permanent |
-| ENT-REP-05 | BadgeDefinition | id, version, name, issuer_class, criteria, expiry_policy, category, status, image_ref, alt_text | Issuer | Permanent |
-| ENT-REP-06 | BadgeAward | subject_ref, definition_id, version, awarded_at, evidence_refs, expires_at, state, visibility, featured | Subject, Definition | Until erasure; revocation history kept |
-| ENT-REP-07 | Streak | subject_ref, cadence, current, longest, state, last_credit_period, protection_tokens | Subject | Until erasure |
-| ENT-REP-08 | StreakProtectionAndVacation | subject_ref, kind, used_at, vacation_start, vacation_end | Streak | 12 months |
-| ENT-REP-09 | Goal | id, subject_ref, type, target, period, progress, status | Subject | 12 months after end |
-| ENT-REP-10 | LeaderboardSnapshot | board_id, scope, period, taken_at, rows (rank, subject_ref or alias, score) | Season, Cohort | 24 months; identity rows removed on erasure |
-| ENT-REP-11 | LeaderboardPreference | subject_ref, mode (name, alias, excluded), alias, show_level | Subject | Until erasure |
-| ENT-REP-12 | ReputationSignal | id, subject_ref, context, domain, type_id, source_ref, source_class, value, occurred_at, evidence_ref, weight_components, status | Subject | 36 months or until source erasure |
-| ENT-REP-13 | ReputationScore | subject_ref, context, domain, score, label, confidence, as_of, config_version, input_hash | Subject | History 24 months |
-| ENT-REP-14 | ReputationConfig | version, weights, half_life, thresholds, min_sources, status | Config | Permanent |
-| ENT-REP-15 | Recognition | id, giver_ref, recipient_ref, type, target_ref, note, created_at, hidden | Subjects | 24 months |
-| ENT-REP-16 | IntegrityFlagAndCase | flag id, rule_family, subject_ref, evidence_codes, decision, reviewers, appeal, closed_at | Subject | 12 months after closure |
-| ENT-REP-17 | Season | id, name, start, end, boards, scoring, bands, state | Config | Permanent |
-| ENT-REP-18 | GamificationPreference | subject_ref, intensity, data_choice, sub-toggles, reputation_opt_out | Subject | Until erasure |
-| ENT-REP-19 | ShareCard | id, subject_ref, kind, fields, token_hash, created_at, revoked_at, views | Subject | Until revoke or erasure |
-| ENT-REP-20 | FairnessReport and Action | id, period, findings, actions, owners, status | Config | 5 years aggregate |
+| ID         | Entity                      | Key attributes                                                                                                                      | Relationships       | Retention class                                       |
+| ---------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------- |
+| ENT-REP-01 | XpRule and RuleVersion      | id, version, event_type, amount_fn, cap_group, effective_from, effective_to, description, status                                    | Config version      | Permanent                                             |
+| ENT-REP-02 | XpLedgerEntry               | id, subject_ref, amount, rule_id, rule_version, reference_type, reference_id, kind, reason, occurred_at, posted_at, source_event_id | Subject, XpRule     | Permanent with opaque ref; mapping deleted on erasure |
+| ENT-REP-03 | XpBalance (projection)      | subject_ref, xp_total, xp_week, xp_by_skill, level, as_of                                                                           | Ledger              | Rebuildable                                           |
+| ENT-REP-04 | LevelDefinition             | version, level, threshold, name                                                                                                     | Config version      | Permanent                                             |
+| ENT-REP-05 | BadgeDefinition             | id, version, name, issuer_class, criteria, expiry_policy, category, status, image_ref, alt_text                                     | Issuer              | Permanent                                             |
+| ENT-REP-06 | BadgeAward                  | subject_ref, definition_id, version, awarded_at, evidence_refs, expires_at, state, visibility, featured                             | Subject, Definition | Until erasure; revocation history kept                |
+| ENT-REP-07 | Streak                      | subject_ref, cadence, current, longest, state, last_credit_period, protection_tokens                                                | Subject             | Until erasure                                         |
+| ENT-REP-08 | StreakProtectionAndVacation | subject_ref, kind, used_at, vacation_start, vacation_end                                                                            | Streak              | 12 months                                             |
+| ENT-REP-09 | Goal                        | id, subject_ref, type, target, period, progress, status                                                                             | Subject             | 12 months after end                                   |
+| ENT-REP-10 | LeaderboardSnapshot         | board_id, scope, period, taken_at, rows (rank, subject_ref or alias, score)                                                         | Season, Cohort      | 24 months; identity rows removed on erasure           |
+| ENT-REP-11 | LeaderboardPreference       | subject_ref, mode (name, alias, excluded), alias, show_level                                                                        | Subject             | Until erasure                                         |
+| ENT-REP-12 | ReputationSignal            | id, subject_ref, context, domain, type_id, source_ref, source_class, value, occurred_at, evidence_ref, weight_components, status    | Subject             | 36 months or until source erasure                     |
+| ENT-REP-13 | ReputationScore             | subject_ref, context, domain, score, label, confidence, as_of, config_version, input_hash                                           | Subject             | History 24 months                                     |
+| ENT-REP-14 | ReputationConfig            | version, weights, half_life, thresholds, min_sources, status                                                                        | Config              | Permanent                                             |
+| ENT-REP-15 | Recognition                 | id, giver_ref, recipient_ref, type, target_ref, note, created_at, hidden                                                            | Subjects            | 24 months                                             |
+| ENT-REP-16 | IntegrityFlagAndCase        | flag id, rule_family, subject_ref, evidence_codes, decision, reviewers, appeal, closed_at                                           | Subject             | 12 months after closure                               |
+| ENT-REP-17 | Season                      | id, name, start, end, boards, scoring, bands, state                                                                                 | Config              | Permanent                                             |
+| ENT-REP-18 | GamificationPreference      | subject_ref, intensity, data_choice, sub-toggles, reputation_opt_out                                                                | Subject             | Until erasure                                         |
+| ENT-REP-19 | ShareCard                   | id, subject_ref, kind, fields, token_hash, created_at, revoked_at, views                                                            | Subject             | Until revoke or erasure                               |
+| ENT-REP-20 | FairnessReport and Action   | id, period, findings, actions, owners, status                                                                                       | Config              | 5 years aggregate                                     |
 
 ```mermaid
 erDiagram
@@ -1323,120 +1325,120 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload |
-|---|---|---|---|
-| EVT-REP-001 | rep.xp.awarded | ledger award posted | subject ref, amount, rule, reference |
-| EVT-REP-002 | rep.xp.reversed | reversal posted | subject ref, original id, reason code |
-| EVT-REP-003 | rep.xp.capped | cap note written | subject ref, amount capped |
-| EVT-REP-004 | rep.level.changed | level up or down | subject ref, from, to |
-| EVT-REP-005 | rep.badge.awarded | badge issued | subject ref, definition, version |
-| EVT-REP-006 | rep.badge.revoked | badge revoked | subject ref, definition, reason code |
-| EVT-REP-007 | rep.badge.expiring | 30 days before expiry | subject ref, definition |
-| EVT-REP-008 | rep.streak.updated | streak state change | subject ref, state, count |
-| EVT-REP-009 | rep.goal.completed | goal complete | subject ref, goal type |
-| EVT-REP-010 | rep.leaderboard.snapshot | snapshot finalized | board id, period |
-| EVT-REP-011 | rep.season.closed | season finalized | season id |
-| EVT-REP-012 | rep.reputation.updated | score label change | subject ref, context, domain, label |
-| EVT-REP-013 | rep.reputation.signal_removed | signal removed or contested | subject ref, signal id |
-| EVT-REP-014 | rep.recognition.given | recognition created | giver ref, recipient ref, type |
-| EVT-REP-015 | rep.integrity.case_opened | case opened | case id, family |
-| EVT-REP-016 | rep.integrity.sanction_applied | sanction executed | case id, effect |
-| EVT-REP-017 | rep.preference.changed | intensity or opt-out change | subject ref, intensity |
-| EVT-REP-018 | rep.config.activated | new config version active | area, version |
-| EVT-REP-019 | rep.sharecard.created | share card generated | subject ref, kind |
+| ID          | Event                          | Trigger                     | Key payload                           |
+| ----------- | ------------------------------ | --------------------------- | ------------------------------------- |
+| EVT-REP-001 | rep.xp.awarded                 | ledger award posted         | subject ref, amount, rule, reference  |
+| EVT-REP-002 | rep.xp.reversed                | reversal posted             | subject ref, original id, reason code |
+| EVT-REP-003 | rep.xp.capped                  | cap note written            | subject ref, amount capped            |
+| EVT-REP-004 | rep.level.changed              | level up or down            | subject ref, from, to                 |
+| EVT-REP-005 | rep.badge.awarded              | badge issued                | subject ref, definition, version      |
+| EVT-REP-006 | rep.badge.revoked              | badge revoked               | subject ref, definition, reason code  |
+| EVT-REP-007 | rep.badge.expiring             | 30 days before expiry       | subject ref, definition               |
+| EVT-REP-008 | rep.streak.updated             | streak state change         | subject ref, state, count             |
+| EVT-REP-009 | rep.goal.completed             | goal complete               | subject ref, goal type                |
+| EVT-REP-010 | rep.leaderboard.snapshot       | snapshot finalized          | board id, period                      |
+| EVT-REP-011 | rep.season.closed              | season finalized            | season id                             |
+| EVT-REP-012 | rep.reputation.updated         | score label change          | subject ref, context, domain, label   |
+| EVT-REP-013 | rep.reputation.signal_removed  | signal removed or contested | subject ref, signal id                |
+| EVT-REP-014 | rep.recognition.given          | recognition created         | giver ref, recipient ref, type        |
+| EVT-REP-015 | rep.integrity.case_opened      | case opened                 | case id, family                       |
+| EVT-REP-016 | rep.integrity.sanction_applied | sanction executed           | case id, effect                       |
+| EVT-REP-017 | rep.preference.changed         | intensity or opt-out change | subject ref, intensity                |
+| EVT-REP-018 | rep.config.activated           | new config version active   | area, version                         |
+| EVT-REP-019 | rep.sharecard.created          | share card generated        | subject ref, kind                     |
 
 ### 9.2 Consumed
 
-| Event | From | Used for |
-|---|---|---|
+| Event                                                                                                                                                                                               | From                                   | Used for                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------- |
 | Lesson, course, challenge, profile, evidence, mentor session, event attendance and contribution milestones (for example lrn.lesson.completed, asm.challenge.passed, evd.evidence.verified; planned) | LRN, ASM, EVD, MEN, EVT, NET (planned) | XP rules, badge criteria, streak credit, goals, signals |
-| asm.challenge.invalidated, evd.credential.revoked, ntf endorsement revoked (planned) | ASM, EVD, NET (planned) | Reversals, signal removal |
-| idn.account.deactivated, suspended, erased | IDN | Exclude from boards; stop; erase |
-| set.consent.changed, set.setting.changed, set.dsr.erasure_started | SET | Visibility, locale and time zone, erasure |
-| ins.cohort.graduated, ins.cohort.closed (planned) | INS (planned) | Severance of cohort boards |
-| tsf.case.decided (planned) | TSF (planned) | Account-level sanctions affecting boards |
-| ntf.delivery.* | NTF | Reminder effectiveness metrics |
+| asm.challenge.invalidated, evd.credential.revoked, ntf endorsement revoked (planned)                                                                                                                | ASM, EVD, NET (planned)                | Reversals, signal removal                               |
+| idn.account.deactivated, suspended, erased                                                                                                                                                          | IDN                                    | Exclude from boards; stop; erase                        |
+| set.consent.changed, set.setting.changed, set.dsr.erasure_started                                                                                                                                   | SET                                    | Visibility, locale and time zone, erasure               |
+| ins.cohort.graduated, ins.cohort.closed (planned)                                                                                                                                                   | INS (planned)                          | Severance of cohort boards                              |
+| tsf.case.decided (planned)                                                                                                                                                                          | TSF (planned)                          | Account-level sanctions affecting boards                |
+| ntf.delivery.\*                                                                                                                                                                                     | NTF                                    | Reminder effectiveness metrics                          |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behavior |
-|---|---|---|
-| Source modules' outboxes (LRN, ASM, EVD, MEN, EVT, NET, PRF) | Milestone and signal events | Events queue; XP shows late, never wrong |
-| NTF | Delivering reminders, notices | In-app remains authoritative |
-| SET | Consent, preferences, erasure contributors, locale and time zone | Fail closed on visibility; quieter defaults |
-| Key management and signing service | Open Badges signatures | Export disabled when keys unavailable |
-| Skills taxonomy (SRC, EVD planned) | Domains and skill XP | Unknown skill: unclassified |
-| Object storage and image scanning | Badge and share-card images | Fallback to placeholder |
-| Analytics (ANL planned) | Simulation and fairness aggregates | Reports delayed |
-| Content moderation (TSF planned) | Alias and recognition notes | Notes held until reviewed |
+| Dependency                                                   | Purpose                                                          | Failure behavior                            |
+| ------------------------------------------------------------ | ---------------------------------------------------------------- | ------------------------------------------- |
+| Source modules' outboxes (LRN, ASM, EVD, MEN, EVT, NET, PRF) | Milestone and signal events                                      | Events queue; XP shows late, never wrong    |
+| NTF                                                          | Delivering reminders, notices                                    | In-app remains authoritative                |
+| SET                                                          | Consent, preferences, erasure contributors, locale and time zone | Fail closed on visibility; quieter defaults |
+| Key management and signing service                           | Open Badges signatures                                           | Export disabled when keys unavailable       |
+| Skills taxonomy (SRC, EVD planned)                           | Domains and skill XP                                             | Unknown skill: unclassified                 |
+| Object storage and image scanning                            | Badge and share-card images                                      | Fallback to placeholder                     |
+| Analytics (ANL planned)                                      | Simulation and fairness aggregates                               | Reports delayed                             |
+| Content moderation (TSF planned)                             | Alias and recognition notes                                      | Notes held until reviewed                   |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by | For |
-|---|---|---|---|
-| LRN, ASM, EVD, MEN, EVT, NET (planned) | Milestones and signals | PRF (planned) | Badge display on profiles |
-| SET | Consent, preferences, erasure | INS (planned) | Cohort boards |
-| NTF | Delivery | EMP (planned) | Employer reputation display |
-| IDN | Account state | AIC (planned) | Reputation label as an advisory input under BR-REP-024 |
-| TSF (planned) | Account-level sanctions | ATS (planned) | Reputation labels shown in applications with consent |
-| ADM (planned) | Consoles | ANL (planned) | Gamification aggregates |
-| INS, EXA, EMP (planned) | Institutional and enterprise scope | LRN, STU (planned) | Course badges and instructor reputation |
+| Depends on                             | For                                | Depended on by     | For                                                    |
+| -------------------------------------- | ---------------------------------- | ------------------ | ------------------------------------------------------ |
+| LRN, ASM, EVD, MEN, EVT, NET (planned) | Milestones and signals             | PRF (planned)      | Badge display on profiles                              |
+| SET                                    | Consent, preferences, erasure      | INS (planned)      | Cohort boards                                          |
+| NTF                                    | Delivery                           | EMP (planned)      | Employer reputation display                            |
+| IDN                                    | Account state                      | AIC (planned)      | Reputation label as an advisory input under BR-REP-024 |
+| TSF (planned)                          | Account-level sanctions            | ATS (planned)      | Reputation labels shown in applications with consent   |
+| ADM (planned)                          | Consoles                           | ANL (planned)      | Gamification aggregates                                |
+| INS, EXA, EMP (planned)                | Institutional and enterprise scope | LRN, STU (planned) | Course badges and instructor reputation                |
 
 ## 12. Module-level metrics
 
-| ID | Metric | Definition / formula | Owner |
-|---|---|---|---|
-| REP-M01 | Weekly active learners with XP | users with ≥ 1 ledger award in the week ÷ active learners | Product (engagement) |
-| REP-M02 | Streak continuation rate | users with streak ≥ 3 who continue next period ÷ users with streak ≥ 3 | Product (engagement) |
-| REP-M03 | Goal completion rate | completed goals ÷ goals due | Product (engagement) |
-| REP-M04 | Badge distribution | holders per badge and per category (rarity health) | Product (engagement) |
-| REP-M05 | Leaderboard participation | opted-in ÷ eligible users (informational; not a goal to maximize) | Privacy PM |
-| REP-M06 | Opt-out and Minimal rate | users at Minimal or Off ÷ participants (monitored for dark-pattern signals) | Product (engagement) |
-| REP-M07 | Integrity flag and clawback rate | flags per 10,000 awards; clawed-back XP ÷ XP awarded | SAD |
-| REP-M08 | False-positive rate | holds released as clear ÷ holds | SAD |
-| REP-M09 | Reputation coverage | subjects with ≥ 1 labeled domain ÷ active participants | Product (reputation) |
-| REP-M10 | Reputation dispute rate | contested signals ÷ signals | SAD |
-| REP-M11 | Ledger integrity | nightly projection mismatches (target 0) | Platform engineering |
-| REP-M12 | Fairness gap | largest flagged group gap per audit | SAD |
+| ID      | Metric                           | Definition / formula                                                        | Owner                |
+| ------- | -------------------------------- | --------------------------------------------------------------------------- | -------------------- |
+| REP-M01 | Weekly active learners with XP   | users with ≥ 1 ledger award in the week ÷ active learners                   | Product (engagement) |
+| REP-M02 | Streak continuation rate         | users with streak ≥ 3 who continue next period ÷ users with streak ≥ 3      | Product (engagement) |
+| REP-M03 | Goal completion rate             | completed goals ÷ goals due                                                 | Product (engagement) |
+| REP-M04 | Badge distribution               | holders per badge and per category (rarity health)                          | Product (engagement) |
+| REP-M05 | Leaderboard participation        | opted-in ÷ eligible users (informational; not a goal to maximize)           | Privacy PM           |
+| REP-M06 | Opt-out and Minimal rate         | users at Minimal or Off ÷ participants (monitored for dark-pattern signals) | Product (engagement) |
+| REP-M07 | Integrity flag and clawback rate | flags per 10,000 awards; clawed-back XP ÷ XP awarded                        | SAD                  |
+| REP-M08 | False-positive rate              | holds released as clear ÷ holds                                             | SAD                  |
+| REP-M09 | Reputation coverage              | subjects with ≥ 1 labeled domain ÷ active participants                      | Product (reputation) |
+| REP-M10 | Reputation dispute rate          | contested signals ÷ signals                                                 | SAD                  |
+| REP-M11 | Ledger integrity                 | nightly projection mismatches (target 0)                                    | Platform engineering |
+| REP-M12 | Fairness gap                     | largest flagged group gap per audit                                         | SAD                  |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-REP-01 | Daily XP cap value and per-category caps (legacy 200 XP/day). | 200, per-category caps | 200 total with category caps | Product director | FR-REP-002 |
-| OD-REP-02 | Level thresholds and names. | linear, gentle curve | gentle curve tuned after a simulation, neutral names | Product director | FR-REP-004 |
-| OD-REP-03 | Leaderboard and streak reset time zone and cadence (legacy GAP-006 open; weekly and all-time tabs proposed; DOR-010). | UTC, user local | per-user local day for streaks; UTC week for boards with local display | Product director | FR-REP-011, 014, 027 |
-| OD-REP-04 | May enterprise internal boards exist given the non-goal "not generic HR"? | no, narrow opt-in learning challenges only | narrow opt-in learning challenges with no HR use (BR-REP-035) | Owner | FR-REP-017 |
-| OD-REP-05 | Dedicated consent scope for reputation display (`reputation.share_summary`). | new scope, reuse `evidence.share_summary` | new scope in the SET catalog | Privacy lead | FR-REP-021 |
-| OD-REP-06 | Employer reputation from anonymous candidate reviews: allowed, credibility rules, legal review. | allowed with rules, never | allowed with credibility checks and k-minimum | Owner and counsel | FR-REP-023 |
-| OD-REP-07 | May reputation labels be an input to recruiter-facing ranking or matching? | no, advisory display only, allowlisted input | advisory display only until the fairness audit and kill-switch conditions of the matching rules are met | Owner | BR-REP-024 |
-| OD-REP-08 | Default gamification intensity per role. | Standard for all, role-based | Standard learning, Minimal recruiter and employer | Product director | FR-REP-026 |
-| OD-REP-09 | Half-life and recovery periods. | 12, 24, 36 months | 24 months half-life; 12 months negative expiry | Product director | FR-REP-019, 020 |
-| OD-REP-10 | Public leaderboard for all users or only within cohorts and connections. | global public, cohort and connections only | opt-in global plus cohort | Product director | FR-REP-014 |
-| OD-REP-11 | Badge marketplace claims by issuers other than the platform (F-101). | platform and instructors only, open issuers | platform, instructors and institutions with issuer class shown | Product director | FR-REP-010 |
-| OD-REP-12 | Gamification for minors if allowed by region. | none, private only | private only | Owner and counsel | BR-REP-032 |
+| ID        | Question                                                                                                              | Options                                      | Default proposal                                                                                        | Who decides       | Blocking             |
+| --------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------- | -------------------- |
+| OD-REP-01 | Daily XP cap value and per-category caps (legacy 200 XP/day).                                                         | 200, per-category caps                       | 200 total with category caps                                                                            | Product director  | FR-REP-002           |
+| OD-REP-02 | Level thresholds and names.                                                                                           | linear, gentle curve                         | gentle curve tuned after a simulation, neutral names                                                    | Product director  | FR-REP-004           |
+| OD-REP-03 | Leaderboard and streak reset time zone and cadence (legacy GAP-006 open; weekly and all-time tabs proposed; DOR-010). | UTC, user local                              | per-user local day for streaks; UTC week for boards with local display                                  | Product director  | FR-REP-011, 014, 027 |
+| OD-REP-04 | May enterprise internal boards exist given the non-goal "not generic HR"?                                             | no, narrow opt-in learning challenges only   | narrow opt-in learning challenges with no HR use (BR-REP-035)                                           | Owner             | FR-REP-017           |
+| OD-REP-05 | Dedicated consent scope for reputation display (`reputation.share_summary`).                                          | new scope, reuse `evidence.share_summary`    | new scope in the SET catalog                                                                            | Privacy lead      | FR-REP-021           |
+| OD-REP-06 | Employer reputation from anonymous candidate reviews: allowed, credibility rules, legal review.                       | allowed with rules, never                    | allowed with credibility checks and k-minimum                                                           | Owner and counsel | FR-REP-023           |
+| OD-REP-07 | May reputation labels be an input to recruiter-facing ranking or matching?                                            | no, advisory display only, allowlisted input | advisory display only until the fairness audit and kill-switch conditions of the matching rules are met | Owner             | BR-REP-024           |
+| OD-REP-08 | Default gamification intensity per role.                                                                              | Standard for all, role-based                 | Standard learning, Minimal recruiter and employer                                                       | Product director  | FR-REP-026           |
+| OD-REP-09 | Half-life and recovery periods.                                                                                       | 12, 24, 36 months                            | 24 months half-life; 12 months negative expiry                                                          | Product director  | FR-REP-019, 020      |
+| OD-REP-10 | Public leaderboard for all users or only within cohorts and connections.                                              | global public, cohort and connections only   | opt-in global plus cohort                                                                               | Product director  | FR-REP-014           |
+| OD-REP-11 | Badge marketplace claims by issuers other than the platform (F-101).                                                  | platform and instructors only, open issuers  | platform, instructors and institutions with issuer class shown                                          | Product director  | FR-REP-010           |
+| OD-REP-12 | Gamification for minors if allowed by region.                                                                         | none, private only                           | private only                                                                                            | Owner and counsel | BR-REP-032           |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-REP-01 | XP farming and collusion undermine trust | H / M | Server-side rules, diminishing returns, weighting, sanctions (FR-REP-024, 025) |
-| RSK-REP-02 | Dark patterns and anxiety from streaks | M / M | Humane copy rule, protection, opt-out, vacation mode (BR-REP-014, 027) |
-| RSK-REP-03 | Reputation seen as verified evidence by recruiters | M / H | Labeling, advisory-only rule, explanation (BR-REP-024, 034) |
-| RSK-REP-04 | Discriminatory effects of reputation or detection | M / H | No protected attributes, fairness audit, human gate (BR-REP-030) |
-| RSK-REP-05 | Privacy leakage through leaderboards or small cohorts | M / H | Opt-in identity, k-minimum, aliases (BR-REP-016) |
-| RSK-REP-06 | Rule changes cause inflation or user distrust | M / M | Simulation, guardrails, notice (BR-REP-029) |
-| RSK-REP-07 | Enterprise boards drift into employee monitoring | L / H | Opt-in, aggregate-only, no HR export (BR-REP-035) |
-| RSK-REP-08 | Review bombing or reputation attacks | M / M | Independence discounts, minimum samples, contest path |
-| RSK-REP-09 | Ledger and projection drift | L / M | Nightly verification and rebuild |
+| ID         | Risk                                                  | Likelihood / impact | Mitigation                                                                     |
+| ---------- | ----------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------ |
+| RSK-REP-01 | XP farming and collusion undermine trust              | H / M               | Server-side rules, diminishing returns, weighting, sanctions (FR-REP-024, 025) |
+| RSK-REP-02 | Dark patterns and anxiety from streaks                | M / M               | Humane copy rule, protection, opt-out, vacation mode (BR-REP-014, 027)         |
+| RSK-REP-03 | Reputation seen as verified evidence by recruiters    | M / H               | Labeling, advisory-only rule, explanation (BR-REP-024, 034)                    |
+| RSK-REP-04 | Discriminatory effects of reputation or detection     | M / H               | No protected attributes, fairness audit, human gate (BR-REP-030)               |
+| RSK-REP-05 | Privacy leakage through leaderboards or small cohorts | M / H               | Opt-in identity, k-minimum, aliases (BR-REP-016)                               |
+| RSK-REP-06 | Rule changes cause inflation or user distrust         | M / M               | Simulation, guardrails, notice (BR-REP-029)                                    |
+| RSK-REP-07 | Enterprise boards drift into employee monitoring      | L / H               | Opt-in, aggregate-only, no HR export (BR-REP-035)                              |
+| RSK-REP-08 | Review bombing or reputation attacks                  | M / M               | Independence discounts, minimum samples, contest path                          |
+| RSK-REP-09 | Ledger and projection drift                           | L / M               | Nightly verification and rebuild                                               |
 
 ## 15. Legacy source trace
 
-| Legacy source | What was used | What was dropped or changed and why |
-|---|---|---|
-| `SSOT.md` F-22, F-23, F-101, F-144, F-146, F-148..F-150, WF-11, BR-23, BR-25, BR-053, BR-164..168, BR-202, §10.30, §13.6 `streak.rollover`, OD-06, GAP-006, GAP-019 | XP ledger rules, daily cap, badge rules, reputation rules, decay, leaderboard tabs, streak job | Leaderboard marked post-MVP in SSOT is specified fully here; GAP-019 (intensity deferred) specified as FR-REP-026; unresolved reset time recorded as OD-REP-03 |
-| `docs/registries/FEATURE_REGISTRY.md` F-22, F-23, F-101, F-144, F-148, F-149, F-150 | Feature identities | Merged into 31 features; F-146 activity tracking is consumed as events, not owned |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/LEGACY_REQUIREMENTS_AND_ACCEPTANCE_FROM_REPORTS.md` F-22, F-23, F-101 rows | Intended acceptance sentences ("completing a tracked action raises XP", "a user with XP appears on the leaderboard", "a member lists a badge for claim") | Partial and ephemeral status not carried over |
-| `Yash_Final_Project_Document/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T045..T047, BR-T070, BR-T077, BR-T087, BR-T118 | Moderation notice and appeal, matching allowlist, fairness audit, nudge caps, issuer class | Applied by analogy to gamification sanctions and reminders |
-| `SSOT.md` §15.9.2 and §15.9.4 (FERPA, severance), §15.10 AI safety | Institutional board rules; human gate; no emotion analysis | — |
-| Industry products (Duolingo streaks and leagues, Coursera and Credly badges, Stack Overflow reputation, GitHub contributions, Open Badges 3.0) | Streak protection, seasons, verifiable badges, weighted reputation | Tagged `[PROP]`: FR-REP-009, 010 (kudos), 012, 013, 017, 027, 028 and the independence discounts in FR-REP-022 |
+| Legacy source                                                                                                                                                       | What was used                                                                                                                                            | What was dropped or changed and why                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` F-22, F-23, F-101, F-144, F-146, F-148..F-150, WF-11, BR-23, BR-25, BR-053, BR-164..168, BR-202, §10.30, §13.6 `streak.rollover`, OD-06, GAP-006, GAP-019 | XP ledger rules, daily cap, badge rules, reputation rules, decay, leaderboard tabs, streak job                                                           | Leaderboard marked post-MVP in SSOT is specified fully here; GAP-019 (intensity deferred) specified as FR-REP-026; unresolved reset time recorded as OD-REP-03 |
+| `docs/registries/FEATURE_REGISTRY.md` F-22, F-23, F-101, F-144, F-148, F-149, F-150                                                                                 | Feature identities                                                                                                                                       | Merged into 31 features; F-146 activity tracking is consumed as events, not owned                                                                              |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/LEGACY_REQUIREMENTS_AND_ACCEPTANCE_FROM_REPORTS.md` F-22, F-23, F-101 rows                                   | Intended acceptance sentences ("completing a tracked action raises XP", "a user with XP appears on the leaderboard", "a member lists a badge for claim") | Partial and ephemeral status not carried over                                                                                                                  |
+| `Yash_Final_Project_Document/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T045..T047, BR-T070, BR-T077, BR-T087, BR-T118                                    | Moderation notice and appeal, matching allowlist, fairness audit, nudge caps, issuer class                                                               | Applied by analogy to gamification sanctions and reminders                                                                                                     |
+| `SSOT.md` §15.9.2 and §15.9.4 (FERPA, severance), §15.10 AI safety                                                                                                  | Institutional board rules; human gate; no emotion analysis                                                                                               | —                                                                                                                                                              |
+| Industry products (Duolingo streaks and leagues, Coursera and Credly badges, Stack Overflow reputation, GitHub contributions, Open Badges 3.0)                      | Streak protection, seasons, verifiable badges, weighted reputation                                                                                       | Tagged `[PROP]`: FR-REP-009, 010 (kudos), 012, 013, 017, 027, 028 and the independence discounts in FR-REP-022                                                 |

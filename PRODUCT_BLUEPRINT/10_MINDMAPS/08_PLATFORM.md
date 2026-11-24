@@ -2,7 +2,7 @@
 
 # Mind map: Platform and operations
 
-Every module, sub-module and feature in this domain (157 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (159 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -45,6 +45,7 @@ mindmap
         ANL-034 Embedded analytics and partner API
         ANL-035 Metric change management and dashboard
         ANL-036 Unit economics and cost analytics
+        ANL-037 Career workbench tasks, saved items and
     ADM Admin Console, Support Operations
       Console foundation and access
         ADM-001 Admin console shell and information
@@ -93,6 +94,7 @@ mindmap
         ADM-037 Job queue and dead-letter console
         ADM-038 Incident management tooling and public
         ADM-039 Platform health dashboard
+        ADM-040 Public landing page
     PWA PWA, Offline, Mobile Browser Extension
       Installability and shell
         PWA-001 Web app manifest and installability

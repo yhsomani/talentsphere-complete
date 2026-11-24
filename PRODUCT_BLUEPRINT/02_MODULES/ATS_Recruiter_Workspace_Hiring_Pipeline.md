@@ -10,25 +10,25 @@ ATS is the employer-side system of record for hiring. It takes a need to hire (r
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A recruiter goes from approved requisition to published job quickly and compliantly | Time from requisition approval to publish; share of postings passing readiness on first try |
-| No applicant is lost or left without a decision | Zero applications without an owner after SLA; every terminal outcome has a reason and a candidate message |
-| Reviewers compare candidates on evidence and the same rubric | Share of decisions with all required scorecards; comparison runs on structured rubrics only |
-| Every consequential action is explainable | Audit coverage of 100 percent of state-changing commands [SRC: SSOT §9.7 F-06 acceptance] |
-| The process is monitored for fairness and legality | Adverse-impact reports run on schedule; retention and rights requests meet deadlines |
+| Outcome                                                                             | How the system knows                                                                                      |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| A recruiter goes from approved requisition to published job quickly and compliantly | Time from requisition approval to publish; share of postings passing readiness on first try               |
+| No applicant is lost or left without a decision                                     | Zero applications without an owner after SLA; every terminal outcome has a reason and a candidate message |
+| Reviewers compare candidates on evidence and the same rubric                        | Share of decisions with all required scorecards; comparison runs on structured rubrics only               |
+| Every consequential action is explainable                                           | Audit coverage of 100 percent of state-changing commands [SRC: SSOT §9.7 F-06 acceptance]                 |
+| The process is monitored for fairness and legality                                  | Adverse-impact reports run on schedule; retention and rights requests meet deadlines                      |
 
 ### 1.3 Boundaries
 
-| In scope (owned by ATS) | Out of scope | Consumed |
-|---|---|---|
-| Requisitions, approvals, headcount | Employer org, seats, roles, billing (EMP, BIL planned) | Org, members, roles, entitlements from EMP and BIL |
-| Job authoring, templates, compliance checks, screening question definitions, publishing, multi-posting, lifecycle | Candidate-facing listing, search and application form rendering (JOB) | Candidate applications from JOB |
-| Pipeline stages, automation, review views, bulk actions, rejection, communications | Interview scheduling, rooms, feedback collection forms engine (INT) | Interviews and feedback from INT |
-| Scorecards, notes, collaboration, hiring team | Candidate profile and evidence storage (PRF, EVD, BGV planned) | Profile, credentials, assessment results |
-| Talent pools, sourcing, outreach, duplicates, agency submissions | Messaging transport (MSG, NTF planned) | Delivery services |
-| Offers, approvals, letters, negotiation, hire handoff | E-signature provider, HRIS (external) | Provider hooks |
-| SLA, DEI monitoring, audit, retention, rights, reporting, AI-assist governance | Platform-wide analytics (ANL planned) | Warehouse, if any |
+| In scope (owned by ATS)                                                                                           | Out of scope                                                          | Consumed                                           |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------- |
+| Requisitions, approvals, headcount                                                                                | Employer org, seats, roles, billing (EMP, BIL planned)                | Org, members, roles, entitlements from EMP and BIL |
+| Job authoring, templates, compliance checks, screening question definitions, publishing, multi-posting, lifecycle | Candidate-facing listing, search and application form rendering (JOB) | Candidate applications from JOB                    |
+| Pipeline stages, automation, review views, bulk actions, rejection, communications                                | Interview scheduling, rooms, feedback collection forms engine (INT)   | Interviews and feedback from INT                   |
+| Scorecards, notes, collaboration, hiring team                                                                     | Candidate profile and evidence storage (PRF, EVD, BGV planned)        | Profile, credentials, assessment results           |
+| Talent pools, sourcing, outreach, duplicates, agency submissions                                                  | Messaging transport (MSG, NTF planned)                                | Delivery services                                  |
+| Offers, approvals, letters, negotiation, hire handoff                                                             | E-signature provider, HRIS (external)                                 | Provider hooks                                     |
+| SLA, DEI monitoring, audit, retention, rights, reporting, AI-assist governance                                    | Platform-wide analytics (ANL planned)                                 | Warehouse, if any                                  |
 
 Ownership of shared entities: ATS owns Requisition, Job Posting, Pipeline, Stage Assignment, Scorecard, Note, Offer, Talent Pool, Rejection, Hire. JOB owns Application and its snapshot; ATS changes an Application only through `API-ATS-02` commands that append status events. [DER]
 
@@ -36,37 +36,37 @@ Ownership of shared entities: ATS owns Requisition, Job Posting, Pipeline, Stage
 
 Legend: Y allowed, O own or assigned records only, T scoped to jobs where the person is on the hiring team, A audited override, N not allowed.
 
-| Capability | REC | HMG | EAD | Interviewer (employer member, planned role in EMP) | Coordinator | CAN | PAD | SUP |
-|---|---|---|---|---|---|---|---|---|
-| Create requisition | Y | Request only | Y | N | N | N | N | N |
-| Approve requisition, offer | Approver role only | Approver role only | Y | N | N | N | N | N |
-| Author and publish job | T | Draft only | Y | N | T (draft) | N | N | N |
-| View applications and pipeline | T | T | Y | Assigned stage only | T | N | N | N |
-| Move stage, reject, bulk action | T | T (own jobs) | Y | N | T | N | N | N |
-| Submit scorecard | Y | Y | Y | Y (assigned) | N | N | N | N |
-| View others' scorecards | After own submit | After own submit | Y | After own submit | N | N | N | N |
-| Notes and mentions | T | T | Y | Assigned | T | N | N | N |
-| Source candidates, outreach | Y | N | Y | N | N | N | N | N |
-| Create and send offers | T | Draft/recommend | Y | N | N | N | N | N |
-| View DEI aggregate reports | N | N | Y | N | N | N | Y (platform aggregate) | N |
-| Candidate rights requests | N | N | Y | N | N | Submit | A | Assist |
-| Audit log read | Own actions | Own actions | Y | N | N | N | A | A |
+| Capability                      | REC                | HMG                | EAD | Interviewer (employer member, planned role in EMP) | Coordinator | CAN    | PAD                    | SUP    |
+| ------------------------------- | ------------------ | ------------------ | --- | -------------------------------------------------- | ----------- | ------ | ---------------------- | ------ |
+| Create requisition              | Y                  | Request only       | Y   | N                                                  | N           | N      | N                      | N      |
+| Approve requisition, offer      | Approver role only | Approver role only | Y   | N                                                  | N           | N      | N                      | N      |
+| Author and publish job          | T                  | Draft only         | Y   | N                                                  | T (draft)   | N      | N                      | N      |
+| View applications and pipeline  | T                  | T                  | Y   | Assigned stage only                                | T           | N      | N                      | N      |
+| Move stage, reject, bulk action | T                  | T (own jobs)       | Y   | N                                                  | T           | N      | N                      | N      |
+| Submit scorecard                | Y                  | Y                  | Y   | Y (assigned)                                       | N           | N      | N                      | N      |
+| View others' scorecards         | After own submit   | After own submit   | Y   | After own submit                                   | N           | N      | N                      | N      |
+| Notes and mentions              | T                  | T                  | Y   | Assigned                                           | T           | N      | N                      | N      |
+| Source candidates, outreach     | Y                  | N                  | Y   | N                                                  | N           | N      | N                      | N      |
+| Create and send offers          | T                  | Draft/recommend    | Y   | N                                                  | N           | N      | N                      | N      |
+| View DEI aggregate reports      | N                  | N                  | Y   | N                                                  | N           | N      | Y (platform aggregate) | N      |
+| Candidate rights requests       | N                  | N                  | Y   | N                                                  | N           | Submit | A                      | Assist |
+| Audit log read                  | Own actions        | Own actions        | Y   | N                                                  | N           | N      | A                      | A      |
 
 Hiring team roles are defined per job (FR-ATS-028). `SUP` and `PAD` can see only metadata unless a candidate or employer grants a time-boxed, audited access. [DER]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Requisitions | FR-ATS-001 to 003 |
-| B | Job authoring | FR-ATS-004 to 007 |
-| C | Publishing | FR-ATS-008 to 010 |
-| D | Pipeline configuration | FR-ATS-011, 012 |
-| E | Candidate review | FR-ATS-013 to 024 |
-| F | Collaboration and scorecards | FR-ATS-025 to 030 |
-| G | Sourcing and CRM | FR-ATS-031 to 035 |
-| H | Offers and hire | FR-ATS-036 to 040 |
-| I | Governance and reporting | FR-ATS-041 to 048 |
+| Code | Sub-module                   | Features          |
+| ---- | ---------------------------- | ----------------- |
+| A    | Requisitions                 | FR-ATS-001 to 003 |
+| B    | Job authoring                | FR-ATS-004 to 007 |
+| C    | Publishing                   | FR-ATS-008 to 010 |
+| D    | Pipeline configuration       | FR-ATS-011, 012   |
+| E    | Candidate review             | FR-ATS-013 to 024 |
+| F    | Collaboration and scorecards | FR-ATS-025 to 030 |
+| G    | Sourcing and CRM             | FR-ATS-031 to 035 |
+| H    | Offers and hire              | FR-ATS-036 to 040 |
+| I    | Governance and reporting     | FR-ATS-041 to 048 |
 
 ```mermaid
 flowchart LR
@@ -142,7 +142,7 @@ flowchart LR
 - **Priority / tier:** Should · R2
 - **Source:** [SRC: BR-071] [PROP]
 - **Purpose and outcome:** Keep requisition fill count, open duration and spend against budget visible; success is no over-hiring and no abandoned requisitions.
-- **Roles and permissions:** `REC, HMG: view own` · `EAD: view all, adjust` 
+- **Roles and permissions:** `REC, HMG: view own` · `EAD: view all, adjust`
 - **Preconditions and entry points:** Requisition list and detail; hire events.
 - **User interactions and actions:** 1) View filled / headcount, open days, offers outstanding. 2) Adjust headcount (needs re-approval if increase). 3) Put on hold, close as cancelled or filled.
 - **System behaviour:** Each hire decrements remaining headcount; at zero the requisition becomes `filled` and open postings close per FR-ATS-040. Offers outstanding plus hires cannot exceed headcount unless org policy allows overbooking. Aging: a requisition open more than 21 days with no pipeline activity flags for review; at 30 days it auto-pauses its postings with notice [SRC: BR-071]. Billing credit for auto-pause is a BIL (planned) decision (OD-ATS-04).
@@ -556,7 +556,7 @@ flowchart LR
 
 - **Sub-module:** E Review
 - **Priority / tier:** Should · R2
-- **Source:** [SRC: F-103 Candidate Comparison and Rubric; BR-176]
+- **Source:** [SRC: F-103 Candidate Comparison and Rubric; BR-176] · also [SRC: SSOT §7 F-167 Candidate Comparison & Rubric (Enhanced); weights per OD-ATS-11]
 - **Purpose and outcome:** Compare shortlisted candidates side by side on the same structured criteria; success is decisions that reference rubric rows.
 - **Roles and permissions:** `Hiring team (T)`
 - **Preconditions and entry points:** Select 2 to 6 candidates, then Compare.
@@ -583,7 +583,7 @@ flowchart LR
 - **Priority / tier:** Must · R2
 - **Source:** [SRC: SSOT F-06 step 3; BR-17, BR-20, BR-041]
 - **Purpose and outcome:** Move an application through the pipeline with validation and an append-only record.
-- **Roles and permissions:** `REC (T), EAD, Coordinator (T)`; `HMG (T): move own jobs` 
+- **Roles and permissions:** `REC (T), EAD, Coordinator (T)`; `HMG (T): move own jobs`
 - **Preconditions and entry points:** Kanban, table, detail, bulk actions, automation.
 - **User interactions and actions:** 1) Choose destination stage. 2) If moving backward, give a reason (text). 3) If moving to Offer, system checks prerequisites. 4) If moving to a terminal disposition, choose Reject (FR-ATS-022) or Hired (FR-ATS-040). 5) Optionally send a stage message.
 - **System behaviour:** Valid forward moves to any later stage are allowed when org config "allow stage skipping" is on (default on for Applied to Interview and Assessment); otherwise sequential. Entering Offer requires completed required scorecards [SRC: BR-042] (BR-ATS-025). Each transition appends a status event with actor, from, to, reason, timestamp (BR-ATS-012) and maps to the candidate status via SM-JOB-01. The command is idempotent per (application, expected-from-stage, request id), preventing double moves.
@@ -661,7 +661,7 @@ flowchart LR
 - **Priority / tier:** Must · R2
 - **Source:** [SRC: BR-224 org-configurable feedback templates]
 - **Purpose and outcome:** Send consistent, personalized candidate emails and messages.
-- **Roles and permissions:** `REC (T): send, use` · `EAD: manage org templates` 
+- **Roles and permissions:** `REC (T): send, use` · `EAD: manage org templates`
 - **Preconditions and entry points:** Candidate detail Communicate, bulk email, automations.
 - **User interactions and actions:** 1) Choose a template (Acknowledgement, Request documents, Interview invitation (INT), Rejection, Offer follow-up, Custom). 2) Merge fields ({{candidate.firstName}}, {{job.title}}, {{company.name}}, {{recruiter.name}}). 3) Preview rendered text for the candidate. 4) Send now or schedule. 5) Save as template.
 - **System behaviour:** Sends via NTF/MSG (planned) from a platform address with reply-to routing back to the thread; every send is logged in the candidate communication log (FR-ATS-024). Unsubstituted merge fields block sending. Sending hours honor candidate time zone (default 08:00 to 20:00) [PROP]. Templates versioned; sent messages keep the rendered copy.
@@ -1321,56 +1321,56 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-ATS-001 | Only users with the Recruiter or Employer Admin role and an active seat may create requisitions and job postings; hiring managers may request or draft only. | Accountability. | API authorization | [SRC: BR-01] |
-| BR-ATS-002 | Every ATS record carries `organization_id`; cross-tenant reads and writes are prohibited. | Tenant isolation. | Data layer and policies | [SRC: BR-080, BR-040] |
-| BR-ATS-003 | A job posting may be published only against an approved requisition unless org policy explicitly allows requisition-free postings. | Budget control. | Publish command | [DER] |
-| BR-ATS-004 | Jobs require an approved organization and a verified owner; verified organizations receive accelerated automatic approval, unverified go to platform review. | Fraud control. | Publish workflow | [SRC: BR-036, BR-062] |
-| BR-ATS-005 | Publish readiness is validated server-side: title, description length, location or eligibility, employment type, level, 3+ skills, pay where required, apply method, hiring manager, no hard-fail language. | Quality and law. | Publish command | [SRC: BR-10] |
-| BR-ATS-006 | Where a job location falls under a pay-disclosure rule, pay range is mandatory and cannot be hidden. | Pay transparency law. | Readiness check | [DER] [DEC-REQ OD-JOB-07] |
-| BR-ATS-007 | Posting lifecycle changes are server-owned and follow SM-ATS-02; only own-organization postings may be changed. | Integrity. | Domain command | [SRC: BR-11, BR-12] |
-| BR-ATS-008 | Postings auto-close after expiry; default 60 days, configurable 14 to 90. | Freshness. | Scheduler | [SRC: BR-057; OD-JOB-03] |
-| BR-ATS-009 | Reposting creates a new posting version for the same requisition, preserves applicants, and is blocked while another posting is active for the same requisition and location. | No duplicates. | Repost command | [PROP] |
-| BR-ATS-010 | Posting text is linted: explicit protected-attribute requirements are hard-fail; biased wording is a warning needing a recorded reason to dismiss. | Non-discrimination. | Authoring, publish | [PROP] |
-| BR-ATS-011 | Every pipeline stage maps to exactly one system category and thereby to one candidate-visible status. | Consistent status. | Pipeline config validation | [DER] [SRC: V61-18] |
-| BR-ATS-012 | Stage transitions are server-owned, validated, idempotent and append a status event; backward moves need a reason; invalid transitions are blocked. | Auditability. | Transition command | [SRC: BR-17, BR-041, BR-20] |
-| BR-ATS-013 | Rejection and other terminal dispositions require a reason category from the managed taxonomy. | Candidate feedback and reporting. | Command | [SRC: BR-217] |
-| BR-ATS-014 | Rejection messages send with a configurable delay (default 24 hours); a candidate must be notified of rejection; free text is visible only to the candidate. | Dignity, correctness. | Message scheduler | [SRC: BR-045, BR-219] [PROP: mandatory notice] |
-| BR-ATS-015 | Automation rules may not reject or rank candidates; the only automated decline is a knockout decline on approved objective rule types in strict mode, with human review on request. | Human oversight. | Rule validator | [SRC: BR-171] [PROP] |
-| BR-ATS-016 | Scorecards, notes and ratings are private to the hiring team and never candidate-visible. | Candour. | Projection, API | [SRC: BR-19] |
-| BR-ATS-017 | Blind review (default on): a reviewer cannot see others' scorecards before submitting their own. | Independent judgment. | Scorecard API | [PROP] |
-| BR-ATS-018 | Submitted scorecards are immutable; changes happen by addendum (compensating entry). | Evidence integrity. | Scorecard service | [SRC: BR-174] |
-| BR-ATS-019 | Candidate comparison uses structured rubrics only; no free-form scores or automated overall ranking. | Fair comparison. | Comparison service | [SRC: BR-176] |
-| BR-ATS-020 | Notes are visible only to the job's hiring team; mentions grant no access; they may be subject to data access requests. | Privacy. | Notes service | [SRC: BR-19] [DER] |
-| BR-ATS-021 | Bulk actions: max 500 items per batch; preview for more than 25 items or any reject/email; per-item results; no silent partial imports. | Safety. | Batch service | [SRC: BR-077] [PROP] |
-| BR-ATS-022 | Outreach to sourced candidates only if the candidate's visibility permits and the employer is not blocked; opt-outs are honored globally for 12 months. | Consent. | Sourcing and outreach | [PROP] |
-| BR-ATS-023 | Talent pool membership requires a lawful basis (consent or sourced with notice within 30 days) and expires after 12 months unless renewed. | Data protection. | Pool service | [DER] |
-| BR-ATS-024 | Duplicate candidates are never merged automatically; merges are human-confirmed and reversible for 30 days. | Accuracy. | Duplicate service | [PROP] |
-| BR-ATS-025 | An offer can be created only after required scorecards for the offer stage are complete. | Evidence before offer. | Offer command | [SRC: BR-042] |
-| BR-ATS-026 | Offers follow an approval chain; approvers cannot approve their own offers; material edits void prior approvals; approval records are immutable. | Control. | Approval engine | [PROP] |
-| BR-ATS-027 | One active offer per application. | Clarity. | Unique constraint | [SRC: SSOT F-06 step 6] |
-| BR-ATS-028 | Offers have a mandatory expiry (default 7 days); expiry is automatic. | Closure. | Scheduler | [PROP] |
-| BR-ATS-029 | Offer letters are immutable snapshots tied to an offer version; letter pay must match offer pay; e-sign is through a connected provider. | Consistency. | Letter service | [PROP] |
-| BR-ATS-030 | Hired requires an accepted offer; hiring decrements headcount, closes the requisition at zero and closes other applications for that requisition. | Integrity. | Hire command | [DER] |
-| BR-ATS-031 | SLA defaults: review within 5 business days; interviewer reminder at 3 and escalation at 7; candidate non-response reminders at 5 and flag at 8; escalations propose, never auto-change status. | Candidate experience. | SLA job | [SRC: BR-069, BR-070 partly] [PROP; OD-ATS-03] |
-| BR-ATS-032 | Requisitions inactive more than 21 days are flagged; at 30 days postings are auto-paused with notice. | Prevent abandoned requisitions. | Aging job | [SRC: BR-071] |
-| BR-ATS-033 | Self-identification data is voluntary, stored separately, never visible to reviewers, never an input to search, rules, AI or scoring. | Fairness. | Data model and API | [DER] [SRC: BR-172] |
-| BR-ATS-034 | Adverse-impact monitoring uses the four-fifths screening rule with minimum sample sizes; results are for governance, not individual decisions. | Compliance. | Reporting | [DER] |
-| BR-ATS-035 | Retention: unsuccessful applications default 24 months after close (6 to 36 allowed); legal hold overrides purge; purge removes personal data but keeps aggregates and pseudonymous audit. | Data minimization. | Purge job | [PROP] |
-| BR-ATS-036 | Candidate rights requests are fulfilled within 30 days (one documented extension); erasure completes in all stores and indexes within 24 hours of execution unless a legal exception applies. | GDPR. | Rights workflow | [SRC: BR-063] [DER] |
-| BR-ATS-037 | Every state-changing command writes an immutable audit entry in the same transaction. | Accountability. | Command layer | [SRC: BR-067] |
-| BR-ATS-038 | AI output is advisory, labelled, confidence thresholds apply (below 0.5 suppressed, below 0.7 disclaimer), excludes protected attributes, and never decides stage, rejection or ranking. | Safe AI. | AI gateway | [SRC: BR-065, BR-066, BR-171, BR-172, BR-221] |
-| BR-ATS-039 | Candidate documents are scanned before extraction and served only from scanned copies via signed URLs. | Security. | File service | [SRC: BR-043, BR-044] |
-| BR-ATS-040 | Access to a job's candidates is limited to its hiring team and EAD; interviewers see only candidates in their assigned stages by default. | Least privilege. | Access policy | [SRC: BR-040, BR-12] [PROP] |
-| BR-ATS-041 | Report cohorts below 10 are labelled small sample and demographic cells below 10 are suppressed. | Privacy. | Reporting | [SRC: BR-207, BR-220 principle] |
-| BR-ATS-042 | Agency submissions create applications only after candidate consent; attribution goes to the first confirmed submission within the agreement window. | Fairness and consent. | Submission service | [PROP; OD-ATS-07] |
-| BR-ATS-043 | Outreach sequences have at most 4 steps, stop on reply or application, include an opt-out, and are capped per recruiter per day (default 100). | Anti-spam. | Outreach service | [PROP; OD-ATS-06] |
-| BR-ATS-044 | Recruiters see verified signals, labelled by provenance; unverified claims are marked; reputation data appears only with candidate consent or an active application. | Honesty and consent. | Evidence API | [SRC: BR-064, BR-167] |
-| BR-ATS-045 | Candidate privacy settings are honored: blocked employers cannot source or contact; sourcing visibility off excludes the candidate; external boards and agencies receive no data without consent. | Candidate control. | Sourcing, distribution, submission | [PROP] aligned [SRC: BR-JOB-036] |
-| BR-ATS-046 | Every job posting save creates a retained revision; published versions are never overwritten. | Traceability. | Authoring service | [PROP] |
-| BR-ATS-047 | Blind screening mode masks identity fields server-side until the configured reveal stage; reveal is logged. | Bias reduction. | Projection | [PROP] |
-| BR-ATS-048 | Previous applications by the same candidate to the same org are shown only to authorized reviewers, within retention, with an anchoring warning, and may be turned off by org policy. | Fair review. | Application detail | [PROP] |
+| ID         | Rule                                                                                                                                                                                                        | Rationale                         | Enforced where                     | Source                                         |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------- | ---------------------------------------------- |
+| BR-ATS-001 | Only users with the Recruiter or Employer Admin role and an active seat may create requisitions and job postings; hiring managers may request or draft only.                                                | Accountability.                   | API authorization                  | [SRC: BR-01]                                   |
+| BR-ATS-002 | Every ATS record carries `organization_id`; cross-tenant reads and writes are prohibited.                                                                                                                   | Tenant isolation.                 | Data layer and policies            | [SRC: BR-080, BR-040]                          |
+| BR-ATS-003 | A job posting may be published only against an approved requisition unless org policy explicitly allows requisition-free postings.                                                                          | Budget control.                   | Publish command                    | [DER]                                          |
+| BR-ATS-004 | Jobs require an approved organization and a verified owner; verified organizations receive accelerated automatic approval, unverified go to platform review.                                                | Fraud control.                    | Publish workflow                   | [SRC: BR-036, BR-062]                          |
+| BR-ATS-005 | Publish readiness is validated server-side: title, description length, location or eligibility, employment type, level, 3+ skills, pay where required, apply method, hiring manager, no hard-fail language. | Quality and law.                  | Publish command                    | [SRC: BR-10]                                   |
+| BR-ATS-006 | Where a job location falls under a pay-disclosure rule, pay range is mandatory and cannot be hidden.                                                                                                        | Pay transparency law.             | Readiness check                    | [DER] [DEC-REQ OD-JOB-07]                      |
+| BR-ATS-007 | Posting lifecycle changes are server-owned and follow SM-ATS-02; only own-organization postings may be changed.                                                                                             | Integrity.                        | Domain command                     | [SRC: BR-11, BR-12]                            |
+| BR-ATS-008 | Postings auto-close after expiry; default 60 days, configurable 14 to 90.                                                                                                                                   | Freshness.                        | Scheduler                          | [SRC: BR-057; OD-JOB-03]                       |
+| BR-ATS-009 | Reposting creates a new posting version for the same requisition, preserves applicants, and is blocked while another posting is active for the same requisition and location.                               | No duplicates.                    | Repost command                     | [PROP]                                         |
+| BR-ATS-010 | Posting text is linted: explicit protected-attribute requirements are hard-fail; biased wording is a warning needing a recorded reason to dismiss.                                                          | Non-discrimination.               | Authoring, publish                 | [PROP]                                         |
+| BR-ATS-011 | Every pipeline stage maps to exactly one system category and thereby to one candidate-visible status.                                                                                                       | Consistent status.                | Pipeline config validation         | [DER] [SRC: V61-18]                            |
+| BR-ATS-012 | Stage transitions are server-owned, validated, idempotent and append a status event; backward moves need a reason; invalid transitions are blocked.                                                         | Auditability.                     | Transition command                 | [SRC: BR-17, BR-041, BR-20]                    |
+| BR-ATS-013 | Rejection and other terminal dispositions require a reason category from the managed taxonomy.                                                                                                              | Candidate feedback and reporting. | Command                            | [SRC: BR-217]                                  |
+| BR-ATS-014 | Rejection messages send with a configurable delay (default 24 hours); a candidate must be notified of rejection; free text is visible only to the candidate.                                                | Dignity, correctness.             | Message scheduler                  | [SRC: BR-045, BR-219] [PROP: mandatory notice] |
+| BR-ATS-015 | Automation rules may not reject or rank candidates; the only automated decline is a knockout decline on approved objective rule types in strict mode, with human review on request.                         | Human oversight.                  | Rule validator                     | [SRC: BR-171] [PROP]                           |
+| BR-ATS-016 | Scorecards, notes and ratings are private to the hiring team and never candidate-visible.                                                                                                                   | Candour.                          | Projection, API                    | [SRC: BR-19]                                   |
+| BR-ATS-017 | Blind review (default on): a reviewer cannot see others' scorecards before submitting their own.                                                                                                            | Independent judgment.             | Scorecard API                      | [PROP]                                         |
+| BR-ATS-018 | Submitted scorecards are immutable; changes happen by addendum (compensating entry).                                                                                                                        | Evidence integrity.               | Scorecard service                  | [SRC: BR-174]                                  |
+| BR-ATS-019 | Candidate comparison uses structured rubrics only; no free-form scores or automated overall ranking.                                                                                                        | Fair comparison.                  | Comparison service                 | [SRC: BR-176]                                  |
+| BR-ATS-020 | Notes are visible only to the job's hiring team; mentions grant no access; they may be subject to data access requests.                                                                                     | Privacy.                          | Notes service                      | [SRC: BR-19] [DER]                             |
+| BR-ATS-021 | Bulk actions: max 500 items per batch; preview for more than 25 items or any reject/email; per-item results; no silent partial imports.                                                                     | Safety.                           | Batch service                      | [SRC: BR-077] [PROP]                           |
+| BR-ATS-022 | Outreach to sourced candidates only if the candidate's visibility permits and the employer is not blocked; opt-outs are honored globally for 12 months.                                                     | Consent.                          | Sourcing and outreach              | [PROP]                                         |
+| BR-ATS-023 | Talent pool membership requires a lawful basis (consent or sourced with notice within 30 days) and expires after 12 months unless renewed.                                                                  | Data protection.                  | Pool service                       | [DER]                                          |
+| BR-ATS-024 | Duplicate candidates are never merged automatically; merges are human-confirmed and reversible for 30 days.                                                                                                 | Accuracy.                         | Duplicate service                  | [PROP]                                         |
+| BR-ATS-025 | An offer can be created only after required scorecards for the offer stage are complete.                                                                                                                    | Evidence before offer.            | Offer command                      | [SRC: BR-042]                                  |
+| BR-ATS-026 | Offers follow an approval chain; approvers cannot approve their own offers; material edits void prior approvals; approval records are immutable.                                                            | Control.                          | Approval engine                    | [PROP]                                         |
+| BR-ATS-027 | One active offer per application.                                                                                                                                                                           | Clarity.                          | Unique constraint                  | [SRC: SSOT F-06 step 6]                        |
+| BR-ATS-028 | Offers have a mandatory expiry (default 7 days); expiry is automatic.                                                                                                                                       | Closure.                          | Scheduler                          | [PROP]                                         |
+| BR-ATS-029 | Offer letters are immutable snapshots tied to an offer version; letter pay must match offer pay; e-sign is through a connected provider.                                                                    | Consistency.                      | Letter service                     | [PROP]                                         |
+| BR-ATS-030 | Hired requires an accepted offer; hiring decrements headcount, closes the requisition at zero and closes other applications for that requisition.                                                           | Integrity.                        | Hire command                       | [DER]                                          |
+| BR-ATS-031 | SLA defaults: review within 5 business days; interviewer reminder at 3 and escalation at 7; candidate non-response reminders at 5 and flag at 8; escalations propose, never auto-change status.             | Candidate experience.             | SLA job                            | [SRC: BR-069, BR-070 partly] [PROP; OD-ATS-03] |
+| BR-ATS-032 | Requisitions inactive more than 21 days are flagged; at 30 days postings are auto-paused with notice.                                                                                                       | Prevent abandoned requisitions.   | Aging job                          | [SRC: BR-071]                                  |
+| BR-ATS-033 | Self-identification data is voluntary, stored separately, never visible to reviewers, never an input to search, rules, AI or scoring.                                                                       | Fairness.                         | Data model and API                 | [DER] [SRC: BR-172]                            |
+| BR-ATS-034 | Adverse-impact monitoring uses the four-fifths screening rule with minimum sample sizes; results are for governance, not individual decisions.                                                              | Compliance.                       | Reporting                          | [DER]                                          |
+| BR-ATS-035 | Retention: unsuccessful applications default 24 months after close (6 to 36 allowed); legal hold overrides purge; purge removes personal data but keeps aggregates and pseudonymous audit.                  | Data minimization.                | Purge job                          | [PROP]                                         |
+| BR-ATS-036 | Candidate rights requests are fulfilled within 30 days (one documented extension); erasure completes in all stores and indexes within 24 hours of execution unless a legal exception applies.               | GDPR.                             | Rights workflow                    | [SRC: BR-063] [DER]                            |
+| BR-ATS-037 | Every state-changing command writes an immutable audit entry in the same transaction.                                                                                                                       | Accountability.                   | Command layer                      | [SRC: BR-067]                                  |
+| BR-ATS-038 | AI output is advisory, labelled, confidence thresholds apply (below 0.5 suppressed, below 0.7 disclaimer), excludes protected attributes, and never decides stage, rejection or ranking.                    | Safe AI.                          | AI gateway                         | [SRC: BR-065, BR-066, BR-171, BR-172, BR-221]  |
+| BR-ATS-039 | Candidate documents are scanned before extraction and served only from scanned copies via signed URLs.                                                                                                      | Security.                         | File service                       | [SRC: BR-043, BR-044]                          |
+| BR-ATS-040 | Access to a job's candidates is limited to its hiring team and EAD; interviewers see only candidates in their assigned stages by default.                                                                   | Least privilege.                  | Access policy                      | [SRC: BR-040, BR-12] [PROP]                    |
+| BR-ATS-041 | Report cohorts below 10 are labelled small sample and demographic cells below 10 are suppressed.                                                                                                            | Privacy.                          | Reporting                          | [SRC: BR-207, BR-220 principle]                |
+| BR-ATS-042 | Agency submissions create applications only after candidate consent; attribution goes to the first confirmed submission within the agreement window.                                                        | Fairness and consent.             | Submission service                 | [PROP; OD-ATS-07]                              |
+| BR-ATS-043 | Outreach sequences have at most 4 steps, stop on reply or application, include an opt-out, and are capped per recruiter per day (default 100).                                                              | Anti-spam.                        | Outreach service                   | [PROP; OD-ATS-06]                              |
+| BR-ATS-044 | Recruiters see verified signals, labelled by provenance; unverified claims are marked; reputation data appears only with candidate consent or an active application.                                        | Honesty and consent.              | Evidence API                       | [SRC: BR-064, BR-167]                          |
+| BR-ATS-045 | Candidate privacy settings are honored: blocked employers cannot source or contact; sourcing visibility off excludes the candidate; external boards and agencies receive no data without consent.           | Candidate control.                | Sourcing, distribution, submission | [PROP] aligned [SRC: BR-JOB-036]               |
+| BR-ATS-046 | Every job posting save creates a retained revision; published versions are never overwritten.                                                                                                               | Traceability.                     | Authoring service                  | [PROP]                                         |
+| BR-ATS-047 | Blind screening mode masks identity fields server-side until the configured reveal stage; reveal is logged.                                                                                                 | Bias reduction.                   | Projection                         | [PROP]                                         |
+| BR-ATS-048 | Previous applications by the same candidate to the same org are shown only to authorized reviewers, within retention, with an anchoring warning, and may be turned off by org policy.                       | Fair review.                      | Application detail                 | [PROP]                                         |
 
 ## 6. State machines
 
@@ -1378,18 +1378,18 @@ flowchart LR
 
 States: `draft`, `pending_approval`, `approved`, `open`, `on_hold`, `filled`, `cancelled`, `rejected`. Terminal: `filled`, `cancelled`, `rejected`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | draft | Created | Org active |
-| draft | pending_approval | Submit | Required fields valid |
-| pending_approval | approved | All approval steps approve | BR-ATS-026 pattern |
-| pending_approval | rejected | Any required approver rejects | Reason |
-| pending_approval | draft | Changes requested | Comment |
-| approved | open | First posting published | Readiness |
-| approved, open | on_hold | Owner holds or aging 30 days | Reason or system |
-| on_hold | open | Resume | Headcount remaining |
-| open | filled | Headcount reaches zero | BR-ATS-030 |
-| draft, approved, open, on_hold | cancelled | Owner cancels | Reason; postings close |
+| From                           | To               | Trigger                       | Guard                  |
+| ------------------------------ | ---------------- | ----------------------------- | ---------------------- |
+| (none)                         | draft            | Created                       | Org active             |
+| draft                          | pending_approval | Submit                        | Required fields valid  |
+| pending_approval               | approved         | All approval steps approve    | BR-ATS-026 pattern     |
+| pending_approval               | rejected         | Any required approver rejects | Reason                 |
+| pending_approval               | draft            | Changes requested             | Comment                |
+| approved                       | open             | First posting published       | Readiness              |
+| approved, open                 | on_hold          | Owner holds or aging 30 days  | Reason or system       |
+| on_hold                        | open             | Resume                        | Headcount remaining    |
+| open                           | filled           | Headcount reaches zero        | BR-ATS-030             |
+| draft, approved, open, on_hold | cancelled        | Owner cancels                 | Reason; postings close |
 
 ```mermaid
 stateDiagram-v2
@@ -1416,21 +1416,21 @@ stateDiagram-v2
 
 States: `draft`, `pending_review`, `approved`, `scheduled`, `published`, `paused`, `closed`, `taken_down`, `archived`. Terminal: `archived`. Names follow the proposed V61-18 vocabulary; `rejected_by_moderation` is an event that returns the posting to `draft`. [SRC: SSOT §9.7 F-04 diagram, V61-18]
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | draft | Created | Role allowed |
-| draft | pending_review | Submit | Readiness passes |
-| pending_review | approved | Approval or automatic accelerated approval | BR-ATS-004 |
-| pending_review | draft | Rejected by reviewer or moderation | Reasons recorded |
-| approved | scheduled | Schedule | Future time |
-| approved, scheduled | published | Publish now or time reached | Readiness re-check |
-| published | paused | Pause | Reason |
-| paused | published | Resume | Not expired |
-| published, paused | closed | Close, expiry, requisition filled | BR-ATS-008 |
-| closed | published | Reopen within 30 days | Headcount remaining |
-| draft, pending_review, approved, scheduled, published, paused | taken_down | Moderator or PAD takedown | Reason |
-| taken_down | draft | Restore by MOD or PAD after appeal | Audit |
-| closed | archived | 12 months after close, or manual | none |
+| From                                                          | To             | Trigger                                    | Guard               |
+| ------------------------------------------------------------- | -------------- | ------------------------------------------ | ------------------- |
+| (none)                                                        | draft          | Created                                    | Role allowed        |
+| draft                                                         | pending_review | Submit                                     | Readiness passes    |
+| pending_review                                                | approved       | Approval or automatic accelerated approval | BR-ATS-004          |
+| pending_review                                                | draft          | Rejected by reviewer or moderation         | Reasons recorded    |
+| approved                                                      | scheduled      | Schedule                                   | Future time         |
+| approved, scheduled                                           | published      | Publish now or time reached                | Readiness re-check  |
+| published                                                     | paused         | Pause                                      | Reason              |
+| paused                                                        | published      | Resume                                     | Not expired         |
+| published, paused                                             | closed         | Close, expiry, requisition filled          | BR-ATS-008          |
+| closed                                                        | published      | Reopen within 30 days                      | Headcount remaining |
+| draft, pending_review, approved, scheduled, published, paused | taken_down     | Moderator or PAD takedown                  | Reason              |
+| taken_down                                                    | draft          | Restore by MOD or PAD after appeal         | Audit               |
+| closed                                                        | archived       | 12 months after close, or manual           | none                |
 
 ```mermaid
 stateDiagram-v2
@@ -1456,20 +1456,20 @@ stateDiagram-v2
 
 States: `draft`, `pending_approval`, `approved`, `extended`, `negotiating`, `accepted`, `declined`, `rescinded`, `expired`, `superseded`. Terminal: `accepted` (then hire), `declined`, `rescinded`, `expired`, `superseded`. [SRC: SSOT §10.9 conflicting Offer outcomes: this machine names all outcomes; V61-18 `offer_declined`]
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | draft | Create | BR-ATS-025, BR-ATS-027 |
-| draft | pending_approval | Submit | Fields valid |
-| pending_approval | approved | Approval chain complete | BR-ATS-026 |
-| pending_approval | draft | Rejected or changes requested | Reason |
-| approved | extended | Extend to candidate | Letter ready |
-| extended | negotiating | Candidate counter or recruiter revision | none |
-| negotiating | pending_approval | Material revision | BR-ATS-026 |
-| extended | accepted | Candidate accepts | BR-JOB-023, e-sign if required |
-| extended, negotiating | declined | Candidate declines | BR-JOB-023 |
-| extended, negotiating | expired | Expiry reached | BR-ATS-028 |
-| approved, extended, negotiating | rescinded | Employer rescinds | EAD approval, reason |
-| draft, pending_approval | superseded | Replaced by a new offer version path | Same application only |
+| From                            | To               | Trigger                                 | Guard                          |
+| ------------------------------- | ---------------- | --------------------------------------- | ------------------------------ |
+| (none)                          | draft            | Create                                  | BR-ATS-025, BR-ATS-027         |
+| draft                           | pending_approval | Submit                                  | Fields valid                   |
+| pending_approval                | approved         | Approval chain complete                 | BR-ATS-026                     |
+| pending_approval                | draft            | Rejected or changes requested           | Reason                         |
+| approved                        | extended         | Extend to candidate                     | Letter ready                   |
+| extended                        | negotiating      | Candidate counter or recruiter revision | none                           |
+| negotiating                     | pending_approval | Material revision                       | BR-ATS-026                     |
+| extended                        | accepted         | Candidate accepts                       | BR-JOB-023, e-sign if required |
+| extended, negotiating           | declined         | Candidate declines                      | BR-JOB-023                     |
+| extended, negotiating           | expired          | Expiry reached                          | BR-ATS-028                     |
+| approved, extended, negotiating | rescinded        | Employer rescinds                       | EAD approval, reason           |
+| draft, pending_approval         | superseded       | Replaced by a new offer version path    | Same application only          |
 
 ```mermaid
 stateDiagram-v2
@@ -1498,14 +1498,14 @@ stateDiagram-v2
 
 States: `requested`, `drafting`, `submitted`, `overdue`, `waived`. Terminal: `submitted`, `waived` (addenda append to submitted).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | requested | Interview completed or stage entry | Assignee set |
-| requested | drafting | First save | none |
-| requested, drafting | overdue | Due date passed | SLA |
-| overdue | drafting | Save | none |
-| requested, drafting, overdue | submitted | Submit | All competencies rated |
-| requested, drafting, overdue | waived | REC waives (interviewer left, no-show) | Reason |
+| From                         | To        | Trigger                                | Guard                  |
+| ---------------------------- | --------- | -------------------------------------- | ---------------------- |
+| (none)                       | requested | Interview completed or stage entry     | Assignee set           |
+| requested                    | drafting  | First save                             | none                   |
+| requested, drafting          | overdue   | Due date passed                        | SLA                    |
+| overdue                      | drafting  | Save                                   | none                   |
+| requested, drafting, overdue | submitted | Submit                                 | All competencies rated |
+| requested, drafting, overdue | waived    | REC waives (interviewer left, no-show) | Reason                 |
 
 ```mermaid
 stateDiagram-v2
@@ -1528,14 +1528,14 @@ stateDiagram-v2
 
 States: `prospect`, `notified`, `engaged`, `opted_out`, `converted`, `expired`. Terminal: `opted_out`, `converted`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | prospect | Added with lawful basis | BR-ATS-023 |
-| prospect | notified | Sourcing notice sent within 30 days | none |
-| prospect, notified | engaged | Candidate replies or applies | none |
-| any non-terminal | opted_out | Candidate opts out or withdraws consent | none |
-| engaged | converted | Application created for a job | Candidate consent |
-| any non-terminal | expired | 12 months without renewal | BR-ATS-023 |
+| From               | To        | Trigger                                 | Guard             |
+| ------------------ | --------- | --------------------------------------- | ----------------- |
+| (none)             | prospect  | Added with lawful basis                 | BR-ATS-023        |
+| prospect           | notified  | Sourcing notice sent within 30 days     | none              |
+| prospect, notified | engaged   | Candidate replies or applies            | none              |
+| any non-terminal   | opted_out | Candidate opts out or withdraws consent | none              |
+| engaged            | converted | Application created for a job           | Candidate consent |
+| any non-terminal   | expired   | 12 months without renewal               | BR-ATS-023        |
 
 ```mermaid
 stateDiagram-v2
@@ -1559,17 +1559,17 @@ stateDiagram-v2
 
 States: `received`, `verifying`, `in_progress`, `awaiting_approval`, `fulfilled`, `refused`, `escalated`. Terminal: `fulfilled`, `refused`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | received | Forwarded from SET or candidate | none |
-| received | verifying | Identity check started | none |
-| verifying | in_progress | Identity verified | none |
-| verifying | refused | Identity not verifiable | Reason |
-| in_progress | awaiting_approval | Package or erasure plan assembled | none |
-| awaiting_approval | fulfilled | EAD approves and executes | Hold check |
-| awaiting_approval | refused | Legal exception | Legal basis listed |
-| any non-terminal | escalated | Deadline at risk (day 25) | Notify PAD |
-| escalated | in_progress | Owner reassigned | none |
+| From              | To                | Trigger                           | Guard              |
+| ----------------- | ----------------- | --------------------------------- | ------------------ |
+| (none)            | received          | Forwarded from SET or candidate   | none               |
+| received          | verifying         | Identity check started            | none               |
+| verifying         | in_progress       | Identity verified                 | none               |
+| verifying         | refused           | Identity not verifiable           | Reason             |
+| in_progress       | awaiting_approval | Package or erasure plan assembled | none               |
+| awaiting_approval | fulfilled         | EAD approves and executes         | Hold check         |
+| awaiting_approval | refused           | Legal exception                   | Legal basis listed |
+| any non-terminal  | escalated         | Deadline at risk (day 25)         | Notify PAD         |
+| escalated         | in_progress       | Owner reassigned                  | none               |
 
 ```mermaid
 stateDiagram-v2
@@ -1591,16 +1591,16 @@ stateDiagram-v2
 
 States: `pending`, `approved`, `rejected`, `changes_requested`, `delegated`, `expired`, `cancelled`. Terminal: `approved`, `rejected`, `expired`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | pending | Subject submitted | Approver eligible |
-| pending | approved | Approver approves | Not creator |
-| pending | rejected | Approver rejects | Reason |
-| pending | changes_requested | Approver requests changes | Comment |
-| pending | delegated | Approver delegates | Delegate eligible |
-| delegated | pending | New approver assigned | none |
-| pending | expired | 5 business days then escalation window ends | Policy |
-| pending | cancelled | Subject withdrawn or voided by edit | none |
+| From      | To                | Trigger                                     | Guard             |
+| --------- | ----------------- | ------------------------------------------- | ----------------- |
+| (none)    | pending           | Subject submitted                           | Approver eligible |
+| pending   | approved          | Approver approves                           | Not creator       |
+| pending   | rejected          | Approver rejects                            | Reason            |
+| pending   | changes_requested | Approver requests changes                   | Comment           |
+| pending   | delegated         | Approver delegates                          | Delegate eligible |
+| delegated | pending           | New approver assigned                       | none              |
+| pending   | expired           | 5 business days then escalation window ends | Policy            |
+| pending   | cancelled         | Subject withdrawn or voided by edit         | none              |
 
 ```mermaid
 stateDiagram-v2
@@ -1620,64 +1620,64 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-ATS-001 | Recruiter home | `/ats` | REC, Coordinator, EAD | Daily tasks | empty, counts, errors |
-| SCR-ATS-002 | Requisition list | `/ats/requisitions` | REC, HMG, EAD | Manage requisitions | filters, aging, confidential |
-| SCR-ATS-003 | Requisition editor and detail | `/ats/requisitions/:id` | REC, HMG, EAD | Create, approve status | each SM-ATS-01 state |
-| SCR-ATS-004 | Approvals inbox | `/ats/approvals` | Approvers | Decide | pending, decided |
-| SCR-ATS-005 | Job list | `/ats/jobs` | REC, HMG, EAD | Jobs by status | empty, expiring |
-| SCR-ATS-006 | Job authoring studio | `/ats/jobs/:id/edit` | REC, HMG, EAD | Write job | readiness fail/pass, conflicts |
-| SCR-ATS-007 | Question builder | `/ats/jobs/:id/questions` | REC, EAD | Define questions | forbidden, preview |
-| SCR-ATS-008 | Publish and distribution | `/ats/jobs/:id/publish` | REC, EAD | Review, schedule, distribute | pending review, scheduled, failed board |
-| SCR-ATS-009 | Pipeline board | `/ats/jobs/:id/pipeline` | Hiring team | Kanban | loading, conflict toast, blind mode |
-| SCR-ATS-010 | Pipeline table and views | `/ats/jobs/:id/table` | Hiring team | Table | saved views |
-| SCR-ATS-011 | Application detail | `/ats/applications/:id` | Hiring team | Review | tabs; withdrawn; erased |
-| SCR-ATS-012 | Comparison | `/ats/jobs/:id/compare` | Hiring team | Side by side | hidden scores |
-| SCR-ATS-013 | Scorecard form | `/ats/scorecards/:id` | Interviewers, REC, HMG | Rate | drafting, submitted, overdue |
-| SCR-ATS-014 | Hiring manager workspace | `/ats/manager` | HMG | Decisions | empty |
-| SCR-ATS-015 | Talent pools | `/ats/pools` | REC, EAD | CRM | consent status |
-| SCR-ATS-016 | Sourcing search | `/ats/sourcing` | REC, EAD | Find candidates | cap reached |
-| SCR-ATS-017 | Outreach campaigns | `/ats/outreach` | REC, EAD | Sequences | running, paused |
-| SCR-ATS-018 | Duplicates queue | `/ats/duplicates` | REC, EAD | Merge | empty |
-| SCR-ATS-019 | Offer editor | `/ats/offers/:id` | REC, EAD | Build, track | each SM-ATS-03 state |
-| SCR-ATS-020 | Pipeline and stage settings | `/ats/settings/pipelines` | EAD | Configure | impact preview |
-| SCR-ATS-021 | Templates (job, message, scorecard) | `/ats/settings/templates` | EAD, REC | Reuse | versions |
-| SCR-ATS-022 | Compliance and DEI | `/ats/compliance` | EAD | Impact reports | small sample |
-| SCR-ATS-023 | Audit log | `/ats/audit` | EAD | Review | filters |
-| SCR-ATS-024 | Retention and holds | `/ats/settings/retention` | EAD | Policies | preview |
-| SCR-ATS-025 | Rights requests | `/ats/rights` | EAD | Fulfil | due soon, escalated |
-| SCR-ATS-026 | Reports | `/ats/reports` | REC, HMG, EAD | Analytics | empty period |
-| SCR-ATS-027 | AI-assist settings | `/ats/settings/ai` | EAD | Govern AI | off by default |
+| ID          | Name                                | Route proposal            | Roles                  | Purpose                      | Key states                              |
+| ----------- | ----------------------------------- | ------------------------- | ---------------------- | ---------------------------- | --------------------------------------- |
+| SCR-ATS-001 | Recruiter home                      | `/ats`                    | REC, Coordinator, EAD  | Daily tasks                  | empty, counts, errors                   |
+| SCR-ATS-002 | Requisition list                    | `/ats/requisitions`       | REC, HMG, EAD          | Manage requisitions          | filters, aging, confidential            |
+| SCR-ATS-003 | Requisition editor and detail       | `/ats/requisitions/:id`   | REC, HMG, EAD          | Create, approve status       | each SM-ATS-01 state                    |
+| SCR-ATS-004 | Approvals inbox                     | `/ats/approvals`          | Approvers              | Decide                       | pending, decided                        |
+| SCR-ATS-005 | Job list                            | `/ats/jobs`               | REC, HMG, EAD          | Jobs by status               | empty, expiring                         |
+| SCR-ATS-006 | Job authoring studio                | `/ats/jobs/:id/edit`      | REC, HMG, EAD          | Write job                    | readiness fail/pass, conflicts          |
+| SCR-ATS-007 | Question builder                    | `/ats/jobs/:id/questions` | REC, EAD               | Define questions             | forbidden, preview                      |
+| SCR-ATS-008 | Publish and distribution            | `/ats/jobs/:id/publish`   | REC, EAD               | Review, schedule, distribute | pending review, scheduled, failed board |
+| SCR-ATS-009 | Pipeline board                      | `/ats/jobs/:id/pipeline`  | Hiring team            | Kanban                       | loading, conflict toast, blind mode     |
+| SCR-ATS-010 | Pipeline table and views            | `/ats/jobs/:id/table`     | Hiring team            | Table                        | saved views                             |
+| SCR-ATS-011 | Application detail                  | `/ats/applications/:id`   | Hiring team            | Review                       | tabs; withdrawn; erased                 |
+| SCR-ATS-012 | Comparison                          | `/ats/jobs/:id/compare`   | Hiring team            | Side by side                 | hidden scores                           |
+| SCR-ATS-013 | Scorecard form                      | `/ats/scorecards/:id`     | Interviewers, REC, HMG | Rate                         | drafting, submitted, overdue            |
+| SCR-ATS-014 | Hiring manager workspace            | `/ats/manager`            | HMG                    | Decisions                    | empty                                   |
+| SCR-ATS-015 | Talent pools                        | `/ats/pools`              | REC, EAD               | CRM                          | consent status                          |
+| SCR-ATS-016 | Sourcing search                     | `/ats/sourcing`           | REC, EAD               | Find candidates              | cap reached                             |
+| SCR-ATS-017 | Outreach campaigns                  | `/ats/outreach`           | REC, EAD               | Sequences                    | running, paused                         |
+| SCR-ATS-018 | Duplicates queue                    | `/ats/duplicates`         | REC, EAD               | Merge                        | empty                                   |
+| SCR-ATS-019 | Offer editor                        | `/ats/offers/:id`         | REC, EAD               | Build, track                 | each SM-ATS-03 state                    |
+| SCR-ATS-020 | Pipeline and stage settings         | `/ats/settings/pipelines` | EAD                    | Configure                    | impact preview                          |
+| SCR-ATS-021 | Templates (job, message, scorecard) | `/ats/settings/templates` | EAD, REC               | Reuse                        | versions                                |
+| SCR-ATS-022 | Compliance and DEI                  | `/ats/compliance`         | EAD                    | Impact reports               | small sample                            |
+| SCR-ATS-023 | Audit log                           | `/ats/audit`              | EAD                    | Review                       | filters                                 |
+| SCR-ATS-024 | Retention and holds                 | `/ats/settings/retention` | EAD                    | Policies                     | preview                                 |
+| SCR-ATS-025 | Rights requests                     | `/ats/rights`             | EAD                    | Fulfil                       | due soon, escalated                     |
+| SCR-ATS-026 | Reports                             | `/ats/reports`            | REC, HMG, EAD          | Analytics                    | empty period                            |
+| SCR-ATS-027 | AI-assist settings                  | `/ats/settings/ai`        | EAD                    | Govern AI                    | off by default                          |
 
 Accessibility notes: Kanban supports full keyboard operation through "Move to" menus; SLA, status and rating indicators have text alternatives; charts have data tables; focus management in dialogs; shortcuts are discoverable and can be disabled. [DER]
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-ATS-01 | Requisition | id, org, title, department, headcount, filled, budget band, owner, hiring manager, state, confidentiality | Has postings, approvals | 7 years metadata, personal data minimized |
-| ENT-ATS-02 | Job posting and revision | posting id, requisition id, content, revision no., state, pay, eligibility, expiry, published at | Requisition, applications (JOB) | Revisions 24 months after close |
-| ENT-ATS-03 | Screening form definition | posting id, version, questions, criteria | Posting | With posting |
-| ENT-ATS-04 | Distribution record | posting id, board, external id, status | Posting | With posting |
-| ENT-ATS-05 | Pipeline template and job snapshot | stages, categories, SLA, templates | Org, posting | With posting |
-| ENT-ATS-06 | Stage assignment and candidate review view | application id, stage id, owner, tags, flags, manager recommendation, SLA state | JOB application | Per BR-ATS-035 |
-| ENT-ATS-07 | Disposition | application id, category, template, message, timing | Application | Per BR-ATS-035 |
-| ENT-ATS-08 | Note | application id, author, body, mentions, pinned, revisions | Application | Per BR-ATS-035 |
-| ENT-ATS-09 | Scorecard (template, version, submission, addendum) | template id, version, competencies, anchors; submission ratings, notes, recommendation | Interview, application | Per BR-ATS-035 |
-| ENT-ATS-10 | Hiring team membership | posting id, member, role, stage visibility | Posting, EMP member | With posting |
-| ENT-ATS-11 | Talent pool and membership | pool, candidate, basis, state, expiry | Candidate | 12 months |
-| ENT-ATS-12 | Candidate merge record | primary, secondary, confidence, merged by, undo until | Candidates | 30 days then permanent log |
-| ENT-ATS-13 | Offer and version | offer id, application id, terms, version, state, expiry, letter ref, signature ref | Application, approvals | 7 years if hired; else per BR-ATS-035 |
-| ENT-ATS-14 | Self-identification record | candidate, org, categories (encrypted), consent | Candidate | Shortest of policy, 24 months |
-| ENT-ATS-15 | Audit entry | actor, object, action, before, after, reason, request id, hash | All | 7 years (OD-ATS-08) |
-| ENT-ATS-16 | Approval request | subject type/id, step, approver, state, decision reason | Requisition, offer, posting | 7 years |
-| ENT-ATS-17 | Automation rule and run | trigger, conditions, actions, executions | Pipeline | 12 months runs |
-| ENT-ATS-18 | Rights request | type, candidate, state, due date, outcome | Candidate | 6 years |
-| ENT-ATS-19 | Recruiter task | owner, title, due, linked object, state | Application | 12 months |
-| ENT-ATS-20 | AI output record | application, feature, model version, confidence, reviewer action | Application | 24 months |
-| ENT-ATS-21 | Communication message | application, direction, channel, template version, rendered body, delivery status | Application | Per BR-ATS-035 |
-| ENT-ATS-22 | Saved view and search | owner, scope, config | User | Until deleted |
+| ID         | Entity                                              | Key attributes                                                                                            | Relationships                   | Retention class                           |
+| ---------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------- | ----------------------------------------- |
+| ENT-ATS-01 | Requisition                                         | id, org, title, department, headcount, filled, budget band, owner, hiring manager, state, confidentiality | Has postings, approvals         | 7 years metadata, personal data minimized |
+| ENT-ATS-02 | Job posting and revision                            | posting id, requisition id, content, revision no., state, pay, eligibility, expiry, published at          | Requisition, applications (JOB) | Revisions 24 months after close           |
+| ENT-ATS-03 | Screening form definition                           | posting id, version, questions, criteria                                                                  | Posting                         | With posting                              |
+| ENT-ATS-04 | Distribution record                                 | posting id, board, external id, status                                                                    | Posting                         | With posting                              |
+| ENT-ATS-05 | Pipeline template and job snapshot                  | stages, categories, SLA, templates                                                                        | Org, posting                    | With posting                              |
+| ENT-ATS-06 | Stage assignment and candidate review view          | application id, stage id, owner, tags, flags, manager recommendation, SLA state                           | JOB application                 | Per BR-ATS-035                            |
+| ENT-ATS-07 | Disposition                                         | application id, category, template, message, timing                                                       | Application                     | Per BR-ATS-035                            |
+| ENT-ATS-08 | Note                                                | application id, author, body, mentions, pinned, revisions                                                 | Application                     | Per BR-ATS-035                            |
+| ENT-ATS-09 | Scorecard (template, version, submission, addendum) | template id, version, competencies, anchors; submission ratings, notes, recommendation                    | Interview, application          | Per BR-ATS-035                            |
+| ENT-ATS-10 | Hiring team membership                              | posting id, member, role, stage visibility                                                                | Posting, EMP member             | With posting                              |
+| ENT-ATS-11 | Talent pool and membership                          | pool, candidate, basis, state, expiry                                                                     | Candidate                       | 12 months                                 |
+| ENT-ATS-12 | Candidate merge record                              | primary, secondary, confidence, merged by, undo until                                                     | Candidates                      | 30 days then permanent log                |
+| ENT-ATS-13 | Offer and version                                   | offer id, application id, terms, version, state, expiry, letter ref, signature ref                        | Application, approvals          | 7 years if hired; else per BR-ATS-035     |
+| ENT-ATS-14 | Self-identification record                          | candidate, org, categories (encrypted), consent                                                           | Candidate                       | Shortest of policy, 24 months             |
+| ENT-ATS-15 | Audit entry                                         | actor, object, action, before, after, reason, request id, hash                                            | All                             | 7 years (OD-ATS-08)                       |
+| ENT-ATS-16 | Approval request                                    | subject type/id, step, approver, state, decision reason                                                   | Requisition, offer, posting     | 7 years                                   |
+| ENT-ATS-17 | Automation rule and run                             | trigger, conditions, actions, executions                                                                  | Pipeline                        | 12 months runs                            |
+| ENT-ATS-18 | Rights request                                      | type, candidate, state, due date, outcome                                                                 | Candidate                       | 6 years                                   |
+| ENT-ATS-19 | Recruiter task                                      | owner, title, due, linked object, state                                                                   | Application                     | 12 months                                 |
+| ENT-ATS-20 | AI output record                                    | application, feature, model version, confidence, reviewer action                                          | Application                     | 24 months                                 |
+| ENT-ATS-21 | Communication message                               | application, direction, channel, template version, rendered body, delivery status                         | Application                     | Per BR-ATS-035                            |
+| ENT-ATS-22 | Saved view and search                               | owner, scope, config                                                                                      | User                            | Until deleted                             |
 
 ```mermaid
 erDiagram
@@ -1695,119 +1695,120 @@ erDiagram
 
 ## 9. Events emitted and consumed
 
-| ID | Event | Emitted by | Consumed by |
-|---|---|---|---|
-| EVT-ATS-001 | `ats.requisition.created` | FR-ATS-001 | ANL (planned) |
-| EVT-ATS-002 | `ats.requisition.approved` | FR-ATS-002 | Authoring, BIL (planned) |
-| EVT-ATS-003 | `ats.requisition.filled` | FR-ATS-040 | ATS posting closer, ANL |
-| EVT-ATS-004 | `ats.posting.published` | FR-ATS-008 | JOB projection, search index, distribution |
-| EVT-ATS-005 | `ats.posting.paused` | FR-ATS-010 | JOB |
-| EVT-ATS-006 | `ats.posting.closed` | FR-ATS-010 | JOB, NTF |
-| EVT-ATS-007 | `ats.posting.taken_down` | TSF path | JOB, EMP |
-| EVT-ATS-008 | `ats.application.stage_changed` | FR-ATS-020 | JOB (status), INT, NTF, ANL |
-| EVT-ATS-009 | `ats.application.rejected` | FR-ATS-022 | JOB, NTF, ANL |
-| EVT-ATS-010 | `ats.application.hired` | FR-ATS-040 | EMP webhooks, EVD (planned), ANL |
-| EVT-ATS-011 | `ats.bulk_action.completed` | FR-ATS-021 | NTF |
-| EVT-ATS-012 | `ats.scorecard.requested` | FR-ATS-027 | NTF |
-| EVT-ATS-013 | `ats.scorecard.submitted` | FR-ATS-027 | ATS summary |
-| EVT-ATS-014 | `ats.note.created` | FR-ATS-025 | NTF (mentions) |
-| EVT-ATS-015 | `ats.offer.submitted` | FR-ATS-036 | Approvals |
-| EVT-ATS-016 | `ats.offer.extended` | FR-ATS-038 | JOB, NTF |
-| EVT-ATS-017 | `ats.offer.revised` | FR-ATS-039 | JOB |
-| EVT-ATS-018 | `ats.offer.rescinded` | FR-ATS-039 | JOB, NTF |
-| EVT-ATS-019 | `ats.offer.decided` | JOB acceptance command | ATS, NTF |
-| EVT-ATS-020 | `ats.approval.decided` | FR-ATS-002, 037 | ATS |
-| EVT-ATS-021 | `ats.pool.member_added` | FR-ATS-031 | NTF |
-| EVT-ATS-022 | `ats.outreach.sent` | FR-ATS-033 | MSG, ANL |
-| EVT-ATS-023 | `ats.duplicate.merged` | FR-ATS-034 | Search index |
-| EVT-ATS-024 | `ats.sla.breached` | FR-ATS-041 | NTF, ANL |
-| EVT-ATS-025 | `ats.rights.requested` / `.fulfilled` | FR-ATS-045 | SET (planned) |
-| EVT-ATS-026 | `ats.data.purged` | FR-ATS-044 | Search index, ANL |
-| EVT-ATS-027 | `ats.ai.output_generated` | FR-ATS-047 | ANL, audit |
-| EVT-ATS-028 | `ats.automation.executed` | FR-ATS-012 | audit |
-| EVT-ATS-029 | `ats.application.viewed` | FR-ATS-015 | JOB (if employer opt-in) |
+| ID          | Event                                 | Emitted by             | Consumed by                                |
+| ----------- | ------------------------------------- | ---------------------- | ------------------------------------------ |
+| EVT-ATS-001 | `ats.requisition.created`             | FR-ATS-001             | ANL (planned)                              |
+| EVT-ATS-002 | `ats.requisition.approved`            | FR-ATS-002             | Authoring, BIL (planned)                   |
+| EVT-ATS-003 | `ats.requisition.filled`              | FR-ATS-040             | ATS posting closer, ANL                    |
+| EVT-ATS-004 | `ats.posting.published`               | FR-ATS-008             | JOB projection, search index, distribution |
+| EVT-ATS-005 | `ats.posting.paused`                  | FR-ATS-010             | JOB                                        |
+| EVT-ATS-006 | `ats.posting.closed`                  | FR-ATS-010             | JOB, NTF                                   |
+| EVT-ATS-007 | `ats.posting.taken_down`              | TSF path               | JOB, EMP                                   |
+| EVT-ATS-008 | `ats.application.stage_changed`       | FR-ATS-020             | JOB (status), INT, NTF, ANL                |
+| EVT-ATS-009 | `ats.application.rejected`            | FR-ATS-022             | JOB, NTF, ANL                              |
+| EVT-ATS-010 | `ats.application.hired`               | FR-ATS-040             | EMP webhooks, EVD (planned), ANL           |
+| EVT-ATS-011 | `ats.bulk_action.completed`           | FR-ATS-021             | NTF                                        |
+| EVT-ATS-012 | `ats.scorecard.requested`             | FR-ATS-027             | NTF                                        |
+| EVT-ATS-013 | `ats.scorecard.submitted`             | FR-ATS-027             | ATS summary                                |
+| EVT-ATS-014 | `ats.note.created`                    | FR-ATS-025             | NTF (mentions)                             |
+| EVT-ATS-015 | `ats.offer.submitted`                 | FR-ATS-036             | Approvals                                  |
+| EVT-ATS-016 | `ats.offer.extended`                  | FR-ATS-038             | JOB, NTF                                   |
+| EVT-ATS-017 | `ats.offer.revised`                   | FR-ATS-039             | JOB                                        |
+| EVT-ATS-018 | `ats.offer.rescinded`                 | FR-ATS-039             | JOB, NTF                                   |
+| EVT-ATS-019 | `ats.offer.decided`                   | JOB acceptance command | ATS, NTF                                   |
+| EVT-ATS-020 | `ats.approval.decided`                | FR-ATS-002, 037        | ATS                                        |
+| EVT-ATS-021 | `ats.pool.member_added`               | FR-ATS-031             | NTF                                        |
+| EVT-ATS-022 | `ats.outreach.sent`                   | FR-ATS-033             | MSG, ANL                                   |
+| EVT-ATS-023 | `ats.duplicate.merged`                | FR-ATS-034             | Search index                               |
+| EVT-ATS-024 | `ats.sla.breached`                    | FR-ATS-041             | NTF, ANL                                   |
+| EVT-ATS-025 | `ats.rights.requested` / `.fulfilled` | FR-ATS-045             | SET (planned)                              |
+| EVT-ATS-026 | `ats.data.purged`                     | FR-ATS-044             | Search index, ANL                          |
+| EVT-ATS-027 | `ats.ai.output_generated`             | FR-ATS-047             | ANL, audit                                 |
+| EVT-ATS-028 | `ats.automation.executed`             | FR-ATS-012             | audit                                      |
+| EVT-ATS-029 | `ats.application.viewed`              | FR-ATS-015             | JOB (if employer opt-in)                   |
 
 Consumed: `job.application.submitted`, `job.application.withdrawn`, `job.application.updated`, `job.interview_invite.responded`, `job.offer.viewed`, `job.offer.decided`, `int.interview.completed`, `int.feedback.submitted`, `emp.org.verified`, `emp.member.removed`, `tsf.listing.taken_down` (sibling or planned).
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Use | Failure behaviour |
-|---|---|---|
-| E-signature providers | Offer letters | Platform acceptance fallback if org allows |
-| HRIS and payroll hooks | Hire handoff | Retry then task |
-| External job boards | Multi-posting | Retry, manual close task |
-| Email transport (NTF planned) | Candidate communication | Retry, bounce handling |
-| Virus scanner, file store (PLT planned) | Documents | Access denied until clean |
-| Search service | Applicant and sourcing search | Degraded DB query |
-| AI service (AIC planned) | Assist | Panel hidden |
-| Rule library for jurisdictions | Compliance checks | Warn when unknown |
+| Dependency                              | Use                           | Failure behaviour                          |
+| --------------------------------------- | ----------------------------- | ------------------------------------------ |
+| E-signature providers                   | Offer letters                 | Platform acceptance fallback if org allows |
+| HRIS and payroll hooks                  | Hire handoff                  | Retry then task                            |
+| External job boards                     | Multi-posting                 | Retry, manual close task                   |
+| Email transport (NTF planned)           | Candidate communication       | Retry, bounce handling                     |
+| Virus scanner, file store (PLT planned) | Documents                     | Access denied until clean                  |
+| Search service                          | Applicant and sourcing search | Degraded DB query                          |
+| AI service (AIC planned)                | Assist                        | Panel hidden                               |
+| Rule library for jurisdictions          | Compliance checks             | Warn when unknown                          |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| JOB | Applications, candidate responses, listing projection | JOB: status, offers, feedback |
-| INT | Interview plans, scheduling, feedback forms | INT: stage and scorecard tasks |
-| EMP | Org, roles, seats, approval policy, integrations | EMP: policy and webhook delivery |
-| PRF, EVD, BGV, ASM (planned) | Evidence | none |
-| NTF, MSG (planned) | Delivery | none |
-| SET (planned) | Rights, consent | SET: rights fulfilment |
-| BIL (planned) | Entitlements | BIL: usage metering |
-| TSF (planned) | Takedown | TSF: posting actions |
-| ANL (planned) | Warehouse metrics | ANL |
-| AIC (planned) | AI assist | AIC |
+| Depends on                   | For                                                   | Depended on by                   |
+| ---------------------------- | ----------------------------------------------------- | -------------------------------- |
+| JOB                          | Applications, candidate responses, listing projection | JOB: status, offers, feedback    |
+| INT                          | Interview plans, scheduling, feedback forms           | INT: stage and scorecard tasks   |
+| EMP                          | Org, roles, seats, approval policy, integrations      | EMP: policy and webhook delivery |
+| PRF, EVD, BGV, ASM (planned) | Evidence                                              | none                             |
+| NTF, MSG (planned)           | Delivery                                              | none                             |
+| SET (planned)                | Rights, consent                                       | SET: rights fulfilment           |
+| BIL (planned)                | Entitlements                                          | BIL: usage metering              |
+| TSF (planned)                | Takedown                                              | TSF: posting actions             |
+| ANL (planned)                | Warehouse metrics                                     | ANL                              |
+| AIC (planned)                | AI assist                                             | AIC                              |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Time to publish | Median time from requisition approval to first publish | EAD |
-| Time to fill | Median days from requisition open to filled | EAD |
-| Time to hire | Median days from application to hire | REC |
-| Stage conversion | Applications reaching stage N+1 / applications reaching stage N | REC |
-| Time in stage | Median days in stage; p90 | REC |
-| SLA compliance | Applications reviewed within SLA / applications due | EAD |
-| Source effectiveness | Hires per source / applications per source | REC |
-| Offer acceptance rate | Accepted / extended offers | EAD |
-| Scorecard completion rate | Submitted on time / requested | HMG |
-| Adverse-impact ratio | Group selection rate / highest group selection rate per stage (cells with n >= 10) | EAD |
-| Rights SLA | Requests fulfilled within 30 days / requests | EAD |
-| Rejection with feedback rate | Rejections with reason and message sent / rejections | REC |
+| Metric                       | Definition and formula                                                             | Owner role |
+| ---------------------------- | ---------------------------------------------------------------------------------- | ---------- |
+| Time to publish              | Median time from requisition approval to first publish                             | EAD        |
+| Time to fill                 | Median days from requisition open to filled                                        | EAD        |
+| Time to hire                 | Median days from application to hire                                               | REC        |
+| Stage conversion             | Applications reaching stage N+1 / applications reaching stage N                    | REC        |
+| Time in stage                | Median days in stage; p90                                                          | REC        |
+| SLA compliance               | Applications reviewed within SLA / applications due                                | EAD        |
+| Source effectiveness         | Hires per source / applications per source                                         | REC        |
+| Offer acceptance rate        | Accepted / extended offers                                                         | EAD        |
+| Scorecard completion rate    | Submitted on time / requested                                                      | HMG        |
+| Adverse-impact ratio         | Group selection rate / highest group selection rate per stage (cells with n >= 10) | EAD        |
+| Rights SLA                   | Requests fulfilled within 30 days / requests                                       | EAD        |
+| Rejection with feedback rate | Rejections with reason and message sent / rejections                               | REC        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-ATS-01 | May requisition-free postings exist | Never; policy opt-in | Org policy opt-in | Product owner | FR-ATS-004, 008 |
-| OD-ATS-02 | Should the platform enforce approval of postings by verified orgs | Always review; accelerated for verified | Accelerated for verified, with fraud scoring | Product owner and T&S | FR-ATS-008 |
-| OD-ATS-03 | Legacy BR-069 auto-transitions to `stale_withdrawn` after 14 days; `candidate_unresponsive` as a status | Adopt as status; propose only; flag | Propose only, flag `candidate_unresponsive`, no automatic status change | Product owner | FR-ATS-041 |
-| OD-ATS-04 | Billing credit when a requisition auto-pauses (BR-071) | Credit; none | Defer to BIL | Finance and product owner | FR-ATS-003 |
-| OD-ATS-05 | Are internal notes disclosable in data access requests | Always; redacted; never | Disclosable with redaction of third-party data and privileged notes, counsel to confirm | Counsel | FR-ATS-025, 045 |
-| OD-ATS-06 | Daily outreach cap and global opt-out period | 100 and 12 months proposed | As proposed | Product owner | FR-ATS-033 |
-| OD-ATS-07 | Agency attribution window and fees | Window days; fees on platform or outside | Window set per agreement; fees outside platform | Product owner | FR-ATS-035 |
-| OD-ATS-08 | Audit and decision log retention | 3, 7 years | 7 years | Counsel | FR-ATS-043 |
-| OD-ATS-09 | AI bias-audit attestation requirement per jurisdiction | Always; where required | Where required | Counsel | FR-ATS-047 |
-| OD-ATS-10 | Do employers bear sourcing features (brush with the §4.2 non-goal of generic HR) | Include narrowly; exclude | Include as career-domain sourcing only; no payroll, HRIS or performance management | Product owner | FR-ATS-031 to 033, 040 |
+| ID        | Question                                                                                                                                                                                           | Options                                                                                                                                                                           | Default proposal                                                                        | Decides                         | Blocks                 |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------- | ---------------------- |
+| OD-ATS-01 | May requisition-free postings exist                                                                                                                                                                | Never; policy opt-in                                                                                                                                                              | Org policy opt-in                                                                       | Product owner                   | FR-ATS-004, 008        |
+| OD-ATS-02 | Should the platform enforce approval of postings by verified orgs                                                                                                                                  | Always review; accelerated for verified                                                                                                                                           | Accelerated for verified, with fraud scoring                                            | Product owner and T&S           | FR-ATS-008             |
+| OD-ATS-03 | Legacy BR-069 auto-transitions to `stale_withdrawn` after 14 days; `candidate_unresponsive` as a status                                                                                            | Adopt as status; propose only; flag                                                                                                                                               | Propose only, flag `candidate_unresponsive`, no automatic status change                 | Product owner                   | FR-ATS-041             |
+| OD-ATS-04 | Billing credit when a requisition auto-pauses (BR-071)                                                                                                                                             | Credit; none                                                                                                                                                                      | Defer to BIL                                                                            | Finance and product owner       | FR-ATS-003             |
+| OD-ATS-05 | Are internal notes disclosable in data access requests                                                                                                                                             | Always; redacted; never                                                                                                                                                           | Disclosable with redaction of third-party data and privileged notes, counsel to confirm | Counsel                         | FR-ATS-025, 045        |
+| OD-ATS-06 | Daily outreach cap and global opt-out period                                                                                                                                                       | 100 and 12 months proposed                                                                                                                                                        | As proposed                                                                             | Product owner                   | FR-ATS-033             |
+| OD-ATS-07 | Agency attribution window and fees                                                                                                                                                                 | Window days; fees on platform or outside                                                                                                                                          | Window set per agreement; fees outside platform                                         | Product owner                   | FR-ATS-035             |
+| OD-ATS-08 | Audit and decision log retention                                                                                                                                                                   | 3, 7 years                                                                                                                                                                        | 7 years                                                                                 | Counsel                         | FR-ATS-043             |
+| OD-ATS-09 | AI bias-audit attestation requirement per jurisdiction                                                                                                                                             | Always; where required                                                                                                                                                            | Where required                                                                          | Counsel                         | FR-ATS-047             |
+| OD-ATS-10 | Do employers bear sourcing features (brush with the §4.2 non-goal of generic HR)                                                                                                                   | Include narrowly; exclude                                                                                                                                                         | Include as career-domain sourcing only; no payroll, HRIS or performance management      | Product owner                   | FR-ATS-031 to 033, 040 |
+| OD-ATS-11 | Legacy F-167 asks for side-by-side rubric scores "with weights" for more than two candidates, while `BR-ATS-019` forbids an automated overall ranking. May hiring teams define competency weights? | A: no weights, rows only (current FR-ATS-019); B: team-defined weights shown as an informational weighted subtotal that never sorts or filters automatically; C: weighted ranking | A `[PROP]`; B is a possible later option                                                | Product owner and fairness lead | FR-ATS-019             |
 
 ## 14. Risks
 
-| ID | Risk | Mitigation |
-|---|---|---|
+| ID         | Risk                                                                | Mitigation                                     |
+| ---------- | ------------------------------------------------------------------- | ---------------------------------------------- |
 | RSK-ATS-01 | Automated or AI-assisted screening creates discrimination liability | BR-ATS-015, BR-ATS-038, blind mode, monitoring |
-| RSK-ATS-02 | Candidate PII leak across tenants or to the candidate (notes) | BR-ATS-002, BR-ATS-016, contract tests |
-| RSK-ATS-03 | Over-complex pipelines slow recruiters | Defaults, templates, saved views |
-| RSK-ATS-04 | Retention and rights obligations missed | Scheduled jobs, escalation at day 25 |
-| RSK-ATS-05 | Scraping of sourcing index | Caps, logging, contact reveal policy |
-| RSK-ATS-06 | Offer errors (wrong pay, wrong letter) | Letter vs offer match check, approvals |
-| RSK-ATS-07 | Integrations (boards, HRIS) fail silently | Retries with visible status and tasks |
-| RSK-ATS-08 | Legacy state vocabulary disagreement causes enum drift | SM names are authoritative here; OD in JOB |
+| RSK-ATS-02 | Candidate PII leak across tenants or to the candidate (notes)       | BR-ATS-002, BR-ATS-016, contract tests         |
+| RSK-ATS-03 | Over-complex pipelines slow recruiters                              | Defaults, templates, saved views               |
+| RSK-ATS-04 | Retention and rights obligations missed                             | Scheduled jobs, escalation at day 25           |
+| RSK-ATS-05 | Scraping of sourcing index                                          | Caps, logging, contact reveal policy           |
+| RSK-ATS-06 | Offer errors (wrong pay, wrong letter)                              | Letter vs offer match check, approvals         |
+| RSK-ATS-07 | Integrations (boards, HRIS) fail silently                           | Retries with visible status and tasks          |
+| RSK-ATS-08 | Legacy state vocabulary disagreement causes enum drift              | SM names are authoritative here; OD in JOB     |
 
 ## 15. Legacy source trace
 
-| Legacy file | Informed | Dropped or changed |
-|---|---|---|
-| SSOT §9.7 F-05, F-06; §10.15 to §10.16 | Pipeline, scorecards, offers, state machine, rules | Phase labels; calendar OD deferred to INT |
-| FEATURE_REGISTRY F-37, F-102, F-103, F-122, F-88 | Templates, HM portal, comparison, rejection feedback | Statuses ignored |
-| BUSINESS_RULE_REGISTRY BR-040..045, 062, 064, 067, 069..071, 077, 080 | SLA, access, scanning, audit, requisition aging | `stale_withdrawn` auto-transition not adopted |
-| SSOT §10.31, §10.37 | AI human review, rejection feedback | Interview-specific rules moved to INT |
-| Own knowledge (Greenhouse, Lever, Workday Recruiting) | Requisition approvals, multi-posting, CRM, blind mode, adverse-impact monitoring | Tagged [PROP] |
+| Legacy file                                                           | Informed                                                                         | Dropped or changed                            |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------- |
+| SSOT §9.7 F-05, F-06; §10.15 to §10.16                                | Pipeline, scorecards, offers, state machine, rules                               | Phase labels; calendar OD deferred to INT     |
+| FEATURE_REGISTRY F-37, F-102, F-103, F-122, F-88                      | Templates, HM portal, comparison, rejection feedback                             | Statuses ignored                              |
+| BUSINESS_RULE_REGISTRY BR-040..045, 062, 064, 067, 069..071, 077, 080 | SLA, access, scanning, audit, requisition aging                                  | `stale_withdrawn` auto-transition not adopted |
+| SSOT §10.31, §10.37                                                   | AI human review, rejection feedback                                              | Interview-specific rules moved to INT         |
+| Own knowledge (Greenhouse, Lever, Workday Recruiting)                 | Requisition approvals, multi-posting, CRM, blind mode, adverse-impact monitoring | Tagged [PROP]                                 |

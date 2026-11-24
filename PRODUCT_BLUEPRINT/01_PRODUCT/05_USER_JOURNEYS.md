@@ -18,14 +18,14 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Aisha opens a shared job link on her phone.
 - **Preconditions:** Job is `published`; employer org is `verified` or shows "unverified employer" label.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the job URL | Public job page renders from cache-friendly endpoint: title, employer, location, work mode, salary range if provided, required skills, description, posting date, "Apply" button; no sign-in wall |
-| 2 | Taps "Apply" | Sign-up sheet opens with "Continue with email", passkey and OAuth options; job id kept as return target |
-| 3 | Enters email, accepts terms (version shown) and the minimum-age attestation | Account created in `pending_verification`; 6-digit code and magic link emailed; terms version and timestamp recorded |
-| 4 | Enters the code | Account `active`; `CAN` base grant created; prompted to set a passkey (skippable) |
-| 5 | Answers two onboarding questions (target role, location) | Profile skeleton created with visibility defaults all private (`BR-XCT-014`) |
-| 6 | Lands back on the job with "Continue application" | Application draft created, autosaved; continues in `JRN-CAN-07` |
+| #   | Actor action                                                                | System response                                                                                                                                                                                   |
+| --- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens the job URL                                                           | Public job page renders from cache-friendly endpoint: title, employer, location, work mode, salary range if provided, required skills, description, posting date, "Apply" button; no sign-in wall |
+| 2   | Taps "Apply"                                                                | Sign-up sheet opens with "Continue with email", passkey and OAuth options; job id kept as return target                                                                                           |
+| 3   | Enters email, accepts terms (version shown) and the minimum-age attestation | Account created in `pending_verification`; 6-digit code and magic link emailed; terms version and timestamp recorded                                                                              |
+| 4   | Enters the code                                                             | Account `active`; `CAN` base grant created; prompted to set a passkey (skippable)                                                                                                                 |
+| 5   | Answers two onboarding questions (target role, location)                    | Profile skeleton created with visibility defaults all private (`BR-XCT-014`)                                                                                                                      |
+| 6   | Lands back on the job with "Continue application"                           | Application draft created, autosaved; continues in `JRN-CAN-07`                                                                                                                                   |
 
 - **Success outcome:** Verified account with a draft application for the job; `idn.account.created` and `job.application.draft_created` events.
 - **Failure branches:**
@@ -43,12 +43,12 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** A recruiter receives a certificate URL in a résumé PDF.
 - **Preconditions:** The holder made the credential's verification page public.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the verification URL | Page shows holder display name, credential title, issuer name and issuer class (platform, institution, employer org, instructor), issue date, expiry, status (`active`, `expired`, `revoked`), and rung |
-| 2 | Clicks "How was this verified?" | Plain-language provenance: what the issuer checked, when, and whether the issuer is verified |
-| 3 | Optionally enters the code printed on the PDF | Code match confirms the PDF corresponds to this credential |
-| 4 | Clicks "Report a problem" | Report form (reason, details); filed to `TSF` |
+| #   | Actor action                                  | System response                                                                                                                                                                                         |
+| --- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens the verification URL                    | Page shows holder display name, credential title, issuer name and issuer class (platform, institution, employer org, instructor), issue date, expiry, status (`active`, `expired`, `revoked`), and rung |
+| 2   | Clicks "How was this verified?"               | Plain-language provenance: what the issuer checked, when, and whether the issuer is verified                                                                                                            |
+| 3   | Optionally enters the code printed on the PDF | Code match confirms the PDF corresponds to this credential                                                                                                                                              |
+| 4   | Clicks "Report a problem"                     | Report form (reason, details); filed to `TSF`                                                                                                                                                           |
 
 - **Success outcome:** The verifier sees authoritative status without an account; lookup counted in `ANL` without identifying the viewer.
 - **Failure branches:**
@@ -65,13 +65,13 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Email "Rohan asked you to confirm his role at Acme" with a link.
 - **Preconditions:** Candidate created the request (`JRN-CAN-03`); token unused and unexpired (14 days [PROP]).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens link on phone | Token validated; page shows only: candidate name, claimed title, employer, dates, the question "Did you work with this person in this role?", and who the referee is said to be |
-| 2 | Chooses "Yes, I confirm", "Partly" (with what differs) or "No" | Choice recorded locally; for "Partly", fields to correct title or dates appear |
-| 3 | Optionally states relationship (manager, peer, report, client) and how they know | Free text capped at 500 characters |
-| 4 | Confirms identity check: enters work email domain or signs in if they already have an account | Domain compared with the claimed employer's verified domain; independence checks run (referee ≠ candidate, no shared device or account signals) |
-| 5 | Submits | Token consumed; response stored; candidate notified; `EVD` moves the claim to `peer_attested` if "Yes" and checks pass |
+| #   | Actor action                                                                                  | System response                                                                                                                                                                 |
+| --- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens link on phone                                                                           | Token validated; page shows only: candidate name, claimed title, employer, dates, the question "Did you work with this person in this role?", and who the referee is said to be |
+| 2   | Chooses "Yes, I confirm", "Partly" (with what differs) or "No"                                | Choice recorded locally; for "Partly", fields to correct title or dates appear                                                                                                  |
+| 3   | Optionally states relationship (manager, peer, report, client) and how they know              | Free text capped at 500 characters                                                                                                                                              |
+| 4   | Confirms identity check: enters work email domain or signs in if they already have an account | Domain compared with the claimed employer's verified domain; independence checks run (referee ≠ candidate, no shared device or account signals)                                 |
+| 5   | Submits                                                                                       | Token consumed; response stored; candidate notified; `EVD` moves the claim to `peer_attested` if "Yes" and checks pass                                                          |
 
 - **Success outcome:** Claim at rung `peer_attested` with referee relationship and domain-match flag shown; referee median time recorded in `bgv.referee_median_minutes`.
 - **Failure branches:**
@@ -89,13 +89,13 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Sam searches the web for "SQL for analysts course" and lands on a catalog page.
 - **Preconditions:** Course `published`, at least one lesson marked preview.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens course page | Syllabus, skills taught, estimated hours, level, instructor with issuer class, rating distribution, what evidence completion produces, price or "Free" |
-| 2 | Plays the preview lesson | Lesson plays with captions and transcript; progress not stored |
-| 3 | Clicks "Enroll" | Sign-up sheet as in `JRN-GUE-01` steps 2 to 4 |
-| 4 | After verification | Enrollment created for a free course; for a paid course, checkout appears only if `OD-PRD-04` admits paid first-party courses, else "Not yet available" |
-| 5 | Starts lesson 1 | Progress tracking begins; continues in `JRN-CAN-05` |
+| #   | Actor action             | System response                                                                                                                                         |
+| --- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens course page        | Syllabus, skills taught, estimated hours, level, instructor with issuer class, rating distribution, what evidence completion produces, price or "Free"  |
+| 2   | Plays the preview lesson | Lesson plays with captions and transcript; progress not stored                                                                                          |
+| 3   | Clicks "Enroll"          | Sign-up sheet as in `JRN-GUE-01` steps 2 to 4                                                                                                           |
+| 4   | After verification       | Enrollment created for a free course; for a paid course, checkout appears only if `OD-PRD-04` admits paid first-party courses, else "Not yet available" |
+| 5   | Starts lesson 1          | Progress tracking begins; continues in `JRN-CAN-05`                                                                                                     |
 
 - **Success outcome:** Active enrollment; `lrn.enrollment.created`.
 - **Failure branches:**
@@ -113,15 +113,15 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Aisha clicks "Join" on the home page.
 - **Preconditions:** None.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Chooses passkey sign-up | Browser passkey ceremony; account in `pending_verification` |
-| 2 | Confirms email via code | Account `active`; welcome notification in-app (transactional, not marketing) |
-| 3 | Chooses intent: "Find a job", "Learn a skill", "Prove my experience", "Switch careers" | Onboarding branch selected; intent stored for personalization only if `matching.recommend` granted later |
-| 4 | Adds target role and up to 10 skills from taxonomy autocomplete | Skills normalized to taxonomy ids; free text kept as unmatched skill flagged for curation |
-| 5 | Sees consent prompts with plain-language text, all default off | Each grant recorded in the consent ledger with version |
-| 6 | Reaches the "first value" screen for the chosen intent: three matched jobs with explanations, or a gap view, or "Add your first evidence" | `act.first_value_session` event recorded with consent class |
-| 7 | Accepts the install prompt (optional) | PWA installed; no core function requires it |
+| #   | Actor action                                                                                                                              | System response                                                                                          |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 1   | Chooses passkey sign-up                                                                                                                   | Browser passkey ceremony; account in `pending_verification`                                              |
+| 2   | Confirms email via code                                                                                                                   | Account `active`; welcome notification in-app (transactional, not marketing)                             |
+| 3   | Chooses intent: "Find a job", "Learn a skill", "Prove my experience", "Switch careers"                                                    | Onboarding branch selected; intent stored for personalization only if `matching.recommend` granted later |
+| 4   | Adds target role and up to 10 skills from taxonomy autocomplete                                                                           | Skills normalized to taxonomy ids; free text kept as unmatched skill flagged for curation                |
+| 5   | Sees consent prompts with plain-language text, all default off                                                                            | Each grant recorded in the consent ledger with version                                                   |
+| 6   | Reaches the "first value" screen for the chosen intent: three matched jobs with explanations, or a gap view, or "Add your first evidence" | `act.first_value_session` event recorded with consent class                                              |
+| 7   | Accepts the install prompt (optional)                                                                                                     | PWA installed; no core function requires it                                                              |
 
 - **Success outcome:** Active account, skeleton profile, first-value event within the session.
 - **Failure branches:**
@@ -138,14 +138,14 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Rohan chooses "Import my résumé" from the profile checklist.
 - **Preconditions:** Active account.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Uploads a PDF or DOCX (max 10 MB [PROP]) or a LinkedIn data export | File stored privately; malware scan; parse job queued; progress indicator |
-| 2 | Waits | Parser extracts experience, education, skills; deterministic parser first, AI parsing only if `ai.assist.process` granted and cost policy allows (`BR-XCT-037`, `BR-XCT-039`) |
-| 3 | Reviews a side-by-side diff: extracted field vs source text | Each field marked "imported, unconfirmed"; nothing is saved to the profile until confirmed |
-| 4 | Confirms, edits or discards each entry | Confirmed entries saved as profile entries and as `claimed` evidence items for roles and education |
-| 5 | Sets visibility per section: Private, Connections, Discoverable to verified employers, Public | Visibility stored per field; preview "as a recruiter sees it" and "as the public sees it" |
-| 6 | Turns on `search.discoverable` (optional) | Profile summary indexed within 15 minutes [SRC: CONSENT_SCOPE_CATALOGUE BR-T063] |
+| #   | Actor action                                                                                  | System response                                                                                                                                                               |
+| --- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Uploads a PDF or DOCX (max 10 MB [PROP]) or a LinkedIn data export                            | File stored privately; malware scan; parse job queued; progress indicator                                                                                                     |
+| 2   | Waits                                                                                         | Parser extracts experience, education, skills; deterministic parser first, AI parsing only if `ai.assist.process` granted and cost policy allows (`BR-XCT-037`, `BR-XCT-039`) |
+| 3   | Reviews a side-by-side diff: extracted field vs source text                                   | Each field marked "imported, unconfirmed"; nothing is saved to the profile until confirmed                                                                                    |
+| 4   | Confirms, edits or discards each entry                                                        | Confirmed entries saved as profile entries and as `claimed` evidence items for roles and education                                                                            |
+| 5   | Sets visibility per section: Private, Connections, Discoverable to verified employers, Public | Visibility stored per field; preview "as a recruiter sees it" and "as the public sees it"                                                                                     |
+| 6   | Turns on `search.discoverable` (optional)                                                     | Profile summary indexed within 15 minutes [SRC: CONSENT_SCOPE_CATALOGUE BR-T063]                                                                                              |
 
 - **Success outcome:** Profile with confirmed entries; evidence items at `claimed`; `prf.profile.updated`.
 - **Failure branches:**
@@ -162,13 +162,13 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Rohan taps "Get this verified" on his Acme role.
 - **Preconditions:** Role entry exists at `claimed`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Chooses verification method: referee, work-email confirmation, upload artifact (offer letter, payslip with redaction guidance) or employer confirmation (if Acme is a verified org) | Methods available listed with the rung each can reach |
-| 2 | Picks referee; enters name, email, relationship | Validation: email not the candidate's own, not a free domain if "work email required" chosen; max 3 open referee requests per claim [PROP] |
-| 3 | Previews the exact message the referee receives | Preview rendered from the template `bgv.referee_request` |
-| 4 | Sends | Token minted; email sent; claim shows "Waiting for referee"; reminders at day 3 and day 7 [PROP] |
-| 5 | Receives notification when referee responds | Claim rung updated per `JRN-GUE-03` |
+| #   | Actor action                                                                                                                                                                        | System response                                                                                                                            |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Chooses verification method: referee, work-email confirmation, upload artifact (offer letter, payslip with redaction guidance) or employer confirmation (if Acme is a verified org) | Methods available listed with the rung each can reach                                                                                      |
+| 2   | Picks referee; enters name, email, relationship                                                                                                                                     | Validation: email not the candidate's own, not a free domain if "work email required" chosen; max 3 open referee requests per claim [PROP] |
+| 3   | Previews the exact message the referee receives                                                                                                                                     | Preview rendered from the template `bgv.referee_request`                                                                                   |
+| 4   | Sends                                                                                                                                                                               | Token minted; email sent; claim shows "Waiting for referee"; reminders at day 3 and day 7 [PROP]                                           |
+| 5   | Receives notification when referee responds                                                                                                                                         | Claim rung updated per `JRN-GUE-03`                                                                                                        |
 
 - **Success outcome:** Claim at `peer_attested` (or `authority_verified` with issuer class `employer_org` if the verified employer confirms).
 - **Failure branches:**
@@ -185,13 +185,13 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Ravi selects "Switch careers" and target role "Product manager".
 - **Preconditions:** `matching.recommend` granted (needed to use profile for recommendations).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Picks target occupation from taxonomy | Required and common skills for the occupation shown with their source (taxonomy, or job-posting frequency from `MKT` if admitted) |
-| 2 | Views the gap | Each skill shows: held with evidence (rung), held claimed only, missing; with uncertainty notes ("based on 3 evidence items") |
-| 3 | Chooses "Build a plan" | Plan of ordered steps: courses, practice challenges, portfolio project suggestions; each step names the gap it closes and evidence it would produce |
-| 4 | Removes two steps and reorders | Plan saved as user-owned; AI-generated items labelled (`BR-XCT-036`) |
-| 5 | Accepts the plan | Goal tracked; weekly progress digest offered (opt-in) |
+| #   | Actor action                          | System response                                                                                                                                     |
+| --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Picks target occupation from taxonomy | Required and common skills for the occupation shown with their source (taxonomy, or job-posting frequency from `MKT` if admitted)                   |
+| 2   | Views the gap                         | Each skill shows: held with evidence (rung), held claimed only, missing; with uncertainty notes ("based on 3 evidence items")                       |
+| 3   | Chooses "Build a plan"                | Plan of ordered steps: courses, practice challenges, portfolio project suggestions; each step names the gap it closes and evidence it would produce |
+| 4   | Removes two steps and reorders        | Plan saved as user-owned; AI-generated items labelled (`BR-XCT-036`)                                                                                |
+| 5   | Accepts the plan                      | Goal tracked; weekly progress digest offered (opt-in)                                                                                               |
 
 - **Success outcome:** Active goal with plan; progress visible as evidence accrues.
 - **Failure branches:**
@@ -208,14 +208,14 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Sam opens an enrolled course from "Continue learning".
 - **Preconditions:** Enrollment `active`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Plays lesson video at 1.5x with captions | Position saved every 10 seconds [PROP] and on pause |
-| 2 | Downloads the next two lessons for the train | Lessons cached in the PWA with licence check; expire after 30 days offline [PROP] |
-| 3 | Completes in-lesson quiz offline | Answers saved as local draft; graded quizzes submit only online; practice quizzes graded locally then reconciled (`BR-XCT-078`) |
-| 4 | Submits the final project with a repository link and write-up | Submission stored; rubric grading queued (auto-graded parts immediately) |
-| 5 | Receives grade and feedback | Course `completed` when all required items pass |
-| 6 | Opens "Your new evidence" | Completion credential with issuer class `platform` (first-party course) or `instructor`; project as `artifact_backed` evidence linked to skills |
+| #   | Actor action                                                  | System response                                                                                                                                 |
+| --- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Plays lesson video at 1.5x with captions                      | Position saved every 10 seconds [PROP] and on pause                                                                                             |
+| 2   | Downloads the next two lessons for the train                  | Lessons cached in the PWA with licence check; expire after 30 days offline [PROP]                                                               |
+| 3   | Completes in-lesson quiz offline                              | Answers saved as local draft; graded quizzes submit only online; practice quizzes graded locally then reconciled (`BR-XCT-078`)                 |
+| 4   | Submits the final project with a repository link and write-up | Submission stored; rubric grading queued (auto-graded parts immediately)                                                                        |
+| 5   | Receives grade and feedback                                   | Course `completed` when all required items pass                                                                                                 |
+| 6   | Opens "Your new evidence"                                     | Completion credential with issuer class `platform` (first-party course) or `instructor`; project as `artifact_backed` evidence linked to skills |
 
 - **Success outcome:** Completion credential and project evidence in `EVD`; `lrn.course.completed`; badge in `REP`.
 - **Failure branches:**
@@ -232,14 +232,14 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Quinn starts "Data Structures — Verified Assessment".
 - **Preconditions:** Online; attempt allowance remaining; assessment AI mode `AI_PROHIBITED`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Reads rules: duration, attempts, AI mode, integrity signals collected, accommodations | Explicit acknowledgement recorded |
-| 2 | Requests extra time accommodation (optional) | Request routed to the assessment owner; approved accommodations apply silently; never disclosed to employers (`BR-XCT-028`) |
-| 3 | Starts the attempt | Server timer starts; AI gateway blocks every TalentSphere AI entry point for this user for the attempt window (`BR-XCT-038`) |
-| 4 | Answers questions; code questions run in the isolated runner | Answers autosaved server-side every change; runner returns test results |
-| 5 | Submits or timer ends | Attempt locked; auto-grading; integrity signals evaluated |
-| 6 | Sees result | Score band and per-topic breakdown; if passed, credential issued at `authority_verified`, issuer class `platform` |
+| #   | Actor action                                                                          | System response                                                                                                              |
+| --- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Reads rules: duration, attempts, AI mode, integrity signals collected, accommodations | Explicit acknowledgement recorded                                                                                            |
+| 2   | Requests extra time accommodation (optional)                                          | Request routed to the assessment owner; approved accommodations apply silently; never disclosed to employers (`BR-XCT-028`)  |
+| 3   | Starts the attempt                                                                    | Server timer starts; AI gateway blocks every TalentSphere AI entry point for this user for the attempt window (`BR-XCT-038`) |
+| 4   | Answers questions; code questions run in the isolated runner                          | Answers autosaved server-side every change; runner returns test results                                                      |
+| 5   | Submits or timer ends                                                                 | Attempt locked; auto-grading; integrity signals evaluated                                                                    |
+| 6   | Sees result                                                                           | Score band and per-topic breakdown; if passed, credential issued at `authority_verified`, issuer class `platform`            |
 
 - **Success outcome:** Credential in `EVD` with assessment version and date; `asm.attempt.graded`.
 - **Failure branches:**
@@ -257,15 +257,15 @@ End-to-end journeys across every role and module. Each journey states its trigge
 - **Trigger:** Aisha searches "junior backend developer" in her city.
 - **Preconditions:** Active account; profile with at least one evidence item.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Searches with filters: location radius, remote, salary floor, posted within 7 days | Results ordered by relevance; no paid boosting in organic ranking (`BR-XCT-020`); each card shows match label with "Why?" |
-| 2 | Opens "Why?" on a job | Explanation: matched skills with her evidence rung, missing skills, location fit, uncertainty statement; no protected attributes used (`BR-XCT-022`, `BR-XCT-023`) |
-| 3 | Clicks "Apply" | Completeness gate: required screening questions, résumé variant selection, evidence picker |
-| 4 | Picks résumé variant and selects which evidence items to include | Snapshot preview "The employer will see exactly this"; contact details included only if she ticks "Share email and phone" |
-| 5 | Answers screening questions | Knockout questions shown with their rule; she can still apply (questions inform humans, never auto-reject, `BR-XCT-021`) |
-| 6 | Submits | Idempotent submit; `application.share_snapshot` granted; application `submitted`; confirmation in-app and email |
-| 7 | Hiring team notified | `ATS` card created in the first stage; recruiter notification per their preferences |
+| #   | Actor action                                                                       | System response                                                                                                                                                    |
+| --- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Searches with filters: location radius, remote, salary floor, posted within 7 days | Results ordered by relevance; no paid boosting in organic ranking (`BR-XCT-020`); each card shows match label with "Why?"                                          |
+| 2   | Opens "Why?" on a job                                                              | Explanation: matched skills with her evidence rung, missing skills, location fit, uncertainty statement; no protected attributes used (`BR-XCT-022`, `BR-XCT-023`) |
+| 3   | Clicks "Apply"                                                                     | Completeness gate: required screening questions, résumé variant selection, evidence picker                                                                         |
+| 4   | Picks résumé variant and selects which evidence items to include                   | Snapshot preview "The employer will see exactly this"; contact details included only if she ticks "Share email and phone"                                          |
+| 5   | Answers screening questions                                                        | Knockout questions shown with their rule; she can still apply (questions inform humans, never auto-reject, `BR-XCT-021`)                                           |
+| 6   | Submits                                                                            | Idempotent submit; `application.share_snapshot` granted; application `submitted`; confirmation in-app and email                                                    |
+| 7   | Hiring team notified                                                               | `ATS` card created in the first stage; recruiter notification per their preferences                                                                                |
 
 - **Success outcome:** Application `submitted` with immutable snapshot; `job.application.submitted`.
 - **Failure branches:**
@@ -309,14 +309,14 @@ sequenceDiagram
 - **Trigger:** Notification "Acme invited you to schedule an interview".
 - **Preconditions:** Application moved to an interview stage by a human.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the application tracker | Candidate-facing status (`submitted`, `in_review`, `interviewing`, `offer_extended`, terminal states) with date of last change; internal stage names hidden |
-| 2 | Opens the scheduling link | Available slots computed from panel calendars, shown in his time zone, with duration, format (video link, phone, onsite) and interviewers' names and titles |
-| 3 | Picks a slot | Slot held for 10 minutes [PROP] during confirmation; confirmed to all parties; calendar invite with external meeting link |
-| 4 | Requests a reschedule two days later | Allowed up to 24 hours before start [PROP]; new slots shown; panel notified |
-| 5 | Sends a question in the application thread | Message delivered to the hiring team thread; recruiter replies |
-| 6 | Attends the interview | Reminder 24 hours and 1 hour before; status remains `interviewing` |
+| #   | Actor action                               | System response                                                                                                                                             |
+| --- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens the application tracker              | Candidate-facing status (`submitted`, `in_review`, `interviewing`, `offer_extended`, terminal states) with date of last change; internal stage names hidden |
+| 2   | Opens the scheduling link                  | Available slots computed from panel calendars, shown in his time zone, with duration, format (video link, phone, onsite) and interviewers' names and titles |
+| 3   | Picks a slot                               | Slot held for 10 minutes [PROP] during confirmation; confirmed to all parties; calendar invite with external meeting link                                   |
+| 4   | Requests a reschedule two days later       | Allowed up to 24 hours before start [PROP]; new slots shown; panel notified                                                                                 |
+| 5   | Sends a question in the application thread | Message delivered to the hiring team thread; recruiter replies                                                                                              |
+| 6   | Attends the interview                      | Reminder 24 hours and 1 hour before; status remains `interviewing`                                                                                          |
 
 - **Success outcome:** Interview completed; candidate sees next step within the employer's stated response window.
 - **Failure branches:**
@@ -333,14 +333,14 @@ sequenceDiagram
 - **Trigger:** Notification "You have an offer from Acme".
 - **Preconditions:** Offer approved through the approval chain (`JRN-REC-06`).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the offer | Offer summary: title, start date, compensation fields the employer chose to include, expiry date, attached letter (PDF) |
-| 2 | Asks a question in the thread | Recruiter replies; offer remains open until expiry |
-| 3 | Clicks "Accept" and types her name to confirm intent | Application `hired`; offer `accepted`; the employer is told; e-signature of the employment contract happens in the employer's tool if any (adjacent) |
-| 4 | Is asked whether to add the role to her profile | On yes: experience entry created as `claimed`, with an employer-confirmation request pre-filled to the verified org |
-| 5 | Employer confirms after start date | Evidence item moves to `authority_verified`, issuer class `employer_org` |
-| 6 | Other active applications | She is offered one-tap withdrawal with a polite template to each |
+| #   | Actor action                                         | System response                                                                                                                                      |
+| --- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens the offer                                      | Offer summary: title, start date, compensation fields the employer chose to include, expiry date, attached letter (PDF)                              |
+| 2   | Asks a question in the thread                        | Recruiter replies; offer remains open until expiry                                                                                                   |
+| 3   | Clicks "Accept" and types her name to confirm intent | Application `hired`; offer `accepted`; the employer is told; e-signature of the employment contract happens in the employer's tool if any (adjacent) |
+| 4   | Is asked whether to add the role to her profile      | On yes: experience entry created as `claimed`, with an employer-confirmation request pre-filled to the verified org                                  |
+| 5   | Employer confirms after start date                   | Evidence item moves to `authority_verified`, issuer class `employer_org`                                                                             |
+| 6   | Other active applications                            | She is offered one-tap withdrawal with a polite template to each                                                                                     |
 
 - **Success outcome:** Outcome recorded; new authority-verified evidence; `ns.career_progress_verified` counts her.
 - **Failure branches:**
@@ -357,13 +357,13 @@ sequenceDiagram
 - **Trigger:** Notification "A recruiter at Globex wants to contact you about Senior ML Engineer".
 - **Preconditions:** Rohan granted `outreach.recruiter_contact` and is discoverable.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the request | Shows recruiter name, verified org, role, salary range if given, why they reached out (matched skills); recruiter cannot see contact details |
-| 2 | Chooses "Interested", "Not now", "Not interested" or "Block this org" | Response recorded |
-| 3 | On "Interested" | Thread opens; recruiter can now message; contact details still masked unless he shares them |
-| 4 | On "Not interested" with optional reason | Recruiter receives a polite decline; cannot send another request to Rohan for 90 days [PROP] |
-| 5 | On "Block this org" | Org blocked: no outreach, search excludes him for that org, existing threads closed (`BR-XCT-017`) |
+| #   | Actor action                                                          | System response                                                                                                                              |
+| --- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens the request                                                     | Shows recruiter name, verified org, role, salary range if given, why they reached out (matched skills); recruiter cannot see contact details |
+| 2   | Chooses "Interested", "Not now", "Not interested" or "Block this org" | Response recorded                                                                                                                            |
+| 3   | On "Interested"                                                       | Thread opens; recruiter can now message; contact details still masked unless he shares them                                                  |
+| 4   | On "Not interested" with optional reason                              | Recruiter receives a polite decline; cannot send another request to Rohan for 90 days [PROP]                                                 |
+| 5   | On "Block this org"                                                   | Org blocked: no outreach, search excludes him for that org, existing threads closed (`BR-XCT-017`)                                           |
 
 - **Success outcome:** A consented conversation or a respected decline; outreach quota consumed on the recruiter side only.
 - **Failure branches:**
@@ -379,13 +379,13 @@ sequenceDiagram
 - **Trigger:** Omar opens Settings → Privacy → "Who can see my data".
 - **Preconditions:** Several grants exist.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Views the consent centre | Every grant listed: scope plain-language label, grantee, granted on, expires on, last used on |
-| 2 | Opens "Globex can open my evidence files" | Detail: which artifacts, access log entries by Globex (date, artifact, viewer role class) |
-| 3 | Clicks "Revoke" | Confirmation explains the effect ("Globex will not be able to open your files from now; links already issued stop working within 5 minutes") |
-| 4 | Confirms | Ledger entry appended; next read by Globex fails; signed URLs lapse (`BR-XCT-008`) |
-| 5 | Turns off `matching.recommend` | Recommendations stop; stored explanations and embeddings deleted; he stays searchable only if discoverable (`BR-XCT-012`) |
+| #   | Actor action                              | System response                                                                                                                              |
+| --- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Views the consent centre                  | Every grant listed: scope plain-language label, grantee, granted on, expires on, last used on                                                |
+| 2   | Opens "Globex can open my evidence files" | Detail: which artifacts, access log entries by Globex (date, artifact, viewer role class)                                                    |
+| 3   | Clicks "Revoke"                           | Confirmation explains the effect ("Globex will not be able to open your files from now; links already issued stop working within 5 minutes") |
+| 4   | Confirms                                  | Ledger entry appended; next read by Globex fails; signed URLs lapse (`BR-XCT-008`)                                                           |
+| 5   | Turns off `matching.recommend`            | Recommendations stop; stored explanations and embeddings deleted; he stays searchable only if discoverable (`BR-XCT-012`)                    |
 
 - **Success outcome:** Revocations effective at next read; receipts downloadable.
 - **Failure branches:**
@@ -400,14 +400,14 @@ sequenceDiagram
 - **Trigger:** Omar chooses "Download my data", then "Delete my account".
 - **Preconditions:** Signed in with recent re-authentication (within 10 minutes [PROP]).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Requests export | Export job collects data from every owning module; ready notification; download link valid 7 days [PROP]; JSON plus readable HTML |
-| 2 | Downloads | Download audited |
-| 3 | Requests deletion | Screen lists what is deleted, what is retained and why (invoices, legal holds, org-owned hiring records about him per org retention), and the cancel window (`OD-PRD-13`) |
-| 4 | Confirms with re-authentication | Account `pending_erasure`; sessions revoked; profile hidden at once; active applications withdrawn with notice to employers; active subscriptions cancelled at period end |
-| 5 | Cancel window passes | Erasure runs: mutable records deleted, `subject_identity_map` row deleted so history keeps only an opaque reference (`BR-XCT-032`); messages he sent show "Deleted user" to counterparties (`BR-XCT-006`) |
-| 6 | Receives final confirmation email | Account `erased`; email address released after the purge clock |
+| #   | Actor action                      | System response                                                                                                                                                                                           |
+| --- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Requests export                   | Export job collects data from every owning module; ready notification; download link valid 7 days [PROP]; JSON plus readable HTML                                                                         |
+| 2   | Downloads                         | Download audited                                                                                                                                                                                          |
+| 3   | Requests deletion                 | Screen lists what is deleted, what is retained and why (invoices, legal holds, org-owned hiring records about him per org retention), and the cancel window (`OD-PRD-13`)                                 |
+| 4   | Confirms with re-authentication   | Account `pending_erasure`; sessions revoked; profile hidden at once; active applications withdrawn with notice to employers; active subscriptions cancelled at period end                                 |
+| 5   | Cancel window passes              | Erasure runs: mutable records deleted, `subject_identity_map` row deleted so history keeps only an opaque reference (`BR-XCT-032`); messages he sent show "Deleted user" to counterparties (`BR-XCT-006`) |
+| 6   | Receives final confirmation email | Account `erased`; email address released after the purge clock                                                                                                                                            |
 
 - **Success outcome:** Erasure completed within the completion deadline; post-erasure sweep finds no residual identifiers.
 - **Failure branches:**
@@ -448,14 +448,14 @@ sequenceDiagram
 - **Trigger:** New phone, passkey gone, password forgotten.
 - **Preconditions:** Account `active`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Clicks "Can't sign in" | Options: email reset link, recovery codes, a second registered passkey |
-| 2 | Requests email reset | Link sent if the account exists; response identical whether or not it exists |
-| 3 | Opens link within 30 minutes [PROP] | Sets new password; all sessions revoked; MFA still required if enrolled |
-| 4 | MFA device also lost | "Recover with support" opens an identity-proofing request |
-| 5 | Support verifies per checklist (`JRN-SUP-02`) | Recovery approved; 24-hour delay before MFA reset with notice to all registered emails [PROP] |
-| 6 | Signs in and registers a new passkey | Security notification sent; recovery codes regenerated |
+| #   | Actor action                                  | System response                                                                               |
+| --- | --------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 1   | Clicks "Can't sign in"                        | Options: email reset link, recovery codes, a second registered passkey                        |
+| 2   | Requests email reset                          | Link sent if the account exists; response identical whether or not it exists                  |
+| 3   | Opens link within 30 minutes [PROP]           | Sets new password; all sessions revoked; MFA still required if enrolled                       |
+| 4   | MFA device also lost                          | "Recover with support" opens an identity-proofing request                                     |
+| 5   | Support verifies per checklist (`JRN-SUP-02`) | Recovery approved; 24-hour delay before MFA reset with notice to all registered emails [PROP] |
+| 6   | Signs in and registers a new passkey          | Security notification sent; recovery codes regenerated                                        |
 
 - **Success outcome:** Access restored without exposing the account to takeover.
 - **Failure branches:**
@@ -471,13 +471,13 @@ sequenceDiagram
 - **Trigger:** Referee answered "No" or an issuer revoked a credential.
 - **Preconditions:** Evidence item owned by Rohan.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the item and clicks "Dispute" | Form: what is wrong, supporting artifacts (up to 5 files) |
-| 2 | Submits | Case created in `TSF` with category `verification_dispute`; item shows "Disputed" to Rohan only |
-| 3 | Moderator reviews referee response, independence signals, artifacts | May request more information through the case thread |
-| 4 | Decision: uphold, overturn (rung restored or raised by a new verification path) or offer re-verification | Decision with reason; `EVD` transitions only via the case decision (`BR-XCT-068`) |
-| 5 | Rohan may appeal once | Appeal decided by a different moderator (`BR-XCT-052`) |
+| #   | Actor action                                                                                             | System response                                                                                 |
+| --- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Opens the item and clicks "Dispute"                                                                      | Form: what is wrong, supporting artifacts (up to 5 files)                                       |
+| 2   | Submits                                                                                                  | Case created in `TSF` with category `verification_dispute`; item shows "Disputed" to Rohan only |
+| 3   | Moderator reviews referee response, independence signals, artifacts                                      | May request more information through the case thread                                            |
+| 4   | Decision: uphold, overturn (rung restored or raised by a new verification path) or offer re-verification | Decision with reason; `EVD` transitions only via the case decision (`BR-XCT-068`)               |
+| 5   | Rohan may appeal once                                                                                    | Appeal decided by a different moderator (`BR-XCT-052`)                                          |
 
 - **Success outcome:** Disputed item resolved with an auditable reason.
 - **Failure branches:**
@@ -492,13 +492,13 @@ sequenceDiagram
 - **Trigger:** On a job page Aisha sees "2 connections work at Acme".
 - **Preconditions:** Connection is a verified member of the job's org.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Clicks "Ask for a referral" | Picks the connection; writes a note (max 1,000 characters); attaches her application draft or profile link |
-| 2 | Sends | Referral request delivered; max 3 open referral requests per job [PROP] |
-| 3 | Connection opens it | Sees her shared items only; chooses "Refer", "Decline" or "Not comfortable" |
-| 4 | Connection refers with a statement of how they know her | Referral attached to her application (created or existing); hiring team sees "Referred by" with relationship |
-| 5 | Application progresses | Both see status updates appropriate to each (referrer sees only stage class, not notes) |
+| #   | Actor action                                            | System response                                                                                              |
+| --- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 1   | Clicks "Ask for a referral"                             | Picks the connection; writes a note (max 1,000 characters); attaches her application draft or profile link   |
+| 2   | Sends                                                   | Referral request delivered; max 3 open referral requests per job [PROP]                                      |
+| 3   | Connection opens it                                     | Sees her shared items only; chooses "Refer", "Decline" or "Not comfortable"                                  |
+| 4   | Connection refers with a statement of how they know her | Referral attached to her application (created or existing); hiring team sees "Referred by" with relationship |
+| 5   | Application progresses                                  | Both see status updates appropriate to each (referrer sees only stage class, not notes)                      |
 
 - **Success outcome:** Referred application; `net.referral.given`; referral counted in `net.referral_to_interview`.
 - **Failure branches:**
@@ -514,13 +514,13 @@ sequenceDiagram
 - **Trigger:** Rohan reaches the free AI assistance limit.
 - **Preconditions:** Candidate premium admitted and priced by the owner.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Sees "Daily AI limit reached" | Explains what is free forever (evidence, applying, messaging) and what the paid plan adds; no dark patterns |
-| 2 | Opens plans | Monthly and yearly with total price including tax where known; cancellation terms |
-| 3 | Pays in hosted checkout | Entitlements change only after the verified webhook (`BR-XCT-043`) |
-| 4 | Returns | Banner "Plan active" once state confirmed; until then "Confirming payment" |
-| 5 | Later cancels in the customer portal | Cancel at period end; data kept; extra résumé variants become read-only beyond the free count (`BR-XCT-045`) |
+| #   | Actor action                         | System response                                                                                              |
+| --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| 1   | Sees "Daily AI limit reached"        | Explains what is free forever (evidence, applying, messaging) and what the paid plan adds; no dark patterns  |
+| 2   | Opens plans                          | Monthly and yearly with total price including tax where known; cancellation terms                            |
+| 3   | Pays in hosted checkout              | Entitlements change only after the verified webhook (`BR-XCT-043`)                                           |
+| 4   | Returns                              | Banner "Plan active" once state confirmed; until then "Confirming payment"                                   |
+| 5   | Later cancels in the customer portal | Cancel at period end; data kept; extra résumé variants become read-only beyond the free count (`BR-XCT-045`) |
 
 - **Success outcome:** Paid entitlements applied server-side; cancellation honored without data loss.
 - **Failure branches:**
@@ -536,13 +536,13 @@ sequenceDiagram
 - **Trigger:** "Tailor for this job" on a job page.
 - **Preconditions:** `ai.assist.process` granted; cost policy allows the request.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Clicks "Tailor" | Shows what will be sent (profile sections, job text), redaction of contact details |
-| 2 | Confirms | AI gateway call; suggestions returned as a diff against his base variant |
-| 3 | Accepts some suggestions, edits others | Accepted text saved in a new variant; suggestions labelled AI-assisted in version history |
-| 4 | Tries to accept a suggestion claiming a skill he has no evidence for | Warning "This adds a claim not in your profile"; accepting creates a `claimed` item, never a verified one (`BR-XCT-036`) |
-| 5 | Uses the variant in an application | Snapshot includes the variant |
+| #   | Actor action                                                         | System response                                                                                                          |
+| --- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Clicks "Tailor"                                                      | Shows what will be sent (profile sections, job text), redaction of contact details                                       |
+| 2   | Confirms                                                             | AI gateway call; suggestions returned as a diff against his base variant                                                 |
+| 3   | Accepts some suggestions, edits others                               | Accepted text saved in a new variant; suggestions labelled AI-assisted in version history                                |
+| 4   | Tries to accept a suggestion claiming a skill he has no evidence for | Warning "This adds a claim not in your profile"; accepting creates a `claimed` item, never a verified one (`BR-XCT-036`) |
+| 5   | Uses the variant in an application                                   | Snapshot includes the variant                                                                                            |
 
 - **Success outcome:** Variant created by the candidate's explicit choices.
 - **Failure branches:**
@@ -558,11 +558,11 @@ sequenceDiagram
 - **Trigger:** Omar has an offer and opens "Salary insights".
 - **Preconditions:** `MKT` admitted.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Enters occupation, level, location | Benchmark shows median and quartiles only for cells with at least `min_cohort_k` contributors; sources labelled (user reports, licensed data) |
-| 2 | Narrows to company | If the company cell is below k → "Not enough data" with the nearest broader cell |
-| 3 | Contributes his own salary anonymously | Report stored separately from his identity; can be deleted from his settings |
+| #   | Actor action                           | System response                                                                                                                               |
+| --- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Enters occupation, level, location     | Benchmark shows median and quartiles only for cells with at least `min_cohort_k` contributors; sources labelled (user reports, licensed data) |
+| 2   | Narrows to company                     | If the company cell is below k → "Not enough data" with the nearest broader cell                                                              |
+| 3   | Contributes his own salary anonymously | Report stored separately from his identity; can be deleted from his settings                                                                  |
 
 - **Success outcome:** Benchmark seen without exposing any individual.
 - **Failure branches:**
@@ -577,13 +577,13 @@ sequenceDiagram
 - **Trigger:** Train enters a tunnel while she edits an application draft and a message.
 - **Preconditions:** PWA installed or visited.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Keeps editing | Offline banner; drafts saved locally with timestamp |
-| 2 | Taps "Submit application" | Blocked: "Submitting needs a connection"; submit not queued for server-authoritative actions (`BR-XCT-078`) |
-| 3 | Sends a message | Queued with "Will send when online"; can be cancelled |
-| 4 | Reconnects | Queued message sent with its idempotency key; draft synced; conflicts shown if the draft changed elsewhere |
-| 5 | Resolves a conflict | Side-by-side choose-one or merge |
+| #   | Actor action              | System response                                                                                             |
+| --- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 1   | Keeps editing             | Offline banner; drafts saved locally with timestamp                                                         |
+| 2   | Taps "Submit application" | Blocked: "Submitting needs a connection"; submit not queued for server-authoritative actions (`BR-XCT-078`) |
+| 3   | Sends a message           | Queued with "Will send when online"; can be cancelled                                                       |
+| 4   | Reconnects                | Queued message sent with its idempotency key; draft synced; conflicts shown if the draft changed elsewhere  |
+| 5   | Resolves a conflict       | Side-by-side choose-one or merge                                                                            |
 
 - **Success outcome:** No lost work; no action taken on stale state.
 - **Failure branches:**
@@ -598,13 +598,13 @@ sequenceDiagram
 - **Trigger:** Conditional offer requires a check.
 - **Preconditions:** Offer extended; vendor integration admitted (`OD-PRD-19`).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens request | Shows check types, vendor name, what data goes to the vendor, legal disclosures for her jurisdiction |
-| 2 | Gives consent and enters required data in the vendor-hosted form | TalentSphere does not store identity numbers [PROP]; vendor order created |
-| 3 | Waits | Status: `ordered`, `in_progress`, `completed` |
-| 4 | Receives result notice | Sees her full report from the vendor; employer sees only the adjudication summary |
-| 5 | If employer intends adverse action | Pre-adverse notice with report copy and dispute window before any final decision (`BR-XCT-021`) |
+| #   | Actor action                                                     | System response                                                                                      |
+| --- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1   | Opens request                                                    | Shows check types, vendor name, what data goes to the vendor, legal disclosures for her jurisdiction |
+| 2   | Gives consent and enters required data in the vendor-hosted form | TalentSphere does not store identity numbers [PROP]; vendor order created                            |
+| 3   | Waits                                                            | Status: `ordered`, `in_progress`, `completed`                                                        |
+| 4   | Receives result notice                                           | Sees her full report from the vendor; employer sees only the adjudication summary                    |
+| 5   | If employer intends adverse action                               | Pre-adverse notice with report copy and dispute window before any final decision (`BR-XCT-021`)      |
 
 - **Success outcome:** Check completed with consent; any adverse action follows notice and human review.
 - **Failure branches:**
@@ -619,12 +619,12 @@ sequenceDiagram
 - **Trigger:** Notice "Your project was removed for violating the intellectual-property policy".
 - **Preconditions:** Takedown action with reason code.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the notice | Shows the content, the policy clause, the action, and the appeal deadline (14 days [PROP]) |
-| 2 | Files an appeal with explanation and proof of ownership | Appeal case created; content kept under hold (`BR-XCT-054`) |
-| 3 | Waits | Second moderator assigned (`BR-XCT-052`) |
-| 4 | Decision | Upheld (final for platform) or overturned (content restored, record annotated) |
+| #   | Actor action                                            | System response                                                                            |
+| --- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1   | Opens the notice                                        | Shows the content, the policy clause, the action, and the appeal deadline (14 days [PROP]) |
+| 2   | Files an appeal with explanation and proof of ownership | Appeal case created; content kept under hold (`BR-XCT-054`)                                |
+| 3   | Waits                                                   | Second moderator assigned (`BR-XCT-052`)                                                   |
+| 4   | Decision                                                | Upheld (final for platform) or overturned (content restored, record annotated)             |
 
 - **Success outcome:** Appeal decided within the stated service time with a reason.
 - **Failure branches:**
@@ -639,14 +639,14 @@ sequenceDiagram
 - **Trigger:** Quinn sees "Climate Data Hackathon" in events.
 - **Preconditions:** Event `registration_open`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Registers, accepts event rules and code of conduct | Registration confirmed; calendar entries |
-| 2 | Creates a team and invites two connections | Team of up to the event's maximum; invites accepted |
-| 3 | Uses the team channel | Channel in `MSG`, scoped to the event |
-| 4 | Submits repository link, demo video link, write-up before the deadline | Submission locked at deadline; late submissions refused |
-| 5 | Judges score with the event rubric | Scores aggregated; conflicts of interest excluded (judge cannot score a team with a connection on it, `BR-XCT-059`) |
-| 6 | Results published | Participation and placement evidence issued to each member with issuer class of the organizer |
+| #   | Actor action                                                           | System response                                                                                                     |
+| --- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 1   | Registers, accepts event rules and code of conduct                     | Registration confirmed; calendar entries                                                                            |
+| 2   | Creates a team and invites two connections                             | Team of up to the event's maximum; invites accepted                                                                 |
+| 3   | Uses the team channel                                                  | Channel in `MSG`, scoped to the event                                                                               |
+| 4   | Submits repository link, demo video link, write-up before the deadline | Submission locked at deadline; late submissions refused                                                             |
+| 5   | Judges score with the event rubric                                     | Scores aggregated; conflicts of interest excluded (judge cannot score a team with a connection on it, `BR-XCT-059`) |
+| 6   | Results published                                                      | Participation and placement evidence issued to each member with issuer class of the organizer                       |
 
 - **Success outcome:** Team submission evaluated; evidence issued.
 - **Failure branches:**
@@ -663,12 +663,12 @@ sequenceDiagram
 - **Trigger:** Email "City University invited you to TalentSphere".
 - **Preconditions:** Seat `provisioned` by `IAD` (`JRN-IAD-01`).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens invite | Shows institution, program, cohort, what the institution can and cannot see (plain list) |
-| 2 | Chooses "I already have an account" or "Create account" | Existing account: the `STD` grant is attached to it; new: account created with the invite email |
-| 3 | Reviews institution sharing | `evidence.share_institution` explained; institution-run course work is visible to faculty by the enrollment itself; personal job search never visible |
-| 4 | Accepts | Seat `claimed`; state `active_managed`; assigned courses appear |
+| #   | Actor action                                            | System response                                                                                                                                       |
+| --- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens invite                                            | Shows institution, program, cohort, what the institution can and cannot see (plain list)                                                              |
+| 2   | Chooses "I already have an account" or "Create account" | Existing account: the `STD` grant is attached to it; new: account created with the invite email                                                       |
+| 3   | Reviews institution sharing                             | `evidence.share_institution` explained; institution-run course work is visible to faculty by the enrollment itself; personal job search never visible |
+| 4   | Accepts                                                 | Seat `claimed`; state `active_managed`; assigned courses appear                                                                                       |
 
 - **Success outcome:** Student linked to cohort without losing independence.
 - **Failure branches:**
@@ -684,13 +684,13 @@ sequenceDiagram
 - **Trigger:** Faculty assigns "Software Engineering Project" with a due date.
 - **Preconditions:** `active_managed`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens assignment | Brief, rubric, due date in his time zone, peer-review requirement (2 reviews [SRC: SSOT OD-37]) |
-| 2 | Submits | Submission time-stamped; late policy applied |
-| 3 | Reviews two peers' anonymized submissions | Double-blind; rubric required for each criterion; comments checked for abuse |
-| 4 | Receives peer and faculty grades | Faculty grade is final; peer grades inform it per course rule |
-| 5 | Course completes | Institution-issued credential with issuer class `institution` |
+| #   | Actor action                              | System response                                                                                 |
+| --- | ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Opens assignment                          | Brief, rubric, due date in his time zone, peer-review requirement (2 reviews [SRC: SSOT OD-37]) |
+| 2   | Submits                                   | Submission time-stamped; late policy applied                                                    |
+| 3   | Reviews two peers' anonymized submissions | Double-blind; rubric required for each criterion; comments checked for abuse                    |
+| 4   | Receives peer and faculty grades          | Faculty grade is final; peer grades inform it per course rule                                   |
+| 5   | Course completes                          | Institution-issued credential with issuer class `institution`                                   |
 
 - **Success outcome:** Graded work and credential on Vikram's profile.
 - **Failure branches:**
@@ -706,12 +706,12 @@ sequenceDiagram
 - **Trigger:** Notification "Globex placement drive open for your cohort".
 - **Preconditions:** Drive published by `PLO` (`JRN-PLO-01`); Vikram meets eligibility.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens drive | Roles, eligibility criteria, schedule, what is shared with Globex |
-| 2 | Applies to a role | Application created under the drive; snapshot includes institution-issued credentials he selects |
-| 3 | Attends drive interview slot | Scheduling as in `JRN-CAN-08` |
-| 4 | Receives offer | Offer recorded against the drive; `PLO` sees outcome only per drive consent |
+| #   | Actor action                 | System response                                                                                  |
+| --- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| 1   | Opens drive                  | Roles, eligibility criteria, schedule, what is shared with Globex                                |
+| 2   | Applies to a role            | Application created under the drive; snapshot includes institution-issued credentials he selects |
+| 3   | Attends drive interview slot | Scheduling as in `JRN-CAN-08`                                                                    |
+| 4   | Receives offer               | Offer recorded against the drive; `PLO` sees outcome only per drive consent                      |
 
 - **Success outcome:** Application through the drive with institution context.
 - **Failure branches:**
@@ -726,12 +726,12 @@ sequenceDiagram
 - **Trigger:** Institution runs graduation for the cohort.
 - **Preconditions:** Seat `active_managed`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Receives "Your graduation transfer is ready" | State `graduation_pending`; list of everything moving to his independent identity |
-| 2 | Confirms a personal email if the account used an institution email | Primary email switched after verification, so access survives the institution closing the mailbox |
-| 3 | Chooses whether to grant `alumni.share_outcomes` and which fields | Default off; offered once with plain text |
-| 4 | Completes | Grant becomes `CAN`; institution's licensed course access ends per licence; credentials stay valid; `evidence.share_institution` ends with the cohort sunset |
+| #   | Actor action                                                       | System response                                                                                                                                              |
+| --- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Receives "Your graduation transfer is ready"                       | State `graduation_pending`; list of everything moving to his independent identity                                                                            |
+| 2   | Confirms a personal email if the account used an institution email | Primary email switched after verification, so access survives the institution closing the mailbox                                                            |
+| 3   | Chooses whether to grant `alumni.share_outcomes` and which fields  | Default off; offered once with plain text                                                                                                                    |
+| 4   | Completes                                                          | Grant becomes `CAN`; institution's licensed course access ends per licence; credentials stay valid; `evidence.share_institution` ends with the cohort sunset |
 
 - **Success outcome:** Independent `CAN` with all earned evidence; graduating-cohort activation counted.
 - **Failure branches:**
@@ -768,12 +768,12 @@ sequenceDiagram
 - **Trigger:** Grace clicks "Teach on TalentSphere".
 - **Preconditions:** Verified account.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Fills application: expertise areas, sample lesson, links to prior teaching | Draft autosaved |
-| 2 | Accepts instructor terms (version recorded) | Application `under_review` |
-| 3 | Reviewer checks sample quality and identity signals | Decision `approved` or `returned` with reasons |
-| 4 | Grace is approved | `INS` grant `active`; studio unlocked |
+| #   | Actor action                                                               | System response                                |
+| --- | -------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1   | Fills application: expertise areas, sample lesson, links to prior teaching | Draft autosaved                                |
+| 2   | Accepts instructor terms (version recorded)                                | Application `under_review`                     |
+| 3   | Reviewer checks sample quality and identity signals                        | Decision `approved` or `returned` with reasons |
+| 4   | Grace is approved                                                          | `INS` grant `active`; studio unlocked          |
 
 - **Success outcome:** Active instructor.
 - **Failure branches:**
@@ -788,14 +788,14 @@ sequenceDiagram
 - **Trigger:** "New course" in studio.
 - **Preconditions:** `INS` active.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Creates outline: modules, lessons, skills taught from taxonomy | Draft version 1 |
-| 2 | Uploads videos, writes text lessons, adds quizzes and a rubric project | Media transcoded, captions auto-generated and editable; accessibility checklist score shown |
-| 3 | Previews as learner | Learner view with keyboard and screen-reader checks |
-| 4 | Submits for public review | Version locked; review SLA shown (72 hours [SRC: SSOT OD-42]) |
-| 5 | Moderator reviews against content policy | Approve, return with comments, or reject |
-| 6 | Approved → publishes | Course `published`; indexed in search; enrolled learners of earlier versions keep their version |
+| #   | Actor action                                                           | System response                                                                                 |
+| --- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Creates outline: modules, lessons, skills taught from taxonomy         | Draft version 1                                                                                 |
+| 2   | Uploads videos, writes text lessons, adds quizzes and a rubric project | Media transcoded, captions auto-generated and editable; accessibility checklist score shown     |
+| 3   | Previews as learner                                                    | Learner view with keyboard and screen-reader checks                                             |
+| 4   | Submits for public review                                              | Version locked; review SLA shown (72 hours [SRC: SSOT OD-42])                                   |
+| 5   | Moderator reviews against content policy                               | Approve, return with comments, or reject                                                        |
+| 6   | Approved → publishes                                                   | Course `published`; indexed in search; enrolled learners of earlier versions keep their version |
 
 - **Success outcome:** Published course version; `stu.course.published`.
 - **Failure branches:**
@@ -828,12 +828,12 @@ flowchart TD
 - **Trigger:** Grading queue shows 40 submissions.
 - **Preconditions:** Meera teaches the batch (`t` scope).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens queue sorted by submission time | Side-by-side rubric and submission; keyboard shortcuts per criterion |
-| 2 | Grades, writes feedback | Saved per submission; returned to learner when "Release grades" is pressed |
-| 3 | For a strong learner, clicks "Attest skill" on two skills | Attestation with issuer class `instructor`; independence check (instructor ≠ learner, not a connection-only relationship flag) |
-| 4 | Releases grades | Learners notified; evidence items created |
+| #   | Actor action                                              | System response                                                                                                                |
+| --- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Opens queue sorted by submission time                     | Side-by-side rubric and submission; keyboard shortcuts per criterion                                                           |
+| 2   | Grades, writes feedback                                   | Saved per submission; returned to learner when "Release grades" is pressed                                                     |
+| 3   | For a strong learner, clicks "Attest skill" on two skills | Attestation with issuer class `instructor`; independence check (instructor ≠ learner, not a connection-only relationship flag) |
+| 4   | Releases grades                                           | Learners notified; evidence items created                                                                                      |
 
 - **Success outcome:** Grades released; attested skills at `authority_verified` with issuer class `instructor`, shown distinctly from platform-verified (`BR-XCT-016`).
 - **Failure branches:**
@@ -848,12 +848,12 @@ flowchart TD
 - **Trigger:** Weekly at-risk digest.
 - **Preconditions:** Faculty grant on the batch.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens at-risk list | Learners flagged by transparent rules (no activity for 10 days, two missed deadlines) with the rule shown; no opaque risk score |
-| 2 | Messages three learners | Messages via the batch channel or direct batch thread |
-| 3 | Grants an extension | Due date changed for that learner; logged |
-| 4 | Marks intervention done | Outcome tracked for the batch report (k-anonymous at institution level) |
+| #   | Actor action            | System response                                                                                                                 |
+| --- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens at-risk list      | Learners flagged by transparent rules (no activity for 10 days, two missed deadlines) with the rule shown; no opaque risk score |
+| 2   | Messages three learners | Messages via the batch channel or direct batch thread                                                                           |
+| 3   | Grants an extension     | Due date changed for that learner; logged                                                                                       |
+| 4   | Marks intervention done | Outcome tracked for the batch report (k-anonymous at institution level)                                                         |
 
 - **Success outcome:** At-risk learners contacted; follow-up tracked.
 - **Failure branches:**
@@ -870,12 +870,12 @@ flowchart TD
 - **Trigger:** "Offer mentoring".
 - **Preconditions:** Verified account with at least one `authority_verified` or `peer_attested` work-history item [PROP].
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Creates offering: topic, format, duration, free or paid, cancellation policy | Paid only if `OD-PRD-04` admits; price fields hidden otherwise |
-| 2 | Connects calendar and sets weekly availability | Availability computed from calendar busy times plus rules |
-| 3 | Submits for review | Mentor application `under_review` |
-| 4 | Approved | Offering listed |
+| #   | Actor action                                                                 | System response                                                |
+| --- | ---------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| 1   | Creates offering: topic, format, duration, free or paid, cancellation policy | Paid only if `OD-PRD-04` admits; price fields hidden otherwise |
+| 2   | Connects calendar and sets weekly availability                               | Availability computed from calendar busy times plus rules      |
+| 3   | Submits for review                                                           | Mentor application `under_review`                              |
+| 4   | Approved                                                                     | Offering listed                                                |
 
 - **Success outcome:** Listed mentor with bookable slots.
 - **Failure branches:**
@@ -890,13 +890,13 @@ flowchart TD
 - **Trigger:** Ravi books a 45-minute "Product interview practice".
 - **Preconditions:** Slot available.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Ravi books, states goal, shares two evidence items | Booking `confirmed`; share granted for this booking only |
-| 2 | Hugo prepares | Sees goal and shared items; nothing else |
-| 3 | Session at external meeting link | Reminders; join link |
-| 4 | Hugo writes private notes and a shared summary with action items | Summary sent to Ravi; private notes only Hugo's |
-| 5 | Ravi rates the session | Rating aggregated; free-text reviewed for abuse |
+| #   | Actor action                                                     | System response                                          |
+| --- | ---------------------------------------------------------------- | -------------------------------------------------------- |
+| 1   | Ravi books, states goal, shares two evidence items               | Booking `confirmed`; share granted for this booking only |
+| 2   | Hugo prepares                                                    | Sees goal and shared items; nothing else                 |
+| 3   | Session at external meeting link                                 | Reminders; join link                                     |
+| 4   | Hugo writes private notes and a shared summary with action items | Summary sent to Ravi; private notes only Hugo's          |
+| 5   | Ravi rates the session                                           | Rating aggregated; free-text reviewed for abuse          |
 
 - **Success outcome:** Session `completed`; mentee's follow-up actions tracked toward his goal.
 - **Failure branches:**
@@ -910,11 +910,11 @@ flowchart TD
 - **Modules touched:** MEN, BIL, TSF, NTF
 - **Trigger:** Mentee does not join within 10 minutes [PROP].
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Hugo marks no-show | Booking `no_show_mentee`; policy applied: paid session not refunded unless mentee disputes with reason |
-| 2 | Mentee disputes ("emergency") | Case to `SUP`; refund decision by rule; money movement by `FIN` |
-| 3 | Mentor no-show instead | Automatic full refund; mentor reliability counter incremented; repeated no-shows pause offering |
+| #   | Actor action                  | System response                                                                                        |
+| --- | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1   | Hugo marks no-show            | Booking `no_show_mentee`; policy applied: paid session not refunded unless mentee disputes with reason |
+| 2   | Mentee disputes ("emergency") | Case to `SUP`; refund decision by rule; money movement by `FIN`                                        |
+| 3   | Mentor no-show instead        | Automatic full refund; mentor reliability counter incremented; repeated no-shows pause offering        |
 
 - **Success outcome:** Policy applied consistently; money moves only through `BIL`.
 - **Failure branches:**
@@ -930,13 +930,13 @@ flowchart TD
 - **Trigger:** "Offer services" in profile.
 - **Preconditions:** Verified account.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Accepts freelancer terms | `FRL` grant; gig mode on |
-| 2 | Creates offering: category (career-related professional services only), deliverables, packages, delivery time | Category validated against the allowed list (`OD-PRD-03`) |
-| 3 | Attaches portfolio evidence | Evidence rung shown on offering |
-| 4 | Completes payout setup with the payment provider | `payout_ready` after provider verification (`BR-XCT-048`) |
-| 5 | Publishes | Offering searchable |
+| #   | Actor action                                                                                                  | System response                                           |
+| --- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | Accepts freelancer terms                                                                                      | `FRL` grant; gig mode on                                  |
+| 2   | Creates offering: category (career-related professional services only), deliverables, packages, delivery time | Category validated against the allowed list (`OD-PRD-03`) |
+| 3   | Attaches portfolio evidence                                                                                   | Evidence rung shown on offering                           |
+| 4   | Completes payout setup with the payment provider                                                              | `payout_ready` after provider verification (`BR-XCT-048`) |
+| 5   | Publishes                                                                                                     | Offering searchable                                       |
 
 - **Success outcome:** Published offering backed by evidence.
 - **Failure branches:**
@@ -951,13 +951,13 @@ flowchart TD
 - **Trigger:** Client posts "Redesign careers page".
 - **Preconditions:** Uma `payout_ready`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Uma submits proposal with price, milestones, timeline | Proposal visible to client only |
-| 2 | Client accepts and funds milestone 1 | Funds held by the payment provider on the platform's account (seller-of-record model per `OD-PRD-04`) |
-| 3 | Uma delivers milestone 1 with files | Delivery recorded; client review window (7 days [PROP]) starts |
-| 4 | Client approves | Funds released to Uma minus fee; next milestone funded |
-| 5 | Contract completes | Both rate; delivered work offered to Uma as evidence with issuer class of the client org if verified, else `peer_attested` by the client |
+| #   | Actor action                                          | System response                                                                                                                          |
+| --- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Uma submits proposal with price, milestones, timeline | Proposal visible to client only                                                                                                          |
+| 2   | Client accepts and funds milestone 1                  | Funds held by the payment provider on the platform's account (seller-of-record model per `OD-PRD-04`)                                    |
+| 3   | Uma delivers milestone 1 with files                   | Delivery recorded; client review window (7 days [PROP]) starts                                                                           |
+| 4   | Client approves                                       | Funds released to Uma minus fee; next milestone funded                                                                                   |
+| 5   | Contract completes                                    | Both rate; delivered work offered to Uma as evidence with issuer class of the client org if verified, else `peer_attested` by the client |
 
 - **Success outcome:** Paid milestones; new evidence.
 - **Failure branches:**
@@ -992,12 +992,12 @@ flowchart TD
 - **Trigger:** Client objects a second time.
 - **Preconditions:** Milestone funded and delivered.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Uma opens dispute with statement and evidence | Funds stay held; both parties notified |
-| 2 | Client responds within 5 days [PROP] | Case packet assembled: contract, messages, deliveries |
-| 3 | `SUP` mediates; proposes split | Either party accepts or escalates |
-| 4 | Escalated decision by `SUP` with `FIN` executing money movement | Decision with reason; funds moved; both may appeal once |
+| #   | Actor action                                                    | System response                                         |
+| --- | --------------------------------------------------------------- | ------------------------------------------------------- |
+| 1   | Uma opens dispute with statement and evidence                   | Funds stay held; both parties notified                  |
+| 2   | Client responds within 5 days [PROP]                            | Case packet assembled: contract, messages, deliveries   |
+| 3   | `SUP` mediates; proposes split                                  | Either party accepts or escalates                       |
+| 4   | Escalated decision by `SUP` with `FIN` executing money movement | Decision with reason; funds moved; both may appeal once |
 
 - **Success outcome:** Funds released according to a recorded decision.
 - **Failure branches:**
@@ -1014,13 +1014,13 @@ flowchart TD
 - **Trigger:** Email "Acme added you as a recruiter".
 - **Preconditions:** `EAD` invited Priya's email (`JRN-EAD-02`).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens invite, signs in or registers | Invite email must match a verified email on the account; if the org enforces SSO, redirected to the org IdP |
-| 2 | Accepts | `REC` grant `active` in `org:Acme`; context switcher shows "Acme — Recruiter" |
-| 3 | Sets notification preferences for new applications (instant, hourly digest, daily) | Stored per context |
-| 4 | Connects calendar | Busy times only are read (no event details) |
-| 5 | Opens the recruiter home | Empty states: "No jobs yet — create a requisition" with a checklist |
+| #   | Actor action                                                                       | System response                                                                                             |
+| --- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 1   | Opens invite, signs in or registers                                                | Invite email must match a verified email on the account; if the org enforces SSO, redirected to the org IdP |
+| 2   | Accepts                                                                            | `REC` grant `active` in `org:Acme`; context switcher shows "Acme — Recruiter"                               |
+| 3   | Sets notification preferences for new applications (instant, hourly digest, daily) | Stored per context                                                                                          |
+| 4   | Connects calendar                                                                  | Busy times only are read (no event details)                                                                 |
+| 5   | Opens the recruiter home                                                           | Empty states: "No jobs yet — create a requisition" with a checklist                                         |
 
 - **Success outcome:** Working recruiter context with calendar and notifications.
 - **Failure branches:**
@@ -1036,14 +1036,14 @@ flowchart TD
 - **Trigger:** Hiring manager asks for a "Backend Engineer II".
 - **Preconditions:** Org verified; job slots available on the plan.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Creates requisition: title, team, headcount, location, work mode, salary range, must-have and nice-to-have skills from taxonomy | Requisition `draft` |
-| 2 | Uses "Draft description" (AI, optional) | Draft labelled AI-assisted; bias-language checker flags terms; recruiter edits (`BR-XCT-041`) |
-| 3 | Submits for approval | Routed to the team's approver (`HMG` or `EAD`), never the requester (`BR-XCT-058`) |
-| 4 | Approver approves | Requisition `approved`; job draft created from it |
-| 5 | Adds screening questions, pipeline template, hiring team | Hiring team members get `t` scope on this job |
-| 6 | Publishes | Automated policy checks (prohibited content, discriminatory requirements, missing employer identity); job `published`; indexed; job slot consumed |
+| #   | Actor action                                                                                                                    | System response                                                                                                                                   |
+| --- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Creates requisition: title, team, headcount, location, work mode, salary range, must-have and nice-to-have skills from taxonomy | Requisition `draft`                                                                                                                               |
+| 2   | Uses "Draft description" (AI, optional)                                                                                         | Draft labelled AI-assisted; bias-language checker flags terms; recruiter edits (`BR-XCT-041`)                                                     |
+| 3   | Submits for approval                                                                                                            | Routed to the team's approver (`HMG` or `EAD`), never the requester (`BR-XCT-058`)                                                                |
+| 4   | Approver approves                                                                                                               | Requisition `approved`; job draft created from it                                                                                                 |
+| 5   | Adds screening questions, pipeline template, hiring team                                                                        | Hiring team members get `t` scope on this job                                                                                                     |
+| 6   | Publishes                                                                                                                       | Automated policy checks (prohibited content, discriminatory requirements, missing employer identity); job `published`; indexed; job slot consumed |
 
 - **Success outcome:** Published job with hiring team; `job.job.published`.
 - **Failure branches:**
@@ -1060,13 +1060,13 @@ flowchart TD
 - **Trigger:** 120 applications in "New".
 - **Preconditions:** On the job's hiring team.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens the stage list with "Suggested order" toggle | Suggested order with rationale per card (skills matched with rung, missing skills); default view is submission order; never labelled "shortlist" [SRC: STR-01 REV2 BR-T072] |
-| 2 | Opens a candidate | Snapshot: chosen résumé variant, evidence items with rung and issuer class, screening answers; artifacts open only within the snapshot grant |
-| 3 | Moves 15 to "Phone screen" | Stage change recorded with actor; candidate-facing status becomes `in_review` |
-| 4 | Selects 40 and clicks "Reject" | Bulk action requires a reason code and a template; confirmation states the count; each rejection is a human action recorded with the actor (`BR-XCT-021`, `BR-XCT-026`) |
-| 5 | Adds a private note | Visible only to the hiring team |
+| #   | Actor action                                       | System response                                                                                                                                                             |
+| --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens the stage list with "Suggested order" toggle | Suggested order with rationale per card (skills matched with rung, missing skills); default view is submission order; never labelled "shortlist" [SRC: STR-01 REV2 BR-T072] |
+| 2   | Opens a candidate                                  | Snapshot: chosen résumé variant, evidence items with rung and issuer class, screening answers; artifacts open only within the snapshot grant                                |
+| 3   | Moves 15 to "Phone screen"                         | Stage change recorded with actor; candidate-facing status becomes `in_review`                                                                                               |
+| 4   | Selects 40 and clicks "Reject"                     | Bulk action requires a reason code and a template; confirmation states the count; each rejection is a human action recorded with the actor (`BR-XCT-021`, `BR-XCT-026`)     |
+| 5   | Adds a private note                                | Visible only to the hiring team                                                                                                                                             |
 
 - **Success outcome:** Every applicant has a human decision or remains in review; rejected candidates are notified.
 - **Failure branches:**
@@ -1082,12 +1082,12 @@ flowchart TD
 - **Trigger:** Few qualified applicants for a niche role.
 - **Preconditions:** Org verified; outreach quota available.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Searches by skills, rung minimum, location, availability | Only profiles with live `search.discoverable` returned; summary fields only if `evidence.share_summary` live |
-| 2 | Opens a summary | Headline, skills with rung, evidence titles; no contact details, no full artifacts |
-| 3 | Sends a first-contact request with role and message | Requires `outreach.recruiter_contact`; quota decremented; message checked for spam patterns |
-| 4 | Candidate accepts (`JRN-CAN-10`) | Thread opens; candidate may apply or share more |
+| #   | Actor action                                             | System response                                                                                              |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 1   | Searches by skills, rung minimum, location, availability | Only profiles with live `search.discoverable` returned; summary fields only if `evidence.share_summary` live |
+| 2   | Opens a summary                                          | Headline, skills with rung, evidence titles; no contact details, no full artifacts                           |
+| 3   | Sends a first-contact request with role and message      | Requires `outreach.recruiter_contact`; quota decremented; message checked for spam patterns                  |
+| 4   | Candidate accepts (`JRN-CAN-10`)                         | Thread opens; candidate may apply or share more                                                              |
 
 - **Success outcome:** Consented conversation started.
 - **Failure branches:**
@@ -1128,13 +1128,13 @@ sequenceDiagram
 - **Trigger:** Candidate moved to "Onsite".
 - **Preconditions:** Panel members have calendars connected or have set manual availability.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Chooses loop template: four 45-minute interviews, two may be parallel | Template defines interview types and scorecards |
-| 2 | Selects panel members | Each gets `interviewer` grant for this loop |
-| 3 | Sends self-schedule link | System computes feasible loop slots across panel calendars in the candidate's time zone |
-| 4 | Candidate picks a slot | Holds placed, invites sent to panel and candidate with external meeting links |
-| 5 | One interviewer declines | Replacement suggested from a backup pool; candidate not disturbed unless time changes |
+| #   | Actor action                                                          | System response                                                                         |
+| --- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1   | Chooses loop template: four 45-minute interviews, two may be parallel | Template defines interview types and scorecards                                         |
+| 2   | Selects panel members                                                 | Each gets `interviewer` grant for this loop                                             |
+| 3   | Sends self-schedule link                                              | System computes feasible loop slots across panel calendars in the candidate's time zone |
+| 4   | Candidate picks a slot                                                | Holds placed, invites sent to panel and candidate with external meeting links           |
+| 5   | One interviewer declines                                              | Replacement suggested from a backup pool; candidate not disturbed unless time changes   |
 
 - **Success outcome:** Confirmed loop; every interviewer has a scorecard task.
 - **Failure branches:**
@@ -1169,12 +1169,12 @@ sequenceDiagram
 - **Trigger:** Debrief decision "Hire" (`JRN-HMG-03`).
 - **Preconditions:** Application `interviewing` with a recorded hire decision.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Drafts offer from template: title, level, start date, compensation fields, expiry | Offer `draft`; fields outside the requisition salary range flagged |
-| 2 | Submits for approval | Chain from org policy (for example hiring manager then finance approver); each approver ≠ drafter |
-| 3 | Approvers approve | Offer `approved`; out-of-range requires an extra approver |
-| 4 | Sends | Application `offer_extended`; candidate notified (`JRN-CAN-09`) |
+| #   | Actor action                                                                      | System response                                                                                   |
+| --- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 1   | Drafts offer from template: title, level, start date, compensation fields, expiry | Offer `draft`; fields outside the requisition salary range flagged                                |
+| 2   | Submits for approval                                                              | Chain from org policy (for example hiring manager then finance approver); each approver ≠ drafter |
+| 3   | Approvers approve                                                                 | Offer `approved`; out-of-range requires an extra approver                                         |
+| 4   | Sends                                                                             | Application `offer_extended`; candidate notified (`JRN-CAN-09`)                                   |
 
 - **Success outcome:** Approved offer delivered.
 - **Failure branches:**
@@ -1189,12 +1189,12 @@ sequenceDiagram
 - **Trigger:** Client Globex engaged the agency for three jobs.
 - **Preconditions:** Engagement `active`; candidate is in a conversation with Farid.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Selects candidate and client job | Candidate receives a consent request naming the client and job |
-| 2 | Candidate consents and chooses evidence | Application created at the client with source "Agency: Farid's agency" |
-| 3 | Client hiring team reviews | Farid sees stage class of his submitted candidates only |
-| 4 | Duplicate check | If the candidate already applied directly, the first valid submission owns the candidacy (`BR-XCT-057`) |
+| #   | Actor action                            | System response                                                                                         |
+| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1   | Selects candidate and client job        | Candidate receives a consent request naming the client and job                                          |
+| 2   | Candidate consents and chooses evidence | Application created at the client with source "Agency: Farid's agency"                                  |
+| 3   | Client hiring team reviews              | Farid sees stage class of his submitted candidates only                                                 |
+| 4   | Duplicate check                         | If the candidate already applied directly, the first valid submission owns the candidacy (`BR-XCT-057`) |
 
 - **Success outcome:** Consented agency submission with clear ownership.
 - **Failure branches:**
@@ -1209,12 +1209,12 @@ sequenceDiagram
 - **Trigger:** Invitation from City University placement office.
 - **Preconditions:** Org verified.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Accepts drive invitation, selects roles | Drive jobs created as drive-restricted (visible only to eligible students) |
-| 2 | Reviews applicants | Standard pipeline with drive tag; institution-issued credentials highlighted |
-| 3 | Schedules drive-day interviews | Slots within the drive window |
-| 4 | Records offers | Drive outcome updated for the `PLO` |
+| #   | Actor action                            | System response                                                              |
+| --- | --------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | Accepts drive invitation, selects roles | Drive jobs created as drive-restricted (visible only to eligible students)   |
+| 2   | Reviews applicants                      | Standard pipeline with drive tag; institution-issued credentials highlighted |
+| 3   | Schedules drive-day interviews          | Slots within the drive window                                                |
+| 4   | Records offers                          | Drive outcome updated for the `PLO`                                          |
 
 - **Success outcome:** Offers recorded against the drive.
 - **Failure branches:**
@@ -1230,11 +1230,11 @@ sequenceDiagram
 - **Trigger:** Sara opens a new requisition assigned to her team.
 - **Preconditions:** `HMG` grant on the team.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | States must-have skills with minimum rung | Stored on requisition; used in explanations, never as automatic rejection |
-| 2 | Builds a scorecard: 4 to 6 competencies with behavioral anchors | Scorecard template saved |
-| 3 | Attaches a take-home assessment from the library with `AI_RESTRICTED` mode | Assessment linked; candidates see rules before starting |
+| #   | Actor action                                                               | System response                                                           |
+| --- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 1   | States must-have skills with minimum rung                                  | Stored on requisition; used in explanations, never as automatic rejection |
+| 2   | Builds a scorecard: 4 to 6 competencies with behavioral anchors            | Scorecard template saved                                                  |
+| 3   | Attaches a take-home assessment from the library with `AI_RESTRICTED` mode | Assessment linked; candidates see rules before starting                   |
 
 - **Success outcome:** Structured evaluation defined before any interview.
 - **Failure branches:**
@@ -1248,11 +1248,11 @@ sequenceDiagram
 - **Trigger:** Interview completed.
 - **Preconditions:** `interviewer` grant on the loop.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens packet | Snapshot, assessment results, her assigned competencies |
-| 2 | Scores each competency with evidence notes | Draft autosaved |
-| 3 | Submits | Scorecard locked; others' scorecards become visible to her only now (`INT.scorecard.view_others`) |
+| #   | Actor action                               | System response                                                                                   |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| 1   | Opens packet                               | Snapshot, assessment results, her assigned competencies                                           |
+| 2   | Scores each competency with evidence notes | Draft autosaved                                                                                   |
+| 3   | Submits                                    | Scorecard locked; others' scorecards become visible to her only now (`INT.scorecard.view_others`) |
 
 - **Success outcome:** Independent scorecard submitted; `hmg` turnaround measured.
 - **Failure branches:**
@@ -1267,11 +1267,11 @@ sequenceDiagram
 - **Trigger:** All scorecards in.
 - **Preconditions:** Loop complete.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens debrief | Matrix of competencies by interviewer, evidence notes, disagreements highlighted |
-| 2 | Records decision "Hire" or "No hire" with rationale | Decision stored with actor; triggers `JRN-REC-06` or rejection flow |
-| 3 | 90 days after start [PROP], answers "Is the hire meeting expectations?" | Aggregate outcome stored for org analytics only, never shown to the hired person as a rating and never exported as their evidence (`BR-XCT-001`) |
+| #   | Actor action                                                            | System response                                                                                                                                  |
+| --- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Opens debrief                                                           | Matrix of competencies by interviewer, evidence notes, disagreements highlighted                                                                 |
+| 2   | Records decision "Hire" or "No hire" with rationale                     | Decision stored with actor; triggers `JRN-REC-06` or rejection flow                                                                              |
+| 3   | 90 days after start [PROP], answers "Is the hire meeting expectations?" | Aggregate outcome stored for org analytics only, never shown to the hired person as a rating and never exported as their evidence (`BR-XCT-001`) |
 
 - **Success outcome:** Decision with rationale; post-hire outcome feeds hiring-quality analytics.
 - **Failure branches:**
@@ -1287,12 +1287,12 @@ sequenceDiagram
 - **Trigger:** "Hire on TalentSphere".
 - **Preconditions:** Verified account.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Enters legal name, display name, website, size, country | Org `unverified`; creator becomes `org_owner` |
-| 2 | Verifies domain by a work email at the domain or a DNS TXT record | Domain `verified` on success |
-| 3 | Optionally submits registration documents | Org `pending_verification` for `PAD` review |
-| 4 | `PAD` approves (`JRN-PAD-02` pattern) | Org `verified`; "Verified employer" badge on jobs |
+| #   | Actor action                                                      | System response                                   |
+| --- | ----------------------------------------------------------------- | ------------------------------------------------- |
+| 1   | Enters legal name, display name, website, size, country           | Org `unverified`; creator becomes `org_owner`     |
+| 2   | Verifies domain by a work email at the domain or a DNS TXT record | Domain `verified` on success                      |
+| 3   | Optionally submits registration documents                         | Org `pending_verification` for `PAD` review       |
+| 4   | `PAD` approves (`JRN-PAD-02` pattern)                             | Org `verified`; "Verified employer" badge on jobs |
 
 - **Success outcome:** Verified org able to publish jobs without the "unverified" label.
 - **Failure branches:**
@@ -1308,12 +1308,12 @@ sequenceDiagram
 - **Trigger:** Team grows.
 - **Preconditions:** Org verified; plan supports SSO.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Invites emails with role (`org_admin`, `recruiter`, `hiring_manager`, `viewer`) | Invites sent; seats checked |
-| 2 | Configures SAML with IdP metadata | Test sign-in required before enabling |
-| 3 | Enables enforcement | Members must sign in via SSO in the org context; personal context unaffected |
-| 4 | Enables SCIM | Deprovisioned users lose org grants within minutes |
+| #   | Actor action                                                                    | System response                                                              |
+| --- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | Invites emails with role (`org_admin`, `recruiter`, `hiring_manager`, `viewer`) | Invites sent; seats checked                                                  |
+| 2   | Configures SAML with IdP metadata                                               | Test sign-in required before enabling                                        |
+| 3   | Enables enforcement                                                             | Members must sign in via SSO in the org context; personal context unaffected |
+| 4   | Enables SCIM                                                                    | Deprovisioned users lose org grants within minutes                           |
 
 - **Success outcome:** Members in correct roles; SSO enforced.
 - **Failure branches:**
@@ -1328,11 +1328,11 @@ sequenceDiagram
 - **Trigger:** Card declined at renewal.
 - **Preconditions:** Active subscription.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Receives "Payment failed" | Subscription `past_due`; full entitlements during grace (`OD-PRD-06`) with banner |
-| 2 | Updates card in customer portal | Retry succeeds; `active` |
-| 3 | Alternative: does nothing | Dunning stages; at exhaustion, free-tier entitlements; jobs beyond the free limit stop accepting new applications but are not deleted; data intact (`BR-XCT-045`) |
+| #   | Actor action                    | System response                                                                                                                                                   |
+| --- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Receives "Payment failed"       | Subscription `past_due`; full entitlements during grace (`OD-PRD-06`) with banner                                                                                 |
+| 2   | Updates card in customer portal | Retry succeeds; `active`                                                                                                                                          |
+| 3   | Alternative: does nothing       | Dunning stages; at exhaustion, free-tier entitlements; jobs beyond the free limit stop accepting new applications but are not deleted; data intact (`BR-XCT-045`) |
 
 - **Success outcome:** No data loss; clear status at every stage.
 - **Failure branches:**
@@ -1346,12 +1346,12 @@ sequenceDiagram
 - **Trigger:** A recruiter leaves; quarterly access-review prompt.
 - **Preconditions:** Member active.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Clicks "Remove member" | Shows owned jobs, open offers, scheduled interviews |
-| 2 | Reassigns each to a member | Ownership moved; candidates see no disruption |
-| 3 | Confirms | Org grants revoked at once; API keys created by the member stay owned by the org (`BR-XCT-003`) |
-| 4 | Runs access review | List of members, roles, last activity, MFA/SSO status; each confirmed or revoked |
+| #   | Actor action               | System response                                                                                 |
+| --- | -------------------------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Clicks "Remove member"     | Shows owned jobs, open offers, scheduled interviews                                             |
+| 2   | Reassigns each to a member | Ownership moved; candidates see no disruption                                                   |
+| 3   | Confirms                   | Org grants revoked at once; API keys created by the member stay owned by the org (`BR-XCT-003`) |
+| 4   | Runs access review         | List of members, roles, last activity, MFA/SSO status; each confirmed or revoked                |
 
 - **Success outcome:** No orphaned work; review recorded in org audit log.
 - **Failure branches:**
@@ -1366,12 +1366,12 @@ sequenceDiagram
 - **Trigger:** Org wants a public careers presence.
 - **Preconditions:** Org verified.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Edits brand page: about, values, benefits, media, open jobs feed | Draft preview; media scanned |
-| 2 | Publishes | Page public and indexed |
-| 3 | A review appears | Admin can respond publicly once per review; cannot edit, hide or learn the author's identity |
-| 4 | Reports a review as false | `TSF` reviews; review stays visible unless the policy threshold for interim hide is met (`BR-XCT-053`) |
+| #   | Actor action                                                     | System response                                                                                        |
+| --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1   | Edits brand page: about, values, benefits, media, open jobs feed | Draft preview; media scanned                                                                           |
+| 2   | Publishes                                                        | Page public and indexed                                                                                |
+| 3   | A review appears                                                 | Admin can respond publicly once per review; cannot edit, hide or learn the author's identity           |
+| 4   | Reports a review as false                                        | `TSF` reviews; review stays visible unless the policy threshold for interim hide is met (`BR-XCT-053`) |
 
 - **Success outcome:** Brand page live; reviews answered without suppression.
 - **Failure branches:**
@@ -1387,12 +1387,12 @@ sequenceDiagram
 - **Trigger:** Department signs up.
 - **Preconditions:** Verified account.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Creates institution with official domain | `pending_verification`; `PAD` review |
-| 2 | Buys or is assigned a seat licence (`OD-PRD-07`) | Seats available |
-| 3 | Creates program and cohort; uploads roster CSV (name, email, student id optional) | Validation report: duplicates, invalid emails, over-seat rows; max rows per batch [SRC: SSOT OD-21 5k] |
-| 4 | Confirms | Seats `provisioned`; invites sent (`JRN-STD-01`) |
+| #   | Actor action                                                                      | System response                                                                                        |
+| --- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1   | Creates institution with official domain                                          | `pending_verification`; `PAD` review                                                                   |
+| 2   | Buys or is assigned a seat licence (`OD-PRD-07`)                                  | Seats available                                                                                        |
+| 3   | Creates program and cohort; uploads roster CSV (name, email, student id optional) | Validation report: duplicates, invalid emails, over-seat rows; max rows per batch [SRC: SSOT OD-21 5k] |
+| 4   | Confirms                                                                          | Seats `provisioned`; invites sent (`JRN-STD-01`)                                                       |
 
 - **Success outcome:** Cohort provisioned with invites out.
 - **Failure branches:**
@@ -1407,11 +1407,11 @@ sequenceDiagram
 - **Trigger:** Accreditation report due.
 - **Preconditions:** Cohort active.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens skill coverage | Share of learners with evidence per skill, by rung, from institution-run work and shared evidence; cells below `min_cohort_k` suppressed |
-| 2 | Drills to a program | Same suppression; no learner names unless the view is institution-run course grades |
-| 3 | Exports PDF | Export carries suppression and method notes |
+| #   | Actor action         | System response                                                                                                                          |
+| --- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens skill coverage | Share of learners with evidence per skill, by rung, from institution-run work and shared evidence; cells below `min_cohort_k` suppressed |
+| 2   | Drills to a program  | Same suppression; no learner names unless the view is institution-run course grades                                                      |
+| 3   | Exports PDF          | Export carries suppression and method notes                                                                                              |
 
 - **Success outcome:** Aggregate report with no individual inference.
 - **Failure branches:**
@@ -1425,12 +1425,12 @@ sequenceDiagram
 - **Trigger:** Program completion.
 - **Preconditions:** Credential template approved.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Selects completed learners and template | Preview per learner |
-| 2 | Issues | Credentials `active`, issuer class `institution`, verification URLs |
-| 3 | Discovers a wrong name on one | Issues a corrected version; old version `superseded` with link (`BR-XCT-069`) |
-| 4 | Revokes one for academic misconduct | Reason recorded; holder notified; public status "Revoked" |
+| #   | Actor action                            | System response                                                               |
+| --- | --------------------------------------- | ----------------------------------------------------------------------------- |
+| 1   | Selects completed learners and template | Preview per learner                                                           |
+| 2   | Issues                                  | Credentials `active`, issuer class `institution`, verification URLs           |
+| 3   | Discovers a wrong name on one           | Issues a corrected version; old version `superseded` with link (`BR-XCT-069`) |
+| 4   | Revokes one for academic misconduct     | Reason recorded; holder notified; public status "Revoked"                     |
 
 - **Success outcome:** Credentials valid and correctable with history.
 - **Failure branches:**
@@ -1446,12 +1446,12 @@ sequenceDiagram
 - **Trigger:** Placement season.
 - **Preconditions:** `PLO` grant.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Creates drive: dates, eligible cohorts, criteria (program, year, credential held) | Drive `draft` |
-| 2 | Invites employers | Invitations to verified orgs (`JRN-REC-08`) |
-| 3 | Publishes to eligible students | Notifications to eligible students only |
-| 4 | Monitors | Applications per role, interviews scheduled, offers; counts only |
+| #   | Actor action                                                                      | System response                                                  |
+| --- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 1   | Creates drive: dates, eligible cohorts, criteria (program, year, credential held) | Drive `draft`                                                    |
+| 2   | Invites employers                                                                 | Invitations to verified orgs (`JRN-REC-08`)                      |
+| 3   | Publishes to eligible students                                                    | Notifications to eligible students only                          |
+| 4   | Monitors                                                                          | Applications per role, interviews scheduled, offers; counts only |
 
 - **Success outcome:** Drive with employers and applicants.
 - **Failure branches:**
@@ -1465,10 +1465,10 @@ sequenceDiagram
 - **Trigger:** End of season.
 - **Preconditions:** Drives closed.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens outcomes | Drive offers plus alumni outcomes from `alumni.share_outcomes`; suppressed below `min_cohort_k` |
-| 2 | Exports | Method notes: coverage rate (share of graduates who shared), suppressed cells |
+| #   | Actor action   | System response                                                                                 |
+| --- | -------------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Opens outcomes | Drive offers plus alumni outcomes from `alumni.share_outcomes`; suppressed below `min_cohort_k` |
+| 2   | Exports        | Method notes: coverage rate (share of graduates who shared), suppressed cells                   |
 
 - **Success outcome:** Honest report stating coverage, not a claimed placement rate for non-sharers.
 - **Failure branches:**
@@ -1484,12 +1484,12 @@ sequenceDiagram
 - **Trigger:** Leadership asks to fill roles internally first.
 - **Preconditions:** `ENT` enabled for the org.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Configures policy: internal window (10 days [PROP]), whether current manager is notified on application (default no) | Policy saved |
-| 2 | Posts internal role | Visible only to org members with the employee flag |
-| 3 | Employee applies | Application confidential to the hiring team per policy |
-| 4 | Window closes | Role may be published externally |
+| #   | Actor action                                                                                                         | System response                                        |
+| --- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 1   | Configures policy: internal window (10 days [PROP]), whether current manager is notified on application (default no) | Policy saved                                           |
+| 2   | Posts internal role                                                                                                  | Visible only to org members with the employee flag     |
+| 3   | Employee applies                                                                                                     | Application confidential to the hiring team per policy |
+| 4   | Window closes                                                                                                        | Role may be published externally                       |
 
 - **Success outcome:** Internal candidates considered first.
 - **Failure branches:**
@@ -1503,11 +1503,11 @@ sequenceDiagram
 - **Trigger:** Annual security training.
 - **Preconditions:** Course in the internal catalog.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Assigns course to departments with due date | Assignments created; employees notified |
-| 2 | Monitors completion | Counts by department; individual completion of mandated courses visible to `EXA` (lawful basis: employment obligation, `OD-PRD-20`) |
-| 3 | Syncs completions to HRIS | Via `JRN-API-01` style integration |
+| #   | Actor action                                | System response                                                                                                                     |
+| --- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Assigns course to departments with due date | Assignments created; employees notified                                                                                             |
+| 2   | Monitors completion                         | Counts by department; individual completion of mandated courses visible to `EXA` (lawful basis: employment obligation, `OD-PRD-20`) |
+| 3   | Syncs completions to HRIS                   | Via `JRN-API-01` style integration                                                                                                  |
 
 - **Success outcome:** Completion tracked and synced.
 - **Failure branches:**
@@ -1521,11 +1521,11 @@ sequenceDiagram
 - **Trigger:** Workforce planning.
 - **Preconditions:** Employees shared skills to the org (opt-in).
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens inventory | Aggregate skill counts by department and rung; suppressed below `min_cohort_k`; coverage stated |
-| 2 | Compares with target skills | Gap list with learning suggestions |
-| 3 | Exports | No individual names |
+| #   | Actor action                | System response                                                                                 |
+| --- | --------------------------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Opens inventory             | Aggregate skill counts by department and rung; suppressed below `min_cohort_k`; coverage stated |
+| 2   | Compares with target skills | Gap list with learning suggestions                                                              |
+| 3   | Exports                     | No individual names                                                                             |
 
 - **Success outcome:** Aggregate gap report.
 - **Failure branches:**
@@ -1541,12 +1541,12 @@ sequenceDiagram
 - **Trigger:** Queue item "Job post: suspected scam" severity high.
 - **Preconditions:** Staff account with `MOD`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens item | Content, reporter count, reporter reliability, prior actions on the account, policy clauses suggested |
-| 2 | Chooses action: no violation, label, restrict, take down, suspend account | Reason code required |
-| 3 | Confirms take down | Content hidden; copy preserved under hold (`BR-XCT-054`); applicants to a scam job notified with safety advice |
-| 4 | Notice sent to the poster with appeal path | Template by reason code |
+| #   | Actor action                                                              | System response                                                                                                |
+| --- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1   | Opens item                                                                | Content, reporter count, reporter reliability, prior actions on the account, policy clauses suggested          |
+| 2   | Chooses action: no violation, label, restrict, take down, suspend account | Reason code required                                                                                           |
+| 3   | Confirms take down                                                        | Content hidden; copy preserved under hold (`BR-XCT-054`); applicants to a scam job notified with safety advice |
+| 4   | Notice sent to the poster with appeal path                                | Template by reason code                                                                                        |
 
 - **Success outcome:** Action with reason, notice and appeal path; time-to-action recorded.
 - **Failure branches:**
@@ -1561,10 +1561,10 @@ sequenceDiagram
 - **Trigger:** Appeal filed (`JRN-CAN-21`).
 - **Preconditions:** Different moderator from the original.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens appeal | Original decision, appeal statement, new evidence |
-| 2 | Upholds or overturns with reason | Overturn restores content and annotates the account record |
+| #   | Actor action                     | System response                                            |
+| --- | -------------------------------- | ---------------------------------------------------------- |
+| 1   | Opens appeal                     | Original decision, appeal statement, new evidence          |
+| 2   | Upholds or overturns with reason | Overturn restores content and annotates the account record |
 
 - **Success outcome:** Appeal decided; overturn rate tracked.
 - **Failure branches:**
@@ -1578,11 +1578,11 @@ sequenceDiagram
 - **Trigger:** Attempt held "Under review" (`JRN-CAN-06` F3).
 - **Preconditions:** Flag with signals.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens case | Signals with base rates and uncertainty; no single signal shown as proof |
-| 2 | Requests explanation from the candidate (optional) | Candidate responds within 7 days [PROP] |
-| 3 | Decides: clear, invalidate attempt, or restrict assessments | Sanctions beyond invalidation need a second reviewer |
+| #   | Actor action                                                | System response                                                          |
+| --- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1   | Opens case                                                  | Signals with base rates and uncertainty; no single signal shown as proof |
+| 2   | Requests explanation from the candidate (optional)          | Candidate responds within 7 days [PROP]                                  |
+| 3   | Decides: clear, invalidate attempt, or restrict assessments | Sanctions beyond invalidation need a second reviewer                     |
 
 - **Success outcome:** Fair decision; cleared attempts release their credential.
 - **Failure branches:**
@@ -1598,12 +1598,12 @@ sequenceDiagram
 - **Trigger:** Ticket "My application shows submitted twice".
 - **Preconditions:** Staff account with `SUP`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens ticket, clicks "Open support view" | Requires reason code and ticket id; scope: this user's applications only; expiry 60 minutes [PROP] |
-| 2 | Inspects | Read-only view; every read audited; user's access log shows a support access entry |
-| 3 | Finds a display duplicate (one record) | Files a defect; replies to user |
-| 4 | Session ends | Access revoked automatically |
+| #   | Actor action                             | System response                                                                                    |
+| --- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 1   | Opens ticket, clicks "Open support view" | Requires reason code and ticket id; scope: this user's applications only; expiry 60 minutes [PROP] |
+| 2   | Inspects                                 | Read-only view; every read audited; user's access log shows a support access entry                 |
+| 3   | Finds a display duplicate (one record)   | Files a defect; replies to user                                                                    |
+| 4   | Session ends                             | Access revoked automatically                                                                       |
 
 - **Success outcome:** Resolved without editing user data or impersonating.
 - **Failure branches:**
@@ -1618,11 +1618,11 @@ sequenceDiagram
 - **Trigger:** Recovery request from `JRN-CAN-13`.
 - **Preconditions:** Request open.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Follows checklist: control of registered email, recent activity facts, device history | Score of proofs recorded |
-| 2 | Approves recovery | 24-hour delayed reset with notices to all known channels |
-| 3 | Insufficient proofs | Refuses with the reason category and next options |
+| #   | Actor action                                                                          | System response                                          |
+| --- | ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| 1   | Follows checklist: control of registered email, recent activity facts, device history | Score of proofs recorded                                 |
+| 2   | Approves recovery                                                                     | 24-hour delayed reset with notices to all known channels |
+| 3   | Insufficient proofs                                                                   | Refuses with the reason category and next options        |
 
 - **Success outcome:** Recovery granted only with sufficient proof.
 - **Failure branches:**
@@ -1638,12 +1638,12 @@ sequenceDiagram
 - **Trigger:** Refund request from an org; separately a chargeback notice.
 - **Preconditions:** Payment record exists.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens refund request | Purchase, usage, policy rule result |
-| 2 | Approves | Refund via processor; entitlement change only when webhook confirms; above threshold a second `FIN` approves |
-| 3 | Opens chargeback | Evidence package assembled from delivery and access logs |
-| 4 | Submits response before deadline | Outcome recorded on reconciliation |
+| #   | Actor action                     | System response                                                                                              |
+| --- | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 1   | Opens refund request             | Purchase, usage, policy rule result                                                                          |
+| 2   | Approves                         | Refund via processor; entitlement change only when webhook confirms; above threshold a second `FIN` approves |
+| 3   | Opens chargeback                 | Evidence package assembled from delivery and access logs                                                     |
+| 4   | Submits response before deadline | Outcome recorded on reconciliation                                                                           |
 
 - **Success outcome:** Refund issued by rule; chargeback answered in time.
 - **Failure branches:**
@@ -1657,12 +1657,12 @@ sequenceDiagram
 - **Trigger:** Period close.
 - **Preconditions:** Period ended.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Opens reconciliation | Processor records vs internal ledger; breaks listed |
-| 2 | Resolves breaks | Each with reason |
-| 3 | Creates payout batch | Payees `payout_ready`; held funds for open disputes excluded |
-| 4 | Second `FIN` approves | Batch sent; payees notified |
+| #   | Actor action          | System response                                              |
+| --- | --------------------- | ------------------------------------------------------------ |
+| 1   | Opens reconciliation  | Processor records vs internal ledger; breaks listed          |
+| 2   | Resolves breaks       | Each with reason                                             |
+| 3   | Creates payout batch  | Payees `payout_ready`; held funds for open disputes excluded |
+| 4   | Second `FIN` approves | Batch sent; payees notified                                  |
 
 - **Success outcome:** Closed period, approved payouts.
 - **Failure branches:**
@@ -1678,11 +1678,11 @@ sequenceDiagram
 - **Trigger:** New scheduling feature ready.
 - **Preconditions:** Flag exists.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Sets exposure to internal accounts, then a percentage | Change requires a second `PAD` approval in production |
-| 2 | Watches error and guardrail metrics | Dashboard per flag |
-| 3 | Errors spike → kills the flag | Kill is one-person and immediate; clients pick it up on next request |
+| #   | Actor action                                          | System response                                                      |
+| --- | ----------------------------------------------------- | -------------------------------------------------------------------- |
+| 1   | Sets exposure to internal accounts, then a percentage | Change requires a second `PAD` approval in production                |
+| 2   | Watches error and guardrail metrics                   | Dashboard per flag                                                   |
+| 3   | Errors spike → kills the flag                         | Kill is one-person and immediate; clients pick it up on next request |
 
 - **Success outcome:** Controlled rollout; reversible.
 - **Failure branches:**
@@ -1696,10 +1696,10 @@ sequenceDiagram
 - **Trigger:** Two skills should merge ("ReactJS" and "React").
 - **Preconditions:** Both skills exist.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Proposes merge | Impact preview: profiles, jobs, courses, evidence affected |
-| 2 | Applies | Old id becomes an alias; references remapped by background job; no evidence rung changes |
+| #   | Actor action   | System response                                                                          |
+| --- | -------------- | ---------------------------------------------------------------------------------------- |
+| 1   | Proposes merge | Impact preview: profiles, jobs, courses, evidence affected                               |
+| 2   | Applies        | Old id becomes an alias; references remapped by background job; no evidence rung changes |
 
 - **Success outcome:** Taxonomy consistent; search and matching use the merged skill.
 - **Failure branches:**
@@ -1713,10 +1713,10 @@ sequenceDiagram
 - **Trigger:** New moderator hired.
 - **Preconditions:** Staff account created.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | `PAD` requests `MOD` grant with training record | Request pending |
-| 2 | `SAD` approves | Grant active; review date set (monthly) |
+| #   | Actor action                                    | System response                         |
+| --- | ----------------------------------------------- | --------------------------------------- |
+| 1   | `PAD` requests `MOD` grant with training record | Request pending                         |
+| 2   | `SAD` approves                                  | Grant active; review date set (monthly) |
 
 - **Success outcome:** Privileged grant with two approvers.
 - **Failure branches:**
@@ -1732,11 +1732,11 @@ sequenceDiagram
 - **Trigger:** Incident: suspected account takeover ring.
 - **Preconditions:** Incident id open.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Requests break-glass for named accounts | Second `SAD` approves; session 60 minutes [PROP] |
-| 2 | Investigates | All access audited |
-| 3 | Session closes | Post-incident review scheduled; notices decided per 04 §7 |
+| #   | Actor action                            | System response                                           |
+| --- | --------------------------------------- | --------------------------------------------------------- |
+| 1   | Requests break-glass for named accounts | Second `SAD` approves; session 60 minutes [PROP]          |
+| 2   | Investigates                            | All access audited                                        |
+| 3   | Session closes                          | Post-incident review scheduled; notices decided per 04 §7 |
 
 - **Success outcome:** Fast, accountable access.
 - **Failure branches:**
@@ -1750,12 +1750,12 @@ sequenceDiagram
 - **Trigger:** Canary test or report shows org B data in org A view.
 - **Preconditions:** Alert.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Declares critical incident | Affected feature flag killed |
-| 2 | Scopes exposure from audit logs | List of records and viewers |
-| 3 | Notifies affected tenants and people per legal requirements | Templates with what, when, what we did |
-| 4 | Records in incident register | `grd.cross_tenant_exposures` incremented |
+| #   | Actor action                                                | System response                          |
+| --- | ----------------------------------------------------------- | ---------------------------------------- |
+| 1   | Declares critical incident                                  | Affected feature flag killed             |
+| 2   | Scopes exposure from audit logs                             | List of records and viewers              |
+| 3   | Notifies affected tenants and people per legal requirements | Templates with what, when, what we did   |
+| 4   | Records in incident register                                | `grd.cross_tenant_exposures` incremented |
 
 - **Success outcome:** Exposure contained and disclosed.
 - **Failure branches:**
@@ -1771,11 +1771,11 @@ sequenceDiagram
 - **Trigger:** Org connects its external ATS.
 - **Preconditions:** `EAD` created an OAuth client with scopes `jobs.write`, `applications.read`.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Partner pushes job with external id | Upsert by external id; idempotent |
-| 2 | Partner reads applications | Only for the org's jobs and only within the snapshot grant; contact only if shared |
-| 3 | Partner updates stage | Recorded as a human action only if the payload names the acting user; otherwise refused (`BR-XCT-021`) |
+| #   | Actor action                        | System response                                                                                        |
+| --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1   | Partner pushes job with external id | Upsert by external id; idempotent                                                                      |
+| 2   | Partner reads applications          | Only for the org's jobs and only within the snapshot grant; contact only if shared                     |
+| 3   | Partner updates stage               | Recorded as a human action only if the payload names the acting user; otherwise refused (`BR-XCT-021`) |
 
 - **Success outcome:** Two-way sync without consent leaks.
 - **Failure branches:**
@@ -1790,12 +1790,12 @@ sequenceDiagram
 - **Trigger:** Partner endpoint down.
 - **Preconditions:** Webhook subscription active.
 
-| # | Actor action | System response |
-|---|---|---|
-| 1 | Event emitted | Signed delivery attempted |
-| 2 | Endpoint returns 500 | Exponential backoff retries over 24 hours [PROP] |
-| 3 | Retries exhausted | Subscription marked failing; `EAD` notified |
-| 4 | `EAD` replays from the delivery log | Deliveries resent with original event ids |
+| #   | Actor action                        | System response                                  |
+| --- | ----------------------------------- | ------------------------------------------------ |
+| 1   | Event emitted                       | Signed delivery attempted                        |
+| 2   | Endpoint returns 500                | Exponential backoff retries over 24 hours [PROP] |
+| 3   | Retries exhausted                   | Subscription marked failing; `EAD` notified      |
+| 4   | `EAD` replays from the delivery log | Deliveries resent with original event ids        |
 
 - **Success outcome:** No silent data loss.
 - **Failure branches:**
@@ -1806,38 +1806,38 @@ sequenceDiagram
 
 ### 19.1 Modules touched
 
-| Module | Journeys |
-|---|---|
-| IDN | GUE-01, CAN-01, CAN-12, CAN-13, STD-01, STD-04, REC-01, EAD-01, EAD-02, EAD-04, IAD-01, SUP-01, SUP-02, PAD-03, SAD-01 |
-| SET | GUE-01, CAN-01, CAN-02, CAN-11, CAN-12, STD-01, STD-04, REC-04, REC-07, PLO-02, EXA-01, SAD-01, API-01 |
-| NTF | Most journeys; notably CAN-01, CAN-08, REC-02, MOD-01, SAD-02 |
-| REP | CAN-05, CAN-22 |
-| PRF | GUE-01, CAN-02, CAN-04, CAN-09, CAN-17, FRL-01, MNT-01 |
-| EVD | GUE-02, GUE-03, CAN-03, CAN-05, CAN-06, CAN-09, CAN-14, INS-03, IAD-03, HMG-03 |
-| BGV | GUE-03, CAN-03, CAN-20, INS-01, EAD-01 |
-| SRC | GUE-01, GUE-04, CAN-04, CAN-07, REC-04, PAD-02 |
-| LRN | GUE-04, CAN-05, STD-02, INS-02, EXA-02 |
-| STU | INS-01, INS-02 |
-| ASM | CAN-06, STD-02, INS-03, HMG-01, MOD-03 |
-| JOB | GUE-01, CAN-07, CAN-09, REC-02, REC-03, STD-03, API-01 |
-| ATS | CAN-07, CAN-08, REC-02, REC-03, REC-06, HMG-03, API-01 |
-| INT | CAN-08, REC-05, HMG-02, MNT-01 |
-| EMP | EAD-01 to EAD-05, REC-01, REC-07 |
-| NET | CAN-15, CAN-22 |
-| MSG | CAN-08, CAN-10, REC-04, MNT-02, FRL-02 |
-| AIC | CAN-04, CAN-07, CAN-17, REC-02, REC-03 |
-| TSF | GUE-03, CAN-14, CAN-21, MOD-01 to MOD-03, EAD-05 |
-| INS | STD-01 to STD-04, IAD-01 to IAD-03, PLO-01, PLO-02, REC-08 |
-| BIL | CAN-16, EAD-03, FIN-01, FIN-02, MNT-03, FRL-02 |
-| MEN | MNT-01 to MNT-03 |
-| GIG | FRL-01 to FRL-03 |
-| EVT | CAN-22 |
-| MKT | CAN-04, CAN-18, EXA-03 |
-| ENT | EXA-01 to EXA-03 |
-| ANL | CAN-01, INS-04, IAD-02, PLO-02, PAD-01 |
-| ADM | CAN-13, SUP-01, SUP-02, PAD-01 to PAD-03, SAD-01, SAD-02 |
-| PWA | GUE-01, CAN-05, CAN-19, PAD-01 |
-| PLT | CAN-02, REC-05, API-01, API-02, EXA-02 |
+| Module | Journeys                                                                                                               |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| IDN    | GUE-01, CAN-01, CAN-12, CAN-13, STD-01, STD-04, REC-01, EAD-01, EAD-02, EAD-04, IAD-01, SUP-01, SUP-02, PAD-03, SAD-01 |
+| SET    | GUE-01, CAN-01, CAN-02, CAN-11, CAN-12, STD-01, STD-04, REC-04, REC-07, PLO-02, EXA-01, SAD-01, API-01                 |
+| NTF    | Most journeys; notably CAN-01, CAN-08, REC-02, MOD-01, SAD-02                                                          |
+| REP    | CAN-05, CAN-22                                                                                                         |
+| PRF    | GUE-01, CAN-02, CAN-04, CAN-09, CAN-17, FRL-01, MNT-01                                                                 |
+| EVD    | GUE-02, GUE-03, CAN-03, CAN-05, CAN-06, CAN-09, CAN-14, INS-03, IAD-03, HMG-03                                         |
+| BGV    | GUE-03, CAN-03, CAN-20, INS-01, EAD-01                                                                                 |
+| SRC    | GUE-01, GUE-04, CAN-04, CAN-07, REC-04, PAD-02                                                                         |
+| LRN    | GUE-04, CAN-05, STD-02, INS-02, EXA-02                                                                                 |
+| STU    | INS-01, INS-02                                                                                                         |
+| ASM    | CAN-06, STD-02, INS-03, HMG-01, MOD-03                                                                                 |
+| JOB    | GUE-01, CAN-07, CAN-09, REC-02, REC-03, STD-03, API-01                                                                 |
+| ATS    | CAN-07, CAN-08, REC-02, REC-03, REC-06, HMG-03, API-01                                                                 |
+| INT    | CAN-08, REC-05, HMG-02, MNT-01                                                                                         |
+| EMP    | EAD-01 to EAD-05, REC-01, REC-07                                                                                       |
+| NET    | CAN-15, CAN-22                                                                                                         |
+| MSG    | CAN-08, CAN-10, REC-04, MNT-02, FRL-02                                                                                 |
+| AIC    | CAN-04, CAN-07, CAN-17, REC-02, REC-03                                                                                 |
+| TSF    | GUE-03, CAN-14, CAN-21, MOD-01 to MOD-03, EAD-05                                                                       |
+| INS    | STD-01 to STD-04, IAD-01 to IAD-03, PLO-01, PLO-02, REC-08                                                             |
+| BIL    | CAN-16, EAD-03, FIN-01, FIN-02, MNT-03, FRL-02                                                                         |
+| MEN    | MNT-01 to MNT-03                                                                                                       |
+| GIG    | FRL-01 to FRL-03                                                                                                       |
+| EVT    | CAN-22                                                                                                                 |
+| MKT    | CAN-04, CAN-18, EXA-03                                                                                                 |
+| ENT    | EXA-01 to EXA-03                                                                                                       |
+| ANL    | CAN-01, INS-04, IAD-02, PLO-02, PAD-01                                                                                 |
+| ADM    | CAN-13, SUP-01, SUP-02, PAD-01 to PAD-03, SAD-01, SAD-02                                                               |
+| PWA    | GUE-01, CAN-05, CAN-19, PAD-01                                                                                         |
+| PLT    | CAN-02, REC-05, API-01, API-02, EXA-02                                                                                 |
 
 All 30 modules are touched by at least one journey.
 
@@ -1847,28 +1847,28 @@ Sequence diagrams: `JRN-CAN-07`, `JRN-CAN-12`, `JRN-STD-04`, `JRN-REC-04`, `JRN-
 
 ## 20. Legacy journey mapping
 
-| Legacy | New journeys |
-|---|---|
-| J-01 Learn → Prove → Showcase | CAN-05, CAN-06, CAN-02 |
-| J-02 Apply → Track → Hire | CAN-07, CAN-08, CAN-09 |
-| J-03 Post → Source → Hire | REC-02 to REC-06 |
-| J-04 Org setup | EAD-01, EAD-02 |
-| J-05 Referral | CAN-15 |
-| J-06, J-26 Career path, switcher | CAN-04 |
-| J-07, J-13, J-18 Creator | INS-01, INS-02 (monetization gated `OD-PRD-04`) |
-| J-08 Mentor | MNT-01 to MNT-03 |
-| J-09, J-12 Institution, graduation | PLO-01, PLO-02, STD-03, STD-04 |
-| J-10 Agency | REC-07 |
-| J-11 Extension | CAN-19 (extension sync conflict `OD-PRD-36`) |
-| J-14 Procurement | IAD-01 |
-| J-15 Faculty | INS-04 |
-| J-16, J-28 Corporate L&D, skills analyst | EXA-02, EXA-03 |
-| J-17 LinkedIn migration | CAN-02 |
-| J-19, J-20 Self-paced learner, path | GUE-04, CAN-05 |
-| J-21 Contestant | CAN-06, CAN-22 |
-| J-22 Researcher | CAN-18, EAD-05 |
-| J-23 Author, newsletter | Not mapped: community content gated `OD-PRD-16` |
-| J-24 Reviewer | EAD-05 (`OD-PRD-17`) |
-| J-25 Peer reviewer | STD-02 |
-| J-27 Hiring manager | HMG-01 to HMG-03 |
-| UJ-01 to UJ-20 (target blueprint) | Covered by GUE-01, CAN-01 to CAN-03, CAN-05 to CAN-13, REC-01, REC-03, REC-04, HMG-02, EAD-02, INS-02, IAD-02, GUE-03, SUP-01, MOD-01, PAD-01 |
+| Legacy                                   | New journeys                                                                                                                                  |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| J-01 Learn → Prove → Showcase            | CAN-05, CAN-06, CAN-02                                                                                                                        |
+| J-02 Apply → Track → Hire                | CAN-07, CAN-08, CAN-09                                                                                                                        |
+| J-03 Post → Source → Hire                | REC-02 to REC-06                                                                                                                              |
+| J-04 Org setup                           | EAD-01, EAD-02                                                                                                                                |
+| J-05 Referral                            | CAN-15                                                                                                                                        |
+| J-06, J-26 Career path, switcher         | CAN-04                                                                                                                                        |
+| J-07, J-13, J-18 Creator                 | INS-01, INS-02 (monetization gated `OD-PRD-04`)                                                                                               |
+| J-08 Mentor                              | MNT-01 to MNT-03                                                                                                                              |
+| J-09, J-12 Institution, graduation       | PLO-01, PLO-02, STD-03, STD-04                                                                                                                |
+| J-10 Agency                              | REC-07                                                                                                                                        |
+| J-11 Extension                           | CAN-19 (extension sync conflict `OD-PRD-36`)                                                                                                  |
+| J-14 Procurement                         | IAD-01                                                                                                                                        |
+| J-15 Faculty                             | INS-04                                                                                                                                        |
+| J-16, J-28 Corporate L&D, skills analyst | EXA-02, EXA-03                                                                                                                                |
+| J-17 LinkedIn migration                  | CAN-02                                                                                                                                        |
+| J-19, J-20 Self-paced learner, path      | GUE-04, CAN-05                                                                                                                                |
+| J-21 Contestant                          | CAN-06, CAN-22                                                                                                                                |
+| J-22 Researcher                          | CAN-18, EAD-05                                                                                                                                |
+| J-23 Author, newsletter                  | Not mapped: community content gated `OD-PRD-16`                                                                                               |
+| J-24 Reviewer                            | EAD-05 (`OD-PRD-17`)                                                                                                                          |
+| J-25 Peer reviewer                       | STD-02                                                                                                                                        |
+| J-27 Hiring manager                      | HMG-01 to HMG-03                                                                                                                              |
+| UJ-01 to UJ-20 (target blueprint)        | Covered by GUE-01, CAN-01 to CAN-03, CAN-05 to CAN-13, REC-01, REC-03, REC-04, HMG-02, EAD-02, INS-02, IAD-02, GUE-03, SUP-01, MOD-01, PAD-01 |

@@ -2,7 +2,7 @@
 
 # Mind map: Institutions and commercial
 
-Every module, sub-module and feature in this domain (65 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (66 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -48,6 +48,7 @@ mindmap
         INS-030 Parent or guardian consent for minors
         INS-031 FERPA-style education record handling
         INS-032 Retention, data export and institution
+        INS-033 Scholarship and funding discovery
     BIL Billing, Plans Entitlements
       Plans and entitlements
         BIL-001 Plan catalogue and versioned price book

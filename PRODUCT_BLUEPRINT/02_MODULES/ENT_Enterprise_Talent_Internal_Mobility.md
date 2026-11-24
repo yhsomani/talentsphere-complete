@@ -18,14 +18,14 @@ ENT gives an employer that already uses TalentSphere a second audience: its own 
 
 ### 1.3 Scope
 
-| In scope | Out of scope | Owned by ENT | Consumed from other modules |
-|---|---|---|---|
-| Enterprise workspace, SSO, SCIM, HRIS read sync | Payroll, compensation administration, benefits, leave, attendance, time tracking, performance ratings, disciplinary records [SRC: SSOT §4.2] | Enterprise workspace, members, internal postings and applications, skills inventory, learning assignments, compliance requirements, succession plans | Employer organization and verification (`EMP` planned), entitlements (`BIL` planned) |
-| Employee skills inventory and org skills map | A generic HRIS or applicant tracking replacement | Enterprise policies, access logs | Course catalogue and learning delivery (`LRN` planned) |
-| Internal job board, internal applications, internal gigs | External hiring pipeline (`ATS` planned owns it; ENT reuses stage handling where noted) | Internal mobility pipeline for internal postings | Taxonomy, roles, career paths (`MKT`) |
-| L&D assignment, compliance tracking, learning requests | Content authoring (`STU` planned) | Learning assignments, compliance requirements, approvals | Evidence and credentials (`EVD` planned), identity (`IDN` planned), consent (`SET` planned) |
-| Talent review and succession (narrow), manager workspace | Performance management and review forms | Talent review cycles, succession slates | Notifications (`NTF` planned), analytics (`ANL`) |
-| Privacy boundary, offboarding, audit log, regional controls | Employee surveillance or productivity monitoring | Consent and link records, regional policy flags | Moderation and support (`TSF`, `ADM` planned) |
+| In scope                                                    | Out of scope                                                                                                                                 | Owned by ENT                                                                                                                                         | Consumed from other modules                                                                 |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Enterprise workspace, SSO, SCIM, HRIS read sync             | Payroll, compensation administration, benefits, leave, attendance, time tracking, performance ratings, disciplinary records [SRC: SSOT §4.2] | Enterprise workspace, members, internal postings and applications, skills inventory, learning assignments, compliance requirements, succession plans | Employer organization and verification (`EMP` planned), entitlements (`BIL` planned)        |
+| Employee skills inventory and org skills map                | A generic HRIS or applicant tracking replacement                                                                                             | Enterprise policies, access logs                                                                                                                     | Course catalogue and learning delivery (`LRN` planned)                                      |
+| Internal job board, internal applications, internal gigs    | External hiring pipeline (`ATS` planned owns it; ENT reuses stage handling where noted)                                                      | Internal mobility pipeline for internal postings                                                                                                     | Taxonomy, roles, career paths (`MKT`)                                                       |
+| L&D assignment, compliance tracking, learning requests      | Content authoring (`STU` planned)                                                                                                            | Learning assignments, compliance requirements, approvals                                                                                             | Evidence and credentials (`EVD` planned), identity (`IDN` planned), consent (`SET` planned) |
+| Talent review and succession (narrow), manager workspace    | Performance management and review forms                                                                                                      | Talent review cycles, succession slates                                                                                                              | Notifications (`NTF` planned), analytics (`ANL`)                                            |
+| Privacy boundary, offboarding, audit log, regional controls | Employee surveillance or productivity monitoring                                                                                             | Consent and link records, regional policy flags                                                                                                      | Moderation and support (`TSF`, `ADM` planned)                                               |
 
 ### 1.4 Boundary note on the SSOT non-goal
 
@@ -37,34 +37,34 @@ Enterprise-scoped roles are assigned inside an enterprise workspace. Canonical c
 
 Legend: C create, R read, U update, D delete, A approve, X execute, — none. "Own" = employee's own data; "Report" = direct reports.
 
-| Capability | CAN (employee) | HMG (manager) | REC (internal) | EXA (L&D/talent admin) | EAD | PAD |
-|---|---|---|---|---|---|---|
-| Configure workspace, SSO, SCIM, HRIS | — | — | — | CRUD (dual control) | A | support access with consent |
-| View own enterprise record and access log | R | R own | R own | R own | R own | — |
-| Skills inventory | CRUD own | R/endorse Report (visibility rules) | R aggregate | R aggregate + individual for admins with purpose | — | — |
-| Internal job board: browse and apply | R/C apply | R | R | R | — | — |
-| Internal posting: create and manage | — | C (own team) | CRUD | CRUD | — | — |
-| Internal applications: view | R own | R only post-disclosure | R for owned postings | R for owned postings | — | — |
-| Learning assignments | R own, X complete | C/R for Report | — | CRUD | — | — |
-| Compliance requirements | R own | R Report status | — | CRUD, waive | — | — |
-| Learning requests | C own | A for Report | — | R, A if no manager | — | — |
-| Talent review and succession | R own record (per policy) | C nominate, R own team | — | CRUD, calibrate | R summary | — |
-| Manager workspace | — | R/X | — | R | — | — |
-| Reports and exports | — | R team (≥ threshold) | R postings metrics | R/X (purpose-bound) | R summary | R platform aggregates |
-| Regional policy and works-council toggles | — | — | — | CRUD | A | — |
+| Capability                                | CAN (employee)            | HMG (manager)                       | REC (internal)       | EXA (L&D/talent admin)                           | EAD       | PAD                         |
+| ----------------------------------------- | ------------------------- | ----------------------------------- | -------------------- | ------------------------------------------------ | --------- | --------------------------- |
+| Configure workspace, SSO, SCIM, HRIS      | —                         | —                                   | —                    | CRUD (dual control)                              | A         | support access with consent |
+| View own enterprise record and access log | R                         | R own                               | R own                | R own                                            | R own     | —                           |
+| Skills inventory                          | CRUD own                  | R/endorse Report (visibility rules) | R aggregate          | R aggregate + individual for admins with purpose | —         | —                           |
+| Internal job board: browse and apply      | R/C apply                 | R                                   | R                    | R                                                | —         | —                           |
+| Internal posting: create and manage       | —                         | C (own team)                        | CRUD                 | CRUD                                             | —         | —                           |
+| Internal applications: view               | R own                     | R only post-disclosure              | R for owned postings | R for owned postings                             | —         | —                           |
+| Learning assignments                      | R own, X complete         | C/R for Report                      | —                    | CRUD                                             | —         | —                           |
+| Compliance requirements                   | R own                     | R Report status                     | —                    | CRUD, waive                                      | —         | —                           |
+| Learning requests                         | C own                     | A for Report                        | —                    | R, A if no manager                               | —         | —                           |
+| Talent review and succession              | R own record (per policy) | C nominate, R own team              | —                    | CRUD, calibrate                                  | R summary | —                           |
+| Manager workspace                         | —                         | R/X                                 | —                    | R                                                | —         | —                           |
+| Reports and exports                       | —                         | R team (≥ threshold)                | R postings metrics   | R/X (purpose-bound)                              | R summary | R platform aggregates       |
+| Regional policy and works-council toggles | —                         | —                                   | —                    | CRUD                                             | A         | —                           |
 
 Service principal `API`: SCIM client and HRIS connector act under `API` with scoped, rotatable credentials.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Enterprise workspace and identity integration | FR-ENT-001 to 006 |
-| B | Skills inventory and job architecture | FR-ENT-007 to 010 |
-| C | Internal mobility | FR-ENT-011 to 017 |
-| D | Learning and development | FR-ENT-018 to 023 |
-| E | Talent review, succession and manager workspace | FR-ENT-024 to 027 |
-| F | Privacy, governance and reporting | FR-ENT-028 to 032 |
+| Code | Sub-module                                      | Features          |
+| ---- | ----------------------------------------------- | ----------------- |
+| A    | Enterprise workspace and identity integration   | FR-ENT-001 to 006 |
+| B    | Skills inventory and job architecture           | FR-ENT-007 to 010 |
+| C    | Internal mobility                               | FR-ENT-011 to 017 |
+| D    | Learning and development                        | FR-ENT-018 to 023 |
+| E    | Talent review, succession and manager workspace | FR-ENT-024 to 027 |
+| F    | Privacy, governance and reporting               | FR-ENT-028 to 032 |
 
 ## 4. Feature specifications
 
@@ -74,7 +74,7 @@ Service principal `API`: SCIM client and HRIS connector act under `API` with sco
 
 - **Sub-module:** A Enterprise workspace and identity integration
 - **Priority / tier:** Must · R6
-- **Source:** [PROP]; relates [SRC: SSOT §7.1 F-161, F-61 employer organization]
+- **Source:** [PROP]; relates [SRC: SSOT §7.1 F-161; employer organization concept, the legacy F-61 label is Premium Candidate Tier and is not cited here]
 - **Purpose and outcome:** A verified employer with an enterprise entitlement creates its enterprise workspace and invites admins. Success: an `active` workspace with at least two admins and baseline policies.
 - **Roles and permissions:** `EAD: create` · `EXA: configure` · `PAD: suspend`
 - **Preconditions and entry points:** Employer org verified (`EMP` planned) and enterprise entitlement active (`BIL` planned); entry from the employer console "Enterprise".
@@ -882,40 +882,40 @@ Service principal `API`: SCIM client and HRIS connector act under `API` with sco
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-ENT-001 | Enterprise features require a verified employer organization and an active enterprise entitlement; without either, no enterprise data is created or readable. | Commercial and trust gate. | Workspace service, entitlement check | [PROP] |
-| BR-ENT-002 | ENT never stores or processes payroll, compensation, benefits, performance ratings, disciplinary or grievance records, leave, attendance or time-tracking data. HRIS import allow-lists, forms and free-text scanning enforce a blocklist. | Stays inside the SSOT non-goal on generic HR/payroll. | Import allow-list, schema, text scanner | [SRC: SSOT §4.2]; [DER] |
-| BR-ENT-003 | A person's personal TalentSphere account belongs to the person. The enterprise sees only an enterprise-scoped projection: HRIS attributes, the enterprise skills inventory, assigned learning, and data the person has explicitly shared. | Privacy boundary between employee and employer. | Projection service, authz | [DER] |
-| BR-ENT-004 | HRIS-sourced attributes (org unit, manager, job profile, status) are read-only in ENT; the HRIS is the source of truth; ENT writes nothing back except an optional transfer request message. | Avoids a shadow HRIS. | Sync service | [PROP] |
-| BR-ENT-005 | Skills data reaches the enterprise only through the enterprise inventory, with per-entry visibility choices; personal-profile evidence is visible only if the employee shares it per skill; aggregate use excludes employees who hid entries. | Consent and control. | Inventory authz | [PROP] (`OD-ENT-05`) |
-| BR-ENT-006 | A manager endorsement or self-attested step is labelled as such and is never presented as verified evidence. | Evidence honesty. | UI templates, API labels | [SRC: SSOT §6.1] |
-| BR-ENT-007 | Internal eligibility rules use only job-related, documented attributes (tenure in role up to the policy cap, job family, location, language, required skills) and never protected attributes or proxies. | Fair opportunity. | Posting validation | [DER] |
-| BR-ENT-008 | Internal applications and gig applications are confidential from the applicant's current manager and from HR partners unless org policy allows HR visibility and the applicant is told before submitting. | Protects employees who explore moves. | Authz, UI disclosure | [PROP] |
-| BR-ENT-009 | The current manager is notified at the policy stage (default: offer accepted) and the release date is agreed within the policy cap (default 60 days). | Orderly transfers. | Workflow engine | [PROP] |
-| BR-ENT-010 | Internal applicants receive a decision and feedback within the SLA (default 10 business days); breaches escalate to the talent admin. | Fair treatment and transparency. | SLA scheduler | [PROP] |
-| BR-ENT-011 | Matching suggestions are opt-in for employees, explained with reasons, never auto-decide, use no performance or protected data, and can be hidden by the employee at any time. | No ungoverned autonomous decisions. | Matching service | [SRC: SSOT §4.2]; [PROP] |
-| BR-ENT-012 | Internal gigs are time-boxed (≤ 6 months), have an agreed allocation percentage within the cap, need current-manager approval, and carry no time or hour tracking. | Avoids time-tracking/HR scope. | Gig service | [PROP] |
-| BR-ENT-013 | Mandatory (compliance) assignments cannot be removed by the employee; completion evidence (time, score, content version) is immutable; waivers require an authorized admin, a reason and an expiry. | Audit integrity. | Assignment service | [PROP] |
-| BR-ENT-014 | Compliance completion records are retained for the org-configured period (default 7 years [PROP], `OD-ENT-09`) even after the employee leaves. | Regulatory evidence. | Retention job | [PROP] |
-| BR-ENT-015 | Enterprise-issued certificates may be added to a person's personal profile only with the person's consent; once issued and accepted, they remain the person's after leaving. | Portability. | Credential hand-off with `EVD` | [PROP] |
-| BR-ENT-016 | Learning requests record approval only; the platform does not process payment, reimbursement or budgets. | Scope boundary. | Request service | [PROP] (`OD-ENT-09`) |
-| BR-ENT-017 | Talent review and succession inputs are limited to inventory skills, stated interests, tenure band and manager nominations; outcomes are recorded human decisions with rationale; no performance ratings, compensation, protected attributes or automated ranking decisions. | Fairness; stays narrow. | Review service, text scanner | [PROP] (`OD-ENT-02`) |
-| BR-ENT-018 | Talent review and succession data is visible only to designated reviewers; employee access to their own record follows the org policy decided under `OD-ENT-03`, never below the legal right of access. | Confidentiality vs rights. | Authz | [PROP]; [DEC-REQ] |
-| BR-ENT-019 | Any aggregate grouping smaller than `min_cohort_k` (default 10; org may raise) is suppressed; managers see operational status for individual direct reports but never skills heat maps for teams below the threshold. | Re-identification control. | Report service | [DER] from [SRC: SSOT Amendment G, BR-178] |
-| BR-ENT-020 | Individual-level exports are allowed only for compliance and learning completion status, need a stated purpose, and are watermarked and logged; skills, mobility, plans and talent review data export only in aggregate. | Purpose limitation. | Export service | [PROP] |
-| BR-ENT-021 | SSO is JIT-provisioning capable; SCIM or HRIS deactivation removes enterprise access within 15 minutes and never deletes the person's personal account. | Safe identity lifecycle. | Identity integration | [PROP] |
-| BR-ENT-022 | After offboarding, skills inventory, plans, mobility preferences and talent review data are deleted or anonymized after 90 days unless a legal hold (reason, expiry) exists; compliance records follow `BR-ENT-014`. | Data minimization. | Retention job | [PROP] (`OD-ENT-09`) |
-| BR-ENT-023 | Every enterprise-role read of an individual employee's data is logged with actor, purpose and time; the employee can see the log; log write failure fails the read. | Transparency and accountability. | Access-log service | [DER] |
-| BR-ENT-024 | Features that process employee data run per country only after the regional policy allows them; sensitive jurisdictions default to off until an acknowledgement is recorded; missing country defaults to the strictest preset. | Local-law and consultation duties. | Feature flags | [PROP] (`OD-ENT-10`) |
-| BR-ENT-025 | Every ENT record and query is scoped by tenant; no cross-tenant read is possible. | Tenant isolation. | Data layer, tests | [SRC: SSOT tenant isolation; METRICS_CATALOG MET-042] |
-| BR-ENT-026 | SSO, SCIM, role and policy changes need two admins (requester and approver); at most two break-glass local admins with MFA exist. | Prevents lockout and abuse. | Admin workflow | [PROP] |
-| BR-ENT-027 | Overdue training follows the configured escalation (employee, manager, L&D); the system sends notices only and takes no punitive or access-removing action. | Non-punitive stance. | Scheduler | [PROP] |
-| BR-ENT-028 | Enterprise data residency follows the choice made at workspace setup, subject to platform availability. | Customer requirement. | Storage routing | [PROP] (`OD-ENT-08`) |
-| BR-ENT-029 | When the HRIS and ENT disagree on an org attribute, the HRIS wins; user-entered skill data is never overwritten by sync. | Clear precedence. | Sync service | [PROP] |
-| BR-ENT-030 | Linking a personal account to an enterprise record needs the person's consent and a verified email; the person can unlink at any time. | Two-sided consent. | Link service | [DER] |
-| BR-ENT-031 | Imported external learning records are labelled as imported and unverified by TalentSphere and satisfy a compliance requirement only if that requirement allows imported evidence. | Evidence honesty. | Import and requirement logic | [PROP] |
-| BR-ENT-032 | Mandatory notice classes (`work-required`) cannot be disabled by employees, but channel choice is theirs; chat-tool messages carry minimal content and confidential application updates never go to shared channels. | Reliable compliance with privacy. | Notification routing | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                         | Rationale                                             | Enforced where                          | Source                                                |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------- | ----------------------------------------------------- |
+| BR-ENT-001 | Enterprise features require a verified employer organization and an active enterprise entitlement; without either, no enterprise data is created or readable.                                                                                                                | Commercial and trust gate.                            | Workspace service, entitlement check    | [PROP]                                                |
+| BR-ENT-002 | ENT never stores or processes payroll, compensation, benefits, performance ratings, disciplinary or grievance records, leave, attendance or time-tracking data. HRIS import allow-lists, forms and free-text scanning enforce a blocklist.                                   | Stays inside the SSOT non-goal on generic HR/payroll. | Import allow-list, schema, text scanner | [SRC: SSOT §4.2]; [DER]                               |
+| BR-ENT-003 | A person's personal TalentSphere account belongs to the person. The enterprise sees only an enterprise-scoped projection: HRIS attributes, the enterprise skills inventory, assigned learning, and data the person has explicitly shared.                                    | Privacy boundary between employee and employer.       | Projection service, authz               | [DER]                                                 |
+| BR-ENT-004 | HRIS-sourced attributes (org unit, manager, job profile, status) are read-only in ENT; the HRIS is the source of truth; ENT writes nothing back except an optional transfer request message.                                                                                 | Avoids a shadow HRIS.                                 | Sync service                            | [PROP]                                                |
+| BR-ENT-005 | Skills data reaches the enterprise only through the enterprise inventory, with per-entry visibility choices; personal-profile evidence is visible only if the employee shares it per skill; aggregate use excludes employees who hid entries.                                | Consent and control.                                  | Inventory authz                         | [PROP] (`OD-ENT-05`)                                  |
+| BR-ENT-006 | A manager endorsement or self-attested step is labelled as such and is never presented as verified evidence.                                                                                                                                                                 | Evidence honesty.                                     | UI templates, API labels                | [SRC: SSOT §6.1]                                      |
+| BR-ENT-007 | Internal eligibility rules use only job-related, documented attributes (tenure in role up to the policy cap, job family, location, language, required skills) and never protected attributes or proxies.                                                                     | Fair opportunity.                                     | Posting validation                      | [DER]                                                 |
+| BR-ENT-008 | Internal applications and gig applications are confidential from the applicant's current manager and from HR partners unless org policy allows HR visibility and the applicant is told before submitting.                                                                    | Protects employees who explore moves.                 | Authz, UI disclosure                    | [PROP]                                                |
+| BR-ENT-009 | The current manager is notified at the policy stage (default: offer accepted) and the release date is agreed within the policy cap (default 60 days).                                                                                                                        | Orderly transfers.                                    | Workflow engine                         | [PROP]                                                |
+| BR-ENT-010 | Internal applicants receive a decision and feedback within the SLA (default 10 business days); breaches escalate to the talent admin.                                                                                                                                        | Fair treatment and transparency.                      | SLA scheduler                           | [PROP]                                                |
+| BR-ENT-011 | Matching suggestions are opt-in for employees, explained with reasons, never auto-decide, use no performance or protected data, and can be hidden by the employee at any time.                                                                                               | No ungoverned autonomous decisions.                   | Matching service                        | [SRC: SSOT §4.2]; [PROP]                              |
+| BR-ENT-012 | Internal gigs are time-boxed (≤ 6 months), have an agreed allocation percentage within the cap, need current-manager approval, and carry no time or hour tracking.                                                                                                           | Avoids time-tracking/HR scope.                        | Gig service                             | [PROP]                                                |
+| BR-ENT-013 | Mandatory (compliance) assignments cannot be removed by the employee; completion evidence (time, score, content version) is immutable; waivers require an authorized admin, a reason and an expiry.                                                                          | Audit integrity.                                      | Assignment service                      | [PROP]                                                |
+| BR-ENT-014 | Compliance completion records are retained for the org-configured period (default 7 years [PROP], `OD-ENT-09`) even after the employee leaves.                                                                                                                               | Regulatory evidence.                                  | Retention job                           | [PROP]                                                |
+| BR-ENT-015 | Enterprise-issued certificates may be added to a person's personal profile only with the person's consent; once issued and accepted, they remain the person's after leaving.                                                                                                 | Portability.                                          | Credential hand-off with `EVD`          | [PROP]                                                |
+| BR-ENT-016 | Learning requests record approval only; the platform does not process payment, reimbursement or budgets.                                                                                                                                                                     | Scope boundary.                                       | Request service                         | [PROP] (`OD-ENT-09`)                                  |
+| BR-ENT-017 | Talent review and succession inputs are limited to inventory skills, stated interests, tenure band and manager nominations; outcomes are recorded human decisions with rationale; no performance ratings, compensation, protected attributes or automated ranking decisions. | Fairness; stays narrow.                               | Review service, text scanner            | [PROP] (`OD-ENT-02`)                                  |
+| BR-ENT-018 | Talent review and succession data is visible only to designated reviewers; employee access to their own record follows the org policy decided under `OD-ENT-03`, never below the legal right of access.                                                                      | Confidentiality vs rights.                            | Authz                                   | [PROP]; [DEC-REQ]                                     |
+| BR-ENT-019 | Any aggregate grouping smaller than `min_cohort_k` (default 10; org may raise) is suppressed; managers see operational status for individual direct reports but never skills heat maps for teams below the threshold.                                                        | Re-identification control.                            | Report service                          | [DER] from [SRC: SSOT Amendment G, BR-178]            |
+| BR-ENT-020 | Individual-level exports are allowed only for compliance and learning completion status, need a stated purpose, and are watermarked and logged; skills, mobility, plans and talent review data export only in aggregate.                                                     | Purpose limitation.                                   | Export service                          | [PROP]                                                |
+| BR-ENT-021 | SSO is JIT-provisioning capable; SCIM or HRIS deactivation removes enterprise access within 15 minutes and never deletes the person's personal account.                                                                                                                      | Safe identity lifecycle.                              | Identity integration                    | [PROP]                                                |
+| BR-ENT-022 | After offboarding, skills inventory, plans, mobility preferences and talent review data are deleted or anonymized after 90 days unless a legal hold (reason, expiry) exists; compliance records follow `BR-ENT-014`.                                                         | Data minimization.                                    | Retention job                           | [PROP] (`OD-ENT-09`)                                  |
+| BR-ENT-023 | Every enterprise-role read of an individual employee's data is logged with actor, purpose and time; the employee can see the log; log write failure fails the read.                                                                                                          | Transparency and accountability.                      | Access-log service                      | [DER]                                                 |
+| BR-ENT-024 | Features that process employee data run per country only after the regional policy allows them; sensitive jurisdictions default to off until an acknowledgement is recorded; missing country defaults to the strictest preset.                                               | Local-law and consultation duties.                    | Feature flags                           | [PROP] (`OD-ENT-10`)                                  |
+| BR-ENT-025 | Every ENT record and query is scoped by tenant; no cross-tenant read is possible.                                                                                                                                                                                            | Tenant isolation.                                     | Data layer, tests                       | [SRC: SSOT tenant isolation; METRICS_CATALOG MET-042] |
+| BR-ENT-026 | SSO, SCIM, role and policy changes need two admins (requester and approver); at most two break-glass local admins with MFA exist.                                                                                                                                            | Prevents lockout and abuse.                           | Admin workflow                          | [PROP]                                                |
+| BR-ENT-027 | Overdue training follows the configured escalation (employee, manager, L&D); the system sends notices only and takes no punitive or access-removing action.                                                                                                                  | Non-punitive stance.                                  | Scheduler                               | [PROP]                                                |
+| BR-ENT-028 | Enterprise data residency follows the choice made at workspace setup, subject to platform availability.                                                                                                                                                                      | Customer requirement.                                 | Storage routing                         | [PROP] (`OD-ENT-08`)                                  |
+| BR-ENT-029 | When the HRIS and ENT disagree on an org attribute, the HRIS wins; user-entered skill data is never overwritten by sync.                                                                                                                                                     | Clear precedence.                                     | Sync service                            | [PROP]                                                |
+| BR-ENT-030 | Linking a personal account to an enterprise record needs the person's consent and a verified email; the person can unlink at any time.                                                                                                                                       | Two-sided consent.                                    | Link service                            | [DER]                                                 |
+| BR-ENT-031 | Imported external learning records are labelled as imported and unverified by TalentSphere and satisfy a compliance requirement only if that requirement allows imported evidence.                                                                                           | Evidence honesty.                                     | Import and requirement logic            | [PROP]                                                |
+| BR-ENT-032 | Mandatory notice classes (`work-required`) cannot be disabled by employees, but channel choice is theirs; chat-tool messages carry minimal content and confidential application updates never go to shared channels.                                                         | Reliable compliance with privacy.                     | Notification routing                    | [PROP]                                                |
 
 ## 6. State machines
 
@@ -1113,188 +1113,188 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-ENT-001 | Enterprise setup wizard | `/enterprise/setup` | EAD, EXA | Create and activate workspace | Steps, checks failing |
-| SCR-ENT-002 | Identity and provisioning | `/enterprise/identity` | EXA | SSO, SCIM, HRIS, test and logs | Test results, failures |
-| SCR-ENT-003 | Directory and members | `/enterprise/members` | EXA | Members, link status, roles | Unlinked, suspended |
-| SCR-ENT-004 | Access and roles | `/enterprise/access` | EXA, EAD | Roles, scopes, approvals | Pending approval |
-| SCR-ENT-005 | Job architecture | `/enterprise/jobs/architecture` | EXA | Profiles and mappings | Unmapped |
-| SCR-ENT-006 | Skills map and gaps | `/enterprise/skills` | EXA | Aggregate map, workforce gaps | Suppressed, low coverage |
-| SCR-ENT-007 | Internal job board | `/careers-internal` | CAN | Browse and filter internal postings | Eligible, ineligible reasons |
-| SCR-ENT-008 | Internal posting editor | `/enterprise/postings/:id` | REC, HMG, EXA | Create and manage postings | Approval, internal-first |
-| SCR-ENT-009 | Internal pipeline | `/enterprise/postings/:id/pipeline` | REC, HMG | Review, interview, offer, transfer | Stages, SLA warnings |
-| SCR-ENT-010 | My applications | `/me/enterprise/applications` | CAN | Track, withdraw, see who sees what | Confidential banner |
-| SCR-ENT-011 | Gigs board and editor | `/enterprise/gigs` | CAN, HMG | Browse, apply, approve | Allocation, approval |
-| SCR-ENT-012 | Employee career hub | `/me/enterprise` | CAN | Learning, jobs, plan, privacy | Unlinked, suspended |
-| SCR-ENT-013 | My skills inventory | `/me/enterprise/skills` | CAN | Manage skills and visibility | Stale, endorsed |
-| SCR-ENT-014 | Mobility preferences | `/me/enterprise/mobility` | CAN | Opt-in and visibility | Off, passive, active |
-| SCR-ENT-015 | Development plan | `/me/enterprise/plan` | CAN | Goals and actions | Shared, private |
-| SCR-ENT-016 | What my employer sees and access log | `/me/enterprise/privacy` | CAN | Projection and log | Entries, concern form |
-| SCR-ENT-017 | Learning assignments console | `/enterprise/learning` | EXA | Assign and track | Audience counts |
-| SCR-ENT-018 | Compliance dashboard | `/enterprise/compliance` | EXA, auditor | Requirements, status, audit export | Overdue, waived |
-| SCR-ENT-019 | Learning paths | `/enterprise/paths` | EXA | Build and publish paths | Cycle error |
-| SCR-ENT-020 | My learning | `/me/enterprise/learning` | CAN | Assigned and requested learning | Due soon, overdue |
-| SCR-ENT-021 | Learning requests | `/enterprise/requests` | CAN, HMG, EXA | Request and approve | Pending, escalated |
-| SCR-ENT-022 | Talent review and succession | `/enterprise/talent-review` | Reviewers, EXA | Cycle, nominations, slates | Locked, restricted |
-| SCR-ENT-023 | Manager workspace | `/enterprise/manager` | HMG | Tasks, reports, aggregates | Empty, suppressed |
-| SCR-ENT-024 | Regional policy | `/enterprise/regions` | EXA, EAD | Country feature matrix | Needs acknowledgement |
-| SCR-ENT-025 | Reports and exports | `/enterprise/reports` | EXA | Aggregates, purpose-bound exports | Suppressed, expired link |
-| SCR-ENT-026 | Notification channels | `/enterprise/notifications` | EXA | Teams, Slack, email routing | Connector revoked |
-| SCR-ENT-027 | Offboarding queue | `/enterprise/offboarding` | EXA | Retention, legal holds | Pending purge |
+| ID          | Name                                 | Route proposal                      | Roles          | Purpose                             | Key states                   |
+| ----------- | ------------------------------------ | ----------------------------------- | -------------- | ----------------------------------- | ---------------------------- |
+| SCR-ENT-001 | Enterprise setup wizard              | `/enterprise/setup`                 | EAD, EXA       | Create and activate workspace       | Steps, checks failing        |
+| SCR-ENT-002 | Identity and provisioning            | `/enterprise/identity`              | EXA            | SSO, SCIM, HRIS, test and logs      | Test results, failures       |
+| SCR-ENT-003 | Directory and members                | `/enterprise/members`               | EXA            | Members, link status, roles         | Unlinked, suspended          |
+| SCR-ENT-004 | Access and roles                     | `/enterprise/access`                | EXA, EAD       | Roles, scopes, approvals            | Pending approval             |
+| SCR-ENT-005 | Job architecture                     | `/enterprise/jobs/architecture`     | EXA            | Profiles and mappings               | Unmapped                     |
+| SCR-ENT-006 | Skills map and gaps                  | `/enterprise/skills`                | EXA            | Aggregate map, workforce gaps       | Suppressed, low coverage     |
+| SCR-ENT-007 | Internal job board                   | `/careers-internal`                 | CAN            | Browse and filter internal postings | Eligible, ineligible reasons |
+| SCR-ENT-008 | Internal posting editor              | `/enterprise/postings/:id`          | REC, HMG, EXA  | Create and manage postings          | Approval, internal-first     |
+| SCR-ENT-009 | Internal pipeline                    | `/enterprise/postings/:id/pipeline` | REC, HMG       | Review, interview, offer, transfer  | Stages, SLA warnings         |
+| SCR-ENT-010 | My applications                      | `/me/enterprise/applications`       | CAN            | Track, withdraw, see who sees what  | Confidential banner          |
+| SCR-ENT-011 | Gigs board and editor                | `/enterprise/gigs`                  | CAN, HMG       | Browse, apply, approve              | Allocation, approval         |
+| SCR-ENT-012 | Employee career hub                  | `/me/enterprise`                    | CAN            | Learning, jobs, plan, privacy       | Unlinked, suspended          |
+| SCR-ENT-013 | My skills inventory                  | `/me/enterprise/skills`             | CAN            | Manage skills and visibility        | Stale, endorsed              |
+| SCR-ENT-014 | Mobility preferences                 | `/me/enterprise/mobility`           | CAN            | Opt-in and visibility               | Off, passive, active         |
+| SCR-ENT-015 | Development plan                     | `/me/enterprise/plan`               | CAN            | Goals and actions                   | Shared, private              |
+| SCR-ENT-016 | What my employer sees and access log | `/me/enterprise/privacy`            | CAN            | Projection and log                  | Entries, concern form        |
+| SCR-ENT-017 | Learning assignments console         | `/enterprise/learning`              | EXA            | Assign and track                    | Audience counts              |
+| SCR-ENT-018 | Compliance dashboard                 | `/enterprise/compliance`            | EXA, auditor   | Requirements, status, audit export  | Overdue, waived              |
+| SCR-ENT-019 | Learning paths                       | `/enterprise/paths`                 | EXA            | Build and publish paths             | Cycle error                  |
+| SCR-ENT-020 | My learning                          | `/me/enterprise/learning`           | CAN            | Assigned and requested learning     | Due soon, overdue            |
+| SCR-ENT-021 | Learning requests                    | `/enterprise/requests`              | CAN, HMG, EXA  | Request and approve                 | Pending, escalated           |
+| SCR-ENT-022 | Talent review and succession         | `/enterprise/talent-review`         | Reviewers, EXA | Cycle, nominations, slates          | Locked, restricted           |
+| SCR-ENT-023 | Manager workspace                    | `/enterprise/manager`               | HMG            | Tasks, reports, aggregates          | Empty, suppressed            |
+| SCR-ENT-024 | Regional policy                      | `/enterprise/regions`               | EXA, EAD       | Country feature matrix              | Needs acknowledgement        |
+| SCR-ENT-025 | Reports and exports                  | `/enterprise/reports`               | EXA            | Aggregates, purpose-bound exports   | Suppressed, expired link     |
+| SCR-ENT-026 | Notification channels                | `/enterprise/notifications`         | EXA            | Teams, Slack, email routing         | Connector revoked            |
+| SCR-ENT-027 | Offboarding queue                    | `/enterprise/offboarding`           | EXA            | Retention, legal holds              | Pending purge                |
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-ENT-01 | EnterpriseWorkspace | tenantId, orgId, state, residency, terms version, policies | 1:N members, postings | Business; per contract |
-| ENT-ENT-02 | EnterpriseMember | memberId, tenantId, personId?, externalId, state, orgUnitId, managerMemberId, jobProfileId, country | N:1 Workspace; optional link to person | Enterprise record; purge per `BR-ENT-022` |
-| ENT-ENT-03 | SSOConnection | protocol, domains, certificate/secret ref, mappings, enforcement | N:1 Workspace | While active |
-| ENT-ENT-04 | ScimConnection and ProvisioningLog | tokenHash, group mappings; log rows | N:1 Workspace | Log 24 months |
-| ENT-ENT-05 | HrisConnection and SyncRun | connector, allow-listed fields, schedule; run counts | N:1 Workspace | Runs 12 months |
-| ENT-ENT-06 | OrgUnit | unitId, parentId, name, country | N:1 Workspace | Synced; current + 24 months history |
-| ENT-ENT-07 | JobProfile | profileId, family, level, roleId (`MKT`), requiredSkills, version | N:1 Workspace | Business; versioned |
-| ENT-ENT-08 | SkillInventoryEntry | memberId, skillId, proficiency, state, evidenceRef?, visibility, endorsedBy? | N:1 Member | Personal; purge per `BR-ENT-022` |
-| ENT-ENT-09 | InternalPosting | postingId, profileId, state, visibility, eligibility rules, closing date | 1:N applications | Business 24 months |
-| ENT-ENT-10 | InternalApplication | applicationId, postingId, memberId, state, feedback, releaseDate | N:1 Posting | Business 24 months; applicant content deleted at purge |
-| ENT-ENT-11 | MobilityPreference | memberId, openness, interests, audiences | 1:1 Member | Personal; purge |
-| ENT-ENT-12 | InternalGig and Assignment | gigId, skills, duration, allocation, state, approvals | N:M members | Business 24 months |
-| ENT-ENT-13 | LearningAssignment | assignmentId, memberId, contentRef, dueDate, state, evidence | N:1 Member | Per `BR-ENT-014` for mandatory; 24 months otherwise |
-| ENT-ENT-14 | ComplianceRequirement | requirementId, content, audience rule, interval, grace, escalation, evidence type | 1:N assignments | Permanent with versions |
-| ENT-ENT-15 | LearningRequest | requestId, memberId, offering, justification, state, approver | N:1 Member | 24 months |
-| ENT-ENT-16 | TalentReviewCycle | cycleId, scope, reviewers, state | 1:N review notes | 7 years or policy |
-| ENT-ENT-17 | SuccessionPlan | criticalRoleId, slate (member, readiness, rationale), reviewDate | N:1 Cycle | Policy; purged for departed members per `BR-ENT-022` |
-| ENT-ENT-18 | ReviewNote | cycleId, memberId, readiness, interests, note, reviewerId | N:1 Cycle | As cycle |
-| ENT-ENT-19 | DevelopmentPlan | planId, memberId, goal, actions, sharedWithManager | N:1 Member | Personal; purge |
-| ENT-ENT-20 | AccessLog | logId, actorRole, actorId, memberId, dataClass, purposeCode, at | N:1 Member | 24 months, append-only |
-| ENT-ENT-21 | EnterprisePolicy | key, value, scope (org, country), version | N:1 Workspace | Permanent with versions |
-| ENT-ENT-22 | ExternalLearningRecord | memberId, source, course, completedAt, hours, score, label | N:1 Member | Per `BR-ENT-014` |
-| ENT-ENT-23 | LinkConsent | memberId, personId, consentVersion, optional shares, state, at | N:1 Member | Append-only |
-| ENT-ENT-24 | ReportExportJob | jobId, requesterId, dataset, level, purpose, state, expiresAt | N:1 Workspace | File 7 days; audit 24 months |
+| ID         | Entity                             | Key attributes                                                                                      | Relationships                          | Retention class                                        |
+| ---------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------ |
+| ENT-ENT-01 | EnterpriseWorkspace                | tenantId, orgId, state, residency, terms version, policies                                          | 1:N members, postings                  | Business; per contract                                 |
+| ENT-ENT-02 | EnterpriseMember                   | memberId, tenantId, personId?, externalId, state, orgUnitId, managerMemberId, jobProfileId, country | N:1 Workspace; optional link to person | Enterprise record; purge per `BR-ENT-022`              |
+| ENT-ENT-03 | SSOConnection                      | protocol, domains, certificate/secret ref, mappings, enforcement                                    | N:1 Workspace                          | While active                                           |
+| ENT-ENT-04 | ScimConnection and ProvisioningLog | tokenHash, group mappings; log rows                                                                 | N:1 Workspace                          | Log 24 months                                          |
+| ENT-ENT-05 | HrisConnection and SyncRun         | connector, allow-listed fields, schedule; run counts                                                | N:1 Workspace                          | Runs 12 months                                         |
+| ENT-ENT-06 | OrgUnit                            | unitId, parentId, name, country                                                                     | N:1 Workspace                          | Synced; current + 24 months history                    |
+| ENT-ENT-07 | JobProfile                         | profileId, family, level, roleId (`MKT`), requiredSkills, version                                   | N:1 Workspace                          | Business; versioned                                    |
+| ENT-ENT-08 | SkillInventoryEntry                | memberId, skillId, proficiency, state, evidenceRef?, visibility, endorsedBy?                        | N:1 Member                             | Personal; purge per `BR-ENT-022`                       |
+| ENT-ENT-09 | InternalPosting                    | postingId, profileId, state, visibility, eligibility rules, closing date                            | 1:N applications                       | Business 24 months                                     |
+| ENT-ENT-10 | InternalApplication                | applicationId, postingId, memberId, state, feedback, releaseDate                                    | N:1 Posting                            | Business 24 months; applicant content deleted at purge |
+| ENT-ENT-11 | MobilityPreference                 | memberId, openness, interests, audiences                                                            | 1:1 Member                             | Personal; purge                                        |
+| ENT-ENT-12 | InternalGig and Assignment         | gigId, skills, duration, allocation, state, approvals                                               | N:M members                            | Business 24 months                                     |
+| ENT-ENT-13 | LearningAssignment                 | assignmentId, memberId, contentRef, dueDate, state, evidence                                        | N:1 Member                             | Per `BR-ENT-014` for mandatory; 24 months otherwise    |
+| ENT-ENT-14 | ComplianceRequirement              | requirementId, content, audience rule, interval, grace, escalation, evidence type                   | 1:N assignments                        | Permanent with versions                                |
+| ENT-ENT-15 | LearningRequest                    | requestId, memberId, offering, justification, state, approver                                       | N:1 Member                             | 24 months                                              |
+| ENT-ENT-16 | TalentReviewCycle                  | cycleId, scope, reviewers, state                                                                    | 1:N review notes                       | 7 years or policy                                      |
+| ENT-ENT-17 | SuccessionPlan                     | criticalRoleId, slate (member, readiness, rationale), reviewDate                                    | N:1 Cycle                              | Policy; purged for departed members per `BR-ENT-022`   |
+| ENT-ENT-18 | ReviewNote                         | cycleId, memberId, readiness, interests, note, reviewerId                                           | N:1 Cycle                              | As cycle                                               |
+| ENT-ENT-19 | DevelopmentPlan                    | planId, memberId, goal, actions, sharedWithManager                                                  | N:1 Member                             | Personal; purge                                        |
+| ENT-ENT-20 | AccessLog                          | logId, actorRole, actorId, memberId, dataClass, purposeCode, at                                     | N:1 Member                             | 24 months, append-only                                 |
+| ENT-ENT-21 | EnterprisePolicy                   | key, value, scope (org, country), version                                                           | N:1 Workspace                          | Permanent with versions                                |
+| ENT-ENT-22 | ExternalLearningRecord             | memberId, source, course, completedAt, hours, score, label                                          | N:1 Member                             | Per `BR-ENT-014`                                       |
+| ENT-ENT-23 | LinkConsent                        | memberId, personId, consentVersion, optional shares, state, at                                      | N:1 Member                             | Append-only                                            |
+| ENT-ENT-24 | ReportExportJob                    | jobId, requesterId, dataset, level, purpose, state, expiresAt                                       | N:1 Workspace                          | File 7 days; audit 24 months                           |
 
 ## 9. Events emitted and consumed
 
 ### 9.1 Emitted
 
-| ID | Name | Trigger | Key payload |
-|---|---|---|---|
-| EVT-ENT-001 | enterprise.workspace.activated | Workspace activated | tenantId |
-| EVT-ENT-002 | enterprise.workspace.suspended | Entitlement lapse | tenantId, reason |
-| EVT-ENT-003 | enterprise.sso.configured | SSO enabled | tenantId, protocol |
-| EVT-ENT-004 | enterprise.member.provisioned | SCIM, HRIS or JIT creation | memberId, source |
-| EVT-ENT-005 | enterprise.member.linked | Employee linked | memberId |
-| EVT-ENT-006 | enterprise.member.unlinked | Employee unlinked | memberId |
-| EVT-ENT-007 | enterprise.member.deprovisioned | Termination or SCIM deactivate | memberId, source |
-| EVT-ENT-008 | enterprise.hris.sync_completed | Sync run ends | runId, counts |
-| EVT-ENT-009 | enterprise.skill.endorsed | Manager endorsement | entryId |
-| EVT-ENT-010 | enterprise.posting.published | Posting opened | postingId, visibility |
-| EVT-ENT-011 | enterprise.application.submitted | Internal application | applicationId (no applicant detail to non-hiring consumers) |
-| EVT-ENT-012 | enterprise.application.stage_changed | Stage change | applicationId, from, to |
-| EVT-ENT-013 | enterprise.transfer.requested | Transfer handoff | applicationId, releaseDate |
-| EVT-ENT-014 | enterprise.transfer.confirmed | HRIS confirmation | applicationId |
-| EVT-ENT-015 | enterprise.gig.assigned | Gig assignment approved | gigId, memberId |
-| EVT-ENT-016 | enterprise.learning.assigned | Assignment created | assignmentId, mandatory |
-| EVT-ENT-017 | enterprise.learning.completed | Completion | assignmentId |
-| EVT-ENT-018 | enterprise.compliance.overdue | Overdue | assignmentId, requirementId |
-| EVT-ENT-019 | enterprise.compliance.waived | Waiver | assignmentId, approverId |
-| EVT-ENT-020 | enterprise.request.decided | Learning request decided | requestId, decision |
-| EVT-ENT-021 | enterprise.review.locked | Talent review cycle locked | cycleId |
-| EVT-ENT-022 | enterprise.access.logged | Individual-level read | memberId, dataClass, purposeCode |
-| EVT-ENT-023 | enterprise.export.generated | Export | jobId, level |
-| EVT-ENT-024 | enterprise.region.policy_changed | Regional enablement | country, feature |
-| EVT-ENT-025 | enterprise.member.purged | Retention purge | memberId, scope |
+| ID          | Name                                 | Trigger                        | Key payload                                                 |
+| ----------- | ------------------------------------ | ------------------------------ | ----------------------------------------------------------- |
+| EVT-ENT-001 | enterprise.workspace.activated       | Workspace activated            | tenantId                                                    |
+| EVT-ENT-002 | enterprise.workspace.suspended       | Entitlement lapse              | tenantId, reason                                            |
+| EVT-ENT-003 | enterprise.sso.configured            | SSO enabled                    | tenantId, protocol                                          |
+| EVT-ENT-004 | enterprise.member.provisioned        | SCIM, HRIS or JIT creation     | memberId, source                                            |
+| EVT-ENT-005 | enterprise.member.linked             | Employee linked                | memberId                                                    |
+| EVT-ENT-006 | enterprise.member.unlinked           | Employee unlinked              | memberId                                                    |
+| EVT-ENT-007 | enterprise.member.deprovisioned      | Termination or SCIM deactivate | memberId, source                                            |
+| EVT-ENT-008 | enterprise.hris.sync_completed       | Sync run ends                  | runId, counts                                               |
+| EVT-ENT-009 | enterprise.skill.endorsed            | Manager endorsement            | entryId                                                     |
+| EVT-ENT-010 | enterprise.posting.published         | Posting opened                 | postingId, visibility                                       |
+| EVT-ENT-011 | enterprise.application.submitted     | Internal application           | applicationId (no applicant detail to non-hiring consumers) |
+| EVT-ENT-012 | enterprise.application.stage_changed | Stage change                   | applicationId, from, to                                     |
+| EVT-ENT-013 | enterprise.transfer.requested        | Transfer handoff               | applicationId, releaseDate                                  |
+| EVT-ENT-014 | enterprise.transfer.confirmed        | HRIS confirmation              | applicationId                                               |
+| EVT-ENT-015 | enterprise.gig.assigned              | Gig assignment approved        | gigId, memberId                                             |
+| EVT-ENT-016 | enterprise.learning.assigned         | Assignment created             | assignmentId, mandatory                                     |
+| EVT-ENT-017 | enterprise.learning.completed        | Completion                     | assignmentId                                                |
+| EVT-ENT-018 | enterprise.compliance.overdue        | Overdue                        | assignmentId, requirementId                                 |
+| EVT-ENT-019 | enterprise.compliance.waived         | Waiver                         | assignmentId, approverId                                    |
+| EVT-ENT-020 | enterprise.request.decided           | Learning request decided       | requestId, decision                                         |
+| EVT-ENT-021 | enterprise.review.locked             | Talent review cycle locked     | cycleId                                                     |
+| EVT-ENT-022 | enterprise.access.logged             | Individual-level read          | memberId, dataClass, purposeCode                            |
+| EVT-ENT-023 | enterprise.export.generated          | Export                         | jobId, level                                                |
+| EVT-ENT-024 | enterprise.region.policy_changed     | Regional enablement            | country, feature                                            |
+| EVT-ENT-025 | enterprise.member.purged             | Retention purge                | memberId, scope                                             |
 
 ### 9.2 Consumed
 
-| Source (module) | Event | Use |
-|---|---|---|
-| `BIL` (planned) | entitlement changed | Activate or suspend workspace |
-| `EMP` (planned) | org verified or suspended | Gate workspace |
-| `LRN` (planned) | enrollment and completion | Assignment states |
-| `EVD` (planned) | evidence shared, revoked, credential issued | Inventory states, certificates |
-| `MKT` | taxonomy version published, role updated | Skill migration, job profile mapping |
-| `IDN` (planned) | person account deleted | Unlink and purge enterprise-linked personal data |
-| `SET` (planned) | consent changed | Link consent state |
-| `INT` (planned) | interview scheduled | Pipeline stage |
+| Source (module) | Event                                       | Use                                              |
+| --------------- | ------------------------------------------- | ------------------------------------------------ |
+| `BIL` (planned) | entitlement changed                         | Activate or suspend workspace                    |
+| `EMP` (planned) | org verified or suspended                   | Gate workspace                                   |
+| `LRN` (planned) | enrollment and completion                   | Assignment states                                |
+| `EVD` (planned) | evidence shared, revoked, credential issued | Inventory states, certificates                   |
+| `MKT`           | taxonomy version published, role updated    | Skill migration, job profile mapping             |
+| `IDN` (planned) | person account deleted                      | Unlink and purge enterprise-linked personal data |
+| `SET` (planned) | consent changed                             | Link consent state                               |
+| `INT` (planned) | interview scheduled                         | Pipeline stage                                   |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-|---|---|---|
-| Identity providers (Okta, Microsoft Entra ID, Google Workspace, OneLogin, Ping) | SSO and SCIM | SAML 2.0, OIDC, SCIM 2.0 |
+| Dependency                                                                                  | Purpose                                   | Notes                                      |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------ |
+| Identity providers (Okta, Microsoft Entra ID, Google Workspace, OneLogin, Ping)             | SSO and SCIM                              | SAML 2.0, OIDC, SCIM 2.0                   |
 | HRIS vendors (Workday, SAP SuccessFactors, BambooHR, HiBob, Personio) and generic SFTP/REST | Org structure and job profiles, read-only | Connector list [PROP]; vendors `OD-ENT-11` |
-| Microsoft Teams, Slack | Notice delivery | OAuth, minimal scopes |
-| xAPI / SCORM LRS endpoints and CSV | External learning records | Import only |
-| DNS (TXT) | Domain ownership for SSO | Standard |
-| `NTF`, `PLT` (planned) | Delivery, integration framework | Consumed |
+| Microsoft Teams, Slack                                                                      | Notice delivery                           | OAuth, minimal scopes                      |
+| xAPI / SCORM LRS endpoints and CSV                                                          | External learning records                 | Import only                                |
+| DNS (TXT)                                                                                   | Domain ownership for SSO                  | Standard                                   |
+| `NTF`, `PLT` (planned)                                                                      | Delivery, integration framework           | Consumed                                   |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why | Depended on by | Why |
-|---|---|---|---|
-| EMP (planned) | Employer organization, verification | ANL | Enterprise workforce metrics |
-| BIL (planned) | Enterprise entitlement | MKT | Workforce planning view uses ENT inventory aggregate (optional) |
-| LRN (planned) | Course catalogue, completion | LRN (planned) | Enterprise assignment hooks |
-| MKT | Taxonomy, roles, paths, gap analysis | EVD (planned) | Enterprise-issued credentials |
-| EVD (planned) | Evidence and credentials | ATS (planned) | Internal pipeline reuses stage handling |
-| IDN, SET (planned) | Accounts, consent | JOB (planned) | Internal-first postings open to external board |
-| ATS, JOB, INT (planned) | Pipeline, external board, interviews | ADM (planned) | Support for enterprise tenants |
-| NTF, PLT (planned) | Delivery, integrations | PWA (planned) | Offline learning access |
+| Depends on              | Why                                  | Depended on by | Why                                                             |
+| ----------------------- | ------------------------------------ | -------------- | --------------------------------------------------------------- |
+| EMP (planned)           | Employer organization, verification  | ANL            | Enterprise workforce metrics                                    |
+| BIL (planned)           | Enterprise entitlement               | MKT            | Workforce planning view uses ENT inventory aggregate (optional) |
+| LRN (planned)           | Course catalogue, completion         | LRN (planned)  | Enterprise assignment hooks                                     |
+| MKT                     | Taxonomy, roles, paths, gap analysis | EVD (planned)  | Enterprise-issued credentials                                   |
+| EVD (planned)           | Evidence and credentials             | ATS (planned)  | Internal pipeline reuses stage handling                         |
+| IDN, SET (planned)      | Accounts, consent                    | JOB (planned)  | Internal-first postings open to external board                  |
+| ATS, JOB, INT (planned) | Pipeline, external board, interviews | ADM (planned)  | Support for enterprise tenants                                  |
+| NTF, PLT (planned)      | Delivery, integrations               | PWA (planned)  | Offline learning access                                         |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| MET-ENT-01 Link rate | Employees linked vs provisioned | linked / provisioned | Enterprise success |
-| MET-ENT-02 Internal fill rate | Postings filled internally | internally filled / closed postings | EXA |
-| MET-ENT-03 Time to internal decision | Median time from application to decision | median(decision − submitted) | EXA |
-| MET-ENT-04 Feedback SLA attainment | Decisions with feedback within SLA | on time / decided | EXA |
-| MET-ENT-05 Mandatory completion rate | Mandatory assignments completed by due date | completed on time / assigned | L&D |
-| MET-ENT-06 Overdue backlog | Overdue assignments | count and age | L&D |
-| MET-ENT-07 Inventory coverage | Employees with ≥ 5 inventory entries | count / linked | EXA |
-| MET-ENT-08 Opt-in rate to matching | Employees opted in | opted in / linked | Product |
-| MET-ENT-09 Deprovision latency | Time from signal to access removal | p95(removal − signal) | Security |
-| MET-ENT-10 Access-log concerns | Concerns raised per 1,000 employees | concerns / linked × 1000 | Privacy lead |
+| Metric                               | Definition                                  | Formula                             | Owner role         |
+| ------------------------------------ | ------------------------------------------- | ----------------------------------- | ------------------ |
+| MET-ENT-01 Link rate                 | Employees linked vs provisioned             | linked / provisioned                | Enterprise success |
+| MET-ENT-02 Internal fill rate        | Postings filled internally                  | internally filled / closed postings | EXA                |
+| MET-ENT-03 Time to internal decision | Median time from application to decision    | median(decision − submitted)        | EXA                |
+| MET-ENT-04 Feedback SLA attainment   | Decisions with feedback within SLA          | on time / decided                   | EXA                |
+| MET-ENT-05 Mandatory completion rate | Mandatory assignments completed by due date | completed on time / assigned        | L&D                |
+| MET-ENT-06 Overdue backlog           | Overdue assignments                         | count and age                       | L&D                |
+| MET-ENT-07 Inventory coverage        | Employees with ≥ 5 inventory entries        | count / linked                      | EXA                |
+| MET-ENT-08 Opt-in rate to matching   | Employees opted in                          | opted in / linked                   | Product            |
+| MET-ENT-09 Deprovision latency       | Time from signal to access removal          | p95(removal − signal)               | Security           |
+| MET-ENT-10 Access-log concerns       | Concerns raised per 1,000 employees         | concerns / linked × 1000            | Privacy lead       |
 
 All are P0/P2 aggregates with `min_cohort_k` where grouped [DER].
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-ENT-01 | Is ENT in scope given SSOT §4.2 "not a generic HR/payroll system" and the owner's "operating system" goal? | A: full module; B: L&D and skills only; C: internal job board only; D: defer | A with minimal viable slice = FR-ENT-001, 002, 003, 005, 011, 012, 018, 019, 027, 029 (workspace, SSO, SCIM, linking, internal jobs, learning and compliance, hub, access log); talent review, succession, gigs, HRIS later | Product owner | All ENT build |
-| OD-ENT-02 | Is talent review and succession allowed even in narrow form? | Allow; allow skills-readiness only; exclude | Allow skills-readiness only | Product owner, Counsel | FR-ENT-024, 025 |
-| OD-ENT-03 | Employee access to their own talent review and succession data | Always; summary only; legal minimum | Summary and legal minimum | Counsel, Product | FR-ENT-024, 025 |
-| OD-ENT-04 | Employees who decline linking: mandatory learning through a workspace-only view? | Yes; no | Yes | Counsel, Product | FR-ENT-005, 018 |
-| OD-ENT-05 | Manager visibility of inventory | Employee choice; manager sees all enterprise-scoped | Employee choice | Product, Counsel | FR-ENT-007, 026 |
-| OD-ENT-06 | Cap on tenure rules in eligibility | None; 6, 12, 24 months | 12 months | Product | FR-ENT-011 |
-| OD-ENT-07 | Internal gigs: in scope? (brushes time and allocation tracking) | Yes; no | Yes, allocation-percentage only | Product owner | FR-ENT-014 |
-| OD-ENT-08 | Data residency options | None; EU/US regions | Choice recorded at setup, availability per platform | Platform, Counsel | FR-ENT-001 |
-| OD-ENT-09 | Compliance record retention, offboarding schedule, budgets and leave pauses | Retention years; budgets in or out; leave pause | 7 years; budgets out; admin-set pauses only | Counsel, Product | FR-ENT-019, 021, 028 |
-| OD-ENT-10 | Regional presets and works-council rules by country | Preset list | Strict default for countries with employee-representation consultation duties; list from counsel | Counsel | FR-ENT-031 |
-| OD-ENT-11 | Which HRIS connectors first | Vendor list | CSV/SFTP and one major vendor driven by first customer | Product owner | FR-ENT-004 |
+| ID        | Question                                                                                                   | Options                                                                      | Default proposal                                                                                                                                                                                                            | Who decides            | Blocking             |
+| --------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------- |
+| OD-ENT-01 | Is ENT in scope given SSOT §4.2 "not a generic HR/payroll system" and the owner's "operating system" goal? | A: full module; B: L&D and skills only; C: internal job board only; D: defer | A with minimal viable slice = FR-ENT-001, 002, 003, 005, 011, 012, 018, 019, 027, 029 (workspace, SSO, SCIM, linking, internal jobs, learning and compliance, hub, access log); talent review, succession, gigs, HRIS later | Product owner          | All ENT build        |
+| OD-ENT-02 | Is talent review and succession allowed even in narrow form?                                               | Allow; allow skills-readiness only; exclude                                  | Allow skills-readiness only                                                                                                                                                                                                 | Product owner, Counsel | FR-ENT-024, 025      |
+| OD-ENT-03 | Employee access to their own talent review and succession data                                             | Always; summary only; legal minimum                                          | Summary and legal minimum                                                                                                                                                                                                   | Counsel, Product       | FR-ENT-024, 025      |
+| OD-ENT-04 | Employees who decline linking: mandatory learning through a workspace-only view?                           | Yes; no                                                                      | Yes                                                                                                                                                                                                                         | Counsel, Product       | FR-ENT-005, 018      |
+| OD-ENT-05 | Manager visibility of inventory                                                                            | Employee choice; manager sees all enterprise-scoped                          | Employee choice                                                                                                                                                                                                             | Product, Counsel       | FR-ENT-007, 026      |
+| OD-ENT-06 | Cap on tenure rules in eligibility                                                                         | None; 6, 12, 24 months                                                       | 12 months                                                                                                                                                                                                                   | Product                | FR-ENT-011           |
+| OD-ENT-07 | Internal gigs: in scope? (brushes time and allocation tracking)                                            | Yes; no                                                                      | Yes, allocation-percentage only                                                                                                                                                                                             | Product owner          | FR-ENT-014           |
+| OD-ENT-08 | Data residency options                                                                                     | None; EU/US regions                                                          | Choice recorded at setup, availability per platform                                                                                                                                                                         | Platform, Counsel      | FR-ENT-001           |
+| OD-ENT-09 | Compliance record retention, offboarding schedule, budgets and leave pauses                                | Retention years; budgets in or out; leave pause                              | 7 years; budgets out; admin-set pauses only                                                                                                                                                                                 | Counsel, Product       | FR-ENT-019, 021, 028 |
+| OD-ENT-10 | Regional presets and works-council rules by country                                                        | Preset list                                                                  | Strict default for countries with employee-representation consultation duties; list from counsel                                                                                                                            | Counsel                | FR-ENT-031           |
+| OD-ENT-11 | Which HRIS connectors first                                                                                | Vendor list                                                                  | CSV/SFTP and one major vendor driven by first customer                                                                                                                                                                      | Product owner          | FR-ENT-004           |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-|---|---|---|---|
-| RSK-ENT-01 | Scope creep into HRIS, performance or payroll | Violates SSOT §4.2 | Blocklist, read-only HRIS, `OD-ENT-01`, `OD-ENT-02` |
-| RSK-ENT-02 | Employer surveillance of employee career exploration | Trust collapse, legal risk | Confidential applications, access log, projection boundary (BR-ENT-003, 008, 023) |
-| RSK-ENT-03 | Works-council and local law non-compliance | Fines, blocked rollout | Regional controls and acknowledgements (FR-ENT-031) |
-| RSK-ENT-04 | Bias in internal matching or succession | Discrimination | Narrow inputs, explainability, fairness review with `MKT` (BR-ENT-011, 017) |
-| RSK-ENT-05 | SSO or SCIM misconfiguration locking out users or leaving access after exit | Security incident | Tests, dual control, break-glass, latency metric (BR-ENT-021, 026) |
-| RSK-ENT-06 | Small-group re-identification in team views | Privacy breach | Thresholds and operational vs analytic separation (BR-ENT-019) |
-| RSK-ENT-07 | Compliance evidence tampering or loss | Audit failure | Immutable evidence, retention (BR-ENT-013, 014) |
+| ID         | Risk                                                                        | Impact                     | Mitigation                                                                        |
+| ---------- | --------------------------------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------- |
+| RSK-ENT-01 | Scope creep into HRIS, performance or payroll                               | Violates SSOT §4.2         | Blocklist, read-only HRIS, `OD-ENT-01`, `OD-ENT-02`                               |
+| RSK-ENT-02 | Employer surveillance of employee career exploration                        | Trust collapse, legal risk | Confidential applications, access log, projection boundary (BR-ENT-003, 008, 023) |
+| RSK-ENT-03 | Works-council and local law non-compliance                                  | Fines, blocked rollout     | Regional controls and acknowledgements (FR-ENT-031)                               |
+| RSK-ENT-04 | Bias in internal matching or succession                                     | Discrimination             | Narrow inputs, explainability, fairness review with `MKT` (BR-ENT-011, 017)       |
+| RSK-ENT-05 | SSO or SCIM misconfiguration locking out users or leaving access after exit | Security incident          | Tests, dual control, break-glass, latency metric (BR-ENT-021, 026)                |
+| RSK-ENT-06 | Small-group re-identification in team views                                 | Privacy breach             | Thresholds and operational vs analytic separation (BR-ENT-019)                    |
+| RSK-ENT-07 | Compliance evidence tampering or loss                                       | Audit failure              | Immutable evidence, retention (BR-ENT-013, 014)                                   |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §7.1 F-161 Internal Mobility & Succession Platform (priority 3, Ph6–7, deps F-84, F-91, F-132) | Existence of internal mobility and succession capability | No detailed spec existed; all behavior here is [PROP] |
-| SSOT §4.2 non-goals (generic HR/payroll) | `BR-ENT-002`, `OD-ENT-01` | Compensation, performance, payroll excluded |
-| SSOT §4.2 no ungoverned autonomous AI decisions | `BR-ENT-011`, `BR-ENT-017` | Human decisions only |
-| SSOT §6.1 Evidence semantics, F-84 Skills Graph | Inventory labels and skill taxonomy | Manager endorsement distinguished from verified evidence |
-| SSOT F-07 LMS, F-114, F-153 | Learning assignment and impact | Aggregates labelled correlational |
-| SSOT Amendment G, BR-178 | `min_cohort_k` | Applied to team and unit grouping |
-| SSOT §5 roles and tenant isolation | Role model, tenant scoping | `EXA` role from the blueprint role table |
-| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` | Privacy classes, cohort minimum principle | None |
+| Source                                                                                              | Used for                                                 | Dropped or changed                                       |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| SSOT §7.1 F-161 Internal Mobility & Succession Platform (priority 3, Ph6–7, deps F-84, F-91, F-132) | Existence of internal mobility and succession capability | No detailed spec existed; all behavior here is [PROP]    |
+| SSOT §4.2 non-goals (generic HR/payroll)                                                            | `BR-ENT-002`, `OD-ENT-01`                                | Compensation, performance, payroll excluded              |
+| SSOT §4.2 no ungoverned autonomous AI decisions                                                     | `BR-ENT-011`, `BR-ENT-017`                               | Human decisions only                                     |
+| SSOT §6.1 Evidence semantics, F-84 Skills Graph                                                     | Inventory labels and skill taxonomy                      | Manager endorsement distinguished from verified evidence |
+| SSOT F-07 LMS, F-114, F-153                                                                         | Learning assignment and impact                           | Aggregates labelled correlational                        |
+| SSOT Amendment G, BR-178                                                                            | `min_cohort_k`                                           | Applied to team and unit grouping                        |
+| SSOT §5 roles and tenant isolation                                                                  | Role model, tenant scoping                               | `EXA` role from the blueprint role table                 |
+| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md`                       | Privacy classes, cohort minimum principle                | None                                                     |

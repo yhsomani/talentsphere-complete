@@ -21,17 +21,17 @@ Web app manifest, install prompts and install state; app shell and navigation fa
 
 ### 1.2 Out of scope (owned elsewhere)
 
-| Capability | Owner | Relationship |
-|---|---|---|
-| Notification content, templates, channel preferences, quiet hours | NTF | PWA owns the Web Push transport, subscription and device-level opt-in; NTF owns what is sent and to whom |
-| Session tokens, passkeys, login | IDN | PWA clears client state on logout signals; uses sessions as given |
-| Job entities, applications, saved jobs | JOB | PWA's extension and offline layer call JOB APIs |
-| Resume content and structured profile | PRF | Extension consumes a read-only resume projection |
-| Assessment delivery, proctoring | ASM | PWA declares assessments online-only (FR-PWA-012) |
-| Course lesson delivery and downloads | LRN | PWA provides the storage and sync substrate; LRN owns content |
-| Public API, webhooks, file service, job engine | PLT | PWA consumes uploads (resumable, FR-PLT-030) and idempotency (FR-PLT-007) |
-| Admin console | ADM | Excluded from install, offline and caching by policy |
-| Native iOS or Android apps | none | Decision gate only (FR-PWA-030); no native build specified |
+| Capability                                                        | Owner | Relationship                                                                                             |
+| ----------------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------- |
+| Notification content, templates, channel preferences, quiet hours | NTF   | PWA owns the Web Push transport, subscription and device-level opt-in; NTF owns what is sent and to whom |
+| Session tokens, passkeys, login                                   | IDN   | PWA clears client state on logout signals; uses sessions as given                                        |
+| Job entities, applications, saved jobs                            | JOB   | PWA's extension and offline layer call JOB APIs                                                          |
+| Resume content and structured profile                             | PRF   | Extension consumes a read-only resume projection                                                         |
+| Assessment delivery, proctoring                                   | ASM   | PWA declares assessments online-only (FR-PWA-012)                                                        |
+| Course lesson delivery and downloads                              | LRN   | PWA provides the storage and sync substrate; LRN owns content                                            |
+| Public API, webhooks, file service, job engine                    | PLT   | PWA consumes uploads (resumable, FR-PLT-030) and idempotency (FR-PLT-007)                                |
+| Admin console                                                     | ADM   | Excluded from install, offline and caching by policy                                                     |
+| Native iOS or Android apps                                        | none  | Decision gate only (FR-PWA-030); no native build specified                                               |
 
 ### 1.3 Owned versus consumed
 
@@ -51,33 +51,33 @@ PWA features serve end users of every role; staff roles are excluded from instal
 
 Legend: **U** use, **C** configure for self, **O** configure for organization, **P** configure platform, **—** none.
 
-| Capability | GUE | CAN, STD, FRL | INS, MNT | REC, HMG | EAD, IAD, PLO, EXA | PAD | SAD |
-|---|---|---|---|---|---|---|---|
-| Install app, update prompts | U | U | U | U | U | P | P |
-| Offline reads of own data | — | U | U | U | U | P (policy) | — |
-| Local unsent drafts | — | U | U | U | U | P | — |
-| Queued writes (after OD-PWA-01 trigger) | — | U | U | U | U | P | — |
-| Sync center | — | U | U | U | U | — | — |
-| Push opt-in per device | — | C | C | C | C | P | — |
-| Org-level push policy (quiet hours, allowed event classes) | — | — | — | — | O | P | — |
-| Low-bandwidth mode | U | C | C | C | C | P | — |
-| Extension install and pairing | — | C | C | C (recruiter extension variant, planned) | — | P (min versions, kill) | P (store, signing) |
-| Extension scan, match, save, autofill | — | U | U | — | — | — | — |
-| Wrapper decision gate | — | — | — | — | — | P | P (approve) |
-| Admin console install, offline cache | — | — | — | — | — | not allowed | not allowed |
+| Capability                                                 | GUE | CAN, STD, FRL | INS, MNT | REC, HMG                                 | EAD, IAD, PLO, EXA | PAD                    | SAD                |
+| ---------------------------------------------------------- | --- | ------------- | -------- | ---------------------------------------- | ------------------ | ---------------------- | ------------------ |
+| Install app, update prompts                                | U   | U             | U        | U                                        | U                  | P                      | P                  |
+| Offline reads of own data                                  | —   | U             | U        | U                                        | U                  | P (policy)             | —                  |
+| Local unsent drafts                                        | —   | U             | U        | U                                        | U                  | P                      | —                  |
+| Queued writes (after OD-PWA-01 trigger)                    | —   | U             | U        | U                                        | U                  | P                      | —                  |
+| Sync center                                                | —   | U             | U        | U                                        | U                  | —                      | —                  |
+| Push opt-in per device                                     | —   | C             | C        | C                                        | C                  | P                      | —                  |
+| Org-level push policy (quiet hours, allowed event classes) | —   | —             | —        | —                                        | O                  | P                      | —                  |
+| Low-bandwidth mode                                         | U   | C             | C        | C                                        | C                  | P                      | —                  |
+| Extension install and pairing                              | —   | C             | C        | C (recruiter extension variant, planned) | —                  | P (min versions, kill) | P (store, signing) |
+| Extension scan, match, save, autofill                      | —   | U             | U        | —                                        | —                  | —                      | —                  |
+| Wrapper decision gate                                      | —   | —             | —        | —                                        | —                  | P                      | P (approve)        |
+| Admin console install, offline cache                       | —   | —             | —        | —                                        | —                  | not allowed            | not allowed        |
 
 Rules: `REC` and `HMG` use the extension for candidate sourcing only after a separate decision (OD-PWA-06); v1 of the extension is candidate-facing. [PROP] Staff roles use the admin origin, which is never installable or cached (BR-PWA-002).
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Installability and shell | FR-PWA-001 to FR-PWA-009 |
-| B | Offline and sync | FR-PWA-010 to FR-PWA-020 |
-| C | Push and re-engagement | FR-PWA-021 to FR-PWA-024 |
-| D | Mobile experience and distribution | FR-PWA-025 to FR-PWA-031 |
-| E | Browser extension companion | FR-PWA-032 to FR-PWA-038 |
-| F | Health and measurement | FR-PWA-039 |
+| Code | Sub-module                         | Features                 |
+| ---- | ---------------------------------- | ------------------------ |
+| A    | Installability and shell           | FR-PWA-001 to FR-PWA-009 |
+| B    | Offline and sync                   | FR-PWA-010 to FR-PWA-020 |
+| C    | Push and re-engagement             | FR-PWA-021 to FR-PWA-024 |
+| D    | Mobile experience and distribution | FR-PWA-025 to FR-PWA-031 |
+| E    | Browser extension companion        | FR-PWA-032 to FR-PWA-038 |
+| F    | Health and measurement             | FR-PWA-039               |
 
 ## 4. Feature specifications
 
@@ -226,23 +226,24 @@ Conventions used by every feature (not repeated in each field):
 - **User interactions and actions:** None; user sees "as of" labels where stale data is shown (FR-PWA-011).
 - **System behaviour:** The strategy table (all caches versioned and namespaced per FR-PWA-008):
 
-| Class | Surface | Strategy | Offline behavior | Max age / notes |
-|---|---|---|---|---|
-| S1 | App shell HTML, precached assets | Precache (revisioned) | Served | replaced atomically on activate |
-| S2 | Hashed static assets, fonts, icons | Cache-first, immutable | Served | 1 year, LRU cap |
-| S3 | Public marketing and help pages | Network-first, 3 second timeout, stale fallback | Stale copy with banner | 24 hours |
-| S4 | Public profiles and public job pages | Network-first, stale-while-revalidate for images only | Not served stale if profile hidden since (tombstone check on reconnect) | 1 hour |
-| S5 | Authenticated reads of the user's own data (profile, applications, saved jobs, messages list metadata, course progress) | Network-first with cache fallback, per-resource TTL | Served with "as of" label | TTL table in FR-PWA-011 |
-| S6 | Search, discovery, recommendations | Network-only (stale-if-error 5 minutes for the last query) | Failure message | prevents stale ranking |
-| S7 | Authentication, session, MFA, token, payment, checkout, webhooks | Network-only, never cached | Fails with clear message | never-cache list |
-| S8 | Assessment content, answers, proctoring, interview rooms | Network-only | Fails; route blocked offline | BR-PWA-002 |
-| S9 | Uploads and downloads of user files | Network-only; uploads resumable via PLT | Upload paused and resumed | signed URLs never cached |
-| S10 | Media (video, audio) | Network-only (range requests pass through); no offline copies | Fails | revisit via FR-PWA-020 |
-| S11 | Images (avatars, logos, thumbnails) | Stale-while-revalidate, LRU 50 MB `[PROP]` | Served | 7 days |
-| S12 | API reads of reference data (skills taxonomy, countries) | Stale-while-revalidate | Served | 24 hours |
-| S13 | Admin origin, any `/admin` path, back-office bundles | Not handled by the SW | Not available offline | BR-PWA-002 |
+| Class | Surface                                                                                                                 | Strategy                                                      | Offline behavior                                                        | Max age / notes                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------- |
+| S1    | App shell HTML, precached assets                                                                                        | Precache (revisioned)                                         | Served                                                                  | replaced atomically on activate |
+| S2    | Hashed static assets, fonts, icons                                                                                      | Cache-first, immutable                                        | Served                                                                  | 1 year, LRU cap                 |
+| S3    | Public marketing and help pages                                                                                         | Network-first, 3 second timeout, stale fallback               | Stale copy with banner                                                  | 24 hours                        |
+| S4    | Public profiles and public job pages                                                                                    | Network-first, stale-while-revalidate for images only         | Not served stale if profile hidden since (tombstone check on reconnect) | 1 hour                          |
+| S5    | Authenticated reads of the user's own data (profile, applications, saved jobs, messages list metadata, course progress) | Network-first with cache fallback, per-resource TTL           | Served with "as of" label                                               | TTL table in FR-PWA-011         |
+| S6    | Search, discovery, recommendations                                                                                      | Network-only (stale-if-error 5 minutes for the last query)    | Failure message                                                         | prevents stale ranking          |
+| S7    | Authentication, session, MFA, token, payment, checkout, webhooks                                                        | Network-only, never cached                                    | Fails with clear message                                                | never-cache list                |
+| S8    | Assessment content, answers, proctoring, interview rooms                                                                | Network-only                                                  | Fails; route blocked offline                                            | BR-PWA-002                      |
+| S9    | Uploads and downloads of user files                                                                                     | Network-only; uploads resumable via PLT                       | Upload paused and resumed                                               | signed URLs never cached        |
+| S10   | Media (video, audio)                                                                                                    | Network-only (range requests pass through); no offline copies | Fails                                                                   | revisit via FR-PWA-020          |
+| S11   | Images (avatars, logos, thumbnails)                                                                                     | Stale-while-revalidate, LRU 50 MB `[PROP]`                    | Served                                                                  | 7 days                          |
+| S12   | API reads of reference data (skills taxonomy, countries)                                                                | Stale-while-revalidate                                        | Served                                                                  | 24 hours                        |
+| S13   | Admin origin, any `/admin` path, back-office bundles                                                                    | Not handled by the SW                                         | Not available offline                                                   | BR-PWA-002                      |
 
-  Responses with `Cache-Control: no-store`, `Vary: Cookie` of a different account, `Set-Cookie`, status other than 200 and 206 range responses are never stored. Authenticated cached entries are keyed by account alias so two accounts on one device never share entries.
+Responses with `Cache-Control: no-store`, `Vary: Cookie` of a different account, `Set-Cookie`, status other than 200 and 206 range responses are never stored. Authenticated cached entries are keyed by account alias so two accounts on one device never share entries.
+
 - **UI elements and controls:** "As of <time>" chips on stale data; connectivity chip.
 - **Configuration options:** Platform: TTLs, caps, strategy table. User: "Clear offline data" (FR-PWA-008).
 - **Business rules:** BR-PWA-001, BR-PWA-002, BR-PWA-011
@@ -396,30 +397,31 @@ Conventions used by every feature (not repeated in each field):
 - **User interactions and actions:** None directly; users experience consistent "Needs connection" or "Saved on this device" outcomes.
 - **System behaviour:** Offline classes: **FO** (app opens offline), **RO** (read cached own data), **LD** (local unsent draft, sent by explicit user action when online), **QW** (queued write, sent automatically after reconnection, after the OD-PWA-01 trigger), **ON** (online only). Each action entry holds the seven contract fields from SSOT §19.2. Default for an unregistered action is **ON** (fail safe). The initial matrix `[PROP]`:
 
-| Action | Class | Why |
-|---|---|---|
-| Open app, navigate shell | FO | Static shell |
-| View own profile, applications, saved jobs, interviews, notifications list | RO | Own data, low risk |
-| Edit profile fields, resume sections | LD (QW later) | Reversible, versioned |
-| Write application answers before submitting | LD | Draft is not a submission |
-| Submit application | ON | Consequential, needs eligibility check |
-| Send message | LD (QW later, with expiry notice) | Not consequential, but recipient state may have changed |
-| Save or unsave job | QW | Idempotent toggle |
-| Mark notification read | QW | Idempotent |
-| Add private note on an application or candidate | LD (QW later) | Own data |
-| Course lesson progress (viewed lesson) | QW | Idempotent, monotonic |
-| Quiz or exam attempts, assessment submission, proctored sessions, coding challenges | ON | Integrity, timing, server authority |
-| Payments, subscription changes, refunds | ON | Financial |
-| Accepting an offer, signing a document, accepting terms | ON | Legal |
-| Evidence submission requiring file upload | LD for metadata; upload resumable when online | Files need scanning |
-| Identity verification, background check consent | ON | Sensitive |
-| Privacy requests, account deletion, password or MFA change | ON | Security |
-| Interview rooms, live video | ON | Real time |
-| Admin console actions | ON and excluded from install | BR-PWA-002 |
-| Posting a job, publishing, hiring decisions | ON | Consequential |
-| Search and recommendations | ON | Freshness |
+| Action                                                                              | Class                                         | Why                                                     |
+| ----------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------- |
+| Open app, navigate shell                                                            | FO                                            | Static shell                                            |
+| View own profile, applications, saved jobs, interviews, notifications list          | RO                                            | Own data, low risk                                      |
+| Edit profile fields, resume sections                                                | LD (QW later)                                 | Reversible, versioned                                   |
+| Write application answers before submitting                                         | LD                                            | Draft is not a submission                               |
+| Submit application                                                                  | ON                                            | Consequential, needs eligibility check                  |
+| Send message                                                                        | LD (QW later, with expiry notice)             | Not consequential, but recipient state may have changed |
+| Save or unsave job                                                                  | QW                                            | Idempotent toggle                                       |
+| Mark notification read                                                              | QW                                            | Idempotent                                              |
+| Add private note on an application or candidate                                     | LD (QW later)                                 | Own data                                                |
+| Course lesson progress (viewed lesson)                                              | QW                                            | Idempotent, monotonic                                   |
+| Quiz or exam attempts, assessment submission, proctored sessions, coding challenges | ON                                            | Integrity, timing, server authority                     |
+| Payments, subscription changes, refunds                                             | ON                                            | Financial                                               |
+| Accepting an offer, signing a document, accepting terms                             | ON                                            | Legal                                                   |
+| Evidence submission requiring file upload                                           | LD for metadata; upload resumable when online | Files need scanning                                     |
+| Identity verification, background check consent                                     | ON                                            | Sensitive                                               |
+| Privacy requests, account deletion, password or MFA change                          | ON                                            | Security                                                |
+| Interview rooms, live video                                                         | ON                                            | Real time                                               |
+| Admin console actions                                                               | ON and excluded from install                  | BR-PWA-002                                              |
+| Posting a job, publishing, hiring decisions                                         | ON                                            | Consequential                                           |
+| Search and recommendations                                                          | ON                                            | Freshness                                               |
 
-  The registry feeds three consumers: the UI wrapper that disables or relabels controls offline, the SW rule generator, and the QA test generator that tries each action offline.
+The registry feeds three consumers: the UI wrapper that disables or relabels controls offline, the SW rule generator, and the QA test generator that tries each action offline.
+
 - **UI elements and controls:** Standard offline control states: enabled with "Saved on this device" outcome (LD), enabled with "Will send when online" outcome (QW), disabled with "Needs connection" (ON).
 - **Configuration options:** Platform: registry (code-defined), per-class feature flags (QW class gated by OD-PWA-01).
 - **Business rules:** BR-PWA-004, BR-PWA-001
@@ -1122,39 +1124,39 @@ Extension scope note: v1 is candidate-facing for Chromium browsers (Chrome, Edge
 
 ## 5. Business rules
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-PWA-001 | The service worker and every client cache are disposable conveniences, never the business source of truth. A cached response is never proof of current state, authorization or consent; server authority decides. | Integrity and security. | Cache layer; server APIs | [SRC: SSOT §19.2] [SRC: Yash 08 INV-T13] |
-| BR-PWA-002 | The never-cache list is enforced in code and tests: authentication, session, MFA, payment and checkout, assessments and proctoring, interview rooms, the admin origin and back-office bundles, sealed data classes, tokenized public URLs (`/r/*`, `/invite/*`), signed file URLs. Admin surfaces are never installable and never offline. | Prevents leakage and stale authorization. | SW routing; CI policy tests | [SRC: Yash 08 PWA-01 R2b] [DER] |
-| BR-PWA-003 | On logout, session expiry (after the retention window), account switch, "Clear offline data" or a forced purge, all caches, drafts, outbox rows, local settings and push subscriptions of the account are removed; shared-device mode retains nothing. | Shared-device safety. | Client storage manager; server unsubscribe | [SRC: Yash 08 OFF-01 §10] |
-| BR-PWA-004 | Offline writes follow the capability registry: drafts (LD) for reversible content, queued writes (QW) only for allowlisted idempotent actions after OD-PWA-01 fires, and everything consequential, legal, financial, assessed, security-related or real-time is online-only (ON). Unregistered actions default to ON. | Safety by default. | Registry; CI; UI wrappers | [SRC: SSOT §19.2] [SRC: Yash 08 OFF-01-REV2] |
-| BR-PWA-005 | Every user intent that may be retried has a UUID idempotency key generated when the intent is created and stored with it; drafts and queued items live 14 days with a warning at 5 days and removal only with consent; server key retention is at least 14 days. | Retry safety. | Client stores; PLT idempotency | [SRC: Yash 08 OFF-01-REV2 §2] |
-| BR-PWA-006 | Concurrent changes are detected with entity versions (`If-Match`); material conflicts are never silently overwritten; monotonic data resolves by rule, others by explicit user choice. | No silent data loss. | API (428, 409/412); conflict dialog | [SRC: SSOT §19.3] |
-| BR-PWA-007 | The install prompt is shown only to signed-in users after engagement criteria and never during forms, assessments, checkout or interviews; frequency is limited (first, +14 days, +60 days, then never); dismissal and "Don't ask again" are honored. | Respect for users. | Install controller | [PROP] |
-| BR-PWA-008 | The service worker never calls `skipWaiting` automatically; updates apply at safe moments with drafts persisted; required updates are set only by minimum version and enforced by API 426; a remote passthrough or unregister mode exists. | Prevent data loss and bricking. | SW; version manifest; API | [SRC: Yash 08 PWA-01 §5] |
-| BR-PWA-009 | Notification permission is requested only after a user tap following an explanation, never on load; denial is remembered and not re-prompted for 90 days; push is opt-in per device. | Consent and trust. | Push controller | [SRC: SSOT §19.1] [PROP] |
-| BR-PWA-010 | Client storage has budgets per category; the app evicts in a fixed order (images, lazy code, reference data, own-data cache) and never evicts drafts or the outbox without consent; write failures surface to the user. | No silent loss. | Storage manager | [SRC: Yash 08 OFF-01 §6] |
-| BR-PWA-011 | The precache holds only the shell critical path and offline page within a 1.5 MB budget; lazy chunks are runtime-cached on first use; back-office bundles are never precached. | Fast install, small footprint. | Build checks | [SRC: Yash 08 PWA-01 R2 B13] |
-| BR-PWA-012 | UI labels about local data are literal: "Unsent. Saved on this device only", "Waiting to send", "As of <time>"; never "Synced" or "Sent" unless the server confirmed. | Honesty. | UI components | [SRC: Yash 08 OFF-01-REV2 §1] |
-| BR-PWA-013 | Low-bandwidth mode is automatic on Save-Data or slow effective connection and manually overridable; it never removes essential flows and never changes legal or safety content. | Inclusion. | Client and CDN renditions | [PROP] |
-| BR-PWA-014 | Mobile UI rules: touch targets ≥ 44 px, no hover-only functions, gesture alternatives, correct input types, zoom never disabled, 16 px inputs, safe-area insets, reflow at 400% zoom, `prefers-reduced-motion` respected. | Usability and accessibility. | `packages/ui`; tests | [SRC: SSOT Appendix D] [DER] |
-| BR-PWA-015 | A wrapper or native client is built only after a documented trigger (iOS push or install friction, Android store presence, native-only capability, institution distribution) is measured and approved; a thin web-view-only wrapper is not approved alone. | Cost and store policy risk. | Decision gate (FR-PWA-030) | [SRC: Yash 08 MOB-01 §5] |
-| BR-PWA-016 | The extension is local-first: scanning, matching and form detection run on the device; page content, browsing activity and form values are not transmitted or stored beyond in-memory use unless the user saves or fills; the only network calls are the user-initiated actions listed in the privacy disclosure (pairing, profile refresh, save job, resume attach, config fetch); no third-party analytics; no remote code. | Privacy and store compliance. | Extension code; CI; review | [SRC: SSOT BR-30, ADR-006] [DEC-REQ] OD-PWA-02 |
-| BR-PWA-017 | The extension requests the minimum permissions (`activeTab`, `storage`, `scripting`, `identity`, `sidePanel`, TalentSphere hosts); job-site and form-site access uses optional host permissions requested at the moment of use; forbidden: `tabs`, `history`, `webRequest`, `cookies`, `<all_urls>`, `webNavigation`; any change needs SAD approval. | Least privilege. | Manifest CI | [DER] |
-| BR-PWA-018 | Autofill never submits, never fills on load, never fills sensitive fields (passwords, payment, government identifiers, date of birth, gender, ethnicity, disability, veteran status, health, EEO self-identification) and never generates answers to free-text questions; every value is shown and editable before filling. | Safety and fairness. | Autofill engine | [PROP] |
-| BR-PWA-019 | Extension pairing uses OAuth authorization code with PKCE; tokens are short-lived and scoped (`extension.profile.read`, `extension.jobs.save`, `extension.autofill.read`); pairings are listed and revocable; revocation takes effect at once. | Secure delegation. | Auth server; extension | [DER] |
-| BR-PWA-020 | Remote extension config is signed, may only disable features or require updates, never add behavior or permissions, and its version counter is monotonic; kill state persists until a newer config changes it. | Safe remote control. | Extension config handler | [DER] |
-| BR-PWA-021 | Offline downloadable media is not available until OD-PWA-07 is decided; when enabled, only licensed, provider-permitted content is downloadable, stored encrypted, time-limited and revoked at unenrollment; protected third-party content is never downloaded. | Rights and ADR-T10. | Download manager | [SRC: Yash 08 OFF-01-REV2 §0] [SRC: SSOT BR-084] |
-| BR-PWA-022 | Deep links, share targets and file handlers are untrusted input: routes are allowlisted, content size and type validated, no action is performed by a link itself, and staged payloads expire in 10 minutes. | Abuse prevention. | Router; SW | [DER] |
-| BR-PWA-023 | App badge counts equal server unread counts, contain no content, are capped at 99 and cleared on read or logout. | Accuracy and privacy. | Badge service | [PROP] |
-| BR-PWA-024 | PWA and extension telemetry is whitelist-only, without personal data, content or tokenized URLs; route templates replace paths; sampling applies; nothing is sent without consent or in shared-device mode. | Privacy. | Telemetry client; server schema | [SRC: SSOT BR-27] |
-| BR-PWA-025 | Background Sync and Periodic Sync are enhancements only; correctness never depends on them; the app also flushes on open, on focus after reconnection and on a visible timer. | Browser variance. | Sync controller | [SRC: Yash 08 PLATFORM_COMPATIBILITY_MATRIX] |
-| BR-PWA-026 | `navigator.onLine` is a hint only; connectivity state combines request outcomes and a small reachability probe; captive portals are detected. | Accurate state. | Connectivity module | [DER] |
-| BR-PWA-027 | Store listings must be truthful and consistent with behavior: single-purpose statement, permission justifications, data-use disclosure equal to the manifest, real screenshots, no keyword stuffing; listing metadata is monitored for drift. | Approval and trust. | Release checklist | [PROP] |
-| BR-PWA-028 | Extension-held personal data (profile snapshot, local resumes, saved-job outbox) is stored encrypted where possible, never leaves the device except through listed actions, and is deleted on disconnect, "Delete local data" or account deletion. | Data minimization. | Extension storage | [SRC: SSOT BR-30] |
-| BR-PWA-029 | Capabilities are feature-detected, never inferred from the user agent; every capability-dependent feature has a defined fallback; no core journey requires install, push or any single browser API. | Robustness. | `capabilities` module | [SRC: SSOT §19.1] [SRC: Yash 08 FF-09] |
-| BR-PWA-030 | Only one outbox flusher runs per account per device at a time (Web Locks lease, with a BroadcastChannel fallback); delivery is FIFO per entity. | Prevent duplicates and reordering. | Outbox | [SRC: Yash 08 OFF-01] |
-| BR-PWA-031 | Push is a convenience channel: payloads are sensitive-content-free and consequential events (offers, legal notices, security alerts) are always also delivered in-app and by email; lock-screen text assumes bystanders. | Privacy and reliability. | NTF routing; payload builder | [SRC: Yash 08 MOB-01 §4] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                                                          | Rationale                                 | Enforced where                             | Source                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------ | ------------------------------------------------ |
+| BR-PWA-001 | The service worker and every client cache are disposable conveniences, never the business source of truth. A cached response is never proof of current state, authorization or consent; server authority decides.                                                                                                                                                                                                             | Integrity and security.                   | Cache layer; server APIs                   | [SRC: SSOT §19.2] [SRC: Yash 08 INV-T13]         |
+| BR-PWA-002 | The never-cache list is enforced in code and tests: authentication, session, MFA, payment and checkout, assessments and proctoring, interview rooms, the admin origin and back-office bundles, sealed data classes, tokenized public URLs (`/r/*`, `/invite/*`), signed file URLs. Admin surfaces are never installable and never offline.                                                                                    | Prevents leakage and stale authorization. | SW routing; CI policy tests                | [SRC: Yash 08 PWA-01 R2b] [DER]                  |
+| BR-PWA-003 | On logout, session expiry (after the retention window), account switch, "Clear offline data" or a forced purge, all caches, drafts, outbox rows, local settings and push subscriptions of the account are removed; shared-device mode retains nothing.                                                                                                                                                                        | Shared-device safety.                     | Client storage manager; server unsubscribe | [SRC: Yash 08 OFF-01 §10]                        |
+| BR-PWA-004 | Offline writes follow the capability registry: drafts (LD) for reversible content, queued writes (QW) only for allowlisted idempotent actions after OD-PWA-01 fires, and everything consequential, legal, financial, assessed, security-related or real-time is online-only (ON). Unregistered actions default to ON.                                                                                                         | Safety by default.                        | Registry; CI; UI wrappers                  | [SRC: SSOT §19.2] [SRC: Yash 08 OFF-01-REV2]     |
+| BR-PWA-005 | Every user intent that may be retried has a UUID idempotency key generated when the intent is created and stored with it; drafts and queued items live 14 days with a warning at 5 days and removal only with consent; server key retention is at least 14 days.                                                                                                                                                              | Retry safety.                             | Client stores; PLT idempotency             | [SRC: Yash 08 OFF-01-REV2 §2]                    |
+| BR-PWA-006 | Concurrent changes are detected with entity versions (`If-Match`); material conflicts are never silently overwritten; monotonic data resolves by rule, others by explicit user choice.                                                                                                                                                                                                                                        | No silent data loss.                      | API (428, 409/412); conflict dialog        | [SRC: SSOT §19.3]                                |
+| BR-PWA-007 | The install prompt is shown only to signed-in users after engagement criteria and never during forms, assessments, checkout or interviews; frequency is limited (first, +14 days, +60 days, then never); dismissal and "Don't ask again" are honored.                                                                                                                                                                         | Respect for users.                        | Install controller                         | [PROP]                                           |
+| BR-PWA-008 | The service worker never calls `skipWaiting` automatically; updates apply at safe moments with drafts persisted; required updates are set only by minimum version and enforced by API 426; a remote passthrough or unregister mode exists.                                                                                                                                                                                    | Prevent data loss and bricking.           | SW; version manifest; API                  | [SRC: Yash 08 PWA-01 §5]                         |
+| BR-PWA-009 | Notification permission is requested only after a user tap following an explanation, never on load; denial is remembered and not re-prompted for 90 days; push is opt-in per device.                                                                                                                                                                                                                                          | Consent and trust.                        | Push controller                            | [SRC: SSOT §19.1] [PROP]                         |
+| BR-PWA-010 | Client storage has budgets per category; the app evicts in a fixed order (images, lazy code, reference data, own-data cache) and never evicts drafts or the outbox without consent; write failures surface to the user.                                                                                                                                                                                                       | No silent loss.                           | Storage manager                            | [SRC: Yash 08 OFF-01 §6]                         |
+| BR-PWA-011 | The precache holds only the shell critical path and offline page within a 1.5 MB budget; lazy chunks are runtime-cached on first use; back-office bundles are never precached.                                                                                                                                                                                                                                                | Fast install, small footprint.            | Build checks                               | [SRC: Yash 08 PWA-01 R2 B13]                     |
+| BR-PWA-012 | UI labels about local data are literal: "Unsent. Saved on this device only", "Waiting to send", "As of <time>"; never "Synced" or "Sent" unless the server confirmed.                                                                                                                                                                                                                                                         | Honesty.                                  | UI components                              | [SRC: Yash 08 OFF-01-REV2 §1]                    |
+| BR-PWA-013 | Low-bandwidth mode is automatic on Save-Data or slow effective connection and manually overridable; it never removes essential flows and never changes legal or safety content.                                                                                                                                                                                                                                               | Inclusion.                                | Client and CDN renditions                  | [PROP]                                           |
+| BR-PWA-014 | Mobile UI rules: touch targets ≥ 44 px, no hover-only functions, gesture alternatives, correct input types, zoom never disabled, 16 px inputs, safe-area insets, reflow at 400% zoom, `prefers-reduced-motion` respected.                                                                                                                                                                                                     | Usability and accessibility.              | `packages/ui`; tests                       | [SRC: SSOT Appendix D] [DER]                     |
+| BR-PWA-015 | A wrapper or native client is built only after a documented trigger (iOS push or install friction, Android store presence, native-only capability, institution distribution) is measured and approved; a thin web-view-only wrapper is not approved alone.                                                                                                                                                                    | Cost and store policy risk.               | Decision gate (FR-PWA-030)                 | [SRC: Yash 08 MOB-01 §5]                         |
+| BR-PWA-016 | The extension is local-first: scanning, matching and form detection run on the device; page content, browsing activity and form values are not transmitted or stored beyond in-memory use unless the user saves or fills; the only network calls are the user-initiated actions listed in the privacy disclosure (pairing, profile refresh, save job, resume attach, config fetch); no third-party analytics; no remote code. | Privacy and store compliance.             | Extension code; CI; review                 | [SRC: SSOT BR-30, ADR-006] [DEC-REQ] OD-PWA-02   |
+| BR-PWA-017 | The extension requests the minimum permissions (`activeTab`, `storage`, `scripting`, `identity`, `sidePanel`, TalentSphere hosts); job-site and form-site access uses optional host permissions requested at the moment of use; forbidden: `tabs`, `history`, `webRequest`, `cookies`, `<all_urls>`, `webNavigation`; any change needs SAD approval.                                                                          | Least privilege.                          | Manifest CI                                | [DER]                                            |
+| BR-PWA-018 | Autofill never submits, never fills on load, never fills sensitive fields (passwords, payment, government identifiers, date of birth, gender, ethnicity, disability, veteran status, health, EEO self-identification) and never generates answers to free-text questions; every value is shown and editable before filling.                                                                                                   | Safety and fairness.                      | Autofill engine                            | [PROP]                                           |
+| BR-PWA-019 | Extension pairing uses OAuth authorization code with PKCE; tokens are short-lived and scoped (`extension.profile.read`, `extension.jobs.save`, `extension.autofill.read`); pairings are listed and revocable; revocation takes effect at once.                                                                                                                                                                                | Secure delegation.                        | Auth server; extension                     | [DER]                                            |
+| BR-PWA-020 | Remote extension config is signed, may only disable features or require updates, never add behavior or permissions, and its version counter is monotonic; kill state persists until a newer config changes it.                                                                                                                                                                                                                | Safe remote control.                      | Extension config handler                   | [DER]                                            |
+| BR-PWA-021 | Offline downloadable media is not available until OD-PWA-07 is decided; when enabled, only licensed, provider-permitted content is downloadable, stored encrypted, time-limited and revoked at unenrollment; protected third-party content is never downloaded.                                                                                                                                                               | Rights and ADR-T10.                       | Download manager                           | [SRC: Yash 08 OFF-01-REV2 §0] [SRC: SSOT BR-084] |
+| BR-PWA-022 | Deep links, share targets and file handlers are untrusted input: routes are allowlisted, content size and type validated, no action is performed by a link itself, and staged payloads expire in 10 minutes.                                                                                                                                                                                                                  | Abuse prevention.                         | Router; SW                                 | [DER]                                            |
+| BR-PWA-023 | App badge counts equal server unread counts, contain no content, are capped at 99 and cleared on read or logout.                                                                                                                                                                                                                                                                                                              | Accuracy and privacy.                     | Badge service                              | [PROP]                                           |
+| BR-PWA-024 | PWA and extension telemetry is whitelist-only, without personal data, content or tokenized URLs; route templates replace paths; sampling applies; nothing is sent without consent or in shared-device mode.                                                                                                                                                                                                                   | Privacy.                                  | Telemetry client; server schema            | [SRC: SSOT BR-27]                                |
+| BR-PWA-025 | Background Sync and Periodic Sync are enhancements only; correctness never depends on them; the app also flushes on open, on focus after reconnection and on a visible timer.                                                                                                                                                                                                                                                 | Browser variance.                         | Sync controller                            | [SRC: Yash 08 PLATFORM_COMPATIBILITY_MATRIX]     |
+| BR-PWA-026 | `navigator.onLine` is a hint only; connectivity state combines request outcomes and a small reachability probe; captive portals are detected.                                                                                                                                                                                                                                                                                 | Accurate state.                           | Connectivity module                        | [DER]                                            |
+| BR-PWA-027 | Store listings must be truthful and consistent with behavior: single-purpose statement, permission justifications, data-use disclosure equal to the manifest, real screenshots, no keyword stuffing; listing metadata is monitored for drift.                                                                                                                                                                                 | Approval and trust.                       | Release checklist                          | [PROP]                                           |
+| BR-PWA-028 | Extension-held personal data (profile snapshot, local resumes, saved-job outbox) is stored encrypted where possible, never leaves the device except through listed actions, and is deleted on disconnect, "Delete local data" or account deletion.                                                                                                                                                                            | Data minimization.                        | Extension storage                          | [SRC: SSOT BR-30]                                |
+| BR-PWA-029 | Capabilities are feature-detected, never inferred from the user agent; every capability-dependent feature has a defined fallback; no core journey requires install, push or any single browser API.                                                                                                                                                                                                                           | Robustness.                               | `capabilities` module                      | [SRC: SSOT §19.1] [SRC: Yash 08 FF-09]           |
+| BR-PWA-030 | Only one outbox flusher runs per account per device at a time (Web Locks lease, with a BroadcastChannel fallback); delivery is FIFO per entity.                                                                                                                                                                                                                                                                               | Prevent duplicates and reordering.        | Outbox                                     | [SRC: Yash 08 OFF-01]                            |
+| BR-PWA-031 | Push is a convenience channel: payloads are sensitive-content-free and consequential events (offers, legal notices, security alerts) are always also delivered in-app and by email; lock-screen text assumes bystanders.                                                                                                                                                                                                      | Privacy and reliability.                  | NTF routing; payload builder               | [SRC: Yash 08 MOB-01 §4]                         |
 
 ## 6. State machines
 
@@ -1162,17 +1164,17 @@ Extension scope note: v1 is candidate-facing for Chromium browsers (Chrome, Edge
 
 States: `unregistered`, `installing`, `waiting`, `activating`, `active`, `redundant`, `passthrough`. Terminal: `redundant` (per version).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| unregistered | installing | first registration | HTTPS; SW supported |
-| installing | waiting | precache complete | all assets verified |
-| installing | redundant | precache failure | old SW remains active |
-| waiting | activating | cold start with no controlled clients or user taps Update | no unsaved input; drafts persisted |
-| waiting | activating | required update at a safe moment | minimum version raised |
-| activating | active | old caches deleted | — |
-| active | redundant | replaced by a newer version | — |
-| active | passthrough | remote mode passthrough | `sw-config.json` |
-| active, passthrough | unregistered | remote mode unregister or Reset app data | — |
+| From                | To           | Trigger                                                   | Guard                              |
+| ------------------- | ------------ | --------------------------------------------------------- | ---------------------------------- |
+| unregistered        | installing   | first registration                                        | HTTPS; SW supported                |
+| installing          | waiting      | precache complete                                         | all assets verified                |
+| installing          | redundant    | precache failure                                          | old SW remains active              |
+| waiting             | activating   | cold start with no controlled clients or user taps Update | no unsaved input; drafts persisted |
+| waiting             | activating   | required update at a safe moment                          | minimum version raised             |
+| activating          | active       | old caches deleted                                        | —                                  |
+| active              | redundant    | replaced by a newer version                               | —                                  |
+| active              | passthrough  | remote mode passthrough                                   | `sw-config.json`                   |
+| active, passthrough | unregistered | remote mode unregister or Reset app data                  | —                                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1193,16 +1195,16 @@ stateDiagram-v2
 
 States: `not_eligible`, `eligible`, `prompted`, `dismissed`, `suppressed`, `installed`. Terminal: none (installed can revert on uninstall).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| not_eligible | eligible | browser reports installable and engagement criteria met | signed in |
-| eligible | prompted | card shown | safe moment; frequency allows |
-| prompted | installed | user accepts and `appinstalled` fires | — |
-| prompted | dismissed | "Not now" or browser dismissal | — |
-| dismissed | eligible | frequency window elapses | fewer than 3 prompts |
-| dismissed, eligible | suppressed | "Don't ask again" or third dismissal | — |
-| any | installed | `appinstalled` or standalone display detected | — |
-| installed | eligible | uninstall detected (standalone no longer seen for 30 days and installability true) | — |
+| From                | To         | Trigger                                                                            | Guard                         |
+| ------------------- | ---------- | ---------------------------------------------------------------------------------- | ----------------------------- |
+| not_eligible        | eligible   | browser reports installable and engagement criteria met                            | signed in                     |
+| eligible            | prompted   | card shown                                                                         | safe moment; frequency allows |
+| prompted            | installed  | user accepts and `appinstalled` fires                                              | —                             |
+| prompted            | dismissed  | "Not now" or browser dismissal                                                     | —                             |
+| dismissed           | eligible   | frequency window elapses                                                           | fewer than 3 prompts          |
+| dismissed, eligible | suppressed | "Don't ask again" or third dismissal                                               | —                             |
+| any                 | installed  | `appinstalled` or standalone display detected                                      | —                             |
+| installed           | eligible   | uninstall detected (standalone no longer seen for 30 days and installability true) | —                             |
 
 ```mermaid
 stateDiagram-v2
@@ -1222,23 +1224,23 @@ stateDiagram-v2
 
 States: `draft`, `ready`, `queued`, `sending`, `sent`, `failed_retryable`, `conflict`, `expired`, `discarded`. Terminal: `sent`, `discarded`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | ready | user presses Send while offline (class QW only) or confirms | action class permits |
-| draft | sending | user presses Send while online | — |
-| ready | queued | class QW action accepted offline | OD-PWA-01 enabled |
-| queued | sending | flusher takes lease | online |
-| sending | sent | server confirms | — |
-| sending | failed_retryable | timeout or 5xx | attempts < 8 |
-| failed_retryable | sending | backoff elapsed or user retry | — |
-| sending | conflict | 409 or 412 | — |
-| conflict | sending | user resolves (Keep mine, Edit) | — |
-| conflict | discarded | user chooses Use theirs | — |
-| draft, queued, failed_retryable | expired | 14 days elapse | warning at 5 days |
-| expired | discarded | user decides discard | consent |
-| expired | draft | user decides keep (resets timer once) | — |
-| sending | discarded | 401, 403, 404 or 422 (non-retryable) | message shown |
-| draft, queued | discarded | user discards or cancels | — |
+| From                            | To               | Trigger                                                     | Guard                |
+| ------------------------------- | ---------------- | ----------------------------------------------------------- | -------------------- |
+| draft                           | ready            | user presses Send while offline (class QW only) or confirms | action class permits |
+| draft                           | sending          | user presses Send while online                              | —                    |
+| ready                           | queued           | class QW action accepted offline                            | OD-PWA-01 enabled    |
+| queued                          | sending          | flusher takes lease                                         | online               |
+| sending                         | sent             | server confirms                                             | —                    |
+| sending                         | failed_retryable | timeout or 5xx                                              | attempts < 8         |
+| failed_retryable                | sending          | backoff elapsed or user retry                               | —                    |
+| sending                         | conflict         | 409 or 412                                                  | —                    |
+| conflict                        | sending          | user resolves (Keep mine, Edit)                             | —                    |
+| conflict                        | discarded        | user chooses Use theirs                                     | —                    |
+| draft, queued, failed_retryable | expired          | 14 days elapse                                              | warning at 5 days    |
+| expired                         | discarded        | user decides discard                                        | consent              |
+| expired                         | draft            | user decides keep (resets timer once)                       | —                    |
+| sending                         | discarded        | 401, 403, 404 or 422 (non-retryable)                        | message shown        |
+| draft, queued                   | discarded        | user discards or cancels                                    | —                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1269,18 +1271,18 @@ stateDiagram-v2
 
 States: `unknown`, `primed`, `requested`, `granted`, `denied`, `subscribed`, `expired`, `revoked`. Terminal: none.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| unknown | primed | priming card shown after value moment | installed on iOS; signed in |
-| primed | requested | user taps "Turn on notifications" | — |
-| requested | granted | browser permission granted | — |
-| requested | denied | browser permission denied | no re-prompt 90 days |
-| granted | subscribed | subscription stored server-side | valid keys |
-| subscribed | expired | push service returns 404 or 410, or 30-day refresh fails | — |
-| expired | subscribed | resubscribe on next launch | permission still granted |
-| subscribed | revoked | user turns off, logout, or account switch | — |
-| denied | primed | 90 days pass and user opens Settings | — |
-| granted, subscribed | denied | user blocks in browser settings (detected on launch) | — |
+| From                | To         | Trigger                                                  | Guard                       |
+| ------------------- | ---------- | -------------------------------------------------------- | --------------------------- |
+| unknown             | primed     | priming card shown after value moment                    | installed on iOS; signed in |
+| primed              | requested  | user taps "Turn on notifications"                        | —                           |
+| requested           | granted    | browser permission granted                               | —                           |
+| requested           | denied     | browser permission denied                                | no re-prompt 90 days        |
+| granted             | subscribed | subscription stored server-side                          | valid keys                  |
+| subscribed          | expired    | push service returns 404 or 410, or 30-day refresh fails | —                           |
+| expired             | subscribed | resubscribe on next launch                               | permission still granted    |
+| subscribed          | revoked    | user turns off, logout, or account switch                | —                           |
+| denied              | primed     | 90 days pass and user opens Settings                     | —                           |
+| granted, subscribed | denied     | user blocks in browser settings (detected on launch)     | —                           |
 
 ```mermaid
 stateDiagram-v2
@@ -1302,12 +1304,12 @@ stateDiagram-v2
 
 States: `online`, `degraded`, `offline`. Terminal: none.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| online | degraded | median request time above 3 seconds or over 30% failures in 20 requests | persists 2 seconds |
-| online, degraded | offline | requests fail and probe fails | persists 2 seconds |
-| offline | degraded | probe succeeds but slow | — |
-| offline, degraded | online | probe and requests succeed | stable 2 seconds |
+| From              | To       | Trigger                                                                 | Guard              |
+| ----------------- | -------- | ----------------------------------------------------------------------- | ------------------ |
+| online            | degraded | median request time above 3 seconds or over 30% failures in 20 requests | persists 2 seconds |
+| online, degraded  | offline  | requests fail and probe fails                                           | persists 2 seconds |
+| offline           | degraded | probe succeeds but slow                                                 | —                  |
+| offline, degraded | online   | probe and requests succeed                                              | stable 2 seconds   |
 
 ```mermaid
 stateDiagram-v2
@@ -1324,15 +1326,15 @@ stateDiagram-v2
 
 States: `unpaired`, `pairing`, `paired`, `reauth_needed`, `revoked`. Terminal: `revoked`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| unpaired | pairing | user clicks Connect | PKCE challenge created |
-| pairing | paired | user authorizes | state and redirect match |
-| pairing | unpaired | user cancels or 10 minutes pass | — |
-| paired | reauth_needed | refresh fails (expired) | — |
-| reauth_needed | paired | user reconnects | — |
-| paired, reauth_needed | revoked | user revokes, account suspended or deleted | — |
-| revoked | unpaired | local data deleted | new pairing starts fresh |
+| From                  | To            | Trigger                                    | Guard                    |
+| --------------------- | ------------- | ------------------------------------------ | ------------------------ |
+| unpaired              | pairing       | user clicks Connect                        | PKCE challenge created   |
+| pairing               | paired        | user authorizes                            | state and redirect match |
+| pairing               | unpaired      | user cancels or 10 minutes pass            | —                        |
+| paired                | reauth_needed | refresh fails (expired)                    | —                        |
+| reauth_needed         | paired        | user reconnects                            | —                        |
+| paired, reauth_needed | revoked       | user revokes, account suspended or deleted | —                        |
+| revoked               | unpaired      | local data deleted                         | new pairing starts fresh |
 
 ```mermaid
 stateDiagram-v2
@@ -1351,14 +1353,14 @@ stateDiagram-v2
 
 States: `monitoring`, `trigger_fired`, `evaluating`, `approved_for_build`, `rejected`, `deferred`. Terminal: `rejected` (until the next review cycle).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| monitoring | trigger_fired | metric crosses threshold for two quarters, or qualitative trigger recorded | snapshot attached |
-| trigger_fired | evaluating | PAD opens an evaluation | — |
-| evaluating | approved_for_build | decision recorded with scope and exit criteria | product owner and SAD approval |
-| evaluating | rejected | evidence insufficient | rationale ≥ 100 characters |
-| evaluating | deferred | conflicting evidence | review date set |
-| deferred, rejected | monitoring | next quarterly review | — |
+| From               | To                 | Trigger                                                                    | Guard                          |
+| ------------------ | ------------------ | -------------------------------------------------------------------------- | ------------------------------ |
+| monitoring         | trigger_fired      | metric crosses threshold for two quarters, or qualitative trigger recorded | snapshot attached              |
+| trigger_fired      | evaluating         | PAD opens an evaluation                                                    | —                              |
+| evaluating         | approved_for_build | decision recorded with scope and exit criteria                             | product owner and SAD approval |
+| evaluating         | rejected           | evidence insufficient                                                      | rationale ≥ 100 characters     |
+| evaluating         | deferred           | conflicting evidence                                                       | review date set                |
+| deferred, rejected | monitoring         | next quarterly review                                                      | —                              |
 
 ```mermaid
 stateDiagram-v2
@@ -1376,56 +1378,56 @@ stateDiagram-v2
 
 Routes are on the product origin unless noted. [PROP]
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-PWA-001 | Install card | inline component | signed-in roles | Offer install | eligible, iOS instructions, dismissed |
-| SCR-PWA-002 | iOS Add to Home Screen sheet | modal | signed-in roles | Step-by-step install on iOS | default |
-| SCR-PWA-003 | Update banner and required-update dialog | inline, modal | all | Apply new version | optional, required, deferred (unsaved input) |
-| SCR-PWA-004 | Settings: About and app data | `/settings/app` | signed-in roles | Versions, update check, Reset app data | default, resetting, confirm with unsent count |
-| SCR-PWA-005 | Settings: Storage | `/settings/storage` | signed-in roles | Usage, persistence, clear, background refresh | normal, over 80%, persistence denied |
-| SCR-PWA-006 | Connectivity chip and details | header | all | Show state, last contact, retry | online (hidden), degraded, offline, captive portal |
-| SCR-PWA-007 | Offline page | `/offline` (precached) | all | Fallback when nothing is cached | offline, server error, maintenance, upgrade required |
-| SCR-PWA-008 | Offline-aware screen states | pattern | all | As-of chips, disabled controls | cached, stale beyond TTL, not saved |
-| SCR-PWA-009 | Draft restore banner and form status | inline | signed-in roles | Restore and status of unsent drafts | restored, storage full, expired warning |
-| SCR-PWA-010 | Sync center | `/settings/sync` | signed-in roles | Drafts, waiting, needs attention | empty, mixed, offline |
-| SCR-PWA-011 | Conflict resolution dialog | modal | signed-in roles | Keep mine, use theirs, edit | text diff, deleted on server, re-conflict |
-| SCR-PWA-012 | Logout and account-switch dialog | modal | signed-in roles | Decide on unsent items; purge | with drafts, shared device |
-| SCR-PWA-013 | Push priming card | inline | signed-in roles | Explain and request push | default, iOS needs install, denied help |
-| SCR-PWA-014 | Settings: Notifications devices and channels | `/settings/notifications` | signed-in roles | Per-device push, class matrix, quiet hours, history | default, locked by org, test sent |
-| SCR-PWA-015 | Data saver settings | `/settings/data` | all | Off, Auto, On | auto-on notice |
-| SCR-PWA-016 | Share target picker | `/share-target` | CAN, STD, FRL | Choose how to use shared content | URL, file, unsupported, signed out |
-| SCR-PWA-017 | Deep-link neutral screen | `/link-unavailable` | all | Unauthorized or missing target | default |
-| SCR-PWA-018 | Permission explainer sheets | modal | all | Camera, microphone, notifications | explain, denied help |
-| SCR-PWA-019 | Offline downloads manager | `/settings/downloads` | STD, CAN | Manage downloaded lessons | empty, downloading, expiring |
-| SCR-PWA-020 | Settings: Extensions | `/settings/extensions` | CAN, STD, FRL, INS, MNT | List pairings, revoke | none, list, revoked |
-| SCR-PWA-021 | Extension pairing consent | `/extensions/pair` | CAN, STD, FRL, INS, MNT | Authorize scopes | consent, success, error |
-| SCR-PWA-022 | Extension popup | extension | all | Connection state, quick actions | unpaired, paired, reconnect needed, disabled by config |
-| SCR-PWA-023 | Extension side panel: scan result | extension | CAN, STD, FRL | Parsed job, edit, actions | detected, list page, unsupported, partial |
-| SCR-PWA-024 | Extension match card | extension | CAN, STD, FRL | Local match and skills | scored, not enough content, no resume |
-| SCR-PWA-025 | Extension autofill panel | extension | CAN, STD, FRL | Review and fill fields | detected, sensitive skipped, permission needed |
-| SCR-PWA-026 | Extension privacy page | extension, `/extensions/privacy` | all | Can do, stored, sent, delete | default, deleting |
-| SCR-PWA-027 | Mobile review (admin) | admin origin `/ops/mobile-review` | PAD, SAD | Trigger dashboard and decisions | monitoring, trigger fired, evaluating |
-| SCR-PWA-028 | Release and store checklist (admin) | admin origin `/ops/store-releases` | PAD, SAD | Submission checklist and status | incomplete, ready, in review, rejected |
-| SCR-PWA-029 | PWA health dashboard (admin) | admin origin `/ops/pwa-health` | PAD | Install, offline, push, vitals | healthy, degraded, no data |
+| ID          | Name                                         | Route proposal                     | Roles                   | Purpose                                             | Key states                                             |
+| ----------- | -------------------------------------------- | ---------------------------------- | ----------------------- | --------------------------------------------------- | ------------------------------------------------------ |
+| SCR-PWA-001 | Install card                                 | inline component                   | signed-in roles         | Offer install                                       | eligible, iOS instructions, dismissed                  |
+| SCR-PWA-002 | iOS Add to Home Screen sheet                 | modal                              | signed-in roles         | Step-by-step install on iOS                         | default                                                |
+| SCR-PWA-003 | Update banner and required-update dialog     | inline, modal                      | all                     | Apply new version                                   | optional, required, deferred (unsaved input)           |
+| SCR-PWA-004 | Settings: About and app data                 | `/settings/app`                    | signed-in roles         | Versions, update check, Reset app data              | default, resetting, confirm with unsent count          |
+| SCR-PWA-005 | Settings: Storage                            | `/settings/storage`                | signed-in roles         | Usage, persistence, clear, background refresh       | normal, over 80%, persistence denied                   |
+| SCR-PWA-006 | Connectivity chip and details                | header                             | all                     | Show state, last contact, retry                     | online (hidden), degraded, offline, captive portal     |
+| SCR-PWA-007 | Offline page                                 | `/offline` (precached)             | all                     | Fallback when nothing is cached                     | offline, server error, maintenance, upgrade required   |
+| SCR-PWA-008 | Offline-aware screen states                  | pattern                            | all                     | As-of chips, disabled controls                      | cached, stale beyond TTL, not saved                    |
+| SCR-PWA-009 | Draft restore banner and form status         | inline                             | signed-in roles         | Restore and status of unsent drafts                 | restored, storage full, expired warning                |
+| SCR-PWA-010 | Sync center                                  | `/settings/sync`                   | signed-in roles         | Drafts, waiting, needs attention                    | empty, mixed, offline                                  |
+| SCR-PWA-011 | Conflict resolution dialog                   | modal                              | signed-in roles         | Keep mine, use theirs, edit                         | text diff, deleted on server, re-conflict              |
+| SCR-PWA-012 | Logout and account-switch dialog             | modal                              | signed-in roles         | Decide on unsent items; purge                       | with drafts, shared device                             |
+| SCR-PWA-013 | Push priming card                            | inline                             | signed-in roles         | Explain and request push                            | default, iOS needs install, denied help                |
+| SCR-PWA-014 | Settings: Notifications devices and channels | `/settings/notifications`          | signed-in roles         | Per-device push, class matrix, quiet hours, history | default, locked by org, test sent                      |
+| SCR-PWA-015 | Data saver settings                          | `/settings/data`                   | all                     | Off, Auto, On                                       | auto-on notice                                         |
+| SCR-PWA-016 | Share target picker                          | `/share-target`                    | CAN, STD, FRL           | Choose how to use shared content                    | URL, file, unsupported, signed out                     |
+| SCR-PWA-017 | Deep-link neutral screen                     | `/link-unavailable`                | all                     | Unauthorized or missing target                      | default                                                |
+| SCR-PWA-018 | Permission explainer sheets                  | modal                              | all                     | Camera, microphone, notifications                   | explain, denied help                                   |
+| SCR-PWA-019 | Offline downloads manager                    | `/settings/downloads`              | STD, CAN                | Manage downloaded lessons                           | empty, downloading, expiring                           |
+| SCR-PWA-020 | Settings: Extensions                         | `/settings/extensions`             | CAN, STD, FRL, INS, MNT | List pairings, revoke                               | none, list, revoked                                    |
+| SCR-PWA-021 | Extension pairing consent                    | `/extensions/pair`                 | CAN, STD, FRL, INS, MNT | Authorize scopes                                    | consent, success, error                                |
+| SCR-PWA-022 | Extension popup                              | extension                          | all                     | Connection state, quick actions                     | unpaired, paired, reconnect needed, disabled by config |
+| SCR-PWA-023 | Extension side panel: scan result            | extension                          | CAN, STD, FRL           | Parsed job, edit, actions                           | detected, list page, unsupported, partial              |
+| SCR-PWA-024 | Extension match card                         | extension                          | CAN, STD, FRL           | Local match and skills                              | scored, not enough content, no resume                  |
+| SCR-PWA-025 | Extension autofill panel                     | extension                          | CAN, STD, FRL           | Review and fill fields                              | detected, sensitive skipped, permission needed         |
+| SCR-PWA-026 | Extension privacy page                       | extension, `/extensions/privacy`   | all                     | Can do, stored, sent, delete                        | default, deleting                                      |
+| SCR-PWA-027 | Mobile review (admin)                        | admin origin `/ops/mobile-review`  | PAD, SAD                | Trigger dashboard and decisions                     | monitoring, trigger fired, evaluating                  |
+| SCR-PWA-028 | Release and store checklist (admin)          | admin origin `/ops/store-releases` | PAD, SAD                | Submission checklist and status                     | incomplete, ready, in review, rejected                 |
+| SCR-PWA-029 | PWA health dashboard (admin)                 | admin origin `/ops/pwa-health`     | PAD                     | Install, offline, push, vitals                      | healthy, degraded, no data                             |
 
 ## 8. Data entities owned
 
 Client-side entities live on the device (IndexedDB or extension storage) and are never the system of record; their server-side shadows are limited to counts and receipts.
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-PWA-01 | PushSubscription | id, accountId, deviceId, endpoint, p256dh, auth, expiresAt, createdAt, lastUsedAt, status | DeviceRegistration | Credentials class; deleted on unsubscribe, logout, account deletion |
-| ENT-PWA-02 | DeviceRegistration | deviceId, accountId, platform, browser, installState, swVersion, appVersion, lastSeenAt, name | PushSubscription, ExtensionPairing | 13 months after last seen |
-| ENT-PWA-03 | ClientOutboxItem (device) | clientSeq, opType, schemaVersion, payload, idempotencyKey, baseEtag, state, attempts, createdAt, expiresAt | ClientDraft | Device only; 14 days; purged at logout |
-| ENT-PWA-04 | ClientDraft (device) | draftId, kind, accountAlias, payload, baseEtag, idempotencyKey, createdAt, updatedAt | ClientOutboxItem | Device only; 14 days |
-| ENT-PWA-05 | OfflinePolicyEntry | actionId, class (FO, RO, LD, QW, ON), seven contract fields, conflictPolicy, ttl | module actions | Versioned with the code (kept permanently in release history) |
-| ENT-PWA-06 | ExtensionPairing | id, accountId, installId, browser, extensionVersion, scopes, createdAt, lastUsedAt, status, refreshTokenHash | DeviceRegistration | While active; metadata 13 months after revoke |
-| ENT-PWA-07 | ExtensionConfigVersion | counter, signedPayload, minVersion, disabledAdapters, disabledFeatures, publishedBy, publishedAt | ADM config | 2 years |
-| ENT-PWA-08 | ExtensionSiteAdapter | adapterId, domainPatterns, ruleVersion, status, lastVerifiedAt | ExtensionConfigVersion | Life of adapter plus 1 year |
-| ENT-PWA-09 | WrapperDecisionRecord | id, quarter, triggerSnapshot, optionChosen, rationale, approvers, reviewDate | ADM approvals | 7 years |
-| ENT-PWA-10 | PwaTelemetryAggregate | metric, dimensions (platform, version, routeClass), period, value | ANL | 13 months |
-| ENT-PWA-11 | AppVersionManifest | version, minSupported, requiredFrom, releasedAt | release pipeline | 2 years |
-| ENT-PWA-12 | DraftCountHint | deviceId, accountId, count, updatedAt | DeviceRegistration | Deleted when count is 0 or after 30 days |
+| ID         | Entity                    | Key attributes                                                                                               | Relationships                      | Retention class                                                     |
+| ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------- | ------------------------------------------------------------------- |
+| ENT-PWA-01 | PushSubscription          | id, accountId, deviceId, endpoint, p256dh, auth, expiresAt, createdAt, lastUsedAt, status                    | DeviceRegistration                 | Credentials class; deleted on unsubscribe, logout, account deletion |
+| ENT-PWA-02 | DeviceRegistration        | deviceId, accountId, platform, browser, installState, swVersion, appVersion, lastSeenAt, name                | PushSubscription, ExtensionPairing | 13 months after last seen                                           |
+| ENT-PWA-03 | ClientOutboxItem (device) | clientSeq, opType, schemaVersion, payload, idempotencyKey, baseEtag, state, attempts, createdAt, expiresAt   | ClientDraft                        | Device only; 14 days; purged at logout                              |
+| ENT-PWA-04 | ClientDraft (device)      | draftId, kind, accountAlias, payload, baseEtag, idempotencyKey, createdAt, updatedAt                         | ClientOutboxItem                   | Device only; 14 days                                                |
+| ENT-PWA-05 | OfflinePolicyEntry        | actionId, class (FO, RO, LD, QW, ON), seven contract fields, conflictPolicy, ttl                             | module actions                     | Versioned with the code (kept permanently in release history)       |
+| ENT-PWA-06 | ExtensionPairing          | id, accountId, installId, browser, extensionVersion, scopes, createdAt, lastUsedAt, status, refreshTokenHash | DeviceRegistration                 | While active; metadata 13 months after revoke                       |
+| ENT-PWA-07 | ExtensionConfigVersion    | counter, signedPayload, minVersion, disabledAdapters, disabledFeatures, publishedBy, publishedAt             | ADM config                         | 2 years                                                             |
+| ENT-PWA-08 | ExtensionSiteAdapter      | adapterId, domainPatterns, ruleVersion, status, lastVerifiedAt                                               | ExtensionConfigVersion             | Life of adapter plus 1 year                                         |
+| ENT-PWA-09 | WrapperDecisionRecord     | id, quarter, triggerSnapshot, optionChosen, rationale, approvers, reviewDate                                 | ADM approvals                      | 7 years                                                             |
+| ENT-PWA-10 | PwaTelemetryAggregate     | metric, dimensions (platform, version, routeClass), period, value                                            | ANL                                | 13 months                                                           |
+| ENT-PWA-11 | AppVersionManifest        | version, minSupported, requiredFrom, releasedAt                                                              | release pipeline                   | 2 years                                                             |
+| ENT-PWA-12 | DraftCountHint            | deviceId, accountId, count, updatedAt                                                                        | DeviceRegistration                 | Deleted when count is 0 or after 30 days                            |
 
 ```mermaid
 erDiagram
@@ -1442,148 +1444,148 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Name | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-PWA-001 | `pwa.install.prompted` | Install card shown | platform, count | ANL, FR-PWA-030 |
-| EVT-PWA-002 | `pwa.install.accepted` | User accepts prompt | platform | ANL |
-| EVT-PWA-003 | `pwa.install.dismissed` | User dismisses | platform, method | ANL |
-| EVT-PWA-004 | `pwa.app.installed` | `appinstalled` | platform, source | ANL, NTF (offers notification opt-in) |
-| EVT-PWA-005 | `pwa.sw.updated` | New SW activated | fromVersion, toVersion | ANL, ADM health |
-| EVT-PWA-006 | `pwa.update.prompted` | Update banner shown | version, required | ANL |
-| EVT-PWA-007 | `pwa.update.applied` | User or cold start applied | version, latencyBucket | ANL |
-| EVT-PWA-008 | `pwa.offline.entered` | State becomes offline | durationBucket on exit | ANL |
-| EVT-PWA-009 | `pwa.draft.saved_offline` | Draft saved while offline | kind | ANL (OD-PWA-01 evidence) |
-| EVT-PWA-010 | `pwa.draft.sent_after_reconnect` | Draft sent after being offline | kind, ageBucket | ANL |
-| EVT-PWA-011 | `pwa.draft.discarded` | Draft discarded unsent | kind, ageBucket | ANL |
-| EVT-PWA-012 | `pwa.outbox.item_queued` | Item queued | opType | ANL |
-| EVT-PWA-013 | `pwa.outbox.item_synced` | Item confirmed | opType, attempts | ANL |
-| EVT-PWA-014 | `pwa.outbox.item_conflict` | Conflict detected | opType | ANL |
-| EVT-PWA-015 | `pwa.outbox.item_expired` | Item expired | opType | ANL |
-| EVT-PWA-016 | `pwa.push.permission_prompted` | Browser prompt requested | platform | ANL |
-| EVT-PWA-017 | `pwa.push.subscribed` | Subscription stored | deviceId | NTF |
-| EVT-PWA-018 | `pwa.push.unsubscribed` | Subscription removed | deviceId, reason | NTF |
-| EVT-PWA-019 | `pwa.push.delivery_failed` | Push send failed | class, statusClass | NTF, ADM health |
-| EVT-PWA-020 | `pwa.push.clicked` | Notification opened | class | NTF, ANL |
-| EVT-PWA-021 | `pwa.lowbandwidth.toggled` | Mode changed | mode, auto | ANL |
-| EVT-PWA-022 | `pwa.storage.quota_warning` | Over 80% usage | category | ANL |
-| EVT-PWA-023 | `pwa.cache.purged` | Purge executed | reason | ANL, audit |
-| EVT-PWA-024 | `pwa.share.received` | Share target used | kind | ANL |
-| EVT-PWA-025 | `pwa.extension.paired` | Pairing complete | browser, version | NTF (security email), audit |
-| EVT-PWA-026 | `pwa.extension.revoked` | Pairing revoked | reason | IDN, audit |
-| EVT-PWA-027 | `pwa.extension.job_saved` | Job saved from extension | source domain class | JOB (planned), ANL |
-| EVT-PWA-028 | `pwa.extension.scan_completed` | Scan finished (counts only, opt-in telemetry) | adapterId, success | ANL, FR-PWA-038 |
-| EVT-PWA-029 | `pwa.extension.autofill_used` | Autofill executed | adapterId, fieldCount | ANL |
-| EVT-PWA-030 | `pwa.wrapper.trigger_fired` | Trigger threshold crossed | trigger, snapshotRef | ADM, product owner |
-| EVT-PWA-031 | `pwa.version.unsupported_blocked` | API returned 426 | clientVersion | ANL, ADM health |
+| ID          | Name                              | Trigger                                       | Key payload            | Consumers                             |
+| ----------- | --------------------------------- | --------------------------------------------- | ---------------------- | ------------------------------------- |
+| EVT-PWA-001 | `pwa.install.prompted`            | Install card shown                            | platform, count        | ANL, FR-PWA-030                       |
+| EVT-PWA-002 | `pwa.install.accepted`            | User accepts prompt                           | platform               | ANL                                   |
+| EVT-PWA-003 | `pwa.install.dismissed`           | User dismisses                                | platform, method       | ANL                                   |
+| EVT-PWA-004 | `pwa.app.installed`               | `appinstalled`                                | platform, source       | ANL, NTF (offers notification opt-in) |
+| EVT-PWA-005 | `pwa.sw.updated`                  | New SW activated                              | fromVersion, toVersion | ANL, ADM health                       |
+| EVT-PWA-006 | `pwa.update.prompted`             | Update banner shown                           | version, required      | ANL                                   |
+| EVT-PWA-007 | `pwa.update.applied`              | User or cold start applied                    | version, latencyBucket | ANL                                   |
+| EVT-PWA-008 | `pwa.offline.entered`             | State becomes offline                         | durationBucket on exit | ANL                                   |
+| EVT-PWA-009 | `pwa.draft.saved_offline`         | Draft saved while offline                     | kind                   | ANL (OD-PWA-01 evidence)              |
+| EVT-PWA-010 | `pwa.draft.sent_after_reconnect`  | Draft sent after being offline                | kind, ageBucket        | ANL                                   |
+| EVT-PWA-011 | `pwa.draft.discarded`             | Draft discarded unsent                        | kind, ageBucket        | ANL                                   |
+| EVT-PWA-012 | `pwa.outbox.item_queued`          | Item queued                                   | opType                 | ANL                                   |
+| EVT-PWA-013 | `pwa.outbox.item_synced`          | Item confirmed                                | opType, attempts       | ANL                                   |
+| EVT-PWA-014 | `pwa.outbox.item_conflict`        | Conflict detected                             | opType                 | ANL                                   |
+| EVT-PWA-015 | `pwa.outbox.item_expired`         | Item expired                                  | opType                 | ANL                                   |
+| EVT-PWA-016 | `pwa.push.permission_prompted`    | Browser prompt requested                      | platform               | ANL                                   |
+| EVT-PWA-017 | `pwa.push.subscribed`             | Subscription stored                           | deviceId               | NTF                                   |
+| EVT-PWA-018 | `pwa.push.unsubscribed`           | Subscription removed                          | deviceId, reason       | NTF                                   |
+| EVT-PWA-019 | `pwa.push.delivery_failed`        | Push send failed                              | class, statusClass     | NTF, ADM health                       |
+| EVT-PWA-020 | `pwa.push.clicked`                | Notification opened                           | class                  | NTF, ANL                              |
+| EVT-PWA-021 | `pwa.lowbandwidth.toggled`        | Mode changed                                  | mode, auto             | ANL                                   |
+| EVT-PWA-022 | `pwa.storage.quota_warning`       | Over 80% usage                                | category               | ANL                                   |
+| EVT-PWA-023 | `pwa.cache.purged`                | Purge executed                                | reason                 | ANL, audit                            |
+| EVT-PWA-024 | `pwa.share.received`              | Share target used                             | kind                   | ANL                                   |
+| EVT-PWA-025 | `pwa.extension.paired`            | Pairing complete                              | browser, version       | NTF (security email), audit           |
+| EVT-PWA-026 | `pwa.extension.revoked`           | Pairing revoked                               | reason                 | IDN, audit                            |
+| EVT-PWA-027 | `pwa.extension.job_saved`         | Job saved from extension                      | source domain class    | JOB (planned), ANL                    |
+| EVT-PWA-028 | `pwa.extension.scan_completed`    | Scan finished (counts only, opt-in telemetry) | adapterId, success     | ANL, FR-PWA-038                       |
+| EVT-PWA-029 | `pwa.extension.autofill_used`     | Autofill executed                             | adapterId, fieldCount  | ANL                                   |
+| EVT-PWA-030 | `pwa.wrapper.trigger_fired`       | Trigger threshold crossed                     | trigger, snapshotRef   | ADM, product owner                    |
+| EVT-PWA-031 | `pwa.version.unsupported_blocked` | API returned 426                              | clientVersion          | ANL, ADM health                       |
 
 ### 9.2 Consumed
 
-| Event | Owner | Used for |
-|---|---|---|
-| `idn.session.revoked`, `idn.logout` | IDN (planned) | Purge and remote logout (FR-PWA-008) |
-| `ntf.notification.created` (push channel selected) | NTF (planned) | Send Web Push (FR-PWA-022) |
-| `admin.killswitch.activated`, `admin.config.changed` | ADM (EVT-ADM-024, EVT-ADM-026) | SW and extension remote modes |
+| Event                                                  | Owner                          | Used for                                 |
+| ------------------------------------------------------ | ------------------------------ | ---------------------------------------- |
+| `idn.session.revoked`, `idn.logout`                    | IDN (planned)                  | Purge and remote logout (FR-PWA-008)     |
+| `ntf.notification.created` (push channel selected)     | NTF (planned)                  | Send Web Push (FR-PWA-022)               |
+| `admin.killswitch.activated`, `admin.config.changed`   | ADM (EVT-ADM-024, EVT-ADM-026) | SW and extension remote modes            |
 | `admin.maintenance.started`, `admin.maintenance.ended` | ADM (EVT-ADM-028, EVT-ADM-029) | Read-only state (FR-PWA-010, FR-PWA-019) |
-| `set.consent.changed` | SET (planned) | Telemetry consent |
-| `jobs.job.closed`, `jobs.application.withdrawn` | JOB (planned) | Cache invalidation list |
+| `set.consent.changed`                                  | SET (planned)                  | Telemetry consent                        |
+| `jobs.job.closed`, `jobs.application.withdrawn`        | JOB (planned)                  | Cache invalidation list                  |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Direction | Purpose | Notes |
-|---|---|---|---|
-| Browser push services (FCM, Mozilla autopush, Apple web push) | Outbound | Web Push delivery | VAPID; endpoint set per subscription |
-| Browser extension stores (Chrome Web Store, Edge Add-ons, Firefox AMO, Safari later) | Outbound | Distribution | FR-PWA-031 |
-| App stores (Apple, Google Play) | Outbound | Only after the wrapper gate | Not specified for build |
-| CDN | Outbound | Static assets, image renditions for low-bandwidth | FR-PLT-036 |
-| Identity provider (own authorization server) | Inbound | Extension PKCE pairing | FR-PLT-002 |
-| Object storage via PLT file service | Outbound | Resumable uploads, signed URLs | FR-PLT-030 |
-| Observability stack | Outbound | Web vitals, SW errors | whitelist only |
-| Platform capabilities (Web APIs) | n/a | Storage, locks, crypto, share, badging | feature-detected |
+| Dependency                                                                           | Direction | Purpose                                           | Notes                                |
+| ------------------------------------------------------------------------------------ | --------- | ------------------------------------------------- | ------------------------------------ |
+| Browser push services (FCM, Mozilla autopush, Apple web push)                        | Outbound  | Web Push delivery                                 | VAPID; endpoint set per subscription |
+| Browser extension stores (Chrome Web Store, Edge Add-ons, Firefox AMO, Safari later) | Outbound  | Distribution                                      | FR-PWA-031                           |
+| App stores (Apple, Google Play)                                                      | Outbound  | Only after the wrapper gate                       | Not specified for build              |
+| CDN                                                                                  | Outbound  | Static assets, image renditions for low-bandwidth | FR-PLT-036                           |
+| Identity provider (own authorization server)                                         | Inbound   | Extension PKCE pairing                            | FR-PLT-002                           |
+| Object storage via PLT file service                                                  | Outbound  | Resumable uploads, signed URLs                    | FR-PLT-030                           |
+| Observability stack                                                                  | Outbound  | Web vitals, SW errors                             | whitelist only                       |
+| Platform capabilities (Web APIs)                                                     | n/a       | Storage, locks, crypto, share, badging            | feature-detected                     |
 
 ## 11. Cross-module dependencies
 
-| PWA depends on | Why |
-|---|---|
-| IDN | Sessions, logout signals, OAuth server for extension |
-| NTF | Push content and channel decisions |
-| PLT | Uploads, idempotency store, rate limits, CDN, config secrets |
-| ADM | Flags, kill switches, maintenance state, config, admin dashboards |
+| PWA depends on          | Why                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| IDN                     | Sessions, logout signals, OAuth server for extension                           |
+| NTF                     | Push content and channel decisions                                             |
+| PLT                     | Uploads, idempotency store, rate limits, CDN, config secrets                   |
+| ADM                     | Flags, kill switches, maintenance state, config, admin dashboards              |
 | JOB, PRF, LRN, MSG, ASM | Action registration, cache invalidation, extension save and profile projection |
-| SET | Consent, privacy center, telemetry consent |
-| AIC | Skills taxonomy and match rules shared with the extension |
-| ANL | Aggregates for decision gates |
+| SET                     | Consent, privacy center, telemetry consent                                     |
+| AIC                     | Skills taxonomy and match rules shared with the extension                      |
+| ANL                     | Aggregates for decision gates                                                  |
 
-| Depends on PWA | Why |
-|---|---|
-| All modules | Offline registry entries, responsive and mobile UI rules, draft and outbox services |
-| NTF | Push transport and device subscription |
-| JOB | Extension saves and tracker |
-| ADM | Admin exclusion rules; health dashboard inputs |
-| LRN | Offline download substrate (R6) |
+| Depends on PWA | Why                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------- |
+| All modules    | Offline registry entries, responsive and mobile UI rules, draft and outbox services |
+| NTF            | Push transport and device subscription                                              |
+| JOB            | Extension saves and tracker                                                         |
+| ADM            | Admin exclusion rules; health dashboard inputs                                      |
+| LRN            | Offline download substrate (R6)                                                     |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Install rate | Installed (appinstalled) ÷ eligible prompted sessions, by platform | PAD |
-| Installed share of sessions | Sessions with `source=pwa` ÷ all sessions | PAD |
-| Update adoption time | Median hours from release to 90% of active clients on the new version | PAD |
-| Offline session share | Sessions with at least one offline period ÷ all sessions, by route class | PAD |
-| Draft rescue rate | Drafts saved offline and later sent ÷ drafts saved offline (OD-PWA-01 evidence) | PAD |
-| Draft loss indicators | Drafts expired or discarded unsent ÷ drafts created; browser-eviction notices shown | PAD |
-| Submit network failure rate | Failed submits due to network ÷ submit attempts by route | PAD |
-| Outbox success rate | Items synced ÷ items queued; conflict rate | PAD |
-| Push opt-in rate | Devices subscribed ÷ installed devices, by platform | PAD |
-| Push delivery and click rate | Delivered ÷ sent; clicked ÷ delivered, by class | PAD |
-| Web Vitals | LCP, INP, CLS, TTFB p75 by route class and device class (SSOT §20.8 targets) | PAD |
-| Low-bandwidth savings | Median bytes per session with mode on versus off, same route mix | PAD |
-| Extension adoption | Active paired extensions (weekly) ÷ active candidates | PAD |
-| Extension parse success | Scans with all required fields (title, company, location) ÷ scans, by adapter | PAD |
-| Extension save-to-apply | Saved jobs from the extension later applied ÷ saved | PAD |
-| Wrapper trigger values | iOS push reach, store-demand evidence counts, native capability requests | PAD with product owner |
+| Metric                       | Definition and formula                                                              | Owner role             |
+| ---------------------------- | ----------------------------------------------------------------------------------- | ---------------------- |
+| Install rate                 | Installed (appinstalled) ÷ eligible prompted sessions, by platform                  | PAD                    |
+| Installed share of sessions  | Sessions with `source=pwa` ÷ all sessions                                           | PAD                    |
+| Update adoption time         | Median hours from release to 90% of active clients on the new version               | PAD                    |
+| Offline session share        | Sessions with at least one offline period ÷ all sessions, by route class            | PAD                    |
+| Draft rescue rate            | Drafts saved offline and later sent ÷ drafts saved offline (OD-PWA-01 evidence)     | PAD                    |
+| Draft loss indicators        | Drafts expired or discarded unsent ÷ drafts created; browser-eviction notices shown | PAD                    |
+| Submit network failure rate  | Failed submits due to network ÷ submit attempts by route                            | PAD                    |
+| Outbox success rate          | Items synced ÷ items queued; conflict rate                                          | PAD                    |
+| Push opt-in rate             | Devices subscribed ÷ installed devices, by platform                                 | PAD                    |
+| Push delivery and click rate | Delivered ÷ sent; clicked ÷ delivered, by class                                     | PAD                    |
+| Web Vitals                   | LCP, INP, CLS, TTFB p75 by route class and device class (SSOT §20.8 targets)        | PAD                    |
+| Low-bandwidth savings        | Median bytes per session with mode on versus off, same route mix                    | PAD                    |
+| Extension adoption           | Active paired extensions (weekly) ÷ active candidates                               | PAD                    |
+| Extension parse success      | Scans with all required fields (title, company, location) ÷ scans, by adapter       | PAD                    |
+| Extension save-to-apply      | Saved jobs from the extension later applied ÷ saved                                 | PAD                    |
+| Wrapper trigger values       | iOS push reach, store-demand evidence counts, native capability requests            | PAD with product owner |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-PWA-01 | When is the queued-write outbox (class QW) built and enabled? The legacy ADR-T10 revisit trigger needs a measured threshold. | Build now; wait for telemetry threshold; never | Specified fully but dormant until `Draft rescue rate` and `Submit network failure rate` cross a threshold set by the product owner `[PROP]` | Product owner with frontend platform lead | FR-PWA-014, FR-PWA-017 activation |
-| OD-PWA-02 | Conflict: SSOT BR-30 says extension data stays in `chrome.storage.local` with no sync, fetch or network; SSOT J-11 ends with a sync ("Profile diff applied"). | A: no network at all; B: local scan and match, network only for explicit user actions (pair, profile refresh, save, resume attach, config); C: full sync | B `[PROP]` (adopted in BR-PWA-016) | Product owner and security lead | FR-PWA-032 to FR-PWA-037 |
-| OD-PWA-03 | May recruiter pipelines (others' personal data) be cached offline? | Never; metadata only; encrypted full | Never `[PROP]` | Security lead and product owner | FR-PWA-011 |
-| OD-PWA-04 | May message bodies be cached for offline reading? | Metadata only; bodies encrypted with 3-day TTL | Metadata only `[PROP]` | Security lead with MSG owner | FR-PWA-008, FR-PWA-011 |
-| OD-PWA-05 | May institutions or organizations force shared-device mode (no offline retention) on managed devices? | Yes by tenant policy; user choice only | Yes by tenant policy `[PROP]` | Product owner with INS owner | FR-PWA-008 |
-| OD-PWA-06 | Is a recruiter-facing extension variant in scope (candidate sourcing on external sites)? It touches the SSOT §4.2 social-clone and scraping boundaries. | Not in scope; later with legal review | Not in scope for v1 `[PROP]` | Product owner and legal | Section 4E scope |
-| OD-PWA-07 | Are offline video and course downloads allowed (SSOT-era ADR-T10 excluded them)? | No; text and documents only; full with licensing | Text and documents only after R6 `[PROP]` | Product owner with LRN owner | FR-PWA-020 |
-| OD-PWA-08 | Numeric thresholds for the wrapper triggers (iOS push reach, install share, store acquisition loss). | Values per trigger | None set; metrics collected first | Product owner | FR-PWA-030 |
-| OD-PWA-09 | Telemetry consent default (opt-in or opt-out for anonymous usage data) per jurisdiction. | Opt-in; opt-out where lawful | Opt-in everywhere until legal review `[PROP]` | Legal and privacy lead with SET owner | FR-PWA-039 |
-| OD-PWA-10 | Supported browser versions and minimum OS versions (compatibility matrix). | Evergreen two latest; wider | Latest two major versions of Chrome, Edge, Safari (iOS 16.4 or newer for web push), Firefox `[PROP]` | Frontend platform lead | FR-PWA-029 |
-| OD-PWA-11 | Which job sites may the scanner support given their terms of service and scraping rules? | User-viewed pages only; allowlist after legal review | Structured-data and user-click only; site adapters only after legal review `[PROP]` | Legal and product owner | FR-PWA-033, FR-PWA-036 |
-| OD-PWA-12 | Who owns store developer accounts and signing keys; is Safari extension support required? | Company-owned; contractor | Company-owned with two-person key access; Safari later `[PROP]` | Security lead | FR-PWA-031 |
+| ID        | Question                                                                                                                                                      | Options                                                                                                                                                  | Default proposal                                                                                                                            | Who decides                               | Blocking                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | --------------------------------- |
+| OD-PWA-01 | When is the queued-write outbox (class QW) built and enabled? The legacy ADR-T10 revisit trigger needs a measured threshold.                                  | Build now; wait for telemetry threshold; never                                                                                                           | Specified fully but dormant until `Draft rescue rate` and `Submit network failure rate` cross a threshold set by the product owner `[PROP]` | Product owner with frontend platform lead | FR-PWA-014, FR-PWA-017 activation |
+| OD-PWA-02 | Conflict: SSOT BR-30 says extension data stays in `chrome.storage.local` with no sync, fetch or network; SSOT J-11 ends with a sync ("Profile diff applied"). | A: no network at all; B: local scan and match, network only for explicit user actions (pair, profile refresh, save, resume attach, config); C: full sync | B `[PROP]` (adopted in BR-PWA-016)                                                                                                          | Product owner and security lead           | FR-PWA-032 to FR-PWA-037          |
+| OD-PWA-03 | May recruiter pipelines (others' personal data) be cached offline?                                                                                            | Never; metadata only; encrypted full                                                                                                                     | Never `[PROP]`                                                                                                                              | Security lead and product owner           | FR-PWA-011                        |
+| OD-PWA-04 | May message bodies be cached for offline reading?                                                                                                             | Metadata only; bodies encrypted with 3-day TTL                                                                                                           | Metadata only `[PROP]`                                                                                                                      | Security lead with MSG owner              | FR-PWA-008, FR-PWA-011            |
+| OD-PWA-05 | May institutions or organizations force shared-device mode (no offline retention) on managed devices?                                                         | Yes by tenant policy; user choice only                                                                                                                   | Yes by tenant policy `[PROP]`                                                                                                               | Product owner with INS owner              | FR-PWA-008                        |
+| OD-PWA-06 | Is a recruiter-facing extension variant in scope (candidate sourcing on external sites)? It touches the SSOT §4.2 social-clone and scraping boundaries.       | Not in scope; later with legal review                                                                                                                    | Not in scope for v1 `[PROP]`                                                                                                                | Product owner and legal                   | Section 4E scope                  |
+| OD-PWA-07 | Are offline video and course downloads allowed (SSOT-era ADR-T10 excluded them)?                                                                              | No; text and documents only; full with licensing                                                                                                         | Text and documents only after R6 `[PROP]`                                                                                                   | Product owner with LRN owner              | FR-PWA-020                        |
+| OD-PWA-08 | Numeric thresholds for the wrapper triggers (iOS push reach, install share, store acquisition loss).                                                          | Values per trigger                                                                                                                                       | None set; metrics collected first                                                                                                           | Product owner                             | FR-PWA-030                        |
+| OD-PWA-09 | Telemetry consent default (opt-in or opt-out for anonymous usage data) per jurisdiction.                                                                      | Opt-in; opt-out where lawful                                                                                                                             | Opt-in everywhere until legal review `[PROP]`                                                                                               | Legal and privacy lead with SET owner     | FR-PWA-039                        |
+| OD-PWA-10 | Supported browser versions and minimum OS versions (compatibility matrix).                                                                                    | Evergreen two latest; wider                                                                                                                              | Latest two major versions of Chrome, Edge, Safari (iOS 16.4 or newer for web push), Firefox `[PROP]`                                        | Frontend platform lead                    | FR-PWA-029                        |
+| OD-PWA-11 | Which job sites may the scanner support given their terms of service and scraping rules?                                                                      | User-viewed pages only; allowlist after legal review                                                                                                     | Structured-data and user-click only; site adapters only after legal review `[PROP]`                                                         | Legal and product owner                   | FR-PWA-033, FR-PWA-036            |
+| OD-PWA-12 | Who owns store developer accounts and signing keys; is Safari extension support required?                                                                     | Company-owned; contractor                                                                                                                                | Company-owned with two-person key access; Safari later `[PROP]`                                                                             | Security lead                             | FR-PWA-031                        |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-PWA-01 | iOS and Safari web limits (push needs Home-Screen install, storage eviction after inactivity, no background sync) reduce reach and reliability. | High / Medium | Install guidance, email and in-app as channels of record, honest labels, wrapper decision gate. |
-| RSK-PWA-02 | Browser evicts drafts and caches, causing user data loss. | Medium / High | Persistent storage request, draft-count hints, clear messaging, short draft lifetime guidance. |
-| RSK-PWA-03 | A faulty service worker bricks the app. | Low / Critical | No auto skipWaiting, remote passthrough and unregister modes, Reset app data, staged releases. |
-| RSK-PWA-04 | Scanner and autofill violate sites' terms or local laws, or trigger takedowns. | Medium / High | OD-PWA-11, user-initiated activation, no crawling, adapter kill switch. |
-| RSK-PWA-05 | Extension store rejection or user distrust over permissions. | Medium / Medium | Minimal permissions, optional hosts at use, privacy page, truthful listing. |
-| RSK-PWA-06 | Cached personal data remains on shared devices. | Medium / High | Partitioning, purge on logout, shared-device mode, encryption. |
-| RSK-PWA-07 | Lock-screen push reveals private information to bystanders. | Medium / Medium | Sensitive-free payloads, org-level text policy. |
-| RSK-PWA-08 | Conflict dialogs frustrate users or lead to wrong choices. | Medium / Medium | Field-level diffs, safe automatic rules for monotonic data, telemetry on conflict rate. |
-| RSK-PWA-09 | Parser breakage as job sites change markup. | High / Low | Versioned adapters, JSON-LD first, parse-success monitoring, remote disable. |
-| RSK-PWA-10 | The offline registry drifts from reality and consequential actions become reachable offline. | Low / High | CI tests that exercise each action offline, default ON, security review for reclassification. |
+| ID         | Risk                                                                                                                                            | Likelihood / impact | Mitigation                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------- |
+| RSK-PWA-01 | iOS and Safari web limits (push needs Home-Screen install, storage eviction after inactivity, no background sync) reduce reach and reliability. | High / Medium       | Install guidance, email and in-app as channels of record, honest labels, wrapper decision gate. |
+| RSK-PWA-02 | Browser evicts drafts and caches, causing user data loss.                                                                                       | Medium / High       | Persistent storage request, draft-count hints, clear messaging, short draft lifetime guidance.  |
+| RSK-PWA-03 | A faulty service worker bricks the app.                                                                                                         | Low / Critical      | No auto skipWaiting, remote passthrough and unregister modes, Reset app data, staged releases.  |
+| RSK-PWA-04 | Scanner and autofill violate sites' terms or local laws, or trigger takedowns.                                                                  | Medium / High       | OD-PWA-11, user-initiated activation, no crawling, adapter kill switch.                         |
+| RSK-PWA-05 | Extension store rejection or user distrust over permissions.                                                                                    | Medium / Medium     | Minimal permissions, optional hosts at use, privacy page, truthful listing.                     |
+| RSK-PWA-06 | Cached personal data remains on shared devices.                                                                                                 | Medium / High       | Partitioning, purge on logout, shared-device mode, encryption.                                  |
+| RSK-PWA-07 | Lock-screen push reveals private information to bystanders.                                                                                     | Medium / Medium     | Sensitive-free payloads, org-level text policy.                                                 |
+| RSK-PWA-08 | Conflict dialogs frustrate users or lead to wrong choices.                                                                                      | Medium / Medium     | Field-level diffs, safe automatic rules for monotonic data, telemetry on conflict rate.         |
+| RSK-PWA-09 | Parser breakage as job sites change markup.                                                                                                     | High / Low          | Versioned adapters, JSON-LD first, parse-success monitoring, remote disable.                    |
+| RSK-PWA-10 | The offline registry drifts from reality and consequential actions become reachable offline.                                                    | Low / High          | CI tests that exercise each action offline, default ON, security review for reclassification.   |
 
 ## 15. Legacy source trace
 
-| Legacy source | Informed | Dropped or changed |
-|---|---|---|
-| SSOT §19 PWA, Offline & Synchronization (19.1 to 19.3) | Capability abstraction, per-feature contract fields, sync principles | Marked open items (installability, SW updates, push permission, logout clearing) now specified |
-| SSOT F-18, F-27, F-28; BR-30; ADR-006; J-11 | Extension companion, local match, job scanner, local-first | BR-30 versus J-11 conflict recorded as OD-PWA-02 and resolved by default proposal B |
-| SSOT F-36 Application Draft Autosave | Local drafts | Local drafts specified separately from server autosave |
-| Yash 08 PWA_ARCHITECTURE | Manifest, shell, route strategy, SW lifecycle, budget | Reference-code findings ignored; tags converted |
-| Yash 08 OFFLINE_AND_SYNC_DESIGN and REV2 | Classes FO, RO, LD, QW, 14-day lifetime, 5-day warning, purge, trigger-gated outbox | Phase scoping turned into OD-PWA-01 gating; backoff constants re-stated here |
-| Yash 08 MOBILE_DISTRIBUTION_DECISION | Options A to D, triggers, push facts | Scoring table dropped; gate retained |
-| Yash 08 PLATFORM_COMPATIBILITY_MATRIX | Capability fallbacks | Browser version lists left to OD-PWA-10 |
-| Own knowledge of Workbox patterns, Web Push, Manifest V3, Simplify and Teal and Huntr extensions | Install prompts, badge, share target, extension privacy and store rules | Tagged `[PROP]` |
-| Dropped: downloadable video offline (legacy Phase 1 and 2 no) | Kept as gated FR-PWA-020 | See OD-PWA-07 |
+| Legacy source                                                                                    | Informed                                                                            | Dropped or changed                                                                             |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| SSOT §19 PWA, Offline & Synchronization (19.1 to 19.3)                                           | Capability abstraction, per-feature contract fields, sync principles                | Marked open items (installability, SW updates, push permission, logout clearing) now specified |
+| SSOT F-18, F-27, F-28; BR-30; ADR-006; J-11                                                      | Extension companion, local match, job scanner, local-first                          | BR-30 versus J-11 conflict recorded as OD-PWA-02 and resolved by default proposal B            |
+| SSOT F-36 Application Draft Autosave                                                             | Local drafts                                                                        | Local drafts specified separately from server autosave                                         |
+| Yash 08 PWA_ARCHITECTURE                                                                         | Manifest, shell, route strategy, SW lifecycle, budget                               | Reference-code findings ignored; tags converted                                                |
+| Yash 08 OFFLINE_AND_SYNC_DESIGN and REV2                                                         | Classes FO, RO, LD, QW, 14-day lifetime, 5-day warning, purge, trigger-gated outbox | Phase scoping turned into OD-PWA-01 gating; backoff constants re-stated here                   |
+| Yash 08 MOBILE_DISTRIBUTION_DECISION                                                             | Options A to D, triggers, push facts                                                | Scoring table dropped; gate retained                                                           |
+| Yash 08 PLATFORM_COMPATIBILITY_MATRIX                                                            | Capability fallbacks                                                                | Browser version lists left to OD-PWA-10                                                        |
+| Own knowledge of Workbox patterns, Web Push, Manifest V3, Simplify and Teal and Huntr extensions | Install prompts, badge, share target, extension privacy and store rules             | Tagged `[PROP]`                                                                                |
+| Dropped: downloadable video offline (legacy Phase 1 and 2 no)                                    | Kept as gated FR-PWA-020                                                            | See OD-PWA-07                                                                                  |

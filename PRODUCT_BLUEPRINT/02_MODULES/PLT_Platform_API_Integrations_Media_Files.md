@@ -21,19 +21,19 @@ API versioning and deprecation; OAuth 2.0 and API keys; scopes and consent; rate
 
 ### 1.2 Out of scope (owned elsewhere)
 
-| Capability | Owner | Relationship |
-|---|---|---|
-| End-user sessions, passkeys, login | IDN | PLT's OAuth server issues API-scoped tokens; user login is IDN's |
-| Notification content and channels | NTF | PLT provides email and SMS provider ports and the job engine; NTF decides what to send |
-| Billing, plans, entitlements, invoices | BIL | PLT enforces quotas and rate limits using entitlements supplied by BIL; the payment adapter is PLT's port, BIL's logic |
-| Domain data models (jobs, applications, courses) | JOB, ATS, LRN and others | Resources exposed by the API are owned by those modules |
-| Consent and data-subject rights | SET | PLT's export and file deletion execute SET's decisions |
-| Admin consoles over PLT surfaces (job console, kill switches, integration admin views) | ADM | PLT owns the engines, ADM owns the console (FR-ADM-037) |
-| Moderation of uploaded content | TSF | PLT provides scan results and hooks; TSF decides on policy |
-| PWA client storage, extension | PWA | Consumes uploads and idempotency |
-| AI model providers and prompts | AIC | AI gateway is AIC's; PLT provides the provider-port pattern and outbound fetch rules |
-| Analytics warehouse and dashboards | ANL | PLT emits usage events |
-| Search indexing | SRC | PLT provides jobs and the outbox |
+| Capability                                                                             | Owner                    | Relationship                                                                                                           |
+| -------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| End-user sessions, passkeys, login                                                     | IDN                      | PLT's OAuth server issues API-scoped tokens; user login is IDN's                                                       |
+| Notification content and channels                                                      | NTF                      | PLT provides email and SMS provider ports and the job engine; NTF decides what to send                                 |
+| Billing, plans, entitlements, invoices                                                 | BIL                      | PLT enforces quotas and rate limits using entitlements supplied by BIL; the payment adapter is PLT's port, BIL's logic |
+| Domain data models (jobs, applications, courses)                                       | JOB, ATS, LRN and others | Resources exposed by the API are owned by those modules                                                                |
+| Consent and data-subject rights                                                        | SET                      | PLT's export and file deletion execute SET's decisions                                                                 |
+| Admin consoles over PLT surfaces (job console, kill switches, integration admin views) | ADM                      | PLT owns the engines, ADM owns the console (FR-ADM-037)                                                                |
+| Moderation of uploaded content                                                         | TSF                      | PLT provides scan results and hooks; TSF decides on policy                                                             |
+| PWA client storage, extension                                                          | PWA                      | Consumes uploads and idempotency                                                                                       |
+| AI model providers and prompts                                                         | AIC                      | AI gateway is AIC's; PLT provides the provider-port pattern and outbound fetch rules                                   |
+| Analytics warehouse and dashboards                                                     | ANL                      | PLT emits usage events                                                                                                 |
+| Search indexing                                                                        | SRC                      | PLT provides jobs and the outbox                                                                                       |
 
 ### 1.3 Owned versus consumed
 
@@ -55,35 +55,35 @@ Roles: `GUE`, `CAN`, `STD`, `INS`, `MNT`, `FRL`, `REC`, `HMG`, `EAD` Employer Ad
 
 Legend: **U** use, **M** manage own, **O** manage for organization or tenant, **P** manage platform, **R** read only, **—** none.
 
-| Capability | CAN, STD, FRL, INS, MNT | REC, HMG | EAD, IAD, EXA, PLO | API | SUP | PAD | SAD |
-|---|---|---|---|---|---|---|---|
-| Authorize third-party apps to own data (OAuth consent) | M | — | M (own account) | — | — | — | — |
-| Create personal API keys (own data, low scopes) | M (if enabled by plan) | M | M | — | — | — | — |
-| Create organization API keys and OAuth clients | — | — | O | — | — | P (review) | P |
-| Use the public API | U (own scope) | U (own scope) | U (org scope) | U (client scope) | — | — | — |
-| Webhook endpoints | — | — | O | — | R (support view) | P | R |
-| Integration connections (calendar own) | M | M | O (org-level) | — | R | P | R |
-| Integration catalog admin, adapter config | — | — | — | — | — | P | P (security review) |
-| Uploads (own files) | U | U | U | U | — | — | — |
-| Org storage quota view | — | — | O | — | R | P | — |
-| Imports and exports (own org) | M (own data export) | — | O | — | — | P | P |
-| Job console and scheduler | — | — | — | — | — | P (via ADM) | R |
-| Developer portal and sandbox | M | M | O | — | — | P | R |
-| Rate limit and quota configuration | — | — | — | — | — | P | P (security keys) |
-| Marketplace publisher approval | — | — | — | — | — | P (decision gate) | P |
+| Capability                                             | CAN, STD, FRL, INS, MNT | REC, HMG      | EAD, IAD, EXA, PLO | API              | SUP              | PAD               | SAD                 |
+| ------------------------------------------------------ | ----------------------- | ------------- | ------------------ | ---------------- | ---------------- | ----------------- | ------------------- |
+| Authorize third-party apps to own data (OAuth consent) | M                       | —             | M (own account)    | —                | —                | —                 | —                   |
+| Create personal API keys (own data, low scopes)        | M (if enabled by plan)  | M             | M                  | —                | —                | —                 | —                   |
+| Create organization API keys and OAuth clients         | —                       | —             | O                  | —                | —                | P (review)        | P                   |
+| Use the public API                                     | U (own scope)           | U (own scope) | U (org scope)      | U (client scope) | —                | —                 | —                   |
+| Webhook endpoints                                      | —                       | —             | O                  | —                | R (support view) | P                 | R                   |
+| Integration connections (calendar own)                 | M                       | M             | O (org-level)      | —                | R                | P                 | R                   |
+| Integration catalog admin, adapter config              | —                       | —             | —                  | —                | —                | P                 | P (security review) |
+| Uploads (own files)                                    | U                       | U             | U                  | U                | —                | —                 | —                   |
+| Org storage quota view                                 | —                       | —             | O                  | —                | R                | P                 | —                   |
+| Imports and exports (own org)                          | M (own data export)     | —             | O                  | —                | —                | P                 | P                   |
+| Job console and scheduler                              | —                       | —             | —                  | —                | —                | P (via ADM)       | R                   |
+| Developer portal and sandbox                           | M                       | M             | O                  | —                | —                | P                 | R                   |
+| Rate limit and quota configuration                     | —                       | —             | —                  | —                | —                | P                 | P (security keys)   |
+| Marketplace publisher approval                         | —                       | —             | —                  | —                | —                | P (decision gate) | P                   |
 
 Rules: an `API` principal acts only within its client's scopes and tenant; it can never exceed the permissions of the user who granted it (delegated) or the org role it was created under (client credentials). [DER] `SUP` sees metadata of customers' integrations and webhook deliveries (status, timestamps, error class) and never secrets or payload bodies without a grant (FR-ADM-009).
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Public API foundation | FR-PLT-001 to FR-PLT-010 |
-| B | Webhooks and events | FR-PLT-011 to FR-PLT-014 |
-| C | Integrations | FR-PLT-015 to FR-PLT-027 |
-| D | Developer experience | FR-PLT-028 to FR-PLT-029 |
-| E | Files and media | FR-PLT-030 to FR-PLT-036, FR-PLT-043 |
-| F | Data movement, background work and outbound safety | FR-PLT-037 to FR-PLT-042 |
+| Code | Sub-module                                         | Features                             |
+| ---- | -------------------------------------------------- | ------------------------------------ |
+| A    | Public API foundation                              | FR-PLT-001 to FR-PLT-010             |
+| B    | Webhooks and events                                | FR-PLT-011 to FR-PLT-014             |
+| C    | Integrations                                       | FR-PLT-015 to FR-PLT-027             |
+| D    | Developer experience                               | FR-PLT-028 to FR-PLT-029             |
+| E    | Files and media                                    | FR-PLT-030 to FR-PLT-036, FR-PLT-043 |
+| F    | Data movement, background work and outbound safety | FR-PLT-037 to FR-PLT-042             |
 
 ## 4. Feature specifications
 
@@ -507,7 +507,7 @@ Conventions used by every feature (not repeated in each field):
 - **Priority / tier:** Should · R2
 - **Source:** [SRC: SSOT §13.3 Slack / Cal.com post-MVP; INT scheduling needs] · [PROP] for providers
 - **Purpose and outcome:** Interviewers, candidates and mentors link their calendars so availability is respected and scheduled events appear where they already look; INT consumes this port.
-- **Roles and permissions:** `CAN, STD, FRL, INS, MNT, REC, HMG: connect personal calendars` · `EAD: org-level calendar (resource calendars, delegated access)` 
+- **Roles and permissions:** `CAN, STD, FRL, INS, MNT, REC, HMG: connect personal calendars` · `EAD: org-level calendar (resource calendars, delegated access)`
 - **Preconditions and entry points:** Settings > Connected accounts > Calendar.
 - **User interactions and actions:** 1. Connect Google Calendar, Microsoft 365/Outlook, or an iCal/ICS feed (read-only), by OAuth. 2. Choose which calendars to check for conflicts and which one to write events to. 3. Choose "Free and busy only" (default) or "Event titles" (not recommended). 4. See the next 7 days preview. 5. Disconnect.
 - **System behaviour:** `CalendarPort` operations: `listCalendars`, `getFreeBusy(range, calendars)`, `createEvent`, `updateEvent`, `cancelEvent`, `subscribeToChanges` (push notifications or polling every 10 minutes). Least scopes: free/busy read plus event write on a chosen calendar; event content is not read unless the user chooses titles (BR-PLT-047). Availability computations use free/busy in UTC with the user's working hours (INT). Scheduled interview events carry a TalentSphere link and ICS attachment (RFC 5545) with `METHOD:REQUEST`, UID stable per interview so updates and cancels amend the same event. Two-way sync of cancellations (a declined event notifies INT). Time zones resolved with IANA names; daylight changes handled by the provider. Rate limits per provider respected (backoff). Disconnecting stops writes and deletes cached busy data.
@@ -682,7 +682,7 @@ Conventions used by every feature (not repeated in each field):
 - **Priority / tier:** Should · R2
 - **Source:** [SRC: SSOT F-33 video interview rooms; §13.3 Kaltura / Panopto / MS Stream gateways Ph6] · [PROP] for conferencing providers
 - **Purpose and outcome:** Interviews and mentoring sessions can use the participant's preferred meeting tool (or a built-in room) with links created and cancelled automatically.
-- **Roles and permissions:** `REC, HMG, MNT, INS: connect personal provider` · `EAD: org default provider` 
+- **Roles and permissions:** `REC, HMG, MNT, INS: connect personal provider` · `EAD: org default provider`
 - **Preconditions and entry points:** INT or MEN schedules a session needing a meeting link. Entry: Settings > Connected accounts > Video.
 - **User interactions and actions:** 1. Connect Zoom, Google Meet (via calendar), Microsoft Teams, or choose "TalentSphere room". 2. When scheduling, choose the provider; the link is created and placed in the calendar invite. 3. Participants join via the link; hosts see attendance where the provider returns it. 4. Cancelling the session cancels the meeting.
 - **System behaviour:** `MeetingPort`: `createMeeting`, `updateMeeting`, `cancelMeeting`, `getAttendance`, `getRecordingStatus`. Links created at scheduling time with lobby or waiting room defaults and unique per session. Recording: off by default; enabling requires the consent flow of INT (all parties informed before joining) (BR-PLT-045); recordings stored by the provider are not copied unless INT's retention rules apply, then ingested through the file service with a retention class. If the provider fails at creation, the system offers the built-in room or a manual link field. Enterprise gateways (Kaltura, Panopto, Microsoft Stream) are catalog entries for lecture video hosting under LRN via the media port (FR-PLT-035), not the meeting port.
@@ -708,11 +708,11 @@ Conventions used by every feature (not repeated in each field):
 - **Source:** [SRC: SSOT §13.3 IDV vendor Ph9 OD-27] · [SRC: Yash 18 PROC-01 identity fallback]
 - **Purpose and outcome:** BGV and IDN verify a person's identity document and liveness through a replaceable vendor, receiving only the minimal result, so the platform avoids storing identity documents.
 - **Roles and permissions:** `CAN, STD, MNT, FRL, EAD: complete verification` · `PAD, SAD: vendor configuration`
-- **Preconditions and entry points:** BGV or IDN requires a verification (profile trust badge, mentor onboarding, support recovery). 
+- **Preconditions and entry points:** BGV or IDN requires a verification (profile trust badge, mentor onboarding, support recovery).
 - **User interactions and actions:** 1. The user is redirected to the vendor's hosted flow (or embedded SDK) after a consent screen stating what is collected and why. 2. They capture the document and a selfie. 3. They return to TalentSphere and see "Verification in progress" then the result.
 - **System behaviour:** `IdentityVerificationPort`: `createSession(subject, level, locale)`, `getResult(sessionId)`, webhook `verification.completed`. The vendor holds documents and biometrics under its retention (contractually short, `[PROP]` 30 days); TalentSphere stores only the outcome facts (verified, level, name match boolean, document country and type, expiry month, verified at, vendor reference) not images (BR-PLT-046). Name mismatch with profile prompts a profile correction flow rather than rejection. Results valid for a policy period (24 months default). Retries limited (3 attempts per 24 hours). Vendor failure shows "Verification unavailable, try later" and does not block non-dependent actions. Appeal path through support (PROC-15). Region and legal restrictions per country on biometrics determine availability.
 - **UI elements and controls:** Consent screen, redirect, status page with states (Not started, In progress, Verified, Needs another try, Unable to verify), help link.
-- **Configuration options:** Platform: vendor, levels, validity, countries. 
+- **Configuration options:** Platform: vendor, levels, validity, countries.
 - **Business rules:** BR-PLT-046, BR-PLT-013
 - **Validation:** Consent recorded before session creation; webhook signature; result schema.
 - **Inputs and outputs:** Input: session request. Output: verification facts to BGV.
@@ -837,7 +837,7 @@ Conventions used by every feature (not repeated in each field):
 - **Source:** [SRC: SSOT CON-011 files/uploads allow-list, MIME sniff, size caps, AV] · [SRC: SSOT §15.1 sensitive file controls]
 - **Purpose and outcome:** Users upload resumes, portfolios, evidence, course materials, images and videos reliably on any connection, and the platform accepts only safe files.
 - **Roles and permissions:** `all signed-in roles: upload within their purpose and quota` · `GUE: upload only on specific public forms (contact form, with CAPTCHA)` · `API: upload via files.write scope`
-- **Preconditions and entry points:** Any upload control in any module calls the service with a purpose (for example `resume`, `avatar`, `evidence`, `course_asset`, `message_attachment`, `support_attachment`, `import_file`). 
+- **Preconditions and entry points:** Any upload control in any module calls the service with a purpose (for example `resume`, `avatar`, `evidence`, `course_asset`, `message_attachment`, `support_attachment`, `import_file`).
 - **User interactions and actions:** 1. Choose or drag files into the uploader. 2. See name, size and a progress bar for each, pause and resume, cancel. 3. After upload see "Checking file" then "Ready" or an error. 4. Replace or remove the file.
 - **System behaviour:** Flow: client calls `POST /api/v1/uploads` with purpose, filename, size, declared type, SHA-256 (optional) and `Idempotency-Key`; server checks the purpose policy (allowed types, max size, count limits) and quota (FR-PLT-032) and returns an upload session with a signed target for direct-to-storage upload (single request ≤ 8 MB; multipart/resumable chunks of 5 to 16 MB for larger files using the tus or the storage provider's multipart protocol). The client uploads straight to object storage (bytes do not pass through API servers); on completion calls `POST /uploads/{id}/complete`. The server verifies size and checksum, sniffs the real content type from magic bytes (the declared type is not trusted), rejects mismatches and executable or script types, then sets state `pending_scan` and enqueues scanning (FR-PLT-031). Files in `pending_scan` are not downloadable or embeddable (BR-PLT-022). Images are re-encoded to strip EXIF and metadata; PDFs are checked for active content (JavaScript, launch actions) and flattened or rejected per purpose policy; Office documents with macros are rejected. Purpose policies `[PROP]`: resume (PDF, DOCX, ≤ 10 MB), avatar (JPEG, PNG, WebP ≤ 5 MB), evidence (PDF, images, video up to 500 MB with transcoding), course assets (per STU limits), message attachments (≤ 25 MB), support attachments (≤ 10 MB). Unfinished upload sessions expire after 24 hours and their parts are garbage collected. Filenames are normalized (Unicode NFC, path characters removed, length ≤ 200) and stored separately from the storage key (random id). Object keys are random and non-guessable; buckets are private.
 - **UI elements and controls:** Shared uploader component: drop zone, file picker, per-file row (name, size, status text, progress, cancel, retry), error messages with remedies, paste support, keyboard operable, announced progress for screen readers.
@@ -859,7 +859,7 @@ Conventions used by every feature (not repeated in each field):
 
 - **Sub-module:** E. Files and media
 - **Priority / tier:** Must · R1
-- **Source:** [SRC: SSOT CON-011; §13.15 pipeline: validation, AV scan; §15.1 sensitive file controls] 
+- **Source:** [SRC: SSOT CON-011; §13.15 pipeline: validation, AV scan; §15.1 sensitive file controls]
 - **Purpose and outcome:** No file reaches another user or a viewer unless it passed malware and policy checks; failures never become visible.
 - **Roles and permissions:** `system` · `SUP: see scan status of a ticket attachment` · `PAD, MOD: review quarantined items (with TSF)`
 - **Preconditions and entry points:** File in `pending_scan` after upload completion.
@@ -1086,7 +1086,7 @@ Conventions used by every feature (not repeated in each field):
 
 - **Sub-module:** F. Data movement, background work and outbound safety
 - **Priority / tier:** Must · R1
-- **Source:** [SRC: SSOT §13.5 dual queue, §13.6 transactional catalog, §13.7 heavy catalog, §13.8 job schema; CON-008 retry and timeout] ·  [SRC: ARCHITECTURE: worker claims `background_jobs` with `FOR UPDATE SKIP LOCKED`]
+- **Source:** [SRC: SSOT §13.5 dual queue, §13.6 transactional catalog, §13.7 heavy catalog, §13.8 job schema; CON-008 retry and timeout] · [SRC: ARCHITECTURE: worker claims `background_jobs` with `FOR UPDATE SKIP LOCKED`]
 - **Purpose and outcome:** All asynchronous work in the product (notifications, scans, transcodes, imports, exports, webhooks, digests, reindexing, retention) runs on one engine that bounds retries, prevents duplicate effects, exposes health, and never loses a job silently.
 - **Roles and permissions:** `engineers: define kinds` · `PAD: operate through the ADM job console (FR-ADM-037)` · `modules: enqueue`
 - **Preconditions and entry points:** A module enqueues a job in the same transaction as the state change that requires it (via the outbox, FR-PLT-042) or directly through the job API.
@@ -1118,7 +1118,7 @@ Conventions used by every feature (not repeated in each field):
 - **User interactions and actions:** 1. Operator sees each schedule: next run, last run and outcome, missed runs, owner. 2. "Run now" enqueues one execution (dry-run option for kinds that support it). 3. Pause or resume a schedule with reason. 4. View history of slot executions.
 - **System behaviour:** A scheduler tick (every 15 seconds) uses a database lock (advisory lock or `schedule_slots` unique key on `(schedule, slot_time)`) so only one instance creates the job for each slot (BR-PLT-032); the job then runs through the normal engine with idempotency key `schedule:slot`. Time zone is explicit per schedule: platform maintenance schedules use UTC; user-facing digests and streak rollovers use each user's local day by fan-out (the schedule runs hourly and processes users whose local time matches), resolving the legacy open question (OD-PLT-05 records the decision request). Missed-run policy per schedule: `skip` (default for time-sensitive), `catch_up_one` (run once for the latest missed slot), `catch_up_all` (rare, idempotent kinds only). Jitter option to avoid thundering herds (for example up to 120 seconds). Overlap policy: `skip_if_running` default. Schedulers that have side effects start in dry-run in non-production and as configured in production: a schedule can be flagged `dryRunDefault` so new schedules first record what they would do (SSOT BR-31). Daylight saving transitions handled by the declared zone library; ambiguous or skipped local times follow documented rules (run once at the first occurrence; skipped times run at the next valid time). Cadences carried from the SSOT: `notification.digest` daily 07:30 (user local), `streak.rollover` daily 00:05 (user local), `retention.purge` daily 02:00 UTC, `metrics.rollup` hourly and daily, `leaderboard.rebuild` daily off-peak, `search.reindex` nightly, benchmark and market-signal kinds nightly, `emerging_skill.detect` weekly, `earnings.settle` monthly, `coupon.expiry_scan` daily.
 - **UI elements and controls:** In ADM: schedule table, "Run now" and "Pause" buttons, slot history.
-- **Configuration options:** Platform: per-schedule policy fields; paused flag. 
+- **Configuration options:** Platform: per-schedule policy fields; paused flag.
 - **Business rules:** BR-PLT-032, BR-PLT-030
 - **Validation:** Cron expression valid; time zone is an IANA name; catch-up policy valid for the kind; minimum interval 1 minute.
 - **Inputs and outputs:** Input: registry, clock. Output: scheduled jobs; event `plt.schedule.missed` when a slot is skipped.
@@ -1184,55 +1184,55 @@ Conventions used by every feature (not repeated in each field):
 
 ## 5. Business rules
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-PLT-001 | The public API is path-versioned (`/api/v1`). Within a major version only additive changes are allowed; breaking changes need a new major and a deprecation window of at least 6 months (OD-PLT-01) announced with `Deprecation` and `Sunset` headers, changelog, email and per-client reports; sunset returns 410. | Integrator trust. | Contract diff in CI; gateway headers | [SRC: SSOT §12.18, CON-002] |
-| BR-PLT-002 | Every route declares a policy action; authorization is enforced server-side per resource and tenant; clients never learn permissions except as UI hints; direct browser writes to domain tables are prohibited. | Single enforcement point. | API framework; route registry | [SRC: Yash 13 API-STD §1] [SRC: SSOT §12.18] |
-| BR-PLT-003 | Access tokens are short-lived (default 30 minutes); refresh tokens rotate and reuse revokes the family; authorization codes are single-use for 60 seconds; API keys and secrets are shown once, stored hashed or encrypted, expire (maximum 1 year), can be IP-restricted and rotate with an overlap. | Limits credential theft impact. | OAuth server; key service | [DER] [PROP] values |
-| BR-PLT-004 | Scopes follow `resource.action[:own|:org]`, are least-privilege, are intersected with the grantor's permissions at consent time and re-checked on every request, and widen only through re-consent; no wildcard scopes. | Prevent over-grant. | OAuth server; resource guard | [DER] |
-| BR-PLT-005 | Rate limits and quotas apply in layers (edge IP, per principal and endpoint class, per tenant quota, concurrency); counters live in a store shared by all instances; the fail mode is fail-closed for authentication and write bursts and fail-open at a conservative local limit for reads; exceeding returns 429 with `Retry-After`; quota exhaustion is explicit, never a silent throttle. | Availability and fairness. | Gateway limiter | [SRC: SSOT CON-006] [SRC: SSOT §20.1 open] |
-| BR-PLT-006 | List endpoints use signed, expiring cursor (keyset) pagination only, default limit 25 and maximum 100 (OD-PLT-03), allow-listed filters and sort keys with a unique tiebreaker, and no offset pagination. | Stable and cheap traversal. | API framework | [SRC: SSOT CON-003, CON-004] |
-| BR-PLT-007 | Unsafe writes honor `Idempotency-Key`: same key and payload replays the stored response, same key with another payload is 422, in-progress is 409; keys are retained 14 days (OD-PLT-03); versioned resources require `If-Match` (428 when missing). | Retry safety including offline clients. | Idempotency store | [SRC: SSOT CON-005, CON-012] [SRC: Yash 08 OFF-01-REV2] |
-| BR-PLT-008 | All errors are RFC 9457 `application/problem+json` with stable `code`, `requestId` and field errors; no internals are exposed; every response carries `X-Request-Id`. | Debuggability and safety. | Error middleware | [SRC: SSOT CON-001] |
-| BR-PLT-009 | The API contract is generated from the shared Zod schemas; OpenAPI, SDKs and examples are generated or tested from it; hand-edited OpenAPI is a defect; routes without policy action, scopes and rate class fail the build. | No drift. | CI | [SRC: Yash 13 API-STD §1] |
-| BR-PLT-010 | Outbound webhooks are signed with HMAC-SHA256 over `timestamp.rawBody` using a per-endpoint secret, with a 5-minute tolerance, dual signatures during a 24-hour rotation overlap; inbound provider webhooks must pass their provider's signature verification and are deduplicated by provider event id before processing. | Authenticity and replay protection. | Webhook subsystem; adapters | [SRC: SSOT CON-007] |
-| BR-PLT-011 | Webhook delivery is at-least-once with a bounded retry schedule (standard 7 attempts over about 34 hours, extended to 72 hours), 10-second timeout, no redirects, honoring 429 and 410, circuit breaking to `degraded` and `auto_disabled`, ordering not guaranteed (per-resource sequence provided), and replayability for 30 days. | Reliability without overload. | Webhook delivery job | [SRC: SSOT CON-007, CON-008] [PROP] schedule |
-| BR-PLT-012 | Every server-side fetch of a tenant- or user-supplied URL goes through the egress client: https only, allowed ports, checked and pinned DNS, deny ranges (loopback, private, link-local, metadata, IPv6 equivalents), no redirects by default, size and time limits, no ambient credentials. | SSRF prevention. | Egress library; network rules | [SRC: SSOT §13.16] |
-| BR-PLT-013 | The domain never calls a vendor SDK directly: every external dependency sits behind a provider port with an adapter, anti-corruption mappers, an owner, a documented degraded mode, contract tests and a removal drill as a release gate. | Vendor replaceability. | Architecture tests; release checklist | [SRC: SSOT §13.4 ADR-009] |
-| BR-PLT-014 | Integration and platform secrets live only in the vault (envelope encryption, tenant-scoped keys), are write-only to users, are decrypted only in the calling process, never logged, rotated on schedule or demand, and access is audited; no plaintext fallback exists. | Secret safety. | Vault service | [SRC: SSOT §13.4] [DER] |
-| BR-PLT-015 | An integration connects only with explicit consent to a generated data-sharing summary; disconnect revokes tokens at the provider, stops syncs and asks what to do with imported data; imported records carry provenance (integration id, external id, imported time). | Transparency and control. | Connection service | [DER] |
-| BR-PLT-016 | Synchronization is idempotent, resumable and bounded; every two-way sync declares a field ownership table naming the system of record per field; unresolved conflicts go to review, not silent overwrite; source-deleted records are marked, not auto-deleted. | Data integrity. | Sync engine | [SRC: SSOT §19.3 principle] [DER] |
-| BR-PLT-017 | SSO requires a DNS-verified domain, strict signature, audience and replay checks, no silent takeover of existing accounts, and an always-available break-glass owner account before enforcement; SCIM deactivation revokes sessions within 5 minutes; JIT provisioning is off by default and least-privilege. | Enterprise security. | SSO and SCIM service | [DER] |
-| BR-PLT-018 | LTI 1.3 launches validate the id token (signature via JWKS, issuer, audience, nonce, expiry, deployment id), use one-time state and nonce, and pass back only authorized scores and completions for bound contexts. | LMS interop security. | LTI service | [PROP] |
-| BR-PLT-019 | Integration health uses `live`, `inferred`, `degraded`, `not_configured`, `reauth_required` and `unknown`; missing data for two probe intervals is `unknown`, never healthy; breaker state is visible to operators and tenant admins. | Honest status. | Health service | [SRC: SSOT BR-28, §20.2] |
-| BR-PLT-020 | Third-party apps are not listed in any directory until the marketplace gate criteria are met and approved; sealed scopes are never available; listing is limited to the career domain; unlisted private apps for one customer are permitted. | Avoid drifting into a general marketplace. | Decision gate | [SRC: SSOT §4.2] [PROP] |
-| BR-PLT-021 | Uploads are validated by sniffed content type against a purpose allow-list, with size, count and archive limits; executable and active content is rejected; EXIF and metadata are stripped from images; filenames are normalized and kept apart from random storage keys. | Safe intake. | Upload service | [SRC: SSOT CON-011] |
-| BR-PLT-022 | A file is unavailable (not downloadable or embeddable) until it has a clean scan verdict; scan failure or engine outage fails closed; infected files are quarantined and never released; suspicious files go to manual review. | Malware containment. | File state machine | [SRC: SSOT §13.15, CON-011] |
-| BR-PLT-023 | Storage quotas are enforced per principal and tenant with reservation at session creation; exceeding blocks new uploads only; plan downgrade never deletes existing data and gives a 30-day grace; warnings at 80% and 100%. | Fair and safe limits. | Quota service | [PROP] |
-| BR-PLT-024 | File deletion is two-phase (soft delete with 30-day restore, then purge of object, renditions, CDN entries and index references); erasure propagates except under legal hold or legal retention, with exceptions reported; deletion leaves a content-free record. | Lifecycle and erasure. | Retention service | [SRC: SSOT CON-015] |
-| BR-PLT-025 | Private files are served only through short-lived, object-scoped signed URLs (default 15 minutes, maximum 1 hour; share links up to 30 days, revocable); active content (HTML, SVG) is served from a separate sandbox origin with nosniff and CSP; tokens are never logged. | Access control. | Access service; CDN | [SRC: SSOT §13.16] [DER] |
-| BR-PLT-026 | Media processing sits behind a provider port; renditions are idempotent by (content hash, profile version); originals are retained; a failed or delayed item affects only itself and the page still renders. | Isolation and cost control. | Media pipeline | [SRC: SSOT §13.15, BR-086] |
-| BR-PLT-027 | External media embeds are validated before publication; provider restrictions are never bypassed; protected content is never downloaded; capabilities decide playback and completion options; tenant allowlists are enforced on the server; authors attest rights; unsupported providers fail explicitly. | Rights and safety. | Embed service | [SRC: SSOT BR-083 to BR-090] |
-| BR-PLT-028 | Imports are validate-then-commit: validation writes nothing; commit is batched with per-row idempotency keys; a file changed after validation must be re-validated; one active import per entity type per tenant; undo is available within 24 hours where the handler supports it. | Data integrity. | Import engine | [SRC: SSOT WF-17] |
-| BR-PLT-029 | Exports are asynchronous, authorization is checked at request and at generation, files are encrypted and delivered by expiring signed links, row and concurrency limits apply, sealed classes are excluded except for the data subject's own package or an approved legal process, and each export carries a manifest. | Safe portability. | Export engine | [SRC: SSOT BR-063] |
-| BR-PLT-030 | Jobs are idempotent and bounded: each kind declares attempts, backoff, timeout, concurrency, `replaySafe` and an idempotency key; a lease with fencing token prevents stale workers from committing; a job whose lease expires after its last allowed attempt becomes `dead`; non-retryable errors go straight to `dead`. | No loops or duplicates. | Job engine | [SRC: SSOT §13.8, CON-008] |
-| BR-PLT-031 | Job states are `queued`, `running`, `retrying`, `succeeded`, `dead`, `cancelled`; `failed` is not a state (it is `retrying` or `dead`); terminal states are `succeeded`, `dead`, `cancelled`. | Resolves the legacy terminal-set ambiguity. | Job schema | [SRC: SSOT §13.8 open] [DEC-REQ] OD-PLT-05 |
-| BR-PLT-032 | Schedules declare a time zone and a missed-run and overlap policy; exactly one instance creates each slot (unique slot key); new schedules with side effects can start in dry-run. | Predictable recurring work. | Scheduler | [SRC: SSOT BR-31, §13.6] |
-| BR-PLT-033 | The sandbox is isolated from production (separate data, hosts and credentials), uses synthetic data and test modes of providers, never sends real email, SMS or payments, and rejects live credentials. | Safety of testing. | Sandbox environment | [PROP] |
-| BR-PLT-034 | Developer apps need a verified publisher for user-delegated scopes, exact https redirect URIs, privacy and terms URLs, justified high-risk scopes and review before live use; scope widening or redirect changes re-trigger review; suspension revokes tokens within 60 seconds. | App ecosystem trust. | Developer portal | [PROP] |
-| BR-PLT-035 | Every API call, job, file, webhook and integration carries tenant and purpose context; cross-tenant access is impossible by construction (tenant-scoped keys, queries and caches); caches include tenant in keys. | Tenant isolation. | Request context; data layer | [SRC: SSOT §20.2, CON-014] |
-| BR-PLT-036 | Domain events are written in the same transaction as the state change (outbox) and delivered at least once; consumers are idempotent by event id; one failing consumer does not block others. | No dual-write loss. | Outbox dispatcher | [SRC: SSOT §13.5 ADR-T05] |
-| BR-PLT-037 | Event types are registered with versioned schemas; within a version changes are additive; breaking changes publish a new version in parallel for a deprecation period; event payloads are thin snapshots with ids. | Stable integrations. | Event registry | [DER] |
-| BR-PLT-038 | API request logs keep metadata 30 days and no bodies by default; debug body capture is time-boxed (60 minutes), redacted, deleted after 7 days and never for sealed classes; webhook payload snapshots follow 30-day retention. | Minimization. | Logging pipeline | [SRC: SSOT CON-016] [PROP] values |
-| BR-PLT-039 | Integrations request only the scopes and fields declared in their definition; HRIS and similar sources are read with a field allowlist that excludes compensation, performance, medical and protected-class data. | Data minimization. | Adapter definitions | [DER] |
-| BR-PLT-040 | Every adapter and queue consumer defines a degraded mode, bounded timeouts and a circuit breaker; provider outages degrade the specific feature with a clear message and queue work instead of failing silently or duplicating effects on recovery. | Graceful degradation. | Adapter framework | [SRC: SSOT §20.1, §13.4] |
-| BR-PLT-041 | Sealed data classes (assessment answers and keys, message bodies, identity documents, background-check reports, health-class data) are not offered through third-party scopes, webhook payloads or org exports; only the data subject's own package or an approved legal process may include them. | Containment. | Scope catalog; payload builders | [DER] (aligned with BR-ADM-017) |
-| BR-PLT-042 | CDN caching applies only to public or tokenized-and-verified content; cache keys include tenant for tenant-scoped content and exclude tokens; purge by tag completes within 60 seconds; private content is `Cache-Control: private` otherwise. | No leakage through caches. | CDN configuration | [SRC: SSOT CON-014] |
-| BR-PLT-043 | Payment and subscription state is changed only by verified, deduplicated provider webhooks applied idempotently; webhooks acknowledge after durable enqueue; provider calls carry idempotency keys; reconciliation compares provider records to the ledger daily. | Financial integrity. | Payment adapter; BIL | [SRC: SSOT BR-32] |
-| BR-PLT-044 | Email and SMS go through provider ports with suppression lists (hard bounces, complaints, opt-outs), authenticated sender domains (SPF, DKIM, DMARC), separate streams for transactional and bulk, no message bodies or addresses in logs, and idempotency keys; mandatory security messages may bypass marketing suppression but not hard-bounce suppression. | Deliverability and privacy. | Email and SMS adapters | [DER] |
-| BR-PLT-045 | Meeting providers create unique links with waiting-room defaults; recording is off by default and requires consent flags before scheduling; recordings are ingested only under a retention class. | Consent. | Meeting adapter | [PROP] |
-| BR-PLT-046 | Identity verification stores only outcome facts (verified, level, name match, document country and type, expiry month, time, vendor reference); no document images or biometrics are stored by TalentSphere; attempts are limited (3 per 24 hours); results expire per policy. | Minimization. | IDV adapter | [DER] |
-| BR-PLT-047 | Calendar access uses the least scope: free/busy by default and event write on one chosen calendar; reading event titles needs the user's explicit choice; cached availability is deleted on disconnect. | Privacy. | Calendar adapter | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                          | Rationale                                                                                                                                                                           | Enforced where                        | Source                                                  |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------- | ----- |
+| BR-PLT-001 | The public API is path-versioned (`/api/v1`). Within a major version only additive changes are allowed; breaking changes need a new major and a deprecation window of at least 6 months (OD-PLT-01) announced with `Deprecation` and `Sunset` headers, changelog, email and per-client reports; sunset returns 410.                                                                           | Integrator trust.                                                                                                                                                                   | Contract diff in CI; gateway headers  | [SRC: SSOT §12.18, CON-002]                             |
+| BR-PLT-002 | Every route declares a policy action; authorization is enforced server-side per resource and tenant; clients never learn permissions except as UI hints; direct browser writes to domain tables are prohibited.                                                                                                                                                                               | Single enforcement point.                                                                                                                                                           | API framework; route registry         | [SRC: Yash 13 API-STD §1] [SRC: SSOT §12.18]            |
+| BR-PLT-003 | Access tokens are short-lived (default 30 minutes); refresh tokens rotate and reuse revokes the family; authorization codes are single-use for 60 seconds; API keys and secrets are shown once, stored hashed or encrypted, expire (maximum 1 year), can be IP-restricted and rotate with an overlap.                                                                                         | Limits credential theft impact.                                                                                                                                                     | OAuth server; key service             | [DER] [PROP] values                                     |
+| BR-PLT-004 | Scopes follow `resource.action[:own                                                                                                                                                                                                                                                                                                                                                           | :org]`, are least-privilege, are intersected with the grantor's permissions at consent time and re-checked on every request, and widen only through re-consent; no wildcard scopes. | Prevent over-grant.                   | OAuth server; resource guard                            | [DER] |
+| BR-PLT-005 | Rate limits and quotas apply in layers (edge IP, per principal and endpoint class, per tenant quota, concurrency); counters live in a store shared by all instances; the fail mode is fail-closed for authentication and write bursts and fail-open at a conservative local limit for reads; exceeding returns 429 with `Retry-After`; quota exhaustion is explicit, never a silent throttle. | Availability and fairness.                                                                                                                                                          | Gateway limiter                       | [SRC: SSOT CON-006] [SRC: SSOT §20.1 open]              |
+| BR-PLT-006 | List endpoints use signed, expiring cursor (keyset) pagination only, default limit 25 and maximum 100 (OD-PLT-03), allow-listed filters and sort keys with a unique tiebreaker, and no offset pagination.                                                                                                                                                                                     | Stable and cheap traversal.                                                                                                                                                         | API framework                         | [SRC: SSOT CON-003, CON-004]                            |
+| BR-PLT-007 | Unsafe writes honor `Idempotency-Key`: same key and payload replays the stored response, same key with another payload is 422, in-progress is 409; keys are retained 14 days (OD-PLT-03); versioned resources require `If-Match` (428 when missing).                                                                                                                                          | Retry safety including offline clients.                                                                                                                                             | Idempotency store                     | [SRC: SSOT CON-005, CON-012] [SRC: Yash 08 OFF-01-REV2] |
+| BR-PLT-008 | All errors are RFC 9457 `application/problem+json` with stable `code`, `requestId` and field errors; no internals are exposed; every response carries `X-Request-Id`.                                                                                                                                                                                                                         | Debuggability and safety.                                                                                                                                                           | Error middleware                      | [SRC: SSOT CON-001]                                     |
+| BR-PLT-009 | The API contract is generated from the shared Zod schemas; OpenAPI, SDKs and examples are generated or tested from it; hand-edited OpenAPI is a defect; routes without policy action, scopes and rate class fail the build.                                                                                                                                                                   | No drift.                                                                                                                                                                           | CI                                    | [SRC: Yash 13 API-STD §1]                               |
+| BR-PLT-010 | Outbound webhooks are signed with HMAC-SHA256 over `timestamp.rawBody` using a per-endpoint secret, with a 5-minute tolerance, dual signatures during a 24-hour rotation overlap; inbound provider webhooks must pass their provider's signature verification and are deduplicated by provider event id before processing.                                                                    | Authenticity and replay protection.                                                                                                                                                 | Webhook subsystem; adapters           | [SRC: SSOT CON-007]                                     |
+| BR-PLT-011 | Webhook delivery is at-least-once with a bounded retry schedule (standard 7 attempts over about 34 hours, extended to 72 hours), 10-second timeout, no redirects, honoring 429 and 410, circuit breaking to `degraded` and `auto_disabled`, ordering not guaranteed (per-resource sequence provided), and replayability for 30 days.                                                          | Reliability without overload.                                                                                                                                                       | Webhook delivery job                  | [SRC: SSOT CON-007, CON-008] [PROP] schedule            |
+| BR-PLT-012 | Every server-side fetch of a tenant- or user-supplied URL goes through the egress client: https only, allowed ports, checked and pinned DNS, deny ranges (loopback, private, link-local, metadata, IPv6 equivalents), no redirects by default, size and time limits, no ambient credentials.                                                                                                  | SSRF prevention.                                                                                                                                                                    | Egress library; network rules         | [SRC: SSOT §13.16]                                      |
+| BR-PLT-013 | The domain never calls a vendor SDK directly: every external dependency sits behind a provider port with an adapter, anti-corruption mappers, an owner, a documented degraded mode, contract tests and a removal drill as a release gate.                                                                                                                                                     | Vendor replaceability.                                                                                                                                                              | Architecture tests; release checklist | [SRC: SSOT §13.4 ADR-009]                               |
+| BR-PLT-014 | Integration and platform secrets live only in the vault (envelope encryption, tenant-scoped keys), are write-only to users, are decrypted only in the calling process, never logged, rotated on schedule or demand, and access is audited; no plaintext fallback exists.                                                                                                                      | Secret safety.                                                                                                                                                                      | Vault service                         | [SRC: SSOT §13.4] [DER]                                 |
+| BR-PLT-015 | An integration connects only with explicit consent to a generated data-sharing summary; disconnect revokes tokens at the provider, stops syncs and asks what to do with imported data; imported records carry provenance (integration id, external id, imported time).                                                                                                                        | Transparency and control.                                                                                                                                                           | Connection service                    | [DER]                                                   |
+| BR-PLT-016 | Synchronization is idempotent, resumable and bounded; every two-way sync declares a field ownership table naming the system of record per field; unresolved conflicts go to review, not silent overwrite; source-deleted records are marked, not auto-deleted.                                                                                                                                | Data integrity.                                                                                                                                                                     | Sync engine                           | [SRC: SSOT §19.3 principle] [DER]                       |
+| BR-PLT-017 | SSO requires a DNS-verified domain, strict signature, audience and replay checks, no silent takeover of existing accounts, and an always-available break-glass owner account before enforcement; SCIM deactivation revokes sessions within 5 minutes; JIT provisioning is off by default and least-privilege.                                                                                 | Enterprise security.                                                                                                                                                                | SSO and SCIM service                  | [DER]                                                   |
+| BR-PLT-018 | LTI 1.3 launches validate the id token (signature via JWKS, issuer, audience, nonce, expiry, deployment id), use one-time state and nonce, and pass back only authorized scores and completions for bound contexts.                                                                                                                                                                           | LMS interop security.                                                                                                                                                               | LTI service                           | [PROP]                                                  |
+| BR-PLT-019 | Integration health uses `live`, `inferred`, `degraded`, `not_configured`, `reauth_required` and `unknown`; missing data for two probe intervals is `unknown`, never healthy; breaker state is visible to operators and tenant admins.                                                                                                                                                         | Honest status.                                                                                                                                                                      | Health service                        | [SRC: SSOT BR-28, §20.2]                                |
+| BR-PLT-020 | Third-party apps are not listed in any directory until the marketplace gate criteria are met and approved; sealed scopes are never available; listing is limited to the career domain; unlisted private apps for one customer are permitted.                                                                                                                                                  | Avoid drifting into a general marketplace.                                                                                                                                          | Decision gate                         | [SRC: SSOT §4.2] [PROP]                                 |
+| BR-PLT-021 | Uploads are validated by sniffed content type against a purpose allow-list, with size, count and archive limits; executable and active content is rejected; EXIF and metadata are stripped from images; filenames are normalized and kept apart from random storage keys.                                                                                                                     | Safe intake.                                                                                                                                                                        | Upload service                        | [SRC: SSOT CON-011]                                     |
+| BR-PLT-022 | A file is unavailable (not downloadable or embeddable) until it has a clean scan verdict; scan failure or engine outage fails closed; infected files are quarantined and never released; suspicious files go to manual review.                                                                                                                                                                | Malware containment.                                                                                                                                                                | File state machine                    | [SRC: SSOT §13.15, CON-011]                             |
+| BR-PLT-023 | Storage quotas are enforced per principal and tenant with reservation at session creation; exceeding blocks new uploads only; plan downgrade never deletes existing data and gives a 30-day grace; warnings at 80% and 100%.                                                                                                                                                                  | Fair and safe limits.                                                                                                                                                               | Quota service                         | [PROP]                                                  |
+| BR-PLT-024 | File deletion is two-phase (soft delete with 30-day restore, then purge of object, renditions, CDN entries and index references); erasure propagates except under legal hold or legal retention, with exceptions reported; deletion leaves a content-free record.                                                                                                                             | Lifecycle and erasure.                                                                                                                                                              | Retention service                     | [SRC: SSOT CON-015]                                     |
+| BR-PLT-025 | Private files are served only through short-lived, object-scoped signed URLs (default 15 minutes, maximum 1 hour; share links up to 30 days, revocable); active content (HTML, SVG) is served from a separate sandbox origin with nosniff and CSP; tokens are never logged.                                                                                                                   | Access control.                                                                                                                                                                     | Access service; CDN                   | [SRC: SSOT §13.16] [DER]                                |
+| BR-PLT-026 | Media processing sits behind a provider port; renditions are idempotent by (content hash, profile version); originals are retained; a failed or delayed item affects only itself and the page still renders.                                                                                                                                                                                  | Isolation and cost control.                                                                                                                                                         | Media pipeline                        | [SRC: SSOT §13.15, BR-086]                              |
+| BR-PLT-027 | External media embeds are validated before publication; provider restrictions are never bypassed; protected content is never downloaded; capabilities decide playback and completion options; tenant allowlists are enforced on the server; authors attest rights; unsupported providers fail explicitly.                                                                                     | Rights and safety.                                                                                                                                                                  | Embed service                         | [SRC: SSOT BR-083 to BR-090]                            |
+| BR-PLT-028 | Imports are validate-then-commit: validation writes nothing; commit is batched with per-row idempotency keys; a file changed after validation must be re-validated; one active import per entity type per tenant; undo is available within 24 hours where the handler supports it.                                                                                                            | Data integrity.                                                                                                                                                                     | Import engine                         | [SRC: SSOT WF-17]                                       |
+| BR-PLT-029 | Exports are asynchronous, authorization is checked at request and at generation, files are encrypted and delivered by expiring signed links, row and concurrency limits apply, sealed classes are excluded except for the data subject's own package or an approved legal process, and each export carries a manifest.                                                                        | Safe portability.                                                                                                                                                                   | Export engine                         | [SRC: SSOT BR-063]                                      |
+| BR-PLT-030 | Jobs are idempotent and bounded: each kind declares attempts, backoff, timeout, concurrency, `replaySafe` and an idempotency key; a lease with fencing token prevents stale workers from committing; a job whose lease expires after its last allowed attempt becomes `dead`; non-retryable errors go straight to `dead`.                                                                     | No loops or duplicates.                                                                                                                                                             | Job engine                            | [SRC: SSOT §13.8, CON-008]                              |
+| BR-PLT-031 | Job states are `queued`, `running`, `retrying`, `succeeded`, `dead`, `cancelled`; `failed` is not a state (it is `retrying` or `dead`); terminal states are `succeeded`, `dead`, `cancelled`.                                                                                                                                                                                                 | Resolves the legacy terminal-set ambiguity.                                                                                                                                         | Job schema                            | [SRC: SSOT §13.8 open] [DEC-REQ] OD-PLT-05              |
+| BR-PLT-032 | Schedules declare a time zone and a missed-run and overlap policy; exactly one instance creates each slot (unique slot key); new schedules with side effects can start in dry-run.                                                                                                                                                                                                            | Predictable recurring work.                                                                                                                                                         | Scheduler                             | [SRC: SSOT BR-31, §13.6]                                |
+| BR-PLT-033 | The sandbox is isolated from production (separate data, hosts and credentials), uses synthetic data and test modes of providers, never sends real email, SMS or payments, and rejects live credentials.                                                                                                                                                                                       | Safety of testing.                                                                                                                                                                  | Sandbox environment                   | [PROP]                                                  |
+| BR-PLT-034 | Developer apps need a verified publisher for user-delegated scopes, exact https redirect URIs, privacy and terms URLs, justified high-risk scopes and review before live use; scope widening or redirect changes re-trigger review; suspension revokes tokens within 60 seconds.                                                                                                              | App ecosystem trust.                                                                                                                                                                | Developer portal                      | [PROP]                                                  |
+| BR-PLT-035 | Every API call, job, file, webhook and integration carries tenant and purpose context; cross-tenant access is impossible by construction (tenant-scoped keys, queries and caches); caches include tenant in keys.                                                                                                                                                                             | Tenant isolation.                                                                                                                                                                   | Request context; data layer           | [SRC: SSOT §20.2, CON-014]                              |
+| BR-PLT-036 | Domain events are written in the same transaction as the state change (outbox) and delivered at least once; consumers are idempotent by event id; one failing consumer does not block others.                                                                                                                                                                                                 | No dual-write loss.                                                                                                                                                                 | Outbox dispatcher                     | [SRC: SSOT §13.5 ADR-T05]                               |
+| BR-PLT-037 | Event types are registered with versioned schemas; within a version changes are additive; breaking changes publish a new version in parallel for a deprecation period; event payloads are thin snapshots with ids.                                                                                                                                                                            | Stable integrations.                                                                                                                                                                | Event registry                        | [DER]                                                   |
+| BR-PLT-038 | API request logs keep metadata 30 days and no bodies by default; debug body capture is time-boxed (60 minutes), redacted, deleted after 7 days and never for sealed classes; webhook payload snapshots follow 30-day retention.                                                                                                                                                               | Minimization.                                                                                                                                                                       | Logging pipeline                      | [SRC: SSOT CON-016] [PROP] values                       |
+| BR-PLT-039 | Integrations request only the scopes and fields declared in their definition; HRIS and similar sources are read with a field allowlist that excludes compensation, performance, medical and protected-class data.                                                                                                                                                                             | Data minimization.                                                                                                                                                                  | Adapter definitions                   | [DER]                                                   |
+| BR-PLT-040 | Every adapter and queue consumer defines a degraded mode, bounded timeouts and a circuit breaker; provider outages degrade the specific feature with a clear message and queue work instead of failing silently or duplicating effects on recovery.                                                                                                                                           | Graceful degradation.                                                                                                                                                               | Adapter framework                     | [SRC: SSOT §20.1, §13.4]                                |
+| BR-PLT-041 | Sealed data classes (assessment answers and keys, message bodies, identity documents, background-check reports, health-class data) are not offered through third-party scopes, webhook payloads or org exports; only the data subject's own package or an approved legal process may include them.                                                                                            | Containment.                                                                                                                                                                        | Scope catalog; payload builders       | [DER] (aligned with BR-ADM-017)                         |
+| BR-PLT-042 | CDN caching applies only to public or tokenized-and-verified content; cache keys include tenant for tenant-scoped content and exclude tokens; purge by tag completes within 60 seconds; private content is `Cache-Control: private` otherwise.                                                                                                                                                | No leakage through caches.                                                                                                                                                          | CDN configuration                     | [SRC: SSOT CON-014]                                     |
+| BR-PLT-043 | Payment and subscription state is changed only by verified, deduplicated provider webhooks applied idempotently; webhooks acknowledge after durable enqueue; provider calls carry idempotency keys; reconciliation compares provider records to the ledger daily.                                                                                                                             | Financial integrity.                                                                                                                                                                | Payment adapter; BIL                  | [SRC: SSOT BR-32]                                       |
+| BR-PLT-044 | Email and SMS go through provider ports with suppression lists (hard bounces, complaints, opt-outs), authenticated sender domains (SPF, DKIM, DMARC), separate streams for transactional and bulk, no message bodies or addresses in logs, and idempotency keys; mandatory security messages may bypass marketing suppression but not hard-bounce suppression.                                | Deliverability and privacy.                                                                                                                                                         | Email and SMS adapters                | [DER]                                                   |
+| BR-PLT-045 | Meeting providers create unique links with waiting-room defaults; recording is off by default and requires consent flags before scheduling; recordings are ingested only under a retention class.                                                                                                                                                                                             | Consent.                                                                                                                                                                            | Meeting adapter                       | [PROP]                                                  |
+| BR-PLT-046 | Identity verification stores only outcome facts (verified, level, name match, document country and type, expiry month, time, vendor reference); no document images or biometrics are stored by TalentSphere; attempts are limited (3 per 24 hours); results expire per policy.                                                                                                                | Minimization.                                                                                                                                                                       | IDV adapter                           | [DER]                                                   |
+| BR-PLT-047 | Calendar access uses the least scope: free/busy by default and event write on one chosen calendar; reading event titles needs the user's explicit choice; cached availability is deleted on disconnect.                                                                                                                                                                                       | Privacy.                                                                                                                                                                            | Calendar adapter                      | [PROP]                                                  |
 
 ## 6. State machines
 
@@ -1240,15 +1240,15 @@ Conventions used by every feature (not repeated in each field):
 
 States: `pending`, `delivering`, `delivered`, `retrying`, `dead`, `cancelled`. Terminal: `delivered`, `dead`, `cancelled`. A replay creates a new delivery.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| pending | delivering | job claimed | endpoint active or degraded |
-| delivering | delivered | 2xx within 10 seconds | — |
-| delivering | retrying | timeout, 5xx, 429, network error | attempts remaining |
-| retrying | delivering | backoff elapsed | — |
-| delivering | dead | attempts exhausted or non-retryable (4xx other than 429, 408) | — |
-| delivering | dead | 410 response | endpoint disabled |
-| pending, retrying | cancelled | endpoint deleted or event retracted | — |
+| From              | To         | Trigger                                                       | Guard                       |
+| ----------------- | ---------- | ------------------------------------------------------------- | --------------------------- |
+| pending           | delivering | job claimed                                                   | endpoint active or degraded |
+| delivering        | delivered  | 2xx within 10 seconds                                         | —                           |
+| delivering        | retrying   | timeout, 5xx, 429, network error                              | attempts remaining          |
+| retrying          | delivering | backoff elapsed                                               | —                           |
+| delivering        | dead       | attempts exhausted or non-retryable (4xx other than 429, 408) | —                           |
+| delivering        | dead       | 410 response                                                  | endpoint disabled           |
+| pending, retrying | cancelled  | endpoint deleted or event retracted                           | —                           |
 
 ```mermaid
 stateDiagram-v2
@@ -1269,15 +1269,15 @@ stateDiagram-v2
 
 States: `pending_verification`, `active`, `degraded`, `auto_disabled`, `disabled`, `deleted`. Terminal: `deleted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| pending_verification | active | challenge answered 2xx | address allowed |
-| active | degraded | 20 consecutive failures or success under 10% over 100 | — |
-| degraded | active | probe or delivery succeeds 3 times | — |
-| degraded | auto_disabled | continuous failure for 3 days | owners notified |
-| active, degraded | disabled | owner pauses, 410 response, or PAD disables | reason recorded |
-| auto_disabled, disabled | active | owner re-enables | re-verification if disabled over 30 days |
-| any | deleted | owner deletes | secret destroyed |
+| From                    | To            | Trigger                                               | Guard                                    |
+| ----------------------- | ------------- | ----------------------------------------------------- | ---------------------------------------- |
+| pending_verification    | active        | challenge answered 2xx                                | address allowed                          |
+| active                  | degraded      | 20 consecutive failures or success under 10% over 100 | —                                        |
+| degraded                | active        | probe or delivery succeeds 3 times                    | —                                        |
+| degraded                | auto_disabled | continuous failure for 3 days                         | owners notified                          |
+| active, degraded        | disabled      | owner pauses, 410 response, or PAD disables           | reason recorded                          |
+| auto_disabled, disabled | active        | owner re-enables                                      | re-verification if disabled over 30 days |
+| any                     | deleted       | owner deletes                                         | secret destroyed                         |
 
 ```mermaid
 stateDiagram-v2
@@ -1300,18 +1300,18 @@ stateDiagram-v2
 
 States: `not_connected`, `authorizing`, `connected`, `degraded`, `reauth_required`, `suspended`, `disconnected`. Terminal: `disconnected` (a new connection starts again at `not_connected`).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| not_connected | authorizing | user starts connect | consent to data-sharing summary |
-| authorizing | connected | provider authorization and test call succeed | — |
-| authorizing | not_connected | denied or timeout | — |
-| connected | degraded | health degraded or breaker open | — |
-| degraded | connected | recovery | — |
-| connected, degraded | reauth_required | token revoked or expired | — |
-| reauth_required | connected | user reconnects | — |
-| connected, degraded, reauth_required | suspended | PAD or plan lapse | reason |
-| suspended | connected | resolved | — |
-| any except not_connected | disconnected | user or admin disconnects | tokens revoked |
+| From                                 | To              | Trigger                                      | Guard                           |
+| ------------------------------------ | --------------- | -------------------------------------------- | ------------------------------- |
+| not_connected                        | authorizing     | user starts connect                          | consent to data-sharing summary |
+| authorizing                          | connected       | provider authorization and test call succeed | —                               |
+| authorizing                          | not_connected   | denied or timeout                            | —                               |
+| connected                            | degraded        | health degraded or breaker open              | —                               |
+| degraded                             | connected       | recovery                                     | —                               |
+| connected, degraded                  | reauth_required | token revoked or expired                     | —                               |
+| reauth_required                      | connected       | user reconnects                              | —                               |
+| connected, degraded, reauth_required | suspended       | PAD or plan lapse                            | reason                          |
+| suspended                            | connected       | resolved                                     | —                               |
+| any except not_connected             | disconnected    | user or admin disconnects                    | tokens revoked                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1334,18 +1334,18 @@ stateDiagram-v2
 
 States: `upload_pending`, `uploading`, `pending_scan`, `available`, `quarantined`, `soft_deleted`, `purge_pending`, `purged`, `upload_expired`. Terminal: `purged`, `upload_expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| upload_pending | uploading | first chunk | session valid |
-| upload_pending, uploading | upload_expired | 24 hours without completion | parts collected |
-| uploading | pending_scan | complete call | size and checksum match, type allowed |
-| pending_scan | available | scan verdict clean | — |
-| pending_scan | quarantined | infected, suspicious confirmed, scan failed after retries | fail closed |
-| available | quarantined | re-scan detects threat or moderation action | — |
-| available | soft_deleted | owner or system delete | — |
-| soft_deleted | available | restore within 30 days | quota |
-| soft_deleted, quarantined | purge_pending | 30 days elapse or erasure | no legal hold |
-| purge_pending | purged | all copies removed | deletion record written |
+| From                      | To             | Trigger                                                   | Guard                                 |
+| ------------------------- | -------------- | --------------------------------------------------------- | ------------------------------------- |
+| upload_pending            | uploading      | first chunk                                               | session valid                         |
+| upload_pending, uploading | upload_expired | 24 hours without completion                               | parts collected                       |
+| uploading                 | pending_scan   | complete call                                             | size and checksum match, type allowed |
+| pending_scan              | available      | scan verdict clean                                        | —                                     |
+| pending_scan              | quarantined    | infected, suspicious confirmed, scan failed after retries | fail closed                           |
+| available                 | quarantined    | re-scan detects threat or moderation action               | —                                     |
+| available                 | soft_deleted   | owner or system delete                                    | —                                     |
+| soft_deleted              | available      | restore within 30 days                                    | quota                                 |
+| soft_deleted, quarantined | purge_pending  | 30 days elapse or erasure                                 | no legal hold                         |
+| purge_pending             | purged         | all copies removed                                        | deletion record written               |
 
 ```mermaid
 stateDiagram-v2
@@ -1370,14 +1370,14 @@ stateDiagram-v2
 
 States: `uploaded`, `processing`, `ready`, `failed`, `retired`. Terminal: `retired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| uploaded | processing | source file `available` and job started | entitlement and caps |
-| processing | ready | renditions and poster published | — |
-| processing | failed | provider error or invalid source after 3 attempts | message class stored |
-| failed | processing | owner retries or source replaced | — |
-| ready | processing | profile version change reprocess | renditions kept until replaced |
-| ready, failed | retired | media deleted | CDN purged |
+| From          | To         | Trigger                                           | Guard                          |
+| ------------- | ---------- | ------------------------------------------------- | ------------------------------ |
+| uploaded      | processing | source file `available` and job started           | entitlement and caps           |
+| processing    | ready      | renditions and poster published                   | —                              |
+| processing    | failed     | provider error or invalid source after 3 attempts | message class stored           |
+| failed        | processing | owner retries or source replaced                  | —                              |
+| ready         | processing | profile version change reprocess                  | renditions kept until replaced |
+| ready, failed | retired    | media deleted                                     | CDN purged                     |
 
 ```mermaid
 stateDiagram-v2
@@ -1396,15 +1396,15 @@ stateDiagram-v2
 
 States: `queued`, `running`, `retrying`, `succeeded`, `dead`, `cancelled`. Terminal: `succeeded`, `dead`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| queued | running | worker claims with lease and fencing token | `runAfter` reached; concurrency allows |
-| running | succeeded | handler completes | token current |
-| running | retrying | retryable error or lease expiry | attempts < max |
-| retrying | queued | backoff elapsed | — |
-| running | dead | attempts exhausted, non-retryable error, or lease expiry at last attempt | error stored |
-| queued, retrying | cancelled | operator or owner cancels | not running |
-| dead | queued | operator replay (new attempt count) | kind `replaySafe`; within 30 days |
+| From             | To        | Trigger                                                                  | Guard                                  |
+| ---------------- | --------- | ------------------------------------------------------------------------ | -------------------------------------- |
+| queued           | running   | worker claims with lease and fencing token                               | `runAfter` reached; concurrency allows |
+| running          | succeeded | handler completes                                                        | token current                          |
+| running          | retrying  | retryable error or lease expiry                                          | attempts < max                         |
+| retrying         | queued    | backoff elapsed                                                          | —                                      |
+| running          | dead      | attempts exhausted, non-retryable error, or lease expiry at last attempt | error stored                           |
+| queued, retrying | cancelled | operator or owner cancels                                                | not running                            |
+| dead             | queued    | operator replay (new attempt count)                                      | kind `replaySafe`; within 30 days      |
 
 ```mermaid
 stateDiagram-v2
@@ -1427,12 +1427,12 @@ Note: `dead` is terminal for automatic processing; an operator replay creates a 
 
 States: `active`, `rotating`, `expired`, `revoked`. Terminal: `expired`, `revoked`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| active | rotating | rotation requested; successor created | — |
-| rotating | revoked | overlap ends (24 hours default) | successor active |
-| active, rotating | expired | expiry date | — |
-| active, rotating | revoked | owner, admin or leak scanner revokes | reason |
+| From             | To       | Trigger                               | Guard            |
+| ---------------- | -------- | ------------------------------------- | ---------------- |
+| active           | rotating | rotation requested; successor created | —                |
+| rotating         | revoked  | overlap ends (24 hours default)       | successor active |
+| active, rotating | expired  | expiry date                           | —                |
+| active, rotating | revoked  | owner, admin or leak scanner revokes  | reason           |
 
 ```mermaid
 stateDiagram-v2
@@ -1450,16 +1450,16 @@ stateDiagram-v2
 
 States: `uploaded`, `validating`, `validated`, `committing`, `committed`, `rolled_back`, `failed`, `cancelled`. Terminal: `committed`, `rolled_back`, `failed`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| uploaded | validating | user starts validation | mapping complete |
-| validating | validated | parse and checks finish | — |
-| validating | failed | unreadable file or system error | — |
-| validated | committing | user confirms import | validation younger than 24 hours; file unchanged; no other active run |
-| committing | committed | all batches processed (row errors reported) | — |
-| committing | failed | systemic error or stop-on-first-error | rows committed so far listed |
-| committed | rolled_back | undo within 24 hours | handler supports rollback |
-| uploaded, validated | cancelled | user cancels | — |
+| From                | To          | Trigger                                     | Guard                                                                 |
+| ------------------- | ----------- | ------------------------------------------- | --------------------------------------------------------------------- |
+| uploaded            | validating  | user starts validation                      | mapping complete                                                      |
+| validating          | validated   | parse and checks finish                     | —                                                                     |
+| validating          | failed      | unreadable file or system error             | —                                                                     |
+| validated           | committing  | user confirms import                        | validation younger than 24 hours; file unchanged; no other active run |
+| committing          | committed   | all batches processed (row errors reported) | —                                                                     |
+| committing          | failed      | systemic error or stop-on-first-error       | rows committed so far listed                                          |
+| committed           | rolled_back | undo within 24 hours                        | handler supports rollback                                             |
+| uploaded, validated | cancelled   | user cancels                                | —                                                                     |
 
 ```mermaid
 stateDiagram-v2
@@ -1483,19 +1483,19 @@ stateDiagram-v2
 
 States: `draft`, `sandbox_active`, `submitted`, `in_review`, `approved`, `rejected`, `suspended`, `retired`. Terminal: `retired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | sandbox_active | create sandbox app | developer terms accepted |
-| sandbox_active | submitted | request live | policies and justifications present |
-| submitted | approved | automated checks pass (low-risk scopes only) | — |
-| submitted | in_review | medium or high-risk scopes | — |
-| in_review | approved | reviewer approves | — |
-| in_review | rejected | reviewer rejects | reasons listed |
-| rejected | submitted | resubmit | changes made |
-| approved | in_review | scopes or redirect URIs change; annual review | old scopes stay active until decision |
-| approved | suspended | abuse, policy violation, security | tokens revoked in 60 seconds |
-| suspended | approved | resolved | PAD decision |
-| any | retired | developer deletes app | grants revoked |
+| From           | To             | Trigger                                       | Guard                                 |
+| -------------- | -------------- | --------------------------------------------- | ------------------------------------- |
+| draft          | sandbox_active | create sandbox app                            | developer terms accepted              |
+| sandbox_active | submitted      | request live                                  | policies and justifications present   |
+| submitted      | approved       | automated checks pass (low-risk scopes only)  | —                                     |
+| submitted      | in_review      | medium or high-risk scopes                    | —                                     |
+| in_review      | approved       | reviewer approves                             | —                                     |
+| in_review      | rejected       | reviewer rejects                              | reasons listed                        |
+| rejected       | submitted      | resubmit                                      | changes made                          |
+| approved       | in_review      | scopes or redirect URIs change; annual review | old scopes stay active until decision |
+| approved       | suspended      | abuse, policy violation, security             | tokens revoked in 60 seconds          |
+| suspended      | approved       | resolved                                      | PAD decision                          |
+| any            | retired        | developer deletes app                         | grants revoked                        |
 
 ```mermaid
 stateDiagram-v2
@@ -1519,13 +1519,13 @@ stateDiagram-v2
 
 States: `requested`, `preparing`, `ready`, `downloaded`, `expired`, `failed`. Terminal: `expired`, `failed` (a retry creates a new run).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| requested | preparing | job claimed | authorized; concurrency allowed |
-| preparing | ready | file generated, scanned and stored | manifest written |
-| preparing | failed | error after retries | — |
-| ready | downloaded | first download (when single-use) or any download | link valid |
-| ready, downloaded | expired | link validity ends or owner deletes | file deleted |
+| From              | To         | Trigger                                          | Guard                           |
+| ----------------- | ---------- | ------------------------------------------------ | ------------------------------- |
+| requested         | preparing  | job claimed                                      | authorized; concurrency allowed |
+| preparing         | ready      | file generated, scanned and stored               | manifest written                |
+| preparing         | failed     | error after retries                              | —                               |
+| ready             | downloaded | first download (when single-use) or any download | link valid                      |
+| ready, downloaded | expired    | link validity ends or owner deletes              | file deleted                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1544,12 +1544,12 @@ stateDiagram-v2
 
 States: `preview`, `stable`, `deprecated`, `sunset`. Terminal: `sunset`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| preview | stable | release | contract frozen |
-| stable | deprecated | successor stable and announcement made | window start recorded |
-| deprecated | sunset | sunset date reached | at least 6 months after announcement unless security exception |
-| deprecated | stable | deprecation withdrawn | PAD decision |
+| From       | To         | Trigger                                | Guard                                                          |
+| ---------- | ---------- | -------------------------------------- | -------------------------------------------------------------- |
+| preview    | stable     | release                                | contract frozen                                                |
+| stable     | deprecated | successor stable and announcement made | window start recorded                                          |
+| deprecated | sunset     | sunset date reached                    | at least 6 months after announcement unless security exception |
+| deprecated | stable     | deprecation withdrawn                  | PAD decision                                                   |
 
 ```mermaid
 stateDiagram-v2
@@ -1565,74 +1565,74 @@ stateDiagram-v2
 
 Routes are on the product origin or the developer portal host (`developers`). [PROP]
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-PLT-001 | Developer portal home | `developers /` | GUE and all | Docs entry, quickstart, status, changelog | default, maintenance banner |
-| SCR-PLT-002 | API reference and try-it | `developers /docs/*` | GUE and all | Endpoint docs, sandbox console | loading, search no results, try-it error |
-| SCR-PLT-003 | Changelog and versions | `developers /changelog` | GUE and all | Versions, deprecations, migration guides | filtered, subscribed |
-| SCR-PLT-004 | App list and create wizard | `developers /apps`, `/apps/new` | developers | Register apps | empty, draft, in review, approved, suspended |
-| SCR-PLT-005 | App detail: credentials, scopes, redirect URIs | `developers /apps/:id` | developers | Secrets, scopes, review status | secret shown once, rotating, review needed |
-| SCR-PLT-006 | OAuth consent screen | `/oauth/authorize` | all signed-in roles | Allow or deny scopes | consent, reduced scopes, denied, admin approval needed |
-| SCR-PLT-007 | Connected apps | `/settings/connected-apps` | signed-in roles | Review and revoke app access | empty, list, revoked |
-| SCR-PLT-008 | API keys | `/settings/developer/keys` | EAD, IAD, EXA, developers | Create, rotate, revoke keys | empty, one-time secret panel, expiring |
-| SCR-PLT-009 | Usage and limits | `/settings/developer/usage` | EAD, developers | Requests, 429s, quotas, increase request | normal, near quota, exhausted |
-| SCR-PLT-010 | Request logs | `/settings/developer/logs` | EAD, developers | Search requests, debug capture | filtered, delayed, capture on |
-| SCR-PLT-011 | Webhook endpoints | `/settings/developer/webhooks` | EAD, developers | List and manage endpoints | empty, healthy, degraded, disabled |
-| SCR-PLT-012 | Add or edit webhook endpoint | wizard | EAD, developers | URL, events, verify, secret | verifying, verification failed, secret once |
-| SCR-PLT-013 | Webhook deliveries | `/settings/developer/webhooks/:id` | EAD, developers | Attempts, replay | list, detail, replay in progress |
-| SCR-PLT-014 | Sandbox tenants and simulator | `developers /sandbox` | developers | Seeded data, scenarios, outbox | create, reset, inactive warning |
-| SCR-PLT-015 | Integrations catalog | `/settings/integrations` | EAD, IAD, EXA, signed-in roles (personal) | Browse and connect | plan-gated, connected, needs sign-in |
-| SCR-PLT-016 | Integration detail and settings | `/settings/integrations/:id` | EAD, IAD, EXA | Mapping, schedule, test, disconnect | healthy, degraded, reauth, syncing |
-| SCR-PLT-017 | Sync run history and report | `/settings/integrations/:id/runs` | EAD, IAD, EXA | Run results and errors | running, failed rows, completed |
-| SCR-PLT-018 | SSO and SCIM setup | `/settings/security/sso` | EAD, IAD, EXA | Configure IdP, test, enforce, SCIM | not configured, tested, enforced, cert expiring |
-| SCR-PLT-019 | LMS and LTI registration | `/settings/integrations/lti` | IAD | Platform registration, tool config | registering, active, passback errors |
-| SCR-PLT-020 | Connected accounts (calendar, video) | `/settings/connected-accounts` | signed-in roles | Personal connections | none, connected, reconnect |
-| SCR-PLT-021 | Uploader component and file chips | component | signed-in roles | Upload with progress, states | idle, uploading, paused, scanning, ready, rejected |
-| SCR-PLT-022 | Storage usage | `/settings/storage` | signed-in roles | Meter, breakdown, delete | normal, 80%, full |
-| SCR-PLT-023 | Recently deleted files | `/settings/storage/deleted` | signed-in roles | Restore within 30 days | empty, list |
-| SCR-PLT-024 | Share link dialog | modal | file owners | Expiry and revoke | default, copied, revoked |
-| SCR-PLT-025 | Media processing status and player | component | INS, MNT, authors, viewers | Status, retry, captions | processing, ready, failed |
-| SCR-PLT-026 | External media validation card | component | authors | Link validation result | valid, blocked, unsupported, attest needed |
-| SCR-PLT-027 | Import wizard | `/imports/new` | IAD, EAD, REC (granted), EXA, PAD | Upload, map, validate, import | each step, errors, undo |
-| SCR-PLT-028 | Import history and report | `/imports` | same | Past runs | list, report, rolled back |
-| SCR-PLT-029 | Export dialog and My exports | modal, `/exports` | signed-in roles | Request and download exports | preparing, ready, expired |
-| SCR-PLT-030 | Admin: integrations fleet health | admin origin `/ops/integrations` | PAD, SUP | Adapter state, breakers | healthy, degraded, unknown |
-| SCR-PLT-031 | Admin: quarantine review | admin origin `/ops/quarantine` | PAD, MOD | Review suspicious files | queue, decision |
-| SCR-PLT-032 | Admin: developer app review | admin origin `/ops/dev-apps` | PAD | Approve, reject, suspend apps | queue, decision |
-| SCR-PLT-033 | Admin: schedules and event inspector | admin origin `/ops/schedules`, `/ops/events` | PAD, SAD | Run now, pause, inspect | list, history |
-| SCR-PLT-034 | Admin: marketplace gate | admin origin `/ops/marketplace-gate` | PAD, SAD | Metrics and decision | monitoring, decided |
+| ID          | Name                                           | Route proposal                               | Roles                                     | Purpose                                   | Key states                                             |
+| ----------- | ---------------------------------------------- | -------------------------------------------- | ----------------------------------------- | ----------------------------------------- | ------------------------------------------------------ |
+| SCR-PLT-001 | Developer portal home                          | `developers /`                               | GUE and all                               | Docs entry, quickstart, status, changelog | default, maintenance banner                            |
+| SCR-PLT-002 | API reference and try-it                       | `developers /docs/*`                         | GUE and all                               | Endpoint docs, sandbox console            | loading, search no results, try-it error               |
+| SCR-PLT-003 | Changelog and versions                         | `developers /changelog`                      | GUE and all                               | Versions, deprecations, migration guides  | filtered, subscribed                                   |
+| SCR-PLT-004 | App list and create wizard                     | `developers /apps`, `/apps/new`              | developers                                | Register apps                             | empty, draft, in review, approved, suspended           |
+| SCR-PLT-005 | App detail: credentials, scopes, redirect URIs | `developers /apps/:id`                       | developers                                | Secrets, scopes, review status            | secret shown once, rotating, review needed             |
+| SCR-PLT-006 | OAuth consent screen                           | `/oauth/authorize`                           | all signed-in roles                       | Allow or deny scopes                      | consent, reduced scopes, denied, admin approval needed |
+| SCR-PLT-007 | Connected apps                                 | `/settings/connected-apps`                   | signed-in roles                           | Review and revoke app access              | empty, list, revoked                                   |
+| SCR-PLT-008 | API keys                                       | `/settings/developer/keys`                   | EAD, IAD, EXA, developers                 | Create, rotate, revoke keys               | empty, one-time secret panel, expiring                 |
+| SCR-PLT-009 | Usage and limits                               | `/settings/developer/usage`                  | EAD, developers                           | Requests, 429s, quotas, increase request  | normal, near quota, exhausted                          |
+| SCR-PLT-010 | Request logs                                   | `/settings/developer/logs`                   | EAD, developers                           | Search requests, debug capture            | filtered, delayed, capture on                          |
+| SCR-PLT-011 | Webhook endpoints                              | `/settings/developer/webhooks`               | EAD, developers                           | List and manage endpoints                 | empty, healthy, degraded, disabled                     |
+| SCR-PLT-012 | Add or edit webhook endpoint                   | wizard                                       | EAD, developers                           | URL, events, verify, secret               | verifying, verification failed, secret once            |
+| SCR-PLT-013 | Webhook deliveries                             | `/settings/developer/webhooks/:id`           | EAD, developers                           | Attempts, replay                          | list, detail, replay in progress                       |
+| SCR-PLT-014 | Sandbox tenants and simulator                  | `developers /sandbox`                        | developers                                | Seeded data, scenarios, outbox            | create, reset, inactive warning                        |
+| SCR-PLT-015 | Integrations catalog                           | `/settings/integrations`                     | EAD, IAD, EXA, signed-in roles (personal) | Browse and connect                        | plan-gated, connected, needs sign-in                   |
+| SCR-PLT-016 | Integration detail and settings                | `/settings/integrations/:id`                 | EAD, IAD, EXA                             | Mapping, schedule, test, disconnect       | healthy, degraded, reauth, syncing                     |
+| SCR-PLT-017 | Sync run history and report                    | `/settings/integrations/:id/runs`            | EAD, IAD, EXA                             | Run results and errors                    | running, failed rows, completed                        |
+| SCR-PLT-018 | SSO and SCIM setup                             | `/settings/security/sso`                     | EAD, IAD, EXA                             | Configure IdP, test, enforce, SCIM        | not configured, tested, enforced, cert expiring        |
+| SCR-PLT-019 | LMS and LTI registration                       | `/settings/integrations/lti`                 | IAD                                       | Platform registration, tool config        | registering, active, passback errors                   |
+| SCR-PLT-020 | Connected accounts (calendar, video)           | `/settings/connected-accounts`               | signed-in roles                           | Personal connections                      | none, connected, reconnect                             |
+| SCR-PLT-021 | Uploader component and file chips              | component                                    | signed-in roles                           | Upload with progress, states              | idle, uploading, paused, scanning, ready, rejected     |
+| SCR-PLT-022 | Storage usage                                  | `/settings/storage`                          | signed-in roles                           | Meter, breakdown, delete                  | normal, 80%, full                                      |
+| SCR-PLT-023 | Recently deleted files                         | `/settings/storage/deleted`                  | signed-in roles                           | Restore within 30 days                    | empty, list                                            |
+| SCR-PLT-024 | Share link dialog                              | modal                                        | file owners                               | Expiry and revoke                         | default, copied, revoked                               |
+| SCR-PLT-025 | Media processing status and player             | component                                    | INS, MNT, authors, viewers                | Status, retry, captions                   | processing, ready, failed                              |
+| SCR-PLT-026 | External media validation card                 | component                                    | authors                                   | Link validation result                    | valid, blocked, unsupported, attest needed             |
+| SCR-PLT-027 | Import wizard                                  | `/imports/new`                               | IAD, EAD, REC (granted), EXA, PAD         | Upload, map, validate, import             | each step, errors, undo                                |
+| SCR-PLT-028 | Import history and report                      | `/imports`                                   | same                                      | Past runs                                 | list, report, rolled back                              |
+| SCR-PLT-029 | Export dialog and My exports                   | modal, `/exports`                            | signed-in roles                           | Request and download exports              | preparing, ready, expired                              |
+| SCR-PLT-030 | Admin: integrations fleet health               | admin origin `/ops/integrations`             | PAD, SUP                                  | Adapter state, breakers                   | healthy, degraded, unknown                             |
+| SCR-PLT-031 | Admin: quarantine review                       | admin origin `/ops/quarantine`               | PAD, MOD                                  | Review suspicious files                   | queue, decision                                        |
+| SCR-PLT-032 | Admin: developer app review                    | admin origin `/ops/dev-apps`                 | PAD                                       | Approve, reject, suspend apps             | queue, decision                                        |
+| SCR-PLT-033 | Admin: schedules and event inspector           | admin origin `/ops/schedules`, `/ops/events` | PAD, SAD                                  | Run now, pause, inspect                   | list, history                                          |
+| SCR-PLT-034 | Admin: marketplace gate                        | admin origin `/ops/marketplace-gate`         | PAD, SAD                                  | Metrics and decision                      | monitoring, decided                                    |
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-PLT-01 | ApiClient | id, ownerType and id, name, type, redirectUris, scopes, status, publisherVerified, environment, reviewState | has ApiCredential, OAuthGrant, WebhookEndpoint | Life of app plus 2 years |
-| ENT-PLT-02 | ApiCredential | id, clientId or ownerId, prefix, secretHash, scopes, ipAllowlist, expiresAt, lastUsedAt, status | ApiClient | 13 months after revoke or expiry |
-| ENT-PLT-03 | OAuthGrant | id, userId, clientId, scopes, catalogVersion, authorizedAt, refreshFamilyId, status | ApiClient, user | Life of grant plus 13 months |
-| ENT-PLT-04 | RateLimitPolicy | class, window, limit, burst, scope, failMode, planOverrides | tenant | Versioned config, 2 years |
-| ENT-PLT-05 | RequestLog and UsageRecord | requestId, tenantId, principalId, route template, status, latencyMs, ts, rateLimitState, idempotencyKey | ApiClient | Metadata 30 days; aggregates 13 months |
-| ENT-PLT-06 | IdempotencyRecord | principalId, route, key, fingerprint, status, responseRef, createdAt | principal | 14 days |
-| ENT-PLT-07 | WebhookEndpoint | id, tenantId, url, apiVersion, eventTypes, secretRef, state, environment, createdBy | has WebhookDelivery | Life plus 13 months |
-| ENT-PLT-08 | WebhookDelivery | id, endpointId, eventId, attempts[], state, responseSnippet, replayOf | WebhookEndpoint, OutboxEvent | 30 days |
-| ENT-PLT-09 | IntegrationDefinition | id, category, adapterId, authType, scopes, dataRead, dataWritten, directions, planGates, status | has IntegrationConnection | Versioned, permanent in release history |
-| ENT-PLT-10 | IntegrationConnection | id, tenantId or userId, definitionId, state, config, secretRefs, lastSuccessAt, health, consentSummaryVersion | IntegrationDefinition, SyncRun | Life plus 13 months |
-| ENT-PLT-11 | VaultSecret | id, ownerRef, kind, ciphertext, keyVersion, rotatedAt, lastUsedAt | connections, endpoints | Deleted at disconnect; versions kept for overlap only |
-| ENT-PLT-12 | SyncRun | id, connectionId, mode, startedAt, counts, errors, cursor, state | IntegrationConnection | 12 months |
-| ENT-PLT-13 | StoredFile | id, ownerRef, tenantId, purpose, state, size, sniffedType, checksum, storageKey, retentionClass, legalHold, version | has ScanResult, MediaAsset | By retention class |
-| ENT-PLT-14 | MediaAsset and Rendition | id, fileId, kind, state, profileVersion, renditions[], posterRef, captionsRef, durationMs | StoredFile | Life of content |
-| ENT-PLT-15 | UploadSession | id, userId, purpose, declaredSize, parts, expiresAt, checksum | StoredFile | 24 hours |
-| ENT-PLT-16 | ImportRun | id, tenantId, entityType, fileId, mapping, options, state, counts, reportRef, rollbackUntil | StoredFile | Report 12 months; source file 30 days |
-| ENT-PLT-17 | ExportJob | id, requesterId, dataset, filters, format, state, fileId, expiresAt, manifestRef | StoredFile | Metadata 13 months; file 24 hours to 7 days |
-| ENT-PLT-18 | BackgroundJob | id, kind, payload, status, attempts, maxAttempts, runAfter, leaseOwner, leaseExpiresAt, fencingToken, idempotencyKey, tenantId, lastError | JobSchedule | Succeeded 14 days; dead 30 days then archived metadata 13 months |
-| ENT-PLT-19 | JobSchedule | id, kind, cron, timeZone, missedPolicy, overlapPolicy, paused, dryRunDefault, lastSlot | BackgroundJob | Versioned config |
-| ENT-PLT-20 | OutboxEvent | id, type, version, tenantId, aggregateId, sequence, payload, createdAt, publishedAt | WebhookDelivery, consumers | 30 days; audit class to the audit store |
-| ENT-PLT-21 | DeveloperAccount | userId, termsAcceptedAt, verifiedPublisher, status | ApiClient | Life plus 2 years |
-| ENT-PLT-22 | SandboxTenant | id, developerId, seedProfile, createdAt, lastActiveAt | ApiClient | Deleted after 90 days inactivity |
-| ENT-PLT-23 | ApiVersion | version, state, announcedAt, sunsetAt, migrationGuideRef | changelog | Permanent |
-| ENT-PLT-24 | StorageQuota | ownerRef, limitBytes, usedBytes, reservedBytes, updatedAt | StoredFile, BIL entitlement | Life of owner |
-| ENT-PLT-25 | RetentionPolicy | class, duration, trigger, legalBasisNote, version | StoredFile | Versioned config |
-| ENT-PLT-26 | ExternalMediaProvider | id, domains, parserVersion, capabilities, status, allowlistScope | media references | Versioned config |
-| ENT-PLT-27 | ScanResult | fileId, engine, signatureVersion, verdict, scannedAt, details | StoredFile | 13 months |
+| ID         | Entity                     | Key attributes                                                                                                                            | Relationships                                  | Retention class                                                  |
+| ---------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
+| ENT-PLT-01 | ApiClient                  | id, ownerType and id, name, type, redirectUris, scopes, status, publisherVerified, environment, reviewState                               | has ApiCredential, OAuthGrant, WebhookEndpoint | Life of app plus 2 years                                         |
+| ENT-PLT-02 | ApiCredential              | id, clientId or ownerId, prefix, secretHash, scopes, ipAllowlist, expiresAt, lastUsedAt, status                                           | ApiClient                                      | 13 months after revoke or expiry                                 |
+| ENT-PLT-03 | OAuthGrant                 | id, userId, clientId, scopes, catalogVersion, authorizedAt, refreshFamilyId, status                                                       | ApiClient, user                                | Life of grant plus 13 months                                     |
+| ENT-PLT-04 | RateLimitPolicy            | class, window, limit, burst, scope, failMode, planOverrides                                                                               | tenant                                         | Versioned config, 2 years                                        |
+| ENT-PLT-05 | RequestLog and UsageRecord | requestId, tenantId, principalId, route template, status, latencyMs, ts, rateLimitState, idempotencyKey                                   | ApiClient                                      | Metadata 30 days; aggregates 13 months                           |
+| ENT-PLT-06 | IdempotencyRecord          | principalId, route, key, fingerprint, status, responseRef, createdAt                                                                      | principal                                      | 14 days                                                          |
+| ENT-PLT-07 | WebhookEndpoint            | id, tenantId, url, apiVersion, eventTypes, secretRef, state, environment, createdBy                                                       | has WebhookDelivery                            | Life plus 13 months                                              |
+| ENT-PLT-08 | WebhookDelivery            | id, endpointId, eventId, attempts[], state, responseSnippet, replayOf                                                                     | WebhookEndpoint, OutboxEvent                   | 30 days                                                          |
+| ENT-PLT-09 | IntegrationDefinition      | id, category, adapterId, authType, scopes, dataRead, dataWritten, directions, planGates, status                                           | has IntegrationConnection                      | Versioned, permanent in release history                          |
+| ENT-PLT-10 | IntegrationConnection      | id, tenantId or userId, definitionId, state, config, secretRefs, lastSuccessAt, health, consentSummaryVersion                             | IntegrationDefinition, SyncRun                 | Life plus 13 months                                              |
+| ENT-PLT-11 | VaultSecret                | id, ownerRef, kind, ciphertext, keyVersion, rotatedAt, lastUsedAt                                                                         | connections, endpoints                         | Deleted at disconnect; versions kept for overlap only            |
+| ENT-PLT-12 | SyncRun                    | id, connectionId, mode, startedAt, counts, errors, cursor, state                                                                          | IntegrationConnection                          | 12 months                                                        |
+| ENT-PLT-13 | StoredFile                 | id, ownerRef, tenantId, purpose, state, size, sniffedType, checksum, storageKey, retentionClass, legalHold, version                       | has ScanResult, MediaAsset                     | By retention class                                               |
+| ENT-PLT-14 | MediaAsset and Rendition   | id, fileId, kind, state, profileVersion, renditions[], posterRef, captionsRef, durationMs                                                 | StoredFile                                     | Life of content                                                  |
+| ENT-PLT-15 | UploadSession              | id, userId, purpose, declaredSize, parts, expiresAt, checksum                                                                             | StoredFile                                     | 24 hours                                                         |
+| ENT-PLT-16 | ImportRun                  | id, tenantId, entityType, fileId, mapping, options, state, counts, reportRef, rollbackUntil                                               | StoredFile                                     | Report 12 months; source file 30 days                            |
+| ENT-PLT-17 | ExportJob                  | id, requesterId, dataset, filters, format, state, fileId, expiresAt, manifestRef                                                          | StoredFile                                     | Metadata 13 months; file 24 hours to 7 days                      |
+| ENT-PLT-18 | BackgroundJob              | id, kind, payload, status, attempts, maxAttempts, runAfter, leaseOwner, leaseExpiresAt, fencingToken, idempotencyKey, tenantId, lastError | JobSchedule                                    | Succeeded 14 days; dead 30 days then archived metadata 13 months |
+| ENT-PLT-19 | JobSchedule                | id, kind, cron, timeZone, missedPolicy, overlapPolicy, paused, dryRunDefault, lastSlot                                                    | BackgroundJob                                  | Versioned config                                                 |
+| ENT-PLT-20 | OutboxEvent                | id, type, version, tenantId, aggregateId, sequence, payload, createdAt, publishedAt                                                       | WebhookDelivery, consumers                     | 30 days; audit class to the audit store                          |
+| ENT-PLT-21 | DeveloperAccount           | userId, termsAcceptedAt, verifiedPublisher, status                                                                                        | ApiClient                                      | Life plus 2 years                                                |
+| ENT-PLT-22 | SandboxTenant              | id, developerId, seedProfile, createdAt, lastActiveAt                                                                                     | ApiClient                                      | Deleted after 90 days inactivity                                 |
+| ENT-PLT-23 | ApiVersion                 | version, state, announcedAt, sunsetAt, migrationGuideRef                                                                                  | changelog                                      | Permanent                                                        |
+| ENT-PLT-24 | StorageQuota               | ownerRef, limitBytes, usedBytes, reservedBytes, updatedAt                                                                                 | StoredFile, BIL entitlement                    | Life of owner                                                    |
+| ENT-PLT-25 | RetentionPolicy            | class, duration, trigger, legalBasisNote, version                                                                                         | StoredFile                                     | Versioned config                                                 |
+| ENT-PLT-26 | ExternalMediaProvider      | id, domains, parserVersion, capabilities, status, allowlistScope                                                                          | media references                               | Versioned config                                                 |
+| ENT-PLT-27 | ScanResult                 | fileId, engine, signatureVersion, verdict, scannedAt, details                                                                             | StoredFile                                     | 13 months                                                        |
 
 ```mermaid
 erDiagram
@@ -1655,192 +1655,192 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Name | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-PLT-001 | `plt.apiclient.registered` | App registered | clientId, ownerId, environment | ADM, ANL |
-| EVT-PLT-002 | `plt.apiclient.approved` | Live approval or suspension decision | clientId, decision | NTF, ADM |
-| EVT-PLT-003 | `plt.credential.created` | Key or secret created | credentialId, ownerRef, scopes | NTF (notice), audit |
-| EVT-PLT-004 | `plt.credential.revoked` | Key revoked or expired | credentialId, reason | NTF, audit |
-| EVT-PLT-005 | `plt.credential.rotated` | Rotation started | credentialId, successorId | NTF, audit |
-| EVT-PLT-006 | `plt.grant.authorized` | OAuth consent granted | userId, clientId, scopes | NTF (notice), audit |
-| EVT-PLT-007 | `plt.grant.revoked` | Grant revoked | grantId, reason | audit |
-| EVT-PLT-008 | `plt.ratelimit.exceeded` | Limit tripped (sampled) | principalId, class | ANL, ADM alerts |
-| EVT-PLT-009 | `plt.quota.threshold_reached` | 80% or 100% of quota | tenantId, quotaType, percent | NTF, BIL |
-| EVT-PLT-010 | `plt.apiversion.deprecated` | Version deprecation announced | version, sunsetAt | NTF, changelog subscribers |
-| EVT-PLT-011 | `plt.webhook.endpoint_created` | Endpoint created or verified | endpointId, tenantId | audit |
-| EVT-PLT-012 | `plt.webhook.endpoint_disabled` | Endpoint disabled or auto-disabled | endpointId, reason | NTF, audit |
-| EVT-PLT-013 | `plt.webhook.delivery_failed` | Attempt failed | deliveryId, attempt, errorClass | ANL, ADM health |
-| EVT-PLT-014 | `plt.webhook.delivery_dead` | Delivery exhausted | deliveryId, eventId | NTF (digest), ADM |
-| EVT-PLT-015 | `plt.webhook.replayed` | Delivery replayed | deliveryId, by | audit |
-| EVT-PLT-016 | `plt.integration.connected` | Connection active | connectionId, definitionId | audit, ANL |
-| EVT-PLT-017 | `plt.integration.disconnected` | Connection ended | connectionId, dataDisposition | audit |
-| EVT-PLT-018 | `plt.integration.health_changed` | Health state transition | connectionId or adapterId, from, to | ADM (EVT consumed), NTF |
-| EVT-PLT-019 | `plt.integration.sync_completed` | Sync run done | runId, counts | owning module, audit |
-| EVT-PLT-020 | `plt.integration.sync_failed` | Sync run failed | runId, errorClass | NTF, ADM |
-| EVT-PLT-021 | `plt.sso.connection_verified` | SSO test sign-in succeeded | tenantId, protocol | audit |
-| EVT-PLT-022 | `plt.scim.user_deprovisioned` | SCIM deactivation applied | userId, tenantId | IDN, audit |
-| EVT-PLT-023 | `plt.file.upload_started` | Upload session created | fileId, purpose | ANL |
-| EVT-PLT-024 | `plt.file.available` | Scan clean | fileId, purpose, size | owning modules |
-| EVT-PLT-025 | `plt.file.quarantined` | File quarantined | fileId, reasonClass | TSF, NTF |
-| EVT-PLT-026 | `plt.file.deleted` | Soft delete | fileId, by | owning modules, search |
-| EVT-PLT-027 | `plt.file.purged` | Purge complete | fileId | audit, SET |
-| EVT-PLT-028 | `plt.media.transcode_completed` | Media ready | assetId | STU, LRN |
-| EVT-PLT-029 | `plt.media.transcode_failed` | Media failed | assetId, reasonClass | STU, NTF |
-| EVT-PLT-030 | `plt.storage.quota_threshold` | Storage quota threshold | ownerRef, percent | NTF, BIL |
-| EVT-PLT-031 | `plt.import.validated` | Validation complete | runId, counts | NTF |
-| EVT-PLT-032 | `plt.import.committed` | Import finished | runId, counts | owning module, audit |
-| EVT-PLT-033 | `plt.import.failed` | Import failed | runId, errorClass | NTF, ADM |
-| EVT-PLT-034 | `plt.export.ready` | Export ready | exportId, expiresAt | NTF |
-| EVT-PLT-035 | `plt.export.expired` | Export link expired | exportId | audit |
-| EVT-PLT-036 | `plt.job.dead` | Job became dead | jobId, kind, errorClass | ADM (FR-ADM-037) |
-| EVT-PLT-037 | `plt.job.replayed` | Operator replay | jobId, by | audit |
-| EVT-PLT-038 | `plt.schedule.missed` | Slot skipped or late | scheduleId, slot, policy | ADM alerts |
-| EVT-PLT-039 | `plt.sandbox.reset` | Sandbox reset or deleted | sandboxId | ANL |
-| EVT-PLT-040 | `plt.egress.blocked` | Outbound request refused | purpose, reasonClass, tenantId | security alerts, ADM |
+| ID          | Name                             | Trigger                              | Key payload                         | Consumers                  |
+| ----------- | -------------------------------- | ------------------------------------ | ----------------------------------- | -------------------------- |
+| EVT-PLT-001 | `plt.apiclient.registered`       | App registered                       | clientId, ownerId, environment      | ADM, ANL                   |
+| EVT-PLT-002 | `plt.apiclient.approved`         | Live approval or suspension decision | clientId, decision                  | NTF, ADM                   |
+| EVT-PLT-003 | `plt.credential.created`         | Key or secret created                | credentialId, ownerRef, scopes      | NTF (notice), audit        |
+| EVT-PLT-004 | `plt.credential.revoked`         | Key revoked or expired               | credentialId, reason                | NTF, audit                 |
+| EVT-PLT-005 | `plt.credential.rotated`         | Rotation started                     | credentialId, successorId           | NTF, audit                 |
+| EVT-PLT-006 | `plt.grant.authorized`           | OAuth consent granted                | userId, clientId, scopes            | NTF (notice), audit        |
+| EVT-PLT-007 | `plt.grant.revoked`              | Grant revoked                        | grantId, reason                     | audit                      |
+| EVT-PLT-008 | `plt.ratelimit.exceeded`         | Limit tripped (sampled)              | principalId, class                  | ANL, ADM alerts            |
+| EVT-PLT-009 | `plt.quota.threshold_reached`    | 80% or 100% of quota                 | tenantId, quotaType, percent        | NTF, BIL                   |
+| EVT-PLT-010 | `plt.apiversion.deprecated`      | Version deprecation announced        | version, sunsetAt                   | NTF, changelog subscribers |
+| EVT-PLT-011 | `plt.webhook.endpoint_created`   | Endpoint created or verified         | endpointId, tenantId                | audit                      |
+| EVT-PLT-012 | `plt.webhook.endpoint_disabled`  | Endpoint disabled or auto-disabled   | endpointId, reason                  | NTF, audit                 |
+| EVT-PLT-013 | `plt.webhook.delivery_failed`    | Attempt failed                       | deliveryId, attempt, errorClass     | ANL, ADM health            |
+| EVT-PLT-014 | `plt.webhook.delivery_dead`      | Delivery exhausted                   | deliveryId, eventId                 | NTF (digest), ADM          |
+| EVT-PLT-015 | `plt.webhook.replayed`           | Delivery replayed                    | deliveryId, by                      | audit                      |
+| EVT-PLT-016 | `plt.integration.connected`      | Connection active                    | connectionId, definitionId          | audit, ANL                 |
+| EVT-PLT-017 | `plt.integration.disconnected`   | Connection ended                     | connectionId, dataDisposition       | audit                      |
+| EVT-PLT-018 | `plt.integration.health_changed` | Health state transition              | connectionId or adapterId, from, to | ADM (EVT consumed), NTF    |
+| EVT-PLT-019 | `plt.integration.sync_completed` | Sync run done                        | runId, counts                       | owning module, audit       |
+| EVT-PLT-020 | `plt.integration.sync_failed`    | Sync run failed                      | runId, errorClass                   | NTF, ADM                   |
+| EVT-PLT-021 | `plt.sso.connection_verified`    | SSO test sign-in succeeded           | tenantId, protocol                  | audit                      |
+| EVT-PLT-022 | `plt.scim.user_deprovisioned`    | SCIM deactivation applied            | userId, tenantId                    | IDN, audit                 |
+| EVT-PLT-023 | `plt.file.upload_started`        | Upload session created               | fileId, purpose                     | ANL                        |
+| EVT-PLT-024 | `plt.file.available`             | Scan clean                           | fileId, purpose, size               | owning modules             |
+| EVT-PLT-025 | `plt.file.quarantined`           | File quarantined                     | fileId, reasonClass                 | TSF, NTF                   |
+| EVT-PLT-026 | `plt.file.deleted`               | Soft delete                          | fileId, by                          | owning modules, search     |
+| EVT-PLT-027 | `plt.file.purged`                | Purge complete                       | fileId                              | audit, SET                 |
+| EVT-PLT-028 | `plt.media.transcode_completed`  | Media ready                          | assetId                             | STU, LRN                   |
+| EVT-PLT-029 | `plt.media.transcode_failed`     | Media failed                         | assetId, reasonClass                | STU, NTF                   |
+| EVT-PLT-030 | `plt.storage.quota_threshold`    | Storage quota threshold              | ownerRef, percent                   | NTF, BIL                   |
+| EVT-PLT-031 | `plt.import.validated`           | Validation complete                  | runId, counts                       | NTF                        |
+| EVT-PLT-032 | `plt.import.committed`           | Import finished                      | runId, counts                       | owning module, audit       |
+| EVT-PLT-033 | `plt.import.failed`              | Import failed                        | runId, errorClass                   | NTF, ADM                   |
+| EVT-PLT-034 | `plt.export.ready`               | Export ready                         | exportId, expiresAt                 | NTF                        |
+| EVT-PLT-035 | `plt.export.expired`             | Export link expired                  | exportId                            | audit                      |
+| EVT-PLT-036 | `plt.job.dead`                   | Job became dead                      | jobId, kind, errorClass             | ADM (FR-ADM-037)           |
+| EVT-PLT-037 | `plt.job.replayed`               | Operator replay                      | jobId, by                           | audit                      |
+| EVT-PLT-038 | `plt.schedule.missed`            | Slot skipped or late                 | scheduleId, slot, policy            | ADM alerts                 |
+| EVT-PLT-039 | `plt.sandbox.reset`              | Sandbox reset or deleted             | sandboxId                           | ANL                        |
+| EVT-PLT-040 | `plt.egress.blocked`             | Outbound request refused             | purpose, reasonClass, tenantId      | security alerts, ADM       |
 
 ### 9.2 Consumed
 
-| Event | Owner | Used for |
-|---|---|---|
-| `admin.killswitch.activated`, `admin.config.changed` | ADM (EVT-ADM-024, EVT-ADM-026) | Kind pauses, limit changes, adapter disablement |
-| `admin.maintenance.started`, `admin.maintenance.ended` | ADM (EVT-ADM-028, EVT-ADM-029) | Read-only mode for API writes |
-| `set.erasure.approved` | SET (planned) | File purge and export deletion (FR-PLT-033) |
-| `bil.entitlement.changed` | BIL (planned) | Quotas, rate limits, integration gates |
-| `idn.account.deactivated` | IDN (planned) | Revoke personal tokens, grants |
-| `emp.org.suspended` | EMP (planned) | Pause org keys, webhooks, syncs |
-| `tsf.content.removed` | TSF (planned) | Quarantine or delete files |
-| All domain events (`module.entity.action`) | All modules | Webhook fan-out through the outbox |
+| Event                                                  | Owner                          | Used for                                        |
+| ------------------------------------------------------ | ------------------------------ | ----------------------------------------------- |
+| `admin.killswitch.activated`, `admin.config.changed`   | ADM (EVT-ADM-024, EVT-ADM-026) | Kind pauses, limit changes, adapter disablement |
+| `admin.maintenance.started`, `admin.maintenance.ended` | ADM (EVT-ADM-028, EVT-ADM-029) | Read-only mode for API writes                   |
+| `set.erasure.approved`                                 | SET (planned)                  | File purge and export deletion (FR-PLT-033)     |
+| `bil.entitlement.changed`                              | BIL (planned)                  | Quotas, rate limits, integration gates          |
+| `idn.account.deactivated`                              | IDN (planned)                  | Revoke personal tokens, grants                  |
+| `emp.org.suspended`                                    | EMP (planned)                  | Pause org keys, webhooks, syncs                 |
+| `tsf.content.removed`                                  | TSF (planned)                  | Quarantine or delete files                      |
+| All domain events (`module.entity.action`)             | All modules                    | Webhook fan-out through the outbox              |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Direction | Purpose | Notes |
-|---|---|---|---|
-| Object storage (S3-compatible) with versioning and object lock options | Outbound | File bytes, quarantine bucket | Region and provider per OD-PLT-06 |
-| Antivirus engine (ClamAV or commercial) | Outbound | Scanning | OD-PLT-07 |
-| Video processing service (Mux, Cloudflare Stream) or self-hosted ffmpeg | Outbound | Transcoding, HLS | OD-PLT-08 |
-| Speech-to-text provider | Outbound | Captions | adapter |
-| CDN | Outbound | Delivery, purge | provider undecided |
-| KMS | Outbound | Envelope keys for the vault | cloud KMS or HSM |
-| Payment provider (Stripe default) | Bidirectional | Billing | OD-PLT-15 |
-| Email provider (Brevo default, behind port) and SMS provider | Outbound | Messaging | SMS scope OD-PLT-12 |
-| Calendar APIs (Google, Microsoft) | Bidirectional | Availability and events | OAuth |
-| Meeting providers (Zoom, Teams, Meet) | Bidirectional | Meeting links | OAuth |
-| ATS APIs (Greenhouse, Lever, Workable, Ashby, others) | Bidirectional | Import and sync | priority per OD-PLT-16 |
-| HRIS APIs (Workday, BambooHR, SAP SuccessFactors) | Inbound | Directory sync | read-only |
-| LMS platforms (Moodle, Canvas, Blackboard) via LTI 1.3 | Bidirectional | SSO launch and grades | |
-| Identity providers (Entra, Google Workspace, Okta) | Inbound | SSO and SCIM | |
-| Identity verification vendor | Bidirectional | Document and liveness | OD-PLT-16 |
-| Oembed and external media providers | Outbound | Embeds | allowlist |
-| Redis-class shared store | Internal | Rate-limit counters, caches | failure modes in BR-PLT-005 |
-| PostgreSQL | Internal | Job queue, outbox, idempotency | system of record |
-| Observability stack | Outbound | Logs, metrics, traces | redacted |
+| Dependency                                                              | Direction     | Purpose                        | Notes                             |
+| ----------------------------------------------------------------------- | ------------- | ------------------------------ | --------------------------------- |
+| Object storage (S3-compatible) with versioning and object lock options  | Outbound      | File bytes, quarantine bucket  | Region and provider per OD-PLT-06 |
+| Antivirus engine (ClamAV or commercial)                                 | Outbound      | Scanning                       | OD-PLT-07                         |
+| Video processing service (Mux, Cloudflare Stream) or self-hosted ffmpeg | Outbound      | Transcoding, HLS               | OD-PLT-08                         |
+| Speech-to-text provider                                                 | Outbound      | Captions                       | adapter                           |
+| CDN                                                                     | Outbound      | Delivery, purge                | provider undecided                |
+| KMS                                                                     | Outbound      | Envelope keys for the vault    | cloud KMS or HSM                  |
+| Payment provider (Stripe default)                                       | Bidirectional | Billing                        | OD-PLT-15                         |
+| Email provider (Brevo default, behind port) and SMS provider            | Outbound      | Messaging                      | SMS scope OD-PLT-12               |
+| Calendar APIs (Google, Microsoft)                                       | Bidirectional | Availability and events        | OAuth                             |
+| Meeting providers (Zoom, Teams, Meet)                                   | Bidirectional | Meeting links                  | OAuth                             |
+| ATS APIs (Greenhouse, Lever, Workable, Ashby, others)                   | Bidirectional | Import and sync                | priority per OD-PLT-16            |
+| HRIS APIs (Workday, BambooHR, SAP SuccessFactors)                       | Inbound       | Directory sync                 | read-only                         |
+| LMS platforms (Moodle, Canvas, Blackboard) via LTI 1.3                  | Bidirectional | SSO launch and grades          |                                   |
+| Identity providers (Entra, Google Workspace, Okta)                      | Inbound       | SSO and SCIM                   |                                   |
+| Identity verification vendor                                            | Bidirectional | Document and liveness          | OD-PLT-16                         |
+| Oembed and external media providers                                     | Outbound      | Embeds                         | allowlist                         |
+| Redis-class shared store                                                | Internal      | Rate-limit counters, caches    | failure modes in BR-PLT-005       |
+| PostgreSQL                                                              | Internal      | Job queue, outbox, idempotency | system of record                  |
+| Observability stack                                                     | Outbound      | Logs, metrics, traces          | redacted                          |
 
 ## 11. Cross-module dependencies
 
-| PLT depends on | Why |
-|---|---|
-| IDN | User authentication for consent, session revocation, account state |
-| BIL | Plan entitlements for quotas, limits, integration gates; payments logic |
-| SET | Consent, erasure and export authority |
-| ADM | Flags, kill switches, config, console surfaces, audit API, approvals |
-| EMP and INS | Tenant, org and institution records |
-| NTF | Notification content for PLT notices |
-| TSF | Moderation hooks for files |
+| PLT depends on | Why                                                                     |
+| -------------- | ----------------------------------------------------------------------- |
+| IDN            | User authentication for consent, session revocation, account state      |
+| BIL            | Plan entitlements for quotas, limits, integration gates; payments logic |
+| SET            | Consent, erasure and export authority                                   |
+| ADM            | Flags, kill switches, config, console surfaces, audit API, approvals    |
+| EMP and INS    | Tenant, org and institution records                                     |
+| NTF            | Notification content for PLT notices                                    |
+| TSF            | Moderation hooks for files                                              |
 
-| Depends on PLT | Why |
-|---|---|
-| All modules | Jobs, outbox, files, idempotency, error model, rate limits, webhooks |
-| PWA | Resumable uploads, idempotency, pairing OAuth, CDN renditions |
-| JOB, ATS | ATS import and sync, jobs and candidates API, webhooks |
-| INT | Calendar and meeting providers |
-| LRN, STU, ASM | Media, transcoding, embeds, LTI |
-| INS | LMS, SSO, SCIM, roster import |
-| ENT (enterprise) | HRIS sync, SSO |
-| BIL | Payment port |
-| NTF | Email and SMS ports |
-| BGV | Identity verification port |
-| ADM | Job console, health, DLQ tools |
-| ANL | Usage and event streams |
+| Depends on PLT   | Why                                                                  |
+| ---------------- | -------------------------------------------------------------------- |
+| All modules      | Jobs, outbox, files, idempotency, error model, rate limits, webhooks |
+| PWA              | Resumable uploads, idempotency, pairing OAuth, CDN renditions        |
+| JOB, ATS         | ATS import and sync, jobs and candidates API, webhooks               |
+| INT              | Calendar and meeting providers                                       |
+| LRN, STU, ASM    | Media, transcoding, embeds, LTI                                      |
+| INS              | LMS, SSO, SCIM, roster import                                        |
+| ENT (enterprise) | HRIS sync, SSO                                                       |
+| BIL              | Payment port                                                         |
+| NTF              | Email and SMS ports                                                  |
+| BGV              | Identity verification port                                           |
+| ADM              | Job console, health, DLQ tools                                       |
+| ANL              | Usage and event streams                                              |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| API availability | Successful non-5xx requests ÷ all requests per month, by endpoint class | PAD |
-| API latency | p50, p95, p99 per endpoint class | PAD |
-| API error budget burn | Observed error rate ÷ allowed error rate (SLO set by OD) | PAD |
-| Developer adoption | Active apps and keys (30-day) and requests per day | PAD |
-| Time to first successful call | Median minutes from developer sign-up to first 2xx in sandbox | PAD |
-| 429 rate | 429 responses ÷ requests by client | PAD |
-| Deprecated-route traffic | Requests to deprecated routes ÷ total at 90, 30 and 7 days before sunset | PAD |
-| Webhook delivery success | Deliveries succeeded within first attempt, within window ÷ all | PAD |
-| Webhook latency | p95 from event creation to first delivery attempt | PAD |
-| Dead webhook deliveries | Count and share per week | PAD |
-| Integration health | Share of connections `live` vs `degraded` vs `unknown` by adapter | PAD |
-| Sync freshness | Median age of last successful sync per integration | PAD |
-| Upload success rate | Completed ÷ started upload sessions, by purpose | PAD |
-| Scan latency | p95 from complete to verdict | PAD |
-| Quarantine rate | Quarantined ÷ scanned files | PAD with TSF |
-| Storage growth and cost | Bytes stored and egressed by class, cost per tenant | PAD |
-| Transcode success and time | Ready ÷ submitted; p95 duration per minute of source | PAD |
-| CDN hit ratio | Cached responses ÷ total for public classes | PAD |
-| Import success | Rows committed ÷ rows validated; runs with errors | PAD |
-| Export time to ready | p95 from request to ready by dataset | PAD |
-| Job queue health | Oldest queued age and depth by kind; dead jobs per day; lease expiries | PAD |
-| Job success rate | Succeeded ÷ finished by kind | PAD |
-| Outbox lag | Age of oldest unpublished event | PAD |
-| Egress blocks | `plt.egress.blocked` per day by reason | SAD |
+| Metric                        | Definition and formula                                                   | Owner role   |
+| ----------------------------- | ------------------------------------------------------------------------ | ------------ |
+| API availability              | Successful non-5xx requests ÷ all requests per month, by endpoint class  | PAD          |
+| API latency                   | p50, p95, p99 per endpoint class                                         | PAD          |
+| API error budget burn         | Observed error rate ÷ allowed error rate (SLO set by OD)                 | PAD          |
+| Developer adoption            | Active apps and keys (30-day) and requests per day                       | PAD          |
+| Time to first successful call | Median minutes from developer sign-up to first 2xx in sandbox            | PAD          |
+| 429 rate                      | 429 responses ÷ requests by client                                       | PAD          |
+| Deprecated-route traffic      | Requests to deprecated routes ÷ total at 90, 30 and 7 days before sunset | PAD          |
+| Webhook delivery success      | Deliveries succeeded within first attempt, within window ÷ all           | PAD          |
+| Webhook latency               | p95 from event creation to first delivery attempt                        | PAD          |
+| Dead webhook deliveries       | Count and share per week                                                 | PAD          |
+| Integration health            | Share of connections `live` vs `degraded` vs `unknown` by adapter        | PAD          |
+| Sync freshness                | Median age of last successful sync per integration                       | PAD          |
+| Upload success rate           | Completed ÷ started upload sessions, by purpose                          | PAD          |
+| Scan latency                  | p95 from complete to verdict                                             | PAD          |
+| Quarantine rate               | Quarantined ÷ scanned files                                              | PAD with TSF |
+| Storage growth and cost       | Bytes stored and egressed by class, cost per tenant                      | PAD          |
+| Transcode success and time    | Ready ÷ submitted; p95 duration per minute of source                     | PAD          |
+| CDN hit ratio                 | Cached responses ÷ total for public classes                              | PAD          |
+| Import success                | Rows committed ÷ rows validated; runs with errors                        | PAD          |
+| Export time to ready          | p95 from request to ready by dataset                                     | PAD          |
+| Job queue health              | Oldest queued age and depth by kind; dead jobs per day; lease expiries   | PAD          |
+| Job success rate              | Succeeded ÷ finished by kind                                             | PAD          |
+| Outbox lag                    | Age of oldest unpublished event                                          | PAD          |
+| Egress blocks                 | `plt.egress.blocked` per day by reason                                   | SAD          |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-PLT-01 | Deprecation window for the public API: SSOT §12.18 says at least 6 months; the target API standard proposes 90 days. | 90 days; 6 months; 12 months for enterprise | 6 months `[PROP]` (stricter wins) | Product owner and platform lead | FR-PLT-001 |
-| OD-PLT-02 | Success response shape: SSOT `{success, data, meta}` versus target `{items, page}` and bare resources (OPEN-46). | SSOT envelope; bare resources with `items`/`page` | Bare resources and `{items, page}` for lists, problem+json for errors `[PROP]`; the envelope is not used | Platform lead | FR-PLT-006, SDKs |
-| OD-PLT-03 | Interface defaults in conflict: list page default 20 (SSOT CON-003) versus 25 (target); idempotency replay window 24 hours (CON-005) versus 14 days (offline clients). | 20 or 25; 24 hours or 14 days | 25 and 14 days `[PROP]` | Platform lead | FR-PLT-006, FR-PLT-007 |
-| OD-PLT-04 | Which plans and roles may use the public API, personal tokens and webhooks. | Paid only; all with low limits | Free: personal read tokens; paid: org keys, OAuth apps and webhooks; enterprise: higher limits and SSO `[PROP]` | Product owner with BIL owner | FR-PLT-003, FR-PLT-011 |
-| OD-PLT-05 | Rule assigning kinds to the transactional versus heavy queue; user-local versus UTC cadence for digests and streaks; legacy ambiguity about `failed`; infrastructure for heavy jobs. | Runtime and resource rule; local-day fan-out | Rule in FR-PLT-039; local-day fan-out for user-facing schedules, UTC for platform schedules `[PROP]` | Platform lead | FR-PLT-039, FR-PLT-040, BR-PLT-031 |
-| OD-PLT-06 | Object storage provider, regions and data residency per tenant. | Single region; per-region buckets; customer-chosen | Single primary region with residency tiers added for institutions later `[PROP]` | Security lead and product owner | FR-PLT-030 |
-| OD-PLT-07 | Antivirus engine choice and acceptable scan latency. | ClamAV self-hosted; commercial API; both | ClamAV plus a second engine for suspicious cases `[PROP]` | Security lead | FR-PLT-031 |
-| OD-PLT-08 | Video processing vendor (Mux, Cloudflare Stream, self-hosted), DRM and offline need. | Vendor; self-host; DRM yes or no | Managed vendor, no DRM in v1 `[PROP]` (legacy OD-14 open) | Platform lead and LRN owner | FR-PLT-035 |
-| OD-PLT-09 | Does HRIS sync, even read-only, brush the SSOT §4.2 non-goal of generic HR? | Exclude; read-only directory sync only | Read-only directory sync with field allowlist `[PROP]` | Product owner | FR-PLT-019 |
-| OD-PLT-10 | Lawful basis and notification duties for candidates imported from an employer's ATS. | Employer controller, no outreach; outreach with acknowledgment | Employer is controller; no automatic outreach unless the org acknowledges lawful basis `[PROP]` | Legal and privacy lead | FR-PLT-018 |
-| OD-PLT-11 | Criteria and thresholds (N apps, abuse record) for opening an integration directory to third-party apps. | Never; unlisted private only; curated directory | Unlisted private apps first; curated directory only after gate review `[PROP]` | Product owner | FR-PLT-027 |
-| OD-PLT-12 | Is SMS in scope and for what purposes (OTP, reminders, marketing)? | None; OTP and security only; reminders too | OTP and security only until legal review `[PROP]` | Product owner and legal | FR-PLT-023 |
-| OD-PLT-13 | Retention periods per file class and for logs. | Values per class | Defaults in FR-PLT-033 `[PROP]` | Legal and privacy lead | FR-PLT-033, FR-PLT-010 |
-| OD-PLT-14 | Rate-limit and quota values per plan and endpoint class; storage per plan. | Values | Placeholders in FR-PLT-005 and FR-PLT-032 `[PROP]`; calibrate with load tests | Product owner with BIL | FR-PLT-005, FR-PLT-032 |
-| OD-PLT-15 | Payment provider(s) per region and whether a second provider is supported. | Stripe only; Stripe plus regional | Stripe only for v1 `[PROP]` | Finance owner and product owner | FR-PLT-022 |
-| OD-PLT-16 | Priority list of ATS, HRIS, LMS and identity verification vendors to build first. | Ranked list | Greenhouse, Lever for ATS; Canvas and Moodle for LTI; Entra and Okta for SSO; vendor RFP for IDV `[PROP]` | Product owner | FR-PLT-018 to FR-PLT-025 |
+| ID        | Question                                                                                                                                                                             | Options                                                        | Default proposal                                                                                                | Who decides                     | Blocking                           |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------------------------------- |
+| OD-PLT-01 | Deprecation window for the public API: SSOT §12.18 says at least 6 months; the target API standard proposes 90 days.                                                                 | 90 days; 6 months; 12 months for enterprise                    | 6 months `[PROP]` (stricter wins)                                                                               | Product owner and platform lead | FR-PLT-001                         |
+| OD-PLT-02 | Success response shape: SSOT `{success, data, meta}` versus target `{items, page}` and bare resources (OPEN-46).                                                                     | SSOT envelope; bare resources with `items`/`page`              | Bare resources and `{items, page}` for lists, problem+json for errors `[PROP]`; the envelope is not used        | Platform lead                   | FR-PLT-006, SDKs                   |
+| OD-PLT-03 | Interface defaults in conflict: list page default 20 (SSOT CON-003) versus 25 (target); idempotency replay window 24 hours (CON-005) versus 14 days (offline clients).               | 20 or 25; 24 hours or 14 days                                  | 25 and 14 days `[PROP]`                                                                                         | Platform lead                   | FR-PLT-006, FR-PLT-007             |
+| OD-PLT-04 | Which plans and roles may use the public API, personal tokens and webhooks.                                                                                                          | Paid only; all with low limits                                 | Free: personal read tokens; paid: org keys, OAuth apps and webhooks; enterprise: higher limits and SSO `[PROP]` | Product owner with BIL owner    | FR-PLT-003, FR-PLT-011             |
+| OD-PLT-05 | Rule assigning kinds to the transactional versus heavy queue; user-local versus UTC cadence for digests and streaks; legacy ambiguity about `failed`; infrastructure for heavy jobs. | Runtime and resource rule; local-day fan-out                   | Rule in FR-PLT-039; local-day fan-out for user-facing schedules, UTC for platform schedules `[PROP]`            | Platform lead                   | FR-PLT-039, FR-PLT-040, BR-PLT-031 |
+| OD-PLT-06 | Object storage provider, regions and data residency per tenant.                                                                                                                      | Single region; per-region buckets; customer-chosen             | Single primary region with residency tiers added for institutions later `[PROP]`                                | Security lead and product owner | FR-PLT-030                         |
+| OD-PLT-07 | Antivirus engine choice and acceptable scan latency.                                                                                                                                 | ClamAV self-hosted; commercial API; both                       | ClamAV plus a second engine for suspicious cases `[PROP]`                                                       | Security lead                   | FR-PLT-031                         |
+| OD-PLT-08 | Video processing vendor (Mux, Cloudflare Stream, self-hosted), DRM and offline need.                                                                                                 | Vendor; self-host; DRM yes or no                               | Managed vendor, no DRM in v1 `[PROP]` (legacy OD-14 open)                                                       | Platform lead and LRN owner     | FR-PLT-035                         |
+| OD-PLT-09 | Does HRIS sync, even read-only, brush the SSOT §4.2 non-goal of generic HR?                                                                                                          | Exclude; read-only directory sync only                         | Read-only directory sync with field allowlist `[PROP]`                                                          | Product owner                   | FR-PLT-019                         |
+| OD-PLT-10 | Lawful basis and notification duties for candidates imported from an employer's ATS.                                                                                                 | Employer controller, no outreach; outreach with acknowledgment | Employer is controller; no automatic outreach unless the org acknowledges lawful basis `[PROP]`                 | Legal and privacy lead          | FR-PLT-018                         |
+| OD-PLT-11 | Criteria and thresholds (N apps, abuse record) for opening an integration directory to third-party apps.                                                                             | Never; unlisted private only; curated directory                | Unlisted private apps first; curated directory only after gate review `[PROP]`                                  | Product owner                   | FR-PLT-027                         |
+| OD-PLT-12 | Is SMS in scope and for what purposes (OTP, reminders, marketing)?                                                                                                                   | None; OTP and security only; reminders too                     | OTP and security only until legal review `[PROP]`                                                               | Product owner and legal         | FR-PLT-023                         |
+| OD-PLT-13 | Retention periods per file class and for logs.                                                                                                                                       | Values per class                                               | Defaults in FR-PLT-033 `[PROP]`                                                                                 | Legal and privacy lead          | FR-PLT-033, FR-PLT-010             |
+| OD-PLT-14 | Rate-limit and quota values per plan and endpoint class; storage per plan.                                                                                                           | Values                                                         | Placeholders in FR-PLT-005 and FR-PLT-032 `[PROP]`; calibrate with load tests                                   | Product owner with BIL          | FR-PLT-005, FR-PLT-032             |
+| OD-PLT-15 | Payment provider(s) per region and whether a second provider is supported.                                                                                                           | Stripe only; Stripe plus regional                              | Stripe only for v1 `[PROP]`                                                                                     | Finance owner and product owner | FR-PLT-022                         |
+| OD-PLT-16 | Priority list of ATS, HRIS, LMS and identity verification vendors to build first.                                                                                                    | Ranked list                                                    | Greenhouse, Lever for ATS; Canvas and Moodle for LTI; Entra and Okta for SSO; vendor RFP for IDV `[PROP]`       | Product owner                   | FR-PLT-018 to FR-PLT-025           |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-PLT-01 | SSRF through webhooks, oEmbed, imports or metadata fetch reaches internal services. | Medium / Critical | Single egress client, pinned DNS, network-level egress rules, bypass corpus tests (FR-PLT-041). |
-| RSK-PLT-02 | Webhook or API secret leakage. | Medium / High | Hashing and vault, scanner revocation, short overlap rotations, IP allowlists. |
-| RSK-PLT-03 | Malicious uploads (malware, polyglots, active documents) reach users. | Medium / High | Fail-closed scan, sandbox origin, re-scan, type sniffing. |
-| RSK-PLT-04 | Vendor outage or lock-in (storage, transcode, email, payments). | Medium / High | Ports, degraded modes, breakers, removal drills, export of renditions. |
-| RSK-PLT-05 | Bulk scraping of candidate or profile data through the public API. | High / High | Scope limits, sealed classes excluded, rate limits and anomaly detection, developer terms, app review. |
-| RSK-PLT-06 | Breaking changes slip into a stable version. | Medium / Medium | Contract diff in CI, pinned SDK tests, long deprecation window. |
-| RSK-PLT-07 | Dead-letter growth hides data loss. | Medium / High | Alerts by age and count, console replay, ownership per kind (FR-ADM-037). |
-| RSK-PLT-08 | Storage and transcoding costs grow faster than plan revenue. | Medium / Medium | Quotas, renditions caps, lifecycle tiers, per-tenant cost tracking. |
-| RSK-PLT-09 | Poor integration data quality (duplicates, mapping errors) damages customer trust. | Medium / Medium | Dry runs, mapping validation, duplicate review, undo windows. |
-| RSK-PLT-10 | Marketplace ambitions drift into the SSOT §4.2 general-marketplace non-goal. | Medium / Medium | Decision gate, career-domain limit, unlisted-first policy. |
-| RSK-PLT-11 | Rate-limit counters inconsistent across instances (SSOT §20.1 open issue). | Medium / Medium | Shared store, documented fail modes, tests with multiple instances. |
-| RSK-PLT-12 | Enforced SSO locks out an organization when the IdP fails. | Low / High | Break-glass owner account requirement, certificate expiry alerts. |
+| ID         | Risk                                                                                | Likelihood / impact | Mitigation                                                                                             |
+| ---------- | ----------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| RSK-PLT-01 | SSRF through webhooks, oEmbed, imports or metadata fetch reaches internal services. | Medium / Critical   | Single egress client, pinned DNS, network-level egress rules, bypass corpus tests (FR-PLT-041).        |
+| RSK-PLT-02 | Webhook or API secret leakage.                                                      | Medium / High       | Hashing and vault, scanner revocation, short overlap rotations, IP allowlists.                         |
+| RSK-PLT-03 | Malicious uploads (malware, polyglots, active documents) reach users.               | Medium / High       | Fail-closed scan, sandbox origin, re-scan, type sniffing.                                              |
+| RSK-PLT-04 | Vendor outage or lock-in (storage, transcode, email, payments).                     | Medium / High       | Ports, degraded modes, breakers, removal drills, export of renditions.                                 |
+| RSK-PLT-05 | Bulk scraping of candidate or profile data through the public API.                  | High / High         | Scope limits, sealed classes excluded, rate limits and anomaly detection, developer terms, app review. |
+| RSK-PLT-06 | Breaking changes slip into a stable version.                                        | Medium / Medium     | Contract diff in CI, pinned SDK tests, long deprecation window.                                        |
+| RSK-PLT-07 | Dead-letter growth hides data loss.                                                 | Medium / High       | Alerts by age and count, console replay, ownership per kind (FR-ADM-037).                              |
+| RSK-PLT-08 | Storage and transcoding costs grow faster than plan revenue.                        | Medium / Medium     | Quotas, renditions caps, lifecycle tiers, per-tenant cost tracking.                                    |
+| RSK-PLT-09 | Poor integration data quality (duplicates, mapping errors) damages customer trust.  | Medium / Medium     | Dry runs, mapping validation, duplicate review, undo windows.                                          |
+| RSK-PLT-10 | Marketplace ambitions drift into the SSOT §4.2 general-marketplace non-goal.        | Medium / Medium     | Decision gate, career-domain limit, unlisted-first policy.                                             |
+| RSK-PLT-11 | Rate-limit counters inconsistent across instances (SSOT §20.1 open issue).          | Medium / Medium     | Shared store, documented fail modes, tests with multiple instances.                                    |
+| RSK-PLT-12 | Enforced SSO locks out an organization when the IdP fails.                          | Low / High          | Break-glass owner account requirement, certificate expiry alerts.                                      |
 
 ## 15. Legacy source trace
 
-| Legacy source | Informed | Dropped or changed |
-|---|---|---|
-| SSOT §12.18 to §12.20 (API architecture, envelope, CON-001 to CON-016) | Versioning, pagination, idempotency, errors, rate limits, webhooks, files, time and money rules | Conflicts on envelope, page default, replay window and deprecation window recorded as OD-PLT-01 to OD-PLT-03 |
-| SSOT §13.3 integration register | Integration categories and vendor examples | Phase numbers dropped; priorities made OD-PLT-16 |
-| SSOT §13.4 ADR-009 doctrine | Adapter pattern, circuit breakers, degraded modes, removal drill | Kept as BR-PLT-013, BR-PLT-040 |
-| SSOT §13.5 to §13.8 (dual queue, job catalogs, job schema) | Job kinds, retries, schema, DLQ | Queue assignment rule and terminal-state ambiguity resolved as proposals (OD-PLT-05, BR-PLT-031) |
-| SSOT §13.15, §13.16, §10.21 BR-083 to BR-090, F-42 | Media pipeline, security, embeds | Provider choice left to OD-PLT-08 |
-| SSOT BR-28, BR-31, BR-32, BR-063, WF-17 | Health states, dry-run schedulers, webhook-owned subscription state, export, validate-then-commit | Applied to PLT engines |
-| SSOT §20.1 to §20.3 | Observability, reliability, trace propagation | Counter-store gap addressed in BR-PLT-005 |
-| Yash 13 API_DESIGN_STANDARDS, INTEGRATION_ARCHITECTURE, EVENT_CATALOG | Contract-first, resource modeling, headers, event naming | Numeric proposals re-labeled `[PROP]` |
-| Yash 18 PROC-04, PROC-09, PROC-13 | Signed delivery of packages, data-rights exports, payment operations | Staff tooling remains in ADM |
-| Own knowledge of Stripe, GitHub, Twilio developer platforms; Greenhouse, Lever, Workday, Canvas LTI 1.3; Mux; Okta SCIM | Webhook signing and replay, OAuth and scopes, LTI, SCIM, sandbox | Tagged `[PROP]` |
-| Dropped: Zapier and Make listings (SSOT §13.3 future) | Covered by public API and webhooks | Revisit under FR-PLT-027 |
+| Legacy source                                                                                                           | Informed                                                                                          | Dropped or changed                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| SSOT §12.18 to §12.20 (API architecture, envelope, CON-001 to CON-016)                                                  | Versioning, pagination, idempotency, errors, rate limits, webhooks, files, time and money rules   | Conflicts on envelope, page default, replay window and deprecation window recorded as OD-PLT-01 to OD-PLT-03 |
+| SSOT §13.3 integration register                                                                                         | Integration categories and vendor examples                                                        | Phase numbers dropped; priorities made OD-PLT-16                                                             |
+| SSOT §13.4 ADR-009 doctrine                                                                                             | Adapter pattern, circuit breakers, degraded modes, removal drill                                  | Kept as BR-PLT-013, BR-PLT-040                                                                               |
+| SSOT §13.5 to §13.8 (dual queue, job catalogs, job schema)                                                              | Job kinds, retries, schema, DLQ                                                                   | Queue assignment rule and terminal-state ambiguity resolved as proposals (OD-PLT-05, BR-PLT-031)             |
+| SSOT §13.15, §13.16, §10.21 BR-083 to BR-090, F-42                                                                      | Media pipeline, security, embeds                                                                  | Provider choice left to OD-PLT-08                                                                            |
+| SSOT BR-28, BR-31, BR-32, BR-063, WF-17                                                                                 | Health states, dry-run schedulers, webhook-owned subscription state, export, validate-then-commit | Applied to PLT engines                                                                                       |
+| SSOT §20.1 to §20.3                                                                                                     | Observability, reliability, trace propagation                                                     | Counter-store gap addressed in BR-PLT-005                                                                    |
+| Yash 13 API_DESIGN_STANDARDS, INTEGRATION_ARCHITECTURE, EVENT_CATALOG                                                   | Contract-first, resource modeling, headers, event naming                                          | Numeric proposals re-labeled `[PROP]`                                                                        |
+| Yash 18 PROC-04, PROC-09, PROC-13                                                                                       | Signed delivery of packages, data-rights exports, payment operations                              | Staff tooling remains in ADM                                                                                 |
+| Own knowledge of Stripe, GitHub, Twilio developer platforms; Greenhouse, Lever, Workday, Canvas LTI 1.3; Mux; Okta SCIM | Webhook signing and replay, OAuth and scopes, LTI, SCIM, sandbox                                  | Tagged `[PROP]`                                                                                              |
+| Dropped: Zapier and Make listings (SSOT §13.3 future)                                                                   | Covered by public API and webhooks                                                                | Revisit under FR-PLT-027                                                                                     |

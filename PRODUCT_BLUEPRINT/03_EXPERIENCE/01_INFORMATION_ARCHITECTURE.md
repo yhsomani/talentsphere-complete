@@ -22,15 +22,15 @@ In scope: sitemap, per-role navigation, global navigation patterns at three widt
 
 [DER] A person has one account (IDN) and may hold several memberships. The shell organizes the product into **workspaces**. A workspace is a pair of (context, role set) that decides the navigation, the dashboard and the data in scope.
 
-| Workspace | URL prefix | Who enters | What it is |
-|---|---|---|---|
-| Public | none | Everyone, signed in or not | Marketing, search, job, course, company, mentor, gig, event and profile pages that are publicly indexable |
-| Personal | none (root paths) | Every signed-in user | Candidate home. Carries optional capability sections: Student (campus), Instructor (studio), Mentor, Freelancer. Capabilities are sections inside the personal workspace, not separate workspaces |
-| Employer | `/employer/{org}` | REC, HMG, EAD with a membership in that employer organization | Hiring workspace for one employer organization |
-| Institution | `/institution/{inst}` | IAD, PLO and institution-attached INS with a membership | Managed learning and placement workspace for one institution |
-| Enterprise | `/enterprise/{org}` | EXA with a membership | Internal mobility, skills and L&D workspace for one enterprise customer |
-| Console | `/console` | MOD, SUP, FIN, PAD, SAD | Staff operations. Visually distinct (section 6.5) |
-| Developers | `/developers` | Anyone for docs; EAD, IAD, EXA for credentials, which live inside their own workspace under `integrations` | Public API documentation and sandbox |
+| Workspace   | URL prefix            | Who enters                                                                                                 | What it is                                                                                                                                                                                        |
+| ----------- | --------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public      | none                  | Everyone, signed in or not                                                                                 | Marketing, search, job, course, company, mentor, gig, event and profile pages that are publicly indexable                                                                                         |
+| Personal    | none (root paths)     | Every signed-in user                                                                                       | Candidate home. Carries optional capability sections: Student (campus), Instructor (studio), Mentor, Freelancer. Capabilities are sections inside the personal workspace, not separate workspaces |
+| Employer    | `/employer/{org}`     | REC, HMG, EAD with a membership in that employer organization                                              | Hiring workspace for one employer organization                                                                                                                                                    |
+| Institution | `/institution/{inst}` | IAD, PLO and institution-attached INS with a membership                                                    | Managed learning and placement workspace for one institution                                                                                                                                      |
+| Enterprise  | `/enterprise/{org}`   | EXA with a membership                                                                                      | Internal mobility, skills and L&D workspace for one enterprise customer                                                                                                                           |
+| Console     | `/console`            | MOD, SUP, FIN, PAD, SAD                                                                                    | Staff operations. Visually distinct (section 6.5)                                                                                                                                                 |
+| Developers  | `/developers`         | Anyone for docs; EAD, IAD, EXA for credentials, which live inside their own workspace under `integrations` | Public API documentation and sandbox                                                                                                                                                              |
 
 Rules:
 
@@ -56,26 +56,26 @@ flowchart LR
 
 ### 2.1 Role to workspace map
 
-| Role | Public | Personal | Employer | Institution | Enterprise | Console |
-|---|---|---|---|---|---|---|
-| GUE | yes | no | no | no | no | no |
-| CAN | yes | yes | no | no | no | no |
-| STD | yes | yes plus Campus section | no | no | no | no |
-| INS | yes | yes plus Studio section | no | yes when attached (Faculty view) | no | no |
-| MNT | yes | yes plus Mentoring (mentor) section | no | no | no | no |
-| FRL | yes | yes plus Gigs (freelancer) section | no | no | no | no |
-| REC | yes | yes | yes | no | no | no |
-| HMG | yes | yes | yes (reduced) | no | no | no |
-| EAD | yes | yes | yes (full) | no | no | no |
-| IAD | yes | yes | no | yes (full) | no | no |
-| PLO | yes | yes | no | yes (placement and read scope) | no | no |
-| EXA | yes | yes | no | no | yes | no |
-| MOD | yes | yes | no | no | no | yes (moderation) |
-| SUP | yes | yes | no | no | no | yes (support) |
-| FIN | yes | yes | no | no | no | yes (finance) |
-| PAD | yes | yes | no | no | no | yes (platform) |
-| SAD | yes | yes | no | no | no | yes (security, all read) |
-| API | n/a | n/a | n/a | n/a | n/a | n/a: a service principal has no UI session; it is managed in the owning workspace under Integrations |
+| Role | Public | Personal                            | Employer      | Institution                      | Enterprise | Console                                                                                              |
+| ---- | ------ | ----------------------------------- | ------------- | -------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| GUE  | yes    | no                                  | no            | no                               | no         | no                                                                                                   |
+| CAN  | yes    | yes                                 | no            | no                               | no         | no                                                                                                   |
+| STD  | yes    | yes plus Campus section             | no            | no                               | no         | no                                                                                                   |
+| INS  | yes    | yes plus Studio section             | no            | yes when attached (Faculty view) | no         | no                                                                                                   |
+| MNT  | yes    | yes plus Mentoring (mentor) section | no            | no                               | no         | no                                                                                                   |
+| FRL  | yes    | yes plus Gigs (freelancer) section  | no            | no                               | no         | no                                                                                                   |
+| REC  | yes    | yes                                 | yes           | no                               | no         | no                                                                                                   |
+| HMG  | yes    | yes                                 | yes (reduced) | no                               | no         | no                                                                                                   |
+| EAD  | yes    | yes                                 | yes (full)    | no                               | no         | no                                                                                                   |
+| IAD  | yes    | yes                                 | no            | yes (full)                       | no         | no                                                                                                   |
+| PLO  | yes    | yes                                 | no            | yes (placement and read scope)   | no         | no                                                                                                   |
+| EXA  | yes    | yes                                 | no            | no                               | yes        | no                                                                                                   |
+| MOD  | yes    | yes                                 | no            | no                               | no         | yes (moderation)                                                                                     |
+| SUP  | yes    | yes                                 | no            | no                               | no         | yes (support)                                                                                        |
+| FIN  | yes    | yes                                 | no            | no                               | no         | yes (finance)                                                                                        |
+| PAD  | yes    | yes                                 | no            | no                               | no         | yes (platform)                                                                                       |
+| SAD  | yes    | yes                                 | no            | no                               | no         | yes (security, all read)                                                                             |
+| API  | n/a    | n/a                                 | n/a           | n/a                              | n/a        | n/a: a service principal has no UI session; it is managed in the owning workspace under Integrations |
 
 [DER] Staff roles also have the Personal workspace so they can use the product as a user, but staff accounts are separate identities from their personal accounts by default (`OD-UX-04`).
 
@@ -85,12 +85,12 @@ flowchart LR
 
 The shell has three layouts. Breakpoints are the as-built values in `packages/ui/src/tokens.ts` (`sm` 640, `md` 768, `lg` 1024, `xl` 1280, `2xl` 1536).
 
-| Class | Width | Primary navigation | Secondary | Top bar |
-|---|---|---|---|---|
-| Phone | 320 to 767 | Bottom tab bar, 5 slots | Full-screen "More" or "Me" tab; section switch via top-of-page segmented tabs | App bar 56 px: back or logo, page title, search icon, bell |
-| Tablet | 768 to 1023 | Navigation rail 72 px, icon above label, up to 7 items plus More | Group flyout on tap; two-pane layouts for list/detail | Bar 56 px: workspace switcher, search field (collapses to icon below 900), bell, avatar |
-| Desktop | 1024 and up | Sidebar 248 px, collapsible to 72 px rail | Sub-navigation as in-page tabs, never a second sidebar | Bar 64 px: breadcrumbs, search field (opens palette), "New" menu, help, bell, avatar |
-| Wide | 1280 and up | Same as desktop | Optional right context panel 320 px for inspector, AI assistant or preview | Same |
+| Class   | Width       | Primary navigation                                               | Secondary                                                                     | Top bar                                                                                 |
+| ------- | ----------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Phone   | 320 to 767  | Bottom tab bar, 5 slots                                          | Full-screen "More" or "Me" tab; section switch via top-of-page segmented tabs | App bar 56 px: back or logo, page title, search icon, bell                              |
+| Tablet  | 768 to 1023 | Navigation rail 72 px, icon above label, up to 7 items plus More | Group flyout on tap; two-pane layouts for list/detail                         | Bar 56 px: workspace switcher, search field (collapses to icon below 900), bell, avatar |
+| Desktop | 1024 and up | Sidebar 248 px, collapsible to 72 px rail                        | Sub-navigation as in-page tabs, never a second sidebar                        | Bar 64 px: breadcrumbs, search field (opens palette), "New" menu, help, bell, avatar    |
+| Wide    | 1280 and up | Same as desktop                                                  | Optional right context panel 320 px for inspector, AI assistant or preview    | Same                                                                                    |
 
 - `NFR-IAX-005` Phone is below 768, not below 640. Between 640 and 767 the layout is the phone layout with wider gutters and two-column card grids. Rationale: a 700 px device in portrait cannot host a 248 px sidebar and 400 px of content. [DER]
 - `NFR-IAX-006` Public pages use a header (not a sidebar) at every width: logo, up to 5 text links, Sign in, Sign up. Below 1024 the links collapse into a menu button whose panel is a full-height drawer.
@@ -135,28 +135,28 @@ Behaviour:
 
 ### 3.5 Top bar contents (Desktop and Tablet)
 
-| Slot | Content | Rule |
-|---|---|---|
-| Left | Breadcrumbs (section 9), or page title only on root pages | Never both a breadcrumb and a duplicate title text |
-| Center | Global search field, 360 px, placeholder "Search or jump to" with `Ctrl K` hint chip | Clicking or focusing opens the command palette (section 7); it is not a separate inline search |
-| Right 1 | "New" menu button (context-sensitive create actions) | Only when the workspace has at least 2 create actions; with one action, show that action's button instead |
-| Right 2 | Help (opens help popover: shortcuts, contact support, help center) | Always present |
-| Right 3 | Notifications bell with unread count badge | Popover lists latest 8, "See all" goes to `/notifications` |
-| Right 4 | Avatar button opening the account menu | Contents below |
+| Slot    | Content                                                                              | Rule                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Left    | Breadcrumbs (section 9), or page title only on root pages                            | Never both a breadcrumb and a duplicate title text                                                        |
+| Center  | Global search field, 360 px, placeholder "Search or jump to" with `Ctrl K` hint chip | Clicking or focusing opens the command palette (section 7); it is not a separate inline search            |
+| Right 1 | "New" menu button (context-sensitive create actions)                                 | Only when the workspace has at least 2 create actions; with one action, show that action's button instead |
+| Right 2 | Help (opens help popover: shortcuts, contact support, help center)                   | Always present                                                                                            |
+| Right 3 | Notifications bell with unread count badge                                           | Popover lists latest 8, "See all" goes to `/notifications`                                                |
+| Right 4 | Avatar button opening the account menu                                               | Contents below                                                                                            |
 
 Account menu items in order: name and email (non-interactive header), Profile (`/profile`), Settings, Switch workspace (if more than one, else hidden), Display (theme and density quick toggles), Keyboard shortcuts, Sign out. Staff: also "Exit staff mode" where applicable. The menu is a menu button pattern (section DS CMP-Menu).
 
 ### 3.6 "New" menu contents per workspace
 
-| Workspace | Actions (in order) |
-|---|---|
-| Personal | Add work history, Upload evidence, Start application draft (opens Jobs), Write post, Request mentor session, New resume |
-| Personal with Instructor | adds New course, New assessment |
-| Personal with Freelancer | adds New gig proposal |
-| Employer | New job, Add candidate, Invite teammate (EAD), New talent pool, Schedule interview |
-| Institution | Invite students, New cohort, New placement drive, Assign course |
-| Enterprise | New learning mandate, New internal job, Import people |
-| Console | Context-sensitive: New announcement (PAD), New macro (SUP), New policy (MOD), New flag (PAD) |
+| Workspace                | Actions (in order)                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Personal                 | Add work history, Upload evidence, Start application draft (opens Jobs), Write post, Request mentor session, New resume |
+| Personal with Instructor | adds New course, New assessment                                                                                         |
+| Personal with Freelancer | adds New gig proposal                                                                                                   |
+| Employer                 | New job, Add candidate, Invite teammate (EAD), New talent pool, Schedule interview                                      |
+| Institution              | Invite students, New cohort, New placement drive, Assign course                                                         |
+| Enterprise               | New learning mandate, New internal job, Import people                                                                   |
+| Console                  | Context-sensitive: New announcement (PAD), New macro (SUP), New policy (MOD), New flag (PAD)                            |
 
 Each action appears only if the user holds the permission and the entitlement. Keyboard shortcut `c` opens the menu when focus is not in a text field (shortcut disable setting per `NFR-IAX-021`).
 
@@ -177,30 +177,30 @@ Search: header contains a search icon button opening the palette in "public sear
 
 ### 4.2 Candidate (CAN), Personal workspace
 
-| Group | Item | Route | Module | Visibility | Badge |
-|---|---|---|---|---|---|
-| (none) | Home | `/dashboard` | shell | always | none |
-| Jobs | Find jobs | `/jobs` | JOB | always | none |
-| Jobs | Applications | `/applications` | JOB | always | Count of applications needing candidate action (interview to confirm, offer to answer, info requested) |
-| Jobs | Interviews | `/interviews` | INT | has at least one interview ever, or always [PROP] | Count of interviews to confirm |
-| Jobs | Saved and alerts | `/jobs/saved` | JOB | always | none |
-| Learn | My learning | `/learn` | LRN | always | Count of overdue deadlines |
-| Learn | Course catalog | `/courses` | LRN | always | none |
-| Learn | Assessments | `/assess` | ASM | always | Count of invitations not started |
-| Learn | Certificates | `/learn/certificates` | LRN | has at least one | none |
-| Career | Profile | `/profile` | PRF | always | none |
-| Career | Evidence | `/evidence` | EVD | always | Count of items needing action (rejected, expiring) |
-| Career | Credentials | `/credentials` | EVD | always | Count expiring within 30 days [PROP] |
-| Career | Verification | `/verification` | BGV | has at least one check or request | Count of pending requests needing candidate consent |
-| Career | Career plan | `/career` | AIC, MKT | always | none |
-| Community | Network | `/network` | NET | always | Count of connection requests |
-| Community | Mentors | `/mentoring` | MEN | always | Count of session requests or confirmations pending |
-| Community | Events | `/events` | EVT | always | none |
-| Community | Reputation | `/reputation` | REP | always | none |
-| (top-level) | Messages | `/messages` | MSG | always | Unread conversation count |
-| Utility | Billing | `/billing` | BIL | always | Dot when payment failed |
-| Utility | Settings | `/settings` | SET | always | Dot when a consent or security action is required |
-| Utility | Help | `/help` | ADM | always | none |
+| Group       | Item             | Route                 | Module   | Visibility                                        | Badge                                                                                                  |
+| ----------- | ---------------- | --------------------- | -------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| (none)      | Home             | `/dashboard`          | shell    | always                                            | none                                                                                                   |
+| Jobs        | Find jobs        | `/jobs`               | JOB      | always                                            | none                                                                                                   |
+| Jobs        | Applications     | `/applications`       | JOB      | always                                            | Count of applications needing candidate action (interview to confirm, offer to answer, info requested) |
+| Jobs        | Interviews       | `/interviews`         | INT      | has at least one interview ever, or always [PROP] | Count of interviews to confirm                                                                         |
+| Jobs        | Saved and alerts | `/jobs/saved`         | JOB      | always                                            | none                                                                                                   |
+| Learn       | My learning      | `/learn`              | LRN      | always                                            | Count of overdue deadlines                                                                             |
+| Learn       | Course catalog   | `/courses`            | LRN      | always                                            | none                                                                                                   |
+| Learn       | Assessments      | `/assess`             | ASM      | always                                            | Count of invitations not started                                                                       |
+| Learn       | Certificates     | `/learn/certificates` | LRN      | has at least one                                  | none                                                                                                   |
+| Career      | Profile          | `/profile`            | PRF      | always                                            | none                                                                                                   |
+| Career      | Evidence         | `/evidence`           | EVD      | always                                            | Count of items needing action (rejected, expiring)                                                     |
+| Career      | Credentials      | `/credentials`        | EVD      | always                                            | Count expiring within 30 days [PROP]                                                                   |
+| Career      | Verification     | `/verification`       | BGV      | has at least one check or request                 | Count of pending requests needing candidate consent                                                    |
+| Career      | Career plan      | `/career`             | AIC, MKT | always                                            | none                                                                                                   |
+| Community   | Network          | `/network`            | NET      | always                                            | Count of connection requests                                                                           |
+| Community   | Mentors          | `/mentoring`          | MEN      | always                                            | Count of session requests or confirmations pending                                                     |
+| Community   | Events           | `/events`             | EVT      | always                                            | none                                                                                                   |
+| Community   | Reputation       | `/reputation`         | REP      | always                                            | none                                                                                                   |
+| (top-level) | Messages         | `/messages`           | MSG      | always                                            | Unread conversation count                                                                              |
+| Utility     | Billing          | `/billing`            | BIL      | always                                            | Dot when payment failed                                                                                |
+| Utility     | Settings         | `/settings`           | SET      | always                                            | Dot when a consent or security action is required                                                      |
+| Utility     | Help             | `/help`               | ADM      | always                                            | none                                                                                                   |
 
 That is 22 items in 5 groups; it is within the limits. Notifications are not a sidebar item: they are the top-bar bell plus `/notifications`.
 
@@ -210,13 +210,13 @@ Phone tabs for CAN: Home, Jobs, Learn, Messages, Me. "Jobs" tab root is `/jobs` 
 
 Same as CAN, plus a leading group "Campus" (institution name shown as group heading):
 
-| Item | Route | Module | Visibility | Badge |
-|---|---|---|---|---|
-| Campus home | `/campus` | INS | STD capability active | Count of new announcements |
-| My courses (assigned) | `/campus/courses` | INS, LRN | STD | Count overdue |
-| My cohort | `/campus/cohort` | INS | STD | none |
-| Placement drives | `/campus/drives` | INS, JOB | STD and institution has placement enabled | Count of drives open to me |
-| Campus assessments | `/campus/assessments` | INS, ASM | STD | Count due |
+| Item                  | Route                 | Module   | Visibility                                | Badge                      |
+| --------------------- | --------------------- | -------- | ----------------------------------------- | -------------------------- |
+| Campus home           | `/campus`             | INS      | STD capability active                     | Count of new announcements |
+| My courses (assigned) | `/campus/courses`     | INS, LRN | STD                                       | Count overdue              |
+| My cohort             | `/campus/cohort`      | INS      | STD                                       | none                       |
+| Placement drives      | `/campus/drives`      | INS, JOB | STD and institution has placement enabled | Count of drives open to me |
+| Campus assessments    | `/campus/assessments` | INS, ASM | STD                                       | Count due                  |
 
 Phone tabs for STD: Home, Campus, Learn, Jobs, Me. Messages opens from the app bar icon (third right-slot icon). Rule `NFR-IAX-008`: when a role's tab bar cannot hold Messages, Messages MUST appear in the app bar of every tab root.
 
@@ -226,16 +226,16 @@ A student who leaves the institution (membership ends) loses the Campus group on
 
 Adds group "Teach" at the top of the CAN sidebar:
 
-| Item | Route | Module | Visibility | Badge |
-|---|---|---|---|---|
-| Studio home | `/studio` | STU | INS capability | none |
-| My courses | `/studio/courses` | STU | INS | Count of courses in review feedback |
-| Learners | `/studio/learners` | STU, LRN | INS | none |
-| Grading | `/studio/grading` | STU, ASM | INS | Count awaiting grade |
-| Discussions | `/studio/discussions` | STU, LRN | INS | Count unanswered questions |
-| Reviews | `/studio/reviews` | STU | INS | none |
-| Earnings | `/studio/earnings` | STU, BIL | INS with paid courses | none |
-| Analytics | `/studio/analytics` | STU, ANL | INS | none |
+| Item        | Route                 | Module   | Visibility            | Badge                               |
+| ----------- | --------------------- | -------- | --------------------- | ----------------------------------- |
+| Studio home | `/studio`             | STU      | INS capability        | none                                |
+| My courses  | `/studio/courses`     | STU      | INS                   | Count of courses in review feedback |
+| Learners    | `/studio/learners`    | STU, LRN | INS                   | none                                |
+| Grading     | `/studio/grading`     | STU, ASM | INS                   | Count awaiting grade                |
+| Discussions | `/studio/discussions` | STU, LRN | INS                   | Count unanswered questions          |
+| Reviews     | `/studio/reviews`     | STU      | INS                   | none                                |
+| Earnings    | `/studio/earnings`    | STU, BIL | INS with paid courses | none                                |
+| Analytics   | `/studio/analytics`   | STU, ANL | INS                   | none                                |
 
 Phone tabs for INS: Home, Studio, Grading, Messages, Me. Learn and Jobs are in Me. Rationale: an instructor's recurring work is grading and answering; learning is secondary. [DER]
 
@@ -245,16 +245,16 @@ Instructors attached to an institution additionally see the institution's Facult
 
 Adds group "Mentor":
 
-| Item | Route | Module | Visibility | Badge |
-|---|---|---|---|---|
-| Mentor home | `/mentoring/mentor` | MEN | MNT capability | none |
-| Requests | `/mentoring/mentor/requests` | MEN | MNT | Count pending |
-| Sessions | `/mentoring/mentor/sessions` | MEN | MNT | Count today |
-| Mentees | `/mentoring/mentor/mentees` | MEN | MNT | none |
-| Availability | `/mentoring/mentor/availability` | MEN, INT | MNT | Dot when no future availability |
-| Offers and pricing | `/mentoring/mentor/offers` | MEN, BIL | MNT | none |
-| Earnings | `/mentoring/mentor/earnings` | MEN, BIL | MNT with paid offers | none |
-| Reviews | `/mentoring/mentor/reviews` | MEN | MNT | none |
+| Item               | Route                            | Module   | Visibility           | Badge                           |
+| ------------------ | -------------------------------- | -------- | -------------------- | ------------------------------- |
+| Mentor home        | `/mentoring/mentor`              | MEN      | MNT capability       | none                            |
+| Requests           | `/mentoring/mentor/requests`     | MEN      | MNT                  | Count pending                   |
+| Sessions           | `/mentoring/mentor/sessions`     | MEN      | MNT                  | Count today                     |
+| Mentees            | `/mentoring/mentor/mentees`      | MEN      | MNT                  | none                            |
+| Availability       | `/mentoring/mentor/availability` | MEN, INT | MNT                  | Dot when no future availability |
+| Offers and pricing | `/mentoring/mentor/offers`       | MEN, BIL | MNT                  | none                            |
+| Earnings           | `/mentoring/mentor/earnings`     | MEN, BIL | MNT with paid offers | none                            |
+| Reviews            | `/mentoring/mentor/reviews`      | MEN      | MNT                  | none                            |
 
 Phone tabs for MNT: Home, Sessions, Requests, Messages, Me.
 
@@ -262,13 +262,13 @@ Phone tabs for MNT: Home, Sessions, Requests, Messages, Me.
 
 Adds group "Freelance" (shown when gig mode is on in `/settings/account`):
 
-| Item | Route | Module | Visibility | Badge |
-|---|---|---|---|---|
-| Find gigs | `/gigs` | GIG | FRL | none |
-| My proposals | `/gigs/my/proposals` | GIG | FRL | Count with client replies |
-| Contracts | `/gigs/my/contracts` | GIG | FRL | Count needing action (milestone to submit) |
-| Earnings | `/gigs/my/earnings` | GIG, BIL | FRL | none |
-| Gig profile | `/gigs/my/profile` | GIG, PRF | FRL | none |
+| Item         | Route                | Module   | Visibility | Badge                                      |
+| ------------ | -------------------- | -------- | ---------- | ------------------------------------------ |
+| Find gigs    | `/gigs`              | GIG      | FRL        | none                                       |
+| My proposals | `/gigs/my/proposals` | GIG      | FRL        | Count with client replies                  |
+| Contracts    | `/gigs/my/contracts` | GIG      | FRL        | Count needing action (milestone to submit) |
+| Earnings     | `/gigs/my/earnings`  | GIG, BIL | FRL        | none                                       |
+| Gig profile  | `/gigs/my/profile`   | GIG, PRF | FRL        | none                                       |
 
 Phone tabs for FRL: Home, Gigs, Contracts, Messages, Me.
 
@@ -276,38 +276,38 @@ Phone tabs for FRL: Home, Gigs, Contracts, Messages, Me.
 
 Prefix `/employer/{org}`.
 
-| Group | Item | Route (after prefix) | Module | Visibility | Badge |
-|---|---|---|---|---|---|
-| (none) | Home | `/dashboard` | shell, ANL | always | none |
-| Hiring | Jobs | `/jobs` | ATS | always | none |
-| Hiring | Applications | `/applications` | ATS | always | Count of new, unreviewed |
-| Hiring | Interviews | `/interviews` | INT | always | Count to schedule |
-| Hiring | Offers | `/offers` | ATS | always | Count awaiting approval or response |
-| Sourcing | Candidate search | `/candidates` | SRC, ATS | entitlement `talent_search` | none |
-| Sourcing | Talent pools | `/pools` | ATS | always | none |
-| Sourcing | Outreach | `/sourcing` | ATS, MSG | entitlement `outreach` | Count of replies |
-| Hiring | Assessments | `/assessments` | ASM | always | none |
-| Insights | Reports | `/reports` | ANL | always | none |
-| Insights | Referrals | `/referrals` | NET | referral program on | Count new |
-| Brand | Company page | `/brand` | EMP | always | none |
-| Brand | Events and hackathons | `/events` | EVT | entitlement | none |
-| Brand | Gigs | `/gigs` | GIG | entitlement | none |
-| Utility | Messages | `/messages` | MSG | always | Unread |
-| Utility | Settings | `/settings` | EMP | always | none |
+| Group    | Item                  | Route (after prefix) | Module     | Visibility                  | Badge                               |
+| -------- | --------------------- | -------------------- | ---------- | --------------------------- | ----------------------------------- |
+| (none)   | Home                  | `/dashboard`         | shell, ANL | always                      | none                                |
+| Hiring   | Jobs                  | `/jobs`              | ATS        | always                      | none                                |
+| Hiring   | Applications          | `/applications`      | ATS        | always                      | Count of new, unreviewed            |
+| Hiring   | Interviews            | `/interviews`        | INT        | always                      | Count to schedule                   |
+| Hiring   | Offers                | `/offers`            | ATS        | always                      | Count awaiting approval or response |
+| Sourcing | Candidate search      | `/candidates`        | SRC, ATS   | entitlement `talent_search` | none                                |
+| Sourcing | Talent pools          | `/pools`             | ATS        | always                      | none                                |
+| Sourcing | Outreach              | `/sourcing`          | ATS, MSG   | entitlement `outreach`      | Count of replies                    |
+| Hiring   | Assessments           | `/assessments`       | ASM        | always                      | none                                |
+| Insights | Reports               | `/reports`           | ANL        | always                      | none                                |
+| Insights | Referrals             | `/referrals`         | NET        | referral program on         | Count new                           |
+| Brand    | Company page          | `/brand`             | EMP        | always                      | none                                |
+| Brand    | Events and hackathons | `/events`            | EVT        | entitlement                 | none                                |
+| Brand    | Gigs                  | `/gigs`              | GIG        | entitlement                 | none                                |
+| Utility  | Messages              | `/messages`          | MSG        | always                      | Unread                              |
+| Utility  | Settings              | `/settings`          | EMP        | always                      | none                                |
 
 Phone tabs for REC: Home, Applications, Interviews, Messages, Me. Jobs and the pipeline are reached from Home cards and Applications filters; the pipeline board on phone is a column-per-screen view (see `07_SCREEN_STATE_CHECKLIST.md` REFSCR-07).
 
 ### 4.8 Hiring Manager (HMG), Employer workspace (reduced)
 
-| Group | Item | Route (after prefix) | Visibility | Badge |
-|---|---|---|---|---|
-| (none) | Home | `/dashboard` | always | none |
-| Hiring | My jobs | `/jobs?scope=mine` | HMG owns or is assigned to at least one | none |
-| Hiring | To review | `/applications?scope=review` | always | Count assigned for my review |
-| Hiring | Interviews | `/interviews?scope=mine` | always | Count to prepare or score |
-| Hiring | Offers to approve | `/offers?scope=approvals` | always | Count pending my approval |
-| Insights | Reports | `/reports?scope=mine` | always | none |
-| Utility | Messages | `/messages` | always | Unread |
+| Group    | Item              | Route (after prefix)         | Visibility                              | Badge                        |
+| -------- | ----------------- | ---------------------------- | --------------------------------------- | ---------------------------- |
+| (none)   | Home              | `/dashboard`                 | always                                  | none                         |
+| Hiring   | My jobs           | `/jobs?scope=mine`           | HMG owns or is assigned to at least one | none                         |
+| Hiring   | To review         | `/applications?scope=review` | always                                  | Count assigned for my review |
+| Hiring   | Interviews        | `/interviews?scope=mine`     | always                                  | Count to prepare or score    |
+| Hiring   | Offers to approve | `/offers?scope=approvals`    | always                                  | Count pending my approval    |
+| Insights | Reports           | `/reports?scope=mine`        | always                                  | none                         |
+| Utility  | Messages          | `/messages`                  | always                                  | Unread                       |
 
 An HMG never sees candidate search, pools, outreach, brand, integrations, billing or team administration. Phone tabs: Home, To review, Interviews, Messages, Me.
 
@@ -315,15 +315,15 @@ An HMG never sees candidate search, pools, outreach, brand, integrations, billin
 
 All REC items plus group "Organization":
 
-| Item | Route (after prefix) | Module | Badge |
-|---|---|---|---|
-| Team and roles | `/team` | EMP | Count pending invitations |
-| Departments | `/team/departments` | EMP | none |
-| Hiring plans and requests | `/jobs/requests` | ATS, EMP | Count requests to approve [PROP] |
-| Integrations | `/integrations` | PLT | Dot on failing integration |
-| Billing and plan | `/billing` | BIL | Dot on payment failure |
-| Compliance | `/compliance` | EMP, SET | none |
-| Audit log | `/audit` | EMP | none |
+| Item                      | Route (after prefix) | Module   | Badge                            |
+| ------------------------- | -------------------- | -------- | -------------------------------- |
+| Team and roles            | `/team`              | EMP      | Count pending invitations        |
+| Departments               | `/team/departments`  | EMP      | none                             |
+| Hiring plans and requests | `/jobs/requests`     | ATS, EMP | Count requests to approve [PROP] |
+| Integrations              | `/integrations`      | PLT      | Dot on failing integration       |
+| Billing and plan          | `/billing`           | BIL      | Dot on payment failure           |
+| Compliance                | `/compliance`        | EMP, SET | none                             |
+| Audit log                 | `/audit`             | EMP      | none                             |
 
 Phone tabs for EAD: Home, Applications, Team, Messages, Me.
 
@@ -331,26 +331,26 @@ Phone tabs for EAD: Home, Applications, Team, Messages, Me.
 
 Prefix `/institution/{inst}`.
 
-| Group | Item | Route (after prefix) | Module | Badge |
-|---|---|---|---|---|
-| (none) | Home | `/dashboard` | INS, ANL | none |
-| People | Students | `/students` | INS | Count pending enrollment approvals |
-| People | Cohorts | `/cohorts` | INS | none |
-| People | Faculty | `/faculty` | INS | Count pending invitations |
-| Learning | Courses | `/courses` | INS, LRN | none |
-| Learning | Programs | `/programs` | INS | none |
-| Learning | Assessments | `/assessments` | INS, ASM | none |
-| Learning | Progress and interventions | `/progress` | INS, ANL | Count at-risk |
-| Placement | Drives | `/placement/drives` | INS, JOB | none |
-| Placement | Partner employers | `/placement/partners` | INS | Count pending requests |
-| Placement | Outcomes | `/placement/outcomes` | INS, ANL | none |
-| Organization | Licensing and seats | `/licensing` | INS, BIL | Dot at 90 percent seat use [PROP] |
-| Organization | Public page | `/brand` | INS | none |
-| Organization | Integrations | `/integrations` | PLT | Dot on failure |
-| Organization | Reports | `/reports` | ANL | none |
-| Utility | Announcements | `/announcements` | INS, NTF | none |
-| Utility | Messages | `/messages` | MSG | Unread |
-| Utility | Settings and audit | `/settings` | INS | none |
+| Group        | Item                       | Route (after prefix)  | Module   | Badge                              |
+| ------------ | -------------------------- | --------------------- | -------- | ---------------------------------- |
+| (none)       | Home                       | `/dashboard`          | INS, ANL | none                               |
+| People       | Students                   | `/students`           | INS      | Count pending enrollment approvals |
+| People       | Cohorts                    | `/cohorts`            | INS      | none                               |
+| People       | Faculty                    | `/faculty`            | INS      | Count pending invitations          |
+| Learning     | Courses                    | `/courses`            | INS, LRN | none                               |
+| Learning     | Programs                   | `/programs`           | INS      | none                               |
+| Learning     | Assessments                | `/assessments`        | INS, ASM | none                               |
+| Learning     | Progress and interventions | `/progress`           | INS, ANL | Count at-risk                      |
+| Placement    | Drives                     | `/placement/drives`   | INS, JOB | none                               |
+| Placement    | Partner employers          | `/placement/partners` | INS      | Count pending requests             |
+| Placement    | Outcomes                   | `/placement/outcomes` | INS, ANL | none                               |
+| Organization | Licensing and seats        | `/licensing`          | INS, BIL | Dot at 90 percent seat use [PROP]  |
+| Organization | Public page                | `/brand`              | INS      | none                               |
+| Organization | Integrations               | `/integrations`       | PLT      | Dot on failure                     |
+| Organization | Reports                    | `/reports`            | ANL      | none                               |
+| Utility      | Announcements              | `/announcements`      | INS, NTF | none                               |
+| Utility      | Messages                   | `/messages`           | MSG      | Unread                             |
+| Utility      | Settings and audit         | `/settings`           | INS      | none                               |
 
 ### 4.11 Placement Officer (PLO)
 
@@ -364,23 +364,23 @@ Institution workspace subset: Home, My courses (`/courses?scope=mine`), Cohorts 
 
 Prefix `/enterprise/{org}`.
 
-| Group | Item | Route (after prefix) | Module | Badge |
-|---|---|---|---|---|
-| (none) | Home | `/dashboard` | ENT, ANL | none |
-| Skills | Skills inventory | `/skills` | ENT | none |
-| Skills | Skill gaps | `/skills/gaps` | ENT, MKT | none |
-| Mobility | Internal jobs | `/mobility/jobs` | ENT, JOB | Count of applications |
-| Mobility | Talent matches | `/mobility/matches` | ENT, AIC | none |
-| Mobility | Succession | `/mobility/succession` | ENT | none |
-| Learning | Mandates | `/learning/mandates` | ENT, LRN | Count overdue |
-| Learning | Programs | `/learning/programs` | ENT, LRN | none |
-| Learning | Certifications | `/learning/certifications` | ENT, LRN | Count expiring |
-| People | Directory | `/people` | ENT | none |
-| Organization | Reports and impact | `/reports` | ANL | none |
-| Organization | Integrations (HRIS) | `/integrations` | PLT | Dot on sync failure |
-| Organization | Billing | `/billing` | BIL | none |
-| Organization | Settings and audit | `/settings` | ENT | none |
-| Utility | Messages | `/messages` | MSG | Unread |
+| Group        | Item                | Route (after prefix)       | Module   | Badge                 |
+| ------------ | ------------------- | -------------------------- | -------- | --------------------- |
+| (none)       | Home                | `/dashboard`               | ENT, ANL | none                  |
+| Skills       | Skills inventory    | `/skills`                  | ENT      | none                  |
+| Skills       | Skill gaps          | `/skills/gaps`             | ENT, MKT | none                  |
+| Mobility     | Internal jobs       | `/mobility/jobs`           | ENT, JOB | Count of applications |
+| Mobility     | Talent matches      | `/mobility/matches`        | ENT, AIC | none                  |
+| Mobility     | Succession          | `/mobility/succession`     | ENT      | none                  |
+| Learning     | Mandates            | `/learning/mandates`       | ENT, LRN | Count overdue         |
+| Learning     | Programs            | `/learning/programs`       | ENT, LRN | none                  |
+| Learning     | Certifications      | `/learning/certifications` | ENT, LRN | Count expiring        |
+| People       | Directory           | `/people`                  | ENT      | none                  |
+| Organization | Reports and impact  | `/reports`                 | ANL      | none                  |
+| Organization | Integrations (HRIS) | `/integrations`            | PLT      | Dot on sync failure   |
+| Organization | Billing             | `/billing`                 | BIL      | none                  |
+| Organization | Settings and audit  | `/settings`                | ENT      | none                  |
+| Utility      | Messages            | `/messages`                | MSG      | Unread                |
 
 Boundary: [SRC: SSOT §4.2] non-goal "not generic HR/payroll". The Directory is a read model of people and skills synced from an HRIS for skills and mobility purposes. It has no payroll, leave, time or performance-review functions (`OD-UX-05`).
 
@@ -388,35 +388,35 @@ Boundary: [SRC: SSOT §4.2] non-goal "not generic HR/payroll". The Directory is 
 
 Prefix `/console`. The sidebar groups are visible per permission; a user with several staff roles sees the union.
 
-| Group | Item | Route (after prefix) | Role | Module |
-|---|---|---|---|---|
-| (none) | Console home | `/dashboard` | all staff | ADM |
-| Trust and safety | Moderation queue | `/moderation` | MOD, PAD | TSF |
-| Trust and safety | Cases | `/moderation/cases` | MOD, PAD | TSF |
-| Trust and safety | Appeals | `/moderation/appeals` | MOD, PAD | TSF |
-| Trust and safety | Policies and rules | `/moderation/policies` | MOD (read), PAD | TSF |
-| Support | Tickets | `/support/tickets` | SUP, PAD | ADM |
-| Support | Account lookup | `/support/users` | SUP, PAD | ADM |
-| Support | Organizations | `/support/orgs` | SUP, PAD | ADM |
-| Support | Verification cases | `/support/verification` | SUP, PAD | BGV |
-| Support | Macros and help center | `/support/content` | SUP, PAD | ADM |
-| Finance | Payments and refunds | `/finance/payments` | FIN, PAD | BIL |
-| Finance | Payouts | `/finance/payouts` | FIN | BIL |
-| Finance | Invoices and tax | `/finance/invoices` | FIN | BIL |
-| Finance | Reconciliation | `/finance/reconciliation` | FIN | BIL |
-| Platform | Users and organizations | `/platform/accounts` | PAD | ADM |
-| Platform | Catalog and taxonomy | `/platform/catalog` | PAD | LRN, MKT |
-| Platform | Plans and entitlements | `/platform/plans` | PAD | BIL |
-| Platform | Feature flags | `/platform/flags` | PAD | ADM |
-| Platform | Announcements | `/platform/announcements` | PAD | NTF |
-| Platform | Templates | `/platform/templates` | PAD | NTF |
-| Platform | Background jobs | `/platform/jobs` | PAD | ADM |
-| Platform | Data requests | `/platform/data-requests` | PAD, SAD | SET |
-| Security | Audit log | `/security/audit` | SAD, PAD (read) | ADM |
-| Security | Access reviews | `/security/access` | SAD | ADM |
-| Security | Sessions and devices | `/security/sessions` | SAD | IDN |
-| Security | Incidents | `/security/incidents` | SAD | ADM |
-| Security | Break-glass | `/security/break-glass` | SAD | ADM |
+| Group            | Item                    | Route (after prefix)      | Role            | Module   |
+| ---------------- | ----------------------- | ------------------------- | --------------- | -------- |
+| (none)           | Console home            | `/dashboard`              | all staff       | ADM      |
+| Trust and safety | Moderation queue        | `/moderation`             | MOD, PAD        | TSF      |
+| Trust and safety | Cases                   | `/moderation/cases`       | MOD, PAD        | TSF      |
+| Trust and safety | Appeals                 | `/moderation/appeals`     | MOD, PAD        | TSF      |
+| Trust and safety | Policies and rules      | `/moderation/policies`    | MOD (read), PAD | TSF      |
+| Support          | Tickets                 | `/support/tickets`        | SUP, PAD        | ADM      |
+| Support          | Account lookup          | `/support/users`          | SUP, PAD        | ADM      |
+| Support          | Organizations           | `/support/orgs`           | SUP, PAD        | ADM      |
+| Support          | Verification cases      | `/support/verification`   | SUP, PAD        | BGV      |
+| Support          | Macros and help center  | `/support/content`        | SUP, PAD        | ADM      |
+| Finance          | Payments and refunds    | `/finance/payments`       | FIN, PAD        | BIL      |
+| Finance          | Payouts                 | `/finance/payouts`        | FIN             | BIL      |
+| Finance          | Invoices and tax        | `/finance/invoices`       | FIN             | BIL      |
+| Finance          | Reconciliation          | `/finance/reconciliation` | FIN             | BIL      |
+| Platform         | Users and organizations | `/platform/accounts`      | PAD             | ADM      |
+| Platform         | Catalog and taxonomy    | `/platform/catalog`       | PAD             | LRN, MKT |
+| Platform         | Plans and entitlements  | `/platform/plans`         | PAD             | BIL      |
+| Platform         | Feature flags           | `/platform/flags`         | PAD             | ADM      |
+| Platform         | Announcements           | `/platform/announcements` | PAD             | NTF      |
+| Platform         | Templates               | `/platform/templates`     | PAD             | NTF      |
+| Platform         | Background jobs         | `/platform/jobs`          | PAD             | ADM      |
+| Platform         | Data requests           | `/platform/data-requests` | PAD, SAD        | SET      |
+| Security         | Audit log               | `/security/audit`         | SAD, PAD (read) | ADM      |
+| Security         | Access reviews          | `/security/access`        | SAD             | ADM      |
+| Security         | Sessions and devices    | `/security/sessions`      | SAD             | IDN      |
+| Security         | Incidents               | `/security/incidents`     | SAD             | ADM      |
+| Security         | Break-glass             | `/security/break-glass`   | SAD             | ADM      |
 
 Rules:
 
@@ -439,137 +439,137 @@ Dynamic segments: `{id}` is an opaque id, `{slug}` a human slug, `{slug}-{id}` a
 
 ### 5.1 Public and authentication
 
-| Route | Screen | Auth | Shell | Module |
-|---|---|---|---|---|
-| `/` | Landing | P (signed-in users are offered "Go to dashboard", not redirected) | pub | shell |
-| `/jobs` | Job search | P | pub or app | JOB |
-| `/jobs/{slug}-{id}` | Job detail | P | pub or app | JOB |
-| `/companies`, `/companies/{slug}` | Company directory, company page | P | pub or app | EMP |
-| `/courses`, `/courses/{slug}-{id}` | Course catalog, course landing page | P | pub or app | LRN |
-| `/paths/{slug}-{id}` | Learning path landing page | P | pub or app | LRN |
-| `/mentors`, `/mentors/{handle}` | Mentor directory, mentor page | P | pub or app | MEN |
-| `/gigs`, `/gigs/{slug}-{id}` | Gig search, gig detail | P | pub or app | GIG |
-| `/events`, `/events/{slug}-{id}` | Event and hackathon list, detail | P | pub or app | EVT |
-| `/institutions/{slug}` | Institution public page | P | pub or app | INS |
-| `/u/{handle}` | Public profile | P (subject to profile visibility) | pub or app | PRF |
-| `/u/{handle}/portfolio` | Public portfolio | P (subject to visibility) | pub or app | PRF |
-| `/market/roles/{slug}`, `/market/skills/{slug}` | Role and skill insight pages | P | pub or app | MKT |
-| `/verify/{code}` | Credential and evidence verification result | P | pub | EVD, BGV |
-| `/search` | Search results (`?q=&type=`) | P | pub or app | SRC |
-| `/pricing`, `/for-employers`, `/for-institutions`, `/for-enterprise` | Marketing pages | P | pub | BIL, shell |
-| `/about`, `/help`, `/help/{slug}` | About, help center, article | P | pub or app | ADM |
-| `/legal/terms`, `/legal/privacy`, `/legal/cookies`, `/legal/accessibility` | Legal documents | P | pub | SET |
-| `/developers`, `/developers/{slug}` | API docs, guides | P | pub | PLT |
-| `/status` | Platform status (may redirect to a status host) | P | pub | ADM |
-| `/login` | Sign in | P | pub (minimal) | IDN |
-| `/signup`, `/signup/{intent}` | Sign up; `intent` in `candidate`, `student`, `employer`, `institution`, `mentor`, `instructor`, `enterprise` | P | pub (minimal) | IDN |
-| `/auth/mfa`, `/auth/reset`, `/auth/reset/{token}`, `/auth/verify-email/{token}` | Authentication flows | P | pub (minimal) | IDN |
-| `/auth/sso/{provider}`, `/auth/sso/callback` | SSO start and return | P | none | IDN |
-| `/invite/{token}` | Accept an invitation (organization, institution, cohort, interview, mentor) | P then S | pub (minimal) | IDN |
-| `/signed-out` | Confirmation after sign-out | P | pub | IDN |
-| `/offline` | Offline fallback page (served by the service worker) | P | none | PWA |
-| `/maintenance` | Maintenance page (served at the edge during planned work) | P | none | ADM |
+| Route                                                                           | Screen                                                                                                       | Auth                                                              | Shell         | Module     |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------------- | ---------- |
+| `/`                                                                             | Landing                                                                                                      | P (signed-in users are offered "Go to dashboard", not redirected) | pub           | shell      |
+| `/jobs`                                                                         | Job search                                                                                                   | P                                                                 | pub or app    | JOB        |
+| `/jobs/{slug}-{id}`                                                             | Job detail                                                                                                   | P                                                                 | pub or app    | JOB        |
+| `/companies`, `/companies/{slug}`                                               | Company directory, company page                                                                              | P                                                                 | pub or app    | EMP        |
+| `/courses`, `/courses/{slug}-{id}`                                              | Course catalog, course landing page                                                                          | P                                                                 | pub or app    | LRN        |
+| `/paths/{slug}-{id}`                                                            | Learning path landing page                                                                                   | P                                                                 | pub or app    | LRN        |
+| `/mentors`, `/mentors/{handle}`                                                 | Mentor directory, mentor page                                                                                | P                                                                 | pub or app    | MEN        |
+| `/gigs`, `/gigs/{slug}-{id}`                                                    | Gig search, gig detail                                                                                       | P                                                                 | pub or app    | GIG        |
+| `/events`, `/events/{slug}-{id}`                                                | Event and hackathon list, detail                                                                             | P                                                                 | pub or app    | EVT        |
+| `/institutions/{slug}`                                                          | Institution public page                                                                                      | P                                                                 | pub or app    | INS        |
+| `/u/{handle}`                                                                   | Public profile                                                                                               | P (subject to profile visibility)                                 | pub or app    | PRF        |
+| `/u/{handle}/portfolio`                                                         | Public portfolio                                                                                             | P (subject to visibility)                                         | pub or app    | PRF        |
+| `/market/roles/{slug}`, `/market/skills/{slug}`                                 | Role and skill insight pages                                                                                 | P                                                                 | pub or app    | MKT        |
+| `/verify/{code}`                                                                | Credential and evidence verification result                                                                  | P                                                                 | pub           | EVD, BGV   |
+| `/search`                                                                       | Search results (`?q=&type=`)                                                                                 | P                                                                 | pub or app    | SRC        |
+| `/pricing`, `/for-employers`, `/for-institutions`, `/for-enterprise`            | Marketing pages                                                                                              | P                                                                 | pub           | BIL, shell |
+| `/about`, `/help`, `/help/{slug}`                                               | About, help center, article                                                                                  | P                                                                 | pub or app    | ADM        |
+| `/legal/terms`, `/legal/privacy`, `/legal/cookies`, `/legal/accessibility`      | Legal documents                                                                                              | P                                                                 | pub           | SET        |
+| `/developers`, `/developers/{slug}`                                             | API docs, guides                                                                                             | P                                                                 | pub           | PLT        |
+| `/status`                                                                       | Platform status (may redirect to a status host)                                                              | P                                                                 | pub           | ADM        |
+| `/login`                                                                        | Sign in                                                                                                      | P                                                                 | pub (minimal) | IDN        |
+| `/signup`, `/signup/{intent}`                                                   | Sign up; `intent` in `candidate`, `student`, `employer`, `institution`, `mentor`, `instructor`, `enterprise` | P                                                                 | pub (minimal) | IDN        |
+| `/auth/mfa`, `/auth/reset`, `/auth/reset/{token}`, `/auth/verify-email/{token}` | Authentication flows                                                                                         | P                                                                 | pub (minimal) | IDN        |
+| `/auth/sso/{provider}`, `/auth/sso/callback`                                    | SSO start and return                                                                                         | P                                                                 | none          | IDN        |
+| `/invite/{token}`                                                               | Accept an invitation (organization, institution, cohort, interview, mentor)                                  | P then S                                                          | pub (minimal) | IDN        |
+| `/signed-out`                                                                   | Confirmation after sign-out                                                                                  | P                                                                 | pub           | IDN        |
+| `/offline`                                                                      | Offline fallback page (served by the service worker)                                                         | P                                                                 | none          | PWA        |
+| `/maintenance`                                                                  | Maintenance page (served at the edge during planned work)                                                    | P                                                                 | none          | ADM        |
 
 ### 5.2 Personal workspace (signed in)
 
-| Route | Screen | Auth | Module |
-|---|---|---|---|
-| `/dashboard` | Home | S | shell |
-| `/profile`, `/profile/edit/{section}`, `/profile/preview` | Own profile, section editor, preview as recruiter sees it | S | PRF |
-| `/profile/resumes`, `/profile/resumes/{id}` | Resumes, resume editor | S | PRF |
-| `/profile/portfolio`, `/profile/portfolio/{id}` | Portfolio, project | S | PRF |
-| `/evidence`, `/evidence/{id}`, `/evidence/new/{step}` | Work history and evidence list, item, add wizard | S | EVD |
-| `/credentials`, `/credentials/{id}` | Credentials wallet, credential | S | EVD |
-| `/verification`, `/verification/{id}` | My verification and background checks | S | BGV |
-| `/jobs/saved`, `/jobs/alerts` | Saved jobs, job alerts | S | JOB |
-| `/applications`, `/applications/{id}`, `/applications/new/{jobId}/{step}` | Application tracker, application detail, apply wizard | S | JOB |
-| `/interviews`, `/interviews/{id}`, `/interviews/{id}/room` | Interviews, detail, live room | S | INT |
-| `/offers`, `/offers/{id}` | Offers received, offer detail | S | ATS, JOB |
-| `/learn` | My learning home | S | LRN |
-| `/learn/courses/{id}` | Enrolled course home | S | LRN |
-| `/learn/courses/{id}/lessons/{lessonId}` | Course player | S | LRN |
-| `/learn/courses/{id}/assignments/{assignmentId}` | Assignment | S | LRN |
-| `/learn/paths`, `/learn/paths/{id}` | My paths, path progress | S | LRN |
-| `/learn/certificates`, `/learn/certificates/{id}` | Certificates | S | LRN |
-| `/learn/notes` | My notes and bookmarks | S | LRN |
-| `/assess`, `/assess/invitations` | Assessments hub, invitations | S | ASM |
-| `/assess/{attemptId}/start`, `/assess/{attemptId}/run`, `/assess/{attemptId}/results` | Pre-check, runner, results | S | ASM |
-| `/assess/challenges`, `/assess/challenges/{id}` | Challenges and contests | S | ASM |
-| `/assess/accommodations` | Request and manage accommodations | S | ASM, SET |
-| `/career`, `/career/assistant`, `/career/goals`, `/career/readiness`, `/career/plan`, `/career/market`, `/career/recommendations` | Career hub, AI assistant, goals, readiness, plan, market, recommendations | S | AIC, MKT |
-| `/network`, `/network/connections`, `/network/invitations`, `/network/people`, `/network/groups`, `/network/groups/{slug}`, `/network/posts/{id}`, `/network/referrals` | Feed, connections, invitations, discover people, groups, group, post, referrals | S | NET |
-| `/messages`, `/messages/{conversationId}`, `/messages/requests` | Inbox, conversation, message requests | S | MSG |
-| `/notifications` | Notification center | S | NTF |
-| `/events/my`, `/events/{slug}-{id}/team` | My events, hackathon team space | S | EVT |
-| `/mentoring`, `/mentoring/sessions`, `/mentoring/sessions/{id}`, `/mentoring/my-mentors` | Mentee home, sessions, session, my mentors | S | MEN |
-| `/mentoring/mentor/...` | Mentor sections (section 4.5) | MNT | MEN |
-| `/gigs/my/...` | Freelancer sections (section 4.6) | FRL | GIG |
-| `/studio/...` | Studio sections (section 4.4) | INS | STU |
-| `/studio/courses/{id}/edit`, `/studio/courses/{id}/edit/{step}` | Course editor, step | INS | STU |
-| `/campus`, `/campus/courses`, `/campus/cohort`, `/campus/drives`, `/campus/assessments` | Student campus | STD | INS |
-| `/reputation`, `/reputation/badges`, `/reputation/leaderboards` | Reputation, badges, leaderboards | S | REP |
-| `/settings/account`, `/settings/security`, `/settings/privacy`, `/settings/consent`, `/settings/notifications`, `/settings/connected-accounts`, `/settings/accessibility`, `/settings/language`, `/settings/data`, `/settings/accommodations` | Settings sections | S | IDN, SET, NTF |
-| `/billing`, `/billing/invoices`, `/billing/payment-methods`, `/billing/plans` | Billing | S | BIL |
-| `/help/contact`, `/help/tickets`, `/help/tickets/{id}` | Contact support, my tickets | S | ADM |
+| Route                                                                                                                                                                                                                                         | Screen                                                                          | Auth | Module        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---- | ------------- |
+| `/dashboard`                                                                                                                                                                                                                                  | Home                                                                            | S    | shell         |
+| `/profile`, `/profile/edit/{section}`, `/profile/preview`                                                                                                                                                                                     | Own profile, section editor, preview as recruiter sees it                       | S    | PRF           |
+| `/profile/resumes`, `/profile/resumes/{id}`                                                                                                                                                                                                   | Resumes, resume editor                                                          | S    | PRF           |
+| `/profile/portfolio`, `/profile/portfolio/{id}`                                                                                                                                                                                               | Portfolio, project                                                              | S    | PRF           |
+| `/evidence`, `/evidence/{id}`, `/evidence/new/{step}`                                                                                                                                                                                         | Work history and evidence list, item, add wizard                                | S    | EVD           |
+| `/credentials`, `/credentials/{id}`                                                                                                                                                                                                           | Credentials wallet, credential                                                  | S    | EVD           |
+| `/verification`, `/verification/{id}`                                                                                                                                                                                                         | My verification and background checks                                           | S    | BGV           |
+| `/jobs/saved`, `/jobs/alerts`                                                                                                                                                                                                                 | Saved jobs, job alerts                                                          | S    | JOB           |
+| `/applications`, `/applications/{id}`, `/applications/new/{jobId}/{step}`                                                                                                                                                                     | Application tracker, application detail, apply wizard                           | S    | JOB           |
+| `/interviews`, `/interviews/{id}`, `/interviews/{id}/room`                                                                                                                                                                                    | Interviews, detail, live room                                                   | S    | INT           |
+| `/offers`, `/offers/{id}`                                                                                                                                                                                                                     | Offers received, offer detail                                                   | S    | ATS, JOB      |
+| `/learn`                                                                                                                                                                                                                                      | My learning home                                                                | S    | LRN           |
+| `/learn/courses/{id}`                                                                                                                                                                                                                         | Enrolled course home                                                            | S    | LRN           |
+| `/learn/courses/{id}/lessons/{lessonId}`                                                                                                                                                                                                      | Course player                                                                   | S    | LRN           |
+| `/learn/courses/{id}/assignments/{assignmentId}`                                                                                                                                                                                              | Assignment                                                                      | S    | LRN           |
+| `/learn/paths`, `/learn/paths/{id}`                                                                                                                                                                                                           | My paths, path progress                                                         | S    | LRN           |
+| `/learn/certificates`, `/learn/certificates/{id}`                                                                                                                                                                                             | Certificates                                                                    | S    | LRN           |
+| `/learn/notes`                                                                                                                                                                                                                                | My notes and bookmarks                                                          | S    | LRN           |
+| `/assess`, `/assess/invitations`                                                                                                                                                                                                              | Assessments hub, invitations                                                    | S    | ASM           |
+| `/assess/{attemptId}/start`, `/assess/{attemptId}/run`, `/assess/{attemptId}/results`                                                                                                                                                         | Pre-check, runner, results                                                      | S    | ASM           |
+| `/assess/challenges`, `/assess/challenges/{id}`                                                                                                                                                                                               | Challenges and contests                                                         | S    | ASM           |
+| `/assess/accommodations`                                                                                                                                                                                                                      | Request and manage accommodations                                               | S    | ASM, SET      |
+| `/career`, `/career/assistant`, `/career/goals`, `/career/readiness`, `/career/plan`, `/career/market`, `/career/recommendations`                                                                                                             | Career hub, AI assistant, goals, readiness, plan, market, recommendations       | S    | AIC, MKT      |
+| `/network`, `/network/connections`, `/network/invitations`, `/network/people`, `/network/groups`, `/network/groups/{slug}`, `/network/posts/{id}`, `/network/referrals`                                                                       | Feed, connections, invitations, discover people, groups, group, post, referrals | S    | NET           |
+| `/messages`, `/messages/{conversationId}`, `/messages/requests`                                                                                                                                                                               | Inbox, conversation, message requests                                           | S    | MSG           |
+| `/notifications`                                                                                                                                                                                                                              | Notification center                                                             | S    | NTF           |
+| `/events/my`, `/events/{slug}-{id}/team`                                                                                                                                                                                                      | My events, hackathon team space                                                 | S    | EVT           |
+| `/mentoring`, `/mentoring/sessions`, `/mentoring/sessions/{id}`, `/mentoring/my-mentors`                                                                                                                                                      | Mentee home, sessions, session, my mentors                                      | S    | MEN           |
+| `/mentoring/mentor/...`                                                                                                                                                                                                                       | Mentor sections (section 4.5)                                                   | MNT  | MEN           |
+| `/gigs/my/...`                                                                                                                                                                                                                                | Freelancer sections (section 4.6)                                               | FRL  | GIG           |
+| `/studio/...`                                                                                                                                                                                                                                 | Studio sections (section 4.4)                                                   | INS  | STU           |
+| `/studio/courses/{id}/edit`, `/studio/courses/{id}/edit/{step}`                                                                                                                                                                               | Course editor, step                                                             | INS  | STU           |
+| `/campus`, `/campus/courses`, `/campus/cohort`, `/campus/drives`, `/campus/assessments`                                                                                                                                                       | Student campus                                                                  | STD  | INS           |
+| `/reputation`, `/reputation/badges`, `/reputation/leaderboards`                                                                                                                                                                               | Reputation, badges, leaderboards                                                | S    | REP           |
+| `/settings/account`, `/settings/security`, `/settings/privacy`, `/settings/consent`, `/settings/notifications`, `/settings/connected-accounts`, `/settings/accessibility`, `/settings/language`, `/settings/data`, `/settings/accommodations` | Settings sections                                                               | S    | IDN, SET, NTF |
+| `/billing`, `/billing/invoices`, `/billing/payment-methods`, `/billing/plans`                                                                                                                                                                 | Billing                                                                         | S    | BIL           |
+| `/help/contact`, `/help/tickets`, `/help/tickets/{id}`                                                                                                                                                                                        | Contact support, my tickets                                                     | S    | ADM           |
 
 ### 5.3 Employer workspace (prefix `/employer/{org}`)
 
-| Route (after prefix) | Screen | Roles | Module |
-|---|---|---|---|
-| `/dashboard` | Employer home | REC, HMG, EAD | ANL, ATS |
-| `/jobs`, `/jobs/new/{step}`, `/jobs/requests` | Jobs list, create wizard, hiring requests | REC, EAD; HMG scoped | ATS, JOB |
-| `/jobs/{id}`, `/jobs/{id}/pipeline`, `/jobs/{id}/applicants`, `/jobs/{id}/edit`, `/jobs/{id}/scorecard`, `/jobs/{id}/settings` | Job overview, pipeline board, applicant list, edit, scorecard design, job settings | REC, EAD; HMG scoped | ATS |
-| `/applications`, `/applications/{id}` | All applications, application review | REC, EAD; HMG scoped | ATS |
-| `/candidates`, `/candidates/{profileId}` | Candidate search, candidate profile view | REC, EAD | SRC, ATS |
-| `/pools`, `/pools/{id}`, `/sourcing`, `/sourcing/{campaignId}` | Talent pools, pool, outreach campaigns, campaign | REC, EAD | ATS |
-| `/interviews`, `/interviews/{id}`, `/interviews/{id}/room`, `/interviews/availability` | Interviews, interview, live room, interviewer availability | REC, HMG, EAD | INT |
-| `/offers`, `/offers/{id}` | Offers, offer | REC, EAD; HMG approvals | ATS |
-| `/assessments`, `/assessments/{id}`, `/assessments/{id}/results/{attemptId}` | Assessment library, assessment, candidate result | REC, EAD | ASM |
-| `/reports`, `/reports/{id}` | Reports, report | REC, HMG, EAD | ANL |
-| `/referrals` | Referrals | REC, EAD | NET |
-| `/brand`, `/brand/careers-site` | Company page editor, careers site | EAD, REC | EMP |
-| `/events`, `/gigs` | Employer events and hackathons, gigs | REC, EAD | EVT, GIG |
-| `/messages`, `/messages/{conversationId}` | Org inbox | REC, HMG, EAD | MSG |
-| `/team`, `/team/roles`, `/team/departments`, `/team/invitations` | Team, role definitions, departments, invitations | EAD | EMP |
-| `/integrations`, `/integrations/api`, `/integrations/webhooks` | Integrations, API keys, webhooks | EAD | PLT |
-| `/billing`, `/billing/invoices` | Plan and invoices | EAD | BIL |
-| `/compliance` | EEO, retention, data requests | EAD | EMP, SET |
-| `/audit` | Org audit log | EAD | EMP |
-| `/settings` | Org settings | EAD | EMP |
+| Route (after prefix)                                                                                                           | Screen                                                                             | Roles                   | Module   |
+| ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ----------------------- | -------- |
+| `/dashboard`                                                                                                                   | Employer home                                                                      | REC, HMG, EAD           | ANL, ATS |
+| `/jobs`, `/jobs/new/{step}`, `/jobs/requests`                                                                                  | Jobs list, create wizard, hiring requests                                          | REC, EAD; HMG scoped    | ATS, JOB |
+| `/jobs/{id}`, `/jobs/{id}/pipeline`, `/jobs/{id}/applicants`, `/jobs/{id}/edit`, `/jobs/{id}/scorecard`, `/jobs/{id}/settings` | Job overview, pipeline board, applicant list, edit, scorecard design, job settings | REC, EAD; HMG scoped    | ATS      |
+| `/applications`, `/applications/{id}`                                                                                          | All applications, application review                                               | REC, EAD; HMG scoped    | ATS      |
+| `/candidates`, `/candidates/{profileId}`                                                                                       | Candidate search, candidate profile view                                           | REC, EAD                | SRC, ATS |
+| `/pools`, `/pools/{id}`, `/sourcing`, `/sourcing/{campaignId}`                                                                 | Talent pools, pool, outreach campaigns, campaign                                   | REC, EAD                | ATS      |
+| `/interviews`, `/interviews/{id}`, `/interviews/{id}/room`, `/interviews/availability`                                         | Interviews, interview, live room, interviewer availability                         | REC, HMG, EAD           | INT      |
+| `/offers`, `/offers/{id}`                                                                                                      | Offers, offer                                                                      | REC, EAD; HMG approvals | ATS      |
+| `/assessments`, `/assessments/{id}`, `/assessments/{id}/results/{attemptId}`                                                   | Assessment library, assessment, candidate result                                   | REC, EAD                | ASM      |
+| `/reports`, `/reports/{id}`                                                                                                    | Reports, report                                                                    | REC, HMG, EAD           | ANL      |
+| `/referrals`                                                                                                                   | Referrals                                                                          | REC, EAD                | NET      |
+| `/brand`, `/brand/careers-site`                                                                                                | Company page editor, careers site                                                  | EAD, REC                | EMP      |
+| `/events`, `/gigs`                                                                                                             | Employer events and hackathons, gigs                                               | REC, EAD                | EVT, GIG |
+| `/messages`, `/messages/{conversationId}`                                                                                      | Org inbox                                                                          | REC, HMG, EAD           | MSG      |
+| `/team`, `/team/roles`, `/team/departments`, `/team/invitations`                                                               | Team, role definitions, departments, invitations                                   | EAD                     | EMP      |
+| `/integrations`, `/integrations/api`, `/integrations/webhooks`                                                                 | Integrations, API keys, webhooks                                                   | EAD                     | PLT      |
+| `/billing`, `/billing/invoices`                                                                                                | Plan and invoices                                                                  | EAD                     | BIL      |
+| `/compliance`                                                                                                                  | EEO, retention, data requests                                                      | EAD                     | EMP, SET |
+| `/audit`                                                                                                                       | Org audit log                                                                      | EAD                     | EMP      |
+| `/settings`                                                                                                                    | Org settings                                                                       | EAD                     | EMP      |
 
 ### 5.4 Institution workspace (prefix `/institution/{inst}`)
 
-| Route (after prefix) | Screen | Roles | Module |
-|---|---|---|---|
-| `/dashboard` | Institution home | IAD, PLO, INS | INS, ANL |
-| `/students`, `/students/{id}`, `/students/import` | Students, student, bulk import | IAD; PLO scoped read | INS |
-| `/cohorts`, `/cohorts/{id}` | Cohorts, cohort | IAD; INS scoped | INS |
-| `/faculty`, `/faculty/{id}` | Faculty | IAD | INS |
-| `/courses`, `/courses/{id}` | Institutional courses, course | IAD; INS scoped | INS, LRN |
-| `/programs`, `/programs/{id}` | Programs | IAD | INS |
-| `/assessments`, `/assessments/{id}` | Assessments | IAD; INS scoped | INS, ASM |
-| `/progress`, `/progress/interventions` | Progress, at-risk and interventions | IAD; INS scoped | INS, ANL |
-| `/placement/drives`, `/placement/drives/{id}`, `/placement/partners`, `/placement/outcomes` | Drives, drive, partner employers, outcomes | IAD, PLO | INS |
-| `/licensing`, `/licensing/seats` | Licenses, seats | IAD | INS, BIL |
-| `/brand` | Public page editor | IAD | INS |
-| `/integrations` | SIS and LMS integrations | IAD | PLT |
-| `/reports`, `/reports/{id}` | Reports | IAD, PLO scoped | ANL |
-| `/announcements` | Announcements | IAD, INS scoped | NTF |
-| `/messages` | Institution inbox | IAD, PLO, INS | MSG |
-| `/settings`, `/audit` | Settings, audit log | IAD | INS |
+| Route (after prefix)                                                                        | Screen                                     | Roles                | Module   |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------- | -------- |
+| `/dashboard`                                                                                | Institution home                           | IAD, PLO, INS        | INS, ANL |
+| `/students`, `/students/{id}`, `/students/import`                                           | Students, student, bulk import             | IAD; PLO scoped read | INS      |
+| `/cohorts`, `/cohorts/{id}`                                                                 | Cohorts, cohort                            | IAD; INS scoped      | INS      |
+| `/faculty`, `/faculty/{id}`                                                                 | Faculty                                    | IAD                  | INS      |
+| `/courses`, `/courses/{id}`                                                                 | Institutional courses, course              | IAD; INS scoped      | INS, LRN |
+| `/programs`, `/programs/{id}`                                                               | Programs                                   | IAD                  | INS      |
+| `/assessments`, `/assessments/{id}`                                                         | Assessments                                | IAD; INS scoped      | INS, ASM |
+| `/progress`, `/progress/interventions`                                                      | Progress, at-risk and interventions        | IAD; INS scoped      | INS, ANL |
+| `/placement/drives`, `/placement/drives/{id}`, `/placement/partners`, `/placement/outcomes` | Drives, drive, partner employers, outcomes | IAD, PLO             | INS      |
+| `/licensing`, `/licensing/seats`                                                            | Licenses, seats                            | IAD                  | INS, BIL |
+| `/brand`                                                                                    | Public page editor                         | IAD                  | INS      |
+| `/integrations`                                                                             | SIS and LMS integrations                   | IAD                  | PLT      |
+| `/reports`, `/reports/{id}`                                                                 | Reports                                    | IAD, PLO scoped      | ANL      |
+| `/announcements`                                                                            | Announcements                              | IAD, INS scoped      | NTF      |
+| `/messages`                                                                                 | Institution inbox                          | IAD, PLO, INS        | MSG      |
+| `/settings`, `/audit`                                                                       | Settings, audit log                        | IAD                  | INS      |
 
 ### 5.5 Enterprise workspace (prefix `/enterprise/{org}`)
 
-| Route (after prefix) | Screen | Module |
-|---|---|---|
-| `/dashboard` | Enterprise home | ENT, ANL |
-| `/skills`, `/skills/gaps`, `/skills/taxonomy` | Skills inventory, gaps, taxonomy mapping | ENT |
-| `/mobility/jobs`, `/mobility/jobs/{id}`, `/mobility/matches`, `/mobility/succession` | Internal jobs, job, matches, succession | ENT |
-| `/learning/mandates`, `/learning/programs`, `/learning/certifications` | Mandates, programs, certifications | ENT, LRN |
-| `/people`, `/people/{id}` | Directory, person (skills view only) | ENT |
-| `/reports` | Reports and impact | ANL |
-| `/integrations` | HRIS and SSO | PLT |
-| `/billing`, `/settings`, `/audit`, `/messages` | Billing, settings, audit, inbox | BIL, ENT, MSG |
+| Route (after prefix)                                                                 | Screen                                   | Module        |
+| ------------------------------------------------------------------------------------ | ---------------------------------------- | ------------- |
+| `/dashboard`                                                                         | Enterprise home                          | ENT, ANL      |
+| `/skills`, `/skills/gaps`, `/skills/taxonomy`                                        | Skills inventory, gaps, taxonomy mapping | ENT           |
+| `/mobility/jobs`, `/mobility/jobs/{id}`, `/mobility/matches`, `/mobility/succession` | Internal jobs, job, matches, succession  | ENT           |
+| `/learning/mandates`, `/learning/programs`, `/learning/certifications`               | Mandates, programs, certifications       | ENT, LRN      |
+| `/people`, `/people/{id}`                                                            | Directory, person (skills view only)     | ENT           |
+| `/reports`                                                                           | Reports and impact                       | ANL           |
+| `/integrations`                                                                      | HRIS and SSO                             | PLT           |
+| `/billing`, `/settings`, `/audit`, `/messages`                                       | Billing, settings, audit, inbox          | BIL, ENT, MSG |
 
 ### 5.6 Console (prefix `/console`)
 
@@ -653,11 +653,11 @@ When a membership, role, entitlement or flag changes while the user is signed in
 
 ### 7.1 Opening and closing
 
-| Action | Input |
-|---|---|
-| Open | `Ctrl K` (Windows, Linux) or `Cmd K` (macOS); activate the top-bar search field; activate the search icon on phone and tablet; the `/` key when focus is not in an editable element |
-| Close | `Esc`; activating the scrim; selecting a result that navigates |
-| Toggle scope | `Tab` cycles the scope chips (All, Navigate, Commands, People, Jobs, Learning); `Shift Tab` reverses |
+| Action       | Input                                                                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open         | `Ctrl K` (Windows, Linux) or `Cmd K` (macOS); activate the top-bar search field; activate the search icon on phone and tablet; the `/` key when focus is not in an editable element |
+| Close        | `Esc`; activating the scrim; selecting a result that navigates                                                                                                                      |
+| Toggle scope | `Tab` cycles the scope chips (All, Navigate, Commands, People, Jobs, Learning); `Shift Tab` reverses                                                                                |
 
 On phone the palette opens as a full-screen sheet with a visible Cancel button. It is a modal dialog (`role="dialog"`, `aria-modal="true"`, label "Search and commands") with a combobox input (`role="combobox"`, `aria-expanded`, `aria-controls` the listbox, `aria-activedescendant` the highlighted option). Results are a `listbox` with `option` rows grouped by `role="group"` with `aria-labelledby` headings.
 
@@ -665,13 +665,13 @@ On phone the palette opens as a full-screen sheet with a visible Cancel button. 
 
 Order of groups when the query is empty: Recent (last 5 visited items and commands in this workspace), Suggested (up to 3 next-best-actions from the dashboard), Navigate (top 6 destinations). When the query has characters, groups: Commands, Navigate, then data groups subject to the workspace and permission scope below.
 
-| Workspace | Data groups (each limited to 5 rows with "See all N results") |
-|---|---|
+| Workspace           | Data groups (each limited to 5 rows with "See all N results")                                                                          |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | Public and Personal | Jobs, Courses, Companies, People (connections and public profiles), Mentors, Messages (conversation titles only, local), Help articles |
-| Employer | Jobs (org), Candidates (applicants and pool members the user can see), Applications, Interviews, Team members, Reports, Help |
-| Institution | Students (assigned scope), Cohorts, Courses, Drives, Reports, Help |
-| Enterprise | People (skills directory), Skills, Mandates, Reports, Help |
-| Console | Accounts by email or id (exact match only for SUP unless permitted), Organizations, Tickets, Cases, Flags, Help |
+| Employer            | Jobs (org), Candidates (applicants and pool members the user can see), Applications, Interviews, Team members, Reports, Help           |
+| Institution         | Students (assigned scope), Cohorts, Courses, Drives, Reports, Help                                                                     |
+| Enterprise          | People (skills directory), Skills, Mandates, Reports, Help                                                                             |
+| Console             | Accounts by email or id (exact match only for SUP unless permitted), Organizations, Tickets, Cases, Flags, Help                        |
 
 Prefix operators: `>` commands only; `@` people; `#` skills and topics; `?` help articles; `/` navigation only. Operators are shown as hints in the empty state.
 
@@ -679,25 +679,25 @@ Prefix operators: `>` commands only; `@` people; `#` skills and topics; `?` help
 
 Commands appear only if permitted and relevant to the current route context. Core commands:
 
-| Command | Available to | Keywords | Effect |
-|---|---|---|---|
-| Go to {destination} | all | the destination label | Navigates |
-| Switch workspace | users with 2 or more workspaces | workspace, org, switch | Opens switcher |
-| Toggle theme | all | dark, light, contrast | Cycles light, dark, system |
-| Change density | all | compact, comfortable | Toggles density |
-| Show keyboard shortcuts | all | shortcuts, keys | Opens help dialog |
-| Add work history | CAN family | experience, job, history | Opens `/evidence/new/work` |
-| Upload evidence | CAN family | certificate, file | Opens `/evidence/new/upload` |
-| New resume | CAN family | cv | Creates draft resume and opens it |
-| Update availability | CAN family | open to work | Opens availability dialog |
-| New job | REC, EAD | post, requisition | Opens `/jobs/new/basics` |
-| Invite teammate | EAD | team | Opens invite dialog |
-| Schedule interview | REC | interview | Opens scheduler for the focused application if any |
-| Invite students | IAD | import | Opens `/students/import` |
-| New course | INS | course | Opens Studio create |
-| Sign out | all | logout | Signs out |
-| Copy link to this page | all | share | Copies canonical URL |
-| Report a problem | all | feedback, bug | Opens report dialog |
+| Command                 | Available to                    | Keywords                 | Effect                                             |
+| ----------------------- | ------------------------------- | ------------------------ | -------------------------------------------------- |
+| Go to {destination}     | all                             | the destination label    | Navigates                                          |
+| Switch workspace        | users with 2 or more workspaces | workspace, org, switch   | Opens switcher                                     |
+| Toggle theme            | all                             | dark, light, contrast    | Cycles light, dark, system                         |
+| Change density          | all                             | compact, comfortable     | Toggles density                                    |
+| Show keyboard shortcuts | all                             | shortcuts, keys          | Opens help dialog                                  |
+| Add work history        | CAN family                      | experience, job, history | Opens `/evidence/new/work`                         |
+| Upload evidence         | CAN family                      | certificate, file        | Opens `/evidence/new/upload`                       |
+| New resume              | CAN family                      | cv                       | Creates draft resume and opens it                  |
+| Update availability     | CAN family                      | open to work             | Opens availability dialog                          |
+| New job                 | REC, EAD                        | post, requisition        | Opens `/jobs/new/basics`                           |
+| Invite teammate         | EAD                             | team                     | Opens invite dialog                                |
+| Schedule interview      | REC                             | interview                | Opens scheduler for the focused application if any |
+| Invite students         | IAD                             | import                   | Opens `/students/import`                           |
+| New course              | INS                             | course                   | Opens Studio create                                |
+| Sign out                | all                             | logout                   | Signs out                                          |
+| Copy link to this page  | all                             | share                    | Copies canonical URL                               |
+| Report a problem        | all                             | feedback, bug            | Opens report dialog                                |
 
 Destructive commands (delete, remove, suspend) are never in the palette. Rule `NFR-IAX-017`.
 
@@ -728,17 +728,17 @@ Destructive commands (delete, remove, suspend) are never in the palette. Rule `N
 
 ### 8.2 Query parameters
 
-| Parameter | Meaning | Rules |
-|---|---|---|
-| `q` | Free-text query | URL-encoded, max 200 chars; stored in URL on submit and after 400 ms idle |
-| `sort` | Sort key, optionally `-key` for descending | Only values from the screen's declared list; unknown values ignored with default and no error |
-| `cursor` | Opaque pagination cursor | Never parsed by the client; `page` and `pageSize` used only where cursor pagination is not available (`03_INTERACTION_PATTERNS.md` section 7) |
-| `view` | Presentation (`list`, `grid`, `board`, `calendar`) | Persisted per user per screen as default; URL wins |
-| `tab` | In-page tab | Value equals the tab slug; default tab omits the parameter |
-| `scope` | Ownership or assignment filter (`mine`, `team`, `all`, `review`) | Server enforces; unauthorized scope falls back to the permitted one |
-| `open` | Id of the entity shown in a side panel or dialog over the list | Makes the panel linkable and restorable on reload |
-| `returnTo` | Where to go after an interrupt flow (login, MFA, verification) | Relative path only, validated (section 10.1) |
-| Filters | Repeated key for multiple values (`skill=react&skill=go`), `min_`/`max_` prefixes for ranges, `from`/`to` for dates (ISO 8601 dates), `status`, `type` | Filter keys documented per list screen; unknown keys preserved but ignored |
+| Parameter  | Meaning                                                                                                                                                | Rules                                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `q`        | Free-text query                                                                                                                                        | URL-encoded, max 200 chars; stored in URL on submit and after 400 ms idle                                                                     |
+| `sort`     | Sort key, optionally `-key` for descending                                                                                                             | Only values from the screen's declared list; unknown values ignored with default and no error                                                 |
+| `cursor`   | Opaque pagination cursor                                                                                                                               | Never parsed by the client; `page` and `pageSize` used only where cursor pagination is not available (`03_INTERACTION_PATTERNS.md` section 7) |
+| `view`     | Presentation (`list`, `grid`, `board`, `calendar`)                                                                                                     | Persisted per user per screen as default; URL wins                                                                                            |
+| `tab`      | In-page tab                                                                                                                                            | Value equals the tab slug; default tab omits the parameter                                                                                    |
+| `scope`    | Ownership or assignment filter (`mine`, `team`, `all`, `review`)                                                                                       | Server enforces; unauthorized scope falls back to the permitted one                                                                           |
+| `open`     | Id of the entity shown in a side panel or dialog over the list                                                                                         | Makes the panel linkable and restorable on reload                                                                                             |
+| `returnTo` | Where to go after an interrupt flow (login, MFA, verification)                                                                                         | Relative path only, validated (section 10.1)                                                                                                  |
+| Filters    | Repeated key for multiple values (`skill=react&skill=go`), `min_`/`max_` prefixes for ranges, `from`/`to` for dates (ISO 8601 dates), `status`, `type` | Filter keys documented per list screen; unknown keys preserved but ignored                                                                    |
 
 Not in the URL: transient UI (menu open, hover), drafts, selections, scroll position (restored by the router), secrets, tokens, personal data (email, phone, name). Tokens in invitation and reset links are in the path and are single use, short lived, and stripped from the address bar after validation (history replace). `NFR-IAX-020`.
 
@@ -791,30 +791,30 @@ Every list or detail page has a header region: breadcrumb (if depth 3+), h1, opt
 
 ### 10.2 Link types
 
-| Link type | Format | Behaviour |
-|---|---|---|
-| Public content | `/jobs/{slug}-{id}` | Works signed out; share cards use Open Graph metadata; signed-in users see the same URL in the app shell |
-| Private resource | `/applications/{id}` | Auth required; wrong workspace triggers 6.2; no access shows the unavailable state |
-| Invitation | `/invite/{token}` | Single use; shows who invited, to what, expiry; signed-out users choose Sign in or Sign up with the invitation bound; expired token: "This invitation has expired. Ask {inviter} to send a new one." and a contact action |
-| Email verification and reset | `/auth/verify-email/{token}`, `/auth/reset/{token}` | Single use; token stripped from URL after load |
-| Verification code | `/verify/{code}` | Public, read-only, shows issuer, subject (as the subject permitted), status, issued and expiry dates, and a link to the issuer; invalid code returns the same page style with "We couldn't find this code" (does not distinguish revoked from never existed unless the subject permitted it) |
-| Notification and email deep link | Same canonical routes plus `?ref=notif` or `?ref=email` (analytics only) | Switches workspace if needed (6.2), scrolls and highlights the target element for 2 seconds (highlight is a 2 px outline plus background, honoring reduced motion) |
-| Calendar and meeting link | `/interviews/{id}/room` and ICS files | Room opens in focus shell; before the start window shows a waiting state |
-| Share target (PWA) | `/share-target` (internal) | Receives text, URL, files from the OS share sheet; routes to evidence upload, message composer or post composer by user choice |
-| Magic or SSO callback | `/auth/sso/callback` | Not a page: processes then redirects to `returnTo` |
+| Link type                        | Format                                                                   | Behaviour                                                                                                                                                                                                                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public content                   | `/jobs/{slug}-{id}`                                                      | Works signed out; share cards use Open Graph metadata; signed-in users see the same URL in the app shell                                                                                                                                                                                     |
+| Private resource                 | `/applications/{id}`                                                     | Auth required; wrong workspace triggers 6.2; no access shows the unavailable state                                                                                                                                                                                                           |
+| Invitation                       | `/invite/{token}`                                                        | Single use; shows who invited, to what, expiry; signed-out users choose Sign in or Sign up with the invitation bound; expired token: "This invitation has expired. Ask {inviter} to send a new one." and a contact action                                                                    |
+| Email verification and reset     | `/auth/verify-email/{token}`, `/auth/reset/{token}`                      | Single use; token stripped from URL after load                                                                                                                                                                                                                                               |
+| Verification code                | `/verify/{code}`                                                         | Public, read-only, shows issuer, subject (as the subject permitted), status, issued and expiry dates, and a link to the issuer; invalid code returns the same page style with "We couldn't find this code" (does not distinguish revoked from never existed unless the subject permitted it) |
+| Notification and email deep link | Same canonical routes plus `?ref=notif` or `?ref=email` (analytics only) | Switches workspace if needed (6.2), scrolls and highlights the target element for 2 seconds (highlight is a 2 px outline plus background, honoring reduced motion)                                                                                                                           |
+| Calendar and meeting link        | `/interviews/{id}/room` and ICS files                                    | Room opens in focus shell; before the start window shows a waiting state                                                                                                                                                                                                                     |
+| Share target (PWA)               | `/share-target` (internal)                                               | Receives text, URL, files from the OS share sheet; routes to evidence upload, message composer or post composer by user choice                                                                                                                                                               |
+| Magic or SSO callback            | `/auth/sso/callback`                                                     | Not a page: processes then redirects to `returnTo`                                                                                                                                                                                                                                           |
 
 ### 10.3 Redirect and status behaviour
 
-| Situation | Response |
-|---|---|
-| Unknown route | 404 page: heading "We can't find that page", search field, links to Home and Help; content carries `noindex` |
-| Anonymous on a signed-in route | 302 to `/login?returnTo=` |
-| Signed in, resource not found or hidden (private) | In-shell unavailable state (10.4), HTTP 404 |
-| Signed in, no permission, non-sensitive resource | In-shell permission-denied state, HTTP 403 |
-| Moved content (slug, handle, org slug) | 301 to canonical |
-| Removed public content | 410 with related items |
-| Maintenance | 503 with `Retry-After`; static maintenance page from the edge |
-| Server error | Route error boundary state (section 10.5), HTTP 5xx on API only; the shell stays interactive |
+| Situation                                         | Response                                                                                                     |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Unknown route                                     | 404 page: heading "We can't find that page", search field, links to Home and Help; content carries `noindex` |
+| Anonymous on a signed-in route                    | 302 to `/login?returnTo=`                                                                                    |
+| Signed in, resource not found or hidden (private) | In-shell unavailable state (10.4), HTTP 404                                                                  |
+| Signed in, no permission, non-sensitive resource  | In-shell permission-denied state, HTTP 403                                                                   |
+| Moved content (slug, handle, org slug)            | 301 to canonical                                                                                             |
+| Removed public content                            | 410 with related items                                                                                       |
+| Maintenance                                       | 503 with `Retry-After`; static maintenance page from the edge                                                |
+| Server error                                      | Route error boundary state (section 10.5), HTTP 5xx on API only; the shell stays interactive                 |
 
 ### 10.4 Unavailable and permission-denied states
 
@@ -828,26 +828,26 @@ Each route segment is wrapped by an error boundary that keeps the shell and nav 
 
 Full flows are in `03_INTERACTION_PATTERNS.md` section 2. This table fixes where each flow starts and where it ends so IA is consistent.
 
-| Entry | URL | Who | Ends at |
-|---|---|---|---|
-| Candidate self sign-up | `/signup/candidate` | New individual | `/dashboard` with the first-run checklist |
-| Student sign-up via institution | Institution invite `/invite/{token}` or `/signup/student?inst={slug}` | New or existing user | `/campus` |
-| Employer sign-up | `/signup/employer` | New recruiter or hiring lead | `/employer/{org}/dashboard` with the organization setup checklist |
-| Teammate invitation | `/invite/{token}` (type org) | Invited REC, HMG, EAD | `/employer/{org}/dashboard` |
-| Institution onboarding | `/signup/institution` (request) then admin-provisioned `/invite/{token}` | IAD | `/institution/{inst}/dashboard` |
-| Enterprise onboarding | Sales-assisted; provisioned invitation | EXA | `/enterprise/{org}/dashboard` |
-| Mentor application | `/signup/mentor` or "Become a mentor" in Personal | CAN | `/mentoring/mentor` in pending-approval state |
-| Instructor application | `/signup/instructor` or "Teach" in Personal | CAN | `/studio` |
-| Freelancer mode | Settings toggle or "Start freelancing" on `/gigs` | CAN | `/gigs/my/profile` |
-| Apply from a shared job link | `/jobs/{slug}-{id}` then Apply while signed out | Guest | Sign up or sign in with `returnTo`, then the apply wizard resumes |
-| Referral link | `/r/{code}` (resolves, records attribution, redirects to the target or `/signup/candidate`) | Guest | Target page or onboarding |
-| Course purchase from a public page | `/courses/{slug}-{id}` then Enroll | Guest | Sign up, checkout, `/learn/courses/{id}` |
-| Assessment invitation (employer or institution) | `/invite/{token}` (type assessment) | Guest or user | `/assess/{attemptId}/start` |
-| Interview invitation | `/invite/{token}` (type interview) | Guest or user | `/interviews/{id}` (guest may join with a limited session) |
-| Browser extension install | `/extension` (marketing) then extension onboarding tab | CAN | `/profile` import review |
-| Profile import (LinkedIn or resume) | `/signup/candidate?import=resume|linkedin` | New candidate | Profile import review screen then `/dashboard` |
-| PWA install prompt | In-app, after second visit and one completed action | Any | Stays in place |
-| Staff account creation | Admin-provisioned invitation with mandatory MFA enrollment | Staff | `/console/dashboard` |
+| Entry                                           | URL                                                                                         | Who                          | Ends at                                                           |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------- | ---------------------------------------------- |
+| Candidate self sign-up                          | `/signup/candidate`                                                                         | New individual               | `/dashboard` with the first-run checklist                         |
+| Student sign-up via institution                 | Institution invite `/invite/{token}` or `/signup/student?inst={slug}`                       | New or existing user         | `/campus`                                                         |
+| Employer sign-up                                | `/signup/employer`                                                                          | New recruiter or hiring lead | `/employer/{org}/dashboard` with the organization setup checklist |
+| Teammate invitation                             | `/invite/{token}` (type org)                                                                | Invited REC, HMG, EAD        | `/employer/{org}/dashboard`                                       |
+| Institution onboarding                          | `/signup/institution` (request) then admin-provisioned `/invite/{token}`                    | IAD                          | `/institution/{inst}/dashboard`                                   |
+| Enterprise onboarding                           | Sales-assisted; provisioned invitation                                                      | EXA                          | `/enterprise/{org}/dashboard`                                     |
+| Mentor application                              | `/signup/mentor` or "Become a mentor" in Personal                                           | CAN                          | `/mentoring/mentor` in pending-approval state                     |
+| Instructor application                          | `/signup/instructor` or "Teach" in Personal                                                 | CAN                          | `/studio`                                                         |
+| Freelancer mode                                 | Settings toggle or "Start freelancing" on `/gigs`                                           | CAN                          | `/gigs/my/profile`                                                |
+| Apply from a shared job link                    | `/jobs/{slug}-{id}` then Apply while signed out                                             | Guest                        | Sign up or sign in with `returnTo`, then the apply wizard resumes |
+| Referral link                                   | `/r/{code}` (resolves, records attribution, redirects to the target or `/signup/candidate`) | Guest                        | Target page or onboarding                                         |
+| Course purchase from a public page              | `/courses/{slug}-{id}` then Enroll                                                          | Guest                        | Sign up, checkout, `/learn/courses/{id}`                          |
+| Assessment invitation (employer or institution) | `/invite/{token}` (type assessment)                                                         | Guest or user                | `/assess/{attemptId}/start`                                       |
+| Interview invitation                            | `/invite/{token}` (type interview)                                                          | Guest or user                | `/interviews/{id}` (guest may join with a limited session)        |
+| Browser extension install                       | `/extension` (marketing) then extension onboarding tab                                      | CAN                          | `/profile` import review                                          |
+| Profile import (LinkedIn or resume)             | `/signup/candidate?import=resume                                                            | linkedin`                    | New candidate                                                     | Profile import review screen then `/dashboard` |
+| PWA install prompt                              | In-app, after second visit and one completed action                                         | Any                          | Stays in place                                                    |
+| Staff account creation                          | Admin-provisioned invitation with mandatory MFA enrollment                                  | Staff                        | `/console/dashboard`                                              |
 
 Rules:
 
@@ -858,89 +858,89 @@ Rules:
 
 [SRC: apps/web/src/App.tsx] Old paths remain valid as 301 redirects for at least one major release so bookmarks and email links continue to work.
 
-| As-built route | Blueprint route | Note |
-|---|---|---|
-| `/dashboard` | `/dashboard` | Unchanged for personal; employers redirected to `/employer/{org}/dashboard` by role |
-| `/jobs`, `/jobs/:id` | `/jobs`, `/jobs/{slug}-{id}` | Id-only links redirect to canonical slug |
-| `/applications` | `/applications` | Unchanged |
-| `/evidence` | `/evidence` | Unchanged (product copy says "Work history") |
-| `/profile`, `/portfolio`, `/resumes` | `/profile`, `/profile/portfolio`, `/profile/resumes` | |
-| `/learning`, `/learning/:id` | `/learn`, `/learn/courses/{id}` | |
-| `/career` | `/career` | |
-| `/network` | `/network` | |
-| `/messages`, `/messages/:id` | `/messages`, `/messages/{conversationId}` | |
-| `/notifications` | `/notifications` | |
-| `/hiring`, `/hiring/jobs/:id` | `/employer/{org}/jobs`, `/employer/{org}/jobs/{id}/pipeline` | Org resolved from the user's single membership, else chooser |
-| `/assessments` | `/assess` | |
-| `/admin` | `/console/dashboard` | |
-| `/settings` | `/settings/account` | |
-| `/checkout` | `/pricing` and `/billing/plans` | Checkout steps live in `focus` shell |
-| `/verify/:hash`, `/reference/:id` | `/verify/{code}`, `/invite/{token}` (reference request type) | |
-| `/privacy`, `/terms` | `/legal/privacy`, `/legal/terms` | |
-| `/login`, `/signup` | unchanged | |
+| As-built route                       | Blueprint route                                              | Note                                                                                |
+| ------------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `/dashboard`                         | `/dashboard`                                                 | Unchanged for personal; employers redirected to `/employer/{org}/dashboard` by role |
+| `/jobs`, `/jobs/:id`                 | `/jobs`, `/jobs/{slug}-{id}`                                 | Id-only links redirect to canonical slug                                            |
+| `/applications`                      | `/applications`                                              | Unchanged                                                                           |
+| `/evidence`                          | `/evidence`                                                  | Unchanged (product copy says "Work history")                                        |
+| `/profile`, `/portfolio`, `/resumes` | `/profile`, `/profile/portfolio`, `/profile/resumes`         |                                                                                     |
+| `/learning`, `/learning/:id`         | `/learn`, `/learn/courses/{id}`                              |                                                                                     |
+| `/career`                            | `/career`                                                    |                                                                                     |
+| `/network`                           | `/network`                                                   |                                                                                     |
+| `/messages`, `/messages/:id`         | `/messages`, `/messages/{conversationId}`                    |                                                                                     |
+| `/notifications`                     | `/notifications`                                             |                                                                                     |
+| `/hiring`, `/hiring/jobs/:id`        | `/employer/{org}/jobs`, `/employer/{org}/jobs/{id}/pipeline` | Org resolved from the user's single membership, else chooser                        |
+| `/assessments`                       | `/assess`                                                    |                                                                                     |
+| `/admin`                             | `/console/dashboard`                                         |                                                                                     |
+| `/settings`                          | `/settings/account`                                          |                                                                                     |
+| `/checkout`                          | `/pricing` and `/billing/plans`                              | Checkout steps live in `focus` shell                                                |
+| `/verify/:hash`, `/reference/:id`    | `/verify/{code}`, `/invite/{token}` (reference request type) |                                                                                     |
+| `/privacy`, `/terms`                 | `/legal/privacy`, `/legal/terms`                             |                                                                                     |
+| `/login`, `/signup`                  | unchanged                                                    |                                                                                     |
 
 ## 13. Information architecture rules (consolidated)
 
-| Id | Rule | Test |
-|---|---|---|
-| NFR-IAX-001 | Personal workspace always exists | Account with only an employer membership still has Personal in the switcher |
-| NFR-IAX-002 | Capabilities add groups to Personal, no second login or root | Enable gig mode: no new URL root, no new session |
-| NFR-IAX-003 | Organization workspaces are per membership | User with two memberships sees two rows |
-| NFR-IAX-004 | Every route belongs to one workspace | Route table lint: no duplicate path across prefixes |
-| NFR-IAX-005 | Phone layout below 768 px | At 767 px bottom tabs; at 768 px rail |
-| NFR-IAX-006 | Public pages use a header at all widths | No sidebar on `/jobs` signed out |
-| NFR-IAX-007 | Same route set at all widths | Playwright: every sidebar item reachable from phone Me screen |
-| NFR-IAX-008 | Messages always reachable from every tab root | On STD and INS phone layouts, app bar shows messages icon |
-| NFR-IAX-009 | Console shows stripe, "Staff" chip and title prefix | Visual and DOM test on `/console/dashboard` |
-| NFR-IAX-010 | Missing permission removes item; purchasable entitlement shows lock | DOM absent vs locked item assertion |
-| NFR-IAX-011 | No "coming soon" items in navigation | Manifest lint |
-| NFR-IAX-012 | Nav derives from one server manifest; server authorizes direct URLs | Request hidden route as unauthorized user returns 403 or 404 |
-| NFR-IAX-013 | Stable `data-testid` on every nav item | Lint |
-| NFR-IAX-014 | Workspace switch under 1 s warm, skeleton never blank | Performance test |
-| NFR-IAX-015 | Workspace name and role visible on tablet and desktop | Visual |
-| NFR-IAX-016 | No URL reachable in two workspaces | Route table lint |
-| NFR-IAX-017 | No destructive commands in the palette | Command registry lint |
-| NFR-IAX-018 | Palette results are authorized like destinations | Security test with a user lacking access sees zero matches |
-| NFR-IAX-019 | Lowercase hyphenated paths, canonical redirects | `/Jobs/` redirects 308 to `/jobs` |
-| NFR-IAX-020 | No tokens or personal data in query strings; token path segments stripped after use | Network and history test |
-| NFR-IAX-021 | Private resource unauthorized equals not found | Compare responses for existing and non-existing id as non-owner |
-| NFR-IAX-022 | Single key shortcuts can be disabled or remapped | Settings test, WCAG 2.1.4 |
-| NFR-IAX-023 | Back control goes to the logical parent | Deep link then Back lands on parent, not the previous site |
-| NFR-IAX-024 | `returnTo` validated as same-origin relative | Fuzz: `//evil.com`, `/\evil`, `https://x`, encoded variants are rejected |
-| NFR-IAX-025 | Session expiry resumes in place with state kept | Expire token while form dirty; form retained after sign-in |
-| NFR-IAX-026 | Onboarding resumable and non-blocking beyond required steps | Abort at step 2, return, resumes at step 2 |
-| NFR-IAX-027 | Invitation binds the invited email | Mismatch shows message and blocks acceptance |
+| Id          | Rule                                                                                | Test                                                                        |
+| ----------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| NFR-IAX-001 | Personal workspace always exists                                                    | Account with only an employer membership still has Personal in the switcher |
+| NFR-IAX-002 | Capabilities add groups to Personal, no second login or root                        | Enable gig mode: no new URL root, no new session                            |
+| NFR-IAX-003 | Organization workspaces are per membership                                          | User with two memberships sees two rows                                     |
+| NFR-IAX-004 | Every route belongs to one workspace                                                | Route table lint: no duplicate path across prefixes                         |
+| NFR-IAX-005 | Phone layout below 768 px                                                           | At 767 px bottom tabs; at 768 px rail                                       |
+| NFR-IAX-006 | Public pages use a header at all widths                                             | No sidebar on `/jobs` signed out                                            |
+| NFR-IAX-007 | Same route set at all widths                                                        | Playwright: every sidebar item reachable from phone Me screen               |
+| NFR-IAX-008 | Messages always reachable from every tab root                                       | On STD and INS phone layouts, app bar shows messages icon                   |
+| NFR-IAX-009 | Console shows stripe, "Staff" chip and title prefix                                 | Visual and DOM test on `/console/dashboard`                                 |
+| NFR-IAX-010 | Missing permission removes item; purchasable entitlement shows lock                 | DOM absent vs locked item assertion                                         |
+| NFR-IAX-011 | No "coming soon" items in navigation                                                | Manifest lint                                                               |
+| NFR-IAX-012 | Nav derives from one server manifest; server authorizes direct URLs                 | Request hidden route as unauthorized user returns 403 or 404                |
+| NFR-IAX-013 | Stable `data-testid` on every nav item                                              | Lint                                                                        |
+| NFR-IAX-014 | Workspace switch under 1 s warm, skeleton never blank                               | Performance test                                                            |
+| NFR-IAX-015 | Workspace name and role visible on tablet and desktop                               | Visual                                                                      |
+| NFR-IAX-016 | No URL reachable in two workspaces                                                  | Route table lint                                                            |
+| NFR-IAX-017 | No destructive commands in the palette                                              | Command registry lint                                                       |
+| NFR-IAX-018 | Palette results are authorized like destinations                                    | Security test with a user lacking access sees zero matches                  |
+| NFR-IAX-019 | Lowercase hyphenated paths, canonical redirects                                     | `/Jobs/` redirects 308 to `/jobs`                                           |
+| NFR-IAX-020 | No tokens or personal data in query strings; token path segments stripped after use | Network and history test                                                    |
+| NFR-IAX-021 | Private resource unauthorized equals not found                                      | Compare responses for existing and non-existing id as non-owner             |
+| NFR-IAX-022 | Single key shortcuts can be disabled or remapped                                    | Settings test, WCAG 2.1.4                                                   |
+| NFR-IAX-023 | Back control goes to the logical parent                                             | Deep link then Back lands on parent, not the previous site                  |
+| NFR-IAX-024 | `returnTo` validated as same-origin relative                                        | Fuzz: `//evil.com`, `/\evil`, `https://x`, encoded variants are rejected    |
+| NFR-IAX-025 | Session expiry resumes in place with state kept                                     | Expire token while form dirty; form retained after sign-in                  |
+| NFR-IAX-026 | Onboarding resumable and non-blocking beyond required steps                         | Abort at step 2, return, resumes at step 2                                  |
+| NFR-IAX-027 | Invitation binds the invited email                                                  | Mismatch shows message and blocks acceptance                                |
 
 ## 14. Conflicts, open decisions and risks
 
 ### 14.1 Conflicts recorded
 
-| Id | Conflict | Resolution in this file |
-|---|---|---|
-| C-IAX-01 | As-built shell is a single top navigation; the product needs 31 modules and 18 roles. Legacy `UI_UX_DESIGN_SYSTEM.md` says "Desktop: Sidebar navigation", the code is a top bar. | Blueprint adopts the sidebar, rail, tabs model (the legacy design target), not the as-built top bar. [SRC: docs/experience/UI_UX_DESIGN_SYSTEM.md §8] |
-| C-IAX-02 | As-built `/hiring` and `/learning` are unprefixed; the blueprint has organization workspaces. | Mapped in section 12. |
-| C-IAX-03 | SSOT §4.2 non-goals (not generic HR, not a social clone) versus Enterprise people directory and Network feed. | Enterprise directory limited to skills and mobility; network feed specified as professional, evidence-linked, not a general social product (module decides). `OD-UX-05`. |
+| Id       | Conflict                                                                                                                                                                         | Resolution in this file                                                                                                                                                  |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| C-IAX-01 | As-built shell is a single top navigation; the product needs 31 modules and 18 roles. Legacy `UI_UX_DESIGN_SYSTEM.md` says "Desktop: Sidebar navigation", the code is a top bar. | Blueprint adopts the sidebar, rail, tabs model (the legacy design target), not the as-built top bar. [SRC: docs/experience/UI_UX_DESIGN_SYSTEM.md §8]                    |
+| C-IAX-02 | As-built `/hiring` and `/learning` are unprefixed; the blueprint has organization workspaces.                                                                                    | Mapped in section 12.                                                                                                                                                    |
+| C-IAX-03 | SSOT §4.2 non-goals (not generic HR, not a social clone) versus Enterprise people directory and Network feed.                                                                    | Enterprise directory limited to skills and mobility; network feed specified as professional, evidence-linked, not a general social product (module decides). `OD-UX-05`. |
 
 ### 14.2 Open decisions
 
-| Id | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-UX-01 | Should the console be on a separate host (for example `admin.`) rather than `/console`? | Same host path; separate host | Same host path for IA, separate session cookie scope handled by IDN; revisit with security | Security officer | Console routing |
-| OD-UX-02 | Sidebar shell versus keeping a top-nav shell with mega-menus | Sidebar; top nav | Sidebar (section 3) | Product owner | All shell work |
-| OD-UX-03 | Is a "view as user" capability allowed for support? | None; read-only view; full impersonation | Read-only "view account as support sees it", no impersonation | Security officer and legal | Section 6.5 |
-| OD-UX-04 | Are staff accounts separate identities from personal accounts? | Separate; same | Separate [PROP] | Security officer | Console login |
-| OD-UX-05 | Scope of Enterprise people directory | Skills only; skills plus org chart | Skills and reporting line only, no HR data | Product owner | ENT module |
-| OD-UX-06 | Step-up authentication window for sensitive console routes | 5, 15, 30 minutes | 15 minutes | Security officer | Console |
-| OD-UX-07 | Can any user self-create an employer or institution organization? | Self-serve; sales-assisted | Employer self-serve with verification; institution request-and-approve | Product owner | Onboarding |
-| OD-UX-08 | "Preview as role" for EAD | Include; exclude | Include as read-only | Product owner | EMP |
-| OD-UX-09 | Support impersonation | See OD-UX-03 | Not offered | Security officer | Console |
-| OD-UX-10 | Locale in URL for localized public pages | Prefix; domain; none | Prefix `/{locale}/` for public pages only once a second language ships | Product owner | Localization |
+| Id       | Question                                                                                | Options                                  | Default proposal                                                                           | Decides                    | Blocks          |
+| -------- | --------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
+| OD-UX-01 | Should the console be on a separate host (for example `admin.`) rather than `/console`? | Same host path; separate host            | Same host path for IA, separate session cookie scope handled by IDN; revisit with security | Security officer           | Console routing |
+| OD-UX-02 | Sidebar shell versus keeping a top-nav shell with mega-menus                            | Sidebar; top nav                         | Sidebar (section 3)                                                                        | Product owner              | All shell work  |
+| OD-UX-03 | Is a "view as user" capability allowed for support?                                     | None; read-only view; full impersonation | Read-only "view account as support sees it", no impersonation                              | Security officer and legal | Section 6.5     |
+| OD-UX-04 | Are staff accounts separate identities from personal accounts?                          | Separate; same                           | Separate [PROP]                                                                            | Security officer           | Console login   |
+| OD-UX-05 | Scope of Enterprise people directory                                                    | Skills only; skills plus org chart       | Skills and reporting line only, no HR data                                                 | Product owner              | ENT module      |
+| OD-UX-06 | Step-up authentication window for sensitive console routes                              | 5, 15, 30 minutes                        | 15 minutes                                                                                 | Security officer           | Console         |
+| OD-UX-07 | Can any user self-create an employer or institution organization?                       | Self-serve; sales-assisted               | Employer self-serve with verification; institution request-and-approve                     | Product owner              | Onboarding      |
+| OD-UX-08 | "Preview as role" for EAD                                                               | Include; exclude                         | Include as read-only                                                                       | Product owner              | EMP             |
+| OD-UX-09 | Support impersonation                                                                   | See OD-UX-03                             | Not offered                                                                                | Security officer           | Console         |
+| OD-UX-10 | Locale in URL for localized public pages                                                | Prefix; domain; none                     | Prefix `/{locale}/` for public pages only once a second language ships                     | Product owner              | Localization    |
 
 ### 14.3 Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
-| RSK-UX-01 | Navigation grows by module without discipline, exceeding limits | Manifest lint enforces the 7/7/24 limits; additions require an IA review |
-| RSK-UX-02 | Users with many memberships lose track of the active workspace | Persistent workspace name in the top bar, document title, announcement on switch, last-used ordering |
-| RSK-UX-03 | Two modules propose clashing routes | Namespace table in section 5 is the arbiter; route lint in CI (`NFR-IAX-004`, `NFR-IAX-016`) |
-| RSK-UX-04 | Hiding items by permission confuses users who were told a feature exists | Locked items for purchasable entitlements; help articles state role requirements |
+| Id        | Risk                                                                     | Mitigation                                                                                           |
+| --------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| RSK-UX-01 | Navigation grows by module without discipline, exceeding limits          | Manifest lint enforces the 7/7/24 limits; additions require an IA review                             |
+| RSK-UX-02 | Users with many memberships lose track of the active workspace           | Persistent workspace name in the top bar, document title, announcement on switch, last-used ordering |
+| RSK-UX-03 | Two modules propose clashing routes                                      | Namespace table in section 5 is the arbiter; route lint in CI (`NFR-IAX-004`, `NFR-IAX-016`)         |
+| RSK-UX-04 | Hiding items by permission confuses users who were told a feature exists | Locked items for purchasable entitlements; help articles state role requirements                     |

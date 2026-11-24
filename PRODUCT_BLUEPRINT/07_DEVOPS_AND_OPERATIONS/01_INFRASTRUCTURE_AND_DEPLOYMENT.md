@@ -24,15 +24,16 @@ flowchart LR
 
 [SRC: OPERATIONS §1 `local -> CI -> preview -> staging -> production`]
 
-| Environment | Purpose | Data | Scale | Access | Lifetime |
-|---|---|---|---|---|---|
-| local | developer loop with Postgres, API, worker, web dev server | synthetic seeds | single instance | developer | permanent per dev |
-| CI | automated tests on ephemeral Postgres service container | synthetic per job | minimal | pipeline | per job |
-| preview | full stack per pull request for review, e2e smoke, UAT-lite | `seed:standard` | minimal | team plus invited reviewers | auto-destroyed on PR close, with idle expiry |
-| staging | production-shaped release candidate soak, perf, chaos, UAT | `seed:volume` plus synthetic traffic | same topology as production, scaled by ratio `OD-OPS-02` | team, UAT users | permanent |
-| production | live | real | autoscaled within limits | least privilege, break-glass | permanent |
+| Environment | Purpose                                                     | Data                                 | Scale                                                    | Access                       | Lifetime                                     |
+| ----------- | ----------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------- | ---------------------------- | -------------------------------------------- |
+| local       | developer loop with Postgres, API, worker, web dev server   | synthetic seeds                      | single instance                                          | developer                    | permanent per dev                            |
+| CI          | automated tests on ephemeral Postgres service container     | synthetic per job                    | minimal                                                  | pipeline                     | per job                                      |
+| preview     | full stack per pull request for review, e2e smoke, UAT-lite | `seed:standard`                      | minimal                                                  | team plus invited reviewers  | auto-destroyed on PR close, with idle expiry |
+| staging     | production-shaped release candidate soak, perf, chaos, UAT  | `seed:volume` plus synthetic traffic | same topology as production, scaled by ratio `OD-OPS-02` | team, UAT users              | permanent                                    |
+| production  | live                                                        | real                                 | autoscaled within limits                                 | least privilege, break-glass | permanent                                    |
 
 Rules:
+
 - Each environment has its own secrets, database, storage buckets, queues, domains and provider accounts or sandboxes. No credential is shared across environments. [SRC: OPERATIONS §1]
 - Production data never flows downward. A debugging need uses a scrubbed, consented reproduction.
 - Parity register: a living table of differences between staging and production, reviewed at each release (doc 06/02 section 6).
@@ -70,30 +71,30 @@ The system stays a modular monolith: one API deployable and one worker deployabl
 
 ## 4. Infrastructure components
 
-| Component | Responsibility | Requirements `[PROP]` | Failure behavior |
-|---|---|---|---|
-| Web hosting and CDN | serve versioned immutable PWA assets, edge caching, TLS, HTTP/3, security headers, WAF and bot rules, edge rate limiting | static assets content-hashed with long cache; `index.html` and service worker short cache; CSP, HSTS, COOP/COEP as per security docs | last good version served from edge; stale-while-revalidate |
-| API | stateless Fastify instances behind load balancer; health, readiness endpoints | horizontal autoscale on CPU and request concurrency; graceful shutdown draining; min 2 instances in production for availability | instance loss tolerated; readiness removes unhealthy |
-| Worker | claims `background_jobs` with `FOR UPDATE SKIP LOCKED`, runs email, webhooks, retention sweeps, backfills, scoring, indexing | horizontal; per-queue concurrency limits; lease with heartbeat; idempotent handlers | lease expiry re-queues; poison jobs go to `dead` with alert |
-| Scheduler | triggers periodic jobs (sweeps, digests, reconciliation) by enqueueing rows once | single-leader or database advisory lock to avoid duplicate schedules | missed ticks caught up idempotently |
-| PostgreSQL | system of record | managed service, same major version across envs, point-in-time recovery, automated backups, TLS, private network only, extension allow-list | failover per section 16; connection pool protects against saturation |
-| Connection pooler | multiplex connections for many API and worker instances | transaction pooling compatible with `pg` usage; limits per service | saturation alert; shed load with 503 + `Retry-After` |
-| Read replica(s) | offload analytics and heavy reads when needed | introduced only on measured need; replica lag metric and staleness-tolerant routes only | fall back to primary |
-| Object storage | files: evidence, resumes, course media, attachments, exports | private buckets, signed short-lived URLs, server-side encryption, lifecycle rules, versioning on, malware scan on upload, per-tenant key prefix | resumable uploads; orphan cleanup job |
-| Media pipeline (module PLT/LRN) | transcoding, thumbnails, HLS packaging, captions | queue-driven, outputs to object storage, cost caps | job retry; original preserved |
-| Search | full-text and faceted search for jobs, candidates, courses, people (module SRC) | start with Postgres full-text and trigram; dedicated engine only after ADR with measured need `OD-OPS-03` | degrade to database search with label |
-| Cache | rate limit counters, short-lived computed data, session denylist | ephemeral by design; never source of truth; TTL on every key | miss is safe; no correctness dependency |
-| Queues | durable work: Postgres `background_jobs` as the baseline; a broker only after ADR | at-least-once delivery, idempotent consumers, dead-letter, visibility metrics | replay tooling |
-| Realtime | messaging, notifications, live interview presence (MSG, NTF, INT) | websocket or SSE gateway, horizontally scalable, backed by pub/sub if multi-instance, auth on connect, reconnect with resume token | falls back to polling |
-| Email | transactional and notification email through the provider-independent service; development uses the labelled dev outbox [SRC: CLAUDE.md Stack] | SPF, DKIM, DMARC aligned; separate sending domains for transactional vs marketing; bounce and complaint webhooks; suppression list | queue and retry; dead-letter |
-| SMS/push | optional channels (NTF) | provider adapter, opt-in only, per-country rules | queue and retry |
-| Payments | Stripe Checkout, Customer Portal, signed webhook, active only with `BILLING_MODE=stripe` [SRC: CLAUDE.md Stack] | webhook endpoint isolated, verified, idempotent | reconcile job compares provider and local state |
-| AI providers | model calls for AIC and others | adapter with timeout, cost cap, fallback, redaction, per-tenant quota | non-AI fallback with label |
-| Video / meeting, calendar, background-check, identity vendors | INT, BGV, LRN live sessions | adapters with sandbox in non-production | graceful "unavailable" states |
-| Observability | logs, metrics, traces, error tracking, RUM, uptime probes, alert routing, status page | per doc 03 section 11; retention parameters `OD-OPS-04` | telemetry loss never blocks requests (async, bounded buffers) |
-| Secrets manager | store and rotate secrets | per-environment, audit logged, no secrets in images or repository | see section 9 |
-| DNS and certificates | domains, TLS automation, CAA, DNSSEC where supported | automated renewal with expiry alerts | alert at expiry horizon |
-| Backup store | backups in a separate account/region from primary | immutable retention window, encryption keys separate | restore drills (section 16) |
+| Component                                                     | Responsibility                                                                                                                                 | Requirements `[PROP]`                                                                                                                           | Failure behavior                                                     |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Web hosting and CDN                                           | serve versioned immutable PWA assets, edge caching, TLS, HTTP/3, security headers, WAF and bot rules, edge rate limiting                       | static assets content-hashed with long cache; `index.html` and service worker short cache; CSP, HSTS, COOP/COEP as per security docs            | last good version served from edge; stale-while-revalidate           |
+| API                                                           | stateless Fastify instances behind load balancer; health, readiness endpoints                                                                  | horizontal autoscale on CPU and request concurrency; graceful shutdown draining; min 2 instances in production for availability                 | instance loss tolerated; readiness removes unhealthy                 |
+| Worker                                                        | claims `background_jobs` with `FOR UPDATE SKIP LOCKED`, runs email, webhooks, retention sweeps, backfills, scoring, indexing                   | horizontal; per-queue concurrency limits; lease with heartbeat; idempotent handlers                                                             | lease expiry re-queues; poison jobs go to `dead` with alert          |
+| Scheduler                                                     | triggers periodic jobs (sweeps, digests, reconciliation) by enqueueing rows once                                                               | single-leader or database advisory lock to avoid duplicate schedules                                                                            | missed ticks caught up idempotently                                  |
+| PostgreSQL                                                    | system of record                                                                                                                               | managed service, same major version across envs, point-in-time recovery, automated backups, TLS, private network only, extension allow-list     | failover per section 16; connection pool protects against saturation |
+| Connection pooler                                             | multiplex connections for many API and worker instances                                                                                        | transaction pooling compatible with `pg` usage; limits per service                                                                              | saturation alert; shed load with 503 + `Retry-After`                 |
+| Read replica(s)                                               | offload analytics and heavy reads when needed                                                                                                  | introduced only on measured need; replica lag metric and staleness-tolerant routes only                                                         | fall back to primary                                                 |
+| Object storage                                                | files: evidence, resumes, course media, attachments, exports                                                                                   | private buckets, signed short-lived URLs, server-side encryption, lifecycle rules, versioning on, malware scan on upload, per-tenant key prefix | resumable uploads; orphan cleanup job                                |
+| Media pipeline (module PLT/LRN)                               | transcoding, thumbnails, HLS packaging, captions                                                                                               | queue-driven, outputs to object storage, cost caps                                                                                              | job retry; original preserved                                        |
+| Search                                                        | full-text and faceted search for jobs, candidates, courses, people (module SRC)                                                                | start with Postgres full-text and trigram; dedicated engine only after ADR with measured need `OD-OPS-03`                                       | degrade to database search with label                                |
+| Cache                                                         | rate limit counters, short-lived computed data, session denylist                                                                               | ephemeral by design; never source of truth; TTL on every key                                                                                    | miss is safe; no correctness dependency                              |
+| Queues                                                        | durable work: Postgres `background_jobs` as the baseline; a broker only after ADR                                                              | at-least-once delivery, idempotent consumers, dead-letter, visibility metrics                                                                   | replay tooling                                                       |
+| Realtime                                                      | messaging, notifications, live interview presence (MSG, NTF, INT)                                                                              | websocket or SSE gateway, horizontally scalable, backed by pub/sub if multi-instance, auth on connect, reconnect with resume token              | falls back to polling                                                |
+| Email                                                         | transactional and notification email through the provider-independent service; development uses the labelled dev outbox [SRC: CLAUDE.md Stack] | SPF, DKIM, DMARC aligned; separate sending domains for transactional vs marketing; bounce and complaint webhooks; suppression list              | queue and retry; dead-letter                                         |
+| SMS/push                                                      | optional channels (NTF)                                                                                                                        | provider adapter, opt-in only, per-country rules                                                                                                | queue and retry                                                      |
+| Payments                                                      | Stripe Checkout, Customer Portal, signed webhook, active only with `BILLING_MODE=stripe` [SRC: CLAUDE.md Stack]                                | webhook endpoint isolated, verified, idempotent                                                                                                 | reconcile job compares provider and local state                      |
+| AI providers                                                  | model calls for AIC and others                                                                                                                 | adapter with timeout, cost cap, fallback, redaction, per-tenant quota                                                                           | non-AI fallback with label                                           |
+| Video / meeting, calendar, background-check, identity vendors | INT, BGV, LRN live sessions                                                                                                                    | adapters with sandbox in non-production                                                                                                         | graceful "unavailable" states                                        |
+| Observability                                                 | logs, metrics, traces, error tracking, RUM, uptime probes, alert routing, status page                                                          | per doc 03 section 11; retention parameters `OD-OPS-04`                                                                                         | telemetry loss never blocks requests (async, bounded buffers)        |
+| Secrets manager                                               | store and rotate secrets                                                                                                                       | per-environment, audit logged, no secrets in images or repository                                                                               | see section 9                                                        |
+| DNS and certificates                                          | domains, TLS automation, CAA, DNSSEC where supported                                                                                           | automated renewal with expiry alerts                                                                                                            | alert at expiry horizon                                              |
+| Backup store                                                  | backups in a separate account/region from primary                                                                                              | immutable retention window, encryption keys separate                                                                                            | restore drills (section 16)                                          |
 
 ## 5. Infrastructure as code (IaC) principles
 
@@ -119,20 +120,20 @@ flowchart LR
   G --> H["8 Deploy staging"] --> I["9 Release gates"] --> J["10 Deploy production"] --> K["11 Post-deploy verify"] --> L["12 Observe and close"]
 ```
 
-| # | Stage | Actions | Gate (see doc 06/02 section 13) | Failure action |
-|---|---|---|---|---|
-| 1 | Validate | install with frozen lockfile, Prettier lint, typecheck, doc link check, generated-artifact freshness, import-boundary and dependency-cycle check | G1 | fail PR |
-| 2 | Build | build contracts, domain, api, worker, web; produce artifact with build id and SBOM | G1 | fail |
-| 3 | Test | unit, component, contract, in-memory API; Postgres integration with fresh DB; migration apply-from-empty and upgrade tests; RLS tests | G1, G2 | fail |
-| 4 | Security | secret scan, SAST, dependency audit, license check, container image scan, IaC policy scan | G2 | block on high/critical |
-| 5 | Package | build container images (API, worker), sign and attest provenance, push to registry with immutable tag = build id | n/a | fail |
-| 6 | Deploy preview | create per-PR environment, run migrations on its database, deploy artifacts | n/a | comment link; teardown on close |
-| 7 | Verify preview | Playwright smoke, axe, visual diff, DAST baseline | G3 | fail PR |
-| 8 | Deploy staging | on merge to `main` or release tag; run migrations (expand phase), deploy, flags mirrored | n/a | halt pipeline |
-| 9 | Release gates | full regression, performance, chaos for changed areas, upgrade test on production-shaped data, UAT, traceability | G4, G5, G6 | block promotion |
-| 10 | Deploy production | approval, migration, rollout strategy (section 13), flag settings | approval | auto-halt |
-| 11 | Post-deploy verify | synthetic probes, canary metrics, smoke journeys | G7 | auto-rollback per section 14 |
-| 12 | Observe and close | release record, changelog publish, status communication, error-budget check | n/a | follow-up tasks |
+| #   | Stage              | Actions                                                                                                                                          | Gate (see doc 06/02 section 13) | Failure action                  |
+| --- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- | ------------------------------- |
+| 1   | Validate           | install with frozen lockfile, Prettier lint, typecheck, doc link check, generated-artifact freshness, import-boundary and dependency-cycle check | G1                              | fail PR                         |
+| 2   | Build              | build contracts, domain, api, worker, web; produce artifact with build id and SBOM                                                               | G1                              | fail                            |
+| 3   | Test               | unit, component, contract, in-memory API; Postgres integration with fresh DB; migration apply-from-empty and upgrade tests; RLS tests            | G1, G2                          | fail                            |
+| 4   | Security           | secret scan, SAST, dependency audit, license check, container image scan, IaC policy scan                                                        | G2                              | block on high/critical          |
+| 5   | Package            | build container images (API, worker), sign and attest provenance, push to registry with immutable tag = build id                                 | n/a                             | fail                            |
+| 6   | Deploy preview     | create per-PR environment, run migrations on its database, deploy artifacts                                                                      | n/a                             | comment link; teardown on close |
+| 7   | Verify preview     | Playwright smoke, axe, visual diff, DAST baseline                                                                                                | G3                              | fail PR                         |
+| 8   | Deploy staging     | on merge to `main` or release tag; run migrations (expand phase), deploy, flags mirrored                                                         | n/a                             | halt pipeline                   |
+| 9   | Release gates      | full regression, performance, chaos for changed areas, upgrade test on production-shaped data, UAT, traceability                                 | G4, G5, G6                      | block promotion                 |
+| 10  | Deploy production  | approval, migration, rollout strategy (section 13), flag settings                                                                                | approval                        | auto-halt                       |
+| 11  | Post-deploy verify | synthetic probes, canary metrics, smoke journeys                                                                                                 | G7                              | auto-rollback per section 14    |
+| 12  | Observe and close  | release record, changelog publish, status communication, error-budget check                                                                      | n/a                             | follow-up tasks                 |
 
 ### 6.2 Pipeline rules
 
@@ -207,12 +208,12 @@ flowchart LR
 
 ### 11.1 Strategy by risk class
 
-| Risk class | Examples | Strategy |
-|---|---|---|
-| Low | copy changes, internal tools, additive endpoints | rolling deploy, post-deploy smoke |
-| Medium | new feature behind a flag, UI changes | rolling deploy, feature flag off, enable by cohort |
-| High | auth, billing, tenant isolation, migrations with backfill, search ranking, AI model change | canary plus flag, staged exposure, extended observation, explicit approver |
-| Emergency | security fix, outage fix | hotfix path with reduced gates recorded (doc 03 section 6.5) |
+| Risk class | Examples                                                                                   | Strategy                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Low        | copy changes, internal tools, additive endpoints                                           | rolling deploy, post-deploy smoke                                          |
+| Medium     | new feature behind a flag, UI changes                                                      | rolling deploy, feature flag off, enable by cohort                         |
+| High       | auth, billing, tenant isolation, migrations with backfill, search ranking, AI model change | canary plus flag, staged exposure, extended observation, explicit approver |
+| Emergency  | security fix, outage fix                                                                   | hotfix path with reduced gates recorded (doc 03 section 6.5)               |
 
 ### 11.2 Canary
 
@@ -243,13 +244,13 @@ Every production release produces a record: build id, commit range, FR ids shipp
 
 ### 13.1 Rollback levels (fastest first)
 
-| Level | Mechanism | When | Time-to-effect target `[PROP]` |
-|---|---|---|---|
-| L0 | turn off feature flag / kill switch | feature misbehaving | minutes (flag propagation budget) |
-| L1 | route traffic back (canary abort or blue/green switch) | bad deploy detected early | minutes |
-| L2 | redeploy previous immutable artifact (N-1) | regression found after full rollout | within the incident clock for Sev 1 |
-| L3 | forward fix | data-shape changes already applied | per fix |
-| L4 | restore data (point-in-time recovery or backup restore) | data corruption | per RTO (section 16) |
+| Level | Mechanism                                               | When                                | Time-to-effect target `[PROP]`      |
+| ----- | ------------------------------------------------------- | ----------------------------------- | ----------------------------------- |
+| L0    | turn off feature flag / kill switch                     | feature misbehaving                 | minutes (flag propagation budget)   |
+| L1    | route traffic back (canary abort or blue/green switch)  | bad deploy detected early           | minutes                             |
+| L2    | redeploy previous immutable artifact (N-1)              | regression found after full rollout | within the incident clock for Sev 1 |
+| L3    | forward fix                                             | data-shape changes already applied  | per fix                             |
+| L4    | restore data (point-in-time recovery or backup restore) | data corruption                     | per RTO (section 16)                |
 
 ### 13.2 Rules
 
@@ -263,17 +264,17 @@ Every production release produces a record: build id, commit range, FR ids shipp
 
 SLOs are set after baseline measurement. [SRC: OPERATIONS §3] Initial candidate SLIs and `[PROP]` targets as parameters, not commitments:
 
-| Capability | SLI | Candidate target parameter | Window |
-|---|---|---|---|
-| Sign-in and session | successful auth requests / valid attempts | `SLO_AUTH_AVAIL` | rolling 30 days |
-| Core API availability | non-5xx / total, excluding client errors | `SLO_API_AVAIL` | rolling 30 days |
-| Core API latency | p95 under budget (doc 06/02 section 14) | `SLO_API_LAT` | rolling 30 days |
-| Application submit | successful submits / attempts | `SLO_APPLY_SUCCESS` | rolling 30 days |
-| Search | p95 latency, availability | `SLO_SEARCH` | rolling 30 days |
-| Messaging delivery | message delivered within threshold | `SLO_MSG_DELIV` | rolling 30 days |
-| Transactional email | queued-to-sent age | `SLO_EMAIL_AGE` | rolling 30 days |
-| Webhook delivery (outbound) | delivered within retry policy | `SLO_WEBHOOK` | rolling 30 days |
-| Assessment taking | session start success and timer integrity | `SLO_ASSESS` | rolling 30 days |
+| Capability                  | SLI                                       | Candidate target parameter | Window          |
+| --------------------------- | ----------------------------------------- | -------------------------- | --------------- |
+| Sign-in and session         | successful auth requests / valid attempts | `SLO_AUTH_AVAIL`           | rolling 30 days |
+| Core API availability       | non-5xx / total, excluding client errors  | `SLO_API_AVAIL`            | rolling 30 days |
+| Core API latency            | p95 under budget (doc 06/02 section 14)   | `SLO_API_LAT`              | rolling 30 days |
+| Application submit          | successful submits / attempts             | `SLO_APPLY_SUCCESS`        | rolling 30 days |
+| Search                      | p95 latency, availability                 | `SLO_SEARCH`               | rolling 30 days |
+| Messaging delivery          | message delivered within threshold        | `SLO_MSG_DELIV`            | rolling 30 days |
+| Transactional email         | queued-to-sent age                        | `SLO_EMAIL_AGE`            | rolling 30 days |
+| Webhook delivery (outbound) | delivered within retry policy             | `SLO_WEBHOOK`              | rolling 30 days |
+| Assessment taking           | session start success and timer integrity | `SLO_ASSESS`               | rolling 30 days |
 
 Error budgets: burn-rate alerts (fast and slow window) page on-call; budget exhaustion pauses feature releases for the affected service until restored. Targets are decided in `OD-OPS-09` after baseline.
 
@@ -295,13 +296,13 @@ Error budgets: burn-rate alerts (fast and slow window) page on-call; budget exha
 
 RPO is the maximum acceptable data loss window; RTO is the maximum acceptable downtime. Both are open decisions with proposed defaults tied to data class. `OD-OPS-11`.
 
-| Tier | Data / service | `RPO` `[PROP]` | `RTO` `[PROP]` | Rationale |
-|---|---|---|---|---|
-| T0 | Authentication, tenant data, applications, payments and entitlements, verification records, audit log | 5 minutes (point-in-time recovery) | 1 hour | integrity and legal/financial impact |
-| T1 | Profiles, evidence metadata, messaging, learning progress, assessment attempts | 15 minutes | 4 hours | user-visible core, high trust cost |
-| T2 | Object storage files (resumes, evidence, media originals) | 24 hours via versioning plus replication | 8 hours | recoverable, versioned |
-| T3 | Search index, caches, analytics aggregates, recommendations | rebuildable (no RPO) | 24 hours | derived data |
-| T4 | Logs, metrics | per retention policy | best effort | observability |
+| Tier | Data / service                                                                                        | `RPO` `[PROP]`                           | `RTO` `[PROP]` | Rationale                            |
+| ---- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------- | -------------- | ------------------------------------ |
+| T0   | Authentication, tenant data, applications, payments and entitlements, verification records, audit log | 5 minutes (point-in-time recovery)       | 1 hour         | integrity and legal/financial impact |
+| T1   | Profiles, evidence metadata, messaging, learning progress, assessment attempts                        | 15 minutes                               | 4 hours        | user-visible core, high trust cost   |
+| T2   | Object storage files (resumes, evidence, media originals)                                             | 24 hours via versioning plus replication | 8 hours        | recoverable, versioned               |
+| T3   | Search index, caches, analytics aggregates, recommendations                                           | rebuildable (no RPO)                     | 24 hours       | derived data                         |
+| T4   | Logs, metrics                                                                                         | per retention policy                     | best effort    | observability                        |
 
 Parameters in config catalogue: `DR_RPO_T0`, `DR_RTO_T0`, and so on. Values above are `[PROP]` placeholders pending stakeholder decision, not commitments.
 
@@ -323,15 +324,15 @@ Parameters in config catalogue: `DR_RPO_T0`, `DR_RTO_T0`, and so on. Values abov
 
 ### 16.4 Disaster scenarios
 
-| Scenario | Response |
-|---|---|
-| Primary database failure | automatic failover to standby within the platform; verify; RTO tier T0 |
+| Scenario                                           | Response                                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------- |
+| Primary database failure                           | automatic failover to standby within the platform; verify; RTO tier T0    |
 | Data corruption / bad migration / malicious delete | point-in-time restore to before the event; replay safe writes if possible |
-| Region or zone outage | multi-zone resilience by default; cross-region recovery per section 16.6 |
-| Provider outage (email, payments, AI, video) | degrade features with labelled states; queue and replay |
-| Credential compromise | rotate, revoke, audit (RB-SEC-01) |
-| Ransomware or account takeover of cloud account | restore from immutable separate-account backups; rebuild from IaC |
-| Loss of key personnel or vendor lockout | break-glass access and documented rebuild (doc 07/03 section 9) |
+| Region or zone outage                              | multi-zone resilience by default; cross-region recovery per section 16.6  |
+| Provider outage (email, payments, AI, video)       | degrade features with labelled states; queue and replay                   |
+| Credential compromise                              | rotate, revoke, audit (RB-SEC-01)                                         |
+| Ransomware or account takeover of cloud account    | restore from immutable separate-account backups; rebuild from IaC         |
+| Loss of key personnel or vendor lockout            | break-glass access and documented rebuild (doc 07/03 section 9)           |
 
 ### 16.5 Drills
 
@@ -343,11 +344,11 @@ Parameters in config catalogue: `DR_RPO_T0`, `DR_RTO_T0`, and so on. Values abov
 
 Decision `OD-OPS-13` (`[DEC-REQ]`): single region with multi-zone vs active-passive multi-region vs active-active.
 
-| Option | Pros | Cons |
-|---|---|---|
-| A. Single region, multi-zone, cross-region backups | simplest, lowest cost, data residency simple | regional outage means restoring elsewhere (RTO hours) |
-| B. Active-passive (warm standby region) | much lower RTO for regional loss | doubled infrastructure cost, replication lag defines RPO, failover complexity |
-| C. Active-active | lowest latency and RTO globally | write conflicts, data residency complexity, highest cost and risk |
+| Option                                             | Pros                                         | Cons                                                                          |
+| -------------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
+| A. Single region, multi-zone, cross-region backups | simplest, lowest cost, data residency simple | regional outage means restoring elsewhere (RTO hours)                         |
+| B. Active-passive (warm standby region)            | much lower RTO for regional loss             | doubled infrastructure cost, replication lag defines RPO, failover complexity |
+| C. Active-active                                   | lowest latency and RTO globally              | write conflicts, data residency complexity, highest cost and risk             |
 
 Default proposal `[PROP]`: Option A for the first release tiers, with the architecture avoiding region-specific assumptions so B is possible. Data residency (candidate and institution data in specific jurisdictions) is a separate open decision `OD-OPS-14` owned with the privacy lead: options are single global region, regional deployments per jurisdiction, or tenant-pinned storage. Both decisions block infrastructure selection beyond staging.
 
@@ -392,35 +393,35 @@ Today's repository defines scripts for local dev (`pnpm dev`), tests, lint, type
 
 ## 21. Open decisions
 
-| Id | Question | Options | Default proposal `[PROP]` | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-OPS-01 | Cloud and vendor selection per component class | single cloud / multi-vendor managed | managed Postgres, managed container platform, S3-compatible storage, one observability vendor | architecture owner, finance | all infrastructure |
-| OD-OPS-02 | Staging scale ratio to production | 10 percent / 50 percent / full | enough to run perf tests proportionally | SRE, finance | G4 |
-| OD-OPS-03 | Dedicated search engine vs Postgres full-text | Postgres first / dedicated | Postgres first, ADR on measured need | architecture owner | SRC module |
-| OD-OPS-04 | Observability retention periods | per data class | logs short, metrics longer, audit per security policy | SRE, security officer | observability cost |
-| OD-OPS-05 | Pipeline duration budget | as measured | set after first baseline | engineering lead | CI design |
-| OD-OPS-06 | Dedicated single-tenant deployments for enterprise | not offered / offered | not offered initially | product owner | EMP, ENT modules |
-| OD-OPS-07 | Change-freeze calendar | cadence rules | freeze around declared high-traffic periods, defined by cadence name | product owner, SRE | release planning |
-| OD-OPS-08 | Auto-rollback thresholds | tune after baseline | relative to baseline error and latency | SRE | G7 |
-| OD-OPS-09 | SLO targets and error budget policy | after baseline | per section 14 parameters | product owner, SRE | alerting |
-| OD-OPS-10 | Capacity input values | stakeholder estimates | relative multiples until supplied | product owner | capacity plan |
-| OD-OPS-11 | RPO and RTO per tier | tiers as proposed / custom | section 16.1 | product owner, SRE, legal | backup design |
-| OD-OPS-12 | Backup retention and immutability window | per regulation | set with privacy lead | security officer, legal | backup cost |
-| OD-OPS-13 | Multi-region strategy | A / B / C | A | architecture owner, product owner | infrastructure |
-| OD-OPS-14 | Data residency model | global / regional / tenant-pinned | global initially, residency-aware design | legal, privacy lead | database topology |
-| OD-OPS-15 | Cost budgets per environment | stakeholder | supplied by finance | finance | cost alerts |
+| Id        | Question                                           | Options                             | Default proposal `[PROP]`                                                                     | Decides                           | Blocks             |
+| --------- | -------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------- | ------------------ |
+| OD-OPS-01 | Cloud and vendor selection per component class     | single cloud / multi-vendor managed | managed Postgres, managed container platform, S3-compatible storage, one observability vendor | architecture owner, finance       | all infrastructure |
+| OD-OPS-02 | Staging scale ratio to production                  | 10 percent / 50 percent / full      | enough to run perf tests proportionally                                                       | SRE, finance                      | G4                 |
+| OD-OPS-03 | Dedicated search engine vs Postgres full-text      | Postgres first / dedicated          | Postgres first, ADR on measured need                                                          | architecture owner                | SRC module         |
+| OD-OPS-04 | Observability retention periods                    | per data class                      | logs short, metrics longer, audit per security policy                                         | SRE, security officer             | observability cost |
+| OD-OPS-05 | Pipeline duration budget                           | as measured                         | set after first baseline                                                                      | engineering lead                  | CI design          |
+| OD-OPS-06 | Dedicated single-tenant deployments for enterprise | not offered / offered               | not offered initially                                                                         | product owner                     | EMP, ENT modules   |
+| OD-OPS-07 | Change-freeze calendar                             | cadence rules                       | freeze around declared high-traffic periods, defined by cadence name                          | product owner, SRE                | release planning   |
+| OD-OPS-08 | Auto-rollback thresholds                           | tune after baseline                 | relative to baseline error and latency                                                        | SRE                               | G7                 |
+| OD-OPS-09 | SLO targets and error budget policy                | after baseline                      | per section 14 parameters                                                                     | product owner, SRE                | alerting           |
+| OD-OPS-10 | Capacity input values                              | stakeholder estimates               | relative multiples until supplied                                                             | product owner                     | capacity plan      |
+| OD-OPS-11 | RPO and RTO per tier                               | tiers as proposed / custom          | section 16.1                                                                                  | product owner, SRE, legal         | backup design      |
+| OD-OPS-12 | Backup retention and immutability window           | per regulation                      | set with privacy lead                                                                         | security officer, legal           | backup cost        |
+| OD-OPS-13 | Multi-region strategy                              | A / B / C                           | A                                                                                             | architecture owner, product owner | infrastructure     |
+| OD-OPS-14 | Data residency model                               | global / regional / tenant-pinned   | global initially, residency-aware design                                                      | legal, privacy lead               | database topology  |
+| OD-OPS-15 | Cost budgets per environment                       | stakeholder                         | supplied by finance                                                                           | finance                           | cost alerts        |
 
 ## 22. Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
-| RSK-OPS-01 | Backups exist but restores fail | scheduled restore drills with recorded RPO/RTO |
-| RSK-OPS-02 | Long-locking migration causes outage | lock timeouts, expand/contract, production-shaped upgrade test |
+| Id         | Risk                                              | Mitigation                                                            |
+| ---------- | ------------------------------------------------- | --------------------------------------------------------------------- |
+| RSK-OPS-01 | Backups exist but restores fail                   | scheduled restore drills with recorded RPO/RTO                        |
+| RSK-OPS-02 | Long-locking migration causes outage              | lock timeouts, expand/contract, production-shaped upgrade test        |
 | RSK-OPS-03 | Provider outage cascades into user-facing failure | adapters with timeouts, queues, degraded labelled states, chaos tests |
-| RSK-OPS-04 | Cost overrun from media or AI usage | caps, budgets, anomaly alerts |
-| RSK-OPS-05 | Staging not representative | parity register, volume seed |
-| RSK-OPS-06 | Single operator knowledge | runbooks, rebuild-from-IaC drill, bus-factor controls (doc 07/03) |
-| RSK-OPS-07 | Region lock-in or residency violations | residency-aware design, OD-OPS-14 |
+| RSK-OPS-04 | Cost overrun from media or AI usage               | caps, budgets, anomaly alerts                                         |
+| RSK-OPS-05 | Staging not representative                        | parity register, volume seed                                          |
+| RSK-OPS-06 | Single operator knowledge                         | runbooks, rebuild-from-IaC drill, bus-factor controls (doc 07/03)     |
+| RSK-OPS-07 | Region lock-in or residency violations            | residency-aware design, OD-OPS-14                                     |
 
 ## 23. Legacy trace
 

@@ -18,14 +18,14 @@ EVT lets institutions, employers, instructors, mentors and the platform run care
 
 ### 1.3 Scope
 
-| In scope | Out of scope | Owned by EVT | Consumed from other modules |
-|---|---|---|---|
-| Event creation, templates, publishing, review | Building a live-streaming or video-conferencing engine [SRC: SSOT §4.2 "unnecessary realtime/live-streaming infrastructure"]; EVT embeds or links external providers | Events, sessions, tickets, registrations, waitlists, check-ins | Identity and roles (`IDN` planned), organizations (`EMP` planned), institutions (`INS` planned) |
-| Registration, ticketing, capacity, waitlists | Payment processing internals | Hackathons, teams, submissions, judging, results | Payments and refunds (`BIL` planned) |
-| Calendar (ICS), reminders, check-in | General social network feed or groups (`NET` planned owns groups) | Career-fair booths and booth interactions | Notifications delivery (`NTF` planned) |
-| Virtual-room link management, Q&A and polls (lightweight), recordings (as stored media) | Interview scheduling engine (`INT` planned owns it; EVT links career-fair slots to it) | Event certificates (issuance request) and attendance records | Credential issuing (`EVD` planned), badges (`REP` planned), media storage (`PLT` planned) |
-| Sponsor and employer participation as labelled sponsorship | Advertising or paid ranking [SRC: SSOT §4.2 non-goal: self-serve ad network] | Event moderation reports (filing and host actions) | Moderation decisions (`TSF` planned) |
-| Series and cohort-based community programmes | Learning content delivery (`LRN` planned) | Event analytics for organizers (own events) | Cross-module analytics (`ANL`) |
+| In scope                                                                                | Out of scope                                                                                                                                                         | Owned by EVT                                                   | Consumed from other modules                                                                     |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Event creation, templates, publishing, review                                           | Building a live-streaming or video-conferencing engine [SRC: SSOT §4.2 "unnecessary realtime/live-streaming infrastructure"]; EVT embeds or links external providers | Events, sessions, tickets, registrations, waitlists, check-ins | Identity and roles (`IDN` planned), organizations (`EMP` planned), institutions (`INS` planned) |
+| Registration, ticketing, capacity, waitlists                                            | Payment processing internals                                                                                                                                         | Hackathons, teams, submissions, judging, results               | Payments and refunds (`BIL` planned)                                                            |
+| Calendar (ICS), reminders, check-in                                                     | General social network feed or groups (`NET` planned owns groups)                                                                                                    | Career-fair booths and booth interactions                      | Notifications delivery (`NTF` planned)                                                          |
+| Virtual-room link management, Q&A and polls (lightweight), recordings (as stored media) | Interview scheduling engine (`INT` planned owns it; EVT links career-fair slots to it)                                                                               | Event certificates (issuance request) and attendance records   | Credential issuing (`EVD` planned), badges (`REP` planned), media storage (`PLT` planned)       |
+| Sponsor and employer participation as labelled sponsorship                              | Advertising or paid ranking [SRC: SSOT §4.2 non-goal: self-serve ad network]                                                                                         | Event moderation reports (filing and host actions)             | Moderation decisions (`TSF` planned)                                                            |
+| Series and cohort-based community programmes                                            | Learning content delivery (`LRN` planned)                                                                                                                            | Event analytics for organizers (own events)                    | Cross-module analytics (`ANL`)                                                                  |
 
 ### 1.4 Boundary note on SSOT non-goals
 
@@ -35,36 +35,36 @@ SSOT §4.2 forbids a "social-media clone", "self-serve advertising network" and 
 
 Legend: C create, R read, U update, D delete/cancel, A approve, X execute action, — none. "Own" = events the user hosts or is registered for. "Org" = events of the user's organization.
 
-| Capability | GUE | CAN/STD | INS | MNT | REC/HMG | EAD | IAD/PLO | MOD | PAD |
-|---|---|---|---|---|---|---|---|---|---|
-| Browse public events | R | R | R | R | R | R | R | R | R |
-| Register / cancel own registration | — | C/D own | C/D own | C/D own | C/D own | C/D own | C/D own | — | — |
-| Create event (draft) | — | — (OD-EVT-02) | C (own) | C (own, approved) | C (org, if granted) | C (org) | C (org) | — | C |
-| Publish without review | — | — | — | — | — | X if org trusted | X if institution trusted | — | X |
-| Review and approve event | — | — | — | — | — | — | — | A | A |
-| Manage attendees, check-in | — | — | X own | X own | X org events | X org | X org | — | X |
-| Create hackathon | — | — | C (own) | — | C (org) | C | C | — | C |
-| Join team / submit | — | X | X | X | — | — | X | — | — |
-| Judge | — | — | X if invited | X if invited | X if invited | X if invited | X if invited | — | — |
-| Run career-fair booth | — | — | — | — | X (booth staff) | X (organizes booth) | X (organizes fair) | — | X |
-| Visit booth, share contact | — | X | — | — | — | — | — | — | — |
-| File report on event | — | X | X | X | X | X | X | — | — |
-| Takedown, feature, override | — | — | — | — | — | — | — | X takedown | X all, audited |
-| View organizer analytics | — | — | R own | R own | R org | R org | R org | — | R all |
+| Capability                         | GUE | CAN/STD       | INS          | MNT               | REC/HMG             | EAD                 | IAD/PLO                  | MOD        | PAD            |
+| ---------------------------------- | --- | ------------- | ------------ | ----------------- | ------------------- | ------------------- | ------------------------ | ---------- | -------------- |
+| Browse public events               | R   | R             | R            | R                 | R                   | R                   | R                        | R          | R              |
+| Register / cancel own registration | —   | C/D own       | C/D own      | C/D own           | C/D own             | C/D own             | C/D own                  | —          | —              |
+| Create event (draft)               | —   | — (OD-EVT-02) | C (own)      | C (own, approved) | C (org, if granted) | C (org)             | C (org)                  | —          | C              |
+| Publish without review             | —   | —             | —            | —                 | —                   | X if org trusted    | X if institution trusted | —          | X              |
+| Review and approve event           | —   | —             | —            | —                 | —                   | —                   | —                        | A          | A              |
+| Manage attendees, check-in         | —   | —             | X own        | X own             | X org events        | X org               | X org                    | —          | X              |
+| Create hackathon                   | —   | —             | C (own)      | —                 | C (org)             | C                   | C                        | —          | C              |
+| Join team / submit                 | —   | X             | X            | X                 | —                   | —                   | X                        | —          | —              |
+| Judge                              | —   | —             | X if invited | X if invited      | X if invited        | X if invited        | X if invited             | —          | —              |
+| Run career-fair booth              | —   | —             | —            | —                 | X (booth staff)     | X (organizes booth) | X (organizes fair)       | —          | X              |
+| Visit booth, share contact         | —   | X             | —            | —                 | —                   | —                   | —                        | —          | —              |
+| File report on event               | —   | X             | X            | X                 | X                   | X                   | X                        | —          | —              |
+| Takedown, feature, override        | —   | —             | —            | —                 | —                   | —                   | —                        | X takedown | X all, audited |
+| View organizer analytics           | —   | —             | R own        | R own             | R org               | R org               | R org                    | —          | R all          |
 
 Service principal `API`: may read public event data and write registrations through the Public API (`PLT` planned) with scoped keys.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Event authoring and publishing | FR-EVT-001 to 005 |
-| B | Discovery, registration and tickets | FR-EVT-006 to 012 |
-| C | Delivery: calendar, reminders, rooms, check-in, interaction | FR-EVT-013 to 019 |
-| D | Sponsors and career fairs | FR-EVT-020 to 023 |
-| E | Hackathons | FR-EVT-024 to 030 |
-| F | After the event | FR-EVT-031 to 033 |
-| G | Programmes, governance and operations | FR-EVT-034 to 038 |
+| Code | Sub-module                                                  | Features          |
+| ---- | ----------------------------------------------------------- | ----------------- |
+| A    | Event authoring and publishing                              | FR-EVT-001 to 005 |
+| B    | Discovery, registration and tickets                         | FR-EVT-006 to 012 |
+| C    | Delivery: calendar, reminders, rooms, check-in, interaction | FR-EVT-013 to 019 |
+| D    | Sponsors and career fairs                                   | FR-EVT-020 to 023 |
+| E    | Hackathons                                                  | FR-EVT-024 to 030 |
+| F    | After the event                                             | FR-EVT-031 to 033 |
+| G    | Programmes, governance and operations                       | FR-EVT-034 to 038 |
 
 ## 4. Feature specifications
 
@@ -1034,50 +1034,50 @@ Service principal `API`: may read public event data and write registrations thro
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-EVT-001 | Only these roles may host: `INS` (own events), approved `MNT`, `REC`/`EAD` for their organization, `IAD`/`PLO` for their institution, `PAD`. A `CAN`/`STD` may not host public events (`OD-EVT-02`). Hosting rights can be suspended by `MOD`/`PAD`. | Limits spam and scam events; keeps the module inside the career domain. | Create and publish services; role check | [PROP] |
-| BR-EVT-002 | To publish, an event needs title, summary, description ≥ 50 chars, start and end with IANA timezone, mode, venue or join method, capacity or unlimited, host identity, code-of-conduct acknowledgement; paid events also need a refund policy. | Prevents incomplete public pages. | Publish validation | [PROP] |
-| BR-EVT-003 | Times are stored in UTC with the event's IANA timezone; shown in the viewer timezone with the event timezone in parentheses; ICS uses UTC and stable `UID`. | Avoids DST and cross-region errors. | Domain layer, ICS generator | [DER] |
-| BR-EVT-004 | Confirmed registrations never exceed capacity (overall and per ticket type). Waitlist is FIFO by `joinedAt`; a freed seat is offered to the next entry for `waitlist_offer_hours` (default 24, `[PROP]`, shrinks near start). | Fairness and no oversell. | Registration transaction | [PROP] |
-| BR-EVT-005 | One active registration per (event, user, ticket type); repeated requests are idempotent and return the existing record. A user cannot hold two overlapping career-fair slots. | Prevents duplicates and double-booking. | Unique constraint plus service | [DER] |
-| BR-EVT-006 | The refund policy is snapshotted at purchase. After the first sale a host may only change it to a more favorable policy for attendees. | Consumer protection. | Ticket service | [PROP] |
-| BR-EVT-007 | A change is material if it alters start/end by more than 15 minutes, venue, mode, join provider, or price. Material changes notify registrants, increment the ICS sequence, and let registrants cancel free of charge regardless of policy. Cancellation is always material. | Registrants are not bound to terms they did not accept. | Event update service | [PROP] |
-| BR-EVT-008 | Attendee personal data is shared with sponsors or employers only after the attendee's explicit, per-organization, revocable opt-in. Defaults are off. Hosts receive only what the service needs (name, email, answers). | Privacy by default. | Consent ledger and read APIs | [DER] from [SRC: SSOT privacy principles]; [PROP] |
-| BR-EVT-009 | Events open to minors require a minimum age and guardian-consent flow set by the host; default minimum age is 18 for employer-hosted events and hackathons (`OD-EVT-07`). | Child safety and law. | Registration eligibility | [PROP] |
-| BR-EVT-010 | Check-in tokens are signed, bound to one registration and event, and single-use for the same check-in type; rescanning returns "already checked in" and records nothing. QR codes rotate at least once per 24 hours before the event. | Prevents sharing and duplicate counting. | Check-in service | [PROP] |
-| BR-EVT-011 | Recording requires a consent notice shown at registration and at join; recordings expire per host setting (default 12 months) and attendees may request removal of their appearance. | Consent and data rights. | Recording service | [PROP] |
-| BR-EVT-012 | In a hackathon a participant belongs to at most one team; team size stays within the published min and max; teams lock at the submission deadline; a submission belongs to exactly one team. | Fairness and clear ownership. | Team and submission services | [PROP] |
-| BR-EVT-013 | Every submission is scored by at least `judges_min` judges (default 3, `[PROP]`); judges declare conflicts; a judge cannot score a submission from their own team or organization; final score is the weighted sum of criteria; tie-break rule is fixed before the build phase. | Defensible judging. | Judging service | [PROP] |
-| BR-EVT-014 | Rules, criteria, team size and prizes are frozen when the build phase starts. Only `PAD` may change them, with notice to all participants and a 48-hour penalty-free withdrawal window. | Participants rely on published terms. | Hackathon service | [PROP] |
-| BR-EVT-015 | Participants keep ownership of their work unless the published rules state a license; rules must contain an IP clause. Sponsors and hosts cannot influence scores; sponsor prize tracks are judged under the same criteria process. | Avoids IP disputes and pay-to-win. | Publish validation, judging | [PROP] |
-| BR-EVT-016 | A certificate is issued only to an attendee with checked-in attendance of at least the configured threshold (default 80%) or, for hackathons, a submitted project; revoked on disqualification. | Credential integrity. | Certificate service | [PROP] |
-| BR-EVT-017 | Career-fair employer booths require a verified employer organization. Booth staff see a candidate's profile data only through a candidate's explicit "share", scoped to chosen fields; anonymous aggregate visit counts are allowed. | Candidate control. | Booth and share services | [PROP] |
-| BR-EVT-018 | Events must follow the content policy; banned users and hosts under suspension cannot register or publish; the host may remove an attendee with a reason; reports go to `MOD`. | Safety. | Moderation hooks | [PROP] |
-| BR-EVT-019 | When an event is cancelled or taken down, every paid registration is refunded in full automatically and unpaid pending payments are voided. | Consumer protection. | Cancel flow with `BIL` | [PROP] |
-| BR-EVT-020 | Default reminders are 24 hours, 1 hour and 10 minutes before start; reminders are opt-out per event; cancellation and material-change notices cannot be opted out. | Reliability vs consent. | Reminder scheduler | [PROP] |
-| BR-EVT-021 | Organizer analytics show attendee-level data only for the host's own events; any cross-event or platform benchmark uses at least `min_cohort_k` (default 10) events or attendees; survey breakdowns appear only with at least 5 responses. | Re-identification control. | Analytics read layer | [DER] from [SRC: SSOT Amendment G, BR-178] |
-| BR-EVT-022 | Sponsorship, fees or tier never influence event discovery ranking, judging, or access to candidate data; sponsor recognition is labelled "Sponsor". Paid placement is not offered. | Non-goal compliance (no ad network, no pay-to-rank). | Ranking service, UI | [SRC: SSOT §4.2] |
-| BR-EVT-023 | Hackathon eligibility (age, country restrictions required by law, sponsor-employee exclusion) is evaluated at registration; only pass/fail is stored visible to hosts. | Legal eligibility without exposing data. | Registration service | [PROP] |
-| BR-EVT-024 | Attendee personal data for an event is retained 24 months after the event end and then anonymized; registration answers are erased with account deletion; consent ledger rows are anonymized not deleted. | Data minimization. | Retention job | [PROP] (`OD-EVT-06`) |
-| BR-EVT-025 | Anonymous Q&A hides the author from other attendees only; moderators and hosts can see the author. Blocked users' posts are hidden from everyone but the author. | Safe participation with accountability. | Q&A service | [PROP] |
-| BR-EVT-026 | A programme is complete when the attendee attended at least the required number of sessions; completion triggers a programme certificate. | Clear completion rule. | Series service | [PROP] |
-| BR-EVT-027 | Editing a recurring series with "this and following" changes future instances only; past instances and their registrations are immutable. | Preserves history. | Series service | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                            | Rationale                                                               | Enforced where                          | Source                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------- |
+| BR-EVT-001 | Only these roles may host: `INS` (own events), approved `MNT`, `REC`/`EAD` for their organization, `IAD`/`PLO` for their institution, `PAD`. A `CAN`/`STD` may not host public events (`OD-EVT-02`). Hosting rights can be suspended by `MOD`/`PAD`.                            | Limits spam and scam events; keeps the module inside the career domain. | Create and publish services; role check | [PROP]                                            |
+| BR-EVT-002 | To publish, an event needs title, summary, description ≥ 50 chars, start and end with IANA timezone, mode, venue or join method, capacity or unlimited, host identity, code-of-conduct acknowledgement; paid events also need a refund policy.                                  | Prevents incomplete public pages.                                       | Publish validation                      | [PROP]                                            |
+| BR-EVT-003 | Times are stored in UTC with the event's IANA timezone; shown in the viewer timezone with the event timezone in parentheses; ICS uses UTC and stable `UID`.                                                                                                                     | Avoids DST and cross-region errors.                                     | Domain layer, ICS generator             | [DER]                                             |
+| BR-EVT-004 | Confirmed registrations never exceed capacity (overall and per ticket type). Waitlist is FIFO by `joinedAt`; a freed seat is offered to the next entry for `waitlist_offer_hours` (default 24, `[PROP]`, shrinks near start).                                                   | Fairness and no oversell.                                               | Registration transaction                | [PROP]                                            |
+| BR-EVT-005 | One active registration per (event, user, ticket type); repeated requests are idempotent and return the existing record. A user cannot hold two overlapping career-fair slots.                                                                                                  | Prevents duplicates and double-booking.                                 | Unique constraint plus service          | [DER]                                             |
+| BR-EVT-006 | The refund policy is snapshotted at purchase. After the first sale a host may only change it to a more favorable policy for attendees.                                                                                                                                          | Consumer protection.                                                    | Ticket service                          | [PROP]                                            |
+| BR-EVT-007 | A change is material if it alters start/end by more than 15 minutes, venue, mode, join provider, or price. Material changes notify registrants, increment the ICS sequence, and let registrants cancel free of charge regardless of policy. Cancellation is always material.    | Registrants are not bound to terms they did not accept.                 | Event update service                    | [PROP]                                            |
+| BR-EVT-008 | Attendee personal data is shared with sponsors or employers only after the attendee's explicit, per-organization, revocable opt-in. Defaults are off. Hosts receive only what the service needs (name, email, answers).                                                         | Privacy by default.                                                     | Consent ledger and read APIs            | [DER] from [SRC: SSOT privacy principles]; [PROP] |
+| BR-EVT-009 | Events open to minors require a minimum age and guardian-consent flow set by the host; default minimum age is 18 for employer-hosted events and hackathons (`OD-EVT-07`).                                                                                                       | Child safety and law.                                                   | Registration eligibility                | [PROP]                                            |
+| BR-EVT-010 | Check-in tokens are signed, bound to one registration and event, and single-use for the same check-in type; rescanning returns "already checked in" and records nothing. QR codes rotate at least once per 24 hours before the event.                                           | Prevents sharing and duplicate counting.                                | Check-in service                        | [PROP]                                            |
+| BR-EVT-011 | Recording requires a consent notice shown at registration and at join; recordings expire per host setting (default 12 months) and attendees may request removal of their appearance.                                                                                            | Consent and data rights.                                                | Recording service                       | [PROP]                                            |
+| BR-EVT-012 | In a hackathon a participant belongs to at most one team; team size stays within the published min and max; teams lock at the submission deadline; a submission belongs to exactly one team.                                                                                    | Fairness and clear ownership.                                           | Team and submission services            | [PROP]                                            |
+| BR-EVT-013 | Every submission is scored by at least `judges_min` judges (default 3, `[PROP]`); judges declare conflicts; a judge cannot score a submission from their own team or organization; final score is the weighted sum of criteria; tie-break rule is fixed before the build phase. | Defensible judging.                                                     | Judging service                         | [PROP]                                            |
+| BR-EVT-014 | Rules, criteria, team size and prizes are frozen when the build phase starts. Only `PAD` may change them, with notice to all participants and a 48-hour penalty-free withdrawal window.                                                                                         | Participants rely on published terms.                                   | Hackathon service                       | [PROP]                                            |
+| BR-EVT-015 | Participants keep ownership of their work unless the published rules state a license; rules must contain an IP clause. Sponsors and hosts cannot influence scores; sponsor prize tracks are judged under the same criteria process.                                             | Avoids IP disputes and pay-to-win.                                      | Publish validation, judging             | [PROP]                                            |
+| BR-EVT-016 | A certificate is issued only to an attendee with checked-in attendance of at least the configured threshold (default 80%) or, for hackathons, a submitted project; revoked on disqualification.                                                                                 | Credential integrity.                                                   | Certificate service                     | [PROP]                                            |
+| BR-EVT-017 | Career-fair employer booths require a verified employer organization. Booth staff see a candidate's profile data only through a candidate's explicit "share", scoped to chosen fields; anonymous aggregate visit counts are allowed.                                            | Candidate control.                                                      | Booth and share services                | [PROP]                                            |
+| BR-EVT-018 | Events must follow the content policy; banned users and hosts under suspension cannot register or publish; the host may remove an attendee with a reason; reports go to `MOD`.                                                                                                  | Safety.                                                                 | Moderation hooks                        | [PROP]                                            |
+| BR-EVT-019 | When an event is cancelled or taken down, every paid registration is refunded in full automatically and unpaid pending payments are voided.                                                                                                                                     | Consumer protection.                                                    | Cancel flow with `BIL`                  | [PROP]                                            |
+| BR-EVT-020 | Default reminders are 24 hours, 1 hour and 10 minutes before start; reminders are opt-out per event; cancellation and material-change notices cannot be opted out.                                                                                                              | Reliability vs consent.                                                 | Reminder scheduler                      | [PROP]                                            |
+| BR-EVT-021 | Organizer analytics show attendee-level data only for the host's own events; any cross-event or platform benchmark uses at least `min_cohort_k` (default 10) events or attendees; survey breakdowns appear only with at least 5 responses.                                      | Re-identification control.                                              | Analytics read layer                    | [DER] from [SRC: SSOT Amendment G, BR-178]        |
+| BR-EVT-022 | Sponsorship, fees or tier never influence event discovery ranking, judging, or access to candidate data; sponsor recognition is labelled "Sponsor". Paid placement is not offered.                                                                                              | Non-goal compliance (no ad network, no pay-to-rank).                    | Ranking service, UI                     | [SRC: SSOT §4.2]                                  |
+| BR-EVT-023 | Hackathon eligibility (age, country restrictions required by law, sponsor-employee exclusion) is evaluated at registration; only pass/fail is stored visible to hosts.                                                                                                          | Legal eligibility without exposing data.                                | Registration service                    | [PROP]                                            |
+| BR-EVT-024 | Attendee personal data for an event is retained 24 months after the event end and then anonymized; registration answers are erased with account deletion; consent ledger rows are anonymized not deleted.                                                                       | Data minimization.                                                      | Retention job                           | [PROP] (`OD-EVT-06`)                              |
+| BR-EVT-025 | Anonymous Q&A hides the author from other attendees only; moderators and hosts can see the author. Blocked users' posts are hidden from everyone but the author.                                                                                                                | Safe participation with accountability.                                 | Q&A service                             | [PROP]                                            |
+| BR-EVT-026 | A programme is complete when the attendee attended at least the required number of sessions; completion triggers a programme certificate.                                                                                                                                       | Clear completion rule.                                                  | Series service                          | [PROP]                                            |
+| BR-EVT-027 | Editing a recurring series with "this and following" changes future instances only; past instances and their registrations are immutable.                                                                                                                                       | Preserves history.                                                      | Series service                          | [PROP]                                            |
 
 ## 6. State machines
 
 ### SM-EVT-01 — Event lifecycle
 
-| State | Meaning | Terminal |
-|---|---|---|
-| draft | Private, editable | No |
-| in_review | Awaiting moderator approval | No |
-| published | Public/unlisted/invite-only, registration open per settings | No |
-| live | Between start and end | No |
-| ended | After end; follow-up allowed | No |
-| archived | Read-only history | Yes |
-| rejected | Review rejected | No (returns to draft) |
-| cancelled | Cancelled by host or admin | Yes |
+| State     | Meaning                                                     | Terminal              |
+| --------- | ----------------------------------------------------------- | --------------------- |
+| draft     | Private, editable                                           | No                    |
+| in_review | Awaiting moderator approval                                 | No                    |
+| published | Public/unlisted/invite-only, registration open per settings | No                    |
+| live      | Between start and end                                       | No                    |
+| ended     | After end; follow-up allowed                                | No                    |
+| archived  | Read-only history                                           | Yes                   |
+| rejected  | Review rejected                                             | No (returns to draft) |
+| cancelled | Cancelled by host or admin                                  | Yes                   |
 
 Transitions: draft → in_review (submit, guard: pre-flight passes, review required); draft → published (publish, guard: pre-flight passes, trusted host); in_review → published (approve); in_review → rejected (reject with reason); rejected → draft (edit); published → live (scheduler at start); live → ended (scheduler at end); ended → archived (host action or 90 days); published/live → cancelled (host or PAD, with refunds); draft → archived (host delete or 180 days idle).
 
@@ -1221,177 +1221,177 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-EVT-001 | Events hub | `/events` | GUE, all | Discover and filter events | Loading, results, empty with alert CTA, error with retry |
-| SCR-EVT-002 | Event detail | `/events/:slug` | GUE, all | Overview, agenda, speakers, sponsors, register | Open, full (waitlist), ended, cancelled, invite-only 404 |
-| SCR-EVT-003 | Registration flow | `/events/:slug/register` | Signed-in users | Ticket, questions, consents | Validation errors, payment pending, success |
-| SCR-EVT-004 | My events | `/me/events` | Signed-in users | Registrations, waitlist, certificates, transfers | Upcoming, past, empty |
-| SCR-EVT-005 | Host dashboard | `/host/events` | Hosts | Draft, published, ended events and tasks | Empty first-run, list |
-| SCR-EVT-006 | Event editor | `/host/events/:id/edit` | Hosts | Details, agenda, tickets, questions, team, rooms, sponsors | Autosave states, conflict, read-only |
-| SCR-EVT-007 | Publish checklist | `/host/events/:id/publish` | Hosts | Pre-flight and review status | Failing items, in review, rejected |
-| SCR-EVT-008 | Attendee manager | `/host/events/:id/attendees` | Hosts | Approvals, waitlist, invites, export | Bulk selection, progress, empty |
-| SCR-EVT-009 | Announcements | `/host/events/:id/announce` | Hosts | Compose and schedule updates | Draft, scheduled, sent report |
-| SCR-EVT-010 | Check-in scanner | `/host/events/:id/checkin` | Hosts, staff | Scan, search, mark present | Valid, duplicate, invalid, offline |
-| SCR-EVT-011 | Live event room page | `/events/:slug/live` | Registrants | Join link, Q&A, polls | Before window, live, ended |
-| SCR-EVT-012 | Replay | `/events/:slug/replay` | Per access setting | Recording with captions | Processing, available, expired |
-| SCR-EVT-013 | Career fair floor | `/events/:slug/fair` | Candidates, hosts | Halls and booths | Hall list, booth view, closed |
-| SCR-EVT-014 | Booth editor and lead manager | `/host/events/:id/booth/:boothId` | Booth staff | Booth content, slots, shared profiles | Slots, shares, notes |
-| SCR-EVT-015 | My shares | `/me/events/shares` | CAN, STD | Review/withdraw shared data | List, withdrawn |
-| SCR-EVT-016 | Hackathon home | `/events/:slug/hackathon` | Participants | Timeline, rules, tracks, prizes | Phase banners |
-| SCR-EVT-017 | Team finder and team page | `/events/:slug/teams` | Participants | Create, join, manage team | Open, full, locked |
-| SCR-EVT-018 | Submission editor | `/events/:slug/submission` | Team members | Submit project | Draft, submitted, locked |
-| SCR-EVT-019 | Judging console | `/judge/events/:id` | Judges | Assigned submissions and scoring | Conflicts, progress |
-| SCR-EVT-020 | Results and prizes | `/events/:slug/results` | All, hosts | Leaderboard and fulfillment | Pending, published, corrected |
-| SCR-EVT-021 | Event privacy | `/me/events/privacy` | CAN, STD | Consents and access log | Toggles, log |
-| SCR-EVT-022 | Organizer analytics | `/host/events/:id/analytics` | Hosts | Funnel and outcomes | No data, suppressed cells |
-| SCR-EVT-023 | Moderation queue | `/admin/events/reports` | MOD, PAD | Triage event reports and review queue | Empty, backlog |
-| SCR-EVT-024 | Series and programme page | `/series/:slug` | All | Follow, enroll, progress | Instances, completed |
+| ID          | Name                          | Route proposal                    | Roles              | Purpose                                                    | Key states                                               |
+| ----------- | ----------------------------- | --------------------------------- | ------------------ | ---------------------------------------------------------- | -------------------------------------------------------- |
+| SCR-EVT-001 | Events hub                    | `/events`                         | GUE, all           | Discover and filter events                                 | Loading, results, empty with alert CTA, error with retry |
+| SCR-EVT-002 | Event detail                  | `/events/:slug`                   | GUE, all           | Overview, agenda, speakers, sponsors, register             | Open, full (waitlist), ended, cancelled, invite-only 404 |
+| SCR-EVT-003 | Registration flow             | `/events/:slug/register`          | Signed-in users    | Ticket, questions, consents                                | Validation errors, payment pending, success              |
+| SCR-EVT-004 | My events                     | `/me/events`                      | Signed-in users    | Registrations, waitlist, certificates, transfers           | Upcoming, past, empty                                    |
+| SCR-EVT-005 | Host dashboard                | `/host/events`                    | Hosts              | Draft, published, ended events and tasks                   | Empty first-run, list                                    |
+| SCR-EVT-006 | Event editor                  | `/host/events/:id/edit`           | Hosts              | Details, agenda, tickets, questions, team, rooms, sponsors | Autosave states, conflict, read-only                     |
+| SCR-EVT-007 | Publish checklist             | `/host/events/:id/publish`        | Hosts              | Pre-flight and review status                               | Failing items, in review, rejected                       |
+| SCR-EVT-008 | Attendee manager              | `/host/events/:id/attendees`      | Hosts              | Approvals, waitlist, invites, export                       | Bulk selection, progress, empty                          |
+| SCR-EVT-009 | Announcements                 | `/host/events/:id/announce`       | Hosts              | Compose and schedule updates                               | Draft, scheduled, sent report                            |
+| SCR-EVT-010 | Check-in scanner              | `/host/events/:id/checkin`        | Hosts, staff       | Scan, search, mark present                                 | Valid, duplicate, invalid, offline                       |
+| SCR-EVT-011 | Live event room page          | `/events/:slug/live`              | Registrants        | Join link, Q&A, polls                                      | Before window, live, ended                               |
+| SCR-EVT-012 | Replay                        | `/events/:slug/replay`            | Per access setting | Recording with captions                                    | Processing, available, expired                           |
+| SCR-EVT-013 | Career fair floor             | `/events/:slug/fair`              | Candidates, hosts  | Halls and booths                                           | Hall list, booth view, closed                            |
+| SCR-EVT-014 | Booth editor and lead manager | `/host/events/:id/booth/:boothId` | Booth staff        | Booth content, slots, shared profiles                      | Slots, shares, notes                                     |
+| SCR-EVT-015 | My shares                     | `/me/events/shares`               | CAN, STD           | Review/withdraw shared data                                | List, withdrawn                                          |
+| SCR-EVT-016 | Hackathon home                | `/events/:slug/hackathon`         | Participants       | Timeline, rules, tracks, prizes                            | Phase banners                                            |
+| SCR-EVT-017 | Team finder and team page     | `/events/:slug/teams`             | Participants       | Create, join, manage team                                  | Open, full, locked                                       |
+| SCR-EVT-018 | Submission editor             | `/events/:slug/submission`        | Team members       | Submit project                                             | Draft, submitted, locked                                 |
+| SCR-EVT-019 | Judging console               | `/judge/events/:id`               | Judges             | Assigned submissions and scoring                           | Conflicts, progress                                      |
+| SCR-EVT-020 | Results and prizes            | `/events/:slug/results`           | All, hosts         | Leaderboard and fulfillment                                | Pending, published, corrected                            |
+| SCR-EVT-021 | Event privacy                 | `/me/events/privacy`              | CAN, STD           | Consents and access log                                    | Toggles, log                                             |
+| SCR-EVT-022 | Organizer analytics           | `/host/events/:id/analytics`      | Hosts              | Funnel and outcomes                                        | No data, suppressed cells                                |
+| SCR-EVT-023 | Moderation queue              | `/admin/events/reports`           | MOD, PAD           | Triage event reports and review queue                      | Empty, backlog                                           |
+| SCR-EVT-024 | Series and programme page     | `/series/:slug`                   | All                | Follow, enroll, progress                                   | Instances, completed                                     |
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-EVT-01 | Event | id, type, title, summary, description, state, visibility, mode, startUtc, endUtc, timezone, venue, capacity, hostOrgId/hostUserId, materialVersion, seriesId?, refundPolicy, slug | 1:N sessions, registrations, tickets | Business record, 24 months then archived |
-| ENT-EVT-02 | Session | id, eventId, track, title, startUtc, endUtc, room, speakerIds | N:1 Event; N:M speakers | With event |
-| ENT-EVT-03 | Registration | id, eventId, userId, ticketTypeId, state, position?, offerExpiresAt?, refundSnapshot, createdAt | N:1 Event, User; 1:N answers, check-ins | Personal: 24 months after event then anonymized |
-| ENT-EVT-04 | RegistrationQuestion | id, eventId, type, text, required, options, version, hidden | N:1 Event | With event |
-| ENT-EVT-05 | EventRole | eventId, userId, role (owner, co-host, speaker, moderator, judge, staff), status | N:1 Event | With event |
-| ENT-EVT-06 | TicketType | id, eventId, name, priceMinor, currency, quantity, saleStart, saleEnd, audience; PromoCode child | N:1 Event | Financial record, per `BIL` policy |
-| ENT-EVT-07 | QnaItem and Poll | id, eventId, authorId, text, anonymous, state, votes | N:1 Event | 12 months |
-| ENT-EVT-08 | Sponsorship | id, eventId, orgId, tierName, status, content | N:1 Event, Org | With event |
-| ENT-EVT-09 | Booth | id, eventId, employerOrgId, hall, state, staffIds, jobIds | N:1 Event | With event |
-| ENT-EVT-10 | BoothShare | id, boothId, candidateId, scopeFields, expiresAt, withdrawnAt | N:1 Booth | Personal; expires 90 days after fair by default |
-| ENT-EVT-11 | Hackathon | id, eventId, phases, tracks, criteria(weights), prizes, rulesVersion, teamMin, teamMax | 1:1 Event | With event |
-| ENT-EVT-12 | Submission | id, teamId, title, links, state, snapshotAtDeadline | N:1 Team | With event |
-| ENT-EVT-13 | ConsentLedger | id, userId, eventId, orgId, purpose, state, version, at | N:1 Event | Anonymized after retention |
-| ENT-EVT-14 | Series | id, hostId, recurrence, programmeRules, instanceEventIds | 1:N Event | Business record |
-| ENT-EVT-15 | RegistrationAnswer | registrationId, questionId, value | N:1 Registration | Personal; erased with registration |
-| ENT-EVT-16 | Team | id, hackathonId, name, leaderId, memberIds, state, trackId | N:1 Hackathon | With event |
-| ENT-EVT-17 | Score | id, submissionId, judgeId, criterionScores, finalized, normalized | N:1 Submission | With event; judge identity internal |
-| ENT-EVT-18 | CheckIn | registrationId, sessionId?, method, at | N:1 Registration | Same as registration |
-| ENT-EVT-19 | EventReport | id, targetType, targetId, reporterId, reason, status | N:1 Event; links `TSF` case | Per `TSF` |
-| ENT-EVT-20 | CertificateRequest | id, registrationId or teamId, credentialId?, state | Links `EVD` credential | Per `EVD` |
+| ID         | Entity               | Key attributes                                                                                                                                                                    | Relationships                           | Retention class                                 |
+| ---------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------------------------- |
+| ENT-EVT-01 | Event                | id, type, title, summary, description, state, visibility, mode, startUtc, endUtc, timezone, venue, capacity, hostOrgId/hostUserId, materialVersion, seriesId?, refundPolicy, slug | 1:N sessions, registrations, tickets    | Business record, 24 months then archived        |
+| ENT-EVT-02 | Session              | id, eventId, track, title, startUtc, endUtc, room, speakerIds                                                                                                                     | N:1 Event; N:M speakers                 | With event                                      |
+| ENT-EVT-03 | Registration         | id, eventId, userId, ticketTypeId, state, position?, offerExpiresAt?, refundSnapshot, createdAt                                                                                   | N:1 Event, User; 1:N answers, check-ins | Personal: 24 months after event then anonymized |
+| ENT-EVT-04 | RegistrationQuestion | id, eventId, type, text, required, options, version, hidden                                                                                                                       | N:1 Event                               | With event                                      |
+| ENT-EVT-05 | EventRole            | eventId, userId, role (owner, co-host, speaker, moderator, judge, staff), status                                                                                                  | N:1 Event                               | With event                                      |
+| ENT-EVT-06 | TicketType           | id, eventId, name, priceMinor, currency, quantity, saleStart, saleEnd, audience; PromoCode child                                                                                  | N:1 Event                               | Financial record, per `BIL` policy              |
+| ENT-EVT-07 | QnaItem and Poll     | id, eventId, authorId, text, anonymous, state, votes                                                                                                                              | N:1 Event                               | 12 months                                       |
+| ENT-EVT-08 | Sponsorship          | id, eventId, orgId, tierName, status, content                                                                                                                                     | N:1 Event, Org                          | With event                                      |
+| ENT-EVT-09 | Booth                | id, eventId, employerOrgId, hall, state, staffIds, jobIds                                                                                                                         | N:1 Event                               | With event                                      |
+| ENT-EVT-10 | BoothShare           | id, boothId, candidateId, scopeFields, expiresAt, withdrawnAt                                                                                                                     | N:1 Booth                               | Personal; expires 90 days after fair by default |
+| ENT-EVT-11 | Hackathon            | id, eventId, phases, tracks, criteria(weights), prizes, rulesVersion, teamMin, teamMax                                                                                            | 1:1 Event                               | With event                                      |
+| ENT-EVT-12 | Submission           | id, teamId, title, links, state, snapshotAtDeadline                                                                                                                               | N:1 Team                                | With event                                      |
+| ENT-EVT-13 | ConsentLedger        | id, userId, eventId, orgId, purpose, state, version, at                                                                                                                           | N:1 Event                               | Anonymized after retention                      |
+| ENT-EVT-14 | Series               | id, hostId, recurrence, programmeRules, instanceEventIds                                                                                                                          | 1:N Event                               | Business record                                 |
+| ENT-EVT-15 | RegistrationAnswer   | registrationId, questionId, value                                                                                                                                                 | N:1 Registration                        | Personal; erased with registration              |
+| ENT-EVT-16 | Team                 | id, hackathonId, name, leaderId, memberIds, state, trackId                                                                                                                        | N:1 Hackathon                           | With event                                      |
+| ENT-EVT-17 | Score                | id, submissionId, judgeId, criterionScores, finalized, normalized                                                                                                                 | N:1 Submission                          | With event; judge identity internal             |
+| ENT-EVT-18 | CheckIn              | registrationId, sessionId?, method, at                                                                                                                                            | N:1 Registration                        | Same as registration                            |
+| ENT-EVT-19 | EventReport          | id, targetType, targetId, reporterId, reason, status                                                                                                                              | N:1 Event; links `TSF` case             | Per `TSF`                                       |
+| ENT-EVT-20 | CertificateRequest   | id, registrationId or teamId, credentialId?, state                                                                                                                                | Links `EVD` credential                  | Per `EVD`                                       |
 
 ## 9. Events emitted and consumed
 
 ### 9.1 Emitted
 
-| ID | Name | Trigger | Key payload |
-|---|---|---|---|
-| EVT-EVT-001 | events.event.created | Draft created or cloned | eventId, type, hostId, cloned |
-| EVT-EVT-002 | events.event.submitted_for_review | Submit | eventId |
-| EVT-EVT-003 | events.event.published | Publish or approve | eventId, visibility |
-| EVT-EVT-004 | events.event.updated | Edit after publish | eventId, material, changedFields |
-| EVT-EVT-005 | events.event.cancelled | Cancel or takedown | eventId, reasonClass |
-| EVT-EVT-006 | events.event.started | Scheduler | eventId |
-| EVT-EVT-007 | events.event.ended | Scheduler | eventId |
-| EVT-EVT-008 | events.registration.created | Registration | registrationId, eventId, ticketType |
-| EVT-EVT-009 | events.registration.confirmed | Seat confirmed | registrationId |
-| EVT-EVT-010 | events.registration.waitlisted | Waitlist join | registrationId, position |
-| EVT-EVT-011 | events.registration.offer_issued | Seat offer | registrationId, expiresAt |
-| EVT-EVT-012 | events.registration.cancelled | Cancel | registrationId, refundMinor |
-| EVT-EVT-013 | events.registration.checked_in | Scan or join | registrationId, method |
-| EVT-EVT-014 | events.registration.no_show_marked | After end | registrationId |
-| EVT-EVT-015 | events.recording.published | Recording available | eventId, access |
-| EVT-EVT-016 | events.certificate.issued | Certificate issued | registrationId, credentialId |
-| EVT-EVT-017 | events.booth.confirmed | Booth confirmed | boothId, employerOrgId |
-| EVT-EVT-018 | events.booth_visit.consented | Candidate shares | boothId, scopeClass |
-| EVT-EVT-019 | events.hackathon.opened | Registration opens | hackathonId |
-| EVT-EVT-020 | events.team.created | Team created | teamId, hackathonId |
-| EVT-EVT-021 | events.team.locked | Lock | teamId |
-| EVT-EVT-022 | events.submission.submitted | Submit | submissionId |
-| EVT-EVT-023 | events.score.recorded | Judge finalizes | submissionId, judgeId (internal) |
-| EVT-EVT-024 | events.results.published | Publish | hackathonId |
-| EVT-EVT-025 | events.report.filed | Report | targetType, reasonClass |
-| EVT-EVT-026 | events.attendee.removed | Host removes | registrationId, reasonClass |
-| EVT-EVT-027 | events.series.created | Series created | seriesId |
-| EVT-EVT-028 | events.feedback.submitted | Survey response | eventId (no identity) |
-| EVT-EVT-029 | events.interview_slot.booked | Fair slot booked | boothId, slotId |
-| EVT-EVT-030 | events.sponsor.linked | Sponsor approved | eventId, orgId |
+| ID          | Name                               | Trigger                 | Key payload                         |
+| ----------- | ---------------------------------- | ----------------------- | ----------------------------------- |
+| EVT-EVT-001 | events.event.created               | Draft created or cloned | eventId, type, hostId, cloned       |
+| EVT-EVT-002 | events.event.submitted_for_review  | Submit                  | eventId                             |
+| EVT-EVT-003 | events.event.published             | Publish or approve      | eventId, visibility                 |
+| EVT-EVT-004 | events.event.updated               | Edit after publish      | eventId, material, changedFields    |
+| EVT-EVT-005 | events.event.cancelled             | Cancel or takedown      | eventId, reasonClass                |
+| EVT-EVT-006 | events.event.started               | Scheduler               | eventId                             |
+| EVT-EVT-007 | events.event.ended                 | Scheduler               | eventId                             |
+| EVT-EVT-008 | events.registration.created        | Registration            | registrationId, eventId, ticketType |
+| EVT-EVT-009 | events.registration.confirmed      | Seat confirmed          | registrationId                      |
+| EVT-EVT-010 | events.registration.waitlisted     | Waitlist join           | registrationId, position            |
+| EVT-EVT-011 | events.registration.offer_issued   | Seat offer              | registrationId, expiresAt           |
+| EVT-EVT-012 | events.registration.cancelled      | Cancel                  | registrationId, refundMinor         |
+| EVT-EVT-013 | events.registration.checked_in     | Scan or join            | registrationId, method              |
+| EVT-EVT-014 | events.registration.no_show_marked | After end               | registrationId                      |
+| EVT-EVT-015 | events.recording.published         | Recording available     | eventId, access                     |
+| EVT-EVT-016 | events.certificate.issued          | Certificate issued      | registrationId, credentialId        |
+| EVT-EVT-017 | events.booth.confirmed             | Booth confirmed         | boothId, employerOrgId              |
+| EVT-EVT-018 | events.booth_visit.consented       | Candidate shares        | boothId, scopeClass                 |
+| EVT-EVT-019 | events.hackathon.opened            | Registration opens      | hackathonId                         |
+| EVT-EVT-020 | events.team.created                | Team created            | teamId, hackathonId                 |
+| EVT-EVT-021 | events.team.locked                 | Lock                    | teamId                              |
+| EVT-EVT-022 | events.submission.submitted        | Submit                  | submissionId                        |
+| EVT-EVT-023 | events.score.recorded              | Judge finalizes         | submissionId, judgeId (internal)    |
+| EVT-EVT-024 | events.results.published           | Publish                 | hackathonId                         |
+| EVT-EVT-025 | events.report.filed                | Report                  | targetType, reasonClass             |
+| EVT-EVT-026 | events.attendee.removed            | Host removes            | registrationId, reasonClass         |
+| EVT-EVT-027 | events.series.created              | Series created          | seriesId                            |
+| EVT-EVT-028 | events.feedback.submitted          | Survey response         | eventId (no identity)               |
+| EVT-EVT-029 | events.interview_slot.booked       | Fair slot booked        | boothId, slotId                     |
+| EVT-EVT-030 | events.sponsor.linked              | Sponsor approved        | eventId, orgId                      |
 
 ### 9.2 Consumed
 
-| Source (module) | Event | Use |
-|---|---|---|
-| `BIL` (planned) | payment succeeded/failed/refunded | Move registration state, record refund |
-| `TSF` (planned) | moderation decision | Apply takedown, suspension |
-| `IDN` (planned) | account deleted/suspended | Erase or anonymize registrations, remove roles |
-| `EMP` (planned) | organization verified/suspended | Allow or revoke sponsor, booth, trusted-host status |
-| `EVD` (planned) | credential issued/revoked | Update certificate status |
-| `SET` (planned) | consent changed | Update consent ledger |
+| Source (module) | Event                             | Use                                                 |
+| --------------- | --------------------------------- | --------------------------------------------------- |
+| `BIL` (planned) | payment succeeded/failed/refunded | Move registration state, record refund              |
+| `TSF` (planned) | moderation decision               | Apply takedown, suspension                          |
+| `IDN` (planned) | account deleted/suspended         | Erase or anonymize registrations, remove roles      |
+| `EMP` (planned) | organization verified/suspended   | Allow or revoke sponsor, booth, trusted-host status |
+| `EVD` (planned) | credential issued/revoked         | Update certificate status                           |
+| `SET` (planned) | consent changed                   | Update consent ledger                               |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-|---|---|---|
-| Video conferencing and streaming providers (Zoom, Google Meet, Microsoft Teams, YouTube Live, Vimeo) | Online delivery | Link-based; no in-house streaming; provider list `[PROP]` |
-| Calendar clients (ICS RFC 5545) | Add to calendar and feeds | Standards-based |
-| Maps and geocoding provider | City and venue search | `[PROP]`; provider choice open |
-| `NTF` delivery channels | Email, push, in-app | Consumed |
-| `PLT` media pipeline | Recordings, images | Consumed |
-| Repository hosts for hackathon links (GitHub, GitLab) | Link verification only | Read-only reachability checks, no OAuth in v1 |
-| Printing/PDF generator | Badges and certificates | Internal |
+| Dependency                                                                                           | Purpose                   | Notes                                                     |
+| ---------------------------------------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------- |
+| Video conferencing and streaming providers (Zoom, Google Meet, Microsoft Teams, YouTube Live, Vimeo) | Online delivery           | Link-based; no in-house streaming; provider list `[PROP]` |
+| Calendar clients (ICS RFC 5545)                                                                      | Add to calendar and feeds | Standards-based                                           |
+| Maps and geocoding provider                                                                          | City and venue search     | `[PROP]`; provider choice open                            |
+| `NTF` delivery channels                                                                              | Email, push, in-app       | Consumed                                                  |
+| `PLT` media pipeline                                                                                 | Recordings, images        | Consumed                                                  |
+| Repository hosts for hackathon links (GitHub, GitLab)                                                | Link verification only    | Read-only reachability checks, no OAuth in v1             |
+| Printing/PDF generator                                                                               | Badges and certificates   | Internal                                                  |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why | Depended on by | Why |
-|---|---|---|---|
-| IDN (planned) | Roles, sessions | ANL | Event funnel metrics |
-| EMP, INS (planned) | Organization verification, institution cohorts | ATS (planned) | Event-sourced candidates |
-| BIL (planned) | Paid tickets, refunds | REP (planned) | Participation badges |
-| NTF (planned) | Delivery | EVD (planned) | Certificates as evidence |
-| TSF (planned) | Moderation | MEN (planned) | Mentor office hours |
-| EVD, REP (planned) | Credentials and badges | NET (planned) | Event discussion and meetups |
-| INT (planned) | Fair interview slots | SRC (planned) | Event search index |
-| JOB, ATS, MSG (planned) | Booth jobs, pipeline, follow-up | PWA (planned) | Offline check-in |
+| Depends on              | Why                                            | Depended on by | Why                          |
+| ----------------------- | ---------------------------------------------- | -------------- | ---------------------------- |
+| IDN (planned)           | Roles, sessions                                | ANL            | Event funnel metrics         |
+| EMP, INS (planned)      | Organization verification, institution cohorts | ATS (planned)  | Event-sourced candidates     |
+| BIL (planned)           | Paid tickets, refunds                          | REP (planned)  | Participation badges         |
+| NTF (planned)           | Delivery                                       | EVD (planned)  | Certificates as evidence     |
+| TSF (planned)           | Moderation                                     | MEN (planned)  | Mentor office hours          |
+| EVD, REP (planned)      | Credentials and badges                         | NET (planned)  | Event discussion and meetups |
+| INT (planned)           | Fair interview slots                           | SRC (planned)  | Event search index           |
+| JOB, ATS, MSG (planned) | Booth jobs, pipeline, follow-up                | PWA (planned)  | Offline check-in             |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| MET-EVT-01 Registration conversion | Detail views that become registrations | registrations / unique detail viewers | Product (`PAD`) |
-| MET-EVT-02 Show rate | Confirmed registrations that attended | checked_in / confirmed at end | Host, Product |
-| MET-EVT-03 Waitlist fill | Seats refilled from the waitlist | offered-and-claimed / freed seats | Product |
-| MET-EVT-04 Hackathon completion | Teams that submitted vs teams formed | submitted / locked teams | Product |
-| MET-EVT-05 Consent-to-contact rate | Attendees granting sponsor contact | granted / registrations | Privacy lead |
-| MET-EVT-06 Events with upheld reports | Share of events with upheld reports | upheld / events ended | `MOD` lead |
-| MET-EVT-07 Event-sourced candidates entering ATS | Consented attendees added to pipelines | count per event | Product |
-| MET-EVT-08 Certificate claim rate | Claimed credentials vs issued | claimed / issued | Product |
+| Metric                                           | Definition                             | Formula                               | Owner role      |
+| ------------------------------------------------ | -------------------------------------- | ------------------------------------- | --------------- |
+| MET-EVT-01 Registration conversion               | Detail views that become registrations | registrations / unique detail viewers | Product (`PAD`) |
+| MET-EVT-02 Show rate                             | Confirmed registrations that attended  | checked_in / confirmed at end         | Host, Product   |
+| MET-EVT-03 Waitlist fill                         | Seats refilled from the waitlist       | offered-and-claimed / freed seats     | Product         |
+| MET-EVT-04 Hackathon completion                  | Teams that submitted vs teams formed   | submitted / locked teams              | Product         |
+| MET-EVT-05 Consent-to-contact rate               | Attendees granting sponsor contact     | granted / registrations               | Privacy lead    |
+| MET-EVT-06 Events with upheld reports            | Share of events with upheld reports    | upheld / events ended                 | `MOD` lead      |
+| MET-EVT-07 Event-sourced candidates entering ATS | Consented attendees added to pipelines | count per event                       | Product         |
+| MET-EVT-08 Certificate claim rate                | Claimed credentials vs issued          | claimed / issued                      | Product         |
 
 All are P2 (aggregate with `min_cohort_k` for cross-event) [DER: SSOT Amendment G].
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-EVT-01 | Is EVT in scope given SSOT §4.2 and the "operating system" goal? | A: full module; B: webinars and career fairs only; C: defer all | A, phased: R6 Minimal viable slice = FR-EVT-001, 004, 006, 007, 010, 013, 014, 015, 017, 031, 035 (free webinars, no paid tickets, no hackathons, no fair) | Product owner | All EVT build |
-| OD-EVT-02 | May candidates/students host public events (meetups, study groups)? | A: no; B: yes with trust tier; C: only in groups (`NET`) | A | Product owner, Trust and Safety | FR-EVT-001 |
-| OD-EVT-03 | Build a native live room later or stay on external providers? | External only; native later | External only | Product owner, Engineering | FR-EVT-015, 018 |
-| OD-EVT-04 | Paid tickets: are they in scope, platform fee, payout model? | None; free only in v1; paid via `BIL` | Free only in v1 | Finance, Product | FR-EVT-009 paid features |
-| OD-EVT-05 | Moderation review SLA and trusted-host criteria | Parameter values | Review within 1 business day; trust after 3 clean events | Trust and Safety | FR-EVT-004, 035 |
-| OD-EVT-06 | Legal basis and retention for attendee data; recordings in other jurisdictions | Counsel input | 24 months, then anonymize | Counsel, Privacy | BR-EVT-024, FR-EVT-019 |
-| OD-EVT-07 | Minors at events and hackathons | Min age 13, 16 or 18; guardian consent | 18 for employer and hackathon events | Counsel, Product | FR-EVT-025 |
-| OD-EVT-08 | Cash prizes and sweepstakes law | Cash allowed; in-kind only | In-kind and recognition only until counsel advises | Counsel | FR-EVT-024, 029 |
+| ID        | Question                                                                       | Options                                                         | Default proposal                                                                                                                                           | Who decides                     | Blocking                 |
+| --------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------ |
+| OD-EVT-01 | Is EVT in scope given SSOT §4.2 and the "operating system" goal?               | A: full module; B: webinars and career fairs only; C: defer all | A, phased: R6 Minimal viable slice = FR-EVT-001, 004, 006, 007, 010, 013, 014, 015, 017, 031, 035 (free webinars, no paid tickets, no hackathons, no fair) | Product owner                   | All EVT build            |
+| OD-EVT-02 | May candidates/students host public events (meetups, study groups)?            | A: no; B: yes with trust tier; C: only in groups (`NET`)        | A                                                                                                                                                          | Product owner, Trust and Safety | FR-EVT-001               |
+| OD-EVT-03 | Build a native live room later or stay on external providers?                  | External only; native later                                     | External only                                                                                                                                              | Product owner, Engineering      | FR-EVT-015, 018          |
+| OD-EVT-04 | Paid tickets: are they in scope, platform fee, payout model?                   | None; free only in v1; paid via `BIL`                           | Free only in v1                                                                                                                                            | Finance, Product                | FR-EVT-009 paid features |
+| OD-EVT-05 | Moderation review SLA and trusted-host criteria                                | Parameter values                                                | Review within 1 business day; trust after 3 clean events                                                                                                   | Trust and Safety                | FR-EVT-004, 035          |
+| OD-EVT-06 | Legal basis and retention for attendee data; recordings in other jurisdictions | Counsel input                                                   | 24 months, then anonymize                                                                                                                                  | Counsel, Privacy                | BR-EVT-024, FR-EVT-019   |
+| OD-EVT-07 | Minors at events and hackathons                                                | Min age 13, 16 or 18; guardian consent                          | 18 for employer and hackathon events                                                                                                                       | Counsel, Product                | FR-EVT-025               |
+| OD-EVT-08 | Cash prizes and sweepstakes law                                                | Cash allowed; in-kind only                                      | In-kind and recognition only until counsel advises                                                                                                         | Counsel                         | FR-EVT-024, 029          |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-|---|---|---|---|
-| RSK-EVT-01 | Scam events and phishing links via join URLs | User harm, brand damage | Host verification, allow-list, review gate, reports (FR-EVT-004, 015, 035) |
-| RSK-EVT-02 | Sponsor pressure turns events into lead farms | Consent violations | Opt-in per organization, audit logs (FR-EVT-034) |
-| RSK-EVT-03 | Judging disputes and IP claims in hackathons | Legal, reputation | Locked rules, conflict controls, audit, IP clause (BR-EVT-013..015) |
-| RSK-EVT-04 | Oversell or double allocation under race conditions | Trust loss | Transactional capacity, idempotency (BR-EVT-004, 005) |
-| RSK-EVT-05 | Scope creep toward a social network or live streaming | Violates SSOT §4.2 | Keep external providers, labelled limits (OD-EVT-01, 03) |
-| RSK-EVT-06 | Cross-border event data and recording laws | Compliance | Consent notice, retention, OD-EVT-06 |
+| ID         | Risk                                                  | Impact                  | Mitigation                                                                 |
+| ---------- | ----------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------- |
+| RSK-EVT-01 | Scam events and phishing links via join URLs          | User harm, brand damage | Host verification, allow-list, review gate, reports (FR-EVT-004, 015, 035) |
+| RSK-EVT-02 | Sponsor pressure turns events into lead farms         | Consent violations      | Opt-in per organization, audit logs (FR-EVT-034)                           |
+| RSK-EVT-03 | Judging disputes and IP claims in hackathons          | Legal, reputation       | Locked rules, conflict controls, audit, IP clause (BR-EVT-013..015)        |
+| RSK-EVT-04 | Oversell or double allocation under race conditions   | Trust loss              | Transactional capacity, idempotency (BR-EVT-004, 005)                      |
+| RSK-EVT-05 | Scope creep toward a social network or live streaming | Violates SSOT §4.2      | Keep external providers, labelled limits (OD-EVT-01, 03)                   |
+| RSK-EVT-06 | Cross-border event data and recording laws            | Compliance              | Consent notice, retention, OD-EVT-06                                       |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §7.1 F-57 Events & Webinars (priority 5, Ph8, depends on F-53) | Existence of an events capability; community positioning | No detailed spec existed; the entire behavior here is [PROP] |
-| SSOT §7.1 F-139 Local Communities & Meetups (Ph7) | Meetups and series | Groups themselves belong to `NET` |
-| SSOT §4.2 non-goals | Sponsor and ranking limits, no live-streaming infrastructure | Native live rooms excluded |
-| SSOT Amendment G and BR-178 `min_cohort_k` | Aggregation threshold | Applied to cross-event benchmarks |
-| SSOT F-08 Challenges Arena, F-124 Project Marketplace | Hackathon conceptual neighbors | Hackathons are an event, not a challenge-arena feature; relationship recorded as dependency only |
-| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` | Event-envelope and consent principles reused for analytics | None |
+| Source                                                                        | Used for                                                     | Dropped or changed                                                                               |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| SSOT §7.1 F-57 Events & Webinars (priority 5, Ph8, depends on F-53)           | Existence of an events capability; community positioning     | No detailed spec existed; the entire behavior here is [PROP]                                     |
+| SSOT §7.1 F-139 Local Communities & Meetups (Ph7)                             | Meetups and series                                           | Groups themselves belong to `NET`                                                                |
+| SSOT §4.2 non-goals                                                           | Sponsor and ranking limits, no live-streaming infrastructure | Native live rooms excluded                                                                       |
+| SSOT Amendment G and BR-178 `min_cohort_k`                                    | Aggregation threshold                                        | Applied to cross-event benchmarks                                                                |
+| SSOT F-08 Challenges Arena, F-124 Project Marketplace                         | Hackathon conceptual neighbors                               | Hackathons are an event, not a challenge-arena feature; relationship recorded as dependency only |
+| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` | Event-envelope and consent principles reused for analytics   | None                                                                                             |

@@ -2,12 +2,12 @@
 
 # Mind map: Learning and assessment
 
-Every module, sub-module and feature in this domain (186 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (188 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
   root((Learning and assessment))
-    LRN LRN Learning and Course Experience
+    LRN Learning and Course Experience
       Catalog and discovery
         LRN-001 Course catalog listing
         LRN-002 Taxonomy categories, tags, levels and
@@ -94,7 +94,8 @@ mindmap
         LRN-073 Adaptive review and spaced repetition
         LRN-074 Learning data export and deletion
         LRN-075 Report a content problem
-    STU STU Instructor Studio and Content
+        LRN-076 Industry learning hubs
+    STU Instructor Studio and Content
       Instructor onboarding and identity
         STU-001 Instructor application
         STU-002 Instructor identity and expertise
@@ -156,7 +157,7 @@ mindmap
         STU-051 Content localization
         STU-052 IP attestation and licensing
         STU-053 Instructor quality score
-    ASM ASM Assessments, Challenges and
+    ASM Assessments, Challenges and Integrity
       Challenges arena
         ASM-001 Challenge catalog
         ASM-002 Challenge detail and start screen
@@ -224,10 +225,11 @@ mindmap
         ASM-056 Author analytics
         ASM-057 Item and challenge issue reports and
         ASM-058 Assessment data retention
+        ASM-059 Code review challenges
 ```
 
 ## Specifications
 
-- [LRN — LRN: Learning and Course Experience](../02_MODULES/LRN_Learning_Course_Experience.md)
-- [STU — STU: Instructor Studio and Content Production](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
-- [ASM — ASM: Assessments, Challenges and Integrity](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+- [LRN — Learning and Course Experience](../02_MODULES/LRN_Learning_Course_Experience.md)
+- [STU — Instructor Studio and Content Production](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+- [ASM — Assessments, Challenges and Integrity](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)

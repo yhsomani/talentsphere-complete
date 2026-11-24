@@ -2,7 +2,7 @@
 
 # Mind map: OS expansion modules
 
-Every module, sub-module and feature in this domain (166 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (167 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -162,6 +162,7 @@ mindmap
         MKT-034 Market data consent centre
         MKT-035 Corrections, disputes and methodology
         MKT-036 Fairness review of market insights
+        MKT-037 Company skill profiles
     ENT Enterprise Talent Internal Mobility,
       Features
         ENT-001 Enterprise workspace setup

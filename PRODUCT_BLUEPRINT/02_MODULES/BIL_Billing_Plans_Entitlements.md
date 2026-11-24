@@ -12,15 +12,15 @@ BIL decides what each account is entitled to, collects money for it, and proves 
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| Every role can see exactly what its plan includes and what it has left | Entitlement view returns values with source (plan, grant, seat, contract) |
-| Paid access follows verified payment state and nothing else | Entitlements recomputed only from webhook-confirmed state (BR-BIL-001, BR-BIL-002) |
-| No plan buys credibility, hiring rank, assessment bypass or private evidence | Integrity guard passes on every plan version (BR-BIL-004) |
-| Money movements reconcile | Daily reconciliation run has zero unexplained differences (SM-BIL-12) |
-| Seats are never oversold | Pool counters reconcile to assignments (BR-BIL-017) |
-| Failed payments recover or degrade access in defined steps | Dunning state machine reaches `recovered` or `exhausted` (SM-BIL-03) |
-| Finance can correct mistakes safely | Adjustments carry reason, approver and audit (BR-BIL-022) |
+| Outcome                                                                      | How the system knows                                                               |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Every role can see exactly what its plan includes and what it has left       | Entitlement view returns values with source (plan, grant, seat, contract)          |
+| Paid access follows verified payment state and nothing else                  | Entitlements recomputed only from webhook-confirmed state (BR-BIL-001, BR-BIL-002) |
+| No plan buys credibility, hiring rank, assessment bypass or private evidence | Integrity guard passes on every plan version (BR-BIL-004)                          |
+| Money movements reconcile                                                    | Daily reconciliation run has zero unexplained differences (SM-BIL-12)              |
+| Seats are never oversold                                                     | Pool counters reconcile to assignments (BR-BIL-017)                                |
+| Failed payments recover or degrade access in defined steps                   | Dunning state machine reaches `recovered` or `exhausted` (SM-BIL-03)               |
+| Finance can correct mistakes safely                                          | Adjustments carry reason, approver and audit (BR-BIL-022)                          |
 
 ### 1.3 Boundaries
 
@@ -28,18 +28,18 @@ BIL decides what each account is entitled to, collects money for it, and proves 
 
 **Out of scope (owned elsewhere):**
 
-| Capability | Owner | Relationship |
-|---|---|---|
-| Course catalogue, course pricing display, enrollment | LRN, STU (planned) | They set the product and price reference; BIL charges |
-| Seat assignment to individual students | INS (this batch) | BIL owns pools; INS owns assignment (FR-INS-010 to 012) |
-| Job posting limits being applied to a job | JOB, ATS (planned) | BIL owns the limit value and the check function; JOB calls it |
-| AI request execution | AIC (planned) | AIC asks BIL to reserve and settle quota |
-| Notification delivery | NTF (planned) | BIL emits events |
-| Identity and sessions | IDN (planned) | BIL reads the authenticated principal |
-| Support tickets and general admin | ADM (planned) | FIN console is billing-specific |
-| General ledger, payroll, accounts payable | Out of product (SSOT §4.2 non-goal: not a generic HR/payroll system) | BIL emits hooks (FR-BIL-020) for an external ERP |
-| Sales prospecting and CRM | Out of product | Enterprise quotes are a document workflow only (FR-BIL-027, OD-BIL-12) |
-| Advertising | Out of product (SSOT §4.2 non-goal) | No ad billing exists |
+| Capability                                           | Owner                                                                | Relationship                                                           |
+| ---------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Course catalogue, course pricing display, enrollment | LRN, STU (planned)                                                   | They set the product and price reference; BIL charges                  |
+| Seat assignment to individual students               | INS (this batch)                                                     | BIL owns pools; INS owns assignment (FR-INS-010 to 012)                |
+| Job posting limits being applied to a job            | JOB, ATS (planned)                                                   | BIL owns the limit value and the check function; JOB calls it          |
+| AI request execution                                 | AIC (planned)                                                        | AIC asks BIL to reserve and settle quota                               |
+| Notification delivery                                | NTF (planned)                                                        | BIL emits events                                                       |
+| Identity and sessions                                | IDN (planned)                                                        | BIL reads the authenticated principal                                  |
+| Support tickets and general admin                    | ADM (planned)                                                        | FIN console is billing-specific                                        |
+| General ledger, payroll, accounts payable            | Out of product (SSOT §4.2 non-goal: not a generic HR/payroll system) | BIL emits hooks (FR-BIL-020) for an external ERP                       |
+| Sales prospecting and CRM                            | Out of product                                                       | Enterprise quotes are a document workflow only (FR-BIL-027, OD-BIL-12) |
+| Advertising                                          | Out of product (SSOT §4.2 non-goal)                                  | No ad billing exists                                                   |
 
 **Non-goal brushes (SSOT §4.2):** enterprise quotes and invoicing must not grow into a CRM; payouts must not grow into a payroll system. Both are specified narrowly and recorded as OD-BIL-12 and OD-BIL-10.
 
@@ -51,37 +51,37 @@ Owned entities: `ENT-BIL-01` to `ENT-BIL-28` (section 8). Consumed: user, organi
 
 Legend: V view, C create, U update, A approve, X execute, `own` own account only, `org` the billing owner of an organization, `—` none.
 
-| Capability | CAN/STD/FRL/MNT/INS | REC/HMG | EAD (billing owner) | IAD (billing role) | FIN | SUP | PAD | SAD | API |
-|---|---|---|---|---|---|---|---|---|---|
-| View plans and prices | V | V | V | V | V | V | V | V | V |
-| View own entitlements and usage | V own | V own | V org | V org | V any | V any (read-only, audited) | V any | V any | — |
-| Checkout, change, cancel plan | X own | X own (if org permits) | X org | X org | — | — | — | — | — |
-| Manage payment methods, invoices | X own | — | X org | X org | V | V | V | V | — |
-| Apply coupon | X own | X own | X org | X org | V | — | — | — | — |
-| Request refund | C own | C own | C org | C org | A | — | A (bounded) | — | — |
-| Purchase seats, request quote | — | — | C | C | A | — | — | — | — |
-| Create plan or price version | — | — | — | — | C draft | — | A | A | — |
-| Create coupon | — | — | — | — | C, A within bounds | — | A beyond bounds | — | — |
-| Post adjustment or credit | — | — | — | — | C | — | A (second approver) | — | — |
-| Override entitlement grant | — | — | — | — | C | — | A | A | — |
-| View reconciliation, ledger | — | — | — | — | V, X | — | V | V | — |
-| Replay webhook event | — | — | — | — | X | — | X | X | — |
-| Provider webhook | — | — | — | — | — | — | — | — | X (signed) |
+| Capability                       | CAN/STD/FRL/MNT/INS | REC/HMG                | EAD (billing owner) | IAD (billing role) | FIN                | SUP                        | PAD                 | SAD   | API        |
+| -------------------------------- | ------------------- | ---------------------- | ------------------- | ------------------ | ------------------ | -------------------------- | ------------------- | ----- | ---------- |
+| View plans and prices            | V                   | V                      | V                   | V                  | V                  | V                          | V                   | V     | V          |
+| View own entitlements and usage  | V own               | V own                  | V org               | V org              | V any              | V any (read-only, audited) | V any               | V any | —          |
+| Checkout, change, cancel plan    | X own               | X own (if org permits) | X org               | X org              | —                  | —                          | —                   | —     | —          |
+| Manage payment methods, invoices | X own               | —                      | X org               | X org              | V                  | V                          | V                   | V     | —          |
+| Apply coupon                     | X own               | X own                  | X org               | X org              | V                  | —                          | —                   | —     | —          |
+| Request refund                   | C own               | C own                  | C org               | C org              | A                  | —                          | A (bounded)         | —     | —          |
+| Purchase seats, request quote    | —                   | —                      | C                   | C                  | A                  | —                          | —                   | —     | —          |
+| Create plan or price version     | —                   | —                      | —                   | —                  | C draft            | —                          | A                   | A     | —          |
+| Create coupon                    | —                   | —                      | —                   | —                  | C, A within bounds | —                          | A beyond bounds     | —     | —          |
+| Post adjustment or credit        | —                   | —                      | —                   | —                  | C                  | —                          | A (second approver) | —     | —          |
+| Override entitlement grant       | —                   | —                      | —                   | —                  | C                  | —                          | A                   | A     | —          |
+| View reconciliation, ledger      | —                   | —                      | —                   | —                  | V, X               | —                          | V                   | V     | —          |
+| Replay webhook event             | —                   | —                      | —                   | —                  | X                  | —                          | X                   | X     | —          |
+| Provider webhook                 | —                   | —                      | —                   | —                  | —                  | —                          | —                   | —     | X (signed) |
 
 Notes: Billing actions follow the buyer's context, not a single role (BR-BIL-033). `SUP` has read-only billing view with a reason captured. `PLO` and `INS` hold no billing rights (SSOT BR-078 via BR-INS-004). Two-person approval applies to refunds and adjustments above the threshold parameter (BR-BIL-022).
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Plans and entitlements | FR-BIL-001 to 006 |
-| B | Checkout and subscription lifecycle | FR-BIL-007 to 012 |
-| C | Invoices, tax, promotions, refunds, dunning | FR-BIL-013 to 017 |
-| D | Provider integration and books | FR-BIL-018 to 020 |
-| E | Usage metering | FR-BIL-021 to 023 |
-| F | Seats, procurement and contracts | FR-BIL-024 to 028 |
-| G | Payouts | FR-BIL-029 |
-| H | Finance operations and governance | FR-BIL-030 to 033 |
+| Code | Sub-module                                  | Features          |
+| ---- | ------------------------------------------- | ----------------- |
+| A    | Plans and entitlements                      | FR-BIL-001 to 006 |
+| B    | Checkout and subscription lifecycle         | FR-BIL-007 to 012 |
+| C    | Invoices, tax, promotions, refunds, dunning | FR-BIL-013 to 017 |
+| D    | Provider integration and books              | FR-BIL-018 to 020 |
+| E    | Usage metering                              | FR-BIL-021 to 023 |
+| F    | Seats, procurement and contracts            | FR-BIL-024 to 028 |
+| G    | Payouts                                     | FR-BIL-029        |
+| H    | Finance operations and governance           | FR-BIL-030 to 033 |
 
 ## 4. Feature specifications
 
@@ -91,7 +91,7 @@ Notes: Billing actions follow the buyer's context, not a single role (BR-BIL-033
 
 - **Sub-module:** A. Plans and entitlements
 - **Priority / tier:** Must · R1 (catalogue), R5 (full price book)
-- **Source:** [SRC: SSOT F-16 plans Free, Pro, Team, Enterprise; docs/PRICING.md `PLATFORM_PLANS`] · [DER]
+- **Source:** [SRC: SSOT F-16 plans Free, Pro, Team, Enterprise; docs/PRICING.md `PLATFORM_PLANS`] · [DER] · also [SRC: SSOT §7 F-61 Premium Candidate Tier (OD-34 gated; see OD-BIL-01)]
 - **Purpose and outcome:** `FIN` defines which plans exist for which audience and what each costs in each currency, with every change versioned. Known by every plan having an immutable active price version.
 - **Roles and permissions:** `FIN: create draft, edit draft` · `PAD, SAD: approve and publish` · `all roles: read published`
 - **Preconditions and entry points:** Finance console `/admin/billing/plans`. Plan names and audiences are pending OD-BIL-14.
@@ -599,7 +599,7 @@ Notes: Billing actions follow the buyer's context, not a single role (BR-BIL-033
 
 - **Sub-module:** E. Usage metering
 - **Priority / tier:** Must · R4 (needed before AI features go to paid users)
-- **Source:** [SRC: docs/PRICING.md AI_QUOTA_LIMITS derived from entitlements, meter in process memory flagged ephemeral; SSOT §16.4 and Amendment C: no paid inference for a free user without an explicit active cost policy; OD-07 numeric quota undecided]
+- **Source:** [SRC: docs/PRICING.md AI_QUOTA_LIMITS derived from entitlements, meter in process memory flagged ephemeral; SSOT §16.4 and Amendment C: no paid inference for a free user without an explicit active cost policy; OD-07 numeric quota undecided] · also [SRC: SSOT §7 F-61 Premium Candidate Tier (OD-34 gated)]
 - **Purpose and outcome:** AI features consume a metered quota that follows the plan and survives restarts. Known by durable counters and accurate remaining values.
 - **Roles and permissions:** `all authenticated: consume own, view own` · `FIN: configure limits via entitlements, view usage` · `SUP: view (audited)` · `API (AIC service): reserve, settle`
 - **Preconditions and entry points:** Any AIC request (chat, resume assist, interview practice feedback). Usage shown in `/billing/usage` and in the AI panel.
@@ -928,46 +928,46 @@ Notes: Billing actions follow the buyer's context, not a single role (BR-BIL-033
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-BIL-001 | Entitlements derive only from verified provider state, contract grants, seat pools or the free default; never from client claims or redirects. | Prevents free access and spoofing. | Entitlement resolver | [SRC: BR-056; docs/PRICING.md] |
-| BR-BIL-002 | Subscription and order state is webhook-owned; a checkout success redirect grants nothing. | Provider is the source of truth. | Checkout return handler, webhook handlers | [SRC: BR-32] |
-| BR-BIL-003 | Provider events are verified by signature, stored once by provider event id, processed idempotently and tolerate out-of-order delivery. | Zero double-billing. | Webhook endpoint | [SRC: SCI-06; F-16] |
-| BR-BIL-004 | No plan, coupon, contract or grant may sell credibility, verification level, hiring or search rank, assessment bypass, access to private evidence, or moderation outcomes. | Platform trust; SSOT bans opaque pay-to-rank. | Integrity guard at publish and grant | [SRC: docs/PRICING.md invariants; §4.2] |
-| BR-BIL-005 | Published price versions are immutable; price changes create new versions with an effective date. | Auditability and fairness. | Price book service | [DER] |
-| BR-BIL-006 | Money is integer minor units with an ISO 4217 currency; one currency per subscription. | Avoids rounding errors. | Domain money type | [SRC: CON-010] |
-| BR-BIL-007 | Upgrades apply immediately with proration; downgrades and cheaper interval changes apply at period end by default. | Fairness and predictable revenue. | Subscription change service | [SRC: BR-055] |
-| BR-BIL-008 | Downgrade or lapse never deletes user data; over-limit resources become read-only or paused after notice and the owner chooses which to keep. | Trust and data safety. | Plan change and limit services | [SRC: docs/PRICING.md "downgrades do not unpublish"] [DER] |
-| BR-BIL-009 | Entitlements follow the billing owner of the covered context: personal plan for the individual, organization plan for covered members within the organization. | Resolves the per-user versus per-organization gap. | Resolver | [SRC: docs/PRICING.md review note] [DEC-REQ] OD-BIL-06 |
-| BR-BIL-010 | One trial per user per plan family and per payment fingerprint. | Abuse control. | Trial service | [PROP] |
-| BR-BIL-011 | Coupons cannot reduce a price below the platform minimum, exceed `coupon_max_percent` (default 75), or be redeemed more than allowed. | Margin protection. | Coupon service | [SRC: BR-099; OD-43] |
-| BR-BIL-012 | Course purchase refunds: full within the window at or below the progress threshold, pro-rated within the window otherwise (defaults 30 days, 20 percent). | Published fair policy. | Refund policy engine | [SRC: BR-100; OD-29] |
-| BR-BIL-013 | Failed payments follow the dunning schedule; after the grace period paid entitlements resolve to free values; data is retained. | Clear consequences. | Dunning service, resolver | [SRC: docs/PRICING.md] [PROP] |
-| BR-BIL-014 | Card data never touches TalentSphere systems; only provider tokens and masked display data are stored. | PCI scope minimization. | Checkout and portal design | [DER] |
-| BR-BIL-015 | Tax is calculated by the tax engine at checkout; no tax is collected in an unregistered jurisdiction; no assumed rates. | Compliance. | Tax service | [PROP] |
-| BR-BIL-016 | Finalized invoices are immutable; corrections are credit notes and new invoices; numbering is gapless per issuing entity and year. | Legal validity. | Invoice service | [DER] |
-| BR-BIL-017 | Seat and organization-limit consumption is atomic: assigned seats never exceed total and limits never oversell under concurrency. | Fairness and revenue integrity. | Row locks, check constraints | [SRC: BR-074] |
-| BR-BIL-018 | Institutional and enterprise prices come from the price book (volume tiers per package) or an approved quote; never hard-coded. | Pricing is configurable and OD-gated. | Price book, quote service | [SRC: BR-081; OD-15] |
-| BR-BIL-019 | No paid inference for a free user without an explicit active cost policy; AI quota is reserved before the call and settled after. | Cost control. | AI meter | [SRC: §16.4; Amendment C] |
-| BR-BIL-020 | Usage meters are durable, atomic, idempotent on usage event key and use documented windows with reset time shown to users. | Accurate limits across instances. | Meter service | [PROP] |
-| BR-BIL-021 | Outreach caps are weekly per seat, values from the plan; custom values only by contract. | Anti-spam and plan clarity. | Outreach check | [SRC: BR-130] |
-| BR-BIL-022 | Refunds and adjustments above `refund_dual_approval_amount` or `adjustment_dual_approval_amount`, and all entitlement grants above bounds, need a second approver who is not the proposer. | Fraud and error control. | Approval workflow | [PROP] |
-| BR-BIL-023 | Refunds return to the original payment method; credits are goodwill only, non-withdrawable and expiring per policy. | Anti-laundering. | Refund and credit services | [DER] |
-| BR-BIL-024 | Earner balances carry a hold period, require completed payout onboarding, and are subject to clawback for refunds and disputes. | Protects against reversals. | Payout service | [SRC: WF-28; BR-101] [PROP] |
-| BR-BIL-025 | Holding funds for third-party work (escrow) is not part of ordinary balances and exists only if the escrow decision gate is approved. | Regulatory and non-goal risk. | Payout service feature flag | [DEC-REQ] OD-BIL-10 |
-| BR-BIL-026 | Every gated capability checks one registered entitlement key on the server; UI hints are never authoritative; an unregistered key is an error. | No UI-only gating. | Enforcement-point registry | [SRC: CLAUDE rule business rules in domain] |
-| BR-BIL-027 | Seat revocation, grace and release follow INS rules; BIL only returns seats to the pool and expires pools. | Single owner per rule. | Seat service | [SRC: BR-073, BR-075] |
-| BR-BIL-028 | Region and currency come from the billing country, validated against card issuer and tax evidence, never from IP alone. | Prevents price arbitrage and tax errors. | Checkout, region service | [PROP] |
-| BR-BIL-029 | Reconciliation never changes money silently; discrepancies become items resolved by authorized actions. | Auditable books. | Reconciliation service | [PROP] |
-| BR-BIL-030 | Ledger entries are append-only and balanced; corrections are reversing entries in the open period. | Accounting integrity. | Ledger service | [PROP] |
-| BR-BIL-031 | Enterprise custom terms are stored as contract grants with expiry; no hidden manual flags; quotes are documents, not a pipeline. | Visibility and non-goal protection. | Contract and grant services | [DER] [SRC: §4.2] |
-| BR-BIL-032 | Billing records are retained for the statutory period (default 7 years) with minimized personal fields after account deletion. | Legal obligation. | Retention job | [PROP] OD-BIL-02 |
-| BR-BIL-033 | Billing actions follow the buyer's context: candidates and learners buy personal plans and courses, employers buy employer plans, institutions buy seats; roles without a billing capability cannot purchase. | Resolves legacy BR-07. | Authorization layer | [SRC: BR-07 conflict] [DEC-REQ] OD-BIL-11 |
-| BR-BIL-034 | Test mode and live mode are isolated: data, keys and webhooks never cross; live requires explicit enablement. | Prevents accidental charges. | Environment guard | [SRC: docs/PRICING.md] |
-| BR-BIL-035 | Organizations without a subscription are limited by `free_active_jobs_limit`; the value is undecided and the decision is recorded. | Legacy policy gap. | Limit service | [SRC: docs/PRICING.md] [DEC-REQ] OD-BIL-05 |
-| BR-BIL-036 | Region rules decide tax display, reverse charge for valid business tax ids and invoice wording. | Compliance. | Tax and invoice services | [PROP] |
-| BR-BIL-037 | A higher price for an existing subscriber needs at least 30 days' notice before renewal. | Consumer fairness. | Price change scheduler | [PROP] |
-| BR-BIL-038 | Trial parameters (days, card required, access on cancel) are per plan and never inferred. | Configurable policy. | Plan version | [PROP] OD-BIL-04 |
+| ID         | Rule                                                                                                                                                                                                          | Rationale                                          | Enforced where                            | Source                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| BR-BIL-001 | Entitlements derive only from verified provider state, contract grants, seat pools or the free default; never from client claims or redirects.                                                                | Prevents free access and spoofing.                 | Entitlement resolver                      | [SRC: BR-056; docs/PRICING.md]                             |
+| BR-BIL-002 | Subscription and order state is webhook-owned; a checkout success redirect grants nothing.                                                                                                                    | Provider is the source of truth.                   | Checkout return handler, webhook handlers | [SRC: BR-32]                                               |
+| BR-BIL-003 | Provider events are verified by signature, stored once by provider event id, processed idempotently and tolerate out-of-order delivery.                                                                       | Zero double-billing.                               | Webhook endpoint                          | [SRC: SCI-06; F-16]                                        |
+| BR-BIL-004 | No plan, coupon, contract or grant may sell credibility, verification level, hiring or search rank, assessment bypass, access to private evidence, or moderation outcomes.                                    | Platform trust; SSOT bans opaque pay-to-rank.      | Integrity guard at publish and grant      | [SRC: docs/PRICING.md invariants; §4.2]                    |
+| BR-BIL-005 | Published price versions are immutable; price changes create new versions with an effective date.                                                                                                             | Auditability and fairness.                         | Price book service                        | [DER]                                                      |
+| BR-BIL-006 | Money is integer minor units with an ISO 4217 currency; one currency per subscription.                                                                                                                        | Avoids rounding errors.                            | Domain money type                         | [SRC: CON-010]                                             |
+| BR-BIL-007 | Upgrades apply immediately with proration; downgrades and cheaper interval changes apply at period end by default.                                                                                            | Fairness and predictable revenue.                  | Subscription change service               | [SRC: BR-055]                                              |
+| BR-BIL-008 | Downgrade or lapse never deletes user data; over-limit resources become read-only or paused after notice and the owner chooses which to keep.                                                                 | Trust and data safety.                             | Plan change and limit services            | [SRC: docs/PRICING.md "downgrades do not unpublish"] [DER] |
+| BR-BIL-009 | Entitlements follow the billing owner of the covered context: personal plan for the individual, organization plan for covered members within the organization.                                                | Resolves the per-user versus per-organization gap. | Resolver                                  | [SRC: docs/PRICING.md review note] [DEC-REQ] OD-BIL-06     |
+| BR-BIL-010 | One trial per user per plan family and per payment fingerprint.                                                                                                                                               | Abuse control.                                     | Trial service                             | [PROP]                                                     |
+| BR-BIL-011 | Coupons cannot reduce a price below the platform minimum, exceed `coupon_max_percent` (default 75), or be redeemed more than allowed.                                                                         | Margin protection.                                 | Coupon service                            | [SRC: BR-099; OD-43]                                       |
+| BR-BIL-012 | Course purchase refunds: full within the window at or below the progress threshold, pro-rated within the window otherwise (defaults 30 days, 20 percent).                                                     | Published fair policy.                             | Refund policy engine                      | [SRC: BR-100; OD-29]                                       |
+| BR-BIL-013 | Failed payments follow the dunning schedule; after the grace period paid entitlements resolve to free values; data is retained.                                                                               | Clear consequences.                                | Dunning service, resolver                 | [SRC: docs/PRICING.md] [PROP]                              |
+| BR-BIL-014 | Card data never touches TalentSphere systems; only provider tokens and masked display data are stored.                                                                                                        | PCI scope minimization.                            | Checkout and portal design                | [DER]                                                      |
+| BR-BIL-015 | Tax is calculated by the tax engine at checkout; no tax is collected in an unregistered jurisdiction; no assumed rates.                                                                                       | Compliance.                                        | Tax service                               | [PROP]                                                     |
+| BR-BIL-016 | Finalized invoices are immutable; corrections are credit notes and new invoices; numbering is gapless per issuing entity and year.                                                                            | Legal validity.                                    | Invoice service                           | [DER]                                                      |
+| BR-BIL-017 | Seat and organization-limit consumption is atomic: assigned seats never exceed total and limits never oversell under concurrency.                                                                             | Fairness and revenue integrity.                    | Row locks, check constraints              | [SRC: BR-074]                                              |
+| BR-BIL-018 | Institutional and enterprise prices come from the price book (volume tiers per package) or an approved quote; never hard-coded.                                                                               | Pricing is configurable and OD-gated.              | Price book, quote service                 | [SRC: BR-081; OD-15]                                       |
+| BR-BIL-019 | No paid inference for a free user without an explicit active cost policy; AI quota is reserved before the call and settled after.                                                                             | Cost control.                                      | AI meter                                  | [SRC: §16.4; Amendment C]                                  |
+| BR-BIL-020 | Usage meters are durable, atomic, idempotent on usage event key and use documented windows with reset time shown to users.                                                                                    | Accurate limits across instances.                  | Meter service                             | [PROP]                                                     |
+| BR-BIL-021 | Outreach caps are weekly per seat, values from the plan; custom values only by contract.                                                                                                                      | Anti-spam and plan clarity.                        | Outreach check                            | [SRC: BR-130]                                              |
+| BR-BIL-022 | Refunds and adjustments above `refund_dual_approval_amount` or `adjustment_dual_approval_amount`, and all entitlement grants above bounds, need a second approver who is not the proposer.                    | Fraud and error control.                           | Approval workflow                         | [PROP]                                                     |
+| BR-BIL-023 | Refunds return to the original payment method; credits are goodwill only, non-withdrawable and expiring per policy.                                                                                           | Anti-laundering.                                   | Refund and credit services                | [DER]                                                      |
+| BR-BIL-024 | Earner balances carry a hold period, require completed payout onboarding, and are subject to clawback for refunds and disputes.                                                                               | Protects against reversals.                        | Payout service                            | [SRC: WF-28; BR-101] [PROP]                                |
+| BR-BIL-025 | Holding funds for third-party work (escrow) is not part of ordinary balances and exists only if the escrow decision gate is approved.                                                                         | Regulatory and non-goal risk.                      | Payout service feature flag               | [DEC-REQ] OD-BIL-10                                        |
+| BR-BIL-026 | Every gated capability checks one registered entitlement key on the server; UI hints are never authoritative; an unregistered key is an error.                                                                | No UI-only gating.                                 | Enforcement-point registry                | [SRC: CLAUDE rule business rules in domain]                |
+| BR-BIL-027 | Seat revocation, grace and release follow INS rules; BIL only returns seats to the pool and expires pools.                                                                                                    | Single owner per rule.                             | Seat service                              | [SRC: BR-073, BR-075]                                      |
+| BR-BIL-028 | Region and currency come from the billing country, validated against card issuer and tax evidence, never from IP alone.                                                                                       | Prevents price arbitrage and tax errors.           | Checkout, region service                  | [PROP]                                                     |
+| BR-BIL-029 | Reconciliation never changes money silently; discrepancies become items resolved by authorized actions.                                                                                                       | Auditable books.                                   | Reconciliation service                    | [PROP]                                                     |
+| BR-BIL-030 | Ledger entries are append-only and balanced; corrections are reversing entries in the open period.                                                                                                            | Accounting integrity.                              | Ledger service                            | [PROP]                                                     |
+| BR-BIL-031 | Enterprise custom terms are stored as contract grants with expiry; no hidden manual flags; quotes are documents, not a pipeline.                                                                              | Visibility and non-goal protection.                | Contract and grant services               | [DER] [SRC: §4.2]                                          |
+| BR-BIL-032 | Billing records are retained for the statutory period (default 7 years) with minimized personal fields after account deletion.                                                                                | Legal obligation.                                  | Retention job                             | [PROP] OD-BIL-02                                           |
+| BR-BIL-033 | Billing actions follow the buyer's context: candidates and learners buy personal plans and courses, employers buy employer plans, institutions buy seats; roles without a billing capability cannot purchase. | Resolves legacy BR-07.                             | Authorization layer                       | [SRC: BR-07 conflict] [DEC-REQ] OD-BIL-11                  |
+| BR-BIL-034 | Test mode and live mode are isolated: data, keys and webhooks never cross; live requires explicit enablement.                                                                                                 | Prevents accidental charges.                       | Environment guard                         | [SRC: docs/PRICING.md]                                     |
+| BR-BIL-035 | Organizations without a subscription are limited by `free_active_jobs_limit`; the value is undecided and the decision is recorded.                                                                            | Legacy policy gap.                                 | Limit service                             | [SRC: docs/PRICING.md] [DEC-REQ] OD-BIL-05                 |
+| BR-BIL-036 | Region rules decide tax display, reverse charge for valid business tax ids and invoice wording.                                                                                                               | Compliance.                                        | Tax and invoice services                  | [PROP]                                                     |
+| BR-BIL-037 | A higher price for an existing subscriber needs at least 30 days' notice before renewal.                                                                                                                      | Consumer fairness.                                 | Price change scheduler                    | [PROP]                                                     |
+| BR-BIL-038 | Trial parameters (days, card required, access on cancel) are per plan and never inferred.                                                                                                                     | Configurable policy.                               | Plan version                              | [PROP] OD-BIL-04                                           |
 
 ## 6. State machines
 
@@ -975,24 +975,24 @@ Notes: Billing actions follow the buyer's context, not a single role (BR-BIL-033
 
 States: `incomplete`, `trialing`, `active`, `past_due`, `paused`, `unpaid`, `canceled`, `expired`. Terminal: `canceled`, `expired`. `cancel_at_period_end` is a flag on `active` or `trialing`, not a state.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | incomplete | Checkout session created | n/a |
-| incomplete | active | Payment confirmed by webhook | No trial |
-| incomplete | trialing | Checkout completed with trial | Trial eligible |
-| incomplete | expired | Session expires unpaid | 24 hours |
-| trialing | active | Trial ends and charge succeeds | n/a |
-| trialing | past_due | Charge fails at conversion | n/a |
-| trialing | canceled | Cancel | Per setting |
-| active | past_due | Renewal charge fails | n/a |
-| past_due | active | Payment recovered | n/a |
-| past_due | unpaid | Grace exhausted | n/a |
-| unpaid | active | Payment recovered | n/a |
-| unpaid | canceled | Final cancel day | n/a |
-| active | paused | Owner pauses | Allowed on plan |
-| paused | active | Pause ends or owner resumes | n/a |
-| active | canceled | Period ends with cancel flag | n/a |
-| canceled | active | Reactivate creates new subscription | New subscription id |
+| From       | To         | Trigger                             | Guard               |
+| ---------- | ---------- | ----------------------------------- | ------------------- |
+| (new)      | incomplete | Checkout session created            | n/a                 |
+| incomplete | active     | Payment confirmed by webhook        | No trial            |
+| incomplete | trialing   | Checkout completed with trial       | Trial eligible      |
+| incomplete | expired    | Session expires unpaid              | 24 hours            |
+| trialing   | active     | Trial ends and charge succeeds      | n/a                 |
+| trialing   | past_due   | Charge fails at conversion          | n/a                 |
+| trialing   | canceled   | Cancel                              | Per setting         |
+| active     | past_due   | Renewal charge fails                | n/a                 |
+| past_due   | active     | Payment recovered                   | n/a                 |
+| past_due   | unpaid     | Grace exhausted                     | n/a                 |
+| unpaid     | active     | Payment recovered                   | n/a                 |
+| unpaid     | canceled   | Final cancel day                    | n/a                 |
+| active     | paused     | Owner pauses                        | Allowed on plan     |
+| paused     | active     | Pause ends or owner resumes         | n/a                 |
+| active     | canceled   | Period ends with cancel flag        | n/a                 |
+| canceled   | active     | Reactivate creates new subscription | New subscription id |
 
 ```mermaid
 stateDiagram-v2
@@ -1019,13 +1019,13 @@ stateDiagram-v2
 
 States: `draft`, `open`, `paid`, `void`, `uncollectible`. Terminal: `paid`, `void`, `uncollectible`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | open | Finalize | Totals balance, number assigned |
-| open | paid | Payment confirmed | Amount equals due |
-| open | void | `FIN` voids | No payment, reason |
-| open | uncollectible | Write-off | Dual approval above threshold |
-| draft | void | Discard | n/a |
+| From  | To            | Trigger           | Guard                           |
+| ----- | ------------- | ----------------- | ------------------------------- |
+| draft | open          | Finalize          | Totals balance, number assigned |
+| open  | paid          | Payment confirmed | Amount equals due               |
+| open  | void          | `FIN` voids       | No payment, reason              |
+| open  | uncollectible | Write-off         | Dual approval above threshold   |
+| draft | void          | Discard           | n/a                             |
 
 ```mermaid
 stateDiagram-v2
@@ -1044,16 +1044,16 @@ stateDiagram-v2
 
 States: `scheduled`, `retrying`, `grace`, `degraded`, `recovered`, `exhausted`. Terminal: `recovered`, `exhausted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | scheduled | Payment failure | Soft decline |
-| (new) | degraded | Hard decline | Skip retries, grace still applies |
-| scheduled | retrying | Retry time | n/a |
-| retrying | recovered | Payment succeeds | n/a |
-| retrying | grace | Retry fails | Retries remain |
-| grace | degraded | Grace days elapse | n/a |
-| degraded | recovered | Payment succeeds | Entitlements restored |
-| degraded | exhausted | Final cancel day | Subscription canceled |
+| From      | To        | Trigger           | Guard                             |
+| --------- | --------- | ----------------- | --------------------------------- |
+| (new)     | scheduled | Payment failure   | Soft decline                      |
+| (new)     | degraded  | Hard decline      | Skip retries, grace still applies |
+| scheduled | retrying  | Retry time        | n/a                               |
+| retrying  | recovered | Payment succeeds  | n/a                               |
+| retrying  | grace     | Retry fails       | Retries remain                    |
+| grace     | degraded  | Grace days elapse | n/a                               |
+| degraded  | recovered | Payment succeeds  | Entitlements restored             |
+| degraded  | exhausted | Final cancel day  | Subscription canceled             |
 
 ```mermaid
 stateDiagram-v2
@@ -1073,17 +1073,17 @@ stateDiagram-v2
 
 States: `requested`, `under_review`, `awaiting_second_approval`, `approved`, `processing`, `refunded`, `denied`, `failed`. Terminal: `refunded`, `denied`, `failed` (a retry creates a new attempt on the same record from `failed` to `processing` by `FIN`).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| requested | under_review | `FIN` opens | n/a |
-| under_review | approved | `FIN` approves | At or below dual-approval amount |
-| under_review | awaiting_second_approval | `FIN` approves | Above dual-approval amount |
-| awaiting_second_approval | approved | Second approver | Different person |
-| under_review, awaiting_second_approval | denied | Decision | Reason |
-| approved | processing | Provider call | Idempotency key |
-| processing | refunded | Provider confirms | n/a |
-| processing | failed | Provider error | n/a |
-| failed | processing | `FIN` retries | n/a |
+| From                                   | To                       | Trigger           | Guard                            |
+| -------------------------------------- | ------------------------ | ----------------- | -------------------------------- |
+| requested                              | under_review             | `FIN` opens       | n/a                              |
+| under_review                           | approved                 | `FIN` approves    | At or below dual-approval amount |
+| under_review                           | awaiting_second_approval | `FIN` approves    | Above dual-approval amount       |
+| awaiting_second_approval               | approved                 | Second approver   | Different person                 |
+| under_review, awaiting_second_approval | denied                   | Decision          | Reason                           |
+| approved                               | processing               | Provider call     | Idempotency key                  |
+| processing                             | refunded                 | Provider confirms | n/a                              |
+| processing                             | failed                   | Provider error    | n/a                              |
+| failed                                 | processing               | `FIN` retries     | n/a                              |
 
 ```mermaid
 stateDiagram-v2
@@ -1106,12 +1106,12 @@ stateDiagram-v2
 
 States: `draft`, `active`, `exhausted`, `expired`, `revoked`. Terminal: `exhausted`, `expired`, `revoked`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | active | Activate | Bounds valid, approved if beyond bounds |
-| active | exhausted | Redemption limit reached | n/a |
-| active | expired | End date passes | n/a |
-| active | revoked | `FIN` revokes | Reason |
+| From   | To        | Trigger                  | Guard                                   |
+| ------ | --------- | ------------------------ | --------------------------------------- |
+| draft  | active    | Activate                 | Bounds valid, approved if beyond bounds |
+| active | exhausted | Redemption limit reached | n/a                                     |
+| active | expired   | End date passes          | n/a                                     |
+| active | revoked   | `FIN` revokes            | Reason                                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1129,15 +1129,15 @@ stateDiagram-v2
 
 States: `pending`, `active`, `expiring`, `expired`, `cancelled`. Terminal: `expired`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | pending | Purchase created | Awaiting payment or approval |
-| pending | active | Payment confirmed or `FIN` provisional release | Idempotent on PO or event id |
-| active | expiring | 60 days before end | n/a |
-| expiring | active | Renewal or extension | n/a |
-| active, expiring | expired | End date reached | n/a |
-| pending | cancelled | Purchase cancelled or unpaid timeout | n/a |
-| active | cancelled | Contract termination | No assigned seats or approved exception |
+| From             | To        | Trigger                                        | Guard                                   |
+| ---------------- | --------- | ---------------------------------------------- | --------------------------------------- |
+| (new)            | pending   | Purchase created                               | Awaiting payment or approval            |
+| pending          | active    | Payment confirmed or `FIN` provisional release | Idempotent on PO or event id            |
+| active           | expiring  | 60 days before end                             | n/a                                     |
+| expiring         | active    | Renewal or extension                           | n/a                                     |
+| active, expiring | expired   | End date reached                               | n/a                                     |
+| pending          | cancelled | Purchase cancelled or unpaid timeout           | n/a                                     |
+| active           | cancelled | Contract termination                           | No assigned seats or approved exception |
 
 ```mermaid
 stateDiagram-v2
@@ -1157,14 +1157,14 @@ stateDiagram-v2
 
 States: `draft`, `submitted`, `approved`, `invoiced`, `paid`, `rejected`, `cancelled`. Terminal: `paid`, `rejected`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | submitted | Requester submits | PO present when required |
-| submitted | approved | Buyer approver approves | n/a |
-| submitted | rejected | Approver rejects | Reason |
-| approved | invoiced | `FIN` issues invoice | Price matches book or quote |
-| invoiced | paid | Payment recorded in full | n/a |
-| draft, submitted, approved, invoiced | cancelled | Requester or `FIN` cancels | Not paid |
+| From                                 | To        | Trigger                    | Guard                       |
+| ------------------------------------ | --------- | -------------------------- | --------------------------- |
+| draft                                | submitted | Requester submits          | PO present when required    |
+| submitted                            | approved  | Buyer approver approves    | n/a                         |
+| submitted                            | rejected  | Approver rejects           | Reason                      |
+| approved                             | invoiced  | `FIN` issues invoice       | Price matches book or quote |
+| invoiced                             | paid      | Payment recorded in full   | n/a                         |
+| draft, submitted, approved, invoiced | cancelled | Requester or `FIN` cancels | Not paid                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1187,17 +1187,17 @@ stateDiagram-v2
 
 States: `draft`, `pending_approval`, `sent`, `accepted`, `active`, `renewing`, `expired`, `terminated`, `declined`. Terminal: `expired`, `terminated`, `declined`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | pending_approval | `FIN` submits | Integrity check passed |
-| pending_approval | sent | Approved | Approver differs |
-| sent | accepted | Buyer accepts | Signatory recorded |
-| sent | declined | Buyer declines or quote expires | n/a |
-| accepted | active | Start date | Grants created |
-| active | renewing | Notice window opens | n/a |
-| renewing | active | New version accepted | n/a |
-| active, renewing | expired | End date | n/a |
-| active | terminated | Early termination | Approval, terms |
+| From             | To               | Trigger                         | Guard                  |
+| ---------------- | ---------------- | ------------------------------- | ---------------------- |
+| draft            | pending_approval | `FIN` submits                   | Integrity check passed |
+| pending_approval | sent             | Approved                        | Approver differs       |
+| sent             | accepted         | Buyer accepts                   | Signatory recorded     |
+| sent             | declined         | Buyer declines or quote expires | n/a                    |
+| accepted         | active           | Start date                      | Grants created         |
+| active           | renewing         | Notice window opens             | n/a                    |
+| renewing         | active           | New version accepted            | n/a                    |
+| active, renewing | expired          | End date                        | n/a                    |
+| active           | terminated       | Early termination               | Approval, terms        |
 
 ```mermaid
 stateDiagram-v2
@@ -1221,16 +1221,16 @@ stateDiagram-v2
 
 States: `received`, `verified`, `processed`, `failed`, `dead_letter`, `ignored_duplicate`, `rejected`. Terminal: `processed`, `ignored_duplicate`, `rejected`, `dead_letter` (replay returns to `verified`).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| received | rejected | Bad signature or wrong mode | n/a |
-| received | verified | Signature valid | n/a |
-| received | ignored_duplicate | Provider event id exists | n/a |
-| verified | processed | Handler succeeds | n/a |
-| verified | failed | Handler error | n/a |
-| failed | processed | Retry succeeds | Up to 10 attempts |
-| failed | dead_letter | Retries exhausted | Alert |
-| dead_letter | verified | Operator replay | Audit |
+| From        | To                | Trigger                     | Guard             |
+| ----------- | ----------------- | --------------------------- | ----------------- |
+| received    | rejected          | Bad signature or wrong mode | n/a               |
+| received    | verified          | Signature valid             | n/a               |
+| received    | ignored_duplicate | Provider event id exists    | n/a               |
+| verified    | processed         | Handler succeeds            | n/a               |
+| verified    | failed            | Handler error               | n/a               |
+| failed      | processed         | Retry succeeds              | Up to 10 attempts |
+| failed      | dead_letter       | Retries exhausted           | Alert             |
+| dead_letter | verified          | Operator replay             | Audit             |
 
 ```mermaid
 stateDiagram-v2
@@ -1252,16 +1252,16 @@ stateDiagram-v2
 
 States: `pending_hold`, `available`, `scheduled`, `in_transit`, `paid`, `failed`, `held_review`. Terminal: `paid`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| pending_hold | available | Hold days elapse | No open dispute |
-| available | scheduled | Payout run | Balance at least minimum, onboarding complete |
-| scheduled | in_transit | Transfer created | Idempotency |
-| in_transit | paid | Provider confirms | n/a |
-| in_transit | failed | Provider reports failure | Funds returned to balance |
-| failed | available | Earner fixes details | n/a |
-| pending_hold, available | held_review | Dispute or fraud flag | `FIN` decides |
-| held_review | available | Cleared | n/a |
+| From                    | To          | Trigger                  | Guard                                         |
+| ----------------------- | ----------- | ------------------------ | --------------------------------------------- |
+| pending_hold            | available   | Hold days elapse         | No open dispute                               |
+| available               | scheduled   | Payout run               | Balance at least minimum, onboarding complete |
+| scheduled               | in_transit  | Transfer created         | Idempotency                                   |
+| in_transit              | paid        | Provider confirms        | n/a                                           |
+| in_transit              | failed      | Provider reports failure | Funds returned to balance                     |
+| failed                  | available   | Earner fixes details     | n/a                                           |
+| pending_hold, available | held_review | Dispute or fraud flag    | `FIN` decides                                 |
+| held_review             | available   | Cleared                  | n/a                                           |
 
 ```mermaid
 stateDiagram-v2
@@ -1282,12 +1282,12 @@ stateDiagram-v2
 
 States: `opened`, `evidence_submitted`, `won`, `lost`, `accepted`. Terminal: `won`, `lost`, `accepted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| opened | evidence_submitted | `FIN` submits evidence | Before deadline |
-| opened | accepted | `FIN` accepts liability | n/a |
-| evidence_submitted | won | Provider outcome | n/a |
-| evidence_submitted | lost | Provider outcome | Entitlement revoked, clawback |
+| From               | To                 | Trigger                 | Guard                         |
+| ------------------ | ------------------ | ----------------------- | ----------------------------- |
+| opened             | evidence_submitted | `FIN` submits evidence  | Before deadline               |
+| opened             | accepted           | `FIN` accepts liability | n/a                           |
+| evidence_submitted | won                | Provider outcome        | n/a                           |
+| evidence_submitted | lost               | Provider outcome        | Entitlement revoked, clawback |
 
 ```mermaid
 stateDiagram-v2
@@ -1305,14 +1305,14 @@ stateDiagram-v2
 
 States: `scheduled`, `running`, `clean`, `discrepancies_open`, `resolved`, `failed`. Terminal: `clean`, `resolved`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| scheduled | running | Job starts | n/a |
-| running | clean | No items | n/a |
-| running | discrepancies_open | Items found | Alert |
-| running | failed | Error | Retry |
-| failed | running | Retry | n/a |
-| discrepancies_open | resolved | All items explained or fixed | Notes present |
+| From               | To                 | Trigger                      | Guard         |
+| ------------------ | ------------------ | ---------------------------- | ------------- |
+| scheduled          | running            | Job starts                   | n/a           |
+| running            | clean              | No items                     | n/a           |
+| running            | discrepancies_open | Items found                  | Alert         |
+| running            | failed             | Error                        | Retry         |
+| failed             | running            | Retry                        | n/a           |
+| discrepancies_open | resolved           | All items explained or fixed | Notes present |
 
 ```mermaid
 stateDiagram-v2
@@ -1329,39 +1329,39 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-BIL-001 | Pricing | `/pricing` | GUE, all | Compare plans | loading, country unsupported, cached |
-| SCR-BIL-002 | Checkout summary | `/billing/checkout` | buyers | Confirm plan and details | invalid, processing |
-| SCR-BIL-003 | Checkout return | `/billing/success`, `/billing/cancelled` | buyers | Processing and result | processing, delayed, failed |
-| SCR-BIL-004 | Billing home | `/billing` | billing owner | Plan, next invoice, methods | past due banner, trial banner |
-| SCR-BIL-005 | Change plan | `/billing/plan` | billing owner | Upgrade, downgrade, cancel, pause | preview, over-limit |
-| SCR-BIL-006 | Payment methods | `/billing/methods` | billing owner | Manage cards | expiring, only-method |
-| SCR-BIL-007 | Invoices | `/billing/invoices` | billing owner | History, PDFs | empty, open invoice |
-| SCR-BIL-008 | Refund request | `/billing/invoices/:id/refund` | buyer | Request refund | eligible, outside window |
-| SCR-BIL-009 | Usage | `/billing/usage` | all authenticated | Quotas and history | at limit, reset time |
-| SCR-BIL-010 | Limit dialog | in-app modal | all | Explain limit and options | hard cap, credits |
-| SCR-BIL-011 | Organization billing | `/billing/organization` | EAD | Owner, coverage, seats | no owner, covered list |
-| SCR-BIL-012 | Purchase requests | `/billing/purchase-requests` | IAD, EAD | PO flow | draft, awaiting approval, invoiced |
-| SCR-BIL-013 | Quote acceptance | `/quotes/:token` | EAD, IAD | Accept enterprise quote | valid, expired |
-| SCR-BIL-014 | Earnings | `/earnings` | INS, MNT, FRL | Balances, payouts | onboarding needed, hold, negative |
-| SCR-BIL-015 | Order receipt | `/orders/:id` | buyers | Purchase confirmation | paid, activating |
-| SCR-BIL-016 | Admin plans and prices | `/admin/billing/plans` | FIN, PAD | Price book | draft, pending approval |
-| SCR-BIL-017 | Entitlement keys | `/admin/billing/entitlements` | FIN, PAD | Vocabulary | unenforced warning |
-| SCR-BIL-018 | Regions | `/admin/billing/regions` | FIN | Currency and tax mode | conflict |
-| SCR-BIL-019 | Coupons | `/admin/billing/coupons` | FIN | Create, revoke | list, near limit |
-| SCR-BIL-020 | Refund and dispute queue | `/admin/billing/refunds` | FIN | Decide refunds | awaiting second approval |
-| SCR-BIL-021 | Customer billing view | `/admin/billing/customers/:id` | FIN, SUP | Inspect and adjust | restricted for SUP |
-| SCR-BIL-022 | Adjustments inbox | `/admin/billing/adjustments` | FIN, PAD | Approve adjustments | pending |
-| SCR-BIL-023 | Webhooks | `/admin/billing/webhooks` | FIN, PAD | Event health | dead letters |
-| SCR-BIL-024 | Reconciliation | `/admin/billing/reconciliation` | FIN | Resolve discrepancies | clean, items |
-| SCR-BIL-025 | Ledger | `/admin/billing/ledger` | FIN | Entries, mappings | period closed |
-| SCR-BIL-026 | Pools | `/admin/billing/pools` | FIN | Seat pools | pending, expiring |
-| SCR-BIL-027 | Contracts | `/admin/billing/contracts` | FIN, PAD | Quotes and contracts | renewing |
-| SCR-BIL-028 | Dunning view | `/admin/billing/dunning` | FIN | Failed payments | extension dialog |
-| SCR-BIL-029 | Reports | `/admin/billing/reports` | FIN | Finance reports | suppressed segment |
-| SCR-BIL-030 | Compliance | `/admin/billing/compliance` | SAD, FIN | Controls | overdue rotation |
-| SCR-BIL-031 | Notification templates | `/admin/billing/templates` | FIN, PAD | Preview templates | locale fallback |
+| ID          | Name                     | Route proposal                           | Roles             | Purpose                           | Key states                           |
+| ----------- | ------------------------ | ---------------------------------------- | ----------------- | --------------------------------- | ------------------------------------ |
+| SCR-BIL-001 | Pricing                  | `/pricing`                               | GUE, all          | Compare plans                     | loading, country unsupported, cached |
+| SCR-BIL-002 | Checkout summary         | `/billing/checkout`                      | buyers            | Confirm plan and details          | invalid, processing                  |
+| SCR-BIL-003 | Checkout return          | `/billing/success`, `/billing/cancelled` | buyers            | Processing and result             | processing, delayed, failed          |
+| SCR-BIL-004 | Billing home             | `/billing`                               | billing owner     | Plan, next invoice, methods       | past due banner, trial banner        |
+| SCR-BIL-005 | Change plan              | `/billing/plan`                          | billing owner     | Upgrade, downgrade, cancel, pause | preview, over-limit                  |
+| SCR-BIL-006 | Payment methods          | `/billing/methods`                       | billing owner     | Manage cards                      | expiring, only-method                |
+| SCR-BIL-007 | Invoices                 | `/billing/invoices`                      | billing owner     | History, PDFs                     | empty, open invoice                  |
+| SCR-BIL-008 | Refund request           | `/billing/invoices/:id/refund`           | buyer             | Request refund                    | eligible, outside window             |
+| SCR-BIL-009 | Usage                    | `/billing/usage`                         | all authenticated | Quotas and history                | at limit, reset time                 |
+| SCR-BIL-010 | Limit dialog             | in-app modal                             | all               | Explain limit and options         | hard cap, credits                    |
+| SCR-BIL-011 | Organization billing     | `/billing/organization`                  | EAD               | Owner, coverage, seats            | no owner, covered list               |
+| SCR-BIL-012 | Purchase requests        | `/billing/purchase-requests`             | IAD, EAD          | PO flow                           | draft, awaiting approval, invoiced   |
+| SCR-BIL-013 | Quote acceptance         | `/quotes/:token`                         | EAD, IAD          | Accept enterprise quote           | valid, expired                       |
+| SCR-BIL-014 | Earnings                 | `/earnings`                              | INS, MNT, FRL     | Balances, payouts                 | onboarding needed, hold, negative    |
+| SCR-BIL-015 | Order receipt            | `/orders/:id`                            | buyers            | Purchase confirmation             | paid, activating                     |
+| SCR-BIL-016 | Admin plans and prices   | `/admin/billing/plans`                   | FIN, PAD          | Price book                        | draft, pending approval              |
+| SCR-BIL-017 | Entitlement keys         | `/admin/billing/entitlements`            | FIN, PAD          | Vocabulary                        | unenforced warning                   |
+| SCR-BIL-018 | Regions                  | `/admin/billing/regions`                 | FIN               | Currency and tax mode             | conflict                             |
+| SCR-BIL-019 | Coupons                  | `/admin/billing/coupons`                 | FIN               | Create, revoke                    | list, near limit                     |
+| SCR-BIL-020 | Refund and dispute queue | `/admin/billing/refunds`                 | FIN               | Decide refunds                    | awaiting second approval             |
+| SCR-BIL-021 | Customer billing view    | `/admin/billing/customers/:id`           | FIN, SUP          | Inspect and adjust                | restricted for SUP                   |
+| SCR-BIL-022 | Adjustments inbox        | `/admin/billing/adjustments`             | FIN, PAD          | Approve adjustments               | pending                              |
+| SCR-BIL-023 | Webhooks                 | `/admin/billing/webhooks`                | FIN, PAD          | Event health                      | dead letters                         |
+| SCR-BIL-024 | Reconciliation           | `/admin/billing/reconciliation`          | FIN               | Resolve discrepancies             | clean, items                         |
+| SCR-BIL-025 | Ledger                   | `/admin/billing/ledger`                  | FIN               | Entries, mappings                 | period closed                        |
+| SCR-BIL-026 | Pools                    | `/admin/billing/pools`                   | FIN               | Seat pools                        | pending, expiring                    |
+| SCR-BIL-027 | Contracts                | `/admin/billing/contracts`               | FIN, PAD          | Quotes and contracts              | renewing                             |
+| SCR-BIL-028 | Dunning view             | `/admin/billing/dunning`                 | FIN               | Failed payments                   | extension dialog                     |
+| SCR-BIL-029 | Reports                  | `/admin/billing/reports`                 | FIN               | Finance reports                   | suppressed segment                   |
+| SCR-BIL-030 | Compliance               | `/admin/billing/compliance`              | SAD, FIN          | Controls                          | overdue rotation                     |
+| SCR-BIL-031 | Notification templates   | `/admin/billing/templates`               | FIN, PAD          | Preview templates                 | locale fallback                      |
 
 Accessibility notes: all amounts announce currency and sign; charts have table alternatives; destructive actions (cancel, void, refund) use confirmation dialogs with focus returned to the trigger; checkout and billing pages meet WCAG 2.2 AA and work at 320 px width.
 
@@ -1369,37 +1369,37 @@ Accessibility notes: all amounts announce currency and sign; charts have table a
 
 Retention classes: `R-fin` statutory financial retention (default 7 years), `R-config` kept while product exists, `R-short` 90 days, `R-session` 30 days.
 
-| ID | Name | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-BIL-01 | Plan | id, key, name, audience, status | has many PlanVersion | R-config |
-| ENT-BIL-02 | PlanVersion | id, plan_id, currency, region_id, interval, amount_minor, trial_days, effective_from, provider_price_id, status | Plan, region | R-fin |
-| ENT-BIL-03 | EntitlementKey | key, module, type, unit, class tag, customer_visible, enforced_by | used by PlanEntitlement | R-config |
-| ENT-BIL-04 | PlanEntitlement | plan_version_id, key, value | PlanVersion, EntitlementKey | R-fin |
-| ENT-BIL-05 | BillingAccount | id, owner_type (user or organization), owner_id, provider_customer_id, country, billing details, tax profile ref | owner | R-fin |
-| ENT-BIL-06 | Subscription | id, billing_account_id, plan_version_id, state (SM-BIL-01), period start and end, cancel_at_period_end, trial_end, scheduled_change | BillingAccount | R-fin |
-| ENT-BIL-07 | SubscriptionItem | subscription_id, kind (seat, add-on), quantity | Subscription | R-fin |
-| ENT-BIL-08 | Invoice | id, number, account_id, state (SM-BIL-02), currency, totals, tax, due_date, po_number, pdf_ref | BillingAccount | R-fin |
-| ENT-BIL-09 | InvoiceLine | invoice_id, description, quantity, unit_amount_minor, tax_code, source_ref | Invoice | R-fin |
-| ENT-BIL-10 | PaymentAttempt | id, invoice_id, provider_ref, status, failure_code, dunning_step | Invoice | R-fin |
-| ENT-BIL-11 | PaymentMethodRef | id, account_id, provider_ref, brand, last4, expiry, fingerprint_hash, is_default | BillingAccount | R-fin |
-| ENT-BIL-12 | Coupon | id, code, type, value, applies_to, limits, validity, state (SM-BIL-05) | has many redemptions | R-fin |
-| ENT-BIL-13 | CouponRedemption | coupon_id, account_id, invoice_id, amount_minor | Coupon | R-fin |
-| ENT-BIL-14 | Refund | id, invoice_id, amount_minor, reason, state (SM-BIL-04), approvers[], provider_ref | Invoice | R-fin |
-| ENT-BIL-15 | CreditEntry | account_id, amount_minor, currency, reason, expires_at | BillingAccount | R-fin |
-| ENT-BIL-16 | UsageCounter | subject, key, window_start, used, reserved | EntitlementKey | R-short for detail, aggregates R-fin |
-| ENT-BIL-17 | EntitlementGrant | id, subject (user or organization), key, value, source (contract, seat, manual, org), starts_at, ends_at, reason | resolver | R-fin |
-| ENT-BIL-18 | SeatPool | id, institution_id, package_ref, total, valid_from, valid_until, state (SM-BIL-06) | Institution (INS) | R-fin |
-| ENT-BIL-19 | PurchaseRequest | id, buyer, items, po_number, state (SM-BIL-07), approver | BillingAccount | R-fin |
-| ENT-BIL-20 | Contract | id, buyer, version, terms, entitlement overrides, state (SM-BIL-08), documents[] | BillingAccount | R-fin |
-| ENT-BIL-21 | WebhookEvent | provider_event_id, type, payload_ref, state (SM-BIL-09), attempts | n/a | R-short for payload, id R-fin |
-| ENT-BIL-22 | LedgerEntry | id, journal_id, account_code, debit_minor, credit_minor, currency, fx_rate, source_ref, period | source objects | R-fin |
-| ENT-BIL-23 | TaxProfile and Registration | account tax ids, validation status; platform registrations by jurisdiction | BillingAccount | R-fin |
-| ENT-BIL-24 | EarnerBalanceEntry and Payout | user_id, source, amount_minor, state (SM-BIL-10), hold_until, provider_transfer_ref | PayoutAccount | R-fin |
-| ENT-BIL-25 | PayoutAccount | user_id, provider_account_ref, onboarding_status, country | user | R-fin |
-| ENT-BIL-26 | Dispute | id, payment_ref, state (SM-BIL-11), evidence_refs, deadline | PaymentAttempt | R-fin |
-| ENT-BIL-27 | AdjustmentRequest | id, account_id, type, amount_minor, reason_code, proposer, approver, state | BillingAccount | R-fin |
-| ENT-BIL-28 | ReconciliationRun | id, window, state (SM-BIL-12), item counts, items[] | n/a | R-fin |
-| ENT-BIL-29 | Order | id, buyer, items (module, product_ref, price), state, invoice_id, fulfillment_state | BillingAccount | R-fin |
+| ID         | Name                          | Key attributes                                                                                                                      | Relationships               | Retention                            |
+| ---------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------ |
+| ENT-BIL-01 | Plan                          | id, key, name, audience, status                                                                                                     | has many PlanVersion        | R-config                             |
+| ENT-BIL-02 | PlanVersion                   | id, plan_id, currency, region_id, interval, amount_minor, trial_days, effective_from, provider_price_id, status                     | Plan, region                | R-fin                                |
+| ENT-BIL-03 | EntitlementKey                | key, module, type, unit, class tag, customer_visible, enforced_by                                                                   | used by PlanEntitlement     | R-config                             |
+| ENT-BIL-04 | PlanEntitlement               | plan_version_id, key, value                                                                                                         | PlanVersion, EntitlementKey | R-fin                                |
+| ENT-BIL-05 | BillingAccount                | id, owner_type (user or organization), owner_id, provider_customer_id, country, billing details, tax profile ref                    | owner                       | R-fin                                |
+| ENT-BIL-06 | Subscription                  | id, billing_account_id, plan_version_id, state (SM-BIL-01), period start and end, cancel_at_period_end, trial_end, scheduled_change | BillingAccount              | R-fin                                |
+| ENT-BIL-07 | SubscriptionItem              | subscription_id, kind (seat, add-on), quantity                                                                                      | Subscription                | R-fin                                |
+| ENT-BIL-08 | Invoice                       | id, number, account_id, state (SM-BIL-02), currency, totals, tax, due_date, po_number, pdf_ref                                      | BillingAccount              | R-fin                                |
+| ENT-BIL-09 | InvoiceLine                   | invoice_id, description, quantity, unit_amount_minor, tax_code, source_ref                                                          | Invoice                     | R-fin                                |
+| ENT-BIL-10 | PaymentAttempt                | id, invoice_id, provider_ref, status, failure_code, dunning_step                                                                    | Invoice                     | R-fin                                |
+| ENT-BIL-11 | PaymentMethodRef              | id, account_id, provider_ref, brand, last4, expiry, fingerprint_hash, is_default                                                    | BillingAccount              | R-fin                                |
+| ENT-BIL-12 | Coupon                        | id, code, type, value, applies_to, limits, validity, state (SM-BIL-05)                                                              | has many redemptions        | R-fin                                |
+| ENT-BIL-13 | CouponRedemption              | coupon_id, account_id, invoice_id, amount_minor                                                                                     | Coupon                      | R-fin                                |
+| ENT-BIL-14 | Refund                        | id, invoice_id, amount_minor, reason, state (SM-BIL-04), approvers[], provider_ref                                                  | Invoice                     | R-fin                                |
+| ENT-BIL-15 | CreditEntry                   | account_id, amount_minor, currency, reason, expires_at                                                                              | BillingAccount              | R-fin                                |
+| ENT-BIL-16 | UsageCounter                  | subject, key, window_start, used, reserved                                                                                          | EntitlementKey              | R-short for detail, aggregates R-fin |
+| ENT-BIL-17 | EntitlementGrant              | id, subject (user or organization), key, value, source (contract, seat, manual, org), starts_at, ends_at, reason                    | resolver                    | R-fin                                |
+| ENT-BIL-18 | SeatPool                      | id, institution_id, package_ref, total, valid_from, valid_until, state (SM-BIL-06)                                                  | Institution (INS)           | R-fin                                |
+| ENT-BIL-19 | PurchaseRequest               | id, buyer, items, po_number, state (SM-BIL-07), approver                                                                            | BillingAccount              | R-fin                                |
+| ENT-BIL-20 | Contract                      | id, buyer, version, terms, entitlement overrides, state (SM-BIL-08), documents[]                                                    | BillingAccount              | R-fin                                |
+| ENT-BIL-21 | WebhookEvent                  | provider_event_id, type, payload_ref, state (SM-BIL-09), attempts                                                                   | n/a                         | R-short for payload, id R-fin        |
+| ENT-BIL-22 | LedgerEntry                   | id, journal_id, account_code, debit_minor, credit_minor, currency, fx_rate, source_ref, period                                      | source objects              | R-fin                                |
+| ENT-BIL-23 | TaxProfile and Registration   | account tax ids, validation status; platform registrations by jurisdiction                                                          | BillingAccount              | R-fin                                |
+| ENT-BIL-24 | EarnerBalanceEntry and Payout | user_id, source, amount_minor, state (SM-BIL-10), hold_until, provider_transfer_ref                                                 | PayoutAccount               | R-fin                                |
+| ENT-BIL-25 | PayoutAccount                 | user_id, provider_account_ref, onboarding_status, country                                                                           | user                        | R-fin                                |
+| ENT-BIL-26 | Dispute                       | id, payment_ref, state (SM-BIL-11), evidence_refs, deadline                                                                         | PaymentAttempt              | R-fin                                |
+| ENT-BIL-27 | AdjustmentRequest             | id, account_id, type, amount_minor, reason_code, proposer, approver, state                                                          | BillingAccount              | R-fin                                |
+| ENT-BIL-28 | ReconciliationRun             | id, window, state (SM-BIL-12), item counts, items[]                                                                                 | n/a                         | R-fin                                |
+| ENT-BIL-29 | Order                         | id, buyer, items (module, product_ref, price), state, invoice_id, fulfillment_state                                                 | BillingAccount              | R-fin                                |
 
 ```mermaid
 erDiagram
@@ -1422,48 +1422,48 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Emitted when | Key payload | Consumers (planned) |
-|---|---|---|---|---|
-| EVT-BIL-001 | `bil.plan.published` | Price version published | plan_version_id | ANL, SRC |
-| EVT-BIL-002 | `bil.checkout.completed` | Webhook confirms checkout | account_id, subscription_id | NTF, ANL |
-| EVT-BIL-003 | `bil.subscription.activated` | State `active` | subscription_id, plan | all modules via entitlement cache |
-| EVT-BIL-004 | `bil.subscription.changed` | Plan or quantity changed | from, to, effective | NTF, ANL |
-| EVT-BIL-005 | `bil.subscription.cancel_scheduled` | Cancel at period end set | end date | NTF |
-| EVT-BIL-006 | `bil.subscription.ended` | State `canceled` or `expired` | subscription_id | all modules |
-| EVT-BIL-007 | `bil.subscription.paused` | Paused | window | NTF |
-| EVT-BIL-008 | `bil.trial.started` | Trial begins | trial_end | NTF |
-| EVT-BIL-009 | `bil.trial.converted` | Trial to active | subscription_id | ANL |
-| EVT-BIL-010 | `bil.invoice.finalized` | Invoice opened | invoice_id | NTF, ledger |
-| EVT-BIL-011 | `bil.invoice.paid` | Invoice paid | invoice_id, amount | NTF, ledger |
-| EVT-BIL-012 | `bil.payment.failed` | Payment attempt fails | invoice_id, code | NTF |
-| EVT-BIL-013 | `bil.payment.recovered` | Dunning recovered | subscription_id | NTF |
-| EVT-BIL-014 | `bil.dunning.degraded` | Access degraded | subscription_id | all modules |
-| EVT-BIL-015 | `bil.entitlements.changed` | Any change to an actor's resolved entitlements | subject, keys | all modules |
-| EVT-BIL-016 | `bil.coupon.redeemed` | Redemption | coupon_id, account | ANL |
-| EVT-BIL-017 | `bil.refund.requested` | Request created | refund_id | NTF |
-| EVT-BIL-018 | `bil.refund.completed` | Provider confirms | refund_id, amount | LRN, ledger, payouts |
-| EVT-BIL-019 | `bil.refund.denied` | Denied | refund_id | NTF |
-| EVT-BIL-020 | `bil.dispute.opened` | Chargeback received | dispute_id | FIN queue |
-| EVT-BIL-021 | `bil.dispute.closed` | Outcome | dispute_id, outcome | ledger, payouts |
-| EVT-BIL-022 | `bil.usage.threshold` | 80 or 100 percent used | subject, key | NTF |
-| EVT-BIL-023 | `bil.usage.limit_reached` | Limit hit | subject, key | ANL |
-| EVT-BIL-024 | `bil.pool.activated` | Seat pool active | pool_id, institution_id | INS |
-| EVT-BIL-025 | `bil.pool.expiring` | 60, 30, 7 days | pool_id | INS, NTF |
-| EVT-BIL-026 | `bil.pool.expired` | Pool expired | pool_id | INS |
-| EVT-BIL-027 | `bil.seat.assigned` | Team seat assigned | user, org | NTF |
-| EVT-BIL-028 | `bil.purchase.status_changed` | Purchase request state change | request_id, state | NTF |
-| EVT-BIL-029 | `bil.contract.activated` | Contract start | contract_id | all modules |
-| EVT-BIL-030 | `bil.contract.renewal_due` | Notice windows | contract_id | NTF |
-| EVT-BIL-031 | `bil.order.paid` | One-time order paid | order_id, items | LRN, MEN, ASM, GIG |
-| EVT-BIL-032 | `bil.order.fulfilled` | Fulfillment done | order_id | NTF |
-| EVT-BIL-033 | `bil.payout.paid` | Payout paid | user, amount | NTF |
-| EVT-BIL-034 | `bil.payout.failed` | Payout failed | user | NTF |
-| EVT-BIL-035 | `bil.adjustment.executed` | Adjustment posted | adjustment_id | ledger |
-| EVT-BIL-036 | `bil.ledger.posted` | Journal posted | journal_id | ERP hook |
-| EVT-BIL-037 | `bil.recon.discrepancy` | Items remain after run | run_id, count | FIN |
-| EVT-BIL-038 | `bil.webhook.dead_lettered` | Event dead-lettered | event_id | on-call |
-| EVT-BIL-039 | `bil.price.change_notice` | Price increase scheduled | subscriptions affected | NTF |
-| EVT-BIL-040 | `bil.region.country_change` | Country change scheduled | account | NTF |
+| ID          | Event                               | Emitted when                                   | Key payload                 | Consumers (planned)               |
+| ----------- | ----------------------------------- | ---------------------------------------------- | --------------------------- | --------------------------------- |
+| EVT-BIL-001 | `bil.plan.published`                | Price version published                        | plan_version_id             | ANL, SRC                          |
+| EVT-BIL-002 | `bil.checkout.completed`            | Webhook confirms checkout                      | account_id, subscription_id | NTF, ANL                          |
+| EVT-BIL-003 | `bil.subscription.activated`        | State `active`                                 | subscription_id, plan       | all modules via entitlement cache |
+| EVT-BIL-004 | `bil.subscription.changed`          | Plan or quantity changed                       | from, to, effective         | NTF, ANL                          |
+| EVT-BIL-005 | `bil.subscription.cancel_scheduled` | Cancel at period end set                       | end date                    | NTF                               |
+| EVT-BIL-006 | `bil.subscription.ended`            | State `canceled` or `expired`                  | subscription_id             | all modules                       |
+| EVT-BIL-007 | `bil.subscription.paused`           | Paused                                         | window                      | NTF                               |
+| EVT-BIL-008 | `bil.trial.started`                 | Trial begins                                   | trial_end                   | NTF                               |
+| EVT-BIL-009 | `bil.trial.converted`               | Trial to active                                | subscription_id             | ANL                               |
+| EVT-BIL-010 | `bil.invoice.finalized`             | Invoice opened                                 | invoice_id                  | NTF, ledger                       |
+| EVT-BIL-011 | `bil.invoice.paid`                  | Invoice paid                                   | invoice_id, amount          | NTF, ledger                       |
+| EVT-BIL-012 | `bil.payment.failed`                | Payment attempt fails                          | invoice_id, code            | NTF                               |
+| EVT-BIL-013 | `bil.payment.recovered`             | Dunning recovered                              | subscription_id             | NTF                               |
+| EVT-BIL-014 | `bil.dunning.degraded`              | Access degraded                                | subscription_id             | all modules                       |
+| EVT-BIL-015 | `bil.entitlements.changed`          | Any change to an actor's resolved entitlements | subject, keys               | all modules                       |
+| EVT-BIL-016 | `bil.coupon.redeemed`               | Redemption                                     | coupon_id, account          | ANL                               |
+| EVT-BIL-017 | `bil.refund.requested`              | Request created                                | refund_id                   | NTF                               |
+| EVT-BIL-018 | `bil.refund.completed`              | Provider confirms                              | refund_id, amount           | LRN, ledger, payouts              |
+| EVT-BIL-019 | `bil.refund.denied`                 | Denied                                         | refund_id                   | NTF                               |
+| EVT-BIL-020 | `bil.dispute.opened`                | Chargeback received                            | dispute_id                  | FIN queue                         |
+| EVT-BIL-021 | `bil.dispute.closed`                | Outcome                                        | dispute_id, outcome         | ledger, payouts                   |
+| EVT-BIL-022 | `bil.usage.threshold`               | 80 or 100 percent used                         | subject, key                | NTF                               |
+| EVT-BIL-023 | `bil.usage.limit_reached`           | Limit hit                                      | subject, key                | ANL                               |
+| EVT-BIL-024 | `bil.pool.activated`                | Seat pool active                               | pool_id, institution_id     | INS                               |
+| EVT-BIL-025 | `bil.pool.expiring`                 | 60, 30, 7 days                                 | pool_id                     | INS, NTF                          |
+| EVT-BIL-026 | `bil.pool.expired`                  | Pool expired                                   | pool_id                     | INS                               |
+| EVT-BIL-027 | `bil.seat.assigned`                 | Team seat assigned                             | user, org                   | NTF                               |
+| EVT-BIL-028 | `bil.purchase.status_changed`       | Purchase request state change                  | request_id, state           | NTF                               |
+| EVT-BIL-029 | `bil.contract.activated`            | Contract start                                 | contract_id                 | all modules                       |
+| EVT-BIL-030 | `bil.contract.renewal_due`          | Notice windows                                 | contract_id                 | NTF                               |
+| EVT-BIL-031 | `bil.order.paid`                    | One-time order paid                            | order_id, items             | LRN, MEN, ASM, GIG                |
+| EVT-BIL-032 | `bil.order.fulfilled`               | Fulfillment done                               | order_id                    | NTF                               |
+| EVT-BIL-033 | `bil.payout.paid`                   | Payout paid                                    | user, amount                | NTF                               |
+| EVT-BIL-034 | `bil.payout.failed`                 | Payout failed                                  | user                        | NTF                               |
+| EVT-BIL-035 | `bil.adjustment.executed`           | Adjustment posted                              | adjustment_id               | ledger                            |
+| EVT-BIL-036 | `bil.ledger.posted`                 | Journal posted                                 | journal_id                  | ERP hook                          |
+| EVT-BIL-037 | `bil.recon.discrepancy`             | Items remain after run                         | run_id, count               | FIN                               |
+| EVT-BIL-038 | `bil.webhook.dead_lettered`         | Event dead-lettered                            | event_id                    | on-call                           |
+| EVT-BIL-039 | `bil.price.change_notice`           | Price increase scheduled                       | subscriptions affected      | NTF                               |
+| EVT-BIL-040 | `bil.region.country_change`         | Country change scheduled                       | account                     | NTF                               |
 
 ### 9.2 Consumed
 
@@ -1471,92 +1471,92 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| System | Direction | Purpose | Notes |
-|---|---|---|---|
-| Payment provider (Stripe in the current plan; provider-independent port) | Both | Checkout, subscriptions, invoices, refunds, disputes, connected accounts | Test and live isolated (BR-BIL-034); OD-BIL-02 on local methods |
-| Tax engine and registry checks (provider tax or dedicated; VIES style) | Outbound | Rates, tax id validation | OD-BIL-03 |
-| FX rate source | Inbound | Base-currency reporting | Dated rates stored |
-| Accounting or ERP system | Outbound | Journals, deferred revenue | Via ledger hooks only |
-| Email delivery | Outbound | Notices | Via NTF |
-| Secret store | Internal | Keys | Via PLT |
-| Object storage | Internal | PDFs, contracts | Via PLT |
-| Bank transfer reconciliation feed | Inbound | PO payments | Optional |
+| System                                                                   | Direction | Purpose                                                                  | Notes                                                           |
+| ------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Payment provider (Stripe in the current plan; provider-independent port) | Both      | Checkout, subscriptions, invoices, refunds, disputes, connected accounts | Test and live isolated (BR-BIL-034); OD-BIL-02 on local methods |
+| Tax engine and registry checks (provider tax or dedicated; VIES style)   | Outbound  | Rates, tax id validation                                                 | OD-BIL-03                                                       |
+| FX rate source                                                           | Inbound   | Base-currency reporting                                                  | Dated rates stored                                              |
+| Accounting or ERP system                                                 | Outbound  | Journals, deferred revenue                                               | Via ledger hooks only                                           |
+| Email delivery                                                           | Outbound  | Notices                                                                  | Via NTF                                                         |
+| Secret store                                                             | Internal  | Keys                                                                     | Via PLT                                                         |
+| Object storage                                                           | Internal  | PDFs, contracts                                                          | Via PLT                                                         |
+| Bank transfer reconciliation feed                                        | Inbound   | PO payments                                                              | Optional                                                        |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| IDN (planned) | Authenticated principal, MFA for finance roles | ADM |
-| EMP (planned) | Organization identity and members | JOB, ATS (limits), ENT |
-| INS (this batch) | Institution verification, seat assignment | INS depends on BIL pools |
-| AIC (planned) | Quota reserve and settle | AIC depends on BIL meter |
-| JOB, ATS, NET, MSG (planned) | Usage events and enforcement points | They depend on BIL checks |
-| LRN, STU, MEN, GIG, ASM (planned) | Products, fulfillment, earning events | They depend on BIL orders and payouts |
-| NTF (planned) | Delivery | all |
-| ANL (planned) | Finance metrics | — |
-| ADM (planned) | Support access, console shell | — |
-| SET (planned) | Data rights | — |
-| PLT (planned) | Secrets, files, outbox | — |
+| Depends on                        | For                                            | Depended on by                        |
+| --------------------------------- | ---------------------------------------------- | ------------------------------------- |
+| IDN (planned)                     | Authenticated principal, MFA for finance roles | ADM                                   |
+| EMP (planned)                     | Organization identity and members              | JOB, ATS (limits), ENT                |
+| INS (this batch)                  | Institution verification, seat assignment      | INS depends on BIL pools              |
+| AIC (planned)                     | Quota reserve and settle                       | AIC depends on BIL meter              |
+| JOB, ATS, NET, MSG (planned)      | Usage events and enforcement points            | They depend on BIL checks             |
+| LRN, STU, MEN, GIG, ASM (planned) | Products, fulfillment, earning events          | They depend on BIL orders and payouts |
+| NTF (planned)                     | Delivery                                       | all                                   |
+| ANL (planned)                     | Finance metrics                                | —                                     |
+| ADM (planned)                     | Support access, console shell                  | —                                     |
+| SET (planned)                     | Data rights                                    | —                                     |
+| PLT (planned)                     | Secrets, files, outbox                         | —                                     |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| Webhook processing success | Events processed without dead letter | processed / (processed + dead_letter) | FIN |
-| Reconciliation clean rate | Runs with zero open items | clean runs / runs | FIN |
-| Entitlement drift | Accounts whose resolved entitlements differ from provider-derived expectation | mismatches / accounts checked | FIN |
-| Involuntary churn | Subscriptions lost to payment failure | exhausted dunning / active at start | FIN |
-| Dunning recovery rate | Failed payments recovered | recovered / dunning cases | FIN |
-| Trial conversion | Trials becoming paid | converted / trials ended | PAD |
-| Refund rate | Refunded amount over revenue | refunds / gross revenue | FIN |
-| Seat utilization | Assigned seats over total (active pools) | assigned / total | FIN |
-| Limit hit rate | Users reaching a limit per period | users at limit / active users | PAD |
-| MRR movement | New + expansion - contraction - churn | per period | FIN |
+| Metric                     | Definition                                                                    | Formula                               | Owner role |
+| -------------------------- | ----------------------------------------------------------------------------- | ------------------------------------- | ---------- |
+| Webhook processing success | Events processed without dead letter                                          | processed / (processed + dead_letter) | FIN        |
+| Reconciliation clean rate  | Runs with zero open items                                                     | clean runs / runs                     | FIN        |
+| Entitlement drift          | Accounts whose resolved entitlements differ from provider-derived expectation | mismatches / accounts checked         | FIN        |
+| Involuntary churn          | Subscriptions lost to payment failure                                         | exhausted dunning / active at start   | FIN        |
+| Dunning recovery rate      | Failed payments recovered                                                     | recovered / dunning cases             | FIN        |
+| Trial conversion           | Trials becoming paid                                                          | converted / trials ended              | PAD        |
+| Refund rate                | Refunded amount over revenue                                                  | refunds / gross revenue               | FIN        |
+| Seat utilization           | Assigned seats over total (active pools)                                      | assigned / total                      | FIN        |
+| Limit hit rate             | Users reaching a limit per period                                             | users at limit / active users         | PAD        |
+| MRR movement               | New + expansion - contraction - churn                                         | per period                            | FIN        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocks |
-|---|---|---|---|---|---|
-| OD-BIL-01 | What are the prices, currencies, AI quotas and limits for every plan? (SSOT V61-09: none decided; docs/PRICING.md values are recommendations only.) | Founder sets after cost model and market research | No numbers in the blueprint; parameter names only | Founder, Finance | FR-BIL-001, FR-BIL-021, FR-BIL-022 |
-| OD-BIL-02 | Payment provider scope: Stripe only, or add local methods (bank debit, UPI, wallets) and region partners; statutory retention by country. | Stripe only at first; add per region | Stripe via a provider port; 7-year retention default | Founder, Legal | FR-BIL-007, FR-BIL-033 |
-| OD-BIL-03 | Tax approach: provider tax product, Merchant of Record, or own engine. | A: provider tax; B: MoR; C: own | A for first regions, revisit at scale | Finance, Legal | FR-BIL-014 |
-| OD-BIL-04 | Trial policy: which plans, days, card required. | None, 14 days with card, or no-card trial | 14 days with card on entry paid plans | Product, Finance | FR-BIL-008 |
-| OD-BIL-05 | Free-tier limits and free-recruiter posting policy (`free_active_jobs_limit`). | Unlimited today, capped, or none | Capped at a value Finance sets | Product, Founder | FR-BIL-012, FR-BIL-022 |
-| OD-BIL-06 | Entitlements follow the user or the organization's billing owner. | Per user; per organization; both (BR-BIL-009) | Both, as in BR-BIL-009 | Product | FR-BIL-003, FR-BIL-012 |
-| OD-BIL-07 | Subscription refund policy. | No refunds; 14 days first payment; 30 days | 14 days first payment with low-usage test | Finance, Legal | FR-BIL-016 |
-| OD-BIL-08 | Regional pricing and purchasing-power policy. | List price in USD only; local currency same value; adjusted per region | Local currency list prices; no PPP until data | Finance | FR-BIL-006 |
-| OD-BIL-09 | Overage policy for AI and other meters. | Hard cap; credit packs; metered overage | Hard cap | Product, Finance | FR-BIL-023 |
-| OD-BIL-10 | Payout terms and whether third-party funds may be held (escrow); this touches SSOT §4.2 (no general marketplace, not payroll) and financial regulation. | No escrow; provider-managed escrow; own escrow | No escrow; revenue share paid with hold period; escrow is gated (see GIG OD) | Founder, Legal | FR-BIL-029 |
-| OD-BIL-11 | Who may buy what (SSOT BR-07 says billing actions are recruiter-only, conflicting with learner purchases and candidate plans). | Keep BR-07; replace with BR-BIL-033 | Replace with BR-BIL-033 | Founder | FR-BIL-007, FR-BIL-028 |
-| OD-BIL-12 | Enterprise sales workflow: quotes only, or a sales CRM. | Quotes only; integrate external CRM | Quotes only | Founder | FR-BIL-027 |
-| OD-BIL-13 | Revenue recognition basis for marketplace sales (gross or net) and the ERP target. | Gross; net as agent | Net as agent, confirm with accountant | Finance | FR-BIL-020 |
-| OD-BIL-14 | Plan names and audiences: SSOT lists Free, Pro, Team, Enterprise; code lists Candidate Pro, Recruiter Starter, Recruiter Enterprise. | Adopt audience-prefixed names; keep SSOT names | Audience-prefixed; map SSOT names | Product | FR-BIL-001, FR-BIL-022 |
-| OD-BIL-15 | Pay-per-use outreach credits (SSOT F-59) in scope or only weekly caps. | Caps only; credits | Caps only | Product | FR-BIL-022 |
+| ID        | Question                                                                                                                                                | Options                                                                | Default proposal                                                             | Who decides      | Blocks                             |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------- | ---------------------------------- |
+| OD-BIL-01 | What are the prices, currencies, AI quotas and limits for every plan? (SSOT V61-09: none decided; docs/PRICING.md values are recommendations only.)     | Founder sets after cost model and market research                      | No numbers in the blueprint; parameter names only                            | Founder, Finance | FR-BIL-001, FR-BIL-021, FR-BIL-022 |
+| OD-BIL-02 | Payment provider scope: Stripe only, or add local methods (bank debit, UPI, wallets) and region partners; statutory retention by country.               | Stripe only at first; add per region                                   | Stripe via a provider port; 7-year retention default                         | Founder, Legal   | FR-BIL-007, FR-BIL-033             |
+| OD-BIL-03 | Tax approach: provider tax product, Merchant of Record, or own engine.                                                                                  | A: provider tax; B: MoR; C: own                                        | A for first regions, revisit at scale                                        | Finance, Legal   | FR-BIL-014                         |
+| OD-BIL-04 | Trial policy: which plans, days, card required.                                                                                                         | None, 14 days with card, or no-card trial                              | 14 days with card on entry paid plans                                        | Product, Finance | FR-BIL-008                         |
+| OD-BIL-05 | Free-tier limits and free-recruiter posting policy (`free_active_jobs_limit`).                                                                          | Unlimited today, capped, or none                                       | Capped at a value Finance sets                                               | Product, Founder | FR-BIL-012, FR-BIL-022             |
+| OD-BIL-06 | Entitlements follow the user or the organization's billing owner.                                                                                       | Per user; per organization; both (BR-BIL-009)                          | Both, as in BR-BIL-009                                                       | Product          | FR-BIL-003, FR-BIL-012             |
+| OD-BIL-07 | Subscription refund policy.                                                                                                                             | No refunds; 14 days first payment; 30 days                             | 14 days first payment with low-usage test                                    | Finance, Legal   | FR-BIL-016                         |
+| OD-BIL-08 | Regional pricing and purchasing-power policy.                                                                                                           | List price in USD only; local currency same value; adjusted per region | Local currency list prices; no PPP until data                                | Finance          | FR-BIL-006                         |
+| OD-BIL-09 | Overage policy for AI and other meters.                                                                                                                 | Hard cap; credit packs; metered overage                                | Hard cap                                                                     | Product, Finance | FR-BIL-023                         |
+| OD-BIL-10 | Payout terms and whether third-party funds may be held (escrow); this touches SSOT §4.2 (no general marketplace, not payroll) and financial regulation. | No escrow; provider-managed escrow; own escrow                         | No escrow; revenue share paid with hold period; escrow is gated (see GIG OD) | Founder, Legal   | FR-BIL-029                         |
+| OD-BIL-11 | Who may buy what (SSOT BR-07 says billing actions are recruiter-only, conflicting with learner purchases and candidate plans).                          | Keep BR-07; replace with BR-BIL-033                                    | Replace with BR-BIL-033                                                      | Founder          | FR-BIL-007, FR-BIL-028             |
+| OD-BIL-12 | Enterprise sales workflow: quotes only, or a sales CRM.                                                                                                 | Quotes only; integrate external CRM                                    | Quotes only                                                                  | Founder          | FR-BIL-027                         |
+| OD-BIL-13 | Revenue recognition basis for marketplace sales (gross or net) and the ERP target.                                                                      | Gross; net as agent                                                    | Net as agent, confirm with accountant                                        | Finance          | FR-BIL-020                         |
+| OD-BIL-14 | Plan names and audiences: SSOT lists Free, Pro, Team, Enterprise; code lists Candidate Pro, Recruiter Starter, Recruiter Enterprise.                    | Adopt audience-prefixed names; keep SSOT names                         | Audience-prefixed; map SSOT names                                            | Product          | FR-BIL-001, FR-BIL-022             |
+| OD-BIL-15 | Pay-per-use outreach credits (SSOT F-59) in scope or only weekly caps.                                                                                  | Caps only; credits                                                     | Caps only                                                                    | Product          | FR-BIL-022                         |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-BIL-01 | Entitlement drift: product grants access that payment state does not support, or the reverse. | Medium, high | Single resolver, drift metric, reconciliation re-sync |
-| RSK-BIL-02 | Forged or replayed webhooks. | Low, high | Signature, tolerance, idempotency, mode isolation |
-| RSK-BIL-03 | Prices or quotas set without a cost model causing losses (AI cost). | Medium, high | OD-BIL-01, BR-BIL-019, hard cap default |
-| RSK-BIL-04 | Tax non-compliance in new regions. | Medium, high | Registration gap list, no assumed rates, OD-BIL-03 |
-| RSK-BIL-05 | Pay-to-rank creep through custom contracts. | Medium, high | Integrity guard on contracts and grants, no exceptions |
-| RSK-BIL-06 | Fraud: trial abuse, coupon abuse, stolen cards, refund abuse. | Medium, medium | Fingerprint checks, rate limits, dual approval, dispute handling |
-| RSK-BIL-07 | Payout and escrow regulation exposure (money transmission). | Medium, severe | Use provider-managed connected accounts, escrow gated by OD-BIL-10 |
-| RSK-BIL-08 | Over-limit downgrades harming customers (unpublished jobs). | Medium, medium | BR-BIL-008, notice, owner chooses |
-| RSK-BIL-09 | Scope creep into accounting, payroll or CRM. | Medium, medium | Hooks only, BR-BIL-031, OD-BIL-12 |
-| RSK-BIL-10 | Provider lock-in or outage. | Low, high | Provider port, status banner, cached resolution with fail policy |
+| ID         | Risk                                                                                          | Likelihood and impact | Mitigation                                                         |
+| ---------- | --------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------ |
+| RSK-BIL-01 | Entitlement drift: product grants access that payment state does not support, or the reverse. | Medium, high          | Single resolver, drift metric, reconciliation re-sync              |
+| RSK-BIL-02 | Forged or replayed webhooks.                                                                  | Low, high             | Signature, tolerance, idempotency, mode isolation                  |
+| RSK-BIL-03 | Prices or quotas set without a cost model causing losses (AI cost).                           | Medium, high          | OD-BIL-01, BR-BIL-019, hard cap default                            |
+| RSK-BIL-04 | Tax non-compliance in new regions.                                                            | Medium, high          | Registration gap list, no assumed rates, OD-BIL-03                 |
+| RSK-BIL-05 | Pay-to-rank creep through custom contracts.                                                   | Medium, high          | Integrity guard on contracts and grants, no exceptions             |
+| RSK-BIL-06 | Fraud: trial abuse, coupon abuse, stolen cards, refund abuse.                                 | Medium, medium        | Fingerprint checks, rate limits, dual approval, dispute handling   |
+| RSK-BIL-07 | Payout and escrow regulation exposure (money transmission).                                   | Medium, severe        | Use provider-managed connected accounts, escrow gated by OD-BIL-10 |
+| RSK-BIL-08 | Over-limit downgrades harming customers (unpublished jobs).                                   | Medium, medium        | BR-BIL-008, notice, owner chooses                                  |
+| RSK-BIL-09 | Scope creep into accounting, payroll or CRM.                                                  | Medium, medium        | Hooks only, BR-BIL-031, OD-BIL-12                                  |
+| RSK-BIL-10 | Provider lock-in or outage.                                                                   | Low, high             | Provider port, status banner, cached resolution with fail policy   |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed and why |
-|---|---|---|
-| docs/PRICING.md | Entitlement keys, enforcement findings, open decisions (org owner, free recruiters, proration, trials) | All prices and quota numbers not carried; owner rule keeps them OD-gated; test-mode Stripe ids not copied |
-| SSOT.md F-16, BR-055, BR-056, BR-32, BR-099 to BR-101, BR-130, OD-07, OD-15, OD-28, OD-29, OD-34, OD-43, V61-09, WF-09, WF-16, WF-23, WF-25 to WF-28, SCI-06, SCI-09 | Rules, workflows, idempotency, refund and coupon parameters | BR-07 conflict recorded (OD-BIL-11); plan names conflict (OD-BIL-14) |
-| docs/registries/FEATURE_REGISTRY.md F-16, F-41, F-61 | Scope inventory | F-61 Premium Candidate tier folded into candidate plans under OD-BIL-01 |
-| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md | Awareness of what exists | No status copied |
-| Yash_Final_Project_Document 21_COST_AND_FINOPS, 19_BUSINESS_AND_COMMERCIAL_OPERATIONS | Context only (not read in depth; cost model not adopted) | Cost figures not used |
-| Own domain knowledge (Stripe Billing, Chargebee, Paddle, Greenhouse and LinkedIn Recruiter plans, Coursera and Udemy refunds, Upwork fees, accounting practice) | Dunning, proration, tax, reconciliation, ledger, payouts, finance console | Tagged [PROP] |
+| Source                                                                                                                                                               | Used for                                                                                               | Dropped or changed and why                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| docs/PRICING.md                                                                                                                                                      | Entitlement keys, enforcement findings, open decisions (org owner, free recruiters, proration, trials) | All prices and quota numbers not carried; owner rule keeps them OD-gated; test-mode Stripe ids not copied |
+| SSOT.md F-16, BR-055, BR-056, BR-32, BR-099 to BR-101, BR-130, OD-07, OD-15, OD-28, OD-29, OD-34, OD-43, V61-09, WF-09, WF-16, WF-23, WF-25 to WF-28, SCI-06, SCI-09 | Rules, workflows, idempotency, refund and coupon parameters                                            | BR-07 conflict recorded (OD-BIL-11); plan names conflict (OD-BIL-14)                                      |
+| docs/registries/FEATURE_REGISTRY.md F-16, F-41, F-61                                                                                                                 | Scope inventory                                                                                        | F-61 Premium Candidate tier folded into candidate plans under OD-BIL-01                                   |
+| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md                                                                                                           | Awareness of what exists                                                                               | No status copied                                                                                          |
+| Yash_Final_Project_Document 21_COST_AND_FINOPS, 19_BUSINESS_AND_COMMERCIAL_OPERATIONS                                                                                | Context only (not read in depth; cost model not adopted)                                               | Cost figures not used                                                                                     |
+| Own domain knowledge (Stripe Billing, Chargebee, Paddle, Greenhouse and LinkedIn Recruiter plans, Coursera and Udemy refunds, Upwork fees, accounting practice)      | Dunning, proration, tax, reconciliation, ledger, payouts, finance console                              | Tagged [PROP]                                                                                             |
 
 **Conflicts recorded:** (1) SSOT BR-07 versus learner and candidate purchases: OD-BIL-11. (2) SSOT plan names versus code plan names: OD-BIL-14. (3) docs/PRICING.md per-user entitlements versus organization-level need: OD-BIL-06. (4) SSOT §4.2 (not payroll, not general marketplace) versus payouts and quotes: OD-BIL-10, OD-BIL-12. (5) F-41 phase Ph6 versus institutional exit criterion at Ph3: pools provisioned manually by `FIN` first (see OD-INS-11).

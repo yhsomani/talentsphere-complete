@@ -13,25 +13,25 @@ Status: intended plan for keeping the complete product healthy over its life. No
 
 ### 2.1 Maintenance classes
 
-| Class | Definition | Examples | Planning |
-|---|---|---|---|
-| Corrective | fix defects | bug fixes, regressions | defect process (doc 06/02 section 7) |
-| Preventive | reduce future failures | refactors with tests, alert tuning, flaky test fixes, query tuning | tech-debt backlog (section 5) |
-| Adaptive | respond to environment changes | runtime/framework/browser/OS updates, provider API changes, legal changes | dependency and vendor calendars |
-| Perfective | improve non-functional qualities | performance, accessibility, usability polish | quarterly health review |
-| Operational | keep running | certificate renewals, key rotation, capacity, backups, data operations | runbooks and scheduled jobs |
+| Class       | Definition                       | Examples                                                                  | Planning                             |
+| ----------- | -------------------------------- | ------------------------------------------------------------------------- | ------------------------------------ |
+| Corrective  | fix defects                      | bug fixes, regressions                                                    | defect process (doc 06/02 section 7) |
+| Preventive  | reduce future failures           | refactors with tests, alert tuning, flaky test fixes, query tuning        | tech-debt backlog (section 5)        |
+| Adaptive    | respond to environment changes   | runtime/framework/browser/OS updates, provider API changes, legal changes | dependency and vendor calendars      |
+| Perfective  | improve non-functional qualities | performance, accessibility, usability polish                              | quarterly health review              |
+| Operational | keep running                     | certificate renewals, key rotation, capacity, backups, data operations    | runbooks and scheduled jobs          |
 
 ### 2.2 Maintenance calendar (cadence names, no dates)
 
-| Cadence | Activities | Owner role |
-|---|---|---|
-| continuous | automated dependency alerts, vulnerability scanning, error tracking triage, secret scanning | engineering |
-| weekly | alert review, flaky-test review, dependency update batch merge window, support top-issues review, stale PR sweep | tech lead / SRE |
-| monthly | error-budget review, capacity and cost review, incident aggregate review, vendor status review, documentation freshness report, defect aging review | engineering lead, SRE |
-| per release | release record, changelog, flag cleanup check, migration contract-phase scheduling | release manager |
-| quarterly | restore drill, access review, vendor review, FinOps review, quarterly health review (section 11), threat-model refresh for changed areas, performance baseline re-measure, suite health review, accessibility audit pass | engineering lead, SRE, security officer |
-| semiannual | full rebuild-from-IaC drill, game day, key and certificate inventory audit, license audit | SRE, security officer |
-| annual | penetration test, architecture and ADR review, disaster recovery plan review, vendor exit tabletop, end-of-life review of the technology stack, policy review (privacy, retention, AI) | architecture owner, security officer, privacy lead |
+| Cadence     | Activities                                                                                                                                                                                                               | Owner role                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| continuous  | automated dependency alerts, vulnerability scanning, error tracking triage, secret scanning                                                                                                                              | engineering                                        |
+| weekly      | alert review, flaky-test review, dependency update batch merge window, support top-issues review, stale PR sweep                                                                                                         | tech lead / SRE                                    |
+| monthly     | error-budget review, capacity and cost review, incident aggregate review, vendor status review, documentation freshness report, defect aging review                                                                      | engineering lead, SRE                              |
+| per release | release record, changelog, flag cleanup check, migration contract-phase scheduling                                                                                                                                       | release manager                                    |
+| quarterly   | restore drill, access review, vendor review, FinOps review, quarterly health review (section 11), threat-model refresh for changed areas, performance baseline re-measure, suite health review, accessibility audit pass | engineering lead, SRE, security officer            |
+| semiannual  | full rebuild-from-IaC drill, game day, key and certificate inventory audit, license audit                                                                                                                                | SRE, security officer                              |
+| annual      | penetration test, architecture and ADR review, disaster recovery plan review, vendor exit tabletop, end-of-life review of the technology stack, policy review (privacy, retention, AI)                                   | architecture owner, security officer, privacy lead |
 
 ### 2.3 Maintenance work intake
 
@@ -53,14 +53,14 @@ Applies with doc 03 (engineering standards) section 9. Build files (`package.jso
 
 ### 4.1 Classes and handling
 
-| Class | Handling | Cadence |
-|---|---|---|
-| Security patch (exploitable high/critical) | out-of-band, fast path with targeted tests; severity targets in doc 03 section 9.2 | continuous |
-| Patch and minor (non-security) | automated PR batch, CI must be green, merged by reviewer in the weekly window; grouped by ecosystem to limit noise | weekly |
-| Major version | planned task with ADR if architectural effect: read changelog and migration guide, spike in a branch, update tests, canary rollout | scheduled by currency matrix, at least before end-of-support |
-| Runtime (Node, PostgreSQL major, OS) | project with staging soak, perf comparison, rollback plan; PostgreSQL major uses blue/green or logical replication (doc 07/01 section 11.4) | annual review, ahead of end-of-support |
-| Transitive-only vulnerability | resolved via override or parent upgrade; exception recorded if no fix exists | continuous |
-| Provider SDK/API versions | tracked in vendor register; adapter tests against provider sandbox | monthly review |
+| Class                                      | Handling                                                                                                                                    | Cadence                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Security patch (exploitable high/critical) | out-of-band, fast path with targeted tests; severity targets in doc 03 section 9.2                                                          | continuous                                                   |
+| Patch and minor (non-security)             | automated PR batch, CI must be green, merged by reviewer in the weekly window; grouped by ecosystem to limit noise                          | weekly                                                       |
+| Major version                              | planned task with ADR if architectural effect: read changelog and migration guide, spike in a branch, update tests, canary rollout          | scheduled by currency matrix, at least before end-of-support |
+| Runtime (Node, PostgreSQL major, OS)       | project with staging soak, perf comparison, rollback plan; PostgreSQL major uses blue/green or logical replication (doc 07/01 section 11.4) | annual review, ahead of end-of-support                       |
+| Transitive-only vulnerability              | resolved via override or parent upgrade; exception recorded if no fix exists                                                                | continuous                                                   |
+| Provider SDK/API versions                  | tracked in vendor register; adapter tests against provider sandbox                                                                          | monthly review                                               |
 
 ### 4.2 Upgrade procedure
 
@@ -105,19 +105,19 @@ Id, title, class, module, linked `FR-`/ADR, risk (S1 to S4 style), interest desc
 
 ## 6. Code and data hygiene tasks
 
-| Task | Cadence | Notes |
-|---|---|---|
-| Remove stale feature flags | per release, reported quarterly | flag lifecycle (doc 03 section 10) |
-| Remove dead code, unused exports and routes | quarterly | use coverage plus usage telemetry; unused public API versions follow deprecation policy |
-| Remove unused tables and columns | quarterly | contract phase of expand/contract only |
-| Migrations squash/baseline | annual `[PROP]`, only with ADR | history stays in repository; ledger helper still validates immutability |
-| Index and query review | quarterly | slow query log, unused index report, bloat report |
-| Test suite health | quarterly | duplicates, slow tests, quarantined tests (doc 06/02 section 17) |
-| Seed data and fixtures refresh | per release when schema changes | synthetic data only |
-| Content and taxonomy upkeep | per cadence in owning module | skills taxonomy, job categories, countries, certificate definitions, translations |
-| Generated registers and docs freshness | per release | stale generated file fails CI (doc 03 section 8) |
-| Secret and certificate rotation | per cadence in doc 07/01 section 9 | inventory audit semiannual |
-| Access recertification | quarterly | doc 07/02 section 15 |
+| Task                                        | Cadence                            | Notes                                                                                   |
+| ------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------- |
+| Remove stale feature flags                  | per release, reported quarterly    | flag lifecycle (doc 03 section 10)                                                      |
+| Remove dead code, unused exports and routes | quarterly                          | use coverage plus usage telemetry; unused public API versions follow deprecation policy |
+| Remove unused tables and columns            | quarterly                          | contract phase of expand/contract only                                                  |
+| Migrations squash/baseline                  | annual `[PROP]`, only with ADR     | history stays in repository; ledger helper still validates immutability                 |
+| Index and query review                      | quarterly                          | slow query log, unused index report, bloat report                                       |
+| Test suite health                           | quarterly                          | duplicates, slow tests, quarantined tests (doc 06/02 section 17)                        |
+| Seed data and fixtures refresh              | per release when schema changes    | synthetic data only                                                                     |
+| Content and taxonomy upkeep                 | per cadence in owning module       | skills taxonomy, job categories, countries, certificate definitions, translations       |
+| Generated registers and docs freshness      | per release                        | stale generated file fails CI (doc 03 section 8)                                        |
+| Secret and certificate rotation             | per cadence in doc 07/01 section 9 | inventory audit semiannual                                                              |
+| Access recertification                      | quarterly                          | doc 07/02 section 15                                                                    |
 
 ## 7. Deprecation policy
 
@@ -142,13 +142,13 @@ stateDiagram-v2
   Deprecated --> Active: deprecation reversed with notice
 ```
 
-| Stage | What happens | Controls |
-|---|---|---|
-| Announce | changelog, in-app notice, email to affected users/integrators identified via usage telemetry, docs banner, status/developer announcement | announcement text reviewed by product owner |
-| Deprecated | feature works; new use discouraged or blocked for new tenants; API returns `Deprecation` and `Sunset` headers and logs usage per caller; warnings in SDKs | usage dashboard by caller |
-| Migration support | migration guide, tooling or export, support macro, office hours for integrators | tickets tagged `deprecation` |
-| Sunset | feature read-only or limited, final reminder, final export offered | blocked only after remaining-usage review |
-| Removal | code, routes, flags, jobs, tables or columns removed via contract phase; docs and KB redirected; data retained or deleted per retention policy | removal PR links decision; export done |
+| Stage             | What happens                                                                                                                                              | Controls                                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Announce          | changelog, in-app notice, email to affected users/integrators identified via usage telemetry, docs banner, status/developer announcement                  | announcement text reviewed by product owner |
+| Deprecated        | feature works; new use discouraged or blocked for new tenants; API returns `Deprecation` and `Sunset` headers and logs usage per caller; warnings in SDKs | usage dashboard by caller                   |
+| Migration support | migration guide, tooling or export, support macro, office hours for integrators                                                                           | tickets tagged `deprecation`                |
+| Sunset            | feature read-only or limited, final reminder, final export offered                                                                                        | blocked only after remaining-usage review   |
+| Removal           | code, routes, flags, jobs, tables or columns removed via contract phase; docs and KB redirected; data retained or deleted per retention policy            | removal PR links decision; export done      |
 
 ### 7.3 Minimum notice periods `[PROP]`
 
@@ -230,6 +230,7 @@ Reviewed in the monthly capacity and cost review and in depth quarterly. Inputs:
 Held once per quarterly cadence. Output: a health report with red, amber and green status per area, an action list with owners, and decisions recorded. No dates in this document: the report carries its own cadence marker.
 
 ### 11.1 Security and compliance
+
 - [ ] Open vulnerabilities: none exploitable high/critical past target; exceptions have owner and expiry.
 - [ ] Privileged access recertified; break-glass uses reviewed; leavers' access removed.
 - [ ] Secret and certificate inventory current; rotations performed on cadence.
@@ -239,6 +240,7 @@ Held once per quarterly cadence. Output: a health report with red, amber and gre
 - [ ] AI governance: bias, safety and cost reports reviewed; model/provider changes recorded.
 
 ### 11.2 Reliability and operations
+
 - [ ] SLO attainment and error budgets reviewed; release pacing decisions recorded.
 - [ ] Incident trends, repeat incidents, postmortem action closure.
 - [ ] Alert precision and paging load reviewed; noisy alerts removed.
@@ -249,6 +251,7 @@ Held once per quarterly cadence. Output: a health report with red, amber and gre
 - [ ] Status page accuracy and communication latency reviewed.
 
 ### 11.3 Quality and engineering health
+
 - [ ] Defect aging and escape rate; S1/S2 regression tests present.
 - [ ] Flaky test rate; quarantine list age; skipped tests list.
 - [ ] AC traceability coverage for shipped scope; BR and SM coverage.
@@ -261,17 +264,20 @@ Held once per quarterly cadence. Output: a health report with red, amber and gre
 - [ ] Persistence honesty: labelled-ephemeral and simulated surfaces listed against release-tier exit criteria.
 
 ### 11.4 People and continuity
+
 - [ ] Bus-factor register: areas with a single owner listed; cross-training plan.
 - [ ] Onboarding path walked or updated; time-to-first-merge reviewed.
 - [ ] On-call load and training status.
 - [ ] Vendor and account continuity: two admins per system confirmed.
 
 ### 11.5 Vendors and cost
+
 - [ ] Vendor register reviewed; SLA attainment; incidents; subprocessor changes; renewals ahead; exit plans current.
 - [ ] FinOps checklist (section 10.1) completed.
 - [ ] Concentration-risk review.
 
 ### 11.6 Product and platform lifecycle
+
 - [ ] Deprecation list: active deprecations, remaining usage, removal readiness.
 - [ ] Feature usage review: candidates for deprecation or investment.
 - [ ] Support top issues and KB gaps; user satisfaction trends.
@@ -280,6 +286,7 @@ Held once per quarterly cadence. Output: a health report with red, amber and gre
 - [ ] End-of-life horizon scan (section 12) updated.
 
 ### 11.7 Review rules
+
 - Any red item older than one cycle is escalated to leadership with a decision request (fix, accept risk with sign-off, or stop).
 - The checklist itself is reviewed annually for relevance.
 
@@ -314,67 +321,67 @@ Build tooling, CI providers and package registries are on the horizon register; 
 
 ## 13. Sustainability metrics
 
-| Metric | Definition / formula | Owner role |
-|---|---|---|
-| Maintenance capacity share | maintenance and debt effort / total engineering effort per cycle | engineering lead |
-| Dependency lag | dependencies behind latest supported major / total | tech lead |
-| Items past end-of-support | EOL register entries beyond milestone without exception | tech lead |
-| Mean time to patch (security) | disclosure to production per severity | security officer |
-| Debt backlog age | median and p90 age of open high-risk debt | engineering lead |
-| Debt interest trend | tickets labelled debt-slowdown per cycle | tech lead |
-| Docs freshness | docs within verification interval / total owned docs | doc owners |
-| Runbook currency | runbooks verified within interval / total | SRE |
-| Bus-factor coverage | critical areas with at least two qualified people / total critical areas | engineering lead |
-| Time to first merged PR (new joiner) | join to first merged change | engineering lead |
-| Flag debt | release flags past removal criteria / active release flags | tech lead |
-| Cost per MAU trend | monthly spend / MAU | finance, SRE |
-| Waste ratio | identified waste spend / total spend | SRE |
-| Deprecation completion | deprecations reaching Removed on plan / total | product owner |
-| Health review red items open > 1 cycle | count | engineering lead |
+| Metric                                 | Definition / formula                                                     | Owner role       |
+| -------------------------------------- | ------------------------------------------------------------------------ | ---------------- |
+| Maintenance capacity share             | maintenance and debt effort / total engineering effort per cycle         | engineering lead |
+| Dependency lag                         | dependencies behind latest supported major / total                       | tech lead        |
+| Items past end-of-support              | EOL register entries beyond milestone without exception                  | tech lead        |
+| Mean time to patch (security)          | disclosure to production per severity                                    | security officer |
+| Debt backlog age                       | median and p90 age of open high-risk debt                                | engineering lead |
+| Debt interest trend                    | tickets labelled debt-slowdown per cycle                                 | tech lead        |
+| Docs freshness                         | docs within verification interval / total owned docs                     | doc owners       |
+| Runbook currency                       | runbooks verified within interval / total                                | SRE              |
+| Bus-factor coverage                    | critical areas with at least two qualified people / total critical areas | engineering lead |
+| Time to first merged PR (new joiner)   | join to first merged change                                              | engineering lead |
+| Flag debt                              | release flags past removal criteria / active release flags               | tech lead        |
+| Cost per MAU trend                     | monthly spend / MAU                                                      | finance, SRE     |
+| Waste ratio                            | identified waste spend / total spend                                     | SRE              |
+| Deprecation completion                 | deprecations reaching Removed on plan / total                            | product owner    |
+| Health review red items open > 1 cycle | count                                                                    | engineering lead |
 
 Targets are set after baseline (`OD-MNT-08`).
 
 ## 14. Roles
 
-| Role | Responsibility |
-|---|---|
-| Engineering lead | owns maintenance capacity, debt policy, health review |
-| Tech lead(s) per module group | dependency upgrades, debt register, flags, module docs |
-| SRE | currency of platform, drills, capacity, FinOps data |
-| Security officer (`SAD`) | vulnerability policy, access review, pen test |
-| Privacy lead | retention, DPAs, data operations approvals |
-| Product owner | deprecation decisions, EOL of features, health review decisions |
-| Finance partner | FinOps review, budgets |
-| Doc owners | freshness of their documents |
+| Role                          | Responsibility                                                  |
+| ----------------------------- | --------------------------------------------------------------- |
+| Engineering lead              | owns maintenance capacity, debt policy, health review           |
+| Tech lead(s) per module group | dependency upgrades, debt register, flags, module docs          |
+| SRE                           | currency of platform, drills, capacity, FinOps data             |
+| Security officer (`SAD`)      | vulnerability policy, access review, pen test                   |
+| Privacy lead                  | retention, DPAs, data operations approvals                      |
+| Product owner                 | deprecation decisions, EOL of features, health review decisions |
+| Finance partner               | FinOps review, budgets                                          |
+| Doc owners                    | freshness of their documents                                    |
 
 One person may hold several roles; no headcount is implied.
 
 ## 15. Open decisions
 
-| Id | Question | Options | Default proposal `[PROP]` | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-MNT-01 | Reserved maintenance capacity share | fixed share / per-cycle negotiation | fixed minority share, reviewed quarterly | engineering lead, product owner | planning |
-| OD-MNT-02 | Allowed dependency lag | one major / two majors / n.a. | one major behind latest supported | tech lead | health review |
-| OD-MNT-03 | Debt ceiling thresholds | numeric after baseline | set after first quarterly review | engineering lead | debt policy |
-| OD-MNT-04 | Deprecation notice periods | per class | section 7.3 defaults, contract terms override | product owner, legal | deprecation process |
-| OD-MNT-05 | Bus-factor target | two / three for critical | two for all, three for security and database | engineering lead | continuity plan |
-| OD-MNT-06 | EOL start threshold | multiplier | 1.5 x lead time | tech lead | horizon register |
-| OD-MNT-07 | Maintain a platform wind-down template | yes / no | yes, annual review | leadership | EOL planning |
-| OD-MNT-08 | Targets for sustainability metrics | after baseline | propose after two quarterly cycles | engineering lead | dashboards |
-| OD-MNT-09 | Dependency update automation and its configuration location | tool choice | automated PR batches; config as an owner-approved build file | repository owner | upgrade flow |
+| Id        | Question                                                    | Options                             | Default proposal `[PROP]`                                    | Decides                         | Blocks              |
+| --------- | ----------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------ | ------------------------------- | ------------------- |
+| OD-MNT-01 | Reserved maintenance capacity share                         | fixed share / per-cycle negotiation | fixed minority share, reviewed quarterly                     | engineering lead, product owner | planning            |
+| OD-MNT-02 | Allowed dependency lag                                      | one major / two majors / n.a.       | one major behind latest supported                            | tech lead                       | health review       |
+| OD-MNT-03 | Debt ceiling thresholds                                     | numeric after baseline              | set after first quarterly review                             | engineering lead                | debt policy         |
+| OD-MNT-04 | Deprecation notice periods                                  | per class                           | section 7.3 defaults, contract terms override                | product owner, legal            | deprecation process |
+| OD-MNT-05 | Bus-factor target                                           | two / three for critical            | two for all, three for security and database                 | engineering lead                | continuity plan     |
+| OD-MNT-06 | EOL start threshold                                         | multiplier                          | 1.5 x lead time                                              | tech lead                       | horizon register    |
+| OD-MNT-07 | Maintain a platform wind-down template                      | yes / no                            | yes, annual review                                           | leadership                      | EOL planning        |
+| OD-MNT-08 | Targets for sustainability metrics                          | after baseline                      | propose after two quarterly cycles                           | engineering lead                | dashboards          |
+| OD-MNT-09 | Dependency update automation and its configuration location | tool choice                         | automated PR batches; config as an owner-approved build file | repository owner                | upgrade flow        |
 
 ## 16. Risks
 
-| Id | Risk | Mitigation |
-|---|---|---|
-| RSK-MNT-01 | Maintenance squeezed out by feature pressure | reserved capacity, health review escalation of red items |
-| RSK-MNT-02 | Unnoticed end-of-support of a runtime or provider API | horizon register with lead time rule, model/provider pinning |
-| RSK-MNT-03 | Knowledge concentrated in few people | bus-factor register, pairing, key-person-out exercise |
-| RSK-MNT-04 | Documentation drifts from intent and from code | docs-as-code checks, freshness reports, divergence rule |
-| RSK-MNT-05 | Deprecations break integrators | notice periods, usage telemetry, contract tests until removal |
-| RSK-MNT-06 | Build-file restriction delays urgent upgrades | owner-approved fast path for security patches, pre-agreed approver |
-| RSK-MNT-07 | Cost drift unnoticed in media and AI usage | monthly review, unit economics, caps |
-| RSK-MNT-08 | Quarterly review becomes ritual without action | red-item escalation rule, annual checklist review |
+| Id         | Risk                                                  | Mitigation                                                         |
+| ---------- | ----------------------------------------------------- | ------------------------------------------------------------------ |
+| RSK-MNT-01 | Maintenance squeezed out by feature pressure          | reserved capacity, health review escalation of red items           |
+| RSK-MNT-02 | Unnoticed end-of-support of a runtime or provider API | horizon register with lead time rule, model/provider pinning       |
+| RSK-MNT-03 | Knowledge concentrated in few people                  | bus-factor register, pairing, key-person-out exercise              |
+| RSK-MNT-04 | Documentation drifts from intent and from code        | docs-as-code checks, freshness reports, divergence rule            |
+| RSK-MNT-05 | Deprecations break integrators                        | notice periods, usage telemetry, contract tests until removal      |
+| RSK-MNT-06 | Build-file restriction delays urgent upgrades         | owner-approved fast path for security patches, pre-agreed approver |
+| RSK-MNT-07 | Cost drift unnoticed in media and AI usage            | monthly review, unit economics, caps                               |
+| RSK-MNT-08 | Quarterly review becomes ritual without action        | red-item escalation rule, annual checklist review                  |
 
 ## 17. Acceptance criteria (testable)
 

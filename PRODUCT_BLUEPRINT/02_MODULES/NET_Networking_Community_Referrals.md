@@ -30,20 +30,20 @@ Connections and requests; follow; block, mute and restrict; people discovery; wa
 
 ### 1.5 Out of scope (owned elsewhere)
 
-| Capability | Owner |
-|---|---|
-| Direct and group messages, outreach limits, message requests | MSG |
-| Reports, moderation queue, sanctions, appeals, fraud detection | TSF |
-| Recommendation engine, match scoring, explanations model | AIC |
-| Profile fields, resume, portfolio | PRF |
-| Notification delivery, preferences, digests | NTF (planned) |
-| Privacy dashboard, consent ledger, data export and erasure orchestration | SET (planned) |
-| Verified employment and credential evidence | EVD, BGV (planned) |
-| Job postings, applications, pipeline stages, hire confirmation | JOB, ATS (planned) |
-| Events and webinars | EVT (planned) |
-| Mentor matching and sessions | MEN (planned) |
-| Plans, outreach credit purchase, billing | BIL (planned) |
-| Payment of referral bonuses (payroll is a non-goal) | Employer's own payroll; see `OD-NET-04` |
+| Capability                                                               | Owner                                   |
+| ------------------------------------------------------------------------ | --------------------------------------- |
+| Direct and group messages, outreach limits, message requests             | MSG                                     |
+| Reports, moderation queue, sanctions, appeals, fraud detection           | TSF                                     |
+| Recommendation engine, match scoring, explanations model                 | AIC                                     |
+| Profile fields, resume, portfolio                                        | PRF                                     |
+| Notification delivery, preferences, digests                              | NTF (planned)                           |
+| Privacy dashboard, consent ledger, data export and erasure orchestration | SET (planned)                           |
+| Verified employment and credential evidence                              | EVD, BGV (planned)                      |
+| Job postings, applications, pipeline stages, hire confirmation           | JOB, ATS (planned)                      |
+| Events and webinars                                                      | EVT (planned)                           |
+| Mentor matching and sessions                                             | MEN (planned)                           |
+| Plans, outreach credit purchase, billing                                 | BIL (planned)                           |
+| Payment of referral bonuses (payroll is a non-goal)                      | Employer's own payroll; see `OD-NET-04` |
 
 ### 1.6 Owned versus consumed
 
@@ -53,36 +53,36 @@ Owned: connection graph, follows, blocks and mutes, posts and their children, gr
 
 Legend: Y allowed, O own objects only, S scoped (group, organization or institution), R by rule, N not allowed.
 
-| Capability | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| View public posts and public group pages | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | N | Y |
-| Send and respond to connection requests | N | Y | R | Y | Y | Y | Y | Y | Y | Y | N | N | N |
-| Follow people, organizations, topics | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | N | N | N |
-| Block, mute, restrict | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | N | N |
-| Publish posts, comments, reactions | N | Y | R | Y | Y | Y | Y | Y | Y | Y | N | N | N |
-| Create groups | N | Y | R | Y | Y | Y | Y | Y | Y | Y | N | N | N |
-| Create institution-linked alumni or affinity groups | N | N | N | N | N | N | N | N | S | S | N | N | N |
-| Request referral | N | Y | Y | N | N | N | N | N | N | N | N | N | N |
-| Respond to referral request as referrer | N | O | O | O | O | O | O | O | O | O | N | N | N |
-| Configure referral program | N | N | N | N | N | N | N | S | N | N | N | N | N |
-| View referral tags and attribution on applications | N | O | O | N | N | S | S | S | N | N | N | N | N |
-| Hide or remove content for policy reasons | N | O | O | O | O | O | O | O | O | O | Y | N | Y |
-| Read a user's block list | N | O | O | O | O | O | O | O | O | O | N | N | N |
-| Configure ranking and run ranking audit | N | N | N | N | N | N | N | N | N | N | N | N | Y |
-| Support read-only view of relationship data with ticket and consent | N | N | N | N | N | N | N | N | N | N | N | R | N |
+| Capability                                                          | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD |
+| ------------------------------------------------------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| View public posts and public group pages                            | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | Y   |
+| Send and respond to connection requests                             | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   |
+| Follow people, organizations, topics                                | N   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   |
+| Block, mute, restrict                                               | N   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   |
+| Publish posts, comments, reactions                                  | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   |
+| Create groups                                                       | N   | Y   | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | N   | N   | N   |
+| Create institution-linked alumni or affinity groups                 | N   | N   | N   | N   | N   | N   | N   | N   | S   | S   | N   | N   | N   |
+| Request referral                                                    | N   | Y   | Y   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   |
+| Respond to referral request as referrer                             | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | N   | N   | N   |
+| Configure referral program                                          | N   | N   | N   | N   | N   | N   | N   | S   | N   | N   | N   | N   | N   |
+| View referral tags and attribution on applications                  | N   | O   | O   | N   | N   | S   | S   | S   | N   | N   | N   | N   | N   |
+| Hide or remove content for policy reasons                           | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | Y   | N   | Y   |
+| Read a user's block list                                            | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | N   | N   | N   |
+| Configure ranking and run ranking audit                             | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | Y   |
+| Support read-only view of relationship data with ticket and consent | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | R   | N   |
 
 Notes. `STD` rules marked R: students attached to an institution follow the same rules plus institution policies (`IAD` may restrict group creation for managed learners). Minors (16 and 17) follow `BR-NET-011`. `HMG` and `REC` may use NET as individuals but their employer-branded posts go through an organization page owned by EMP (planned). `API` principals have no NET write access in this blueprint; read access to a member's own public posts is a PLT (planned) concern.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| NET-A | Connections and relationships | FR-NET-001 to 007 |
+| Code  | Sub-module                                | Features          |
+| ----- | ----------------------------------------- | ----------------- |
+| NET-A | Connections and relationships             | FR-NET-001 to 007 |
 | NET-B | Discovery, introductions and social proof | FR-NET-008 to 013 |
-| NET-C | Feed and content | FR-NET-014 to 024 |
-| NET-D | Groups and communities | FR-NET-025 to 028 |
-| NET-E | Referrals | FR-NET-029 to 035 |
-| NET-F | Governance and lifecycle | FR-NET-036 to 037 |
+| NET-C | Feed and content                          | FR-NET-014 to 024 |
+| NET-D | Groups and communities                    | FR-NET-025 to 028 |
+| NET-E | Referrals                                 | FR-NET-029 to 035 |
+| NET-F | Governance and lifecycle                  | FR-NET-036 to 037 |
 
 ```mermaid
 flowchart LR
@@ -157,7 +157,7 @@ flowchart LR
 
 - **Sub-module:** NET-A Connections and relationships
 - **Priority / tier:** Should · R1
-- **Source:** [PROP] (the owner's brief asks for stale-request nudges; legacy has no cadence)
+- **Source:** [PROP] (the owner's brief asks for stale-request nudges; legacy has no cadence) · also [SRC: SSOT §7 F-30 Networking Stale-Request Nudges]
 - **Purpose and outcome:** Pending requests do not rot: recipients get gentle reminders; senders get cleanup help; old requests expire so caps recover.
 - **Roles and permissions:** System job; `CAN, STD, INS, MNT, REC, HMG, EAD, IAD, PLO: configure own nudge preference` · `PAD: configure thresholds`
 - **Preconditions and entry points:** A request is `pending` and recipient has not opted out of nudges. Entry points: scheduled job; Settings > Notifications > Network.
@@ -642,7 +642,7 @@ flowchart LR
 
 - **Sub-module:** NET-C Feed and content
 - **Priority / tier:** Could · R4
-- **Source:** [SRC: SSOT §7 F-54; BR-123]
+- **Source:** [SRC: SSOT §7 F-54; BR-123] · also [SRC: SSOT §7 F-79 Articles & Newsletters]
 - **Purpose and outcome:** Members publish long-form career writing and optional newsletters to opted-in subscribers.
 - **Roles and permissions:** `CAN, INS, MNT, REC (personal), EAD (org page): create` · `STD (R)` · `MOD: review`
 - **Preconditions and entry points:** Write article from composer; Settings > Newsletters. Member account at least 14 days old and email verified [PROP].
@@ -667,7 +667,7 @@ flowchart LR
 
 - **Sub-module:** NET-C Feed and content
 - **Priority / tier:** Won't-now · R5 (gated by `OD-NET-03`)
-- **Source:** [SRC: SSOT §10 BR-126, BR-187; §4.2 non-goal self-serve ad network]
+- **Source:** [SRC: SSOT §10 BR-126, BR-187; §4.2 non-goal self-serve ad network] · also [SRC: SSOT §7 F-62 Sponsored Content (NOT RECOMMENDED; dormant, gated by OD-NET-03)]
 - **Purpose and outcome:** If sponsored posts exist at all, they are explicit and cannot affect organic ranking or hiring outcomes.
 - **Roles and permissions:** `EAD: create sponsored post for an organization page` (only if `OD-NET-03` approves) · `PAD: approve policy`
 - **Preconditions and entry points:** Decision `OD-NET-03` approves sponsored content. Until then this feature is dormant and no sponsored slot exists.
@@ -1050,49 +1050,49 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-NET-001 | A connection request requires two active accounts, no existing connection, no pending request in either direction, no block in either direction, and a recipient setting that permits the sender. A concurrent opposite request auto-accepts. | Prevents duplicates and unwanted contact. | NET service, request create | [DER] |
-| BR-NET-002 | Outstanding sent requests are capped at 100 and new requests at 30 per day per member. | Spam and harassment control. | NET service, per-member counters | [PROP] `OD-NET-07` |
-| BR-NET-003 | The request note is at most 300 characters; URLs and email addresses are removed from notes of accounts younger than 7 days. | Reduces scam outreach. | NET service validation | [PROP] |
-| BR-NET-004 | Decline and ignore are silent: the sender sees Pending until expiry, then Not accepted. After a decline or expiry, the sender may re-request after 30 days; after 3 declines or expiries from the same sender to the same recipient the sender cannot request that person again. | Protects recipients from retaliation and repeat pressure. | NET service, request create | [PROP] |
-| BR-NET-005 | Pending requests are nudged on day 7 and day 21 (max 2) and expire on day 45. Senders may withdraw at any time. | Keeps caps usable and the inbox clean. | Daily job | [PROP] `OD-NET-07` |
-| BR-NET-006 | A connection is mutual. Removal is silent and unilateral. Connection-only access ends at once. | Predictable symmetric trust model. | NET service | [DER] |
-| BR-NET-007 | Follows are unique per (follower, target); they never grant access beyond the target's public content; blocked or muted targets cannot be followed. | Separates attention from trust. | NET service | [SRC: SSOT BR-121] |
-| BR-NET-008 | Block removes connection, follows, pending requests, introductions and referral requests in both directions, hides both parties from each other everywhere, and is never revealed to the blocked party. Blocked users cannot request referrals or be offered as introducers. | Safety, privacy. | One shared relationship check in every read and write path | [SRC: SSOT BR-213, BR-216, BR-238] |
-| BR-NET-009 | Mute hides a person's or topic's content from the muter without unfollowing and without notifying the muted party. | Low-confrontation control. | Feed and notification filters | [SRC: SSOT BR-127] |
-| BR-NET-010 | Visibility (Public, Connections, Followers and connections, Group, Private) is enforced server-side on every read, search, notification and share. | No client-side-only privacy. | NET service, read path | [SRC: SSOT BR-122] |
-| BR-NET-011 | Members aged 16 and 17 have private-by-default profiles, receive connection requests only from people sharing a verified context (institution, group, mutual connection), do not appear in discovery to unrelated adults, cannot use contact discovery or introductions, and cannot choose Named for profile views. Under 16 are not permitted. | Protects minors. | NET service with age claim from IDN | [SRC: SSOT BR-128] `OD-NET-08` |
-| BR-NET-012 | People suggestions use only declared, consented signals and show the reasons; protected attributes and inferred sensitive attributes are never used. | Fairness and transparency. | Discovery service | [SRC: SSOT BR-184, BR-185] |
-| BR-NET-013 | Contact discovery uses client-side hashed emails, mutual opt-in, 30-day TTL, no import of any social graph, no invitations to non-members. | Privacy by design. | Discovery service | [SRC: SSOT MIG-05] |
-| BR-NET-014 | Introductions are separate from cold outreach; requesters are capped at 10 per week; the introducer and the target can opt out; paths are visible only to the requester. | Dignified warm intros. | Introduction service | [SRC: SSOT BR-209..BR-216] |
-| BR-NET-015 | Endorsements require an existing connection at the time of giving, one per (giver, receiver, skill), and are never treated as verification. | Prevents fake proof. | NET service | [SRC: SSOT BR-131] |
-| BR-NET-016 | A written recommendation is displayed only after the recipient accepts it; edits after acceptance require re-acceptance. | Recipient control. | NET service | [SRC: SSOT BR-132] |
-| BR-NET-017 | Every post, comment and article passes a pre-publish abuse scan. Per-member limits: 10 posts per day, 60 comments per hour, 10 mentions per post, 5 topics per post. | Abuse resistance. | Content service, rate limiter | [SRC: SSOT BR-125] limits [PROP] |
-| BR-NET-018 | One reaction per user per target (changeable); one repost per user per post; reposting requires a Public original. | Honest counts. | Content service | [SRC: SSOT BR-116, BR-117] |
-| BR-NET-019 | Edits keep an Edited marker and version history. | Accountability. | Content service | [SRC: SSOT BR-118] |
-| BR-NET-020 | Post authors and comment authors may hide or delete comments on their posts; authors may disable comments; moderators may override. | Author control. | Content service | [SRC: SSOT BR-119] |
-| BR-NET-021 | Mentions notify only members who allow mentions from that author; mentions in text are never blocked by recipient settings. | Anti-harassment. | Notification fan-out | [SRC: SSOT BR-120] |
-| BR-NET-022 | A strict chronological feed view is always available; ranking factors are disclosed on demand. | Member agency. | Feed service | [SRC: SSOT BR-124] |
-| BR-NET-023 | Ranking may use only these signals: recency, relationship type and strength, declared topic interests, group membership, content quality signals (completeness, reports ratio), member feedback (not interested, snooze), format preference. It may never use protected or inferred sensitive attributes, private messages, assessment results, application or interview status, location trails, affinity memberships, or payment. | Fairness. | Ranking service allowlist | [DER] from [SRC: SSOT BR-185, §18] |
-| BR-NET-024 | Sponsored content, if ever enabled, is labelled, sits in separate slots, has no effect on organic ranking or hiring visibility, and uses no sensitive targeting. | Honesty; avoids pay-to-rank. | Feed service, BIL | [SRC: SSOT BR-126, BR-187] |
-| BR-NET-025 | Groups have at least one owner; group moderators act only within the group; platform moderation overrides group decisions. | Clear accountability. | Group service | [PROP] |
-| BR-NET-026 | Join mode is Public, Private (approval) or Hidden (invitation); bans prevent rejoin; admin declines are silent. | Community self-governance. | Group service | [PROP] |
-| BR-NET-027 | Alumni group membership requires a verified affiliation; graduates keep alumni status; members may opt out of default join; no cross-institution data leakage. | Trust and privacy. | Group service | [SRC: SSOT BR-241, BR-243, BR-246, BR-247] |
-| BR-NET-028 | A referral request needs: an open job in an enabled programme, at least one verified current employee connection, a skill match of at least 70 percent, and fewer than 3 prior requests in the last 30 days (maximum 3 per rolling 30 days; see `OD-NET-05`). A pitch is 50 to 300 characters. | Quality and anti-spam. | Referral service | [SRC: SSOT F-142, BR-233] |
-| BR-NET-029 | Every referral requires the referrer's explicit consent and a verified current employment at the employer; the candidate's resume is shared only after consent. | Consent and integrity. | Referral service | [SRC: SSOT BR-234, BR-237] |
-| BR-NET-030 | The referral tag is a visible priority signal for human recruiters only; it never auto-ranks, auto-advances, rejects or demotes any application and is never used by matching to hide other candidates. | Avoids opaque pay-to-rank and bias. | ATS integration, matching | [SRC: SSOT BR-235] [DER] |
-| BR-NET-031 | A referrer may make at most 20 referrals per calendar quarter; attribution lasts 12 months from the referral date (configurable 3 to 24 months); earliest consented referral wins. | Fairness and fraud control. | Referral service | [SRC: SSOT BR-239, BR-240] |
-| BR-NET-032 | Referral rewards follow employer policy; XP is the default; TalentSphere records eligibility and never disburses money. | Avoids payroll scope. | Referral service | [SRC: SSOT BR-236] [DEC-REQ `OD-NET-04`] |
-| BR-NET-033 | Self-referral, referrals for payment, reciprocal rings and referrals of already-active candidates for reward are prohibited; flagged referrals withhold rewards until human review; no automatic sanction. | Integrity. | Referral service, TSF | [PROP] |
-| BR-NET-034 | Profile-view logging honours the viewer's privacy mode at the time of the view; Private views are not logged individually. | Viewer privacy. | Profile service | [SRC: SSOT BR-133] |
-| BR-NET-035 | Privacy defaults: connections visible to connections only, requests from shared context, discoverable on, follows on, activity status off, mentions Everyone, introductions on, alumni listing on, affinity listing off. | Safe defaults. | Settings service | [PROP] |
-| BR-NET-036 | An external person referred by an employee shares no data with the employer until they consent; invitation email is sent once; non-consenting emails are deleted after 30 days. | Data minimization. | Referral service | [PROP] |
-| BR-NET-037 | Content hidden by moderation stays visible to its author with a notice and appeal path; severe categories bypass group moderators and go straight to TSF. | Due process. | Content service, TSF | [DER] |
-| BR-NET-038 | Deleted social content is hidden at once, retained 30 days in restricted storage, then purged, except TSF evidence and legal holds; blocks are retained for the retention window; referral records are kept in minimal form for 12 months. | Data rights with safety. | Lifecycle job | [DER] |
-| BR-NET-039 | Graph limits: 30,000 connections, 5,000 follows, 5,000 blocks, 1,000 bookmarks per folder. | Abuse and performance. | NET service | [PROP] |
-| BR-NET-040 | Dismissals, snoozes and mutes train only the member's own ranking and never affect another member's content ranking. | Prevents brigading. | Ranking service | [SRC: SSOT BR-186] |
-| BR-NET-041 | Newsletter subscriptions are opt-in with one-click unsubscribe (RFC 8058). | Anti-spam law alignment. | Newsletter service | [SRC: SSOT BR-123] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                                                                | Rationale                                                 | Enforced where                                             | Source                                     |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------ |
+| BR-NET-001 | A connection request requires two active accounts, no existing connection, no pending request in either direction, no block in either direction, and a recipient setting that permits the sender. A concurrent opposite request auto-accepts.                                                                                                                                                                                       | Prevents duplicates and unwanted contact.                 | NET service, request create                                | [DER]                                      |
+| BR-NET-002 | Outstanding sent requests are capped at 100 and new requests at 30 per day per member.                                                                                                                                                                                                                                                                                                                                              | Spam and harassment control.                              | NET service, per-member counters                           | [PROP] `OD-NET-07`                         |
+| BR-NET-003 | The request note is at most 300 characters; URLs and email addresses are removed from notes of accounts younger than 7 days.                                                                                                                                                                                                                                                                                                        | Reduces scam outreach.                                    | NET service validation                                     | [PROP]                                     |
+| BR-NET-004 | Decline and ignore are silent: the sender sees Pending until expiry, then Not accepted. After a decline or expiry, the sender may re-request after 30 days; after 3 declines or expiries from the same sender to the same recipient the sender cannot request that person again.                                                                                                                                                    | Protects recipients from retaliation and repeat pressure. | NET service, request create                                | [PROP]                                     |
+| BR-NET-005 | Pending requests are nudged on day 7 and day 21 (max 2) and expire on day 45. Senders may withdraw at any time.                                                                                                                                                                                                                                                                                                                     | Keeps caps usable and the inbox clean.                    | Daily job                                                  | [PROP] `OD-NET-07`                         |
+| BR-NET-006 | A connection is mutual. Removal is silent and unilateral. Connection-only access ends at once.                                                                                                                                                                                                                                                                                                                                      | Predictable symmetric trust model.                        | NET service                                                | [DER]                                      |
+| BR-NET-007 | Follows are unique per (follower, target); they never grant access beyond the target's public content; blocked or muted targets cannot be followed.                                                                                                                                                                                                                                                                                 | Separates attention from trust.                           | NET service                                                | [SRC: SSOT BR-121]                         |
+| BR-NET-008 | Block removes connection, follows, pending requests, introductions and referral requests in both directions, hides both parties from each other everywhere, and is never revealed to the blocked party. Blocked users cannot request referrals or be offered as introducers.                                                                                                                                                        | Safety, privacy.                                          | One shared relationship check in every read and write path | [SRC: SSOT BR-213, BR-216, BR-238]         |
+| BR-NET-009 | Mute hides a person's or topic's content from the muter without unfollowing and without notifying the muted party.                                                                                                                                                                                                                                                                                                                  | Low-confrontation control.                                | Feed and notification filters                              | [SRC: SSOT BR-127]                         |
+| BR-NET-010 | Visibility (Public, Connections, Followers and connections, Group, Private) is enforced server-side on every read, search, notification and share.                                                                                                                                                                                                                                                                                  | No client-side-only privacy.                              | NET service, read path                                     | [SRC: SSOT BR-122]                         |
+| BR-NET-011 | Members aged 16 and 17 have private-by-default profiles, receive connection requests only from people sharing a verified context (institution, group, mutual connection), do not appear in discovery to unrelated adults, cannot use contact discovery or introductions, and cannot choose Named for profile views. Under 16 are not permitted.                                                                                     | Protects minors.                                          | NET service with age claim from IDN                        | [SRC: SSOT BR-128] `OD-NET-08`             |
+| BR-NET-012 | People suggestions use only declared, consented signals and show the reasons; protected attributes and inferred sensitive attributes are never used.                                                                                                                                                                                                                                                                                | Fairness and transparency.                                | Discovery service                                          | [SRC: SSOT BR-184, BR-185]                 |
+| BR-NET-013 | Contact discovery uses client-side hashed emails, mutual opt-in, 30-day TTL, no import of any social graph, no invitations to non-members.                                                                                                                                                                                                                                                                                          | Privacy by design.                                        | Discovery service                                          | [SRC: SSOT MIG-05]                         |
+| BR-NET-014 | Introductions are separate from cold outreach; requesters are capped at 10 per week; the introducer and the target can opt out; paths are visible only to the requester.                                                                                                                                                                                                                                                            | Dignified warm intros.                                    | Introduction service                                       | [SRC: SSOT BR-209..BR-216]                 |
+| BR-NET-015 | Endorsements require an existing connection at the time of giving, one per (giver, receiver, skill), and are never treated as verification.                                                                                                                                                                                                                                                                                         | Prevents fake proof.                                      | NET service                                                | [SRC: SSOT BR-131]                         |
+| BR-NET-016 | A written recommendation is displayed only after the recipient accepts it; edits after acceptance require re-acceptance.                                                                                                                                                                                                                                                                                                            | Recipient control.                                        | NET service                                                | [SRC: SSOT BR-132]                         |
+| BR-NET-017 | Every post, comment and article passes a pre-publish abuse scan. Per-member limits: 10 posts per day, 60 comments per hour, 10 mentions per post, 5 topics per post.                                                                                                                                                                                                                                                                | Abuse resistance.                                         | Content service, rate limiter                              | [SRC: SSOT BR-125] limits [PROP]           |
+| BR-NET-018 | One reaction per user per target (changeable); one repost per user per post; reposting requires a Public original.                                                                                                                                                                                                                                                                                                                  | Honest counts.                                            | Content service                                            | [SRC: SSOT BR-116, BR-117]                 |
+| BR-NET-019 | Edits keep an Edited marker and version history.                                                                                                                                                                                                                                                                                                                                                                                    | Accountability.                                           | Content service                                            | [SRC: SSOT BR-118]                         |
+| BR-NET-020 | Post authors and comment authors may hide or delete comments on their posts; authors may disable comments; moderators may override.                                                                                                                                                                                                                                                                                                 | Author control.                                           | Content service                                            | [SRC: SSOT BR-119]                         |
+| BR-NET-021 | Mentions notify only members who allow mentions from that author; mentions in text are never blocked by recipient settings.                                                                                                                                                                                                                                                                                                         | Anti-harassment.                                          | Notification fan-out                                       | [SRC: SSOT BR-120]                         |
+| BR-NET-022 | A strict chronological feed view is always available; ranking factors are disclosed on demand.                                                                                                                                                                                                                                                                                                                                      | Member agency.                                            | Feed service                                               | [SRC: SSOT BR-124]                         |
+| BR-NET-023 | Ranking may use only these signals: recency, relationship type and strength, declared topic interests, group membership, content quality signals (completeness, reports ratio), member feedback (not interested, snooze), format preference. It may never use protected or inferred sensitive attributes, private messages, assessment results, application or interview status, location trails, affinity memberships, or payment. | Fairness.                                                 | Ranking service allowlist                                  | [DER] from [SRC: SSOT BR-185, §18]         |
+| BR-NET-024 | Sponsored content, if ever enabled, is labelled, sits in separate slots, has no effect on organic ranking or hiring visibility, and uses no sensitive targeting.                                                                                                                                                                                                                                                                    | Honesty; avoids pay-to-rank.                              | Feed service, BIL                                          | [SRC: SSOT BR-126, BR-187]                 |
+| BR-NET-025 | Groups have at least one owner; group moderators act only within the group; platform moderation overrides group decisions.                                                                                                                                                                                                                                                                                                          | Clear accountability.                                     | Group service                                              | [PROP]                                     |
+| BR-NET-026 | Join mode is Public, Private (approval) or Hidden (invitation); bans prevent rejoin; admin declines are silent.                                                                                                                                                                                                                                                                                                                     | Community self-governance.                                | Group service                                              | [PROP]                                     |
+| BR-NET-027 | Alumni group membership requires a verified affiliation; graduates keep alumni status; members may opt out of default join; no cross-institution data leakage.                                                                                                                                                                                                                                                                      | Trust and privacy.                                        | Group service                                              | [SRC: SSOT BR-241, BR-243, BR-246, BR-247] |
+| BR-NET-028 | A referral request needs: an open job in an enabled programme, at least one verified current employee connection, a skill match of at least 70 percent, and fewer than 3 prior requests in the last 30 days (maximum 3 per rolling 30 days; see `OD-NET-05`). A pitch is 50 to 300 characters.                                                                                                                                      | Quality and anti-spam.                                    | Referral service                                           | [SRC: SSOT F-142, BR-233]                  |
+| BR-NET-029 | Every referral requires the referrer's explicit consent and a verified current employment at the employer; the candidate's resume is shared only after consent.                                                                                                                                                                                                                                                                     | Consent and integrity.                                    | Referral service                                           | [SRC: SSOT BR-234, BR-237]                 |
+| BR-NET-030 | The referral tag is a visible priority signal for human recruiters only; it never auto-ranks, auto-advances, rejects or demotes any application and is never used by matching to hide other candidates.                                                                                                                                                                                                                             | Avoids opaque pay-to-rank and bias.                       | ATS integration, matching                                  | [SRC: SSOT BR-235] [DER]                   |
+| BR-NET-031 | A referrer may make at most 20 referrals per calendar quarter; attribution lasts 12 months from the referral date (configurable 3 to 24 months); earliest consented referral wins.                                                                                                                                                                                                                                                  | Fairness and fraud control.                               | Referral service                                           | [SRC: SSOT BR-239, BR-240]                 |
+| BR-NET-032 | Referral rewards follow employer policy; XP is the default; TalentSphere records eligibility and never disburses money.                                                                                                                                                                                                                                                                                                             | Avoids payroll scope.                                     | Referral service                                           | [SRC: SSOT BR-236] [DEC-REQ `OD-NET-04`]   |
+| BR-NET-033 | Self-referral, referrals for payment, reciprocal rings and referrals of already-active candidates for reward are prohibited; flagged referrals withhold rewards until human review; no automatic sanction.                                                                                                                                                                                                                          | Integrity.                                                | Referral service, TSF                                      | [PROP]                                     |
+| BR-NET-034 | Profile-view logging honours the viewer's privacy mode at the time of the view; Private views are not logged individually.                                                                                                                                                                                                                                                                                                          | Viewer privacy.                                           | Profile service                                            | [SRC: SSOT BR-133]                         |
+| BR-NET-035 | Privacy defaults: connections visible to connections only, requests from shared context, discoverable on, follows on, activity status off, mentions Everyone, introductions on, alumni listing on, affinity listing off.                                                                                                                                                                                                            | Safe defaults.                                            | Settings service                                           | [PROP]                                     |
+| BR-NET-036 | An external person referred by an employee shares no data with the employer until they consent; invitation email is sent once; non-consenting emails are deleted after 30 days.                                                                                                                                                                                                                                                     | Data minimization.                                        | Referral service                                           | [PROP]                                     |
+| BR-NET-037 | Content hidden by moderation stays visible to its author with a notice and appeal path; severe categories bypass group moderators and go straight to TSF.                                                                                                                                                                                                                                                                           | Due process.                                              | Content service, TSF                                       | [DER]                                      |
+| BR-NET-038 | Deleted social content is hidden at once, retained 30 days in restricted storage, then purged, except TSF evidence and legal holds; blocks are retained for the retention window; referral records are kept in minimal form for 12 months.                                                                                                                                                                                          | Data rights with safety.                                  | Lifecycle job                                              | [DER]                                      |
+| BR-NET-039 | Graph limits: 30,000 connections, 5,000 follows, 5,000 blocks, 1,000 bookmarks per folder.                                                                                                                                                                                                                                                                                                                                          | Abuse and performance.                                    | NET service                                                | [PROP]                                     |
+| BR-NET-040 | Dismissals, snoozes and mutes train only the member's own ranking and never affect another member's content ranking.                                                                                                                                                                                                                                                                                                                | Prevents brigading.                                       | Ranking service                                            | [SRC: SSOT BR-186]                         |
+| BR-NET-041 | Newsletter subscriptions are opt-in with one-click unsubscribe (RFC 8058).                                                                                                                                                                                                                                                                                                                                                          | Anti-spam law alignment.                                  | Newsletter service                                         | [SRC: SSOT BR-123]                         |
 
 ## 6. State machines
 
@@ -1100,15 +1100,15 @@ flowchart LR
 
 States: `pending`, `accepted`, `declined`, `ignored`, `withdrawn`, `expired`, `cancelled_by_block`. Terminal: all except `pending`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | pending | Sender sends | `BR-NET-001..003` pass |
-| pending | accepted | Recipient accepts | Both active, no block |
-| pending | declined | Recipient declines | recipient is addressee |
-| pending | ignored | Recipient ignores or bulk-ignores | recipient is addressee |
-| pending | withdrawn | Sender withdraws | sender is requester |
-| pending | expired | Daily job | age at least 45 days |
-| pending | cancelled_by_block | Either party blocks | any |
+| From    | To                 | Trigger                           | Guard                  |
+| ------- | ------------------ | --------------------------------- | ---------------------- |
+| (new)   | pending            | Sender sends                      | `BR-NET-001..003` pass |
+| pending | accepted           | Recipient accepts                 | Both active, no block  |
+| pending | declined           | Recipient declines                | recipient is addressee |
+| pending | ignored            | Recipient ignores or bulk-ignores | recipient is addressee |
+| pending | withdrawn          | Sender withdraws                  | sender is requester    |
+| pending | expired            | Daily job                         | age at least 45 days   |
+| pending | cancelled_by_block | Either party blocks               | any                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1131,11 +1131,11 @@ stateDiagram-v2
 
 States: `active`, `removed`, `severed_by_block`. Terminal: `removed`, `severed_by_block`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | Request accepted | n/a |
-| active | removed | Either party removes | confirmed |
-| active | severed_by_block | Either party blocks | any |
+| From   | To               | Trigger              | Guard     |
+| ------ | ---------------- | -------------------- | --------- |
+| (new)  | active           | Request accepted     | n/a       |
+| active | removed          | Either party removes | confirmed |
+| active | severed_by_block | Either party blocks  | any       |
 
 ```mermaid
 stateDiagram-v2
@@ -1150,16 +1150,16 @@ stateDiagram-v2
 
 States: `draft`, `published`, `hidden_by_moderation`, `deleted`, `purged`. Terminal: `purged`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | draft | Author saves draft | n/a |
-| draft | published | Author posts | scan pass or async scan pending |
-| draft | deleted | Author discards | n/a |
-| published | hidden_by_moderation | Scan fail or TSF action | TSF decision or scan result |
-| hidden_by_moderation | published | Appeal upheld or TSF reversal | TSF decision |
-| published | deleted | Author deletes | n/a |
-| hidden_by_moderation | deleted | Author deletes | no TSF hold |
-| deleted | purged | Retention job | 30 days and no hold |
+| From                 | To                   | Trigger                       | Guard                           |
+| -------------------- | -------------------- | ----------------------------- | ------------------------------- |
+| (new)                | draft                | Author saves draft            | n/a                             |
+| draft                | published            | Author posts                  | scan pass or async scan pending |
+| draft                | deleted              | Author discards               | n/a                             |
+| published            | hidden_by_moderation | Scan fail or TSF action       | TSF decision or scan result     |
+| hidden_by_moderation | published            | Appeal upheld or TSF reversal | TSF decision                    |
+| published            | deleted              | Author deletes                | n/a                             |
+| hidden_by_moderation | deleted              | Author deletes                | no TSF hold                     |
+| deleted              | purged               | Retention job                 | 30 days and no hold             |
 
 ```mermaid
 stateDiagram-v2
@@ -1178,18 +1178,18 @@ stateDiagram-v2
 
 States: `requested`, `invited`, `active`, `left`, `removed`, `banned`. Terminal: `left`, `banned` (`removed` may re-request).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | requested | Member requests | Private group |
-| (new) | invited | Admin or member invites | invitee is connection |
-| (new) | active | Join | Public group, not banned |
-| requested | active | Admin approves | capacity available |
-| requested | removed | Admin declines or member cancels | n/a |
-| invited | active | Invitee accepts | not banned |
-| invited | removed | Invitee declines or expires | 14 days |
-| active | left | Member leaves | not last owner |
-| active | removed | Admin removes | role hierarchy |
-| active | banned | Admin bans or TSF | reason recorded |
+| From      | To        | Trigger                          | Guard                    |
+| --------- | --------- | -------------------------------- | ------------------------ |
+| (new)     | requested | Member requests                  | Private group            |
+| (new)     | invited   | Admin or member invites          | invitee is connection    |
+| (new)     | active    | Join                             | Public group, not banned |
+| requested | active    | Admin approves                   | capacity available       |
+| requested | removed   | Admin declines or member cancels | n/a                      |
+| invited   | active    | Invitee accepts                  | not banned               |
+| invited   | removed   | Invitee declines or expires      | 14 days                  |
+| active    | left      | Member leaves                    | not last owner           |
+| active    | removed   | Admin removes                    | role hierarchy           |
+| active    | banned    | Admin bans or TSF                | reason recorded          |
 
 ```mermaid
 stateDiagram-v2
@@ -1212,26 +1212,26 @@ stateDiagram-v2
 
 States: `invited`, `submitted`, `viewed`, `referred`, `forwarded`, `declined`, `ignored`, `expired`, `withdrawn`, `cancelled`, `applied`, `hired`, `closed`, `reward_eligible`, `reward_settled`, `reward_rejected`. Terminal: `declined`, `ignored`, `expired`, `withdrawn`, `cancelled`, `closed`, `reward_settled`, `reward_rejected`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | submitted | Candidate submits | `BR-NET-028` |
-| (new) | invited | Employee-initiated submit | `BR-NET-031`, `BR-NET-036` |
-| submitted | viewed | Referrer opens | addressee |
-| viewed, submitted | referred | Referrer chooses Refer | `BR-NET-029`, quota |
-| viewed, submitted | forwarded | Referrer forwards | one forward |
-| viewed, submitted | declined | Referrer declines | n/a |
-| submitted, viewed | ignored | Referrer ignores | n/a |
-| submitted, viewed, invited | expired | 21 days (invited 30) | n/a |
-| submitted, invited | withdrawn | Candidate withdraws | n/a |
-| submitted, viewed | cancelled | Block, referrer leaves, job closed | any |
-| invited | submitted | Referred person consents | consent recorded |
-| referred | applied | Candidate applies with referral | within 14 days |
-| referred | expired | No application in 14 days | n/a |
-| applied | hired | Hire confirmed by ATS | n/a |
-| applied | closed | Rejected or withdrawn | n/a |
-| hired | reward_eligible | Policy met | `BR-NET-032`, `BR-NET-033` |
-| reward_eligible | reward_settled | EAD approves or marks paid | n/a |
-| reward_eligible | reward_rejected | EAD rejects or integrity flag confirmed | reason required |
+| From                       | To              | Trigger                                 | Guard                      |
+| -------------------------- | --------------- | --------------------------------------- | -------------------------- |
+| (new)                      | submitted       | Candidate submits                       | `BR-NET-028`               |
+| (new)                      | invited         | Employee-initiated submit               | `BR-NET-031`, `BR-NET-036` |
+| submitted                  | viewed          | Referrer opens                          | addressee                  |
+| viewed, submitted          | referred        | Referrer chooses Refer                  | `BR-NET-029`, quota        |
+| viewed, submitted          | forwarded       | Referrer forwards                       | one forward                |
+| viewed, submitted          | declined        | Referrer declines                       | n/a                        |
+| submitted, viewed          | ignored         | Referrer ignores                        | n/a                        |
+| submitted, viewed, invited | expired         | 21 days (invited 30)                    | n/a                        |
+| submitted, invited         | withdrawn       | Candidate withdraws                     | n/a                        |
+| submitted, viewed          | cancelled       | Block, referrer leaves, job closed      | any                        |
+| invited                    | submitted       | Referred person consents                | consent recorded           |
+| referred                   | applied         | Candidate applies with referral         | within 14 days             |
+| referred                   | expired         | No application in 14 days               | n/a                        |
+| applied                    | hired           | Hire confirmed by ATS                   | n/a                        |
+| applied                    | closed          | Rejected or withdrawn                   | n/a                        |
+| hired                      | reward_eligible | Policy met                              | `BR-NET-032`, `BR-NET-033` |
+| reward_eligible            | reward_settled  | EAD approves or marks paid              | n/a                        |
+| reward_eligible            | reward_rejected | EAD rejects or integrity flag confirmed | reason required            |
 
 ```mermaid
 stateDiagram-v2
@@ -1273,19 +1273,19 @@ stateDiagram-v2
 
 States: `requested`, `drafting`, `pending_acceptance`, `published`, `hidden`, `declined`, `withdrawn`, `expired`. Terminal: `declined`, `withdrawn`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | requested | Requester asks | open requests under 10 |
-| (new) | drafting | Writer starts unprompted | n/a |
-| requested | drafting | Writer accepts | n/a |
-| requested | declined | Writer declines | n/a |
-| drafting | pending_acceptance | Writer submits | 50 to 3,000 characters, scan pass |
-| pending_acceptance | published | Recipient accepts and shows | n/a |
-| pending_acceptance | hidden | Recipient accepts and hides | n/a |
-| pending_acceptance | declined | Recipient declines | n/a |
-| published, hidden | withdrawn | Writer or recipient removes | n/a |
-| published | hidden | Recipient hides | n/a |
-| requested, drafting | expired | 90 days | n/a |
+| From                | To                 | Trigger                     | Guard                             |
+| ------------------- | ------------------ | --------------------------- | --------------------------------- |
+| (new)               | requested          | Requester asks              | open requests under 10            |
+| (new)               | drafting           | Writer starts unprompted    | n/a                               |
+| requested           | drafting           | Writer accepts              | n/a                               |
+| requested           | declined           | Writer declines             | n/a                               |
+| drafting            | pending_acceptance | Writer submits              | 50 to 3,000 characters, scan pass |
+| pending_acceptance  | published          | Recipient accepts and shows | n/a                               |
+| pending_acceptance  | hidden             | Recipient accepts and hides | n/a                               |
+| pending_acceptance  | declined           | Recipient declines          | n/a                               |
+| published, hidden   | withdrawn          | Writer or recipient removes | n/a                               |
+| published           | hidden             | Recipient hides             | n/a                               |
+| requested, drafting | expired            | 90 days                     | n/a                               |
 
 ```mermaid
 stateDiagram-v2
@@ -1312,16 +1312,16 @@ stateDiagram-v2
 
 States: `requested`, `more_info_requested`, `approved`, `delivered`, `declined`, `expired`, `cancelled`. Terminal: `delivered`, `declined`, `expired`, `cancelled`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | requested | Requester submits | weekly cap, `BR-NET-014` |
-| requested | more_info_requested | Introducer asks | n/a |
-| more_info_requested | requested | Requester answers | within 7 days |
-| requested | approved | Introducer approves | target allows intros |
-| approved | delivered | Thread opened with target | target not blocked |
-| requested, more_info_requested | declined | Introducer declines | n/a |
-| requested, more_info_requested, approved | expired | 14 days | n/a |
-| any non-terminal | cancelled | Block, connection removed, account deleted | n/a |
+| From                                     | To                  | Trigger                                    | Guard                    |
+| ---------------------------------------- | ------------------- | ------------------------------------------ | ------------------------ |
+| (new)                                    | requested           | Requester submits                          | weekly cap, `BR-NET-014` |
+| requested                                | more_info_requested | Introducer asks                            | n/a                      |
+| more_info_requested                      | requested           | Requester answers                          | within 7 days            |
+| requested                                | approved            | Introducer approves                        | target allows intros     |
+| approved                                 | delivered           | Thread opened with target                  | target not blocked       |
+| requested, more_info_requested           | declined            | Introducer declines                        | n/a                      |
+| requested, more_info_requested, approved | expired             | 14 days                                    | n/a                      |
+| any non-terminal                         | cancelled           | Block, connection removed, account deleted | n/a                      |
 
 ```mermaid
 stateDiagram-v2
@@ -1346,14 +1346,14 @@ stateDiagram-v2
 
 States: `active`, `suspended`, `archived`, `deleted`. Terminal: `deleted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | Created | caps pass |
-| active | suspended | TSF action | decision recorded |
-| suspended | active | TSF reversal | appeal upheld |
-| active | archived | Owner archives or inactivity 12 months with notice | owner confirm or notice |
-| archived | active | Owner restores | n/a |
-| archived, suspended | deleted | Owner deletes or TSF removes | 30 days notice for owner delete |
+| From                | To        | Trigger                                            | Guard                           |
+| ------------------- | --------- | -------------------------------------------------- | ------------------------------- |
+| (new)               | active    | Created                                            | caps pass                       |
+| active              | suspended | TSF action                                         | decision recorded               |
+| suspended           | active    | TSF reversal                                       | appeal upheld                   |
+| active              | archived  | Owner archives or inactivity 12 months with notice | owner confirm or notice         |
+| archived            | active    | Owner restores                                     | n/a                             |
+| archived, suspended | deleted   | Owner deletes or TSF removes                       | 30 days notice for owner delete |
 
 ```mermaid
 stateDiagram-v2
@@ -1369,75 +1369,75 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-NET-001 | My Network home | `/network` | CAN, STD, INS, MNT, REC, HMG, EAD, IAD, PLO | Counts, invitations, suggestions | loading, empty, populated, error |
-| SCR-NET-002 | Invitations | `/network/invitations` | same | Received and sent requests | empty, bulk-select, error |
-| SCR-NET-003 | Connections | `/network/connections` | same | List, search, tags, notes, remove | empty, loading, 30k cap |
-| SCR-NET-004 | Following | `/network/following` | same | Manage follows | empty, populated |
-| SCR-NET-005 | Discover people | `/network/discover` | same | PYMK and filters | empty, fallback-simplified |
-| SCR-NET-006 | Find people I know | `/network/contacts` | adult members | Hashed contact match | consent, processing, results, disabled |
-| SCR-NET-007 | Introduction request | `/network/introductions/new/:targetId` | adults | Choose path and write purpose | no-path, cap-reached |
-| SCR-NET-008 | Introductions inbox | `/network/introductions` | adults | Introducer decisions and history | empty, populated |
-| SCR-NET-009 | Endorsements and recommendations | `/profile/proof` | same | Give, receive, manage | empty, pending |
-| SCR-NET-010 | Recommendation editor | `/network/recommendations/:id` | same | Write and submit | draft, saved, rejected |
-| SCR-NET-011 | Profile views | `/network/profile-views` | same | Insights and viewing mode | empty, below-threshold |
-| SCR-NET-012 | Home feed | `/feed` | members | Top and Recent feed | loading, empty, caught-up, degraded |
-| SCR-NET-013 | Post composer | modal on `/feed` | members | Create posts | draft, scanning, error |
-| SCR-NET-014 | Post detail | `/posts/:id` | per visibility | Post with comments | deleted, hidden, comments-off |
-| SCR-NET-015 | Edit history | `/posts/:id/history` | author, MOD | Versions and diff | empty |
-| SCR-NET-016 | Why am I seeing this | popover | members | Explanation | expired-explanation |
-| SCR-NET-017 | Feed preferences | `/settings/feed` | members | Muted topics, snoozes, reset | empty |
-| SCR-NET-018 | Saved items | `/saved` | members | Bookmarks and folders | empty |
-| SCR-NET-019 | Topic page | `/topics/:slug` | members, GUE public | Topic posts and follow | empty |
-| SCR-NET-020 | Article editor | `/write` | adults | Article and newsletter composing | autosaved, scheduled |
-| SCR-NET-021 | Newsletter settings | `/settings/newsletters` | authors | Cadence, subscribers (aggregate) | none |
-| SCR-NET-022 | Groups directory | `/communities` | members | Browse groups | empty, filtered |
-| SCR-NET-023 | Group page | `/communities/:slug` | per group type | Posts, members, rules | joined, requested, banned, suspended |
-| SCR-NET-024 | Group create or settings | `/communities/new`, `/communities/:slug/settings` | owners, admins | Configure | validation errors |
-| SCR-NET-025 | Group admin | `/communities/:slug/admin` | admins, moderators | Queue, members, audit | empty queue |
-| SCR-NET-026 | Alumni home | `/alumni` | verified alumni | Alumni group and directory | not-verified |
-| SCR-NET-027 | Referral request | `/jobs/:id/referral` | CAN, STD | Request referral | ineligible, quota-reached |
-| SCR-NET-028 | Referral inbox | `/network/referrals` | employees | Respond to requests | empty |
-| SCR-NET-029 | Refer someone | `/jobs/:id/refer` | verified employees | Employee-initiated referral | quota, invite-sent |
-| SCR-NET-030 | My referrals | `/me/referrals` | members | Status of all referrals | empty |
-| SCR-NET-031 | Referral programme settings | `/org/:id/referrals/settings` | EAD | Configure programme | draft, saved |
-| SCR-NET-032 | Referral rewards queue | `/org/:id/referrals/rewards` | EAD | Approve eligibility | empty |
-| SCR-NET-033 | Network privacy settings | `/settings/privacy/network` | members | Visibility and contact controls | locked-by-institution |
-| SCR-NET-034 | Blocked and muted | `/settings/privacy/blocked` | members | Manage lists | empty |
-| SCR-NET-035 | Ranking admin | `/admin/feed-ranking` | PAD | Versions, experiments, audit | rollout, rolled-back |
+| ID          | Name                             | Route proposal                                    | Roles                                       | Purpose                           | Key states                             |
+| ----------- | -------------------------------- | ------------------------------------------------- | ------------------------------------------- | --------------------------------- | -------------------------------------- |
+| SCR-NET-001 | My Network home                  | `/network`                                        | CAN, STD, INS, MNT, REC, HMG, EAD, IAD, PLO | Counts, invitations, suggestions  | loading, empty, populated, error       |
+| SCR-NET-002 | Invitations                      | `/network/invitations`                            | same                                        | Received and sent requests        | empty, bulk-select, error              |
+| SCR-NET-003 | Connections                      | `/network/connections`                            | same                                        | List, search, tags, notes, remove | empty, loading, 30k cap                |
+| SCR-NET-004 | Following                        | `/network/following`                              | same                                        | Manage follows                    | empty, populated                       |
+| SCR-NET-005 | Discover people                  | `/network/discover`                               | same                                        | PYMK and filters                  | empty, fallback-simplified             |
+| SCR-NET-006 | Find people I know               | `/network/contacts`                               | adult members                               | Hashed contact match              | consent, processing, results, disabled |
+| SCR-NET-007 | Introduction request             | `/network/introductions/new/:targetId`            | adults                                      | Choose path and write purpose     | no-path, cap-reached                   |
+| SCR-NET-008 | Introductions inbox              | `/network/introductions`                          | adults                                      | Introducer decisions and history  | empty, populated                       |
+| SCR-NET-009 | Endorsements and recommendations | `/profile/proof`                                  | same                                        | Give, receive, manage             | empty, pending                         |
+| SCR-NET-010 | Recommendation editor            | `/network/recommendations/:id`                    | same                                        | Write and submit                  | draft, saved, rejected                 |
+| SCR-NET-011 | Profile views                    | `/network/profile-views`                          | same                                        | Insights and viewing mode         | empty, below-threshold                 |
+| SCR-NET-012 | Home feed                        | `/feed`                                           | members                                     | Top and Recent feed               | loading, empty, caught-up, degraded    |
+| SCR-NET-013 | Post composer                    | modal on `/feed`                                  | members                                     | Create posts                      | draft, scanning, error                 |
+| SCR-NET-014 | Post detail                      | `/posts/:id`                                      | per visibility                              | Post with comments                | deleted, hidden, comments-off          |
+| SCR-NET-015 | Edit history                     | `/posts/:id/history`                              | author, MOD                                 | Versions and diff                 | empty                                  |
+| SCR-NET-016 | Why am I seeing this             | popover                                           | members                                     | Explanation                       | expired-explanation                    |
+| SCR-NET-017 | Feed preferences                 | `/settings/feed`                                  | members                                     | Muted topics, snoozes, reset      | empty                                  |
+| SCR-NET-018 | Saved items                      | `/saved`                                          | members                                     | Bookmarks and folders             | empty                                  |
+| SCR-NET-019 | Topic page                       | `/topics/:slug`                                   | members, GUE public                         | Topic posts and follow            | empty                                  |
+| SCR-NET-020 | Article editor                   | `/write`                                          | adults                                      | Article and newsletter composing  | autosaved, scheduled                   |
+| SCR-NET-021 | Newsletter settings              | `/settings/newsletters`                           | authors                                     | Cadence, subscribers (aggregate)  | none                                   |
+| SCR-NET-022 | Groups directory                 | `/communities`                                    | members                                     | Browse groups                     | empty, filtered                        |
+| SCR-NET-023 | Group page                       | `/communities/:slug`                              | per group type                              | Posts, members, rules             | joined, requested, banned, suspended   |
+| SCR-NET-024 | Group create or settings         | `/communities/new`, `/communities/:slug/settings` | owners, admins                              | Configure                         | validation errors                      |
+| SCR-NET-025 | Group admin                      | `/communities/:slug/admin`                        | admins, moderators                          | Queue, members, audit             | empty queue                            |
+| SCR-NET-026 | Alumni home                      | `/alumni`                                         | verified alumni                             | Alumni group and directory        | not-verified                           |
+| SCR-NET-027 | Referral request                 | `/jobs/:id/referral`                              | CAN, STD                                    | Request referral                  | ineligible, quota-reached              |
+| SCR-NET-028 | Referral inbox                   | `/network/referrals`                              | employees                                   | Respond to requests               | empty                                  |
+| SCR-NET-029 | Refer someone                    | `/jobs/:id/refer`                                 | verified employees                          | Employee-initiated referral       | quota, invite-sent                     |
+| SCR-NET-030 | My referrals                     | `/me/referrals`                                   | members                                     | Status of all referrals           | empty                                  |
+| SCR-NET-031 | Referral programme settings      | `/org/:id/referrals/settings`                     | EAD                                         | Configure programme               | draft, saved                           |
+| SCR-NET-032 | Referral rewards queue           | `/org/:id/referrals/rewards`                      | EAD                                         | Approve eligibility               | empty                                  |
+| SCR-NET-033 | Network privacy settings         | `/settings/privacy/network`                       | members                                     | Visibility and contact controls   | locked-by-institution                  |
+| SCR-NET-034 | Blocked and muted                | `/settings/privacy/blocked`                       | members                                     | Manage lists                      | empty                                  |
+| SCR-NET-035 | Ranking admin                    | `/admin/feed-ranking`                             | PAD                                         | Versions, experiments, audit      | rollout, rolled-back                   |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-NET-01 | Connection | id, member_a, member_b (ordered), created_at, private_note_a/b, tags | Member x2 | Life of account; purged on deletion |
-| ENT-NET-02 | ConnectionRequest | id, sender, recipient, note, state, expires_at, nudge_count | Member x2 | 12 months after terminal |
-| ENT-NET-03 | Follow | follower, target_type, target_id, notify | Member, Org, Topic | Life of account |
-| ENT-NET-04 | Block | blocker, blocked, created_at | Member x2 | Life of account plus retention window |
-| ENT-NET-05 | Mute | member, target_type, target_id, expires_at | Member | Life of account |
-| ENT-NET-06 | Post | id, author, text, audience, state, topics, client_post_id | Member, Group, PostVersion | 30 days after delete |
-| ENT-NET-07 | PostVersion | post_id, version, text, edited_at | Post | 90 days or hold |
-| ENT-NET-08 | Comment | id, post_id, parent_id, author, text, state | Post | With post |
-| ENT-NET-09 | Reaction | target_type, target_id, member, kind | Post, Comment | With target |
-| ENT-NET-10 | Repost and Bookmark | member, post_id, folder, created_at | Post | Life of account |
-| ENT-NET-11 | Topic | id, slug, name, state, taxonomy_ref | Post, Follow | Permanent |
-| ENT-NET-12 | Article and NewsletterIssue | id, author, title, body, versions, subscribers_count | Member | Life of account plus 30 days |
-| ENT-NET-13 | FeedImpression | member, post_id, reason_codes, ranking_version, shown_at | Post, Member | 30 days |
-| ENT-NET-14 | FeedPreference | member, muted_topics, snoozes, derived_interest_ref | Member | Life of account |
-| ENT-NET-15 | Group | id, name, slug, type, rules, state, posting_permission | Member, Topic | Life of group plus 30 days |
-| ENT-NET-16 | GroupMembership | group_id, member, role, state, answers | Group, Member | Life of group |
-| ENT-NET-17 | Endorsement | giver, receiver, skill_ref, relationship | Member, Skill | Life of account |
-| ENT-NET-18 | Recommendation | id, writer, recipient, text, state, version | Member | Life of account |
-| ENT-NET-19 | IntroductionRequest | id, requester, introducer, target, purpose, state | Member x3 | 12 months after terminal |
-| ENT-NET-20 | ReferralRequest | id, origin, candidate, referrer, job_ref, pitch, ask, state, attestation | Member, Job | 12 months after terminal; minimal after |
-| ENT-NET-21 | ReferralOutcome | referral_id, application_ref, hired_at, attributed_referrer | ReferralRequest | Attribution window plus 12 months |
-| ENT-NET-22 | ReferralReward | referral_id, policy_version, type, state, reference | ReferralRequest | 7 years if monetary record [PROP] |
-| ENT-NET-23 | ReferralProgramme | org_id, enabled, categories, window, policy_version, terms | Organisation | Life of org |
-| ENT-NET-24 | ContactHash | member, hash, expires_at, consent_ref | Member | 30 days |
-| ENT-NET-25 | ProfileView | viewer_ref, owner, viewed_at, mode | Member | 90 days |
-| ENT-NET-26 | NetworkPrivacySetting | member, settings_json, version | Member | Life of account |
-| ENT-NET-27 | RankingConfig | id, version, signals, weights, author, approver, active_from | Admin | Permanent |
+| ID         | Name                        | Key attributes                                                           | Relationships              | Retention class                         |
+| ---------- | --------------------------- | ------------------------------------------------------------------------ | -------------------------- | --------------------------------------- |
+| ENT-NET-01 | Connection                  | id, member_a, member_b (ordered), created_at, private_note_a/b, tags     | Member x2                  | Life of account; purged on deletion     |
+| ENT-NET-02 | ConnectionRequest           | id, sender, recipient, note, state, expires_at, nudge_count              | Member x2                  | 12 months after terminal                |
+| ENT-NET-03 | Follow                      | follower, target_type, target_id, notify                                 | Member, Org, Topic         | Life of account                         |
+| ENT-NET-04 | Block                       | blocker, blocked, created_at                                             | Member x2                  | Life of account plus retention window   |
+| ENT-NET-05 | Mute                        | member, target_type, target_id, expires_at                               | Member                     | Life of account                         |
+| ENT-NET-06 | Post                        | id, author, text, audience, state, topics, client_post_id                | Member, Group, PostVersion | 30 days after delete                    |
+| ENT-NET-07 | PostVersion                 | post_id, version, text, edited_at                                        | Post                       | 90 days or hold                         |
+| ENT-NET-08 | Comment                     | id, post_id, parent_id, author, text, state                              | Post                       | With post                               |
+| ENT-NET-09 | Reaction                    | target_type, target_id, member, kind                                     | Post, Comment              | With target                             |
+| ENT-NET-10 | Repost and Bookmark         | member, post_id, folder, created_at                                      | Post                       | Life of account                         |
+| ENT-NET-11 | Topic                       | id, slug, name, state, taxonomy_ref                                      | Post, Follow               | Permanent                               |
+| ENT-NET-12 | Article and NewsletterIssue | id, author, title, body, versions, subscribers_count                     | Member                     | Life of account plus 30 days            |
+| ENT-NET-13 | FeedImpression              | member, post_id, reason_codes, ranking_version, shown_at                 | Post, Member               | 30 days                                 |
+| ENT-NET-14 | FeedPreference              | member, muted_topics, snoozes, derived_interest_ref                      | Member                     | Life of account                         |
+| ENT-NET-15 | Group                       | id, name, slug, type, rules, state, posting_permission                   | Member, Topic              | Life of group plus 30 days              |
+| ENT-NET-16 | GroupMembership             | group_id, member, role, state, answers                                   | Group, Member              | Life of group                           |
+| ENT-NET-17 | Endorsement                 | giver, receiver, skill_ref, relationship                                 | Member, Skill              | Life of account                         |
+| ENT-NET-18 | Recommendation              | id, writer, recipient, text, state, version                              | Member                     | Life of account                         |
+| ENT-NET-19 | IntroductionRequest         | id, requester, introducer, target, purpose, state                        | Member x3                  | 12 months after terminal                |
+| ENT-NET-20 | ReferralRequest             | id, origin, candidate, referrer, job_ref, pitch, ask, state, attestation | Member, Job                | 12 months after terminal; minimal after |
+| ENT-NET-21 | ReferralOutcome             | referral_id, application_ref, hired_at, attributed_referrer              | ReferralRequest            | Attribution window plus 12 months       |
+| ENT-NET-22 | ReferralReward              | referral_id, policy_version, type, state, reference                      | ReferralRequest            | 7 years if monetary record [PROP]       |
+| ENT-NET-23 | ReferralProgramme           | org_id, enabled, categories, window, policy_version, terms               | Organisation               | Life of org                             |
+| ENT-NET-24 | ContactHash                 | member, hash, expires_at, consent_ref                                    | Member                     | 30 days                                 |
+| ENT-NET-25 | ProfileView                 | viewer_ref, owner, viewed_at, mode                                       | Member                     | 90 days                                 |
+| ENT-NET-26 | NetworkPrivacySetting       | member, settings_json, version                                           | Member                     | Life of account                         |
+| ENT-NET-27 | RankingConfig               | id, version, signals, weights, author, approver, active_from             | Admin                      | Permanent                               |
 
 ```mermaid
 erDiagram
@@ -1459,146 +1459,146 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-NET-001 | net.connection_request.sent | FR-NET-001 | request id, sender, recipient | NTF, TSF |
-| EVT-NET-002 | net.connection_request.accepted | FR-NET-002 | request id, connection id | NTF, REP, AIC |
-| EVT-NET-003 | net.connection.removed | FR-NET-004 | pair | AIC, NET |
-| EVT-NET-004 | net.follow.created | FR-NET-005 | follower, target | NTF, AIC |
-| EVT-NET-005 | net.block.created | FR-NET-006 | blocker, blocked | MSG, TSF, ATS (planned) |
-| EVT-NET-006 | net.privacy.changed | FR-NET-007 | member, diff | SRC, MSG |
-| EVT-NET-007 | net.suggestion.dismissed | FR-NET-008 | member, suggestion | AIC |
-| EVT-NET-008 | net.introduction.requested | FR-NET-010 | request id | NTF |
-| EVT-NET-009 | net.endorsement.given | FR-NET-011 | giver, receiver, skill | NTF, TSF, AIC |
-| EVT-NET-010 | net.recommendation.accepted | FR-NET-012 | recommendation id | PRF, AIC |
-| EVT-NET-011 | net.profile_view.logged | FR-NET-013 | viewer mode, owner | ANL |
-| EVT-NET-012 | net.post.published | FR-NET-014 | post id, audience | TSF, SRC, AIC |
-| EVT-NET-013 | net.post.edited | FR-NET-015 | post id, version | TSF |
-| EVT-NET-014 | net.post.deleted | FR-NET-015 | post id | SRC |
-| EVT-NET-015 | net.comment.created | FR-NET-016 | comment id | NTF, TSF |
-| EVT-NET-016 | net.reaction.set | FR-NET-017 | target, kind | ANL |
-| EVT-NET-017 | net.mention.created | FR-NET-018 | mention | NTF |
-| EVT-NET-018 | net.feed.explanation_viewed | FR-NET-020 | impression | ANL |
-| EVT-NET-019 | net.feed.feedback | FR-NET-021 | member, action | AIC |
-| EVT-NET-020 | net.newsletter.issue_sent | FR-NET-022 | issue id, recipients | NTF |
-| EVT-NET-021 | net.group.created | FR-NET-025 | group id | TSF |
-| EVT-NET-022 | net.group.member_joined | FR-NET-026 | group, member | NTF |
-| EVT-NET-023 | net.group.moderation_action | FR-NET-027 | action, target | TSF |
-| EVT-NET-024 | net.referral.requested | FR-NET-029 | request id | NTF |
-| EVT-NET-025 | net.referral.responded | FR-NET-030 | request id, action | NTF, ATS |
-| EVT-NET-026 | net.referral.employee_submitted | FR-NET-031 | request id | NTF |
-| EVT-NET-027 | net.referral.delivered | FR-NET-032 | referral id, application ref | ATS, ANL |
-| EVT-NET-028 | net.referral.attributed | FR-NET-032 | referral id, hire | ATS, REP |
-| EVT-NET-029 | net.referral.reward_eligible | FR-NET-033 | referral id | NTF, REP |
-| EVT-NET-030 | net.referral.integrity_flagged | FR-NET-034 | referral id, signal | TSF |
-| EVT-NET-031 | net.ranking.version_activated | FR-NET-036 | version | ANL, ADM |
-| EVT-NET-032 | net.account.social_data_purged | FR-NET-037 | member | SET |
-| EVT-NET-033 | net.group.alumni_joined | FR-NET-028 | group, member | NTF |
-| EVT-NET-034 | net.referral_programme.updated | FR-NET-035 | org, version | NTF |
+| ID          | Event                           | Trigger    | Key payload                   | Consumers               |
+| ----------- | ------------------------------- | ---------- | ----------------------------- | ----------------------- |
+| EVT-NET-001 | net.connection_request.sent     | FR-NET-001 | request id, sender, recipient | NTF, TSF                |
+| EVT-NET-002 | net.connection_request.accepted | FR-NET-002 | request id, connection id     | NTF, REP, AIC           |
+| EVT-NET-003 | net.connection.removed          | FR-NET-004 | pair                          | AIC, NET                |
+| EVT-NET-004 | net.follow.created              | FR-NET-005 | follower, target              | NTF, AIC                |
+| EVT-NET-005 | net.block.created               | FR-NET-006 | blocker, blocked              | MSG, TSF, ATS (planned) |
+| EVT-NET-006 | net.privacy.changed             | FR-NET-007 | member, diff                  | SRC, MSG                |
+| EVT-NET-007 | net.suggestion.dismissed        | FR-NET-008 | member, suggestion            | AIC                     |
+| EVT-NET-008 | net.introduction.requested      | FR-NET-010 | request id                    | NTF                     |
+| EVT-NET-009 | net.endorsement.given           | FR-NET-011 | giver, receiver, skill        | NTF, TSF, AIC           |
+| EVT-NET-010 | net.recommendation.accepted     | FR-NET-012 | recommendation id             | PRF, AIC                |
+| EVT-NET-011 | net.profile_view.logged         | FR-NET-013 | viewer mode, owner            | ANL                     |
+| EVT-NET-012 | net.post.published              | FR-NET-014 | post id, audience             | TSF, SRC, AIC           |
+| EVT-NET-013 | net.post.edited                 | FR-NET-015 | post id, version              | TSF                     |
+| EVT-NET-014 | net.post.deleted                | FR-NET-015 | post id                       | SRC                     |
+| EVT-NET-015 | net.comment.created             | FR-NET-016 | comment id                    | NTF, TSF                |
+| EVT-NET-016 | net.reaction.set                | FR-NET-017 | target, kind                  | ANL                     |
+| EVT-NET-017 | net.mention.created             | FR-NET-018 | mention                       | NTF                     |
+| EVT-NET-018 | net.feed.explanation_viewed     | FR-NET-020 | impression                    | ANL                     |
+| EVT-NET-019 | net.feed.feedback               | FR-NET-021 | member, action                | AIC                     |
+| EVT-NET-020 | net.newsletter.issue_sent       | FR-NET-022 | issue id, recipients          | NTF                     |
+| EVT-NET-021 | net.group.created               | FR-NET-025 | group id                      | TSF                     |
+| EVT-NET-022 | net.group.member_joined         | FR-NET-026 | group, member                 | NTF                     |
+| EVT-NET-023 | net.group.moderation_action     | FR-NET-027 | action, target                | TSF                     |
+| EVT-NET-024 | net.referral.requested          | FR-NET-029 | request id                    | NTF                     |
+| EVT-NET-025 | net.referral.responded          | FR-NET-030 | request id, action            | NTF, ATS                |
+| EVT-NET-026 | net.referral.employee_submitted | FR-NET-031 | request id                    | NTF                     |
+| EVT-NET-027 | net.referral.delivered          | FR-NET-032 | referral id, application ref  | ATS, ANL                |
+| EVT-NET-028 | net.referral.attributed         | FR-NET-032 | referral id, hire             | ATS, REP                |
+| EVT-NET-029 | net.referral.reward_eligible    | FR-NET-033 | referral id                   | NTF, REP                |
+| EVT-NET-030 | net.referral.integrity_flagged  | FR-NET-034 | referral id, signal           | TSF                     |
+| EVT-NET-031 | net.ranking.version_activated   | FR-NET-036 | version                       | ANL, ADM                |
+| EVT-NET-032 | net.account.social_data_purged  | FR-NET-037 | member                        | SET                     |
+| EVT-NET-033 | net.group.alumni_joined         | FR-NET-028 | group, member                 | NTF                     |
+| EVT-NET-034 | net.referral_programme.updated  | FR-NET-035 | org, version                  | NTF                     |
 
 ### 9.2 Consumed
 
-| Event | From | Use |
-|---|---|---|
-| tsf.content.actioned | TSF (EVT-TSF-010) | Hide or restore posts, groups, comments |
-| tsf.sanction.applied | TSF (EVT-TSF-013) | Pause posting, requests, referrals |
-| idn.account.deactivated, idn.account.deleted (planned) | IDN, SET | FR-NET-037 |
-| evd.employment.verified (planned) | EVD | Referrer eligibility |
-| ats.application.hired (planned) | ATS | Referral outcome |
-| job.job.closed (planned) | JOB | Expire referral requests |
-| inst.affiliation.verified (planned) | INS | Alumni auto-join |
-| aic.recommendation.ready (planned) | AIC | Suggestions |
+| Event                                                  | From              | Use                                     |
+| ------------------------------------------------------ | ----------------- | --------------------------------------- |
+| tsf.content.actioned                                   | TSF (EVT-TSF-010) | Hide or restore posts, groups, comments |
+| tsf.sanction.applied                                   | TSF (EVT-TSF-013) | Pause posting, requests, referrals      |
+| idn.account.deactivated, idn.account.deleted (planned) | IDN, SET          | FR-NET-037                              |
+| evd.employment.verified (planned)                      | EVD               | Referrer eligibility                    |
+| ats.application.hired (planned)                        | ATS               | Referral outcome                        |
+| job.job.closed (planned)                               | JOB               | Expire referral requests                |
+| inst.affiliation.verified (planned)                    | INS               | Alumni auto-join                        |
+| aic.recommendation.ready (planned)                     | AIC               | Suggestions                             |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behaviour |
-|---|---|---|
-| Object storage and media pipeline (PLT planned) | Images and documents | Post publishes text; media pending |
-| Malware and image safety scanner | Attachment scan | Media held until scan returns |
-| Link preview fetcher | Previews with SSRF protection | Plain link |
-| Email provider (NTF planned) | Newsletter and invitation mail | Retry and suppression |
-| Geocoding service | Location filters | Filter by text |
-| Realtime transport (MSG planned) | Live "new posts" pill | Poll every 60 seconds |
+| Dependency                                      | Purpose                        | Failure behaviour                  |
+| ----------------------------------------------- | ------------------------------ | ---------------------------------- |
+| Object storage and media pipeline (PLT planned) | Images and documents           | Post publishes text; media pending |
+| Malware and image safety scanner                | Attachment scan                | Media held until scan returns      |
+| Link preview fetcher                            | Previews with SSRF protection  | Plain link                         |
+| Email provider (NTF planned)                    | Newsletter and invitation mail | Retry and suppression              |
+| Geocoding service                               | Location filters               | Filter by text                     |
+| Realtime transport (MSG planned)                | Live "new posts" pill          | Poll every 60 seconds              |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For |
-|---|---|
-| IDN (planned) | Account state, age claim, roles |
-| PRF (planned) | Profile snapshot, skills |
-| EVD, BGV (planned) | Employment verification for referrers |
-| JOB, ATS (planned) | Job context, referral tag, hire outcome |
-| EMP (planned) | Organization pages, employee roster |
-| INS (planned) | Affiliation verification |
-| NTF (planned) | Notification delivery |
-| SET (planned) | Privacy page, consent ledger, deletion |
-| AIC | Suggestions, explanations, match score for referral eligibility |
-| TSF | Reporting, moderation, sanctions, fraud signals |
-| MSG | Introduction threads, block enforcement |
-| BIL (planned) | Sponsored slots (dormant) |
-| REP (planned) | XP rewards |
+| Depends on         | For                                                             |
+| ------------------ | --------------------------------------------------------------- |
+| IDN (planned)      | Account state, age claim, roles                                 |
+| PRF (planned)      | Profile snapshot, skills                                        |
+| EVD, BGV (planned) | Employment verification for referrers                           |
+| JOB, ATS (planned) | Job context, referral tag, hire outcome                         |
+| EMP (planned)      | Organization pages, employee roster                             |
+| INS (planned)      | Affiliation verification                                        |
+| NTF (planned)      | Notification delivery                                           |
+| SET (planned)      | Privacy page, consent ledger, deletion                          |
+| AIC                | Suggestions, explanations, match score for referral eligibility |
+| TSF                | Reporting, moderation, sanctions, fraud signals                 |
+| MSG                | Introduction threads, block enforcement                         |
+| BIL (planned)      | Sponsored slots (dormant)                                       |
+| REP (planned)      | XP rewards                                                      |
 
-| Depended on by | Uses |
-|---|---|
-| MSG | Connection, block and privacy state for message permission |
-| AIC | Graph and content signals (consented) |
-| ATS (planned) | Referral tags and attribution |
-| SRC (planned) | Public posts and people index |
-| EVT (planned) | Groups and discovery |
-| MEN (planned) | Connections and groups for mentor discovery |
+| Depended on by | Uses                                                       |
+| -------------- | ---------------------------------------------------------- |
+| MSG            | Connection, block and privacy state for message permission |
+| AIC            | Graph and content signals (consented)                      |
+| ATS (planned)  | Referral tags and attribution                              |
+| SRC (planned)  | Public posts and people index                              |
+| EVT (planned)  | Groups and discovery                                       |
+| MEN (planned)  | Connections and groups for mentor discovery                |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner |
-|---|---|---|---|
-| Request acceptance rate | Accepted share of resolved requests | accepted / (accepted + declined + ignored + expired) | Product (PAD) |
-| Invitation response time (median) | Time from send to resolution | median(resolved_at - sent_at) | Product |
-| Spam-request rate | Requests reported or flagged per 1,000 sent | flagged / sent x 1,000 | TSF lead |
-| Feed explanation coverage | Items with at least one valid reason | items with reasons / items shown | Product |
-| Chronological usage | Share of sessions in Recent view | Recent sessions / sessions | Product |
-| Group moderation latency | Median time from report to action | median(action_at - report_at) | TSF lead |
-| Referral conversion | Referred applications that reach hire | hired referrals / delivered referrals | EAD view, PAD |
-| Referral integrity flag rate | Flags per 1,000 referrals | flags / referrals x 1,000 | TSF lead |
-| Block rate | New blocks per 1,000 active members per week | blocks / actives x 1,000 | TSF lead |
-| Ranking exposure disparity | Max ratio of exposure between author size bands | max(band exposure) / min(band exposure) | PAD |
+| Metric                            | Definition                                      | Formula                                              | Owner         |
+| --------------------------------- | ----------------------------------------------- | ---------------------------------------------------- | ------------- |
+| Request acceptance rate           | Accepted share of resolved requests             | accepted / (accepted + declined + ignored + expired) | Product (PAD) |
+| Invitation response time (median) | Time from send to resolution                    | median(resolved_at - sent_at)                        | Product       |
+| Spam-request rate                 | Requests reported or flagged per 1,000 sent     | flagged / sent x 1,000                               | TSF lead      |
+| Feed explanation coverage         | Items with at least one valid reason            | items with reasons / items shown                     | Product       |
+| Chronological usage               | Share of sessions in Recent view                | Recent sessions / sessions                           | Product       |
+| Group moderation latency          | Median time from report to action               | median(action_at - report_at)                        | TSF lead      |
+| Referral conversion               | Referred applications that reach hire           | hired referrals / delivered referrals                | EAD view, PAD |
+| Referral integrity flag rate      | Flags per 1,000 referrals                       | flags / referrals x 1,000                            | TSF lead      |
+| Block rate                        | New blocks per 1,000 active members per week    | blocks / actives x 1,000                             | TSF lead      |
+| Ranking exposure disparity        | Max ratio of exposure between author size bands | max(band exposure) / min(band exposure)              | PAD           |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-NET-01 | How far does NET go before it becomes a "social-media clone" (SSOT §4.2)? Is the career-topic requirement on every post acceptable? | A: topics required; B: topics optional; C: groups-only content | A with the excluded formats in section 1.3 | Owner | FR-NET-014, FR-NET-019 |
-| OD-NET-02 | Default feed view: ranked or chronological? | Top; Recent; per-member sticky choice | Top, sticky choice, one tap to Recent | Owner | FR-NET-019 |
-| OD-NET-03 | Are sponsored posts allowed at all (self-serve advertising is a non-goal)? | Never; employer pages only with sales review; open | Never until decided | Owner | FR-NET-023 |
-| OD-NET-04 | Do referral bonuses exist on TalentSphere, and is recording monetary bounties acceptable (payroll is a non-goal)? | XP only; record external payment; platform-paid | XP and record only | Owner and counsel | FR-NET-033 |
-| OD-NET-05 | Referral limit wording conflict: F-142 says fewer than 3 requests per 30 days; BR-233 says max 3 per 30 days. | Block at the 3rd; block at the 4th | Max 3 (BR-233): block the 4th | Product owner | FR-NET-029 |
-| OD-NET-06 | Is a 70 percent skill match an acceptable gate on asking for a referral, given fairness and AIC explainability? | Hard gate; soft warning; none | Soft warning plus the 70 percent hard gate only when the employer sets it | Owner and AIC lead | FR-NET-029 |
-| OD-NET-07 | Connection caps and nudge schedule values | As proposed; stricter; none | As proposed | Product | FR-NET-001, 003 |
-| OD-NET-08 | Minimum age and minors' network scope; may minors use groups and referrals? | 16 and 17 limited; 18 only | 16 and 17 limited per `BR-NET-011`; referrals disabled for minors | Owner and counsel | FR-NET-001, 010, 029 |
-| OD-NET-09 | Enable hashed-contact discovery at all? | Yes; no; later | Later (R4) | Owner and counsel | FR-NET-009 |
-| OD-NET-10 | Weight of endorsements in matching | None; low weight; equal to self-reported | Low weight, labelled | AIC lead | FR-NET-011 |
-| OD-NET-11 | Should referrer notes be visible to candidates? | Hidden; visible | Hidden from candidate, visible to recruiters | Product and counsel | FR-NET-030 |
-| OD-NET-12 | Referrer eligibility: F-142 says "works at company at most 6 months" which is ambiguous (maximum or minimum tenure) | Any verified current employee; minimum 3 months; maximum tenure | Any verified current employee, employer may add a minimum tenure | Product | FR-NET-030 |
+| ID        | Question                                                                                                                            | Options                                                         | Default proposal                                                          | Who decides         | Blocking               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------- | ---------------------- |
+| OD-NET-01 | How far does NET go before it becomes a "social-media clone" (SSOT §4.2)? Is the career-topic requirement on every post acceptable? | A: topics required; B: topics optional; C: groups-only content  | A with the excluded formats in section 1.3                                | Owner               | FR-NET-014, FR-NET-019 |
+| OD-NET-02 | Default feed view: ranked or chronological?                                                                                         | Top; Recent; per-member sticky choice                           | Top, sticky choice, one tap to Recent                                     | Owner               | FR-NET-019             |
+| OD-NET-03 | Are sponsored posts allowed at all (self-serve advertising is a non-goal)?                                                          | Never; employer pages only with sales review; open              | Never until decided                                                       | Owner               | FR-NET-023             |
+| OD-NET-04 | Do referral bonuses exist on TalentSphere, and is recording monetary bounties acceptable (payroll is a non-goal)?                   | XP only; record external payment; platform-paid                 | XP and record only                                                        | Owner and counsel   | FR-NET-033             |
+| OD-NET-05 | Referral limit wording conflict: F-142 says fewer than 3 requests per 30 days; BR-233 says max 3 per 30 days.                       | Block at the 3rd; block at the 4th                              | Max 3 (BR-233): block the 4th                                             | Product owner       | FR-NET-029             |
+| OD-NET-06 | Is a 70 percent skill match an acceptable gate on asking for a referral, given fairness and AIC explainability?                     | Hard gate; soft warning; none                                   | Soft warning plus the 70 percent hard gate only when the employer sets it | Owner and AIC lead  | FR-NET-029             |
+| OD-NET-07 | Connection caps and nudge schedule values                                                                                           | As proposed; stricter; none                                     | As proposed                                                               | Product             | FR-NET-001, 003        |
+| OD-NET-08 | Minimum age and minors' network scope; may minors use groups and referrals?                                                         | 16 and 17 limited; 18 only                                      | 16 and 17 limited per `BR-NET-011`; referrals disabled for minors         | Owner and counsel   | FR-NET-001, 010, 029   |
+| OD-NET-09 | Enable hashed-contact discovery at all?                                                                                             | Yes; no; later                                                  | Later (R4)                                                                | Owner and counsel   | FR-NET-009             |
+| OD-NET-10 | Weight of endorsements in matching                                                                                                  | None; low weight; equal to self-reported                        | Low weight, labelled                                                      | AIC lead            | FR-NET-011             |
+| OD-NET-11 | Should referrer notes be visible to candidates?                                                                                     | Hidden; visible                                                 | Hidden from candidate, visible to recruiters                              | Product and counsel | FR-NET-030             |
+| OD-NET-12 | Referrer eligibility: F-142 says "works at company at most 6 months" which is ambiguous (maximum or minimum tenure)                 | Any verified current employee; minimum 3 months; maximum tenure | Any verified current employee, employer may add a minimum tenure          | Product             | FR-NET-030             |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-NET-01 | The feed drifts into engagement-bait and a social-media clone | M / H | Section 1.3 exclusions, signal allowlist, quarterly ranking audit |
-| RSK-NET-02 | Connection spam and romance or investment scams | H / H | Caps, note link stripping, TSF scam signals, silent decline |
-| RSK-NET-03 | Referral collusion and bounty farming | M / M | `BR-NET-033`, rewards withheld on flag, human review |
-| RSK-NET-04 | Referral tag becomes a hidden pay-to-rank or bias channel | M / H | `BR-NET-030`, audits of outcomes by tag |
-| RSK-NET-05 | Minors contacted by adults | L / H | `BR-NET-011`, shared-context rule, TSF minors policy |
-| RSK-NET-06 | Block leaks (side channels reveal a block) | M / H | Uniform not-found responses, tests on all read paths |
-| RSK-NET-07 | Ranking opacity erodes trust | M / M | Explanations, chronological view, transparency summary |
-| RSK-NET-08 | Hidden-group abuse (harassment, fraud rings) | M / H | Group-level automated detection, TSF access with legal basis, report channel always available |
+| ID         | Risk                                                          | Likelihood and impact | Mitigation                                                                                    |
+| ---------- | ------------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| RSK-NET-01 | The feed drifts into engagement-bait and a social-media clone | M / H                 | Section 1.3 exclusions, signal allowlist, quarterly ranking audit                             |
+| RSK-NET-02 | Connection spam and romance or investment scams               | H / H                 | Caps, note link stripping, TSF scam signals, silent decline                                   |
+| RSK-NET-03 | Referral collusion and bounty farming                         | M / M                 | `BR-NET-033`, rewards withheld on flag, human review                                          |
+| RSK-NET-04 | Referral tag becomes a hidden pay-to-rank or bias channel     | M / H                 | `BR-NET-030`, audits of outcomes by tag                                                       |
+| RSK-NET-05 | Minors contacted by adults                                    | L / H                 | `BR-NET-011`, shared-context rule, TSF minors policy                                          |
+| RSK-NET-06 | Block leaks (side channels reveal a block)                    | M / H                 | Uniform not-found responses, tests on all read paths                                          |
+| RSK-NET-07 | Ranking opacity erodes trust                                  | M / M                 | Explanations, chronological view, transparency summary                                        |
+| RSK-NET-08 | Hidden-group abuse (harassment, fraud rings)                  | M / H                 | Group-level automated detection, TSF access with legal basis, report channel always available |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §7 F-09, F-53..F-60, F-121, F-125, F-140, F-142 | Feature scope | Phase labels dropped (tiers are dependency-based) |
-| SSOT §10.22 to 10.24, 10.36, 10.39, 10.40 (BR-116..BR-134, BR-209..BR-216, BR-233..BR-247) | Rules renamed `BR-NET-` | Caps kept as proposals; BR-233 vs F-142 conflict recorded as `OD-NET-05` |
-| SSOT MIG-03, MIG-05 | Contact discovery | Graph import excluded |
-| SSOT §4.2, §18.2 | Boundaries and ranking transparency | n/a |
-| docs/registries/BUSINESS_RULE_REGISTRY.md | Cross-check of the above | n/a |
-| Added by this blueprint [PROP] | Stale-request nudges, restrict, employee-initiated and external referrals, referral integrity, ranking governance, deletion cascade, newsletters, share previews | n/a |
+| Legacy source                                                                              | Used for                                                                                                                                                         | Dropped or changed                                                       |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| SSOT §7 F-09, F-53..F-60, F-121, F-125, F-140, F-142                                       | Feature scope                                                                                                                                                    | Phase labels dropped (tiers are dependency-based)                        |
+| SSOT §10.22 to 10.24, 10.36, 10.39, 10.40 (BR-116..BR-134, BR-209..BR-216, BR-233..BR-247) | Rules renamed `BR-NET-`                                                                                                                                          | Caps kept as proposals; BR-233 vs F-142 conflict recorded as `OD-NET-05` |
+| SSOT MIG-03, MIG-05                                                                        | Contact discovery                                                                                                                                                | Graph import excluded                                                    |
+| SSOT §4.2, §18.2                                                                           | Boundaries and ranking transparency                                                                                                                              | n/a                                                                      |
+| docs/registries/BUSINESS_RULE_REGISTRY.md                                                  | Cross-check of the above                                                                                                                                         | n/a                                                                      |
+| Added by this blueprint [PROP]                                                             | Stale-request nudges, restrict, employee-initiated and external referrals, referral integrity, ranking governance, deletion cascade, newsletters, share previews | n/a                                                                      |

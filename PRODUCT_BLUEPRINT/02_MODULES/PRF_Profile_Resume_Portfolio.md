@@ -18,18 +18,18 @@ PRF owns the **self-presented** professional identity: what a person says about 
 
 ### 1.3 In scope, out of scope, owned vs consumed
 
-| Area                                                               | In scope (owned by PRF) | Out of scope (owner)                                         |
-| ------------------------------------------------------------------ | ----------------------- | ------------------------------------------------------------ |
-| Profile record, sections, completeness, visibility, slug           | Yes                     | Account, login, email, age gate: IDN (planned)               |
-| Public profile page and SEO flags                                  | Yes                     | Global privacy center, consent ledger, data export: SET (planned) |
-| Resume builder, templates, import, export, ATS check, share links  | Yes                     | AI generation engine and prompts: AIC (planned)              |
-| Portfolio projects and media                                       | Yes                     | File storage, malware scanning, transcoding: PLT (planned)   |
-| Recommendations (free-text testimonials)                           | Yes                     | Skill endorsements and verification marks: EVD               |
-| Open-to-work and career preferences                                | Yes                     | Job matching using them: AIC and JOB (planned)               |
-| Profile view analytics                                             | Yes                     | Platform analytics warehouse: ANL (planned)                  |
-| Self-declared certifications, experience, education                | Yes (claims)            | Verification of them: EVD (work history, credentials), BGV (formal checks) |
-| Recruiter discoverability switch (stealth mode)                    | Yes (the setting)       | Search index, ranking and fairness controls: SRC             |
-| Application-time resume snapshot                                   | Consumed from PRF by JOB (planned) | Application records: JOB (planned)               |
+| Area                                                              | In scope (owned by PRF)            | Out of scope (owner)                                                       |
+| ----------------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------- |
+| Profile record, sections, completeness, visibility, slug          | Yes                                | Account, login, email, age gate: IDN (planned)                             |
+| Public profile page and SEO flags                                 | Yes                                | Global privacy center, consent ledger, data export: SET (planned)          |
+| Resume builder, templates, import, export, ATS check, share links | Yes                                | AI generation engine and prompts: AIC (planned)                            |
+| Portfolio projects and media                                      | Yes                                | File storage, malware scanning, transcoding: PLT (planned)                 |
+| Recommendations (free-text testimonials)                          | Yes                                | Skill endorsements and verification marks: EVD                             |
+| Open-to-work and career preferences                               | Yes                                | Job matching using them: AIC and JOB (planned)                             |
+| Profile view analytics                                            | Yes                                | Platform analytics warehouse: ANL (planned)                                |
+| Self-declared certifications, experience, education               | Yes (claims)                       | Verification of them: EVD (work history, credentials), BGV (formal checks) |
+| Recruiter discoverability switch (stealth mode)                   | Yes (the setting)                  | Search index, ranking and fairness controls: SRC                           |
+| Application-time resume snapshot                                  | Consumed from PRF by JOB (planned) | Application records: JOB (planned)                                         |
 
 **Owned:** the data in section 8. **Consumed:** account identity (IDN), canonical skill taxonomy (SRC §taxonomy admin and EVD), verification state (EVD, BGV), media storage (PLT), notifications (NTF), moderation decisions (TSF).
 
@@ -44,25 +44,25 @@ PRF owns the **self-presented** professional identity: what a person says about 
 
 Role codes are from CONVENTIONS section 5. `own` means the profile owner. `Y` allowed, `-` not allowed, `A` allowed with audit, `V` allowed subject to the owner's visibility and block settings.
 
-| Capability                                  | GUE | CAN/STD/FRL (own) | CAN (other) | REC/HMG (employer, verified org) | EAD | INS/MNT | MOD | SUP | PAD | SAD |
-| ------------------------------------------- | --- | ----------------- | ----------- | -------------------------------- | --- | ------- | --- | --- | --- | --- |
-| Create and edit own profile sections        | -   | Y                 | -           | -                                | -   | Y (own) | -   | -   | -   | -   |
-| View public-level sections                  | V   | Y                 | V           | V                                | V   | V       | Y   | Y   | Y   | Y   |
-| View connections-level sections             | -   | Y                 | V (connected) | -                              | -   | V       | A   | A   | A   | A   |
-| View recruiter-level sections               | -   | Y                 | -           | V                                | V   | -       | A   | A   | A   | A   |
-| View private sections                       | -   | Y                 | -           | -                                | -   | -       | A (case) | A (case, with owner consent or legal basis) | A (case) | A (case) |
-| Set section visibility, slug, SEO flag      | -   | Y                 | -           | -                                | -   | Y (own) | -   | -   | -   | -   |
-| Edit another person's profile               | -   | -                 | -           | -                                | -   | -       | A (remove content only) | A (on owner request, logged) | A (break-glass) | A  |
-| Manage resumes, export, share links         | -   | Y                 | -           | -                                | -   | Y (own) | -   | -   | -   | -   |
-| View a resume via share link                | V (token) | Y   | V (token)   | V (token)                        | V   | V       | -   | -   | -   | -   |
-| Manage portfolio projects                   | -   | Y                 | -           | -                                | -   | Y (own) | A (remove) | -  | -   | -   |
-| Write a recommendation for someone          | -   | Y                 | Y (signed in) | Y (signed in)                  | Y   | Y       | -   | -   | -   | -   |
-| Accept, hide, remove a received recommendation | - | Y                 | -           | -                                | -   | Y (own) | A (remove) | -  | -   | -   |
-| Set open-to-work and preferences            | -   | Y                 | -           | -                                | -   | Y (own) | -   | -   | -   | -   |
-| View profile-view analytics                 | -   | Y (own)           | -           | -                                | -   | Y (own) | -   | -   | A (aggregate) | -  |
-| Manage resume templates (catalog)           | -   | -                 | -           | -                                | -   | -       | -   | -   | Y   | Y   |
-| Configure completeness weights, reserved slugs | -  | -                | -           | -                                | -   | -       | -   | -   | Y (audited, versioned) | Y |
-| Suspend a profile                           | -   | -                 | -           | -                                | -   | -       | Y (via TSF) | - | Y | Y  |
+| Capability                                     | GUE       | CAN/STD/FRL (own) | CAN (other)   | REC/HMG (employer, verified org) | EAD | INS/MNT | MOD                     | SUP                                         | PAD                    | SAD      |
+| ---------------------------------------------- | --------- | ----------------- | ------------- | -------------------------------- | --- | ------- | ----------------------- | ------------------------------------------- | ---------------------- | -------- |
+| Create and edit own profile sections           | -         | Y                 | -             | -                                | -   | Y (own) | -                       | -                                           | -                      | -        |
+| View public-level sections                     | V         | Y                 | V             | V                                | V   | V       | Y                       | Y                                           | Y                      | Y        |
+| View connections-level sections                | -         | Y                 | V (connected) | -                                | -   | V       | A                       | A                                           | A                      | A        |
+| View recruiter-level sections                  | -         | Y                 | -             | V                                | V   | -       | A                       | A                                           | A                      | A        |
+| View private sections                          | -         | Y                 | -             | -                                | -   | -       | A (case)                | A (case, with owner consent or legal basis) | A (case)               | A (case) |
+| Set section visibility, slug, SEO flag         | -         | Y                 | -             | -                                | -   | Y (own) | -                       | -                                           | -                      | -        |
+| Edit another person's profile                  | -         | -                 | -             | -                                | -   | -       | A (remove content only) | A (on owner request, logged)                | A (break-glass)        | A        |
+| Manage resumes, export, share links            | -         | Y                 | -             | -                                | -   | Y (own) | -                       | -                                           | -                      | -        |
+| View a resume via share link                   | V (token) | Y                 | V (token)     | V (token)                        | V   | V       | -                       | -                                           | -                      | -        |
+| Manage portfolio projects                      | -         | Y                 | -             | -                                | -   | Y (own) | A (remove)              | -                                           | -                      | -        |
+| Write a recommendation for someone             | -         | Y                 | Y (signed in) | Y (signed in)                    | Y   | Y       | -                       | -                                           | -                      | -        |
+| Accept, hide, remove a received recommendation | -         | Y                 | -             | -                                | -   | Y (own) | A (remove)              | -                                           | -                      | -        |
+| Set open-to-work and preferences               | -         | Y                 | -             | -                                | -   | Y (own) | -                       | -                                           | -                      | -        |
+| View profile-view analytics                    | -         | Y (own)           | -             | -                                | -   | Y (own) | -                       | -                                           | A (aggregate)          | -        |
+| Manage resume templates (catalog)              | -         | -                 | -             | -                                | -   | -       | -                       | -                                           | Y                      | Y        |
+| Configure completeness weights, reserved slugs | -         | -                 | -             | -                                | -   | -       | -                       | -                                           | Y (audited, versioned) | Y        |
+| Suspend a profile                              | -         | -                 | -             | -                                | -   | -       | Y (via TSF)             | -                                           | Y                      | Y        |
 
 Rules for reading the matrix: the owner's block list (FR-PRF-017) overrides every `V`. Employer roles see recruiter-level sections only when the employer organization is verified (EMP, planned) and the owner has not blocked it. Moderators and support see private data only inside an open case and every view is written to the audit log (BR-PRF-034).
 
@@ -80,13 +80,13 @@ flowchart LR
     D --> EVD
 ```
 
-| Sub-module | Name                           | Features            |
-| ---------- | ------------------------------ | ------------------- |
-| A          | Profile core                   | FR-PRF-001 to 012   |
-| B          | Visibility and public presence | FR-PRF-013 to 019   |
-| C          | Resume                         | FR-PRF-020 to 028   |
-| D          | Portfolio and social proof     | FR-PRF-029 to 032   |
-| E          | Preferences and analytics      | FR-PRF-033 to 036   |
+| Sub-module | Name                           | Features          |
+| ---------- | ------------------------------ | ----------------- |
+| A          | Profile core                   | FR-PRF-001 to 012 |
+| B          | Visibility and public presence | FR-PRF-013 to 019 |
+| C          | Resume                         | FR-PRF-020 to 028 |
+| D          | Portfolio and social proof     | FR-PRF-029 to 032 |
+| E          | Preferences and analytics      | FR-PRF-033 to 036 |
 
 ## 4. Feature specifications
 
@@ -242,7 +242,7 @@ flowchart LR
 
 - **Sub-module:** A Profile core
 - **Priority / tier:** Must · R1
-- **Source:** [SRC: SSOT F-12 step 5]
+- **Source:** [SRC: SSOT F-12 step 5] · also [SRC: SSOT §7 F-80 Profile Enhancements]
 - **Purpose and outcome:** The user lists schools, degrees and programs; entries can be linked to an institution on the platform (INS module planned) and verified.
 - **Roles and permissions:** `CAN/STD/FRL/INS/MNT: create, edit, reorder, delete own` · `IAD: confirm affiliation (via INS planned)`
 - **Preconditions and entry points:** Profile exists. Entry: "Education" card.
@@ -263,7 +263,7 @@ flowchart LR
 - **Security and privacy:** Grade is sensitive-ish personal data; default hidden publicly. Education data not used to infer protected attributes (BR-PRF-030).
 - **Acceptance criteria:**
   1. Given a valid entry, when saved, then it appears with the "Unverified" chip.
-  2. Given "Hide grade" is on, when a recruiter views the profile, then the grade is not returned by the API. 
+  2. Given "Hide grade" is on, when a recruiter views the profile, then the grade is not returned by the API.
   3. Given end year 2040 in 2026, when saving, then rejected because it exceeds current year + 8. (negative)
 
 ### FR-PRF-007 — Skills section
@@ -300,7 +300,7 @@ flowchart LR
 
 - **Sub-module:** A Profile core
 - **Priority / tier:** Should · R1
-- **Source:** [PROP] (languages are a standard profile section and a search facet)
+- **Source:** [PROP] (languages are a standard profile section and a search facet) · also [SRC: SSOT §7 F-80 Profile Enhancements]
 - **Purpose and outcome:** The user lists spoken and written languages with a proficiency on the CEFR scale, used for filters and matching. Success is a stored list.
 - **Roles and permissions:** `CAN/STD/FRL/INS/MNT: add, edit, remove own`
 - **Preconditions and entry points:** Profile exists. Entry: "Languages" card.
@@ -329,7 +329,7 @@ flowchart LR
 
 - **Sub-module:** A Profile core
 - **Priority / tier:** Must · R1
-- **Source:** [SRC: SSOT F-12 step 6]
+- **Source:** [SRC: SSOT F-12 step 6] · also [SRC: SSOT §7 F-80 Profile Enhancements]
 - **Purpose and outcome:** The user lists certifications and licenses as claims; EVD turns them into checkable credentials. Success is an entry with a clear verified/unverified state.
 - **Roles and permissions:** `CAN/STD/FRL/INS/MNT: create, edit, delete own`
 - **Preconditions and entry points:** Profile exists. Entry: "Certifications" card or after completing a platform course (prompt to add).
@@ -1137,74 +1137,74 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-| --- | --- | --- | --- | --- |
-| BR-PRF-001 | Only the profile owner may create, edit or delete profile content. Staff may only act under BR-PRF-034. | Identity data integrity and trust. | API authz on every write; database row policy by owner id | [SRC: SSOT F-12 "Own-row edit only"; BR-005] |
-| BR-PRF-002 | Every profile write carries the expected `version`; a mismatch returns 409 and writes nothing. | Prevents silent overwrite between tabs or devices. | API + database `version` check | [SRC: SSOT F-12 edge cases] |
-| BR-PRF-003 | Rich text is sanitized server-side to an allowlist (bold, italic, lists, `https`/`mailto` links with `rel="nofollow ugc noopener"`); raw HTML and scripts are removed. | Stored XSS prevention. | Write path and render path | [SRC: SSOT F-12 Security Requirements] |
-| BR-PRF-004 | Public and cross-user responses contain only public-safe fields. Phone, login email, date of birth, address and tax identifiers are never returned unless the owner chose a contact audience that includes the viewer. | PII protection. | Serializer allowlist per viewer class | [SRC: SSOT F-12 step 10] |
-| BR-PRF-005 | A profile that does not exist, is hidden, archived, suspended, erased, or blocked for the viewer yields the same 404 response body, headers and timing class. | No existence leak. | Public profile route and all lookups | [SRC: SSOT F-12 failure modes] |
-| BR-PRF-006 | Each section has one visibility value (public, connections, recruiters, private). The effective visibility is the narrower of section visibility and profile state; decided only on the server. | Single enforcement point. | `visibleSections()` used by page, API, search snippets, resume pages, exports | [SRC: SSOT F-12 step 9] |
-| BR-PRF-007 | Completeness is a deterministic server-side function of profile content and the active weight set (default basic 20, skills 15, experience 20, education 15, certifications 10, portfolio 10, summary 10); weights sum to 100. The job-application threshold of 70 is owned by JOB (planned) and reads this score. | Reproducible gating. | Domain function; weights table with versioning | [SRC: SSOT F-12 step 8; BR-037; BR-061] |
-| BR-PRF-008 | Every skill on a profile references a canonical skill id from the governed taxonomy. Users cannot create canonical skills; unknown skills go to a suggestion queue. | Clean matching and search. | Skills write path | [SRC: SSOT BR-141, BR-144] |
-| BR-PRF-009 | A profile lists at most 50 skills and pins at most 5 as top skills. | Signal quality; UI sanity. Limits are defaults. | Skills write path | [PROP] |
-| BR-PRF-010 | Dates must be valid: end not before start; experience start not in the future; education end year up to current year + 8; no `end` when current. | Data quality. | Section validators | [DER] |
-| BR-PRF-011 | Editing employer, title, start date or end date of a verified work entry, or issuer, title or dates of a verified credential claim, removes the verified mark and notifies EVD. The UI warns before saving. Non-locked fields (description, skills used) may change freely. | Verification must describe what was verified. | Section update handlers; EVD event | [DER] from SSOT §6.1 |
-| BR-PRF-012 | Slug: 3–30 chars of `a-z0-9-`, no edge or double hyphen, not all digits, unique case-insensitively, not reserved or offensive; at most 3 changes per rolling 12 months; old slug redirects 90 days then is quarantined 30 days before anyone can claim it. | Stable links, anti-squatting and impersonation control. | Slug service + unique index | [SRC: SSOT F-12 slug edge case]; numbers [PROP] |
-| BR-PRF-013 | Profile images: JPEG, PNG, WebP, ≤ 4 MB (avatar), MIME verified from bytes, malware scanned, EXIF and GPS stripped, re-encoded. | Safe media. | Media pipeline | [SRC: SSOT F-12 step 2] |
-| BR-PRF-014 | Resume exports are append-only records; deleting an export soft-deletes the file artifact only. Each export or application creates an automatic version. | Evidence of what was sent. | Export service; storage policy | [SRC: SSOT BR-26] |
-| BR-PRF-015 | Verification marks appear on a resume export only if the owner toggled them on and the underlying item is currently verified at render time. | Marks must be true at the moment shown. | Resume renderer | [DER] |
-| BR-PRF-016 | Parsed, imported or AI-suggested content is a draft. It is written to the profile only after explicit user confirmation, and AI may not add skills, employers, dates or credentials the user has not claimed. | User remains author of claims. | Import, parse, tailor flows | [SRC: SSOT BR-33] |
-| BR-PRF-017 | Uploaded resumes and import files are malware scanned before any parsing; extracted text is encrypted at rest; raw files are deleted after 30 days (resume) or 24 hours (import file) unless the user keeps them as a resume original. | Sensitive data handling. | Upload pipeline | [SRC: SSOT BR-043, BR-044]; retention [PROP] |
-| BR-PRF-018 | A user has at most one default resume; if the default is deleted or archived, the user must pick another or have none. | Predictable apply-time behavior. | Resume service | [DER] |
-| BR-PRF-019 | Limits: 10 active resumes per user, 50 saved versions per resume, 20 active share links. | Abuse and cost control. Defaults. | Resume service | [PROP] |
-| BR-PRF-020 | The ATS check is advisory. It never blocks saving, exporting, sharing or applying. | Avoid false blocking from heuristics. | UI and export service | [DER] |
-| BR-PRF-021 | Resume share links use random 128-bit tokens stored hashed, expire (default 30 days, max 365), are revocable, `noindex`, and return 410 when expired or revoked. | Safe link sharing. | Share service | [PROP] |
-| BR-PRF-022 | Recommendations require an authenticated author; anonymous recommendations are not permitted. | Accountability. | Recommendation service | [DER] from SSOT BR-153 |
-| BR-PRF-023 | A recommendation is 50–3000 characters, states a relationship, is shown only after the recipient approves, and there is at most one per author-recipient pair (edits are revisions that need re-approval). The owner can hide or delete it but never edit its text. | Authenticity of social proof. | Recommendation service | [PROP] |
-| BR-PRF-024 | An open-to-work signal expires 90 days after it is set unless renewed. Query-time checks treat expired signals as off. | Stale availability misleads recruiters. | Settings service; SRC | [PROP] |
-| BR-PRF-025 | Open-to-work, preferences and discoverability are used by search, matching and outreach only within the consent the user set; changes apply at query time, not only after re-indexing. | Consent must be immediate. | SRC query filter; AIC and JOB reads | [SRC: SSOT F-92 "consent revocation < 24h"] |
-| BR-PRF-026 | Salary expectation and work authorization are never public and are shared only at the audience the user chose. | Sensitive employment data. | Preferences serializer | [DER] |
-| BR-PRF-027 | Profile views are attributed to a viewer only if the viewer allows it; private-mode viewers appear as an anonymous category; a user in private mode cannot see their own viewers list. | Viewer privacy and reciprocity. | View logger and analytics API | [PROP] |
-| BR-PRF-028 | Profile view events are retained 12 months, then reduced to aggregates; breakdowns are suppressed when fewer than 5 views in the period. | Data minimization; re-identification control. | Retention job; analytics API | [PROP]; threshold [DEC-REQ] OD-PRF-05 |
-| BR-PRF-029 | Block rules (person, organization, domain) make the profile, its search appearances and its messages unavailable to the blocked party without notifying them. Anonymous links cannot be blocked and the owner is told so. | Personal safety and employer hiding. | Viewer check on all surfaces | [PROP] |
-| BR-PRF-030 | Protected attributes (age, date of birth, gender, marital status, race, religion, disability, photo, native language, military or volunteer affiliation) are never required, never used in ranking or match scoring by PRF, and optional fields default to hidden. Photos are excluded from resume templates by default in regions where it is not customary. | Anti-discrimination by design. | Schema; resume defaults; reviews | [DER] |
-| BR-PRF-031 | Pronouns, preferred name and name pronunciation are optional and displayed only if set. | Inclusion. | Profile UI | [PROP] |
-| BR-PRF-032 | Imports accept only files the user uploads from their own export; the platform does not scrape or log into third-party sites to read a profile. | Terms-of-service and privacy compliance. | Import feature scope | [SRC: SSOT F-65 LinkedIn Decoupling] |
-| BR-PRF-033 | The owner may hide verified marks but cannot hide a Disputed or Revoked status on an item that is displayed. | Prevents using hiding to mislead. | Mark renderer | [DER] |
-| BR-PRF-034 | Moderators and support may view private profile content only inside an open case with a stated reason; every view and every content removal is audit logged; staff cannot edit text, only remove content or restore on owner request. | Least privilege. | Admin tools; audit log | [SRC: SSOT BR-67] |
-| BR-PRF-035 | Portfolio media: images ≤ 10 MB, PDFs ≤ 50 MB, 20 media per project; external embeds only from allowlisted providers and only if the provider allows embedding; alt text is required before a project is published. | Safety and accessibility. | Media service; publish validator | [SRC: SSOT F-12 step 7; BR-083..084]; limits [PROP] |
-| BR-PRF-036 | Skills attached to a project or resume create claims, never verified skills; verification comes only from EVD. | Claims are not evidence. | Skill link service | [SRC: SSOT §6.1] |
-| BR-PRF-037 | Spoken language level uses CEFR (A1–C2) plus Native. | Common, comparable scale. | Language validator | [PROP] |
-| BR-PRF-038 | Public profiles carry `noindex` unless the owner opts into search engine visibility; indexable pages expose only public fields. | Control over external discovery. | Page headers and structured data | [PROP] |
-| BR-PRF-039 | JSON resume export conforms to JSON Resume schema v1.0.0 plus a namespaced `meta.talentsphere` block. | Portability. | Export service | [PROP] |
-| BR-PRF-040 | Profile history keeps up to 30 snapshots for at least 12 months; content removed for moderation or by erasure is redacted from all snapshots. | Recovery without retaining removed data. | Version service; erasure handler | [PROP] |
-| BR-PRF-041 | Accounts flagged under 18 by IDN (planned) can never have public or recruiter-visible sections, cannot be discoverable, and cannot set open-to-work to recruiters. | Child safety. | Visibility service | [DER] |
-| BR-PRF-042 | A resume template may carry the "ATS-safe" flag only if it passes the template checklist: real text, standard headings, no layout tables, no text in images, embedded fonts, tagged PDF. | Truthful labeling. | Template publish gate | [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                          | Rationale                                               | Enforced where                                                                | Source                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- |
+| BR-PRF-001 | Only the profile owner may create, edit or delete profile content. Staff may only act under BR-PRF-034.                                                                                                                                                                                                                                                       | Identity data integrity and trust.                      | API authz on every write; database row policy by owner id                     | [SRC: SSOT F-12 "Own-row edit only"; BR-005]        |
+| BR-PRF-002 | Every profile write carries the expected `version`; a mismatch returns 409 and writes nothing.                                                                                                                                                                                                                                                                | Prevents silent overwrite between tabs or devices.      | API + database `version` check                                                | [SRC: SSOT F-12 edge cases]                         |
+| BR-PRF-003 | Rich text is sanitized server-side to an allowlist (bold, italic, lists, `https`/`mailto` links with `rel="nofollow ugc noopener"`); raw HTML and scripts are removed.                                                                                                                                                                                        | Stored XSS prevention.                                  | Write path and render path                                                    | [SRC: SSOT F-12 Security Requirements]              |
+| BR-PRF-004 | Public and cross-user responses contain only public-safe fields. Phone, login email, date of birth, address and tax identifiers are never returned unless the owner chose a contact audience that includes the viewer.                                                                                                                                        | PII protection.                                         | Serializer allowlist per viewer class                                         | [SRC: SSOT F-12 step 10]                            |
+| BR-PRF-005 | A profile that does not exist, is hidden, archived, suspended, erased, or blocked for the viewer yields the same 404 response body, headers and timing class.                                                                                                                                                                                                 | No existence leak.                                      | Public profile route and all lookups                                          | [SRC: SSOT F-12 failure modes]                      |
+| BR-PRF-006 | Each section has one visibility value (public, connections, recruiters, private). The effective visibility is the narrower of section visibility and profile state; decided only on the server.                                                                                                                                                               | Single enforcement point.                               | `visibleSections()` used by page, API, search snippets, resume pages, exports | [SRC: SSOT F-12 step 9]                             |
+| BR-PRF-007 | Completeness is a deterministic server-side function of profile content and the active weight set (default basic 20, skills 15, experience 20, education 15, certifications 10, portfolio 10, summary 10); weights sum to 100. The job-application threshold of 70 is owned by JOB (planned) and reads this score.                                            | Reproducible gating.                                    | Domain function; weights table with versioning                                | [SRC: SSOT F-12 step 8; BR-037; BR-061]             |
+| BR-PRF-008 | Every skill on a profile references a canonical skill id from the governed taxonomy. Users cannot create canonical skills; unknown skills go to a suggestion queue.                                                                                                                                                                                           | Clean matching and search.                              | Skills write path                                                             | [SRC: SSOT BR-141, BR-144]                          |
+| BR-PRF-009 | A profile lists at most 50 skills and pins at most 5 as top skills.                                                                                                                                                                                                                                                                                           | Signal quality; UI sanity. Limits are defaults.         | Skills write path                                                             | [PROP]                                              |
+| BR-PRF-010 | Dates must be valid: end not before start; experience start not in the future; education end year up to current year + 8; no `end` when current.                                                                                                                                                                                                              | Data quality.                                           | Section validators                                                            | [DER]                                               |
+| BR-PRF-011 | Editing employer, title, start date or end date of a verified work entry, or issuer, title or dates of a verified credential claim, removes the verified mark and notifies EVD. The UI warns before saving. Non-locked fields (description, skills used) may change freely.                                                                                   | Verification must describe what was verified.           | Section update handlers; EVD event                                            | [DER] from SSOT §6.1                                |
+| BR-PRF-012 | Slug: 3–30 chars of `a-z0-9-`, no edge or double hyphen, not all digits, unique case-insensitively, not reserved or offensive; at most 3 changes per rolling 12 months; old slug redirects 90 days then is quarantined 30 days before anyone can claim it.                                                                                                    | Stable links, anti-squatting and impersonation control. | Slug service + unique index                                                   | [SRC: SSOT F-12 slug edge case]; numbers [PROP]     |
+| BR-PRF-013 | Profile images: JPEG, PNG, WebP, ≤ 4 MB (avatar), MIME verified from bytes, malware scanned, EXIF and GPS stripped, re-encoded.                                                                                                                                                                                                                               | Safe media.                                             | Media pipeline                                                                | [SRC: SSOT F-12 step 2]                             |
+| BR-PRF-014 | Resume exports are append-only records; deleting an export soft-deletes the file artifact only. Each export or application creates an automatic version.                                                                                                                                                                                                      | Evidence of what was sent.                              | Export service; storage policy                                                | [SRC: SSOT BR-26]                                   |
+| BR-PRF-015 | Verification marks appear on a resume export only if the owner toggled them on and the underlying item is currently verified at render time.                                                                                                                                                                                                                  | Marks must be true at the moment shown.                 | Resume renderer                                                               | [DER]                                               |
+| BR-PRF-016 | Parsed, imported or AI-suggested content is a draft. It is written to the profile only after explicit user confirmation, and AI may not add skills, employers, dates or credentials the user has not claimed.                                                                                                                                                 | User remains author of claims.                          | Import, parse, tailor flows                                                   | [SRC: SSOT BR-33]                                   |
+| BR-PRF-017 | Uploaded resumes and import files are malware scanned before any parsing; extracted text is encrypted at rest; raw files are deleted after 30 days (resume) or 24 hours (import file) unless the user keeps them as a resume original.                                                                                                                        | Sensitive data handling.                                | Upload pipeline                                                               | [SRC: SSOT BR-043, BR-044]; retention [PROP]        |
+| BR-PRF-018 | A user has at most one default resume; if the default is deleted or archived, the user must pick another or have none.                                                                                                                                                                                                                                        | Predictable apply-time behavior.                        | Resume service                                                                | [DER]                                               |
+| BR-PRF-019 | Limits: 10 active resumes per user, 50 saved versions per resume, 20 active share links.                                                                                                                                                                                                                                                                      | Abuse and cost control. Defaults.                       | Resume service                                                                | [PROP]                                              |
+| BR-PRF-020 | The ATS check is advisory. It never blocks saving, exporting, sharing or applying.                                                                                                                                                                                                                                                                            | Avoid false blocking from heuristics.                   | UI and export service                                                         | [DER]                                               |
+| BR-PRF-021 | Resume share links use random 128-bit tokens stored hashed, expire (default 30 days, max 365), are revocable, `noindex`, and return 410 when expired or revoked.                                                                                                                                                                                              | Safe link sharing.                                      | Share service                                                                 | [PROP]                                              |
+| BR-PRF-022 | Recommendations require an authenticated author; anonymous recommendations are not permitted.                                                                                                                                                                                                                                                                 | Accountability.                                         | Recommendation service                                                        | [DER] from SSOT BR-153                              |
+| BR-PRF-023 | A recommendation is 50–3000 characters, states a relationship, is shown only after the recipient approves, and there is at most one per author-recipient pair (edits are revisions that need re-approval). The owner can hide or delete it but never edit its text.                                                                                           | Authenticity of social proof.                           | Recommendation service                                                        | [PROP]                                              |
+| BR-PRF-024 | An open-to-work signal expires 90 days after it is set unless renewed. Query-time checks treat expired signals as off.                                                                                                                                                                                                                                        | Stale availability misleads recruiters.                 | Settings service; SRC                                                         | [PROP]                                              |
+| BR-PRF-025 | Open-to-work, preferences and discoverability are used by search, matching and outreach only within the consent the user set; changes apply at query time, not only after re-indexing.                                                                                                                                                                        | Consent must be immediate.                              | SRC query filter; AIC and JOB reads                                           | [SRC: SSOT F-92 "consent revocation < 24h"]         |
+| BR-PRF-026 | Salary expectation and work authorization are never public and are shared only at the audience the user chose.                                                                                                                                                                                                                                                | Sensitive employment data.                              | Preferences serializer                                                        | [DER]                                               |
+| BR-PRF-027 | Profile views are attributed to a viewer only if the viewer allows it; private-mode viewers appear as an anonymous category; a user in private mode cannot see their own viewers list.                                                                                                                                                                        | Viewer privacy and reciprocity.                         | View logger and analytics API                                                 | [PROP]                                              |
+| BR-PRF-028 | Profile view events are retained 12 months, then reduced to aggregates; breakdowns are suppressed when fewer than 5 views in the period.                                                                                                                                                                                                                      | Data minimization; re-identification control.           | Retention job; analytics API                                                  | [PROP]; threshold [DEC-REQ] OD-PRF-05               |
+| BR-PRF-029 | Block rules (person, organization, domain) make the profile, its search appearances and its messages unavailable to the blocked party without notifying them. Anonymous links cannot be blocked and the owner is told so.                                                                                                                                     | Personal safety and employer hiding.                    | Viewer check on all surfaces                                                  | [PROP]                                              |
+| BR-PRF-030 | Protected attributes (age, date of birth, gender, marital status, race, religion, disability, photo, native language, military or volunteer affiliation) are never required, never used in ranking or match scoring by PRF, and optional fields default to hidden. Photos are excluded from resume templates by default in regions where it is not customary. | Anti-discrimination by design.                          | Schema; resume defaults; reviews                                              | [DER]                                               |
+| BR-PRF-031 | Pronouns, preferred name and name pronunciation are optional and displayed only if set.                                                                                                                                                                                                                                                                       | Inclusion.                                              | Profile UI                                                                    | [PROP]                                              |
+| BR-PRF-032 | Imports accept only files the user uploads from their own export; the platform does not scrape or log into third-party sites to read a profile.                                                                                                                                                                                                               | Terms-of-service and privacy compliance.                | Import feature scope                                                          | [SRC: SSOT F-65 LinkedIn Decoupling]                |
+| BR-PRF-033 | The owner may hide verified marks but cannot hide a Disputed or Revoked status on an item that is displayed.                                                                                                                                                                                                                                                  | Prevents using hiding to mislead.                       | Mark renderer                                                                 | [DER]                                               |
+| BR-PRF-034 | Moderators and support may view private profile content only inside an open case with a stated reason; every view and every content removal is audit logged; staff cannot edit text, only remove content or restore on owner request.                                                                                                                         | Least privilege.                                        | Admin tools; audit log                                                        | [SRC: SSOT BR-67]                                   |
+| BR-PRF-035 | Portfolio media: images ≤ 10 MB, PDFs ≤ 50 MB, 20 media per project; external embeds only from allowlisted providers and only if the provider allows embedding; alt text is required before a project is published.                                                                                                                                           | Safety and accessibility.                               | Media service; publish validator                                              | [SRC: SSOT F-12 step 7; BR-083..084]; limits [PROP] |
+| BR-PRF-036 | Skills attached to a project or resume create claims, never verified skills; verification comes only from EVD.                                                                                                                                                                                                                                                | Claims are not evidence.                                | Skill link service                                                            | [SRC: SSOT §6.1]                                    |
+| BR-PRF-037 | Spoken language level uses CEFR (A1–C2) plus Native.                                                                                                                                                                                                                                                                                                          | Common, comparable scale.                               | Language validator                                                            | [PROP]                                              |
+| BR-PRF-038 | Public profiles carry `noindex` unless the owner opts into search engine visibility; indexable pages expose only public fields.                                                                                                                                                                                                                               | Control over external discovery.                        | Page headers and structured data                                              | [PROP]                                              |
+| BR-PRF-039 | JSON resume export conforms to JSON Resume schema v1.0.0 plus a namespaced `meta.talentsphere` block.                                                                                                                                                                                                                                                         | Portability.                                            | Export service                                                                | [PROP]                                              |
+| BR-PRF-040 | Profile history keeps up to 30 snapshots for at least 12 months; content removed for moderation or by erasure is redacted from all snapshots.                                                                                                                                                                                                                 | Recovery without retaining removed data.                | Version service; erasure handler                                              | [PROP]                                              |
+| BR-PRF-041 | Accounts flagged under 18 by IDN (planned) can never have public or recruiter-visible sections, cannot be discoverable, and cannot set open-to-work to recruiters.                                                                                                                                                                                            | Child safety.                                           | Visibility service                                                            | [DER]                                               |
+| BR-PRF-042 | A resume template may carry the "ATS-safe" flag only if it passes the template checklist: real text, standard headings, no layout tables, no text in images, embedded fonts, tagged PDF.                                                                                                                                                                      | Truthful labeling.                                      | Template publish gate                                                         | [DER]                                               |
 
 ## 6. State machines
 
 ### SM-PRF-01 — Profile publication
 
-| State | Meaning |
-| --- | --- |
-| `draft` | Created, never published; visible only to owner |
-| `published` | Visible per section settings |
-| `hidden` | Owner temporarily removed it from every surface |
-| `archived` | Owner closed it without deleting data |
+| State       | Meaning                                                   |
+| ----------- | --------------------------------------------------------- |
+| `draft`     | Created, never published; visible only to owner           |
+| `published` | Visible per section settings                              |
+| `hidden`    | Owner temporarily removed it from every surface           |
+| `archived`  | Owner closed it without deleting data                     |
 | `suspended` | Staff action; visible to nobody but the owner as a notice |
-| `erased` | Terminal; created by IDN erasure |
+| `erased`    | Terminal; created by IDN erasure                          |
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `draft` | `published` | Owner presses Publish | Required fields, no safety hold |
-| `published` | `hidden` | Owner presses Hide | none |
-| `hidden` | `published` | Owner presses Publish | no safety hold |
-| `published`/`hidden` | `archived` | Owner archives | none |
-| `archived` | `draft` | Owner reopens | none |
-| any non-terminal | `suspended` | TSF decision | MOD or PAD, reason recorded |
-| `suspended` | previous state | Appeal upheld or hold lifted | TSF decision |
-| any | `erased` | `idn.account.erased` | irreversible |
+| From                 | To             | Trigger                      | Guard                           |
+| -------------------- | -------------- | ---------------------------- | ------------------------------- |
+| `draft`              | `published`    | Owner presses Publish        | Required fields, no safety hold |
+| `published`          | `hidden`       | Owner presses Hide           | none                            |
+| `hidden`             | `published`    | Owner presses Publish        | no safety hold                  |
+| `published`/`hidden` | `archived`     | Owner archives               | none                            |
+| `archived`           | `draft`        | Owner reopens                | none                            |
+| any non-terminal     | `suspended`    | TSF decision                 | MOD or PAD, reason recorded     |
+| `suspended`          | previous state | Appeal upheld or hold lifted | TSF decision                    |
+| any                  | `erased`       | `idn.account.erased`         | irreversible                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1231,14 +1231,14 @@ stateDiagram-v2
 
 States: `active`, `expired`, `revoked`, `locked` (passcode lockout, temporary), `deleted` (parent resume deleted or owner erased). Terminal: `expired`, `revoked`, `deleted`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `active` | Owner creates link | link limit not exceeded |
-| `active` | `expired` | Clock passes expiry | none |
-| `active` | `revoked` | Owner revokes | none |
-| `active` | `locked` | 5 wrong passcodes | per-token lockout 15 min |
-| `locked` | `active` | Lockout time elapsed | none |
-| `active`/`locked` | `deleted` | Resume deleted or owner erased | none |
+| From              | To        | Trigger                        | Guard                    |
+| ----------------- | --------- | ------------------------------ | ------------------------ |
+| `[*]`             | `active`  | Owner creates link             | link limit not exceeded  |
+| `active`          | `expired` | Clock passes expiry            | none                     |
+| `active`          | `revoked` | Owner revokes                  | none                     |
+| `active`          | `locked`  | 5 wrong passcodes              | per-token lockout 15 min |
+| `locked`          | `active`  | Lockout time elapsed           | none                     |
+| `active`/`locked` | `deleted` | Resume deleted or owner erased | none                     |
 
 ```mermaid
 stateDiagram-v2
@@ -1258,19 +1258,19 @@ stateDiagram-v2
 
 States: `queued`, `scanning`, `processing`, `ready_for_review` (parse and import only), `completed`, `failed`, `rejected` (malware or policy), `cancelled`, `applied` (import/parse merged). Terminal: `completed`, `failed`, `rejected`, `cancelled`, `applied`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `queued` | User submits | validation passed |
-| `queued` | `scanning` | Worker claims | uploads only |
-| `scanning` | `rejected` | Scan flags file | none |
-| `scanning` | `processing` | Scan clean | none |
-| `queued` (exports) | `processing` | Worker claims | none |
-| `processing` | `ready_for_review` | Parse or import extraction ok | job is parse/import |
-| `processing` | `completed` | Export file produced | job is export |
-| `processing` | `failed` | Error or timeout after 3 retries | retry count |
-| `ready_for_review` | `applied` | User confirms | profile version check |
-| `ready_for_review` | `cancelled` | User discards or 30 days pass | none |
-| `queued`/`processing` | `cancelled` | User cancels | not yet complete |
+| From                  | To                 | Trigger                          | Guard                 |
+| --------------------- | ------------------ | -------------------------------- | --------------------- |
+| `[*]`                 | `queued`           | User submits                     | validation passed     |
+| `queued`              | `scanning`         | Worker claims                    | uploads only          |
+| `scanning`            | `rejected`         | Scan flags file                  | none                  |
+| `scanning`            | `processing`       | Scan clean                       | none                  |
+| `queued` (exports)    | `processing`       | Worker claims                    | none                  |
+| `processing`          | `ready_for_review` | Parse or import extraction ok    | job is parse/import   |
+| `processing`          | `completed`        | Export file produced             | job is export         |
+| `processing`          | `failed`           | Error or timeout after 3 retries | retry count           |
+| `ready_for_review`    | `applied`          | User confirms                    | profile version check |
+| `ready_for_review`    | `cancelled`        | User discards or 30 days pass    | none                  |
+| `queued`/`processing` | `cancelled`        | User cancels                     | not yet complete      |
 
 ```mermaid
 stateDiagram-v2
@@ -1297,20 +1297,20 @@ stateDiagram-v2
 
 States: `requested`, `declined`, `expired`, `submitted` (awaiting owner), `published`, `hidden`, `withdrawn`, `removed` (moderation or deletion). Terminal: `declined`, `expired`, `withdrawn`, `removed`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `requested` | Owner sends request | recipient not blocked |
-| `requested` | `submitted` | Author submits | authenticated, text valid |
-| `requested` | `declined` | Recipient declines | none |
-| `requested` | `expired` | 30 days pass | none |
-| `[*]` | `submitted` | Unrequested recommendation | owner allows unrequested |
-| `submitted` | `published` | Owner approves | none |
-| `submitted` | `hidden` | Owner keeps hidden | none |
-| `published` | `hidden` | Owner hides | none |
-| `hidden` | `published` | Owner shows | none |
-| `published`/`hidden` | `submitted` | Author revises | none |
-| any active | `withdrawn` | Author withdraws | none |
-| any active | `removed` | Moderator removes, owner deletes, or either account erased | none |
+| From                 | To          | Trigger                                                    | Guard                     |
+| -------------------- | ----------- | ---------------------------------------------------------- | ------------------------- |
+| `[*]`                | `requested` | Owner sends request                                        | recipient not blocked     |
+| `requested`          | `submitted` | Author submits                                             | authenticated, text valid |
+| `requested`          | `declined`  | Recipient declines                                         | none                      |
+| `requested`          | `expired`   | 30 days pass                                               | none                      |
+| `[*]`                | `submitted` | Unrequested recommendation                                 | owner allows unrequested  |
+| `submitted`          | `published` | Owner approves                                             | none                      |
+| `submitted`          | `hidden`    | Owner keeps hidden                                         | none                      |
+| `published`          | `hidden`    | Owner hides                                                | none                      |
+| `hidden`             | `published` | Owner shows                                                | none                      |
+| `published`/`hidden` | `submitted` | Author revises                                             | none                      |
+| any active           | `withdrawn` | Author withdraws                                           | none                      |
+| any active           | `removed`   | Moderator removes, owner deletes, or either account erased | none                      |
 
 ```mermaid
 stateDiagram-v2
@@ -1353,67 +1353,67 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-| --- | --- | --- | --- | --- | --- |
-| SCR-PRF-001 | Profile onboarding wizard | `/welcome/profile` | CAN, STD, INS, MNT | First-run guided setup (FR-PRF-001) | step n of 4, saving, offline, under-age restricted |
-| SCR-PRF-002 | Profile home | `/profile` | own | Overview, completeness ring, suggestions (FR-PRF-012) | empty, partial, complete, suspended notice |
-| SCR-PRF-003 | Profile editor | `/profile/edit` | own | Edit all sections, publish and hide (FR-PRF-002–011, 018) | dirty, saving, conflict 409, error |
-| SCR-PRF-004 | Section editor drawer | `/profile/edit/:section/:id?` | own | Add or edit an entry (FR-PRF-005–011) | create, edit, invalid, verified-field warning |
-| SCR-PRF-005 | Skills editor | `/profile/edit/skills` | own | Typeahead, pins, proficiency (FR-PRF-007) | empty, limit reached, suggest skill |
-| SCR-PRF-006 | Visibility and privacy | `/profile/privacy` | own | Section visibility, preview as, discoverability (FR-PRF-013, 016) | propagating, preview mode |
-| SCR-PRF-007 | Public profile | `/in/:slug` | any | Viewer page (FR-PRF-014) | full, partial, 404, loading section, print |
-| SCR-PRF-008 | Public link settings | `/profile/privacy/link` | own | Slug, QR (FR-PRF-015) | available, taken, limit reached |
-| SCR-PRF-009 | Preview as viewer | `/profile/preview?as=` | own | See what a viewer sees (FR-PRF-013) | public, connection, recruiter |
-| SCR-PRF-010 | Profile history | `/profile/history` | own | Snapshots, compare, restore (FR-PRF-018) | empty, compare, restoring |
-| SCR-PRF-011 | Import profile | `/profile/import` | own | Upload, diff, apply (FR-PRF-019) | uploading, processing, diff, failed |
-| SCR-PRF-012 | Resume library | `/resumes` | own | Resume list and versions (FR-PRF-020) | empty, limit reached, archived filter |
-| SCR-PRF-013 | Resume editor | `/resumes/:id/edit` | own | Builder with live preview (FR-PRF-021) | saving, preview failed, override |
-| SCR-PRF-014 | Template gallery | `/resumes/templates` | own | Pick template (FR-PRF-022) | filtered, retired template |
-| SCR-PRF-015 | Export dialog and history | `/resumes/:id/export` | own | Export and history (FR-PRF-023) | processing, ready, failed |
-| SCR-PRF-016 | Resume upload | `/resumes/import` | own | Upload to parse (FR-PRF-024) | scanning, reading, failed, manual fallback |
-| SCR-PRF-017 | Parse review | `/resumes/import/:jobId` | own | Review and merge (FR-PRF-025) | low-confidence rows, confirm, discarded |
-| SCR-PRF-018 | ATS check panel | `/resumes/:id/ats` | own | Checklist and fixes (FR-PRF-026) | pass, warn, fail, error |
-| SCR-PRF-019 | Tailor for a job | `/resumes/:id/tailor` | own | Coverage and suggestions (FR-PRF-027) | no AI, coverage ready |
-| SCR-PRF-020 | Resume share manager | `/resumes/:id/share` | own | Links, views, revoke (FR-PRF-028) | none, active, locked |
-| SCR-PRF-021 | Hosted resume page | `/r/:token` | any with token | Read-only resume (FR-PRF-028) | passcode, expired (410), loaded |
-| SCR-PRF-022 | Portfolio manager | `/profile/portfolio` | own | Project list, featured (FR-PRF-029) | empty, drafts, limit |
-| SCR-PRF-023 | Project editor | `/profile/portfolio/:id/edit` | own | Project form, media (FR-PRF-029, 030) | draft, publish blocked (alt text), quota |
-| SCR-PRF-024 | Public project page | `/in/:slug/projects/:projectSlug` | any | Project view (FR-PRF-029) | visible, restricted (404), broken link |
-| SCR-PRF-025 | Recommendations manager | `/profile/recommendations` | own | Request, approve, hide (FR-PRF-031) | empty, pending, published |
-| SCR-PRF-026 | Write recommendation | `/recommend/:token` | author | Author form (FR-PRF-031) | sign-in required, draft, submitted, expired |
-| SCR-PRF-027 | Open to work and preferences | `/profile/career` | own | Status and preferences (FR-PRF-033, 034) | not set, active, renewal due |
-| SCR-PRF-028 | Profile views | `/profile/views` | own | Analytics (FR-PRF-035) | no data, low volume, named list |
-| SCR-PRF-029 | Blocked viewers | `/profile/privacy/blocked` | own | Block rules (FR-PRF-017) | empty, rule list, anonymous-link caveat |
-| SCR-PRF-030 | Report dialog and suspension notice | modal and `/profile/notice` | any, own | Report and notice (FR-PRF-036) | submitted, suspended, appeal |
+| ID          | Name                                | Route proposal                    | Roles              | Purpose                                                           | Key states                                         |
+| ----------- | ----------------------------------- | --------------------------------- | ------------------ | ----------------------------------------------------------------- | -------------------------------------------------- |
+| SCR-PRF-001 | Profile onboarding wizard           | `/welcome/profile`                | CAN, STD, INS, MNT | First-run guided setup (FR-PRF-001)                               | step n of 4, saving, offline, under-age restricted |
+| SCR-PRF-002 | Profile home                        | `/profile`                        | own                | Overview, completeness ring, suggestions (FR-PRF-012)             | empty, partial, complete, suspended notice         |
+| SCR-PRF-003 | Profile editor                      | `/profile/edit`                   | own                | Edit all sections, publish and hide (FR-PRF-002–011, 018)         | dirty, saving, conflict 409, error                 |
+| SCR-PRF-004 | Section editor drawer               | `/profile/edit/:section/:id?`     | own                | Add or edit an entry (FR-PRF-005–011)                             | create, edit, invalid, verified-field warning      |
+| SCR-PRF-005 | Skills editor                       | `/profile/edit/skills`            | own                | Typeahead, pins, proficiency (FR-PRF-007)                         | empty, limit reached, suggest skill                |
+| SCR-PRF-006 | Visibility and privacy              | `/profile/privacy`                | own                | Section visibility, preview as, discoverability (FR-PRF-013, 016) | propagating, preview mode                          |
+| SCR-PRF-007 | Public profile                      | `/in/:slug`                       | any                | Viewer page (FR-PRF-014)                                          | full, partial, 404, loading section, print         |
+| SCR-PRF-008 | Public link settings                | `/profile/privacy/link`           | own                | Slug, QR (FR-PRF-015)                                             | available, taken, limit reached                    |
+| SCR-PRF-009 | Preview as viewer                   | `/profile/preview?as=`            | own                | See what a viewer sees (FR-PRF-013)                               | public, connection, recruiter                      |
+| SCR-PRF-010 | Profile history                     | `/profile/history`                | own                | Snapshots, compare, restore (FR-PRF-018)                          | empty, compare, restoring                          |
+| SCR-PRF-011 | Import profile                      | `/profile/import`                 | own                | Upload, diff, apply (FR-PRF-019)                                  | uploading, processing, diff, failed                |
+| SCR-PRF-012 | Resume library                      | `/resumes`                        | own                | Resume list and versions (FR-PRF-020)                             | empty, limit reached, archived filter              |
+| SCR-PRF-013 | Resume editor                       | `/resumes/:id/edit`               | own                | Builder with live preview (FR-PRF-021)                            | saving, preview failed, override                   |
+| SCR-PRF-014 | Template gallery                    | `/resumes/templates`              | own                | Pick template (FR-PRF-022)                                        | filtered, retired template                         |
+| SCR-PRF-015 | Export dialog and history           | `/resumes/:id/export`             | own                | Export and history (FR-PRF-023)                                   | processing, ready, failed                          |
+| SCR-PRF-016 | Resume upload                       | `/resumes/import`                 | own                | Upload to parse (FR-PRF-024)                                      | scanning, reading, failed, manual fallback         |
+| SCR-PRF-017 | Parse review                        | `/resumes/import/:jobId`          | own                | Review and merge (FR-PRF-025)                                     | low-confidence rows, confirm, discarded            |
+| SCR-PRF-018 | ATS check panel                     | `/resumes/:id/ats`                | own                | Checklist and fixes (FR-PRF-026)                                  | pass, warn, fail, error                            |
+| SCR-PRF-019 | Tailor for a job                    | `/resumes/:id/tailor`             | own                | Coverage and suggestions (FR-PRF-027)                             | no AI, coverage ready                              |
+| SCR-PRF-020 | Resume share manager                | `/resumes/:id/share`              | own                | Links, views, revoke (FR-PRF-028)                                 | none, active, locked                               |
+| SCR-PRF-021 | Hosted resume page                  | `/r/:token`                       | any with token     | Read-only resume (FR-PRF-028)                                     | passcode, expired (410), loaded                    |
+| SCR-PRF-022 | Portfolio manager                   | `/profile/portfolio`              | own                | Project list, featured (FR-PRF-029)                               | empty, drafts, limit                               |
+| SCR-PRF-023 | Project editor                      | `/profile/portfolio/:id/edit`     | own                | Project form, media (FR-PRF-029, 030)                             | draft, publish blocked (alt text), quota           |
+| SCR-PRF-024 | Public project page                 | `/in/:slug/projects/:projectSlug` | any                | Project view (FR-PRF-029)                                         | visible, restricted (404), broken link             |
+| SCR-PRF-025 | Recommendations manager             | `/profile/recommendations`        | own                | Request, approve, hide (FR-PRF-031)                               | empty, pending, published                          |
+| SCR-PRF-026 | Write recommendation                | `/recommend/:token`               | author             | Author form (FR-PRF-031)                                          | sign-in required, draft, submitted, expired        |
+| SCR-PRF-027 | Open to work and preferences        | `/profile/career`                 | own                | Status and preferences (FR-PRF-033, 034)                          | not set, active, renewal due                       |
+| SCR-PRF-028 | Profile views                       | `/profile/views`                  | own                | Analytics (FR-PRF-035)                                            | no data, low volume, named list                    |
+| SCR-PRF-029 | Blocked viewers                     | `/profile/privacy/blocked`        | own                | Block rules (FR-PRF-017)                                          | empty, rule list, anonymous-link caveat            |
+| SCR-PRF-030 | Report dialog and suspension notice | modal and `/profile/notice`       | any, own           | Report and notice (FR-PRF-036)                                    | submitted, suspended, appeal                       |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-| --- | --- | --- | --- | --- |
-| ENT-PRF-01 | Profile | id, accountId, state, fullName, preferredName, pronouns, headline, summary, locationId, timezone, avatarAssetId, bannerAssetId, completenessScore, searchEngineVisible, version | 1:1 account; 1:n sections | Account lifetime; erased with account |
-| ENT-PRF-02 | ProfileExperience | id, profileId, title, companyText, organizationId?, employmentType, workMode, start, end?, description, skillIds, order, verificationRef? | n:1 Profile; 0..1 EVD work-history record | Account lifetime |
-| ENT-PRF-03 | ProfileEducation | id, profileId, institutionText, institutionId?, degree, field, startYear, endYear, expected, grade, gradeHidden, verificationRef? | n:1 Profile | Account lifetime |
-| ENT-PRF-04 | ProfileSkill | id, profileId, skillId, proficiency, years, pinned, order, claimRef | n:1 Profile; 1:1 EVD skill claim | Account lifetime |
-| ENT-PRF-05 | ProfileLanguage | id, profileId, languageCode, level, modalities | n:1 Profile | Account lifetime |
-| ENT-PRF-06 | ProfileLink | id, profileId, type, url, label, ownershipVerified, contactAudience | n:1 Profile | Account lifetime |
-| ENT-PRF-07 | ProfileExtraEntry | id, profileId, type, typedFields (json), order, verificationRef? | n:1 Profile | Account lifetime |
-| ENT-PRF-08 | SectionVisibility | profileId, sectionKey, visibility | n:1 Profile | Account lifetime |
-| ENT-PRF-09 | ProfileSlug | slug, profileId, status (current, redirecting, quarantined), changedAt, releasedAt | n:1 Profile | Current for account lifetime; history 120 days |
-| ENT-PRF-10 | ProfileVersion | id, profileId, version, snapshot, changedSections, createdAt | n:1 Profile | 12 months minimum, max 30 |
-| ENT-PRF-11 | Resume | id, ownerId, name, templateVersionId, settings, isDefault, status (active, archived, deleted) | n:1 Profile; 1:n ResumeVersion | Account lifetime; soft delete 30 days |
-| ENT-PRF-12 | ResumeVersion | id, resumeId, number, structure, overrides, createdBy (manual, export, application), createdAt | n:1 Resume | Until resume purge; versions used by applications kept as JOB copies |
-| ENT-PRF-13 | ResumeTemplate | id, version, name, tags, atsSafe, definition, status (active, deprecated) | 1:n ResumeVersion | Permanent while referenced |
-| ENT-PRF-14 | ResumeExport | id, resumeVersionId, format, options, assetId?, status, createdAt, deletedAt? | n:1 ResumeVersion | Row permanent (append-only); file 30 days |
-| ENT-PRF-15 | ResumeShareLink | id, resumeId, tokenHash, expiresAt, options, passcodeHash?, status, viewCount, lastViewedAt | n:1 Resume | 90 days after terminal state |
-| ENT-PRF-16 | PortfolioProject | id, profileId, title, summary, description, role, dates, urls, skillIds, collaborators, visibility, featured, state | n:1 Profile; 1:n PortfolioMedia | Account lifetime |
-| ENT-PRF-17 | PortfolioMedia | id, projectId or profileId, kind, assetId or embedUrl, caption, alt, order | n:1 Project | With project |
-| ENT-PRF-18 | Recommendation | id, recipientProfileId, authorAccountId, relationship, experienceRef?, text, state, requestedAt, submittedAt | n:1 Profile (recipient) | Until withdrawn, removed or either account erased |
-| ENT-PRF-19 | OpenToWorkSetting | profileId, status, audience, titles, timing, expiresAt, discoverability, stealth | 1:1 Profile | Account lifetime |
-| ENT-PRF-20 | CareerPreference | profileId, titles, industries, workModes, locations, relocation, salary, notice, workAuthorization, audiences | 1:1 Profile | Account lifetime; encrypted fields |
-| ENT-PRF-21 | ProfileViewEvent | id, profileId, viewerAccountId?, viewerClass, source, viewedAt | n:1 Profile | 12 months then aggregates |
-| ENT-PRF-22 | ProfileBlockRule | id, profileId, type (person, organization, domain), target, scope | n:1 Profile | Account lifetime |
-| ENT-PRF-23 | ResumeParseJob | id, ownerId, fileHash, status, result, confidence, createdAt | n:1 account | 30 days |
-| ENT-PRF-24 | ProfileImportJob | id, ownerId, source, status, diff, createdAt | n:1 account | 24 h raw file; 30 days metadata |
+| ID         | Name              | Key attributes                                                                                                                                                                  | Relationships                             | Retention class                                                      |
+| ---------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| ENT-PRF-01 | Profile           | id, accountId, state, fullName, preferredName, pronouns, headline, summary, locationId, timezone, avatarAssetId, bannerAssetId, completenessScore, searchEngineVisible, version | 1:1 account; 1:n sections                 | Account lifetime; erased with account                                |
+| ENT-PRF-02 | ProfileExperience | id, profileId, title, companyText, organizationId?, employmentType, workMode, start, end?, description, skillIds, order, verificationRef?                                       | n:1 Profile; 0..1 EVD work-history record | Account lifetime                                                     |
+| ENT-PRF-03 | ProfileEducation  | id, profileId, institutionText, institutionId?, degree, field, startYear, endYear, expected, grade, gradeHidden, verificationRef?                                               | n:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-04 | ProfileSkill      | id, profileId, skillId, proficiency, years, pinned, order, claimRef                                                                                                             | n:1 Profile; 1:1 EVD skill claim          | Account lifetime                                                     |
+| ENT-PRF-05 | ProfileLanguage   | id, profileId, languageCode, level, modalities                                                                                                                                  | n:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-06 | ProfileLink       | id, profileId, type, url, label, ownershipVerified, contactAudience                                                                                                             | n:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-07 | ProfileExtraEntry | id, profileId, type, typedFields (json), order, verificationRef?                                                                                                                | n:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-08 | SectionVisibility | profileId, sectionKey, visibility                                                                                                                                               | n:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-09 | ProfileSlug       | slug, profileId, status (current, redirecting, quarantined), changedAt, releasedAt                                                                                              | n:1 Profile                               | Current for account lifetime; history 120 days                       |
+| ENT-PRF-10 | ProfileVersion    | id, profileId, version, snapshot, changedSections, createdAt                                                                                                                    | n:1 Profile                               | 12 months minimum, max 30                                            |
+| ENT-PRF-11 | Resume            | id, ownerId, name, templateVersionId, settings, isDefault, status (active, archived, deleted)                                                                                   | n:1 Profile; 1:n ResumeVersion            | Account lifetime; soft delete 30 days                                |
+| ENT-PRF-12 | ResumeVersion     | id, resumeId, number, structure, overrides, createdBy (manual, export, application), createdAt                                                                                  | n:1 Resume                                | Until resume purge; versions used by applications kept as JOB copies |
+| ENT-PRF-13 | ResumeTemplate    | id, version, name, tags, atsSafe, definition, status (active, deprecated)                                                                                                       | 1:n ResumeVersion                         | Permanent while referenced                                           |
+| ENT-PRF-14 | ResumeExport      | id, resumeVersionId, format, options, assetId?, status, createdAt, deletedAt?                                                                                                   | n:1 ResumeVersion                         | Row permanent (append-only); file 30 days                            |
+| ENT-PRF-15 | ResumeShareLink   | id, resumeId, tokenHash, expiresAt, options, passcodeHash?, status, viewCount, lastViewedAt                                                                                     | n:1 Resume                                | 90 days after terminal state                                         |
+| ENT-PRF-16 | PortfolioProject  | id, profileId, title, summary, description, role, dates, urls, skillIds, collaborators, visibility, featured, state                                                             | n:1 Profile; 1:n PortfolioMedia           | Account lifetime                                                     |
+| ENT-PRF-17 | PortfolioMedia    | id, projectId or profileId, kind, assetId or embedUrl, caption, alt, order                                                                                                      | n:1 Project                               | With project                                                         |
+| ENT-PRF-18 | Recommendation    | id, recipientProfileId, authorAccountId, relationship, experienceRef?, text, state, requestedAt, submittedAt                                                                    | n:1 Profile (recipient)                   | Until withdrawn, removed or either account erased                    |
+| ENT-PRF-19 | OpenToWorkSetting | profileId, status, audience, titles, timing, expiresAt, discoverability, stealth                                                                                                | 1:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-20 | CareerPreference  | profileId, titles, industries, workModes, locations, relocation, salary, notice, workAuthorization, audiences                                                                   | 1:1 Profile                               | Account lifetime; encrypted fields                                   |
+| ENT-PRF-21 | ProfileViewEvent  | id, profileId, viewerAccountId?, viewerClass, source, viewedAt                                                                                                                  | n:1 Profile                               | 12 months then aggregates                                            |
+| ENT-PRF-22 | ProfileBlockRule  | id, profileId, type (person, organization, domain), target, scope                                                                                                               | n:1 Profile                               | Account lifetime                                                     |
+| ENT-PRF-23 | ResumeParseJob    | id, ownerId, fileHash, status, result, confidence, createdAt                                                                                                                    | n:1 account                               | 30 days                                                              |
+| ENT-PRF-24 | ProfileImportJob  | id, ownerId, source, status, diff, createdAt                                                                                                                                    | n:1 account                               | 24 h raw file; 30 days metadata                                      |
 
 ```mermaid
 erDiagram
@@ -1439,35 +1439,35 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-| --- | --- | --- | --- | --- |
-| EVT-PRF-001 | `prf.profile.created` | Profile created | profileId, accountId | ANL, SRC |
-| EVT-PRF-002 | `prf.profile.updated` | Any section write | profileId, sections[], version | SRC, EVD, BGV, AIC |
-| EVT-PRF-003 | `prf.profile.published` | draft or hidden to published | profileId | SRC, NTF |
-| EVT-PRF-004 | `prf.profile.hidden` | published to hidden or archived | profileId | SRC, JOB |
-| EVT-PRF-005 | `prf.profile.restored` | History restore | profileId, snapshotId | SRC |
-| EVT-PRF-006 | `prf.slug.changed` | Slug saved | profileId, oldSlug, newSlug | SRC, ANL |
-| EVT-PRF-007 | `prf.completeness.changed` | Integer score change or 70 threshold crossed | profileId, score, crossed70 | JOB, NTF, ANL |
-| EVT-PRF-008 | `prf.section.visibility_changed` | Visibility edit | profileId, section, from, to | SRC |
-| EVT-PRF-009 | `prf.discoverability.changed` | Discoverability or stealth change | profileId, discoverability, stealth | SRC |
-| EVT-PRF-010 | `prf.workentry.locked_field_changed` | Verified work or credential claim edited | profileId, entryId | EVD |
-| EVT-PRF-011 | `prf.resume.created` | Resume created | resumeId, source | ANL |
-| EVT-PRF-012 | `prf.resume.exported` | Export completed | resumeId, format | ANL |
-| EVT-PRF-013 | `prf.resume.parsed` | Parse job ready_for_review | jobId, confidence | NTF |
-| EVT-PRF-014 | `prf.resume.imported` | Parse confirmed | jobId, createdItems | ANL, EVD |
-| EVT-PRF-015 | `prf.resume.share_created` | Link created | resumeId, expiry | ANL |
-| EVT-PRF-016 | `prf.resume.share_viewed` | Link opened | linkId, country | NTF (opt-in) |
-| EVT-PRF-017 | `prf.resume.share_revoked` | Link revoked | linkId | ANL |
-| EVT-PRF-018 | `prf.project.published` | Project published | projectId, skillIds | SRC, EVD |
-| EVT-PRF-019 | `prf.project.removed` | Project deleted or removed | projectId | SRC, EVD |
-| EVT-PRF-020 | `prf.recommendation.requested` | Owner sends request | recommendationId | NTF |
-| EVT-PRF-021 | `prf.recommendation.submitted` | Author submits | recommendationId | NTF |
-| EVT-PRF-022 | `prf.recommendation.published` | Owner approves | recommendationId | SRC, EVD |
-| EVT-PRF-023 | `prf.recommendation.withdrawn` | Author withdraws | recommendationId | SRC |
-| EVT-PRF-024 | `prf.opentowork.changed` | Status set, renewed, expired | profileId, status | SRC, AIC |
-| EVT-PRF-025 | `prf.preferences.updated` | Preferences saved | profileId, fieldsChanged | AIC, JOB |
-| EVT-PRF-026 | `prf.profile.viewed` | View recorded | profileId, viewerClass, source | ANL, NTF |
-| EVT-PRF-027 | `prf.import.completed` | Import applied | jobId, counts | ANL |
+| ID          | Event                                | Trigger                                      | Key payload                         | Consumers          |
+| ----------- | ------------------------------------ | -------------------------------------------- | ----------------------------------- | ------------------ |
+| EVT-PRF-001 | `prf.profile.created`                | Profile created                              | profileId, accountId                | ANL, SRC           |
+| EVT-PRF-002 | `prf.profile.updated`                | Any section write                            | profileId, sections[], version      | SRC, EVD, BGV, AIC |
+| EVT-PRF-003 | `prf.profile.published`              | draft or hidden to published                 | profileId                           | SRC, NTF           |
+| EVT-PRF-004 | `prf.profile.hidden`                 | published to hidden or archived              | profileId                           | SRC, JOB           |
+| EVT-PRF-005 | `prf.profile.restored`               | History restore                              | profileId, snapshotId               | SRC                |
+| EVT-PRF-006 | `prf.slug.changed`                   | Slug saved                                   | profileId, oldSlug, newSlug         | SRC, ANL           |
+| EVT-PRF-007 | `prf.completeness.changed`           | Integer score change or 70 threshold crossed | profileId, score, crossed70         | JOB, NTF, ANL      |
+| EVT-PRF-008 | `prf.section.visibility_changed`     | Visibility edit                              | profileId, section, from, to        | SRC                |
+| EVT-PRF-009 | `prf.discoverability.changed`        | Discoverability or stealth change            | profileId, discoverability, stealth | SRC                |
+| EVT-PRF-010 | `prf.workentry.locked_field_changed` | Verified work or credential claim edited     | profileId, entryId                  | EVD                |
+| EVT-PRF-011 | `prf.resume.created`                 | Resume created                               | resumeId, source                    | ANL                |
+| EVT-PRF-012 | `prf.resume.exported`                | Export completed                             | resumeId, format                    | ANL                |
+| EVT-PRF-013 | `prf.resume.parsed`                  | Parse job ready_for_review                   | jobId, confidence                   | NTF                |
+| EVT-PRF-014 | `prf.resume.imported`                | Parse confirmed                              | jobId, createdItems                 | ANL, EVD           |
+| EVT-PRF-015 | `prf.resume.share_created`           | Link created                                 | resumeId, expiry                    | ANL                |
+| EVT-PRF-016 | `prf.resume.share_viewed`            | Link opened                                  | linkId, country                     | NTF (opt-in)       |
+| EVT-PRF-017 | `prf.resume.share_revoked`           | Link revoked                                 | linkId                              | ANL                |
+| EVT-PRF-018 | `prf.project.published`              | Project published                            | projectId, skillIds                 | SRC, EVD           |
+| EVT-PRF-019 | `prf.project.removed`                | Project deleted or removed                   | projectId                           | SRC, EVD           |
+| EVT-PRF-020 | `prf.recommendation.requested`       | Owner sends request                          | recommendationId                    | NTF                |
+| EVT-PRF-021 | `prf.recommendation.submitted`       | Author submits                               | recommendationId                    | NTF                |
+| EVT-PRF-022 | `prf.recommendation.published`       | Owner approves                               | recommendationId                    | SRC, EVD           |
+| EVT-PRF-023 | `prf.recommendation.withdrawn`       | Author withdraws                             | recommendationId                    | SRC                |
+| EVT-PRF-024 | `prf.opentowork.changed`             | Status set, renewed, expired                 | profileId, status                   | SRC, AIC           |
+| EVT-PRF-025 | `prf.preferences.updated`            | Preferences saved                            | profileId, fieldsChanged            | AIC, JOB           |
+| EVT-PRF-026 | `prf.profile.viewed`                 | View recorded                                | profileId, viewerClass, source      | ANL, NTF           |
+| EVT-PRF-027 | `prf.import.completed`               | Import applied                               | jobId, counts                       | ANL                |
 
 ### 9.2 Consumed (owned by others, names planned)
 
@@ -1475,96 +1475,96 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-| --- | --- | --- |
-| Media and file service (PLT, planned) | Upload, malware scan, EXIF strip, thumbnails | Required for avatar, portfolio, resume upload |
-| Document renderer (PDF, DOCX) | Resume export | Self-hosted rendering worker; deterministic output |
-| Resume parser adapter | Text extraction and structuring | Adapter interface so a vendor or in-house model can be swapped; OCR fallback |
-| AI gateway (AIC, planned) | Summary suggestions, tailoring, parsing assist | Optional; respects user opt-out and region |
-| Place and organization lookup | Location typeahead; organization matching | Provider-independent adapter |
-| Email and notification service (NTF, planned) | Requests, reminders | Opt-out classes defined per feature |
-| URL safety service (PLT, planned) | Link blocklist and re-check | Used for links and demo URLs |
-| Moderation tooling (TSF, planned) | Content and image checks, reports | Holds and suspensions |
+| Dependency                                    | Purpose                                        | Notes                                                                        |
+| --------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------- |
+| Media and file service (PLT, planned)         | Upload, malware scan, EXIF strip, thumbnails   | Required for avatar, portfolio, resume upload                                |
+| Document renderer (PDF, DOCX)                 | Resume export                                  | Self-hosted rendering worker; deterministic output                           |
+| Resume parser adapter                         | Text extraction and structuring                | Adapter interface so a vendor or in-house model can be swapped; OCR fallback |
+| AI gateway (AIC, planned)                     | Summary suggestions, tailoring, parsing assist | Optional; respects user opt-out and region                                   |
+| Place and organization lookup                 | Location typeahead; organization matching      | Provider-independent adapter                                                 |
+| Email and notification service (NTF, planned) | Requests, reminders                            | Opt-out classes defined per feature                                          |
+| URL safety service (PLT, planned)             | Link blocklist and re-check                    | Used for links and demo URLs                                                 |
+| Moderation tooling (TSF, planned)             | Content and image checks, reports              | Holds and suspensions                                                        |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why |
-| --- | --- |
-| IDN (planned) | Account, age flag, email verification, erasure events |
+| Depends on    | Why                                                                          |
+| ------------- | ---------------------------------------------------------------------------- |
+| IDN (planned) | Account, age flag, email verification, erasure events                        |
 | SET (planned) | Privacy preferences (private viewing mode, AI opt-out), data export, erasure |
-| PLT (planned) | Media pipeline, public API for profile reads |
-| SRC | Skill taxonomy, search indexing of profiles, permission filter |
-| EVD | Verification marks, skill claims, review of projects, credentials |
-| BGV | Identity-verified mark (opt-in) |
-| TSF (planned) | Reports, holds, suspension |
-| AIC (planned) | AI drafts and parsing assist |
-| NTF (planned) | Delivery of notifications |
+| PLT (planned) | Media pipeline, public API for profile reads                                 |
+| SRC           | Skill taxonomy, search indexing of profiles, permission filter               |
+| EVD           | Verification marks, skill claims, review of projects, credentials            |
+| BGV           | Identity-verified mark (opt-in)                                              |
+| TSF (planned) | Reports, holds, suspension                                                   |
+| AIC (planned) | AI drafts and parsing assist                                                 |
+| NTF (planned) | Delivery of notifications                                                    |
 
-| Depended on by | Uses |
-| --- | --- |
-| JOB (planned) | Completeness score; resume snapshot at application; preferences |
-| ATS (planned) | Candidate profile and resume views |
-| SRC | Profile content, discoverability and block rules for indexing and filtering |
-| AIC (planned) | Preferences, skills, experience for matching |
-| EVD | Claims to verify (experience, education, certifications, skills, projects) |
-| NET, MSG (planned) | Public profile, block rules |
-| INS (planned) | Student profiles and institution affiliation display |
+| Depended on by     | Uses                                                                        |
+| ------------------ | --------------------------------------------------------------------------- |
+| JOB (planned)      | Completeness score; resume snapshot at application; preferences             |
+| ATS (planned)      | Candidate profile and resume views                                          |
+| SRC                | Profile content, discoverability and block rules for indexing and filtering |
+| AIC (planned)      | Preferences, skills, experience for matching                                |
+| EVD                | Claims to verify (experience, education, certifications, skills, projects)  |
+| NET, MSG (planned) | Public profile, block rules                                                 |
+| INS (planned)      | Student profiles and institution affiliation display                        |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-| --- | --- | --- | --- |
-| Profile activation rate | Share of new verified accounts reaching completeness ≥ 70 within 7 days | accounts with score ≥ 70 by day 7 / new verified accounts | PAD (product analytics) |
-| Median completeness | Median score of active profiles | median(score) | PAD |
-| Publish rate | Share of profiles in `published` | published / non-erased | PAD |
-| Resume export success rate | Exports completed without failure | completed / (completed + failed) | PAD |
-| Parse acceptance rate | Parse jobs where the user confirmed ≥ 80% of items | confirmed jobs / ready_for_review jobs | PAD |
-| Parse correction rate | Fields edited during review | edited fields / total fields | PAD |
-| ATS checks passed before export | Share of exports where all ATS checks pass | passed / exports | PAD |
-| Visibility enforcement defects | Confirmed leaks of non-visible data | count per quarter (target 0) | SAD |
-| Recommendation conversion | Requests that become published recommendations | published / requested | PAD |
-| Stale open-to-work | Active signals older than 90 days (must be 0 in queries) | count | PAD |
-| Slug conflict rate | Slug saves rejected as taken | rejected / attempts | PAD |
+| Metric                          | Definition                                                              | Formula                                                   | Owner role              |
+| ------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------- |
+| Profile activation rate         | Share of new verified accounts reaching completeness ≥ 70 within 7 days | accounts with score ≥ 70 by day 7 / new verified accounts | PAD (product analytics) |
+| Median completeness             | Median score of active profiles                                         | median(score)                                             | PAD                     |
+| Publish rate                    | Share of profiles in `published`                                        | published / non-erased                                    | PAD                     |
+| Resume export success rate      | Exports completed without failure                                       | completed / (completed + failed)                          | PAD                     |
+| Parse acceptance rate           | Parse jobs where the user confirmed ≥ 80% of items                      | confirmed jobs / ready_for_review jobs                    | PAD                     |
+| Parse correction rate           | Fields edited during review                                             | edited fields / total fields                              | PAD                     |
+| ATS checks passed before export | Share of exports where all ATS checks pass                              | passed / exports                                          | PAD                     |
+| Visibility enforcement defects  | Confirmed leaks of non-visible data                                     | count per quarter (target 0)                              | SAD                     |
+| Recommendation conversion       | Requests that become published recommendations                          | published / requested                                     | PAD                     |
+| Stale open-to-work              | Active signals older than 90 days (must be 0 in queries)                | count                                                     | PAD                     |
+| Slug conflict rate              | Slug saves rejected as taken                                            | rejected / attempts                                       | PAD                     |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocks |
-| --- | --- | --- | --- | --- | --- |
-| OD-PRF-01 | Should public profiles be indexable by search engines by default? | Off by default; on by default; user chooses at onboarding | Off by default (`noindex`), user opts in | Product owner + legal | FR-PRF-014, BR-PRF-038 |
-| OD-PRF-02 | Are DOCX export and OCR in the first release? | Both; PDF/JSON only; PDF/DOCX only | PDF and JSON first, DOCX and OCR after | Product owner | FR-PRF-023, FR-PRF-024 |
-| OD-PRF-03 | How long are open-to-work signals valid before renewal? | 30, 90, 180 days | 90 days | Product owner | FR-PRF-033, BR-PRF-024 |
-| OD-PRF-04 | Which profile view analytics are free versus paid? | Counts free, names paid; all free; all paid | Counts free, named viewers gated by plan (BIL) | Product owner + finance | FR-PRF-035 |
-| OD-PRF-05 | Minimum number of views before showing a breakdown? | 3, 5, 10 | 5 | Privacy officer | BR-PRF-028 |
-| OD-PRF-06 | Should user photos be allowed at all in resumes and recruiter views? | Allowed everywhere; hidden from recruiter views until interview; allowed by user choice | User choice, hidden in recruiter list views by default | Legal + product owner | BR-PRF-030, FR-PRF-004, FR-PRF-021 |
-| OD-PRF-07 | Does the extension of profile to organizations/companies belong here? | Company pages in EMP only; shared | EMP owns company pages; PRF is people only | Product owner | module boundary |
-| OD-PRF-08 | Is a profile video introduction in scope? | Yes (short clip); no | Defer; revisit after moderation capacity is known | Product owner | FR-PRF-030 |
-| OD-PRF-09 | Are non-English profiles (multiple language versions of one profile) supported? | Single language; multi-language profile | Single language at launch; multi-language later [PROP] | Product owner | FR-PRF-003, FR-PRF-021 |
-| OD-PRF-10 | Conflict with SSOT §4.2 non-goal "social clone": do recommendations, profile views and public open-to-work frame stay within the career-OS scope? | Keep narrowly (as specified); drop recommendations and frames | Keep as specified; no feed or follower features in PRF | Product owner | FR-PRF-031, FR-PRF-033, FR-PRF-035 |
+| ID        | Question                                                                                                                                          | Options                                                                                 | Default proposal                                       | Who decides             | Blocks                             |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------- | ---------------------------------- |
+| OD-PRF-01 | Should public profiles be indexable by search engines by default?                                                                                 | Off by default; on by default; user chooses at onboarding                               | Off by default (`noindex`), user opts in               | Product owner + legal   | FR-PRF-014, BR-PRF-038             |
+| OD-PRF-02 | Are DOCX export and OCR in the first release?                                                                                                     | Both; PDF/JSON only; PDF/DOCX only                                                      | PDF and JSON first, DOCX and OCR after                 | Product owner           | FR-PRF-023, FR-PRF-024             |
+| OD-PRF-03 | How long are open-to-work signals valid before renewal?                                                                                           | 30, 90, 180 days                                                                        | 90 days                                                | Product owner           | FR-PRF-033, BR-PRF-024             |
+| OD-PRF-04 | Which profile view analytics are free versus paid?                                                                                                | Counts free, names paid; all free; all paid                                             | Counts free, named viewers gated by plan (BIL)         | Product owner + finance | FR-PRF-035                         |
+| OD-PRF-05 | Minimum number of views before showing a breakdown?                                                                                               | 3, 5, 10                                                                                | 5                                                      | Privacy officer         | BR-PRF-028                         |
+| OD-PRF-06 | Should user photos be allowed at all in resumes and recruiter views?                                                                              | Allowed everywhere; hidden from recruiter views until interview; allowed by user choice | User choice, hidden in recruiter list views by default | Legal + product owner   | BR-PRF-030, FR-PRF-004, FR-PRF-021 |
+| OD-PRF-07 | Does the extension of profile to organizations/companies belong here?                                                                             | Company pages in EMP only; shared                                                       | EMP owns company pages; PRF is people only             | Product owner           | module boundary                    |
+| OD-PRF-08 | Is a profile video introduction in scope?                                                                                                         | Yes (short clip); no                                                                    | Defer; revisit after moderation capacity is known      | Product owner           | FR-PRF-030                         |
+| OD-PRF-09 | Are non-English profiles (multiple language versions of one profile) supported?                                                                   | Single language; multi-language profile                                                 | Single language at launch; multi-language later [PROP] | Product owner           | FR-PRF-003, FR-PRF-021             |
+| OD-PRF-10 | Conflict with SSOT §4.2 non-goal "social clone": do recommendations, profile views and public open-to-work frame stay within the career-OS scope? | Keep narrowly (as specified); drop recommendations and frames                           | Keep as specified; no feed or follower features in PRF | Product owner           | FR-PRF-031, FR-PRF-033, FR-PRF-035 |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-| --- | --- | --- | --- |
-| RSK-PRF-01 | A visibility check is missed on one surface (search snippet, export, API) and exposes private data | Privacy breach | Single `visibleSections` function; contract tests across surfaces; query-time checks; leak scanning |
-| RSK-PRF-02 | Resume parsing quality is low for some formats and languages | User frustration, wrong data | Review step mandatory; confidence chips; manual fallback; measure correction rate |
-| RSK-PRF-03 | Employers learn a candidate is job hunting through a side channel | Harm to candidate | Domain and org blocks; query-time enforcement; anonymous-link caveat; no analytics at individual level |
-| RSK-PRF-04 | Impersonation profiles and fake experience claims | Trust erosion | Safety checks, slug controls, EVD verification, TSF reports |
-| RSK-PRF-05 | ATS checker over-promises compatibility | Rejected resumes, blame | Advisory language; documented limitations; no guarantees |
-| RSK-PRF-06 | Photo and personal fields enable discrimination | Legal exposure | BR-PRF-030; defaults; fairness controls in SRC |
-| RSK-PRF-07 | Vendor lock-in on parser or renderer | Cost and quality risk | Adapter interfaces; deterministic tests |
-| RSK-PRF-08 | Slug squatting and brand impersonation | Trust, support load | Reserved list, change limits, quarantine, TSF override |
+| ID         | Risk                                                                                               | Impact                       | Mitigation                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
+| RSK-PRF-01 | A visibility check is missed on one surface (search snippet, export, API) and exposes private data | Privacy breach               | Single `visibleSections` function; contract tests across surfaces; query-time checks; leak scanning    |
+| RSK-PRF-02 | Resume parsing quality is low for some formats and languages                                       | User frustration, wrong data | Review step mandatory; confidence chips; manual fallback; measure correction rate                      |
+| RSK-PRF-03 | Employers learn a candidate is job hunting through a side channel                                  | Harm to candidate            | Domain and org blocks; query-time enforcement; anonymous-link caveat; no analytics at individual level |
+| RSK-PRF-04 | Impersonation profiles and fake experience claims                                                  | Trust erosion                | Safety checks, slug controls, EVD verification, TSF reports                                            |
+| RSK-PRF-05 | ATS checker over-promises compatibility                                                            | Rejected resumes, blame      | Advisory language; documented limitations; no guarantees                                               |
+| RSK-PRF-06 | Photo and personal fields enable discrimination                                                    | Legal exposure               | BR-PRF-030; defaults; fairness controls in SRC                                                         |
+| RSK-PRF-07 | Vendor lock-in on parser or renderer                                                               | Cost and quality risk        | Adapter interfaces; deterministic tests                                                                |
+| RSK-PRF-08 | Slug squatting and brand impersonation                                                             | Trust, support load          | Reserved list, change limits, quarantine, TSF override                                                 |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-| --- | --- | --- |
-| `SSOT.md` F-12 Profile Management | Sections, completeness weights, visibility levels, public view, slug, concurrency, state machine | `phone_number` and `tax_id` fields: `tax_id` not kept in PRF (belongs to payouts, BIL planned); data residency set at signup moved to IDN/SET; PROFILE-001..035 detail rules were not found in the registries and are re-derived here |
-| `SSOT.md` F-13 and F-112 | Resume builder, templates, parsing, ATS | Legacy had only one-line spec; multi-resume, share links, versions, DOCX and JSON added as [PROP] |
-| `SSOT.md` F-26 Portfolio Showcase, F-143 | Portfolio structure | Contribution verification moved to EVD |
-| `SSOT.md` F-60 Profile Views, F-61 Premium Candidate Tier | Profile views | Premium gating left as OD-PRF-04 |
-| `SSOT.md` F-64, F-65 LinkedIn migration and decoupling | Import via user-supplied exports only | Scraping and live sync excluded (BR-PRF-032) |
-| `SSOT.md` F-92 (stealth mode, opt-in) | Discoverability and open-to-work | Search side moved to SRC |
-| `SSOT.md` F-94, F-110 | Recommendation concepts | Structured references and endorsements moved to EVD and BGV |
-| `SSOT.md` BR-26, BR-33, BR-043, BR-044, BR-083..090 | Export rules, AI drafts, resume scanning, media rules | Reused as BR-PRF-014, 016, 017, 035 |
-| `docs/registries/FEATURE_REGISTRY.md` | Feature ids F-12, F-13, F-26, F-60, F-64, F-80, F-112 | F-80 "Profile Enhancements" has no detailed spec; absorbed into FR-PRF-002, 008, 011, 034 [DER] |
-| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md` | Not used (status only) | Not copied |
+| Legacy source                                             | Used for                                                                                         | Dropped or changed                                                                                                                                                                                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` F-12 Profile Management                         | Sections, completeness weights, visibility levels, public view, slug, concurrency, state machine | `phone_number` and `tax_id` fields: `tax_id` not kept in PRF (belongs to payouts, BIL planned); data residency set at signup moved to IDN/SET; PROFILE-001..035 detail rules were not found in the registries and are re-derived here |
+| `SSOT.md` F-13 and F-112                                  | Resume builder, templates, parsing, ATS                                                          | Legacy had only one-line spec; multi-resume, share links, versions, DOCX and JSON added as [PROP]                                                                                                                                     |
+| `SSOT.md` F-26 Portfolio Showcase, F-143                  | Portfolio structure                                                                              | Contribution verification moved to EVD                                                                                                                                                                                                |
+| `SSOT.md` F-60 Profile Views, F-61 Premium Candidate Tier | Profile views                                                                                    | Premium gating left as OD-PRF-04                                                                                                                                                                                                      |
+| `SSOT.md` F-64, F-65 LinkedIn migration and decoupling    | Import via user-supplied exports only                                                            | Scraping and live sync excluded (BR-PRF-032)                                                                                                                                                                                          |
+| `SSOT.md` F-92 (stealth mode, opt-in)                     | Discoverability and open-to-work                                                                 | Search side moved to SRC                                                                                                                                                                                                              |
+| `SSOT.md` F-94, F-110                                     | Recommendation concepts                                                                          | Structured references and endorsements moved to EVD and BGV                                                                                                                                                                           |
+| `SSOT.md` BR-26, BR-33, BR-043, BR-044, BR-083..090       | Export rules, AI drafts, resume scanning, media rules                                            | Reused as BR-PRF-014, 016, 017, 035                                                                                                                                                                                                   |
+| `docs/registries/FEATURE_REGISTRY.md`                     | Feature ids F-12, F-13, F-26, F-60, F-64, F-80, F-112                                            | F-80 "Profile Enhancements" has no detailed spec; absorbed into FR-PRF-002, 008, 011, 034 [DER]                                                                                                                                       |
+| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md`         | Not used (status only)                                                                           | Not copied                                                                                                                                                                                                                            |

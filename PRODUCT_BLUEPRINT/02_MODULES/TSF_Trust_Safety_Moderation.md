@@ -23,19 +23,19 @@ Reporting flows for every content type; report taxonomy and triage; policy catal
 
 ### 1.4 Out of scope (owned elsewhere)
 
-| Capability | Owner |
-|---|---|
-| Account authentication, session revocation primitives, age claims | IDN (planned) |
-| Identity and background verification vendors | BGV (planned) |
-| Credential issuance and evidence model | EVD (planned) |
-| Employer verification workflow (know your business customer) | EMP (planned) |
-| Support tickets, refunds, admin console frame | ADM (planned) |
-| Assessment integrity engine and exam proctoring signals | ASM (planned) |
-| Feed ranking changes beyond reach limitation | NET (`FR-NET-036`) |
-| Message delivery and storage | MSG |
-| AI classifier governance (registry, evaluation, bias audit) | AIC (`FR-AIC-024`, `FR-AIC-032`) |
-| Notification delivery | NTF (planned) |
-| Data subject rights orchestration | SET (planned) |
+| Capability                                                        | Owner                            |
+| ----------------------------------------------------------------- | -------------------------------- |
+| Account authentication, session revocation primitives, age claims | IDN (planned)                    |
+| Identity and background verification vendors                      | BGV (planned)                    |
+| Credential issuance and evidence model                            | EVD (planned)                    |
+| Employer verification workflow (know your business customer)      | EMP (planned)                    |
+| Support tickets, refunds, admin console frame                     | ADM (planned)                    |
+| Assessment integrity engine and exam proctoring signals           | ASM (planned)                    |
+| Feed ranking changes beyond reach limitation                      | NET (`FR-NET-036`)               |
+| Message delivery and storage                                      | MSG                              |
+| AI classifier governance (registry, evaluation, bias audit)       | AIC (`FR-AIC-024`, `FR-AIC-032`) |
+| Notification delivery                                             | NTF (planned)                    |
+| Data subject rights orchestration                                 | SET (planned)                    |
 
 ### 1.5 Boundaries and the non-goal "social-media clone"
 
@@ -47,12 +47,12 @@ Owned: reports, cases, decisions, policies, enforcement actions, sanctions, stat
 
 ### 1.7 Permission tiers inside role MOD [PROP]
 
-| Tier | Abilities |
-|---|---|
-| MOD-1 Reviewer | Review assigned cases, apply content actions up to Remove, issue warnings, request second review |
+| Tier                  | Abilities                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| MOD-1 Reviewer        | Review assigned cases, apply content actions up to Remove, issue warnings, request second review                          |
 | MOD-2 Senior reviewer | Everything in MOD-1, review appeals of MOD-1 decisions, apply temporary suspensions up to 30 days, act as second reviewer |
-| MOD-3 Lead | Everything in MOD-2, propose permanent bans, approve macros, manage queues, calibration, trusted flaggers |
-| MOD-S Specialist | Minors safety, legal, fraud investigations (restricted queues with extra training) |
+| MOD-3 Lead            | Everything in MOD-2, propose permanent bans, approve macros, manage queues, calibration, trusted flaggers                 |
+| MOD-S Specialist      | Minors safety, legal, fraud investigations (restricted queues with extra training)                                        |
 
 Permanent bans and verified-employer removals need two humans at MOD-2 or above who are different people from the original reviewer (`BR-TSF-011`).
 
@@ -60,35 +60,35 @@ Permanent bans and verified-employer removals need two humans at MOD-2 or above 
 
 Legend: Y allowed, O own objects only, S scoped by tier or queue, R by rule, N not allowed.
 
-| Capability | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD | SAD |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Submit a report | R | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| View status of own reports | N | O | O | O | O | O | O | O | O | O | O | O | O | O |
-| View notices and statements of reasons about own content or account | N | O | O | O | O | O | O | O | O | O | O | O | O | O |
-| Appeal a decision | N | O | O | O | O | O | O | O | O | O | N | N | N | N |
-| Review cases and apply content actions | N | N | N | N | N | N | N | N | N | N | S | N | N | N |
-| Apply account sanctions | N | N | N | N | N | N | N | N | N | N | S | N | N | R |
-| Apply permanent ban (two humans) | N | N | N | N | N | N | N | N | N | N | S | N | R | R |
-| Read private content beyond a report's scope | N | N | N | N | N | N | N | N | N | N | N | N | N | R |
-| Manage policies and enforcement matrix | N | N | N | N | N | N | N | N | N | N | N | N | Y | Y |
-| Handle legal requests | N | N | N | N | N | N | N | N | N | N | N | N | R | Y |
-| Configure detection thresholds | N | N | N | N | N | N | N | N | N | N | N | N | Y | Y |
-| View transparency data | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Act as institution safety contact (receive escalations for own cohort) | N | N | N | N | N | N | N | N | S | S | N | N | N | N |
-| Act as employer trust contact (respond to fraud inquiries for own org) | N | N | N | N | N | N | N | S | N | N | N | N | N | N |
-| View moderator wellbeing aggregates | N | N | N | N | N | N | N | N | N | N | S | N | Y | Y |
+| Capability                                                             | GUE | CAN | STD | INS | MNT | REC | HMG | EAD | IAD | PLO | MOD | SUP | PAD | SAD |
+| ---------------------------------------------------------------------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Submit a report                                                        | R   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   |
+| View status of own reports                                             | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   |
+| View notices and statements of reasons about own content or account    | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   | O   |
+| Appeal a decision                                                      | N   | O   | O   | O   | O   | O   | O   | O   | O   | O   | N   | N   | N   | N   |
+| Review cases and apply content actions                                 | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | S   | N   | N   | N   |
+| Apply account sanctions                                                | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | S   | N   | N   | R   |
+| Apply permanent ban (two humans)                                       | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | S   | N   | R   | R   |
+| Read private content beyond a report's scope                           | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | R   |
+| Manage policies and enforcement matrix                                 | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | Y   | Y   |
+| Handle legal requests                                                  | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | R   | Y   |
+| Configure detection thresholds                                         | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | Y   | Y   |
+| View transparency data                                                 | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   | Y   |
+| Act as institution safety contact (receive escalations for own cohort) | N   | N   | N   | N   | N   | N   | N   | N   | S   | S   | N   | N   | N   | N   |
+| Act as employer trust contact (respond to fraud inquiries for own org) | N   | N   | N   | N   | N   | N   | N   | S   | N   | N   | N   | N   | N   | N   |
+| View moderator wellbeing aggregates                                    | N   | N   | N   | N   | N   | N   | N   | N   | N   | N   | S   | N   | Y   | Y   |
 
 Notes. `MOD` abilities depend on tier (section 1.7) and queue assignment. `SUP` can route reports from tickets but cannot decide. `SAD` access to private content requires a legal basis recorded in the case and is dual-approved. `API` principals (trusted flaggers' tools) may submit reports through a restricted endpoint (`FR-TSF-004`). Minors follow `BR-TSF-017`.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| TSF-A | Reporting | FR-TSF-001 to 005 |
-| TSF-B | Policy | FR-TSF-006 to 007 |
-| TSF-C | Moderation queue and tooling | FR-TSF-008 to 012 |
-| TSF-D | Automated detection and fraud | FR-TSF-013 to 018 |
-| TSF-E | Enforcement and due process | FR-TSF-019 to 026 |
+| Code  | Sub-module                                             | Features          |
+| ----- | ------------------------------------------------------ | ----------------- |
+| TSF-A | Reporting                                              | FR-TSF-001 to 005 |
+| TSF-B | Policy                                                 | FR-TSF-006 to 007 |
+| TSF-C | Moderation queue and tooling                           | FR-TSF-008 to 012 |
+| TSF-D | Automated detection and fraud                          | FR-TSF-013 to 018 |
+| TSF-E | Enforcement and due process                            | FR-TSF-019 to 026 |
 | TSF-F | Evidence, legal, transparency and moderator operations | FR-TSF-027 to 033 |
 
 ```mermaid
@@ -955,46 +955,46 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-TSF-001 | Any signed-in member can report any reportable object in at most three taps; guests can report public content with a challenge; reports are never refused except by abuse rate limits, which never apply to P0 reasons. | Open reporting is the first safety control. | Report intake | [DER] |
-| BR-TSF-002 | A report moves pending, under review, then resolved or dismissed; internal states add triaged, awaiting information, duplicate, escalated. | Predictable lifecycle. | Case service | [SRC: SSOT BR-34] |
-| BR-TSF-003 | Automated flags that no human has reported lapse after 7 days if not actioned (unless above a risk threshold); any item with a human report never lapses. | Prevents unbounded stale queues without dropping reported items. | Queue service | [SRC: SSOT BR-059] `OD-TSF-02` |
-| BR-TSF-004 | Priority tiers: P0 immediate (first human review within 15 minutes) for child safety and credible imminent harm; P1 within 24 hours; P2 within 72 hours; P3 within 7 days. Trusted flagger reports go one tier up (never above P0). | Risk-based response. | Triage | [PROP] `OD-TSF-05` |
-| BR-TSF-005 | Every content type has a registered report entry, reason list and snapshot adapter; modules cannot ship a new content type without them. | Nothing unreportable. | Release gate | [PROP] |
-| BR-TSF-006 | The reporter's identity is never disclosed to the reported party; reporters are protected from retaliation (retaliatory behavior is a policy violation). | Safety to report. | Notices, case access | [DER] |
-| BR-TSF-007 | Reports on the same object merge into one case; reporter count raises priority but is not itself proof. | Efficiency without mob rule. | Case service | [DER] |
-| BR-TSF-008 | Every action that affects content or an account carries a statement of reasons: what, facts relied on, policy and version, automated or human, effective date and scope, appeal route and deadline. | Transparency and due process. | Action execution check | [DER] from DSA practice |
-| BR-TSF-009 | Automated systems may label, limit reach, delay, hold for review or require verification, but may not impose permanent bans, delete accounts, or suspend beyond 24 hours without human review. The only automatic removal is confirmed illegal-content hash matches, followed by human review. | Human accountability for consequential actions. | Detection platform | [SRC: SSOT §15.10.1, §18.3] [DER] |
-| BR-TSF-010 | Signals are indicators for review, not proof. "Unverifiable" is not "fraudulent". Anomaly is not guilt. | Fairness. | Case workspace | [SRC: SSOT §17.4, §18.3] |
-| BR-TSF-011 | Permanent bans, removal of a verified employer or its job inventory, deletion of large groups, and any action on staff accounts need two different humans at MOD-2 or above; disagreements go to a third reviewer and a tie yields the lesser action. | Quorum for irreversible actions. | Case service | [SRC: SSOT WF-08, §5.9] |
-| BR-TSF-012 | All moderation records are append-only; corrections create new decisions that supersede, never edit. | Auditability. | Data layer | [SRC: SSOT WF-08] |
-| BR-TSF-013 | Sanctions are proportionate and follow the ladder: notice, warning, feature restriction, temporary suspension (1, 7 or 30 days), permanent ban; severe harms may skip rungs per the matrix; low and medium strikes expire after 12 months, high after 36, critical never. | Predictable proportionality. | Sanction service | [PROP] |
-| BR-TSF-014 | Every enforcement action can be appealed within 30 days; appeals are decided by a reviewer who did not make the original decision (one tier above for permanent actions) within 7 days for suspensions, bans and credential disputes and 14 days for others; an appeal never leads to a harsher penalty absent fraud; one final review is available. | Right to contest. | Appeal service | [SRC: SSOT BR-154] [PROP] |
-| BR-TSF-015 | At report and at decision time a hashed evidence package (content, metadata, context, signals, chain hash) is preserved in restricted storage; access is logged; user deletion does not delete evidence under hold. | Evidence integrity. | Evidence service | [DER] |
-| BR-TSF-016 | Legal requests are handled only by designated staff after authenticity and scope checks, with minimum necessary disclosure, user notice unless barred, and a full record. Emergency disclosure needs SAD approval and retroactive review. | Lawful, accountable disclosure. | Legal workflow | [DER] from [SRC: SSOT §5.9] |
-| BR-TSF-017 | Content sexualizing minors or grooming is removed immediately, evidence preserved, handled only by specialists and reported to the competent authority within the statutory time. Minors (16 and 17) keep protective defaults across modules. | Child safety. | Minors queue | [SRC: SSOT BR-128] [DER] |
-| BR-TSF-018 | Credible imminent threats are P0 with 15-minute review and may trigger emergency disclosure; self-harm expressions get support resources and are not sanctioned for the expression itself. | Protect life without punishing distress. | Imminent-harm playbook | [PROP] |
-| BR-TSF-019 | Anonymous company reviews hide identity from the employer and the public but never from PAD or legal (dual approval and recorded basis); interview questions and reviews are pre-moderated before display; employer replies are appended and never edit the original. | Honest reviews with accountability. | Pre-moderation, review service | [SRC: SSOT BR-136, BR-137, BR-138] |
-| BR-TSF-020 | Moderators have least-privilege access; may not act on cases involving themselves, relatives, colleagues, their own employer or anyone they declare a conflict with; reports about staff go to MOD-3 and SAD. | Integrity. | Assignment service | [DER] |
-| BR-TSF-021 | Moderator exposure limits: default maximum 3 hours per day on graphic content, mandatory 10-minute break after 20 consecutive critical cases, weekly rotation, blur and audio mute by default, no individual wellbeing data in performance reviews. | Moderator wellbeing. | Assignment service | [PROP] `OD-TSF-10` |
-| BR-TSF-022 | QA samples 5 percent of decisions, 100 percent of matrix departures and overturned appeals, and 20 percent of automated-assist decisions; quality is weighted equally with throughput. | Consistency. | QA service | [PROP] |
-| BR-TSF-023 | Employers must be verified before posting beyond a new-employer cap; jobs that charge candidates fees, require sensitive documents before an offer, run pyramid schemes, or impersonate other employers are prohibited; unverifiable listings are restricted rather than permanently removed. | Fraud prevention. | Job pre-moderation | [PROP] |
-| BR-TSF-024 | A credential that cannot be verified becomes self-reported, not fraudulent; fraud findings need human review; holders can dispute and receive a decision within 7 days. | Fair verification. | Credential fraud workflow | [SRC: SSOT BR-154] |
-| BR-TSF-025 | Inauthentic behavior findings (fake accounts, rings, ban evasion) need human confirmation with at least two independent signals; shared networks and devices are weighted down; network actions are confirmed per account. | Avoids collective punishment. | Fraud workspace | [DER] |
-| BR-TSF-026 | Feature restrictions and sanctions propagate to modules through a `Restriction` object enforced at each module's write path, scoped to the capability where possible. | Consistency across the product. | Owning modules | [PROP] |
-| BR-TSF-027 | Employer and institution sanctions apply only to that organization and its users; there is no cross-employer blacklist and no sharing of sanctions with third parties except by legal process. | Fair hiring ecosystem. | Sanction service | [PROP] |
-| BR-TSF-028 | Trusted flagger status needs demonstrated expertise, independence and diligence; accuracy is tracked quarterly; below 60 percent for two quarters triggers review; status is public in transparency reporting. | Quality of priority reports. | Flagger program | [DER] from DSA |
-| BR-TSF-029 | Reports are "manifestly unfounded" only when a reviewer says so with a reason; repeated misuse leads to warning, reduced priority and a 14-day suspension of non-P0 reporting with notice and appeal. | Deters abuse without chilling reporting. | Reporter standing | [DER] from DSA |
-| BR-TSF-030 | The platform publishes a transparency report semiannually with counts of reports, actions, appeals, automation share, legal requests and moderator capacity; small cells are suppressed. | Public accountability. | Transparency service | [DER] [PROP] `OD-TSF-09` |
-| BR-TSF-031 | Policies are versioned and immutable once published; non-urgent changes are announced 14 days ahead; urgent safety changes apply immediately with after-the-fact notice. | Predictability. | Policy service | [PROP] |
-| BR-TSF-032 | Retention: reports and evidence 24 months after case closure; sanction records 36 months; ban-evasion hashes 36 months; detection signals 12 months; statements of reasons 36 months; legal holds until released; child-safety evidence per statute. | Data minimization with safety. | Lifecycle job | [PROP] `OD-TSF-11` |
-| BR-TSF-033 | Notices never reveal reporters or detection internals that enable evasion and use non-accusatory language. | Safety and fairness. | Notice templates | [DER] |
-| BR-TSF-034 | Jurisdiction flags enable region-specific obligations (for example EU DSA notice-and-action fields, trader traceability, point of contact); the default is to apply the strictest common baseline where cheap. | Compliance. | Config | [DER] `OD-TSF-01` |
-| BR-TSF-035 | Every decision stores policy id and version, severity, matrix version and a written rationale; departures from the matrix need a reason and MOD-2 approval. | Consistency. | Case workspace | [DER] |
-| BR-TSF-036 | Severe categories reported inside groups bypass group moderators and go to TSF only; group moderators cannot see the reporter or the TSF case. | Protects victims, avoids local cover-ups. | Report routing | [DER] with NET `BR-NET-037` |
-| BR-TSF-037 | An automated or brigading-related hold must be reviewed by a human within 72 hours or content is restored automatically and the case remains open; holds are applied to reduce reach, not to punish. | Prevents indefinite suppression. | Hold service | [PROP] |
-| BR-TSF-038 | Moderators see private message content only within the selected scope of a report or the authorized window of a legal or safety case, never by search. | Privacy. | Access service, MSG `BR-MSG-022` | [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                 | Rationale                                                        | Enforced where                   | Source                             |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------- | ---------------------------------- |
+| BR-TSF-001 | Any signed-in member can report any reportable object in at most three taps; guests can report public content with a challenge; reports are never refused except by abuse rate limits, which never apply to P0 reasons.                                                                                                                              | Open reporting is the first safety control.                      | Report intake                    | [DER]                              |
+| BR-TSF-002 | A report moves pending, under review, then resolved or dismissed; internal states add triaged, awaiting information, duplicate, escalated.                                                                                                                                                                                                           | Predictable lifecycle.                                           | Case service                     | [SRC: SSOT BR-34]                  |
+| BR-TSF-003 | Automated flags that no human has reported lapse after 7 days if not actioned (unless above a risk threshold); any item with a human report never lapses.                                                                                                                                                                                            | Prevents unbounded stale queues without dropping reported items. | Queue service                    | [SRC: SSOT BR-059] `OD-TSF-02`     |
+| BR-TSF-004 | Priority tiers: P0 immediate (first human review within 15 minutes) for child safety and credible imminent harm; P1 within 24 hours; P2 within 72 hours; P3 within 7 days. Trusted flagger reports go one tier up (never above P0).                                                                                                                  | Risk-based response.                                             | Triage                           | [PROP] `OD-TSF-05`                 |
+| BR-TSF-005 | Every content type has a registered report entry, reason list and snapshot adapter; modules cannot ship a new content type without them.                                                                                                                                                                                                             | Nothing unreportable.                                            | Release gate                     | [PROP]                             |
+| BR-TSF-006 | The reporter's identity is never disclosed to the reported party; reporters are protected from retaliation (retaliatory behavior is a policy violation).                                                                                                                                                                                             | Safety to report.                                                | Notices, case access             | [DER]                              |
+| BR-TSF-007 | Reports on the same object merge into one case; reporter count raises priority but is not itself proof.                                                                                                                                                                                                                                              | Efficiency without mob rule.                                     | Case service                     | [DER]                              |
+| BR-TSF-008 | Every action that affects content or an account carries a statement of reasons: what, facts relied on, policy and version, automated or human, effective date and scope, appeal route and deadline.                                                                                                                                                  | Transparency and due process.                                    | Action execution check           | [DER] from DSA practice            |
+| BR-TSF-009 | Automated systems may label, limit reach, delay, hold for review or require verification, but may not impose permanent bans, delete accounts, or suspend beyond 24 hours without human review. The only automatic removal is confirmed illegal-content hash matches, followed by human review.                                                       | Human accountability for consequential actions.                  | Detection platform               | [SRC: SSOT §15.10.1, §18.3] [DER]  |
+| BR-TSF-010 | Signals are indicators for review, not proof. "Unverifiable" is not "fraudulent". Anomaly is not guilt.                                                                                                                                                                                                                                              | Fairness.                                                        | Case workspace                   | [SRC: SSOT §17.4, §18.3]           |
+| BR-TSF-011 | Permanent bans, removal of a verified employer or its job inventory, deletion of large groups, and any action on staff accounts need two different humans at MOD-2 or above; disagreements go to a third reviewer and a tie yields the lesser action.                                                                                                | Quorum for irreversible actions.                                 | Case service                     | [SRC: SSOT WF-08, §5.9]            |
+| BR-TSF-012 | All moderation records are append-only; corrections create new decisions that supersede, never edit.                                                                                                                                                                                                                                                 | Auditability.                                                    | Data layer                       | [SRC: SSOT WF-08]                  |
+| BR-TSF-013 | Sanctions are proportionate and follow the ladder: notice, warning, feature restriction, temporary suspension (1, 7 or 30 days), permanent ban; severe harms may skip rungs per the matrix; low and medium strikes expire after 12 months, high after 36, critical never.                                                                            | Predictable proportionality.                                     | Sanction service                 | [PROP]                             |
+| BR-TSF-014 | Every enforcement action can be appealed within 30 days; appeals are decided by a reviewer who did not make the original decision (one tier above for permanent actions) within 7 days for suspensions, bans and credential disputes and 14 days for others; an appeal never leads to a harsher penalty absent fraud; one final review is available. | Right to contest.                                                | Appeal service                   | [SRC: SSOT BR-154] [PROP]          |
+| BR-TSF-015 | At report and at decision time a hashed evidence package (content, metadata, context, signals, chain hash) is preserved in restricted storage; access is logged; user deletion does not delete evidence under hold.                                                                                                                                  | Evidence integrity.                                              | Evidence service                 | [DER]                              |
+| BR-TSF-016 | Legal requests are handled only by designated staff after authenticity and scope checks, with minimum necessary disclosure, user notice unless barred, and a full record. Emergency disclosure needs SAD approval and retroactive review.                                                                                                            | Lawful, accountable disclosure.                                  | Legal workflow                   | [DER] from [SRC: SSOT §5.9]        |
+| BR-TSF-017 | Content sexualizing minors or grooming is removed immediately, evidence preserved, handled only by specialists and reported to the competent authority within the statutory time. Minors (16 and 17) keep protective defaults across modules.                                                                                                        | Child safety.                                                    | Minors queue                     | [SRC: SSOT BR-128] [DER]           |
+| BR-TSF-018 | Credible imminent threats are P0 with 15-minute review and may trigger emergency disclosure; self-harm expressions get support resources and are not sanctioned for the expression itself.                                                                                                                                                           | Protect life without punishing distress.                         | Imminent-harm playbook           | [PROP]                             |
+| BR-TSF-019 | Anonymous company reviews hide identity from the employer and the public but never from PAD or legal (dual approval and recorded basis); interview questions and reviews are pre-moderated before display; employer replies are appended and never edit the original.                                                                                | Honest reviews with accountability.                              | Pre-moderation, review service   | [SRC: SSOT BR-136, BR-137, BR-138] |
+| BR-TSF-020 | Moderators have least-privilege access; may not act on cases involving themselves, relatives, colleagues, their own employer or anyone they declare a conflict with; reports about staff go to MOD-3 and SAD.                                                                                                                                        | Integrity.                                                       | Assignment service               | [DER]                              |
+| BR-TSF-021 | Moderator exposure limits: default maximum 3 hours per day on graphic content, mandatory 10-minute break after 20 consecutive critical cases, weekly rotation, blur and audio mute by default, no individual wellbeing data in performance reviews.                                                                                                  | Moderator wellbeing.                                             | Assignment service               | [PROP] `OD-TSF-10`                 |
+| BR-TSF-022 | QA samples 5 percent of decisions, 100 percent of matrix departures and overturned appeals, and 20 percent of automated-assist decisions; quality is weighted equally with throughput.                                                                                                                                                               | Consistency.                                                     | QA service                       | [PROP]                             |
+| BR-TSF-023 | Employers must be verified before posting beyond a new-employer cap; jobs that charge candidates fees, require sensitive documents before an offer, run pyramid schemes, or impersonate other employers are prohibited; unverifiable listings are restricted rather than permanently removed.                                                        | Fraud prevention.                                                | Job pre-moderation               | [PROP]                             |
+| BR-TSF-024 | A credential that cannot be verified becomes self-reported, not fraudulent; fraud findings need human review; holders can dispute and receive a decision within 7 days.                                                                                                                                                                              | Fair verification.                                               | Credential fraud workflow        | [SRC: SSOT BR-154]                 |
+| BR-TSF-025 | Inauthentic behavior findings (fake accounts, rings, ban evasion) need human confirmation with at least two independent signals; shared networks and devices are weighted down; network actions are confirmed per account.                                                                                                                           | Avoids collective punishment.                                    | Fraud workspace                  | [DER]                              |
+| BR-TSF-026 | Feature restrictions and sanctions propagate to modules through a `Restriction` object enforced at each module's write path, scoped to the capability where possible.                                                                                                                                                                                | Consistency across the product.                                  | Owning modules                   | [PROP]                             |
+| BR-TSF-027 | Employer and institution sanctions apply only to that organization and its users; there is no cross-employer blacklist and no sharing of sanctions with third parties except by legal process.                                                                                                                                                       | Fair hiring ecosystem.                                           | Sanction service                 | [PROP]                             |
+| BR-TSF-028 | Trusted flagger status needs demonstrated expertise, independence and diligence; accuracy is tracked quarterly; below 60 percent for two quarters triggers review; status is public in transparency reporting.                                                                                                                                       | Quality of priority reports.                                     | Flagger program                  | [DER] from DSA                     |
+| BR-TSF-029 | Reports are "manifestly unfounded" only when a reviewer says so with a reason; repeated misuse leads to warning, reduced priority and a 14-day suspension of non-P0 reporting with notice and appeal.                                                                                                                                                | Deters abuse without chilling reporting.                         | Reporter standing                | [DER] from DSA                     |
+| BR-TSF-030 | The platform publishes a transparency report semiannually with counts of reports, actions, appeals, automation share, legal requests and moderator capacity; small cells are suppressed.                                                                                                                                                             | Public accountability.                                           | Transparency service             | [DER] [PROP] `OD-TSF-09`           |
+| BR-TSF-031 | Policies are versioned and immutable once published; non-urgent changes are announced 14 days ahead; urgent safety changes apply immediately with after-the-fact notice.                                                                                                                                                                             | Predictability.                                                  | Policy service                   | [PROP]                             |
+| BR-TSF-032 | Retention: reports and evidence 24 months after case closure; sanction records 36 months; ban-evasion hashes 36 months; detection signals 12 months; statements of reasons 36 months; legal holds until released; child-safety evidence per statute.                                                                                                 | Data minimization with safety.                                   | Lifecycle job                    | [PROP] `OD-TSF-11`                 |
+| BR-TSF-033 | Notices never reveal reporters or detection internals that enable evasion and use non-accusatory language.                                                                                                                                                                                                                                           | Safety and fairness.                                             | Notice templates                 | [DER]                              |
+| BR-TSF-034 | Jurisdiction flags enable region-specific obligations (for example EU DSA notice-and-action fields, trader traceability, point of contact); the default is to apply the strictest common baseline where cheap.                                                                                                                                       | Compliance.                                                      | Config                           | [DER] `OD-TSF-01`                  |
+| BR-TSF-035 | Every decision stores policy id and version, severity, matrix version and a written rationale; departures from the matrix need a reason and MOD-2 approval.                                                                                                                                                                                          | Consistency.                                                     | Case workspace                   | [DER]                              |
+| BR-TSF-036 | Severe categories reported inside groups bypass group moderators and go to TSF only; group moderators cannot see the reporter or the TSF case.                                                                                                                                                                                                       | Protects victims, avoids local cover-ups.                        | Report routing                   | [DER] with NET `BR-NET-037`        |
+| BR-TSF-037 | An automated or brigading-related hold must be reviewed by a human within 72 hours or content is restored automatically and the case remains open; holds are applied to reduce reach, not to punish.                                                                                                                                                 | Prevents indefinite suppression.                                 | Hold service                     | [PROP]                             |
+| BR-TSF-038 | Moderators see private message content only within the selected scope of a report or the authorized window of a legal or safety case, never by search.                                                                                                                                                                                               | Privacy.                                                         | Access service, MSG `BR-MSG-022` | [DER]                              |
 
 ## 6. State machines
 
@@ -1002,19 +1002,19 @@ flowchart LR
 
 States: `pending`, `triaged`, `awaiting_info`, `under_review`, `resolved_actioned`, `resolved_no_action`, `dismissed`, `duplicate`, `reopened`. Terminal: `resolved_actioned`, `resolved_no_action`, `dismissed`, `duplicate` (can move to `reopened` within 14 days).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | pending | Reporter submits | snapshot stored |
-| pending | triaged | Triage assigns priority and queue | n/a |
-| pending, triaged | duplicate | Merged into existing case | same object |
-| triaged | under_review | Reviewer takes case | n/a |
-| under_review | awaiting_info | Reviewer requests information | SLA clock pauses |
-| awaiting_info | under_review | Information received or 14 days elapsed | n/a |
-| under_review | resolved_actioned | Decision with action | `BR-TSF-035` |
-| under_review | resolved_no_action | Decision no violation | rationale |
-| triaged | dismissed | Manifestly unfounded or lapsed automated flag | reviewer reason or `BR-TSF-003` |
-| resolved_actioned, resolved_no_action, dismissed | reopened | Reporter adds new information within 14 days | n/a |
-| reopened | under_review | Reviewer takes case | n/a |
+| From                                             | To                 | Trigger                                       | Guard                           |
+| ------------------------------------------------ | ------------------ | --------------------------------------------- | ------------------------------- |
+| (new)                                            | pending            | Reporter submits                              | snapshot stored                 |
+| pending                                          | triaged            | Triage assigns priority and queue             | n/a                             |
+| pending, triaged                                 | duplicate          | Merged into existing case                     | same object                     |
+| triaged                                          | under_review       | Reviewer takes case                           | n/a                             |
+| under_review                                     | awaiting_info      | Reviewer requests information                 | SLA clock pauses                |
+| awaiting_info                                    | under_review       | Information received or 14 days elapsed       | n/a                             |
+| under_review                                     | resolved_actioned  | Decision with action                          | `BR-TSF-035`                    |
+| under_review                                     | resolved_no_action | Decision no violation                         | rationale                       |
+| triaged                                          | dismissed          | Manifestly unfounded or lapsed automated flag | reviewer reason or `BR-TSF-003` |
+| resolved_actioned, resolved_no_action, dismissed | reopened           | Reporter adds new information within 14 days  | n/a                             |
+| reopened                                         | under_review       | Reviewer takes case                           | n/a                             |
 
 ```mermaid
 stateDiagram-v2
@@ -1039,21 +1039,21 @@ stateDiagram-v2
 
 States: `open`, `assigned`, `in_review`, `pending_second_review`, `decided_pending_execution`, `executed`, `notified`, `appealed`, `closed`. Terminal: `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | open | Report or signal creates case | n/a |
-| open | assigned | Queue assignment | no conflict |
-| assigned | in_review | Reviewer opens | lock |
-| in_review | assigned | Lock timeout or release | n/a |
-| in_review | pending_second_review | Quorum action proposed | `BR-TSF-011` |
-| pending_second_review | decided_pending_execution | Second reviewer agrees | different person |
-| in_review | decided_pending_execution | Decision submitted | rationale and policy |
-| decided_pending_execution | executed | Owning module acknowledges | idempotent |
-| executed | notified | Statement of reasons issued | `BR-TSF-008` |
-| notified | appealed | Appeal submitted | within 30 days |
-| appealed | closed | Appeal decided | outcome applied |
-| notified | closed | Appeal window ends | 30 days |
-| in_review | closed | No violation decision notified to reporter | n/a |
+| From                      | To                        | Trigger                                    | Guard                |
+| ------------------------- | ------------------------- | ------------------------------------------ | -------------------- |
+| (new)                     | open                      | Report or signal creates case              | n/a                  |
+| open                      | assigned                  | Queue assignment                           | no conflict          |
+| assigned                  | in_review                 | Reviewer opens                             | lock                 |
+| in_review                 | assigned                  | Lock timeout or release                    | n/a                  |
+| in_review                 | pending_second_review     | Quorum action proposed                     | `BR-TSF-011`         |
+| pending_second_review     | decided_pending_execution | Second reviewer agrees                     | different person     |
+| in_review                 | decided_pending_execution | Decision submitted                         | rationale and policy |
+| decided_pending_execution | executed                  | Owning module acknowledges                 | idempotent           |
+| executed                  | notified                  | Statement of reasons issued                | `BR-TSF-008`         |
+| notified                  | appealed                  | Appeal submitted                           | within 30 days       |
+| appealed                  | closed                    | Appeal decided                             | outcome applied      |
+| notified                  | closed                    | Appeal window ends                         | 30 days              |
+| in_review                 | closed                    | No violation decision notified to reporter | n/a                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1077,19 +1077,19 @@ stateDiagram-v2
 
 States: `submitted`, `in_review`, `awaiting_info`, `upheld`, `overturned`, `partially_overturned`, `withdrawn`, `expired`, `final_review`. Terminal: `upheld` (after final review or no request), `overturned`, `partially_overturned`, `withdrawn`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | submitted | User appeals | within 30 days |
-| submitted | in_review | Reviewer assigned | not original decider |
-| in_review | awaiting_info | Reviewer asks the user | n/a |
-| awaiting_info | in_review | User answers or 7 days | n/a |
-| in_review | overturned | Reviewer reverses | n/a |
-| in_review | partially_overturned | Reviewer reduces | n/a |
-| in_review | upheld | Reviewer confirms | rationale |
-| upheld | final_review | User requests one final review | once |
-| final_review | upheld, overturned | MOD-3 or SAD decides | n/a |
-| submitted, in_review | withdrawn | User withdraws | n/a |
-| (action) | expired | Window passes without appeal | 30 days |
+| From                 | To                   | Trigger                        | Guard                |
+| -------------------- | -------------------- | ------------------------------ | -------------------- |
+| (new)                | submitted            | User appeals                   | within 30 days       |
+| submitted            | in_review            | Reviewer assigned              | not original decider |
+| in_review            | awaiting_info        | Reviewer asks the user         | n/a                  |
+| awaiting_info        | in_review            | User answers or 7 days         | n/a                  |
+| in_review            | overturned           | Reviewer reverses              | n/a                  |
+| in_review            | partially_overturned | Reviewer reduces               | n/a                  |
+| in_review            | upheld               | Reviewer confirms              | rationale            |
+| upheld               | final_review         | User requests one final review | once                 |
+| final_review         | upheld, overturned   | MOD-3 or SAD decides           | n/a                  |
+| submitted, in_review | withdrawn            | User withdraws                 | n/a                  |
+| (action)             | expired              | Window passes without appeal   | 30 days              |
 
 ```mermaid
 stateDiagram-v2
@@ -1114,18 +1114,18 @@ stateDiagram-v2
 
 States: `proposed`, `scheduled`, `active`, `under_appeal`, `expired`, `lifted`, `superseded`. Terminal: `expired`, `lifted`, `superseded`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | proposed | Reviewer or detector proposes | n/a |
-| proposed | active | Approved (quorum if required) | `BR-TSF-011` |
-| proposed | scheduled | Approved with a future start | n/a |
-| scheduled | active | Start time reached | n/a |
-| active | under_appeal | Appeal submitted | still enforced unless paused |
-| under_appeal | lifted | Appeal overturned | n/a |
-| under_appeal | active | Appeal upheld | n/a |
-| active | expired | Duration ends | n/a |
-| active | lifted | MOD-2 lifts early | reason |
-| active | superseded | A higher rung replaces it | n/a |
+| From         | To           | Trigger                       | Guard                        |
+| ------------ | ------------ | ----------------------------- | ---------------------------- |
+| (new)        | proposed     | Reviewer or detector proposes | n/a                          |
+| proposed     | active       | Approved (quorum if required) | `BR-TSF-011`                 |
+| proposed     | scheduled    | Approved with a future start  | n/a                          |
+| scheduled    | active       | Start time reached            | n/a                          |
+| active       | under_appeal | Appeal submitted              | still enforced unless paused |
+| under_appeal | lifted       | Appeal overturned             | n/a                          |
+| under_appeal | active       | Appeal upheld                 | n/a                          |
+| active       | expired      | Duration ends                 | n/a                          |
+| active       | lifted       | MOD-2 lifts early             | reason                       |
+| active       | superseded   | A higher rung replaces it     | n/a                          |
 
 ```mermaid
 stateDiagram-v2
@@ -1148,15 +1148,15 @@ stateDiagram-v2
 
 States: `visible`, `labelled`, `reach_limited`, `held_for_review`, `removed`, `geo_restricted`. No terminal state (any state can return to `visible` on restoration).
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| visible | labelled | Label applied | policy |
-| visible, labelled | reach_limited | Reach limitation | matrix |
-| visible, labelled, reach_limited | held_for_review | Automated or brigading hold | review within 72 hours |
-| held_for_review | visible | Review clears or 72 hours elapse | n/a |
-| any | removed | Remove decision | `BR-TSF-035` |
-| any | geo_restricted | Legal order | SAD |
-| removed, held_for_review, reach_limited, labelled, geo_restricted | visible | Restore after appeal, correction or order lapse | n/a |
+| From                                                              | To              | Trigger                                         | Guard                  |
+| ----------------------------------------------------------------- | --------------- | ----------------------------------------------- | ---------------------- |
+| visible                                                           | labelled        | Label applied                                   | policy                 |
+| visible, labelled                                                 | reach_limited   | Reach limitation                                | matrix                 |
+| visible, labelled, reach_limited                                  | held_for_review | Automated or brigading hold                     | review within 72 hours |
+| held_for_review                                                   | visible         | Review clears or 72 hours elapse                | n/a                    |
+| any                                                               | removed         | Remove decision                                 | `BR-TSF-035`           |
+| any                                                               | geo_restricted  | Legal order                                     | SAD                    |
+| removed, held_for_review, reach_limited, labelled, geo_restricted | visible         | Restore after appeal, correction or order lapse | n/a                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1177,16 +1177,16 @@ stateDiagram-v2
 
 States: `received`, `validated`, `rejected`, `in_progress`, `challenged`, `fulfilled`, `closed`. Terminal: `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | received | Intake logged | n/a |
-| received | validated | Counsel confirms authenticity and scope | n/a |
-| received | rejected | Invalid | reason recorded |
-| validated | in_progress | SAD decides to comply | minimum necessary |
-| validated | challenged | SAD decides to contest | counsel |
-| challenged | in_progress | Order narrowed | n/a |
-| in_progress | fulfilled | Response delivered | dual approval for message content |
-| fulfilled, rejected | closed | User notice sent or barred timer set | n/a |
+| From                | To          | Trigger                                 | Guard                             |
+| ------------------- | ----------- | --------------------------------------- | --------------------------------- |
+| (new)               | received    | Intake logged                           | n/a                               |
+| received            | validated   | Counsel confirms authenticity and scope | n/a                               |
+| received            | rejected    | Invalid                                 | reason recorded                   |
+| validated           | in_progress | SAD decides to comply                   | minimum necessary                 |
+| validated           | challenged  | SAD decides to contest                  | counsel                           |
+| challenged          | in_progress | Order narrowed                          | n/a                               |
+| in_progress         | fulfilled   | Response delivered                      | dual approval for message content |
+| fulfilled, rejected | closed      | User notice sent or barred timer set    | n/a                               |
 
 ```mermaid
 stateDiagram-v2
@@ -1206,16 +1206,16 @@ stateDiagram-v2
 
 States: `flagged`, `verifying`, `verified_legit`, `restricted`, `removed`, `banned`. Terminal: `verified_legit`, `banned`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | flagged | Detector or report | n/a |
-| flagged | verifying | Reviewer starts and contacts subject | n/a |
-| flagged, verifying | restricted | High risk; reversible limits | `BR-TSF-037` |
-| verifying | verified_legit | Evidence accepted | reviewer decision |
-| restricted | verified_legit | Verification completed | n/a |
-| verifying, restricted | removed | Violation confirmed on listing | `BR-TSF-035` |
-| removed | banned | Repeat or severe | quorum `BR-TSF-011` |
-| removed | verifying | Appeal accepted | n/a |
+| From                  | To             | Trigger                              | Guard               |
+| --------------------- | -------------- | ------------------------------------ | ------------------- |
+| (new)                 | flagged        | Detector or report                   | n/a                 |
+| flagged               | verifying      | Reviewer starts and contacts subject | n/a                 |
+| flagged, verifying    | restricted     | High risk; reversible limits         | `BR-TSF-037`        |
+| verifying             | verified_legit | Evidence accepted                    | reviewer decision   |
+| restricted            | verified_legit | Verification completed               | n/a                 |
+| verifying, restricted | removed        | Violation confirmed on listing       | `BR-TSF-035`        |
+| removed               | banned         | Repeat or severe                     | quorum `BR-TSF-011` |
+| removed               | verifying      | Appeal accepted                      | n/a                 |
 
 ```mermaid
 stateDiagram-v2
@@ -1237,11 +1237,11 @@ stateDiagram-v2
 
 States: `active`, `released`, `expired`. Terminal: `released`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (new) | active | Report, decision, legal request, authority referral | reason code |
-| active | released | Authorized release | SAD for legal holds; different approver than placer |
-| active | expired | Retention period ends | no legal hold |
+| From   | To       | Trigger                                             | Guard                                               |
+| ------ | -------- | --------------------------------------------------- | --------------------------------------------------- |
+| (new)  | active   | Report, decision, legal request, authority referral | reason code                                         |
+| active | released | Authorized release                                  | SAD for legal holds; different approver than placer |
+| active | expired  | Retention period ends                               | no legal hold                                       |
 
 ```mermaid
 stateDiagram-v2
@@ -1254,70 +1254,70 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-TSF-001 | Report dialog | modal | all signed-in, GUE | Submit a report | stepper, submitted, rate-limited |
-| SCR-TSF-002 | My reports | `/settings/safety/reports` | members | Status of my reports | empty, resolved |
-| SCR-TSF-003 | Report detail | `/settings/safety/reports/:id` | members | Timeline and add information | reopenable |
-| SCR-TSF-004 | Notice and statement of reasons | `/notices/:id` | affected users | Understand action and appeal | appeal-open, appeal-closed |
-| SCR-TSF-005 | Appeal form | `/notices/:id/appeal` | affected users | Submit appeal | submitted, expired |
-| SCR-TSF-006 | Appeal status | `/appeals/:id` | affected users | Track and request final review | decided |
-| SCR-TSF-007 | Safety Center | `/safety` | GUE, all | Guidelines, scam tips, reporting help | none |
-| SCR-TSF-008 | Community guidelines and policies | `/policies` | GUE, all | Public policies with versions | version-diff |
-| SCR-TSF-009 | Transparency Center | `/transparency` | GUE, all | Reports and data | period filter |
-| SCR-TSF-010 | Trusted flagger application and dashboard | `/safety/flaggers` | CAN, flagger | Apply, submit batches | pending, active, revoked |
-| SCR-TSF-011 | Moderator home | `/mod` | MOD | Queues and workload | surge-mode |
-| SCR-TSF-012 | Queue list | `/mod/queues/:id` | MOD | Cases by priority | empty, SLA-risk |
-| SCR-TSF-013 | Case workspace | `/mod/cases/:id` | MOD | Evidence and decision | locked, execution-pending |
-| SCR-TSF-014 | Second review | `/mod/second-review/:id` | MOD-2, MOD-3 | Blind review | submitted |
-| SCR-TSF-015 | Account moderation history | `/mod/accounts/:id` | MOD-2+ | History and strikes | restricted-access |
-| SCR-TSF-016 | Moderator search | `/mod/search` | MOD | Search cases | tier-limited |
-| SCR-TSF-017 | Pre-moderation queue | `/mod/premod` | MOD-1, MOD-2 | Approve reviews and posts | empty |
-| SCR-TSF-018 | Fraud workspace | `/mod/fraud/:id` | MOD-S | Employers, jobs, networks | verifying, restricted |
-| SCR-TSF-019 | Network graph | `/mod/fraud/networks/:id` | MOD-S | Linked accounts | large-network |
-| SCR-TSF-020 | Minors safety queue | `/mod/minors` | MOD-S | Restricted workspace | hash-only |
-| SCR-TSF-021 | Imminent harm console | `/mod/urgent` | MOD-S | P0 handling and disclosure | paging |
-| SCR-TSF-022 | Appeals queue | `/mod/appeals` | MOD-2+ | Decide appeals | overdue |
-| SCR-TSF-023 | Evidence and holds | `/mod/evidence` | MOD-S, SAD | Evidence packages, holds | tamper-alert |
-| SCR-TSF-024 | Legal requests | `/admin/legal` | SAD | Intake, validate, fulfill | gag-timer |
-| SCR-TSF-025 | Policy editor | `/admin/policies` | PAD, SAD | Edit and publish policies | draft, review |
-| SCR-TSF-026 | Enforcement matrix | `/admin/enforcement-matrix` | PAD, SAD | Configure actions | version-diff |
-| SCR-TSF-027 | Detector management | `/admin/detectors` | PAD, SAD, MOD-3 | Rules, thresholds, kill switches | downgraded |
-| SCR-TSF-028 | QA and calibration | `/mod/qa` | MOD-2, MOD-3 | Sampling and coaching | calibration |
-| SCR-TSF-029 | Wellbeing | `/mod/wellbeing` | MOD | Personal exposure and support | limit-reached |
-| SCR-TSF-030 | Safety dashboard | `/admin/safety` | MOD-3, PAD, SAD | SLA and prevalence | alerting |
-| SCR-TSF-031 | Compliance register | `/admin/compliance` | SAD, PAD | DSA obligations | gap-open |
-| SCR-TSF-032 | Macros | `/mod/macros` | MOD-3 | Approve macros | pending-approval |
+| ID          | Name                                      | Route proposal                 | Roles              | Purpose                               | Key states                       |
+| ----------- | ----------------------------------------- | ------------------------------ | ------------------ | ------------------------------------- | -------------------------------- |
+| SCR-TSF-001 | Report dialog                             | modal                          | all signed-in, GUE | Submit a report                       | stepper, submitted, rate-limited |
+| SCR-TSF-002 | My reports                                | `/settings/safety/reports`     | members            | Status of my reports                  | empty, resolved                  |
+| SCR-TSF-003 | Report detail                             | `/settings/safety/reports/:id` | members            | Timeline and add information          | reopenable                       |
+| SCR-TSF-004 | Notice and statement of reasons           | `/notices/:id`                 | affected users     | Understand action and appeal          | appeal-open, appeal-closed       |
+| SCR-TSF-005 | Appeal form                               | `/notices/:id/appeal`          | affected users     | Submit appeal                         | submitted, expired               |
+| SCR-TSF-006 | Appeal status                             | `/appeals/:id`                 | affected users     | Track and request final review        | decided                          |
+| SCR-TSF-007 | Safety Center                             | `/safety`                      | GUE, all           | Guidelines, scam tips, reporting help | none                             |
+| SCR-TSF-008 | Community guidelines and policies         | `/policies`                    | GUE, all           | Public policies with versions         | version-diff                     |
+| SCR-TSF-009 | Transparency Center                       | `/transparency`                | GUE, all           | Reports and data                      | period filter                    |
+| SCR-TSF-010 | Trusted flagger application and dashboard | `/safety/flaggers`             | CAN, flagger       | Apply, submit batches                 | pending, active, revoked         |
+| SCR-TSF-011 | Moderator home                            | `/mod`                         | MOD                | Queues and workload                   | surge-mode                       |
+| SCR-TSF-012 | Queue list                                | `/mod/queues/:id`              | MOD                | Cases by priority                     | empty, SLA-risk                  |
+| SCR-TSF-013 | Case workspace                            | `/mod/cases/:id`               | MOD                | Evidence and decision                 | locked, execution-pending        |
+| SCR-TSF-014 | Second review                             | `/mod/second-review/:id`       | MOD-2, MOD-3       | Blind review                          | submitted                        |
+| SCR-TSF-015 | Account moderation history                | `/mod/accounts/:id`            | MOD-2+             | History and strikes                   | restricted-access                |
+| SCR-TSF-016 | Moderator search                          | `/mod/search`                  | MOD                | Search cases                          | tier-limited                     |
+| SCR-TSF-017 | Pre-moderation queue                      | `/mod/premod`                  | MOD-1, MOD-2       | Approve reviews and posts             | empty                            |
+| SCR-TSF-018 | Fraud workspace                           | `/mod/fraud/:id`               | MOD-S              | Employers, jobs, networks             | verifying, restricted            |
+| SCR-TSF-019 | Network graph                             | `/mod/fraud/networks/:id`      | MOD-S              | Linked accounts                       | large-network                    |
+| SCR-TSF-020 | Minors safety queue                       | `/mod/minors`                  | MOD-S              | Restricted workspace                  | hash-only                        |
+| SCR-TSF-021 | Imminent harm console                     | `/mod/urgent`                  | MOD-S              | P0 handling and disclosure            | paging                           |
+| SCR-TSF-022 | Appeals queue                             | `/mod/appeals`                 | MOD-2+             | Decide appeals                        | overdue                          |
+| SCR-TSF-023 | Evidence and holds                        | `/mod/evidence`                | MOD-S, SAD         | Evidence packages, holds              | tamper-alert                     |
+| SCR-TSF-024 | Legal requests                            | `/admin/legal`                 | SAD                | Intake, validate, fulfill             | gag-timer                        |
+| SCR-TSF-025 | Policy editor                             | `/admin/policies`              | PAD, SAD           | Edit and publish policies             | draft, review                    |
+| SCR-TSF-026 | Enforcement matrix                        | `/admin/enforcement-matrix`    | PAD, SAD           | Configure actions                     | version-diff                     |
+| SCR-TSF-027 | Detector management                       | `/admin/detectors`             | PAD, SAD, MOD-3    | Rules, thresholds, kill switches      | downgraded                       |
+| SCR-TSF-028 | QA and calibration                        | `/mod/qa`                      | MOD-2, MOD-3       | Sampling and coaching                 | calibration                      |
+| SCR-TSF-029 | Wellbeing                                 | `/mod/wellbeing`               | MOD                | Personal exposure and support         | limit-reached                    |
+| SCR-TSF-030 | Safety dashboard                          | `/admin/safety`                | MOD-3, PAD, SAD    | SLA and prevalence                    | alerting                         |
+| SCR-TSF-031 | Compliance register                       | `/admin/compliance`            | SAD, PAD           | DSA obligations                       | gap-open                         |
+| SCR-TSF-032 | Macros                                    | `/mod/macros`                  | MOD-3              | Approve macros                        | pending-approval                 |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-TSF-01 | Report | id, object_ref, reason, sub_reason, reporter (nullable), source, priority, state, details | Case, EvidenceSnapshot | 24 months after closure |
-| ENT-TSF-02 | EvidenceSnapshot | id, report_id, object_payload, context, hash, prev_hash, created_at | Report, EvidenceHold | Per `BR-TSF-032` |
-| ENT-TSF-03 | ModerationCase | id, object_ref, state, priority, queue, assignee, policy_area, opened_at, sla_due | Report, Decision | 24 months after closure |
-| ENT-TSF-04 | Decision | id, case_id, policy_id, policy_version, severity, matrix_version, outcome, rationale, reviewer, superseded_by | Case, EnforcementAction | 36 months |
-| ENT-TSF-05 | ContentTypeRegistration | type, reasons, snapshot_adapter, default_queue, premod_flag | Policy | Permanent |
-| ENT-TSF-06 | Policy | policy_id, title, area, owner | PolicyVersion | Permanent |
-| ENT-TSF-07 | PolicyVersion | policy_id, version, text, examples, severity_map, effective_at, regions | Policy | Permanent |
-| ENT-TSF-08 | EnforcementAction | id, decision_id, object_ref, action, executed_at, module_ack | Decision | 36 months |
-| ENT-TSF-09 | Sanction | id, account_ref, rung, scope, start, end, strikes, state | Decision | 36 months |
-| ENT-TSF-10 | StatementOfReasons | id, decision_id, recipient, fields, automated_flag, issued_at, appeal_deadline | Decision | 36 months |
-| ENT-TSF-11 | Appeal | id, decision_id, appellant, text, evidence_refs, state, reviewer, outcome | Decision | 36 months |
-| ENT-TSF-12 | LegalRequest | id, type, authority, jurisdiction, basis, deadline, state, disclosure_log | SAD | 7 years [PROP] |
-| ENT-TSF-13 | DetectionSignal | id, source_module, object_ref, type, reason_code, score, detector_id, detector_version | Case | 12 months |
-| ENT-TSF-14 | RiskCase (fraud) | id, subject_type (employer, job, credential, network), subject_ref, state, risk_features, notes | Case | 36 months |
-| ENT-TSF-15 | TrustedFlagger | id, org, status, contacts, accuracy_by_quarter, api_key_ref | Report | Life of status plus 36 months |
-| ENT-TSF-16 | EvidenceHold | id, case_id or legal_request_id, reason_code, placed_by, state, review_due | EvidenceSnapshot | Per `BR-TSF-032` |
-| ENT-TSF-17 | QAReview | id, decision_id, qa_reviewer, verdict, error_type, feedback | Decision | 24 months |
-| ENT-TSF-18 | WellbeingRecord | moderator, period, exposure_minutes, graphic_cases, breaks | Moderator | 12 months, confidential |
-| ENT-TSF-19 | TransparencyReport and ComplianceItem | period, metrics, methodology, status; obligation, owner, evidence | Report | Permanent |
-| ENT-TSF-20 | ModerationAuditEntry | id, actor, action, object, at, ip_hash | All | 7 years, append-only |
-| ENT-TSF-21 | ReporterStanding | reporter, unfounded_count, state, window | Report | 12 months |
-| ENT-TSF-22 | MacroTemplate | id, name, text, variables, version, approved_by | Decision | Permanent |
-| ENT-TSF-23 | QueueConfig | queue, skills, languages, sla_by_priority | Case | Permanent |
-| ENT-TSF-24 | EnforcementMatrix | version, rows (policy, severity, allowed_actions, reviewer_tier, quorum) | PolicyVersion | Permanent |
-| ENT-TSF-25 | Restriction | id, sanction_id, account, capability_code, starts_at, ends_at | Sanction | With sanction |
+| ID         | Name                                  | Key attributes                                                                                                | Relationships           | Retention class               |
+| ---------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------- |
+| ENT-TSF-01 | Report                                | id, object_ref, reason, sub_reason, reporter (nullable), source, priority, state, details                     | Case, EvidenceSnapshot  | 24 months after closure       |
+| ENT-TSF-02 | EvidenceSnapshot                      | id, report_id, object_payload, context, hash, prev_hash, created_at                                           | Report, EvidenceHold    | Per `BR-TSF-032`              |
+| ENT-TSF-03 | ModerationCase                        | id, object_ref, state, priority, queue, assignee, policy_area, opened_at, sla_due                             | Report, Decision        | 24 months after closure       |
+| ENT-TSF-04 | Decision                              | id, case_id, policy_id, policy_version, severity, matrix_version, outcome, rationale, reviewer, superseded_by | Case, EnforcementAction | 36 months                     |
+| ENT-TSF-05 | ContentTypeRegistration               | type, reasons, snapshot_adapter, default_queue, premod_flag                                                   | Policy                  | Permanent                     |
+| ENT-TSF-06 | Policy                                | policy_id, title, area, owner                                                                                 | PolicyVersion           | Permanent                     |
+| ENT-TSF-07 | PolicyVersion                         | policy_id, version, text, examples, severity_map, effective_at, regions                                       | Policy                  | Permanent                     |
+| ENT-TSF-08 | EnforcementAction                     | id, decision_id, object_ref, action, executed_at, module_ack                                                  | Decision                | 36 months                     |
+| ENT-TSF-09 | Sanction                              | id, account_ref, rung, scope, start, end, strikes, state                                                      | Decision                | 36 months                     |
+| ENT-TSF-10 | StatementOfReasons                    | id, decision_id, recipient, fields, automated_flag, issued_at, appeal_deadline                                | Decision                | 36 months                     |
+| ENT-TSF-11 | Appeal                                | id, decision_id, appellant, text, evidence_refs, state, reviewer, outcome                                     | Decision                | 36 months                     |
+| ENT-TSF-12 | LegalRequest                          | id, type, authority, jurisdiction, basis, deadline, state, disclosure_log                                     | SAD                     | 7 years [PROP]                |
+| ENT-TSF-13 | DetectionSignal                       | id, source_module, object_ref, type, reason_code, score, detector_id, detector_version                        | Case                    | 12 months                     |
+| ENT-TSF-14 | RiskCase (fraud)                      | id, subject_type (employer, job, credential, network), subject_ref, state, risk_features, notes               | Case                    | 36 months                     |
+| ENT-TSF-15 | TrustedFlagger                        | id, org, status, contacts, accuracy_by_quarter, api_key_ref                                                   | Report                  | Life of status plus 36 months |
+| ENT-TSF-16 | EvidenceHold                          | id, case_id or legal_request_id, reason_code, placed_by, state, review_due                                    | EvidenceSnapshot        | Per `BR-TSF-032`              |
+| ENT-TSF-17 | QAReview                              | id, decision_id, qa_reviewer, verdict, error_type, feedback                                                   | Decision                | 24 months                     |
+| ENT-TSF-18 | WellbeingRecord                       | moderator, period, exposure_minutes, graphic_cases, breaks                                                    | Moderator               | 12 months, confidential       |
+| ENT-TSF-19 | TransparencyReport and ComplianceItem | period, metrics, methodology, status; obligation, owner, evidence                                             | Report                  | Permanent                     |
+| ENT-TSF-20 | ModerationAuditEntry                  | id, actor, action, object, at, ip_hash                                                                        | All                     | 7 years, append-only          |
+| ENT-TSF-21 | ReporterStanding                      | reporter, unfounded_count, state, window                                                                      | Report                  | 12 months                     |
+| ENT-TSF-22 | MacroTemplate                         | id, name, text, variables, version, approved_by                                                               | Decision                | Permanent                     |
+| ENT-TSF-23 | QueueConfig                           | queue, skills, languages, sla_by_priority                                                                     | Case                    | Permanent                     |
+| ENT-TSF-24 | EnforcementMatrix                     | version, rows (policy, severity, allowed_actions, reviewer_tier, quorum)                                      | PolicyVersion           | Permanent                     |
+| ENT-TSF-25 | Restriction                           | id, sanction_id, account, capability_code, starts_at, ends_at                                                 | Sanction                | With sanction                 |
 
 ```mermaid
 erDiagram
@@ -1338,161 +1338,161 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-|---|---|---|---|---|
-| EVT-TSF-001 | tsf.report.submitted | FR-TSF-001 | report id, object ref, reason, priority | NET, MSG, ANL |
-| EVT-TSF-002 | tsf.report.triaged | FR-TSF-008 | report id, queue | ANL |
-| EVT-TSF-003 | tsf.report.resolved | FR-TSF-003 | report id, outcome class | NTF, ANL |
-| EVT-TSF-004 | tsf.case.created | FR-TSF-008 | case id | ANL |
-| EVT-TSF-005 | tsf.case.assigned | FR-TSF-008 | case id, queue | ANL |
-| EVT-TSF-006 | tsf.case.second_review_requested | FR-TSF-010 | case id | ANL |
-| EVT-TSF-007 | tsf.decision.made | FR-TSF-009 | decision id, policy, outcome | ANL, AIC (evaluation) |
-| EVT-TSF-008 | tsf.statement_of_reasons.issued | FR-TSF-021 | statement id, recipient | NTF, ANL |
-| EVT-TSF-009 | tsf.detection.signal_raised | FR-TSF-013 | signal id, object ref, type, score | NET, MSG, JOB |
-| EVT-TSF-010 | tsf.content.actioned | FR-TSF-019 | object ref, action, decision id | NET, MSG, JOB, EVD, LRN, SRC |
-| EVT-TSF-011 | tsf.content.restored | FR-TSF-019 | object ref | NET, MSG, JOB, SRC |
-| EVT-TSF-012 | tsf.sanction.proposed | FR-TSF-020, 018, 023 | sanction id | ANL |
-| EVT-TSF-013 | tsf.sanction.applied | FR-TSF-020 | account, restrictions | IDN, NET, MSG, JOB, AIC, ATS |
-| EVT-TSF-014 | tsf.sanction.lifted | FR-TSF-020 | account, restrictions | IDN, NET, MSG, JOB, AIC |
-| EVT-TSF-015 | tsf.appeal.submitted | FR-TSF-022 | appeal id | ANL |
-| EVT-TSF-016 | tsf.appeal.decided | FR-TSF-022 | appeal id, outcome | NTF, ANL |
-| EVT-TSF-017 | tsf.evidence.preserved | FR-TSF-027 | hold id, scope | MSG, NET, SET |
-| EVT-TSF-018 | tsf.evidence.released | FR-TSF-027 | hold id | MSG, NET, SET |
-| EVT-TSF-019 | tsf.legal_request.received | FR-TSF-028 | request id (no content) | SAD |
-| EVT-TSF-020 | tsf.legal_request.fulfilled | FR-TSF-028 | request id | SAD |
-| EVT-TSF-021 | tsf.fraud.case_opened | FR-TSF-016, 017 | risk case id | EMP, BIL |
-| EVT-TSF-022 | tsf.fraud.employer_restricted | FR-TSF-016 | org id, state | EMP, JOB, MSG |
-| EVT-TSF-023 | tsf.fraud.job_removed | FR-TSF-016 | job id | JOB, NTF |
-| EVT-TSF-024 | tsf.minor_safety.escalated | FR-TSF-024 | case id | SAD |
-| EVT-TSF-025 | tsf.imminent_harm.escalated | FR-TSF-025 | case id | SAD |
-| EVT-TSF-026 | tsf.transparency_report.published | FR-TSF-029 | period | ANL |
-| EVT-TSF-027 | tsf.trusted_flagger.status_changed | FR-TSF-004 | flagger id, status | ANL |
-| EVT-TSF-028 | tsf.qa.review_completed | FR-TSF-032 | review id | AIC, ANL |
-| EVT-TSF-029 | tsf.moderator.exposure_limit_reached | FR-TSF-031 | moderator id (to assignment only) | TSF |
-| EVT-TSF-030 | tsf.policy.version_published | FR-TSF-006, 007 | policy id, version | NTF, all modules |
-| EVT-TSF-031 | tsf.reporter.warned | FR-TSF-005 | reporter id | NTF |
-| EVT-TSF-032 | tsf.scam_warning.shown | FR-TSF-015, 026 | target ref, pattern id | MSG, JOB |
+| ID          | Event                                | Trigger              | Key payload                             | Consumers                    |
+| ----------- | ------------------------------------ | -------------------- | --------------------------------------- | ---------------------------- |
+| EVT-TSF-001 | tsf.report.submitted                 | FR-TSF-001           | report id, object ref, reason, priority | NET, MSG, ANL                |
+| EVT-TSF-002 | tsf.report.triaged                   | FR-TSF-008           | report id, queue                        | ANL                          |
+| EVT-TSF-003 | tsf.report.resolved                  | FR-TSF-003           | report id, outcome class                | NTF, ANL                     |
+| EVT-TSF-004 | tsf.case.created                     | FR-TSF-008           | case id                                 | ANL                          |
+| EVT-TSF-005 | tsf.case.assigned                    | FR-TSF-008           | case id, queue                          | ANL                          |
+| EVT-TSF-006 | tsf.case.second_review_requested     | FR-TSF-010           | case id                                 | ANL                          |
+| EVT-TSF-007 | tsf.decision.made                    | FR-TSF-009           | decision id, policy, outcome            | ANL, AIC (evaluation)        |
+| EVT-TSF-008 | tsf.statement_of_reasons.issued      | FR-TSF-021           | statement id, recipient                 | NTF, ANL                     |
+| EVT-TSF-009 | tsf.detection.signal_raised          | FR-TSF-013           | signal id, object ref, type, score      | NET, MSG, JOB                |
+| EVT-TSF-010 | tsf.content.actioned                 | FR-TSF-019           | object ref, action, decision id         | NET, MSG, JOB, EVD, LRN, SRC |
+| EVT-TSF-011 | tsf.content.restored                 | FR-TSF-019           | object ref                              | NET, MSG, JOB, SRC           |
+| EVT-TSF-012 | tsf.sanction.proposed                | FR-TSF-020, 018, 023 | sanction id                             | ANL                          |
+| EVT-TSF-013 | tsf.sanction.applied                 | FR-TSF-020           | account, restrictions                   | IDN, NET, MSG, JOB, AIC, ATS |
+| EVT-TSF-014 | tsf.sanction.lifted                  | FR-TSF-020           | account, restrictions                   | IDN, NET, MSG, JOB, AIC      |
+| EVT-TSF-015 | tsf.appeal.submitted                 | FR-TSF-022           | appeal id                               | ANL                          |
+| EVT-TSF-016 | tsf.appeal.decided                   | FR-TSF-022           | appeal id, outcome                      | NTF, ANL                     |
+| EVT-TSF-017 | tsf.evidence.preserved               | FR-TSF-027           | hold id, scope                          | MSG, NET, SET                |
+| EVT-TSF-018 | tsf.evidence.released                | FR-TSF-027           | hold id                                 | MSG, NET, SET                |
+| EVT-TSF-019 | tsf.legal_request.received           | FR-TSF-028           | request id (no content)                 | SAD                          |
+| EVT-TSF-020 | tsf.legal_request.fulfilled          | FR-TSF-028           | request id                              | SAD                          |
+| EVT-TSF-021 | tsf.fraud.case_opened                | FR-TSF-016, 017      | risk case id                            | EMP, BIL                     |
+| EVT-TSF-022 | tsf.fraud.employer_restricted        | FR-TSF-016           | org id, state                           | EMP, JOB, MSG                |
+| EVT-TSF-023 | tsf.fraud.job_removed                | FR-TSF-016           | job id                                  | JOB, NTF                     |
+| EVT-TSF-024 | tsf.minor_safety.escalated           | FR-TSF-024           | case id                                 | SAD                          |
+| EVT-TSF-025 | tsf.imminent_harm.escalated          | FR-TSF-025           | case id                                 | SAD                          |
+| EVT-TSF-026 | tsf.transparency_report.published    | FR-TSF-029           | period                                  | ANL                          |
+| EVT-TSF-027 | tsf.trusted_flagger.status_changed   | FR-TSF-004           | flagger id, status                      | ANL                          |
+| EVT-TSF-028 | tsf.qa.review_completed              | FR-TSF-032           | review id                               | AIC, ANL                     |
+| EVT-TSF-029 | tsf.moderator.exposure_limit_reached | FR-TSF-031           | moderator id (to assignment only)       | TSF                          |
+| EVT-TSF-030 | tsf.policy.version_published         | FR-TSF-006, 007      | policy id, version                      | NTF, all modules             |
+| EVT-TSF-031 | tsf.reporter.warned                  | FR-TSF-005           | reporter id                             | NTF                          |
+| EVT-TSF-032 | tsf.scam_warning.shown               | FR-TSF-015, 026      | target ref, pattern id                  | MSG, JOB                     |
 
 ### 9.2 Consumed
 
-| Event | From | Use |
-|---|---|---|
-| net.post.published, net.comment.created, net.group.created (EVT-NET-012, EVT-NET-015, EVT-NET-021) | NET | Content detection |
-| net.referral.integrity_flagged (EVT-NET-030) | NET | Fraud signals |
-| net.group.moderation_action (EVT-NET-023) | NET | Escalation context |
-| msg.report.created (EVT-MSG-021) | MSG | Create report |
-| msg.spam.flagged, msg.scam_warning.shown, msg.scan.verdict, msg.link.blocked (EVT-MSG-020, 022, 023, 030) | MSG | Signals |
-| aic.output.blocked, aic.injection.detected, aic.incident.opened (EVT-AIC-033, 029, 036) | AIC | AI-harm and abuse signals |
-| job.job.created, emp.org.registered, emp.org.verified (planned) | JOB, EMP | Fraud gating |
-| evd.evidence.submitted, evd.credential.disputed (planned) | EVD | Credential fraud |
-| asm.integrity.violation_referred (planned) | ASM | `POL-17` cases |
-| idn.account.created, idn.session.anomaly (planned) | IDN | Evasion and fake account signals |
-| inst.safety_concern.raised (planned) | INS | Minor and learner safety |
-| set.account.erasure_requested (planned) | SET | Retention and hold checks |
+| Event                                                                                                     | From     | Use                              |
+| --------------------------------------------------------------------------------------------------------- | -------- | -------------------------------- |
+| net.post.published, net.comment.created, net.group.created (EVT-NET-012, EVT-NET-015, EVT-NET-021)        | NET      | Content detection                |
+| net.referral.integrity_flagged (EVT-NET-030)                                                              | NET      | Fraud signals                    |
+| net.group.moderation_action (EVT-NET-023)                                                                 | NET      | Escalation context               |
+| msg.report.created (EVT-MSG-021)                                                                          | MSG      | Create report                    |
+| msg.spam.flagged, msg.scam_warning.shown, msg.scan.verdict, msg.link.blocked (EVT-MSG-020, 022, 023, 030) | MSG      | Signals                          |
+| aic.output.blocked, aic.injection.detected, aic.incident.opened (EVT-AIC-033, 029, 036)                   | AIC      | AI-harm and abuse signals        |
+| job.job.created, emp.org.registered, emp.org.verified (planned)                                           | JOB, EMP | Fraud gating                     |
+| evd.evidence.submitted, evd.credential.disputed (planned)                                                 | EVD      | Credential fraud                 |
+| asm.integrity.violation_referred (planned)                                                                | ASM      | `POL-17` cases                   |
+| idn.account.created, idn.session.anomaly (planned)                                                        | IDN      | Evasion and fake account signals |
+| inst.safety_concern.raised (planned)                                                                      | INS      | Minor and learner safety         |
+| set.account.erasure_requested (planned)                                                                   | SET      | Retention and hold checks        |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behaviour |
-|---|---|---|
-| Known-illegal-content hash lists (accredited provider) | CSAM and terror content matching | Media held and TSF alerted if unreachable for over 15 minutes |
-| Image, text and audio classifiers (via AIC registry) | Detection | Rules and queues continue; coverage metric alerts |
-| Machine translation (via AIC gateway) | Moderator assist | Native reviewer routing |
-| Business registry and domain intelligence providers | Employer verification | Manual verification path |
-| Document forensics tooling | Credential checks | Manual review |
-| Authority reporting channels (national hotlines, law enforcement portals) | Mandatory reports and legal requests | Manual submission by SAD |
-| Crisis resource directories | Self-harm resources | Static resource lists |
-| External out-of-court dispute bodies | DSA dispute settlement | Information links maintained |
-| Counselling provider for moderators | Wellbeing | Internal fallback support |
-| Secure evidence storage (PLT planned) | Evidence | Case flagged "evidence incomplete" |
+| Dependency                                                                | Purpose                              | Failure behaviour                                             |
+| ------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------- |
+| Known-illegal-content hash lists (accredited provider)                    | CSAM and terror content matching     | Media held and TSF alerted if unreachable for over 15 minutes |
+| Image, text and audio classifiers (via AIC registry)                      | Detection                            | Rules and queues continue; coverage metric alerts             |
+| Machine translation (via AIC gateway)                                     | Moderator assist                     | Native reviewer routing                                       |
+| Business registry and domain intelligence providers                       | Employer verification                | Manual verification path                                      |
+| Document forensics tooling                                                | Credential checks                    | Manual review                                                 |
+| Authority reporting channels (national hotlines, law enforcement portals) | Mandatory reports and legal requests | Manual submission by SAD                                      |
+| Crisis resource directories                                               | Self-harm resources                  | Static resource lists                                         |
+| External out-of-court dispute bodies                                      | DSA dispute settlement               | Information links maintained                                  |
+| Counselling provider for moderators                                       | Wellbeing                            | Internal fallback support                                     |
+| Secure evidence storage (PLT planned)                                     | Evidence                             | Case flagged "evidence incomplete"                            |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For |
-|---|---|
-| NET, MSG, JOB, EVD, PRF, LRN, STU, EVT, GIG, MEN (planned where not listed) | Content snapshots and action APIs |
-| IDN (planned) | Session revocation, age, device and signup signals |
-| EMP (planned) | Employer verification and badges |
-| BGV (planned) | Identity and credential verification partners |
-| AIC | Classifier registry, translation, evaluation, bias audit |
-| NTF (planned) | Notices |
-| SET (planned) | Data rights interplay |
-| ADM, ANL (planned) | Console frame, dashboards |
-| BIL (planned) | Payment fraud signals, employer plan status |
-| ASM (planned) | Integrity violation referrals |
+| Depends on                                                                  | For                                                      |
+| --------------------------------------------------------------------------- | -------------------------------------------------------- |
+| NET, MSG, JOB, EVD, PRF, LRN, STU, EVT, GIG, MEN (planned where not listed) | Content snapshots and action APIs                        |
+| IDN (planned)                                                               | Session revocation, age, device and signup signals       |
+| EMP (planned)                                                               | Employer verification and badges                         |
+| BGV (planned)                                                               | Identity and credential verification partners            |
+| AIC                                                                         | Classifier registry, translation, evaluation, bias audit |
+| NTF (planned)                                                               | Notices                                                  |
+| SET (planned)                                                               | Data rights interplay                                    |
+| ADM, ANL (planned)                                                          | Console frame, dashboards                                |
+| BIL (planned)                                                               | Payment fraud signals, employer plan status              |
+| ASM (planned)                                                               | Integrity violation referrals                            |
 
-| Depended on by | Uses |
-|---|---|
-| NET | Report routing, content actions, sanctions, referral integrity reviews |
-| MSG | Reports, restrictions, scam and link signals, holds |
-| AIC | AI-harm triage, sanction signals, classifier reuse |
-| JOB, EMP (planned) | Employer and job restrictions, badges |
-| EVD (planned) | Credential dispute outcomes |
-| INS (planned) | Safety escalations, institution contacts |
-| SET (planned) | Hold awareness for erasure |
-| ADM (planned) | Case and account views |
+| Depended on by     | Uses                                                                   |
+| ------------------ | ---------------------------------------------------------------------- |
+| NET                | Report routing, content actions, sanctions, referral integrity reviews |
+| MSG                | Reports, restrictions, scam and link signals, holds                    |
+| AIC                | AI-harm triage, sanction signals, classifier reuse                     |
+| JOB, EMP (planned) | Employer and job restrictions, badges                                  |
+| EVD (planned)      | Credential dispute outcomes                                            |
+| INS (planned)      | Safety escalations, institution contacts                               |
+| SET (planned)      | Hold awareness for erasure                                             |
+| ADM (planned)      | Case and account views                                                 |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner |
-|---|---|---|---|
-| Time to first review by priority | Median and p90 from report to first human action | percentile(first_action_at - created_at) per tier | MOD-3 |
-| SLA attainment | Share of cases reviewed within the tier target | on-time / cases | MOD-3 |
-| P0 time to removal | Median time from P0 report to content removal | median(removed_at - created_at) | SAD |
-| Violating prevalence | Estimated share of content views that violate policy | violating in sample / sample size | PAD |
-| Proactive detection share | Actions originating from detection rather than reports | detection-origin actions / actions | PAD |
-| Automated action precision | Confirmed share of automated holds | upheld / automated holds | AI lead |
-| Appeal overturn rate | Appeals reversing the original decision | overturned and partial / decided appeals | MOD-3 |
-| Appeal SLA attainment | Appeals decided within BR-TSF-014 targets | on-time / decided | MOD-3 |
-| Decision accuracy (QA) | QA agreement rate with original decisions | agree / sampled | QA lead |
-| Scam and fake-job prevalence | Live fake or restricted jobs per 1,000 live jobs | flagged live jobs / live jobs x 1,000 | Fraud lead |
-| Verified-employer share of postings | Postings from verified employers | verified postings / postings | Fraud lead |
-| Reporter satisfaction | Reporters rating outcome clarity | positive / responses | Product |
-| Repeat offender rate | Accounts with 2 or more strikes in 12 months | accounts / actioned accounts | MOD-3 |
-| Moderator exposure within limits | Moderator days within limits | days within / days worked | Ops lead |
-| Legal request on-time rate | Requests answered within deadline | on-time / requests | SAD |
+| Metric                              | Definition                                             | Formula                                           | Owner      |
+| ----------------------------------- | ------------------------------------------------------ | ------------------------------------------------- | ---------- |
+| Time to first review by priority    | Median and p90 from report to first human action       | percentile(first_action_at - created_at) per tier | MOD-3      |
+| SLA attainment                      | Share of cases reviewed within the tier target         | on-time / cases                                   | MOD-3      |
+| P0 time to removal                  | Median time from P0 report to content removal          | median(removed_at - created_at)                   | SAD        |
+| Violating prevalence                | Estimated share of content views that violate policy   | violating in sample / sample size                 | PAD        |
+| Proactive detection share           | Actions originating from detection rather than reports | detection-origin actions / actions                | PAD        |
+| Automated action precision          | Confirmed share of automated holds                     | upheld / automated holds                          | AI lead    |
+| Appeal overturn rate                | Appeals reversing the original decision                | overturned and partial / decided appeals          | MOD-3      |
+| Appeal SLA attainment               | Appeals decided within BR-TSF-014 targets              | on-time / decided                                 | MOD-3      |
+| Decision accuracy (QA)              | QA agreement rate with original decisions              | agree / sampled                                   | QA lead    |
+| Scam and fake-job prevalence        | Live fake or restricted jobs per 1,000 live jobs       | flagged live jobs / live jobs x 1,000             | Fraud lead |
+| Verified-employer share of postings | Postings from verified employers                       | verified postings / postings                      | Fraud lead |
+| Reporter satisfaction               | Reporters rating outcome clarity                       | positive / responses                              | Product    |
+| Repeat offender rate                | Accounts with 2 or more strikes in 12 months           | accounts / actioned accounts                      | MOD-3      |
+| Moderator exposure within limits    | Moderator days within limits                           | days within / days worked                         | Ops lead   |
+| Legal request on-time rate          | Requests answered within deadline                      | on-time / requests                                | SAD        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-TSF-01 | Which regimes apply (EU DSA, UK Online Safety Act, others) and when | Full DSA baseline everywhere; per-region | Apply the DSA baseline everywhere cheaply and enable region-specific extras | Counsel | FR-TSF-030, FR-TSF-021 |
-| OD-TSF-02 | Conflict: BR-059 says flags expire after 7 days if not actioned; accountable review of user reports must not expire | Lapse only automated flags; lapse all; none | Lapse only unreported automated flags | Product owner | FR-TSF-008 |
-| OD-TSF-03 | Moderation staffing model (in-house, vendor, mixed), languages and hours | In-house; vendor; mix | Undecided; design assumes tiers MOD-1 to MOD-S | Owner | Operations |
-| OD-TSF-04 | How much speech moderation beyond safety and legality (political, off-topic) | Label and limit reach; remove; none | Label and limit reach | Owner | `POL-15` |
-| OD-TSF-05 | SLA and accuracy targets | Proposed tiers; stricter; looser | P0 15 minutes, P1 24 hours, P2 72 hours, P3 7 days; accuracy target set after baseline | Owner and counsel | `BR-TSF-004`, FR-TSF-032 |
-| OD-TSF-06 | Appeal SLAs | 7 and 14 days; 3 and 7 days | 7 days for suspensions, bans, credentials; 14 days others | Product | `BR-TSF-014` |
-| OD-TSF-07 | Authority reporting, jurisdictions and on-call hours for P0 | 24x7; business hours with partner | 24x7 on-call for P0 once live | Owner and counsel | FR-TSF-024, FR-TSF-025 |
-| OD-TSF-08 | Handling legal requests from jurisdictions with weak legal protections | Comply; escalate; refuse | Escalate to counsel and SAD, default refuse bulk | Counsel | FR-TSF-028 |
-| OD-TSF-09 | Transparency report cadence and public data scope | Semiannual; annual | Semiannual | Counsel | FR-TSF-029 |
-| OD-TSF-10 | Moderator exposure limits (hours, breaks) | As proposed; stricter | As proposed, reviewed with occupational health | Ops lead | FR-TSF-031 |
-| OD-TSF-11 | Retention periods for reports, evidence, sanctions | As proposed; shorter; longer | As in `BR-TSF-032` | Counsel | FR-TSF-027 |
-| OD-TSF-12 | Whether to collect government ID or use ID verification partners for ban evasion and employer verification | Yes; only for high-risk; no | Only for high-risk and employer verification | Owner and counsel | FR-TSF-016, FR-TSF-023 |
+| ID        | Question                                                                                                            | Options                                     | Default proposal                                                                       | Who decides       | Blocking                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------- | ------------------------ |
+| OD-TSF-01 | Which regimes apply (EU DSA, UK Online Safety Act, others) and when                                                 | Full DSA baseline everywhere; per-region    | Apply the DSA baseline everywhere cheaply and enable region-specific extras            | Counsel           | FR-TSF-030, FR-TSF-021   |
+| OD-TSF-02 | Conflict: BR-059 says flags expire after 7 days if not actioned; accountable review of user reports must not expire | Lapse only automated flags; lapse all; none | Lapse only unreported automated flags                                                  | Product owner     | FR-TSF-008               |
+| OD-TSF-03 | Moderation staffing model (in-house, vendor, mixed), languages and hours                                            | In-house; vendor; mix                       | Undecided; design assumes tiers MOD-1 to MOD-S                                         | Owner             | Operations               |
+| OD-TSF-04 | How much speech moderation beyond safety and legality (political, off-topic)                                        | Label and limit reach; remove; none         | Label and limit reach                                                                  | Owner             | `POL-15`                 |
+| OD-TSF-05 | SLA and accuracy targets                                                                                            | Proposed tiers; stricter; looser            | P0 15 minutes, P1 24 hours, P2 72 hours, P3 7 days; accuracy target set after baseline | Owner and counsel | `BR-TSF-004`, FR-TSF-032 |
+| OD-TSF-06 | Appeal SLAs                                                                                                         | 7 and 14 days; 3 and 7 days                 | 7 days for suspensions, bans, credentials; 14 days others                              | Product           | `BR-TSF-014`             |
+| OD-TSF-07 | Authority reporting, jurisdictions and on-call hours for P0                                                         | 24x7; business hours with partner           | 24x7 on-call for P0 once live                                                          | Owner and counsel | FR-TSF-024, FR-TSF-025   |
+| OD-TSF-08 | Handling legal requests from jurisdictions with weak legal protections                                              | Comply; escalate; refuse                    | Escalate to counsel and SAD, default refuse bulk                                       | Counsel           | FR-TSF-028               |
+| OD-TSF-09 | Transparency report cadence and public data scope                                                                   | Semiannual; annual                          | Semiannual                                                                             | Counsel           | FR-TSF-029               |
+| OD-TSF-10 | Moderator exposure limits (hours, breaks)                                                                           | As proposed; stricter                       | As proposed, reviewed with occupational health                                         | Ops lead          | FR-TSF-031               |
+| OD-TSF-11 | Retention periods for reports, evidence, sanctions                                                                  | As proposed; shorter; longer                | As in `BR-TSF-032`                                                                     | Counsel           | FR-TSF-027               |
+| OD-TSF-12 | Whether to collect government ID or use ID verification partners for ban evasion and employer verification          | Yes; only for high-risk; no                 | Only for high-risk and employer verification                                           | Owner and counsel | FR-TSF-016, FR-TSF-023   |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-TSF-01 | Fake jobs and recruitment scams harm job seekers and the brand | H / H | Employer verification gating, pre-moderation, scam signals, warnings, fast takedown |
-| RSK-TSF-02 | Over-enforcement from automation harms legitimate users | M / H | Holds not bans, human review, appeals, precision monitoring, 72-hour hold limit |
-| RSK-TSF-03 | Under-enforcement, slow response to severe harm | M / H | P0 on-call, SLAs, surge mode, trusted flaggers |
-| RSK-TSF-04 | Moderator psychological harm and turnover | H / H | Exposure limits, tooling, counselling, rotation |
-| RSK-TSF-05 | Regulatory non-compliance (DSA, child safety law) | M / H | Compliance register, counsel review, audits |
-| RSK-TSF-06 | Abuse of reporting to silence people (brigading, employer retaliation) | M / M | Report-abuse controls, brigading holds, reviewer judgment |
-| RSK-TSF-07 | Evidence tampering or leakage | L / H | Hash chain, restricted storage, dual control, audit |
-| RSK-TSF-08 | Inconsistent decisions across reviewers and regions | M / M | Matrix, QA, calibration, macros |
-| RSK-TSF-09 | Anonymous review identity exposure | L / H | Dual approval lookups, minimal access, audit |
-| RSK-TSF-10 | Misuse of legal-request channel (fake authority) | M / H | Independent verification, counsel, minimum disclosure |
+| ID         | Risk                                                                   | Likelihood and impact | Mitigation                                                                          |
+| ---------- | ---------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
+| RSK-TSF-01 | Fake jobs and recruitment scams harm job seekers and the brand         | H / H                 | Employer verification gating, pre-moderation, scam signals, warnings, fast takedown |
+| RSK-TSF-02 | Over-enforcement from automation harms legitimate users                | M / H                 | Holds not bans, human review, appeals, precision monitoring, 72-hour hold limit     |
+| RSK-TSF-03 | Under-enforcement, slow response to severe harm                        | M / H                 | P0 on-call, SLAs, surge mode, trusted flaggers                                      |
+| RSK-TSF-04 | Moderator psychological harm and turnover                              | H / H                 | Exposure limits, tooling, counselling, rotation                                     |
+| RSK-TSF-05 | Regulatory non-compliance (DSA, child safety law)                      | M / H                 | Compliance register, counsel review, audits                                         |
+| RSK-TSF-06 | Abuse of reporting to silence people (brigading, employer retaliation) | M / M                 | Report-abuse controls, brigading holds, reviewer judgment                           |
+| RSK-TSF-07 | Evidence tampering or leakage                                          | L / H                 | Hash chain, restricted storage, dual control, audit                                 |
+| RSK-TSF-08 | Inconsistent decisions across reviewers and regions                    | M / M                 | Matrix, QA, calibration, macros                                                     |
+| RSK-TSF-09 | Anonymous review identity exposure                                     | L / H                 | Dual approval lookups, minimal access, audit                                        |
+| RSK-TSF-10 | Misuse of legal-request channel (fake authority)                       | M / H                 | Independent verification, counsel, minimum disclosure                               |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-|---|---|---|
-| SSOT §7 F-24 and registry F-24 | Module scope | Phase label dropped |
-| SSOT BR-34, BR-059, BR-06 | Report lifecycle, flag expiry, admin-only moderation | BR-059 conflict recorded as `OD-TSF-02`; admin-only replaced by MOD tiers (BR-06 is a legacy rule, not changed here beyond roles) |
-| SSOT WF-08 and §5.9 | Append-only queue, two-human review on bans, quorum escalations | `BR-TSF-011`, `BR-TSF-012` |
-| SSOT BR-128, BR-136, BR-137, BR-138, BR-154 | Minors, anonymous reviews, interview questions pre-moderation, credential appeals | `BR-TSF-017`, `-019`, `-024`, `-014` |
-| SSOT §12.9, §15.10, §17.4, §18.3 | AI safety flow, human gate, anomaly is not guilt | `BR-TSF-009`, `BR-TSF-010` |
-| SSOT §21 UGC health, PROD-022 | Dashboards | `FR-TSF-033` |
-| SSOT state lists (Post hidden_by_moderation, Comment removed_by_moderation, Account, Group Membership) | Content states | `SM-TSF-05` |
-| docs/registries/BUSINESS_RULE_REGISTRY.md | Cross-check | n/a |
-| Added by this blueprint [PROP] | Trusted flaggers, report-abuse controls, policy catalogue and matrix, fraud workflows, ban evasion, imminent harm, scam education, evidence chain, legal requests, DSA register, moderator wellbeing and QA | n/a |
+| Legacy source                                                                                          | Used for                                                                                                                                                                                                    | Dropped or changed                                                                                                                |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| SSOT §7 F-24 and registry F-24                                                                         | Module scope                                                                                                                                                                                                | Phase label dropped                                                                                                               |
+| SSOT BR-34, BR-059, BR-06                                                                              | Report lifecycle, flag expiry, admin-only moderation                                                                                                                                                        | BR-059 conflict recorded as `OD-TSF-02`; admin-only replaced by MOD tiers (BR-06 is a legacy rule, not changed here beyond roles) |
+| SSOT WF-08 and §5.9                                                                                    | Append-only queue, two-human review on bans, quorum escalations                                                                                                                                             | `BR-TSF-011`, `BR-TSF-012`                                                                                                        |
+| SSOT BR-128, BR-136, BR-137, BR-138, BR-154                                                            | Minors, anonymous reviews, interview questions pre-moderation, credential appeals                                                                                                                           | `BR-TSF-017`, `-019`, `-024`, `-014`                                                                                              |
+| SSOT §12.9, §15.10, §17.4, §18.3                                                                       | AI safety flow, human gate, anomaly is not guilt                                                                                                                                                            | `BR-TSF-009`, `BR-TSF-010`                                                                                                        |
+| SSOT §21 UGC health, PROD-022                                                                          | Dashboards                                                                                                                                                                                                  | `FR-TSF-033`                                                                                                                      |
+| SSOT state lists (Post hidden_by_moderation, Comment removed_by_moderation, Account, Group Membership) | Content states                                                                                                                                                                                              | `SM-TSF-05`                                                                                                                       |
+| docs/registries/BUSINESS_RULE_REGISTRY.md                                                              | Cross-check                                                                                                                                                                                                 | n/a                                                                                                                               |
+| Added by this blueprint [PROP]                                                                         | Trusted flaggers, report-abuse controls, policy catalogue and matrix, fraud workflows, ban evasion, imminent harm, scam education, evidence chain, legal requests, DSA register, moderator wellbeing and QA | n/a                                                                                                                               |

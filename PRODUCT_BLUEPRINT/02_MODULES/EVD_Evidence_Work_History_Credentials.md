@@ -19,17 +19,17 @@ EVD turns **claims** into **checkable evidence**. A claim is something a person 
 
 ### 1.3 In scope, out of scope, owned vs consumed
 
-| Area | Owned by EVD | Not owned (owner) |
-| --- | --- | --- |
-| Evidence model, ladder, quality, freshness | Yes | Skill taxonomy and synonyms: SRC |
-| Skill claims, endorsements and weights | Yes | The skill list display on the profile: PRF |
-| Work history verification (candidate-initiated), employer attestation portal and API | Yes | Formal employment verification ordered by an employer during hiring: BGV |
-| Candidate-initiated references | Yes | Employer-initiated reference checks: BGV |
-| Credential issuance, import, wallet, public verification, revocation, portability | Yes | Course and assessment logic that triggers issuance: LRN, ASM (planned) |
-| Share links with scoped consent | Yes | The global consent ledger and privacy center: SET (planned) |
-| Disputes of evidence, revocations and endorsements | Yes | Disputes of background check results: BGV |
-| Recruiter evidence review views | Yes (the evidence panels and packs) | Recruiter pipeline and talent pool UI: ATS (planned) |
-| Reputation score derived from signals | Consumed (REP, planned) | Gamification: REP |
+| Area                                                                                 | Owned by EVD                        | Not owned (owner)                                                        |
+| ------------------------------------------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------ |
+| Evidence model, ladder, quality, freshness                                           | Yes                                 | Skill taxonomy and synonyms: SRC                                         |
+| Skill claims, endorsements and weights                                               | Yes                                 | The skill list display on the profile: PRF                               |
+| Work history verification (candidate-initiated), employer attestation portal and API | Yes                                 | Formal employment verification ordered by an employer during hiring: BGV |
+| Candidate-initiated references                                                       | Yes                                 | Employer-initiated reference checks: BGV                                 |
+| Credential issuance, import, wallet, public verification, revocation, portability    | Yes                                 | Course and assessment logic that triggers issuance: LRN, ASM (planned)   |
+| Share links with scoped consent                                                      | Yes                                 | The global consent ledger and privacy center: SET (planned)              |
+| Disputes of evidence, revocations and endorsements                                   | Yes                                 | Disputes of background check results: BGV                                |
+| Recruiter evidence review views                                                      | Yes (the evidence panels and packs) | Recruiter pipeline and talent pool UI: ATS (planned)                     |
+| Reputation score derived from signals                                                | Consumed (REP, planned)             | Gamification: REP                                                        |
 
 **Consumed:** accounts (IDN), profile claims (PRF), assessment results (ASM, planned), course completion (LRN, planned), connections (NET, planned), organizations and verified domains (EMP, planned), notifications (NTF), moderation (TSF), erasure orchestration (SET/IDN).
 
@@ -44,24 +44,24 @@ EVD turns **claims** into **checkable evidence**. A claim is something a person 
 
 `Y` allowed, `-` not allowed, `V` allowed within visibility or share scope, `A` allowed with audit, `T` via token (no account).
 
-| Capability | GUE | CAN/STD/FRL (holder) | CAN (peer) | INS | MNT | REC/HMG | EAD | IAD/PLO | MOD | SUP | PAD | SAD | API |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Create skill claims, attach evidence | - | Y | - | - | - | - | - | - | - | - | - | - | - |
-| Request work history verification | - | Y | - | - | - | - | - | - | - | - | - | - | - |
-| Respond to a verification request | T | - | - | - | - | T or Y | Y (org verifier) | Y (institution verifier) | - | - | - | - | Y |
-| Verify an organization's own staff history (bulk) | - | - | - | - | - | - | Y | Y (alumni records) | - | - | - | - | Y |
-| Endorse a connected person's skill | - | - | Y | Y | Y | Y | - | - | - | - | - | - | - |
-| Attest a learner's project (instructor attestation) | - | - | - | Y (not own learner conflict) | Y | - | - | Y | - | - | - | - | - |
-| View own wallet and evidence | - | Y | - | - | - | - | - | - | - | - | - | - | - |
-| View another person's evidence | V (public verify only) | - | V | V | V | V (visibility + share) | V | V | A | A | A | A | V |
-| Issue credentials | - | - | - | Y (via LRN/ASM) | - | - | Y (employer_org class) | Y (institution class) | - | - | Y (platform class) | Y | Y |
-| Revoke or suspend a credential | - | - | - | Y (own issued) | - | - | Y (own issued) | Y (own issued) | - | - | Y | Y | Y |
-| Open a dispute | - | Y | Y | Y | Y | Y | Y | Y | - | - | - | - | - |
-| Decide disputes | - | - | - | - | - | - | - | - | - | Y (triage) | Y | Y | - |
-| Manage issuer registry and signing keys | - | - | - | - | - | - | - | - | - | - | Y | Y | - |
-| Create evidence share links | - | Y | - | - | - | - | - | - | - | - | - | - | - |
-| Configure quality score components | - | - | - | - | - | - | - | - | - | - | Y (versioned) | Y | - |
-| Review manual evidence queue | - | - | - | - | - | - | - | - | - | - | Y (verification staff) | Y | - |
+| Capability                                          | GUE                    | CAN/STD/FRL (holder) | CAN (peer) | INS                          | MNT | REC/HMG                | EAD                    | IAD/PLO                  | MOD | SUP        | PAD                    | SAD | API |
+| --------------------------------------------------- | ---------------------- | -------------------- | ---------- | ---------------------------- | --- | ---------------------- | ---------------------- | ------------------------ | --- | ---------- | ---------------------- | --- | --- |
+| Create skill claims, attach evidence                | -                      | Y                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | -                      | -   | -   |
+| Request work history verification                   | -                      | Y                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | -                      | -   | -   |
+| Respond to a verification request                   | T                      | -                    | -          | -                            | -   | T or Y                 | Y (org verifier)       | Y (institution verifier) | -   | -          | -                      | -   | Y   |
+| Verify an organization's own staff history (bulk)   | -                      | -                    | -          | -                            | -   | -                      | Y                      | Y (alumni records)       | -   | -          | -                      | -   | Y   |
+| Endorse a connected person's skill                  | -                      | -                    | Y          | Y                            | Y   | Y                      | -                      | -                        | -   | -          | -                      | -   | -   |
+| Attest a learner's project (instructor attestation) | -                      | -                    | -          | Y (not own learner conflict) | Y   | -                      | -                      | Y                        | -   | -          | -                      | -   | -   |
+| View own wallet and evidence                        | -                      | Y                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | -                      | -   | -   |
+| View another person's evidence                      | V (public verify only) | -                    | V          | V                            | V   | V (visibility + share) | V                      | V                        | A   | A          | A                      | A   | V   |
+| Issue credentials                                   | -                      | -                    | -          | Y (via LRN/ASM)              | -   | -                      | Y (employer_org class) | Y (institution class)    | -   | -          | Y (platform class)     | Y   | Y   |
+| Revoke or suspend a credential                      | -                      | -                    | -          | Y (own issued)               | -   | -                      | Y (own issued)         | Y (own issued)           | -   | -          | Y                      | Y   | Y   |
+| Open a dispute                                      | -                      | Y                    | Y          | Y                            | Y   | Y                      | Y                      | Y                        | -   | -          | -                      | -   | -   |
+| Decide disputes                                     | -                      | -                    | -          | -                            | -   | -                      | -                      | -                        | -   | Y (triage) | Y                      | Y   | -   |
+| Manage issuer registry and signing keys             | -                      | -                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | Y                      | Y   | -   |
+| Create evidence share links                         | -                      | Y                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | -                      | -   | -   |
+| Configure quality score components                  | -                      | -                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | Y (versioned)          | Y   | -   |
+| Review manual evidence queue                        | -                      | -                    | -          | -                            | -   | -                      | -                      | -                        | -   | -          | Y (verification staff) | Y   | -   |
 
 Staff verification staff are a PAD sub-role (named "verification staff") `[PROP]`; the role set in CONVENTIONS has no separate code (OD-EVD-08).
 
@@ -80,14 +80,14 @@ flowchart LR
     F --> REC["Recruiter evidence views"]
 ```
 
-| Sub-module | Name | Features |
-| --- | --- | --- |
-| A | Evidence core | FR-EVD-001 to 007 |
-| B | Work history and references | FR-EVD-008 to 012 |
-| C | Endorsements | FR-EVD-013 to 014 |
-| D | Credentials and wallet | FR-EVD-015 to 022 |
-| E | Sharing and consent | FR-EVD-023 to 025 |
-| F | Quality, disputes and review | FR-EVD-026 to 034 |
+| Sub-module | Name                         | Features          |
+| ---------- | ---------------------------- | ----------------- |
+| A          | Evidence core                | FR-EVD-001 to 007 |
+| B          | Work history and references  | FR-EVD-008 to 012 |
+| C          | Endorsements                 | FR-EVD-013 to 014 |
+| D          | Credentials and wallet       | FR-EVD-015 to 022 |
+| E          | Sharing and consent          | FR-EVD-023 to 025 |
+| F          | Quality, disputes and review | FR-EVD-026 to 034 |
 
 ## 4. Feature specifications
 
@@ -1071,45 +1071,45 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-| --- | --- | --- | --- | --- |
-| BR-EVD-001 | A claim is not evidence. A verified rung can be set only by the evidence service in response to a qualifying source event; client input and direct database updates cannot set it. | Honest verification (SSOT principle "Verified over claimed"). | Evidence service; database constraint on rung columns | [SRC: SSOT §6.1; V61-17 INV-T04 (Proposed)] |
-| BR-EVD-002 | The ladder has four rungs: `claimed`, `artifact_backed`, `peer_attested`, `authority_verified`. `authority_verified` always carries an `issuerClass` (platform, institution, employer_org, instructor) that the UI shows. | One vocabulary everywhere; class matters to matching. | Evidence service; UI chip component | [SRC: SSOT Appendix E V61-17 (Proposed)] |
-| BR-EVD-003 | Instructor attestations require instructor ≠ learner plus independence checks (no enrollment conflict, no shared ownership), are revocable, and never count as platform-verified. | An instructor cannot mint the top rung for their own learner. | Review service | [SRC: V61-17 (Proposed)] |
-| BR-EVD-004 | Employer-domain email proof reaches only `artifact_backed`, unless the domain is bound to a verified employer organization and an authorized verifier of that organization confirms the facts, which yields `authority_verified` (employer_org). | A domain proves association, not title or dates. | Work history service | [SRC: V61-17 (Proposed)] |
-| BR-EVD-005 | Evidence records, status records and events are append-only. Corrections are new records that supersede; nothing is silently rewritten. Artifacts must pass sanity checks (scannable, non-empty, not an unflagged duplicate hash) before counting. | Auditability and tamper evidence. | Database grants; services | [SRC: SSOT BR-149, BR-151, §6.3] |
-| BR-EVD-006 | Credentials are append-only; suspension, revocation, renewal and expiry create new status records and keep the original. Evidence links on an issued credential are immutable. | Preserve history. | Database grants; credential service | [SRC: SSOT BR-149, BR-151] |
-| BR-EVD-007 | A credential's public verification page exposes no personal data by default. The holder's display name appears only if the holder opted in for that credential. Signed payloads identify the holder by opaque subject reference. | Resolves the SSOT conflict between "no PII" (BR-150) and "first name + last initial" (F-96 step 3) in favor of privacy; see OD-EVD-01. | Verification page; payload builder | [SRC: SSOT BR-150, F-96 step 3 (open)]; resolution [DEC-REQ] OD-EVD-01 |
-| BR-EVD-008 | A credential or evidence item is created only from a platform-verified achievement event (course completion meeting criteria, passed assessment with clear integrity, employer or institution issuance by a registered issuer). Issuance is idempotent per (achievement id, template id). | No credentials without real achievement. | Issuance service | [SRC: SSOT BR-156, BR-048] |
-| BR-EVD-009 | The public verification endpoint is rate limited (default 60 per minute per IP). A revocation or suspension is visible on the verification page within 5 minutes; caches are purged on status change. | Abuse protection and freshness. | Edge and verification service | [SRC: SSOT F-96 security]; 5 minutes [PROP] |
-| BR-EVD-010 | Each credential has a SHA-256 hash of its canonical payload and a signature by the issuer's registered key. Verification recomputes both; a mismatch shows an integrity failure and raises an alert. | Tamper detection. | Credential service | [SRC: SSOT F-96 step 2]; signature [PROP] |
-| BR-EVD-011 | A verifier must be authenticated by (a) an account at a verified employer organization with verification authority, or (b) a one-time code to a work email on a domain bound to the employer. The candidate's own addresses can never verify the candidate. | Independence of the authority. | Responder portal | [SRC: SSOT F-94 "company email verification"]; [DER] |
-| BR-EVD-012 | Verifiers and referees must be distinct persons from the candidate and use distinct addresses. No more than 2 referees from the same organization per role. | Anti-fraud (SSOT leaves referee rules open). | Reference and verification services | [SRC: SSOT F-94 (open)]; limit [PROP] |
-| BR-EVD-013 | An employer verification asks only for employment facts (organization, title, dates, employment type) and optionally candidate-listed achievements. It never asks for salary, performance rating, reason for leaving, medical, or protected-attribute data. | Data minimization; discrimination avoidance. | Request builder | [DER] |
-| BR-EVD-014 | A work history request expires after 14 days with reminders on day 3 and day 7; the target verifier response time is under 7 days. | Timely verification. | Scheduler | [SRC: SSOT F-94 "Employment verification < 7d"]; schedule [PROP] |
-| BR-EVD-015 | Endorsements, reviews and references are never anonymous. When an author is erased, their contributions are deleted, not anonymized. | Accountability; avoids creating anonymous endorsements. | All attestation services; erasure handler | [SRC: SSOT BR-153] |
-| BR-EVD-016 | An endorser must be an authenticated, directly connected user with an account at least 7 days old, cannot endorse themselves, and has one active endorsement per (holder, skill); at most 20 are given per day. Weight = min(endorser reputation, 1.0) + 0.2 direct-connection boost; endorsers without reputation weigh 0.1. | Reproducible weighting, anti-gaming. | Endorsement service | [SRC: SSOT BR-131, BR-152, F-96 step 5]; caps [PROP] |
-| BR-EVD-017 | A rung reflects only currently valid sources. Revocation, expiry, suspension, withdrawal or an open dispute removes that source's contribution and the rung is recomputed; the history is kept. | Truth at read time. | Evidence service; impact job | [SRC: SSOT §6.3, §14.3] |
-| BR-EVD-018 | Evidence strength is shown as components (provenance, directness, recency, independence, rigor) and a disclosed composite used for sorting only. It is never the sole basis for automated rejection or ranking out of a candidate. | Explainability and fairness. | Quality service; recruiter views | [SRC: SSOT §6.1]; [DER] |
-| BR-EVD-019 | Imported credentials are verified by method priority: cryptographic signature, issuer API lookup, fetch from allowlisted issuer domain, manual review. Only the first two (or an approved manual review) reach `authority_verified`; a reachable URL alone is `artifact_backed`. | Do not overclaim verification. | Import service | [PROP] |
-| BR-EVD-020 | Credential expiry is evaluated at the end of the validity date in the holder's time zone. Freshness decay is advisory, never deletes evidence, and does not apply to credentials with explicit validity. | Clear semantics. | Scheduler; quality service | [SRC: SSOT F-123, §14.3] |
-| BR-EVD-021 | Revocation, suspension and dispute reasons are visible only to the holder, the issuer and staff; the public sees status only. | Privacy and defamation risk. | Verification page; APIs | [SRC: SSOT F-96 permissions (open)]; resolution [PROP] |
-| BR-EVD-022 | Revocation requires a reason code and a note and triggers downstream impact analysis (rungs, share links, matching, search, in-flight applications, notifications). Revoking platform-class credentials older than 365 days needs dual approval. | Controlled, traceable consequences. | Credential service; admin console | [SRC: SSOT §6.3]; dual approval [PROP] |
-| BR-EVD-023 | Portable credentials target W3C Verifiable Credentials Data Model 2.0 and Open Badges 3.0. A hash commitment is never labeled zero-knowledge. | Open standards, honest claims. | Export service | [SRC: SSOT F-96 step 8] |
-| BR-EVD-024 | Sharing is purpose-bound: each share link has a recipient scope, purpose, item list and expiry (default 14 days, max 90), is recorded as consent, and revocation takes effect at the next read with no consent cache. | Consent revocation must be immediate. | Share service | [SRC: SSOT V61-16 (Proposed)] |
-| BR-EVD-025 | Others see only evidence the holder made visible to them or shared with them; private items appear only as a "not shared" count. | Holder control. | Serializer | [DER] |
-| BR-EVD-026 | All recruiter and employer access to evidence is logged (viewer, org, items, time). API reads cannot enumerate; unknown and unauthorized ids return the same response. Access-log write failure denies access. | Accountability and enumeration defense. | Share and API services | [PROP] |
-| BR-EVD-027 | Selective-disclosure presentations are nonce-bound, short-lived (5 minutes to 24 hours) and check live status at verification. | Replay protection. | Presentation service | [PROP]; [SRC: SSOT BR-155] |
-| BR-EVD-028 | A dispute receives a first decision within 7 days of opening; parties respond within 3 days; one appeal is allowed; a user may have at most 5 open disputes. | Timely, fair resolution. | Dispute service | [SRC: SSOT BR-154]; other numbers [PROP] |
-| BR-EVD-029 | Append-only history refers to people only by an opaque subject reference. On erasure the identity map is deleted, mutable records are deleted or tombstoned, and credentials remain verifiable as "holder record erased". Legal retention exceptions are listed. | Erasure with auditability. | Erasure handler | [SRC: SSOT V61-07, V61-19 (Proposed)] |
-| BR-EVD-030 | Evidence files are malware scanned, limited to 50 MB and allowlisted types, private by default, never publicly addressable, and served only via short-lived signed URLs. | Safe handling. | Upload pipeline | [DER] |
-| BR-EVD-031 | External contribution connections use read-only minimal OAuth scopes; tokens are encrypted and deleted on disconnect; only metadata and counts are stored; forks without upstream merges, bots and trivial changes are excluded. | Minimal data, fair metrics. | Integration service | [SRC: SSOT F-89]; [PROP] |
-| BR-EVD-032 | Reference forms exclude questions about protected attributes, health, family or age; submissions are immutable except one correction within 7 days. | Fair, clean references. | Form templates | [DER] |
-| BR-EVD-033 | Only registered, verified issuers (domain control and identity proven) may issue; every signing key is held in a managed key store, rotation preserves old public keys for verification, and a compromised key triggers re-verification of credentials signed after the compromise date. | Trust anchor. | Issuer registry; KMS | [PROP] |
-| BR-EVD-034 | Evidence quality never uses protected attributes, photo, name, nationality or institution prestige as inputs. | Fairness. | Quality service; audits | [DER] |
-| BR-EVD-035 | Narratives are labeled self-authored, never raise a rung, and AI drafts never auto-commit. | Claims are not evidence. | Narrative service | [SRC: SSOT BR-33]; [DER] |
-| BR-EVD-036 | Skill claims reference canonical skills only; skills inferred from artifacts or contributions are suggestions the holder must accept. | Taxonomy integrity. | Claim service | [SRC: SSOT BR-141, BR-144] |
-| BR-EVD-037 | Manual grants of `authority_verified` for high-impact items (degrees, professional licenses, employer records without an issuer) require two different staff approvals; staff cannot review their own or related accounts. | Prevent insider fraud. | Review queue | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                          | Rationale                                                                                                                              | Enforced where                                        | Source                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------- |
+| BR-EVD-001 | A claim is not evidence. A verified rung can be set only by the evidence service in response to a qualifying source event; client input and direct database updates cannot set it.                                                                                                                                            | Honest verification (SSOT principle "Verified over claimed").                                                                          | Evidence service; database constraint on rung columns | [SRC: SSOT §6.1; V61-17 INV-T04 (Proposed)]                            |
+| BR-EVD-002 | The ladder has four rungs: `claimed`, `artifact_backed`, `peer_attested`, `authority_verified`. `authority_verified` always carries an `issuerClass` (platform, institution, employer_org, instructor) that the UI shows.                                                                                                     | One vocabulary everywhere; class matters to matching.                                                                                  | Evidence service; UI chip component                   | [SRC: SSOT Appendix E V61-17 (Proposed)]                               |
+| BR-EVD-003 | Instructor attestations require instructor ≠ learner plus independence checks (no enrollment conflict, no shared ownership), are revocable, and never count as platform-verified.                                                                                                                                             | An instructor cannot mint the top rung for their own learner.                                                                          | Review service                                        | [SRC: V61-17 (Proposed)]                                               |
+| BR-EVD-004 | Employer-domain email proof reaches only `artifact_backed`, unless the domain is bound to a verified employer organization and an authorized verifier of that organization confirms the facts, which yields `authority_verified` (employer_org).                                                                              | A domain proves association, not title or dates.                                                                                       | Work history service                                  | [SRC: V61-17 (Proposed)]                                               |
+| BR-EVD-005 | Evidence records, status records and events are append-only. Corrections are new records that supersede; nothing is silently rewritten. Artifacts must pass sanity checks (scannable, non-empty, not an unflagged duplicate hash) before counting.                                                                            | Auditability and tamper evidence.                                                                                                      | Database grants; services                             | [SRC: SSOT BR-149, BR-151, §6.3]                                       |
+| BR-EVD-006 | Credentials are append-only; suspension, revocation, renewal and expiry create new status records and keep the original. Evidence links on an issued credential are immutable.                                                                                                                                                | Preserve history.                                                                                                                      | Database grants; credential service                   | [SRC: SSOT BR-149, BR-151]                                             |
+| BR-EVD-007 | A credential's public verification page exposes no personal data by default. The holder's display name appears only if the holder opted in for that credential. Signed payloads identify the holder by opaque subject reference.                                                                                              | Resolves the SSOT conflict between "no PII" (BR-150) and "first name + last initial" (F-96 step 3) in favor of privacy; see OD-EVD-01. | Verification page; payload builder                    | [SRC: SSOT BR-150, F-96 step 3 (open)]; resolution [DEC-REQ] OD-EVD-01 |
+| BR-EVD-008 | A credential or evidence item is created only from a platform-verified achievement event (course completion meeting criteria, passed assessment with clear integrity, employer or institution issuance by a registered issuer). Issuance is idempotent per (achievement id, template id).                                     | No credentials without real achievement.                                                                                               | Issuance service                                      | [SRC: SSOT BR-156, BR-048]                                             |
+| BR-EVD-009 | The public verification endpoint is rate limited (default 60 per minute per IP). A revocation or suspension is visible on the verification page within 5 minutes; caches are purged on status change.                                                                                                                         | Abuse protection and freshness.                                                                                                        | Edge and verification service                         | [SRC: SSOT F-96 security]; 5 minutes [PROP]                            |
+| BR-EVD-010 | Each credential has a SHA-256 hash of its canonical payload and a signature by the issuer's registered key. Verification recomputes both; a mismatch shows an integrity failure and raises an alert.                                                                                                                          | Tamper detection.                                                                                                                      | Credential service                                    | [SRC: SSOT F-96 step 2]; signature [PROP]                              |
+| BR-EVD-011 | A verifier must be authenticated by (a) an account at a verified employer organization with verification authority, or (b) a one-time code to a work email on a domain bound to the employer. The candidate's own addresses can never verify the candidate.                                                                   | Independence of the authority.                                                                                                         | Responder portal                                      | [SRC: SSOT F-94 "company email verification"]; [DER]                   |
+| BR-EVD-012 | Verifiers and referees must be distinct persons from the candidate and use distinct addresses. No more than 2 referees from the same organization per role.                                                                                                                                                                   | Anti-fraud (SSOT leaves referee rules open).                                                                                           | Reference and verification services                   | [SRC: SSOT F-94 (open)]; limit [PROP]                                  |
+| BR-EVD-013 | An employer verification asks only for employment facts (organization, title, dates, employment type) and optionally candidate-listed achievements. It never asks for salary, performance rating, reason for leaving, medical, or protected-attribute data.                                                                   | Data minimization; discrimination avoidance.                                                                                           | Request builder                                       | [DER]                                                                  |
+| BR-EVD-014 | A work history request expires after 14 days with reminders on day 3 and day 7; the target verifier response time is under 7 days.                                                                                                                                                                                            | Timely verification.                                                                                                                   | Scheduler                                             | [SRC: SSOT F-94 "Employment verification < 7d"]; schedule [PROP]       |
+| BR-EVD-015 | Endorsements, reviews and references are never anonymous. When an author is erased, their contributions are deleted, not anonymized.                                                                                                                                                                                          | Accountability; avoids creating anonymous endorsements.                                                                                | All attestation services; erasure handler             | [SRC: SSOT BR-153]                                                     |
+| BR-EVD-016 | An endorser must be an authenticated, directly connected user with an account at least 7 days old, cannot endorse themselves, and has one active endorsement per (holder, skill); at most 20 are given per day. Weight = min(endorser reputation, 1.0) + 0.2 direct-connection boost; endorsers without reputation weigh 0.1. | Reproducible weighting, anti-gaming.                                                                                                   | Endorsement service                                   | [SRC: SSOT BR-131, BR-152, F-96 step 5]; caps [PROP]                   |
+| BR-EVD-017 | A rung reflects only currently valid sources. Revocation, expiry, suspension, withdrawal or an open dispute removes that source's contribution and the rung is recomputed; the history is kept.                                                                                                                               | Truth at read time.                                                                                                                    | Evidence service; impact job                          | [SRC: SSOT §6.3, §14.3]                                                |
+| BR-EVD-018 | Evidence strength is shown as components (provenance, directness, recency, independence, rigor) and a disclosed composite used for sorting only. It is never the sole basis for automated rejection or ranking out of a candidate.                                                                                            | Explainability and fairness.                                                                                                           | Quality service; recruiter views                      | [SRC: SSOT §6.1]; [DER]                                                |
+| BR-EVD-019 | Imported credentials are verified by method priority: cryptographic signature, issuer API lookup, fetch from allowlisted issuer domain, manual review. Only the first two (or an approved manual review) reach `authority_verified`; a reachable URL alone is `artifact_backed`.                                              | Do not overclaim verification.                                                                                                         | Import service                                        | [PROP]                                                                 |
+| BR-EVD-020 | Credential expiry is evaluated at the end of the validity date in the holder's time zone. Freshness decay is advisory, never deletes evidence, and does not apply to credentials with explicit validity.                                                                                                                      | Clear semantics.                                                                                                                       | Scheduler; quality service                            | [SRC: SSOT F-123, §14.3]                                               |
+| BR-EVD-021 | Revocation, suspension and dispute reasons are visible only to the holder, the issuer and staff; the public sees status only.                                                                                                                                                                                                 | Privacy and defamation risk.                                                                                                           | Verification page; APIs                               | [SRC: SSOT F-96 permissions (open)]; resolution [PROP]                 |
+| BR-EVD-022 | Revocation requires a reason code and a note and triggers downstream impact analysis (rungs, share links, matching, search, in-flight applications, notifications). Revoking platform-class credentials older than 365 days needs dual approval.                                                                              | Controlled, traceable consequences.                                                                                                    | Credential service; admin console                     | [SRC: SSOT §6.3]; dual approval [PROP]                                 |
+| BR-EVD-023 | Portable credentials target W3C Verifiable Credentials Data Model 2.0 and Open Badges 3.0. A hash commitment is never labeled zero-knowledge.                                                                                                                                                                                 | Open standards, honest claims.                                                                                                         | Export service                                        | [SRC: SSOT F-96 step 8]                                                |
+| BR-EVD-024 | Sharing is purpose-bound: each share link has a recipient scope, purpose, item list and expiry (default 14 days, max 90), is recorded as consent, and revocation takes effect at the next read with no consent cache.                                                                                                         | Consent revocation must be immediate.                                                                                                  | Share service                                         | [SRC: SSOT V61-16 (Proposed)]                                          |
+| BR-EVD-025 | Others see only evidence the holder made visible to them or shared with them; private items appear only as a "not shared" count.                                                                                                                                                                                              | Holder control.                                                                                                                        | Serializer                                            | [DER]                                                                  |
+| BR-EVD-026 | All recruiter and employer access to evidence is logged (viewer, org, items, time). API reads cannot enumerate; unknown and unauthorized ids return the same response. Access-log write failure denies access.                                                                                                                | Accountability and enumeration defense.                                                                                                | Share and API services                                | [PROP]                                                                 |
+| BR-EVD-027 | Selective-disclosure presentations are nonce-bound, short-lived (5 minutes to 24 hours) and check live status at verification.                                                                                                                                                                                                | Replay protection.                                                                                                                     | Presentation service                                  | [PROP]; [SRC: SSOT BR-155]                                             |
+| BR-EVD-028 | A dispute receives a first decision within 7 days of opening; parties respond within 3 days; one appeal is allowed; a user may have at most 5 open disputes.                                                                                                                                                                  | Timely, fair resolution.                                                                                                               | Dispute service                                       | [SRC: SSOT BR-154]; other numbers [PROP]                               |
+| BR-EVD-029 | Append-only history refers to people only by an opaque subject reference. On erasure the identity map is deleted, mutable records are deleted or tombstoned, and credentials remain verifiable as "holder record erased". Legal retention exceptions are listed.                                                              | Erasure with auditability.                                                                                                             | Erasure handler                                       | [SRC: SSOT V61-07, V61-19 (Proposed)]                                  |
+| BR-EVD-030 | Evidence files are malware scanned, limited to 50 MB and allowlisted types, private by default, never publicly addressable, and served only via short-lived signed URLs.                                                                                                                                                      | Safe handling.                                                                                                                         | Upload pipeline                                       | [DER]                                                                  |
+| BR-EVD-031 | External contribution connections use read-only minimal OAuth scopes; tokens are encrypted and deleted on disconnect; only metadata and counts are stored; forks without upstream merges, bots and trivial changes are excluded.                                                                                              | Minimal data, fair metrics.                                                                                                            | Integration service                                   | [SRC: SSOT F-89]; [PROP]                                               |
+| BR-EVD-032 | Reference forms exclude questions about protected attributes, health, family or age; submissions are immutable except one correction within 7 days.                                                                                                                                                                           | Fair, clean references.                                                                                                                | Form templates                                        | [DER]                                                                  |
+| BR-EVD-033 | Only registered, verified issuers (domain control and identity proven) may issue; every signing key is held in a managed key store, rotation preserves old public keys for verification, and a compromised key triggers re-verification of credentials signed after the compromise date.                                      | Trust anchor.                                                                                                                          | Issuer registry; KMS                                  | [PROP]                                                                 |
+| BR-EVD-034 | Evidence quality never uses protected attributes, photo, name, nationality or institution prestige as inputs.                                                                                                                                                                                                                 | Fairness.                                                                                                                              | Quality service; audits                               | [DER]                                                                  |
+| BR-EVD-035 | Narratives are labeled self-authored, never raise a rung, and AI drafts never auto-commit.                                                                                                                                                                                                                                    | Claims are not evidence.                                                                                                               | Narrative service                                     | [SRC: SSOT BR-33]; [DER]                                               |
+| BR-EVD-036 | Skill claims reference canonical skills only; skills inferred from artifacts or contributions are suggestions the holder must accept.                                                                                                                                                                                         | Taxonomy integrity.                                                                                                                    | Claim service                                         | [SRC: SSOT BR-141, BR-144]                                             |
+| BR-EVD-037 | Manual grants of `authority_verified` for high-impact items (degrees, professional licenses, employer records without an issuer) require two different staff approvals; staff cannot review their own or related accounts.                                                                                                    | Prevent insider fraud.                                                                                                                 | Review queue                                          | [PROP]                                                                 |
 
 ## 6. State machines
 
@@ -1117,16 +1117,16 @@ flowchart LR
 
 States: `claimed`, `artifact_backed`, `peer_attested`, `authority_verified`, `disputed`, `withdrawn`. The rung shows the highest currently valid state; `disputed` overlays while a dispute is open.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `claimed` | Claim created | canonical skill or valid entry |
-| `claimed` | `artifact_backed` | Artifact accepted or domain proof | sanity checks pass |
-| `claimed`/`artifact_backed` | `peer_attested` | Endorsement threshold, peer or instructor review, reference | thresholds and independence |
-| any lower | `authority_verified` | Issuer, employer or platform source | registered issuer; class set |
-| any | `disputed` | Dispute opened | target exists |
-| `disputed` | previous rung (recomputed) | Dispute rejected or withdrawn | none |
-| any higher | lower rung | Source revoked, expired, suspended, withdrawn | recompute (BR-EVD-017) |
-| any | `withdrawn` | Holder withdraws claim | none |
+| From                        | To                         | Trigger                                                     | Guard                          |
+| --------------------------- | -------------------------- | ----------------------------------------------------------- | ------------------------------ |
+| `[*]`                       | `claimed`                  | Claim created                                               | canonical skill or valid entry |
+| `claimed`                   | `artifact_backed`          | Artifact accepted or domain proof                           | sanity checks pass             |
+| `claimed`/`artifact_backed` | `peer_attested`            | Endorsement threshold, peer or instructor review, reference | thresholds and independence    |
+| any lower                   | `authority_verified`       | Issuer, employer or platform source                         | registered issuer; class set   |
+| any                         | `disputed`                 | Dispute opened                                              | target exists                  |
+| `disputed`                  | previous rung (recomputed) | Dispute rejected or withdrawn                               | none                           |
+| any higher                  | lower rung                 | Source revoked, expired, suspended, withdrawn               | recompute (BR-EVD-017)         |
+| any                         | `withdrawn`                | Holder withdraws claim                                      | none                           |
 
 ```mermaid
 stateDiagram-v2
@@ -1152,18 +1152,18 @@ stateDiagram-v2
 
 States: `draft`, `sent`, `opened`, `responded_confirmed`, `responded_corrected`, `responded_cannot_confirm`, `undeliverable`, `expired`, `withdrawn`, `disputed`. Terminal: `expired`, `withdrawn`, `responded_cannot_confirm`, `responded_confirmed` (can move to `disputed`).
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `draft` | `sent` | Candidate sends | verifier valid, active requests ≤ 3 |
-| `sent` | `opened` | Verifier opens | token valid |
-| `sent` | `undeliverable` | Bounce | none |
-| `sent`/`opened` | `responded_confirmed` | Verifier confirms all facts | BR-EVD-011 met |
-| `sent`/`opened` | `responded_corrected` | Verifier corrects a fact | BR-EVD-011 met |
-| `sent`/`opened` | `responded_cannot_confirm` | Verifier cannot confirm | none |
-| `sent`/`opened` | `expired` | 14 days pass | none |
-| `draft`/`sent`/`opened` | `withdrawn` | Candidate withdraws or edits entry | none |
-| `responded_corrected` | `responded_confirmed` | Candidate accepts correction | updates PRF |
-| `responded_*` | `disputed` | Dispute opened | none |
+| From                    | To                         | Trigger                            | Guard                               |
+| ----------------------- | -------------------------- | ---------------------------------- | ----------------------------------- |
+| `draft`                 | `sent`                     | Candidate sends                    | verifier valid, active requests ≤ 3 |
+| `sent`                  | `opened`                   | Verifier opens                     | token valid                         |
+| `sent`                  | `undeliverable`            | Bounce                             | none                                |
+| `sent`/`opened`         | `responded_confirmed`      | Verifier confirms all facts        | BR-EVD-011 met                      |
+| `sent`/`opened`         | `responded_corrected`      | Verifier corrects a fact           | BR-EVD-011 met                      |
+| `sent`/`opened`         | `responded_cannot_confirm` | Verifier cannot confirm            | none                                |
+| `sent`/`opened`         | `expired`                  | 14 days pass                       | none                                |
+| `draft`/`sent`/`opened` | `withdrawn`                | Candidate withdraws or edits entry | none                                |
+| `responded_corrected`   | `responded_confirmed`      | Candidate accepts correction       | updates PRF                         |
+| `responded_*`           | `disputed`                 | Dispute opened                     | none                                |
 
 ```mermaid
 stateDiagram-v2
@@ -1189,19 +1189,19 @@ stateDiagram-v2
 
 States: `offered`, `issued`, `suspended`, `expired`, `revoked`, `disputed`, `declined`, `erased_holder`. Terminal: `revoked`, `declined`, `expired` (renewal creates a new credential).
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `issued` | Event-based issuance | BR-EVD-008 |
-| `[*]` | `offered` | Manual issuance by issuer | recipient list |
-| `offered` | `issued` | Holder accepts | within 30 days |
-| `offered` | `declined` | Holder declines or 30 days pass | none |
-| `issued` | `suspended` | Issuer or staff suspends | reason and note |
-| `suspended` | `issued` | Suspension lifted | authorized actor |
-| `issued`/`suspended` | `revoked` | Revocation | reason, note, dual approval if rule applies |
-| `issued` | `expired` | Validity date passes | `validUntil` present |
-| `issued` | `disputed` | Dispute opened | none |
-| `disputed` | `issued` or `revoked` | Dispute decision | decision recorded |
-| any non-terminal | `erased_holder` | Holder erasure | display only issuer facts |
+| From                 | To                    | Trigger                         | Guard                                       |
+| -------------------- | --------------------- | ------------------------------- | ------------------------------------------- |
+| `[*]`                | `issued`              | Event-based issuance            | BR-EVD-008                                  |
+| `[*]`                | `offered`             | Manual issuance by issuer       | recipient list                              |
+| `offered`            | `issued`              | Holder accepts                  | within 30 days                              |
+| `offered`            | `declined`            | Holder declines or 30 days pass | none                                        |
+| `issued`             | `suspended`           | Issuer or staff suspends        | reason and note                             |
+| `suspended`          | `issued`              | Suspension lifted               | authorized actor                            |
+| `issued`/`suspended` | `revoked`             | Revocation                      | reason, note, dual approval if rule applies |
+| `issued`             | `expired`             | Validity date passes            | `validUntil` present                        |
+| `issued`             | `disputed`            | Dispute opened                  | none                                        |
+| `disputed`           | `issued` or `revoked` | Dispute decision                | decision recorded                           |
+| any non-terminal     | `erased_holder`       | Holder erasure                  | display only issuer facts                   |
 
 ```mermaid
 stateDiagram-v2
@@ -1227,17 +1227,17 @@ stateDiagram-v2
 
 States: `open`, `awaiting_response`, `under_review`, `decided_upheld`, `decided_rejected`, `appealed`, `closed`, `withdrawn`. Terminal: `closed`, `withdrawn`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `open` | Disputer submits | ≤ 5 open disputes |
-| `open` | `awaiting_response` | Triage complete | parties identified |
-| `awaiting_response` | `under_review` | Responses received or 3 days pass | none |
-| `under_review` | `decided_upheld` | Staff decides | no conflict of interest |
-| `under_review` | `decided_rejected` | Staff decides | no conflict of interest |
-| `decided_*` | `appealed` | Disputer appeals once | within 7 days |
-| `appealed` | `decided_upheld` or `decided_rejected` | Second reviewer | different reviewer |
-| `decided_*` | `closed` | Appeal window ends and effects applied | none |
-| `open`/`awaiting_response` | `withdrawn` | Disputer withdraws | none |
+| From                       | To                                     | Trigger                                | Guard                   |
+| -------------------------- | -------------------------------------- | -------------------------------------- | ----------------------- |
+| `[*]`                      | `open`                                 | Disputer submits                       | ≤ 5 open disputes       |
+| `open`                     | `awaiting_response`                    | Triage complete                        | parties identified      |
+| `awaiting_response`        | `under_review`                         | Responses received or 3 days pass      | none                    |
+| `under_review`             | `decided_upheld`                       | Staff decides                          | no conflict of interest |
+| `under_review`             | `decided_rejected`                     | Staff decides                          | no conflict of interest |
+| `decided_*`                | `appealed`                             | Disputer appeals once                  | within 7 days           |
+| `appealed`                 | `decided_upheld` or `decided_rejected` | Second reviewer                        | different reviewer      |
+| `decided_*`                | `closed`                               | Appeal window ends and effects applied | none                    |
+| `open`/`awaiting_response` | `withdrawn`                            | Disputer withdraws                     | none                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1262,13 +1262,13 @@ stateDiagram-v2
 
 States: `active`, `expired`, `revoked`, `partially_unavailable` (an item was revoked), `deleted` (holder erased). Terminal: `expired`, `revoked`, `deleted`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `active` | Holder creates | ≥ 1 item |
-| `active` | `partially_unavailable` | An included item revoked | none |
-| `active`/`partially_unavailable` | `expired` | Expiry passes | none |
-| `active`/`partially_unavailable` | `revoked` | Holder revokes | none |
-| any | `deleted` | Holder erased | none |
+| From                             | To                      | Trigger                  | Guard    |
+| -------------------------------- | ----------------------- | ------------------------ | -------- |
+| `[*]`                            | `active`                | Holder creates           | ≥ 1 item |
+| `active`                         | `partially_unavailable` | An included item revoked | none     |
+| `active`/`partially_unavailable` | `expired`               | Expiry passes            | none     |
+| `active`/`partially_unavailable` | `revoked`               | Holder revokes           | none     |
+| any                              | `deleted`               | Holder erased            | none     |
 
 ```mermaid
 stateDiagram-v2
@@ -1305,66 +1305,66 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-| --- | --- | --- | --- | --- | --- |
-| SCR-EVD-001 | Evidence drawer | overlay on claim | CAN | Rung, evidence list, how to strengthen (FR-EVD-001, 003) | empty, partial, disputed |
-| SCR-EVD-002 | Skill evidence panel | `/skills/:id/evidence` | CAN | Claim evidence, freshness, strength (FR-EVD-002, 026, 027) | no evidence, stale |
-| SCR-EVD-003 | Add evidence | `/evidence/new` | CAN | Upload or link artifact (FR-EVD-003) | uploading, scan failed, unreachable link |
-| SCR-EVD-004 | Contribution connect | `/evidence/connect` | CAN | OAuth and repo selection (FR-EVD-007) | connected, needs reconnect |
-| SCR-EVD-005 | Project review request and review form | `/reviews/:id` | CAN, INS, MNT | Request and perform review (FR-EVD-006) | pending, conflict, submitted |
-| SCR-EVD-006 | Verify a role wizard | `/verify-role/:entryId` | CAN | Start work history verification (FR-EVD-008) | step n, bounced, expired |
-| SCR-EVD-007 | Verification status | `/verifications` | CAN | Track requests (FR-EVD-008) | sent, corrected, confirmed |
-| SCR-EVD-008 | Responder portal | `/v/:token` | verifier (token) | Confirm facts (FR-EVD-009) | identity step, form, expired, locked |
-| SCR-EVD-009 | Employer verification program | `/employer/verification` | EAD | Contacts, CSV, matches (FR-EVD-010) | upload, match report, approved |
-| SCR-EVD-010 | References manager | `/references` | CAN | Request and share references (FR-EVD-011) | none, pending, completed |
-| SCR-EVD-011 | Reference response form | `/ref/:token` | referee | Answer questions (FR-EVD-012) | form, submitted, expired |
-| SCR-EVD-012 | Endorsements | `/endorsements` | CAN | Given and received (FR-EVD-013, 014) | none, limit reached |
-| SCR-EVD-013 | Weight explanation | popover | all | Why this weight (FR-EVD-014) | components shown |
-| SCR-EVD-014 | Credential wallet | `/wallet` | CAN | Cards, filters (FR-EVD-017) | empty, expiring, revoked |
-| SCR-EVD-015 | Credential detail | `/wallet/:id` | CAN | Details, history, actions | issued, disputed |
-| SCR-EVD-016 | Import credential | `/wallet/import` | CAN | Methods and result (FR-EVD-016) | verified, unverified, blocked |
-| SCR-EVD-017 | Public verification page | `/verify/:id` | public | Status and signature (FR-EVD-018) | valid, expired, revoked, erased, 429 |
-| SCR-EVD-018 | Export credentials | `/wallet/export` | CAN | Formats (FR-EVD-021) | processing, ready |
-| SCR-EVD-019 | Selective proof builder | `/wallet/:id/proof` | CAN | Field checklist (FR-EVD-025) | created, expired |
-| SCR-EVD-020 | Share evidence | `/share/new` | CAN | Scope, recipient, expiry (FR-EVD-023) | created, limits |
-| SCR-EVD-021 | Share manager and access log | `/share` | CAN | Links, log, revoke (FR-EVD-024) | no access, revoked |
-| SCR-EVD-022 | Shared evidence viewer | `/s/:token` | recipient | Read scoped evidence | email code, expired, partially unavailable |
-| SCR-EVD-023 | Recruiter evidence panel | tab on candidate | REC, HMG | Review evidence (FR-EVD-030) | not shared, changed, declined |
-| SCR-EVD-024 | Evidence pack request | modal | REC, CAN | Request and consent | pending, granted |
-| SCR-EVD-025 | Dispute form and tracker | `/disputes/:id` | all parties | Open, respond, appeal (FR-EVD-028) | open, decided |
-| SCR-EVD-026 | Impact notice | banner and `/impact/:id` | CAN, staff | Downstream effects (FR-EVD-029) | pending consumers |
-| SCR-EVD-027 | Narrative editor | `/skills/:id/story` | CAN | Write story (FR-EVD-031) | draft, AI suggestion |
-| SCR-EVD-028 | Staff review queue | `/admin/evidence-review` | PAD | Manual decisions (FR-EVD-032) | locked, second approval |
-| SCR-EVD-029 | Issuer application and console | `/issuer` | EAD, IAD | Issuer onboarding, templates, keys (FR-EVD-015, 022) | pending, approved, suspended |
-| SCR-EVD-030 | Issuer directory | `/issuers` | public | Issuer list | filtered |
-| SCR-EVD-031 | Revocation console | `/admin/credentials/:id` | issuer admins, PAD | Suspend, revoke (FR-EVD-020) | impact preview |
-| SCR-EVD-032 | API keys and usage | `/employer/api` | EAD | Verification API (FR-EVD-033) | quota, revoked key |
+| ID          | Name                                   | Route proposal           | Roles              | Purpose                                                    | Key states                                 |
+| ----------- | -------------------------------------- | ------------------------ | ------------------ | ---------------------------------------------------------- | ------------------------------------------ |
+| SCR-EVD-001 | Evidence drawer                        | overlay on claim         | CAN                | Rung, evidence list, how to strengthen (FR-EVD-001, 003)   | empty, partial, disputed                   |
+| SCR-EVD-002 | Skill evidence panel                   | `/skills/:id/evidence`   | CAN                | Claim evidence, freshness, strength (FR-EVD-002, 026, 027) | no evidence, stale                         |
+| SCR-EVD-003 | Add evidence                           | `/evidence/new`          | CAN                | Upload or link artifact (FR-EVD-003)                       | uploading, scan failed, unreachable link   |
+| SCR-EVD-004 | Contribution connect                   | `/evidence/connect`      | CAN                | OAuth and repo selection (FR-EVD-007)                      | connected, needs reconnect                 |
+| SCR-EVD-005 | Project review request and review form | `/reviews/:id`           | CAN, INS, MNT      | Request and perform review (FR-EVD-006)                    | pending, conflict, submitted               |
+| SCR-EVD-006 | Verify a role wizard                   | `/verify-role/:entryId`  | CAN                | Start work history verification (FR-EVD-008)               | step n, bounced, expired                   |
+| SCR-EVD-007 | Verification status                    | `/verifications`         | CAN                | Track requests (FR-EVD-008)                                | sent, corrected, confirmed                 |
+| SCR-EVD-008 | Responder portal                       | `/v/:token`              | verifier (token)   | Confirm facts (FR-EVD-009)                                 | identity step, form, expired, locked       |
+| SCR-EVD-009 | Employer verification program          | `/employer/verification` | EAD                | Contacts, CSV, matches (FR-EVD-010)                        | upload, match report, approved             |
+| SCR-EVD-010 | References manager                     | `/references`            | CAN                | Request and share references (FR-EVD-011)                  | none, pending, completed                   |
+| SCR-EVD-011 | Reference response form                | `/ref/:token`            | referee            | Answer questions (FR-EVD-012)                              | form, submitted, expired                   |
+| SCR-EVD-012 | Endorsements                           | `/endorsements`          | CAN                | Given and received (FR-EVD-013, 014)                       | none, limit reached                        |
+| SCR-EVD-013 | Weight explanation                     | popover                  | all                | Why this weight (FR-EVD-014)                               | components shown                           |
+| SCR-EVD-014 | Credential wallet                      | `/wallet`                | CAN                | Cards, filters (FR-EVD-017)                                | empty, expiring, revoked                   |
+| SCR-EVD-015 | Credential detail                      | `/wallet/:id`            | CAN                | Details, history, actions                                  | issued, disputed                           |
+| SCR-EVD-016 | Import credential                      | `/wallet/import`         | CAN                | Methods and result (FR-EVD-016)                            | verified, unverified, blocked              |
+| SCR-EVD-017 | Public verification page               | `/verify/:id`            | public             | Status and signature (FR-EVD-018)                          | valid, expired, revoked, erased, 429       |
+| SCR-EVD-018 | Export credentials                     | `/wallet/export`         | CAN                | Formats (FR-EVD-021)                                       | processing, ready                          |
+| SCR-EVD-019 | Selective proof builder                | `/wallet/:id/proof`      | CAN                | Field checklist (FR-EVD-025)                               | created, expired                           |
+| SCR-EVD-020 | Share evidence                         | `/share/new`             | CAN                | Scope, recipient, expiry (FR-EVD-023)                      | created, limits                            |
+| SCR-EVD-021 | Share manager and access log           | `/share`                 | CAN                | Links, log, revoke (FR-EVD-024)                            | no access, revoked                         |
+| SCR-EVD-022 | Shared evidence viewer                 | `/s/:token`              | recipient          | Read scoped evidence                                       | email code, expired, partially unavailable |
+| SCR-EVD-023 | Recruiter evidence panel               | tab on candidate         | REC, HMG           | Review evidence (FR-EVD-030)                               | not shared, changed, declined              |
+| SCR-EVD-024 | Evidence pack request                  | modal                    | REC, CAN           | Request and consent                                        | pending, granted                           |
+| SCR-EVD-025 | Dispute form and tracker               | `/disputes/:id`          | all parties        | Open, respond, appeal (FR-EVD-028)                         | open, decided                              |
+| SCR-EVD-026 | Impact notice                          | banner and `/impact/:id` | CAN, staff         | Downstream effects (FR-EVD-029)                            | pending consumers                          |
+| SCR-EVD-027 | Narrative editor                       | `/skills/:id/story`      | CAN                | Write story (FR-EVD-031)                                   | draft, AI suggestion                       |
+| SCR-EVD-028 | Staff review queue                     | `/admin/evidence-review` | PAD                | Manual decisions (FR-EVD-032)                              | locked, second approval                    |
+| SCR-EVD-029 | Issuer application and console         | `/issuer`                | EAD, IAD           | Issuer onboarding, templates, keys (FR-EVD-015, 022)       | pending, approved, suspended               |
+| SCR-EVD-030 | Issuer directory                       | `/issuers`               | public             | Issuer list                                                | filtered                                   |
+| SCR-EVD-031 | Revocation console                     | `/admin/credentials/:id` | issuer admins, PAD | Suspend, revoke (FR-EVD-020)                               | impact preview                             |
+| SCR-EVD-032 | API keys and usage                     | `/employer/api`          | EAD                | Verification API (FR-EVD-033)                              | quota, revoked key                         |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-| --- | --- | --- | --- | --- |
-| ENT-EVD-01 | EvidenceRecord | id, subjectRef, targetType (skill, experience, education, certification, project), targetId, rung, issuerClass, strengthLabel, freshness, weightSetVersion | 1:n artifacts, reviews, endorsements, verifications | Until erasure |
-| ENT-EVD-02 | SkillClaim | id, subjectRef, canonicalSkillId, proficiencyClaimed, proficiencySupported, status | 1:1 EvidenceRecord | Until erasure |
-| ENT-EVD-03 | EvidenceArtifact | id, evidenceId, type, assetId or url, description, hash, visibility, supersedes | n:1 EvidenceRecord | Until erasure; files per policy |
-| ENT-EVD-04 | EvidenceEvent | id, evidenceId, type, sourceEventId, actorRef, at, details | n:1 EvidenceRecord (append-only) | Permanent, subject by opaque ref |
-| ENT-EVD-05 | EvidenceReview | id, projectRef, reviewerRef, rubric, ratings, justification, conflictDeclaration | n:1 EvidenceRecord | Until erasure of either party |
-| ENT-EVD-06 | WorkHistoryVerification | id, entryId, method, facts, state, verifierRef, expiresAt | n:1 EvidenceRecord; 1:n VerifierResponse | 7 years after resolution `[PROP]` or erasure |
-| ENT-EVD-07 | VerifierResponse | id, verificationId, verifierName, verifierEmailHash, organizationId, role, answers, signedAt | n:1 WorkHistoryVerification | With verification |
-| ENT-EVD-08 | Reference | id, subjectRef, refereeName, refereeEmailHash, relationship, answers, sharedScope, state | n:1 EvidenceRecord | Until erasure |
-| ENT-EVD-09 | Endorsement | id, holderRef, endorserRef, skillClaimId, context, strength, weight, weightVersion, state | n:1 SkillClaim | Until erasure of either party |
-| ENT-EVD-10 | Credential | id, subjectRef, issuerId, templateId, payload, hash, signature, validFrom, validUntil, status, renews | n:1 Issuer; 1:n StatusRecord | Permanent (verification); holder identity until erasure |
-| ENT-EVD-11 | CredentialStatusRecord | id, credentialId, status, reasonCode, note, actorRef, at | n:1 Credential (append-only) | Permanent |
-| ENT-EVD-12 | Issuer | id, legalName, domain, class, status, keys (id, publicKey, status), verifiedAt | 1:n Credential, CredentialTemplate | Permanent while credentials exist |
-| ENT-EVD-13 | EvidenceShareLink | id, subjectRef, tokenHash, recipientScope, purpose, items, expiresAt, options, state | 1:n ShareAccessLog | 90 days after terminal state |
-| ENT-EVD-14 | Dispute | id, targetType, targetId, openerRef, reason, description, state, decision, deadlines | n:1 target; 1:n parties | 7 years `[PROP]` or legal hold |
-| ENT-EVD-15 | ImpactReport | id, trigger, dependents, status, createdAt | n:1 status change | 24 months |
-| ENT-EVD-16 | ErasureSweepReport | id, subjectRefHash, stores, residuals, completedAt | none | Permanent, non-identifying |
-| ENT-EVD-17 | CredentialTemplate | id, issuerId, name, criteria, skills, validity, status | n:1 Issuer | Permanent while credentials exist |
-| ENT-EVD-18 | ShareAccessLog | id, linkId, viewerClass, viewerRef?, orgId?, items, at | n:1 ShareLink | 24 months then aggregate |
-| ENT-EVD-19 | ExternalConnection | id, subjectRef, provider, scopes, tokenRef (encrypted), repos, lastSyncAt | n:1 holder | Until disconnect |
-| ENT-EVD-20 | QualityScore | evidenceId, components, composite, label, weightSetVersion, at | 1:1 EvidenceRecord | Latest plus 12 months history |
-| ENT-EVD-21 | VerifierDoNotContact | emailHash, createdAt | none | Until verifier removes |
+| ID         | Name                    | Key attributes                                                                                                                                             | Relationships                                       | Retention class                                         |
+| ---------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------- |
+| ENT-EVD-01 | EvidenceRecord          | id, subjectRef, targetType (skill, experience, education, certification, project), targetId, rung, issuerClass, strengthLabel, freshness, weightSetVersion | 1:n artifacts, reviews, endorsements, verifications | Until erasure                                           |
+| ENT-EVD-02 | SkillClaim              | id, subjectRef, canonicalSkillId, proficiencyClaimed, proficiencySupported, status                                                                         | 1:1 EvidenceRecord                                  | Until erasure                                           |
+| ENT-EVD-03 | EvidenceArtifact        | id, evidenceId, type, assetId or url, description, hash, visibility, supersedes                                                                            | n:1 EvidenceRecord                                  | Until erasure; files per policy                         |
+| ENT-EVD-04 | EvidenceEvent           | id, evidenceId, type, sourceEventId, actorRef, at, details                                                                                                 | n:1 EvidenceRecord (append-only)                    | Permanent, subject by opaque ref                        |
+| ENT-EVD-05 | EvidenceReview          | id, projectRef, reviewerRef, rubric, ratings, justification, conflictDeclaration                                                                           | n:1 EvidenceRecord                                  | Until erasure of either party                           |
+| ENT-EVD-06 | WorkHistoryVerification | id, entryId, method, facts, state, verifierRef, expiresAt                                                                                                  | n:1 EvidenceRecord; 1:n VerifierResponse            | 7 years after resolution `[PROP]` or erasure            |
+| ENT-EVD-07 | VerifierResponse        | id, verificationId, verifierName, verifierEmailHash, organizationId, role, answers, signedAt                                                               | n:1 WorkHistoryVerification                         | With verification                                       |
+| ENT-EVD-08 | Reference               | id, subjectRef, refereeName, refereeEmailHash, relationship, answers, sharedScope, state                                                                   | n:1 EvidenceRecord                                  | Until erasure                                           |
+| ENT-EVD-09 | Endorsement             | id, holderRef, endorserRef, skillClaimId, context, strength, weight, weightVersion, state                                                                  | n:1 SkillClaim                                      | Until erasure of either party                           |
+| ENT-EVD-10 | Credential              | id, subjectRef, issuerId, templateId, payload, hash, signature, validFrom, validUntil, status, renews                                                      | n:1 Issuer; 1:n StatusRecord                        | Permanent (verification); holder identity until erasure |
+| ENT-EVD-11 | CredentialStatusRecord  | id, credentialId, status, reasonCode, note, actorRef, at                                                                                                   | n:1 Credential (append-only)                        | Permanent                                               |
+| ENT-EVD-12 | Issuer                  | id, legalName, domain, class, status, keys (id, publicKey, status), verifiedAt                                                                             | 1:n Credential, CredentialTemplate                  | Permanent while credentials exist                       |
+| ENT-EVD-13 | EvidenceShareLink       | id, subjectRef, tokenHash, recipientScope, purpose, items, expiresAt, options, state                                                                       | 1:n ShareAccessLog                                  | 90 days after terminal state                            |
+| ENT-EVD-14 | Dispute                 | id, targetType, targetId, openerRef, reason, description, state, decision, deadlines                                                                       | n:1 target; 1:n parties                             | 7 years `[PROP]` or legal hold                          |
+| ENT-EVD-15 | ImpactReport            | id, trigger, dependents, status, createdAt                                                                                                                 | n:1 status change                                   | 24 months                                               |
+| ENT-EVD-16 | ErasureSweepReport      | id, subjectRefHash, stores, residuals, completedAt                                                                                                         | none                                                | Permanent, non-identifying                              |
+| ENT-EVD-17 | CredentialTemplate      | id, issuerId, name, criteria, skills, validity, status                                                                                                     | n:1 Issuer                                          | Permanent while credentials exist                       |
+| ENT-EVD-18 | ShareAccessLog          | id, linkId, viewerClass, viewerRef?, orgId?, items, at                                                                                                     | n:1 ShareLink                                       | 24 months then aggregate                                |
+| ENT-EVD-19 | ExternalConnection      | id, subjectRef, provider, scopes, tokenRef (encrypted), repos, lastSyncAt                                                                                  | n:1 holder                                          | Until disconnect                                        |
+| ENT-EVD-20 | QualityScore            | evidenceId, components, composite, label, weightSetVersion, at                                                                                             | 1:1 EvidenceRecord                                  | Latest plus 12 months history                           |
+| ENT-EVD-21 | VerifierDoNotContact    | emailHash, createdAt                                                                                                                                       | none                                                | Until verifier removes                                  |
 
 ```mermaid
 erDiagram
@@ -1384,35 +1384,35 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-| --- | --- | --- | --- | --- |
-| EVT-EVD-001 | `evd.claim.created` | Skill claim created | claimId, skillId | SRC, ANL |
-| EVT-EVD-002 | `evd.evidence.rung_changed` | Rung recomputed | evidenceId, from, to, issuerClass | SRC, JOB, ATS, NTF |
-| EVT-EVD-003 | `evd.artifact.added` | Artifact accepted | evidenceId, type | ANL |
-| EVT-EVD-004 | `evd.evidence.created_from_assessment` | ASM event processed | evidenceId, attemptId | SRC, NTF |
-| EVT-EVD-005 | `evd.evidence.created_from_course` | LRN event processed | evidenceId, courseId | SRC, NTF |
-| EVT-EVD-006 | `evd.review.submitted` | Project review submitted | reviewId, projectId | NTF |
-| EVT-EVD-007 | `evd.workhistory.requested` | Request sent | verificationId | NTF |
-| EVT-EVD-008 | `evd.workhistory.verified` | Confirmed (or accepted correction) | verificationId, entryId, class | PRF, SRC, BGV |
-| EVT-EVD-009 | `evd.workhistory.corrected` | Employer correction | verificationId, fields | PRF |
-| EVT-EVD-010 | `evd.workhistory.expired` | Expiry | verificationId | NTF |
-| EVT-EVD-011 | `evd.reference.submitted` | Reference completed | referenceId | NTF |
-| EVT-EVD-012 | `evd.endorsement.added` | Endorsement saved | endorsementId, skillId | NTF, REP |
-| EVT-EVD-013 | `evd.endorsement.withdrawn` | Withdrawn | endorsementId | SRC |
-| EVT-EVD-014 | `evd.credential.issued` | Issuance | credentialId, issuerId | PRF, NTF, SRC, REP |
-| EVT-EVD-015 | `evd.credential.imported` | Import verified | credentialId, method | SRC |
-| EVT-EVD-016 | `evd.credential.status_changed` | Suspend, revoke, expire, lift | credentialId, status | PRF, SRC, JOB, ATS, API webhooks |
-| EVT-EVD-017 | `evd.credential.expiring` | Reminder offsets | credentialId, days | NTF |
-| EVT-EVD-018 | `evd.credential.exported` | Export | credentialIds, format | ANL |
-| EVT-EVD-019 | `evd.credential.verified` | Public or API verification | credentialId, channel | NTF (opt-in), ANL |
-| EVT-EVD-020 | `evd.share.created` | Link created | linkId, purpose | SET consent ledger |
-| EVT-EVD-021 | `evd.share.accessed` | Access logged | linkId, orgId | NTF (opt-in), ATS |
-| EVT-EVD-022 | `evd.share.revoked` | Revoked | linkId | SET consent ledger |
-| EVT-EVD-023 | `evd.dispute.opened` | Dispute opened | disputeId, target | NTF, ADM |
-| EVT-EVD-024 | `evd.dispute.decided` | Decision | disputeId, outcome | NTF, SRC |
-| EVT-EVD-025 | `evd.impact.completed` | Impact job done | reportId | NTF, ATS |
-| EVT-EVD-026 | `evd.issuer.status_changed` | Approved, suspended | issuerId | ADM |
-| EVT-EVD-027 | `evd.erasure.completed` | Sweep finished | reportId | SET |
+| ID          | Event                                  | Trigger                            | Key payload                       | Consumers                        |
+| ----------- | -------------------------------------- | ---------------------------------- | --------------------------------- | -------------------------------- |
+| EVT-EVD-001 | `evd.claim.created`                    | Skill claim created                | claimId, skillId                  | SRC, ANL                         |
+| EVT-EVD-002 | `evd.evidence.rung_changed`            | Rung recomputed                    | evidenceId, from, to, issuerClass | SRC, JOB, ATS, NTF               |
+| EVT-EVD-003 | `evd.artifact.added`                   | Artifact accepted                  | evidenceId, type                  | ANL                              |
+| EVT-EVD-004 | `evd.evidence.created_from_assessment` | ASM event processed                | evidenceId, attemptId             | SRC, NTF                         |
+| EVT-EVD-005 | `evd.evidence.created_from_course`     | LRN event processed                | evidenceId, courseId              | SRC, NTF                         |
+| EVT-EVD-006 | `evd.review.submitted`                 | Project review submitted           | reviewId, projectId               | NTF                              |
+| EVT-EVD-007 | `evd.workhistory.requested`            | Request sent                       | verificationId                    | NTF                              |
+| EVT-EVD-008 | `evd.workhistory.verified`             | Confirmed (or accepted correction) | verificationId, entryId, class    | PRF, SRC, BGV                    |
+| EVT-EVD-009 | `evd.workhistory.corrected`            | Employer correction                | verificationId, fields            | PRF                              |
+| EVT-EVD-010 | `evd.workhistory.expired`              | Expiry                             | verificationId                    | NTF                              |
+| EVT-EVD-011 | `evd.reference.submitted`              | Reference completed                | referenceId                       | NTF                              |
+| EVT-EVD-012 | `evd.endorsement.added`                | Endorsement saved                  | endorsementId, skillId            | NTF, REP                         |
+| EVT-EVD-013 | `evd.endorsement.withdrawn`            | Withdrawn                          | endorsementId                     | SRC                              |
+| EVT-EVD-014 | `evd.credential.issued`                | Issuance                           | credentialId, issuerId            | PRF, NTF, SRC, REP               |
+| EVT-EVD-015 | `evd.credential.imported`              | Import verified                    | credentialId, method              | SRC                              |
+| EVT-EVD-016 | `evd.credential.status_changed`        | Suspend, revoke, expire, lift      | credentialId, status              | PRF, SRC, JOB, ATS, API webhooks |
+| EVT-EVD-017 | `evd.credential.expiring`              | Reminder offsets                   | credentialId, days                | NTF                              |
+| EVT-EVD-018 | `evd.credential.exported`              | Export                             | credentialIds, format             | ANL                              |
+| EVT-EVD-019 | `evd.credential.verified`              | Public or API verification         | credentialId, channel             | NTF (opt-in), ANL                |
+| EVT-EVD-020 | `evd.share.created`                    | Link created                       | linkId, purpose                   | SET consent ledger               |
+| EVT-EVD-021 | `evd.share.accessed`                   | Access logged                      | linkId, orgId                     | NTF (opt-in), ATS                |
+| EVT-EVD-022 | `evd.share.revoked`                    | Revoked                            | linkId                            | SET consent ledger               |
+| EVT-EVD-023 | `evd.dispute.opened`                   | Dispute opened                     | disputeId, target                 | NTF, ADM                         |
+| EVT-EVD-024 | `evd.dispute.decided`                  | Decision                           | disputeId, outcome                | NTF, SRC                         |
+| EVT-EVD-025 | `evd.impact.completed`                 | Impact job done                    | reportId                          | NTF, ATS                         |
+| EVT-EVD-026 | `evd.issuer.status_changed`            | Approved, suspended                | issuerId                          | ADM                              |
+| EVT-EVD-027 | `evd.erasure.completed`                | Sweep finished                     | reportId                          | SET                              |
 
 ### 9.2 Consumed (planned names)
 
@@ -1420,98 +1420,98 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-| --- | --- | --- |
-| Key management service (PLT, planned) | Issuer signing keys | Ed25519 `[PROP]`; no key export |
-| Email delivery (NTF, planned) | Verifier and referee requests | Domain authentication required; bounce handling |
-| OAuth providers (GitHub, GitLab) | Contribution evidence | Read-only minimal scopes |
-| Open Badges 3.0 / W3C VC 2.0 libraries | Import, export, verify | Standards-based; algorithm allowlist |
-| DNS and well-known file checks | Issuer and employer domain proof | Timeouts and caching |
-| SSRF-safe fetcher (PLT, planned) | Fetching credential URLs | Blocks private ranges |
-| Optional external credential registries (e.g., degree and certification registries) | Issuer API lookup | Adapter per registry |
-| HRIS adapters (optional) | Employer bulk attestation | Adapter interface; CSV first |
-| Malware scanning (PLT, planned) | Artifacts | Required before use |
+| Dependency                                                                          | Purpose                          | Notes                                           |
+| ----------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------- |
+| Key management service (PLT, planned)                                               | Issuer signing keys              | Ed25519 `[PROP]`; no key export                 |
+| Email delivery (NTF, planned)                                                       | Verifier and referee requests    | Domain authentication required; bounce handling |
+| OAuth providers (GitHub, GitLab)                                                    | Contribution evidence            | Read-only minimal scopes                        |
+| Open Badges 3.0 / W3C VC 2.0 libraries                                              | Import, export, verify           | Standards-based; algorithm allowlist            |
+| DNS and well-known file checks                                                      | Issuer and employer domain proof | Timeouts and caching                            |
+| SSRF-safe fetcher (PLT, planned)                                                    | Fetching credential URLs         | Blocks private ranges                           |
+| Optional external credential registries (e.g., degree and certification registries) | Issuer API lookup                | Adapter per registry                            |
+| HRIS adapters (optional)                                                            | Employer bulk attestation        | Adapter interface; CSV first                    |
+| Malware scanning (PLT, planned)                                                     | Artifacts                        | Required before use                             |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why |
-| --- | --- |
-| PRF | Claims to verify; profile visibility; display of marks |
-| SRC | Skill taxonomy, decay classes, indexing of evidence facets |
-| ASM, LRN (planned) | Achievement events |
-| NET (planned) | Connections for endorsements |
-| REP (planned) | Endorser reputation inputs |
-| EMP (planned) | Verified employer organizations and domains |
-| INS (planned) | Institution issuers and affiliation |
-| SET, IDN (planned) | Consent ledger, erasure, account identity |
-| NTF, TSF, ADM, PLT (planned) | Delivery, moderation, staff tools, KMS and fetcher |
+| Depends on                   | Why                                                        |
+| ---------------------------- | ---------------------------------------------------------- |
+| PRF                          | Claims to verify; profile visibility; display of marks     |
+| SRC                          | Skill taxonomy, decay classes, indexing of evidence facets |
+| ASM, LRN (planned)           | Achievement events                                         |
+| NET (planned)                | Connections for endorsements                               |
+| REP (planned)                | Endorser reputation inputs                                 |
+| EMP (planned)                | Verified employer organizations and domains                |
+| INS (planned)                | Institution issuers and affiliation                        |
+| SET, IDN (planned)           | Consent ledger, erasure, account identity                  |
+| NTF, TSF, ADM, PLT (planned) | Delivery, moderation, staff tools, KMS and fetcher         |
 
-| Depended on by | Uses |
-| --- | --- |
-| PRF | Verification marks and summaries |
-| BGV | Reuse of verified work history and education |
-| SRC | Evidence facets and "verified" filters |
-| JOB, ATS (planned) | Evidence panels, application snapshots |
-| AIC (planned) | Evidence-aware matching (disclosed) |
-| REP (planned) | Credential and endorsement signals |
+| Depended on by     | Uses                                         |
+| ------------------ | -------------------------------------------- |
+| PRF                | Verification marks and summaries             |
+| BGV                | Reuse of verified work history and education |
+| SRC                | Evidence facets and "verified" filters       |
+| JOB, ATS (planned) | Evidence panels, application snapshots       |
+| AIC (planned)      | Evidence-aware matching (disclosed)          |
+| REP (planned)      | Credential and endorsement signals           |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-| --- | --- | --- | --- |
-| Evidence coverage | Share of listed skills with at least `artifact_backed` evidence | skills with rung ≥ artifact_backed / listed skills | PAD |
-| Work history verification rate | Verified roles among requested | confirmed / requests sent | PAD |
-| Median verifier response time | Time from sent to response | median(respondedAt − sentAt) | PAD |
-| Verification request expiry rate | Requests that expire | expired / sent | PAD |
-| Credential verification checks | Public and API verifications per credential | checks / credentials | PAD |
-| Dispute SLA compliance | Disputes decided within 7 days | on-time / decided | PAD, SUP lead |
-| Revocation propagation time | Time from status change to public page | p95(visibleAt − changedAt), target ≤ 5 min | SAD |
-| Share revocation latency | Time from revoke to denied read | p95 (target = next read) | SAD |
-| Endorsement integrity | Endorsements down-weighted by anti-gaming rules | down-weighted / total | PAD |
-| Manual review backlog age | Oldest item in queue | max(now − queuedAt) | PAD |
-| Evidence strength by cohort | Distribution of labels across cohorts (fairness audit) | counts per label per cohort | SAD |
+| Metric                           | Definition                                                      | Formula                                            | Owner role    |
+| -------------------------------- | --------------------------------------------------------------- | -------------------------------------------------- | ------------- |
+| Evidence coverage                | Share of listed skills with at least `artifact_backed` evidence | skills with rung ≥ artifact_backed / listed skills | PAD           |
+| Work history verification rate   | Verified roles among requested                                  | confirmed / requests sent                          | PAD           |
+| Median verifier response time    | Time from sent to response                                      | median(respondedAt − sentAt)                       | PAD           |
+| Verification request expiry rate | Requests that expire                                            | expired / sent                                     | PAD           |
+| Credential verification checks   | Public and API verifications per credential                     | checks / credentials                               | PAD           |
+| Dispute SLA compliance           | Disputes decided within 7 days                                  | on-time / decided                                  | PAD, SUP lead |
+| Revocation propagation time      | Time from status change to public page                          | p95(visibleAt − changedAt), target ≤ 5 min         | SAD           |
+| Share revocation latency         | Time from revoke to denied read                                 | p95 (target = next read)                           | SAD           |
+| Endorsement integrity            | Endorsements down-weighted by anti-gaming rules                 | down-weighted / total                              | PAD           |
+| Manual review backlog age        | Oldest item in queue                                            | max(now − queuedAt)                                | PAD           |
+| Evidence strength by cohort      | Distribution of labels across cohorts (fairness audit)          | counts per label per cohort                        | SAD           |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-| --- | --- | --- | --- | --- | --- |
-| OD-EVD-01 | Does the public verification page show the holder's name? (SSOT BR-150 vs F-96 step 3 conflict) | Never; first name + last initial; holder opt-in | Holder opt-in, default off | Product owner + privacy officer | FR-EVD-018, BR-EVD-007 |
-| OD-EVD-02 | How long can an endorser withdraw? (SSOT: 30 days) | 30 days; any time | Any time, as the endorsement is the endorser's statement | Product owner | FR-EVD-013 |
-| OD-EVD-03 | Is the 2nd-degree endorsement boost kept? (unreachable if endorsements need direct connection) | Remove boost; allow 2nd-degree endorsements | Remove the boost | Product owner | FR-EVD-014 |
-| OD-EVD-04 | Peer attestation threshold | 3 endorsers and weight 1.5; 5 and 3.0; configurable | 3 endorsers, weight ≥ 1.5, configurable | Product owner | FR-EVD-014, FR-EVD-001 |
-| OD-EVD-05 | Holder-bound credentials (DID or key binding) at launch? | Platform-attested only; holder DID optional; mandatory | Platform-attested first, optional holder binding later | Architecture + product owner | FR-EVD-021, FR-EVD-025 |
-| OD-EVD-06 | Status of credentials when an issuer is suspended | Stay valid; show warning; invalidate | Show "issuer suspended" warning, still verifiable | Trust and safety lead | FR-EVD-022 |
-| OD-EVD-07 | Retention list for legal holds and dispute records | 7 years; 3 years; per jurisdiction | Per-jurisdiction schedule decided by counsel | Legal | FR-EVD-034, ENT-EVD-14 |
-| OD-EVD-08 | Do verification staff need their own role code? | Sub-role of PAD; new role | Sub-role of PAD | Product owner | Permission matrix |
-| OD-EVD-09 | Who may verify when an employer no longer exists or has no verified domain? | Peer path only; documents reviewed manually; both | Peer path plus manual document review with dual approval | Product owner | FR-EVD-008, FR-EVD-032 |
-| OD-EVD-10 | Conflict with SSOT §4.2 non-goals: does an issuer registry and credential network amount to a generic credential marketplace? | Keep narrowly for career credentials; restrict issuer classes | Keep narrowly; no non-career credential issuers | Product owner | FR-EVD-022 |
-| OD-EVD-11 | Which instructor attestations count and how are independence checks defined? (SSOT leaves open) | Instructor never beyond peer_attested; allow authority for institution-owned courses | peer_attested only unless the institution issuer class applies | Product owner | BR-EVD-003 |
+| ID        | Question                                                                                                                      | Options                                                                              | Default proposal                                               | Who decides                     | Blocking               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------- | ---------------------- |
+| OD-EVD-01 | Does the public verification page show the holder's name? (SSOT BR-150 vs F-96 step 3 conflict)                               | Never; first name + last initial; holder opt-in                                      | Holder opt-in, default off                                     | Product owner + privacy officer | FR-EVD-018, BR-EVD-007 |
+| OD-EVD-02 | How long can an endorser withdraw? (SSOT: 30 days)                                                                            | 30 days; any time                                                                    | Any time, as the endorsement is the endorser's statement       | Product owner                   | FR-EVD-013             |
+| OD-EVD-03 | Is the 2nd-degree endorsement boost kept? (unreachable if endorsements need direct connection)                                | Remove boost; allow 2nd-degree endorsements                                          | Remove the boost                                               | Product owner                   | FR-EVD-014             |
+| OD-EVD-04 | Peer attestation threshold                                                                                                    | 3 endorsers and weight 1.5; 5 and 3.0; configurable                                  | 3 endorsers, weight ≥ 1.5, configurable                        | Product owner                   | FR-EVD-014, FR-EVD-001 |
+| OD-EVD-05 | Holder-bound credentials (DID or key binding) at launch?                                                                      | Platform-attested only; holder DID optional; mandatory                               | Platform-attested first, optional holder binding later         | Architecture + product owner    | FR-EVD-021, FR-EVD-025 |
+| OD-EVD-06 | Status of credentials when an issuer is suspended                                                                             | Stay valid; show warning; invalidate                                                 | Show "issuer suspended" warning, still verifiable              | Trust and safety lead           | FR-EVD-022             |
+| OD-EVD-07 | Retention list for legal holds and dispute records                                                                            | 7 years; 3 years; per jurisdiction                                                   | Per-jurisdiction schedule decided by counsel                   | Legal                           | FR-EVD-034, ENT-EVD-14 |
+| OD-EVD-08 | Do verification staff need their own role code?                                                                               | Sub-role of PAD; new role                                                            | Sub-role of PAD                                                | Product owner                   | Permission matrix      |
+| OD-EVD-09 | Who may verify when an employer no longer exists or has no verified domain?                                                   | Peer path only; documents reviewed manually; both                                    | Peer path plus manual document review with dual approval       | Product owner                   | FR-EVD-008, FR-EVD-032 |
+| OD-EVD-10 | Conflict with SSOT §4.2 non-goals: does an issuer registry and credential network amount to a generic credential marketplace? | Keep narrowly for career credentials; restrict issuer classes                        | Keep narrowly; no non-career credential issuers                | Product owner                   | FR-EVD-022             |
+| OD-EVD-11 | Which instructor attestations count and how are independence checks defined? (SSOT leaves open)                               | Instructor never beyond peer_attested; allow authority for institution-owned courses | peer_attested only unless the institution issuer class applies | Product owner                   | BR-EVD-003             |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-| --- | --- | --- | --- |
-| RSK-EVD-01 | Fake employers or colluding verifiers inflate verified work history | Loss of trust | Domain binding, verifier authentication, independence rules, anomaly detection, manual review with dual approval |
-| RSK-EVD-02 | Endorsement rings and reciprocal gaming | Meaningless signal | Weighting adjustments, cluster detection, caps, reports |
-| RSK-EVD-03 | Public verification pages leak personal data | Privacy breach | No PII by default, PII scans in tests, random ids |
-| RSK-EVD-04 | Revocation not propagating to caches, shares and downstream systems | Stale trust | Cache purge, impact analysis, 5 minute target, monitoring |
-| RSK-EVD-05 | Issuer key compromise | Forged credentials | KMS, rotation, re-verification runbook |
-| RSK-EVD-06 | Evidence scoring perpetuates bias (institution prestige, employer brand) | Unfair outcomes | Excluded inputs, cohort audits, disclosure |
-| RSK-EVD-07 | Employers drown in verification requests or ignore them | Low verification rates | Bulk program, reminders, auto-response, peer path |
-| RSK-EVD-08 | Erasure conflicts with append-only evidence and legal holds | Compliance failure | Opaque subject refs, documented exceptions, sweep reports |
-| RSK-EVD-09 | Recruiters over-rely on a composite strength label | Unfair rejections | Components shown, no automatic rejection, training text |
-| RSK-EVD-10 | Third-party credential URLs are abused for SSRF or malware | Security incident | SSRF-safe fetcher, scanning, allowlists |
+| ID         | Risk                                                                     | Impact                 | Mitigation                                                                                                       |
+| ---------- | ------------------------------------------------------------------------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| RSK-EVD-01 | Fake employers or colluding verifiers inflate verified work history      | Loss of trust          | Domain binding, verifier authentication, independence rules, anomaly detection, manual review with dual approval |
+| RSK-EVD-02 | Endorsement rings and reciprocal gaming                                  | Meaningless signal     | Weighting adjustments, cluster detection, caps, reports                                                          |
+| RSK-EVD-03 | Public verification pages leak personal data                             | Privacy breach         | No PII by default, PII scans in tests, random ids                                                                |
+| RSK-EVD-04 | Revocation not propagating to caches, shares and downstream systems      | Stale trust            | Cache purge, impact analysis, 5 minute target, monitoring                                                        |
+| RSK-EVD-05 | Issuer key compromise                                                    | Forged credentials     | KMS, rotation, re-verification runbook                                                                           |
+| RSK-EVD-06 | Evidence scoring perpetuates bias (institution prestige, employer brand) | Unfair outcomes        | Excluded inputs, cohort audits, disclosure                                                                       |
+| RSK-EVD-07 | Employers drown in verification requests or ignore them                  | Low verification rates | Bulk program, reminders, auto-response, peer path                                                                |
+| RSK-EVD-08 | Erasure conflicts with append-only evidence and legal holds              | Compliance failure     | Opaque subject refs, documented exceptions, sweep reports                                                        |
+| RSK-EVD-09 | Recruiters over-rely on a composite strength label                       | Unfair rejections      | Components shown, no automatic rejection, training text                                                          |
+| RSK-EVD-10 | Third-party credential URLs are abused for SSRF or malware               | Security incident      | SSRF-safe fetcher, scanning, allowlists                                                                          |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-| --- | --- | --- |
-| `SSOT.md` §6.1, §6.3, §14.3 | Claim vs evidence, conflicts, lifecycle | Confidence kept multidimensional |
+| Legacy source                                         | Used for                                                                                                        | Dropped or changed                                                                                                                                                                                      |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` §6.1, §6.3, §14.3                           | Claim vs evidence, conflicts, lifecycle                                                                         | Confidence kept multidimensional                                                                                                                                                                        |
 | `SSOT.md` F-96 (Skill Evidence & Digital Credentials) | Evidence types, issuance, verification URL, revocation, endorsement weighting, export, privacy-preserving proof | Name on verification page resolved to holder opt-in (OD-EVD-01); 2nd-degree boost removed (OD-EVD-03); "admin-only revocation" widened to issuers with controls; `xp_balance` side effects moved to REP |
-| `SSOT.md` F-94, F-162 | Work history verification, referees | Referee rules (open in SSOT) defined as BR-EVD-011..012; employer-initiated checks moved to BGV |
-| `SSOT.md` F-110, BR-131, BR-152, BR-153 | Endorsements | Withdrawal window changed (OD-EVD-02) |
-| `SSOT.md` F-123, F-163, F-164, F-52, F-89, F-143 | Freshness, wallet, narrative, certificate verification, contributions | Reused as FR-EVD-027, 017, 031, 016, 007 |
-| `SSOT.md` Appendix E V61-07, V61-16, V61-17, V61-19 | Erasure design, consent scopes, ladder, issuer class | Marked Proposed in source; adopted here as intended product design with ODs |
-| `SSOT.md` BR-149..BR-156 | Verification rules | Restated as BR-EVD-006..010, 015, 016, 028 |
-| `docs/registries/FEATURE_REGISTRY.md` | Feature ids | Not copied as status |
-| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md` | Not used | n/a |
+| `SSOT.md` F-94, F-162                                 | Work history verification, referees                                                                             | Referee rules (open in SSOT) defined as BR-EVD-011..012; employer-initiated checks moved to BGV                                                                                                         |
+| `SSOT.md` F-110, BR-131, BR-152, BR-153               | Endorsements                                                                                                    | Withdrawal window changed (OD-EVD-02)                                                                                                                                                                   |
+| `SSOT.md` F-123, F-163, F-164, F-52, F-89, F-143      | Freshness, wallet, narrative, certificate verification, contributions                                           | Reused as FR-EVD-027, 017, 031, 016, 007                                                                                                                                                                |
+| `SSOT.md` Appendix E V61-07, V61-16, V61-17, V61-19   | Erasure design, consent scopes, ladder, issuer class                                                            | Marked Proposed in source; adopted here as intended product design with ODs                                                                                                                             |
+| `SSOT.md` BR-149..BR-156                              | Verification rules                                                                                              | Restated as BR-EVD-006..010, 015, 016, 028                                                                                                                                                              |
+| `docs/registries/FEATURE_REGISTRY.md`                 | Feature ids                                                                                                     | Not copied as status                                                                                                                                                                                    |
+| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md`     | Not used                                                                                                        | n/a                                                                                                                                                                                                     |

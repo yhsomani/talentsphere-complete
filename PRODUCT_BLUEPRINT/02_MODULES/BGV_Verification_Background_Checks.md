@@ -18,17 +18,17 @@ BGV runs **formal, consent-based verification checks** that an employer or a can
 
 ### 1.3 In scope, out of scope, owned vs consumed
 
-| Area | Owned by BGV | Not owned (owner) |
-| --- | --- | --- |
-| Check catalog, packages, jurisdiction rule packs | Yes | Role and requisition definition: ATS (planned) |
-| Identity verification and the opt-in identity badge | Yes | Account login, MFA, KYC for payouts: IDN, BIL (planned) |
-| Employer-ordered education, employment, license, right-to-work checks | Yes | Candidate-initiated work history verification and references: EVD |
-| Employer-initiated reference checks and referee forms | Yes | Candidate-solicited references shown on profile: EVD |
-| Criminal and sanctions screening orders via vendors | Yes | None; no in-house data source |
-| Consent capture for checks, disclosures | Yes | Global consent ledger: SET (planned) receives records |
-| Adjudication, pre-adverse and adverse action workflow, disputes | Yes | Final hiring decision and offer: ATS (planned) |
-| Vendor adapters, webhooks, cost and billing hooks | Yes | Plans, invoices, payments: BIL (planned) |
-| Retention and disposal of check data | Yes | Platform-wide DSAR orchestration: SET (planned) |
+| Area                                                                  | Owned by BGV | Not owned (owner)                                                 |
+| --------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------- |
+| Check catalog, packages, jurisdiction rule packs                      | Yes          | Role and requisition definition: ATS (planned)                    |
+| Identity verification and the opt-in identity badge                   | Yes          | Account login, MFA, KYC for payouts: IDN, BIL (planned)           |
+| Employer-ordered education, employment, license, right-to-work checks | Yes          | Candidate-initiated work history verification and references: EVD |
+| Employer-initiated reference checks and referee forms                 | Yes          | Candidate-solicited references shown on profile: EVD              |
+| Criminal and sanctions screening orders via vendors                   | Yes          | None; no in-house data source                                     |
+| Consent capture for checks, disclosures                               | Yes          | Global consent ledger: SET (planned) receives records             |
+| Adjudication, pre-adverse and adverse action workflow, disputes       | Yes          | Final hiring decision and offer: ATS (planned)                    |
+| Vendor adapters, webhooks, cost and billing hooks                     | Yes          | Plans, invoices, payments: BIL (planned)                          |
+| Retention and disposal of check data                                  | Yes          | Platform-wide DSAR orchestration: SET (planned)                   |
 
 **Consumed:** applications and stages (JOB, ATS planned), employer organizations and seats (EMP planned), candidate profile name/location (PRF), prior verified work history and education (EVD), notifications (NTF), billing (BIL), audit and tooling (ADM).
 
@@ -43,21 +43,21 @@ BGV runs **formal, consent-based verification checks** that an employer or a can
 
 `Y` allowed, `-` not allowed, `A` with audit, `S` status only (no result content), `C` own checks only.
 
-| Capability | CAN/STD/FRL | REC | HMG | EAD | IAD/PLO | MOD | SUP | PAD | SAD | API (vendor) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| View check catalog and what is checked about me | C | - | - | - | - | - | - | Y | Y | - |
-| Configure packages and role policies for the org | - | - | - | Y | - | - | - | Y | Y | - |
-| Initiate a check request for a candidate | - | Y (permitted stage) | Y (if delegated) | Y | - | - | - | - | - | - |
-| Give or decline consent | C | - | - | - | - | - | - | - | - | - |
-| Provide information for a check | C | - | - | - | - | - | - | - | - | - |
-| See check status | C | S | S | S | - | - | S (case) | Y | Y | - |
-| View result content | C (own copy) | A (adjudicator permission) | A (adjudicator permission) | A (adjudicator permission) | - | - | - | - | A (break-glass) | - |
-| Record adjudication and send adverse action notices | - | Y (adjudicator) | Y (adjudicator) | Y | - | - | - | - | - | - |
-| Dispute a result | C | - | - | - | - | - | - | - | - | - |
-| Post vendor results and status | - | - | - | - | - | - | - | - | - | Y |
-| Manage vendors, rule packs, retention schedules | - | - | - | - | - | - | - | Y (dual approval) | Y | - |
-| Institution-ordered verification of own students (credentials) | - | - | - | - | Y (education/identity only) | - | - | - | - | - |
-| Run reports on checks (aggregate) | - | - | - | Y (own org) | Y (own inst) | - | - | Y | Y | - |
+| Capability                                                     | CAN/STD/FRL  | REC                        | HMG                        | EAD                        | IAD/PLO                     | MOD | SUP      | PAD               | SAD             | API (vendor) |
+| -------------------------------------------------------------- | ------------ | -------------------------- | -------------------------- | -------------------------- | --------------------------- | --- | -------- | ----------------- | --------------- | ------------ |
+| View check catalog and what is checked about me                | C            | -                          | -                          | -                          | -                           | -   | -        | Y                 | Y               | -            |
+| Configure packages and role policies for the org               | -            | -                          | -                          | Y                          | -                           | -   | -        | Y                 | Y               | -            |
+| Initiate a check request for a candidate                       | -            | Y (permitted stage)        | Y (if delegated)           | Y                          | -                           | -   | -        | -                 | -               | -            |
+| Give or decline consent                                        | C            | -                          | -                          | -                          | -                           | -   | -        | -                 | -               | -            |
+| Provide information for a check                                | C            | -                          | -                          | -                          | -                           | -   | -        | -                 | -               | -            |
+| See check status                                               | C            | S                          | S                          | S                          | -                           | -   | S (case) | Y                 | Y               | -            |
+| View result content                                            | C (own copy) | A (adjudicator permission) | A (adjudicator permission) | A (adjudicator permission) | -                           | -   | -        | -                 | A (break-glass) | -            |
+| Record adjudication and send adverse action notices            | -            | Y (adjudicator)            | Y (adjudicator)            | Y                          | -                           | -   | -        | -                 | -               | -            |
+| Dispute a result                                               | C            | -                          | -                          | -                          | -                           | -   | -        | -                 | -               | -            |
+| Post vendor results and status                                 | -            | -                          | -                          | -                          | -                           | -   | -        | -                 | -               | Y            |
+| Manage vendors, rule packs, retention schedules                | -            | -                          | -                          | -                          | -                           | -   | -        | Y (dual approval) | Y               | -            |
+| Institution-ordered verification of own students (credentials) | -            | -                          | -                          | -                          | Y (education/identity only) | -   | -        | -                 | -               | -            |
+| Run reports on checks (aggregate)                              | -            | -                          | -                          | Y (own org)                | Y (own inst)                | -   | -        | Y                 | Y               | -            |
 
 "Adjudicator permission" is an organization-level capability granted by EAD to named users (default: none). Support agents never see result content. Staff access to results is break-glass with a case reason and dual notification (BR-BGV-034).
 
@@ -74,15 +74,15 @@ flowchart LR
     D --> G
 ```
 
-| Sub-module | Name | Features |
-| --- | --- | --- |
-| A | Foundations: catalog and rules | FR-BGV-001 to 002 |
-| B | Identity and credential checks | FR-BGV-003 to 010 |
-| C | Criminal and screening checks | FR-BGV-011 to 012 |
-| D | Consent and orchestration | FR-BGV-013 to 018 |
-| E | Results, adjudication and disputes | FR-BGV-019 to 024 |
-| F | Portability | FR-BGV-025 |
-| G | Governance | FR-BGV-026 to 031 |
+| Sub-module | Name                               | Features          |
+| ---------- | ---------------------------------- | ----------------- |
+| A          | Foundations: catalog and rules     | FR-BGV-001 to 002 |
+| B          | Identity and credential checks     | FR-BGV-003 to 010 |
+| C          | Criminal and screening checks      | FR-BGV-011 to 012 |
+| D          | Consent and orchestration          | FR-BGV-013 to 018 |
+| E          | Results, adjudication and disputes | FR-BGV-019 to 024 |
+| F          | Portability                        | FR-BGV-025        |
+| G          | Governance                         | FR-BGV-026 to 031 |
 
 ## 4. Feature specifications
 
@@ -983,46 +983,46 @@ flowchart LR
 
 All rules are `[PROP]`/`[DER]` unless a source is cited; jurisdiction-specific content must be validated by counsel (OD-BGV-01).
 
-| ID | Rule | Rationale | Enforced where | Source |
-| --- | --- | --- | --- | --- |
-| BR-BGV-001 | No check is ordered without a valid, specific, informed consent from the candidate that names the check types, the requesting employer, the vendor(s) and the purpose. Consent is per request and expires with it. | Lawful basis, trust. | Order service (rejects orders not covered by consent) | [SRC: SSOT §6 Consent "purpose-bound, versioned"]; [DER] |
-| BR-BGV-002 | The disclosure is a standalone document in the candidate's language, versioned and hash-stored. Biometric processing needs its own separate consent. | Clear, uncluttered disclosure. | Consent flow | [PROP] |
-| BR-BGV-003 | A check may be ordered only if the jurisdiction rule pack permits that type at the current stage (for example after a conditional offer where required). Unknown jurisdiction blocks sensitive checks. Rule engine failure blocks ordering. | Fair-chance and timing laws. | Rule engine at initiation and order | [PROP] |
-| BR-BGV-004 | Employers may order only check types enabled in the catalog and included in a package approved for the role family; checks must be justified by the role. | Proportionality. | Package builder; initiation | [PROP] |
-| BR-BGV-005 | Criminal check scope follows the strictest applicable rule pack: lookback, convictions versus arrests, and exclusion of sealed, expunged and juvenile records. The platform filters out-of-scope records even if a vendor returns them. | Legal scope control. | Result normalizer | [PROP] |
-| BR-BGV-006 | The platform makes no automated hiring decision and provides no pass/fail score from check results. Humans adjudicate. | Accountability. | Product design; ATS integration blocks auto-rejection from BGV status | [DER] |
-| BR-BGV-007 | Before any adverse decision based on a report, an individualized assessment (nature and gravity, time elapsed, relevance to duties, accuracy, rehabilitation evidence) with written rationale is required; discrepancies and potential matches go to the candidate for explanation before being treated as findings. | Fairness; contestability. | Adjudication case workflow | [PROP] |
-| BR-BGV-008 | A pre-adverse action notice with a copy of the report and rights information is sent before a final adverse action, followed by a waiting period (default 5 business days, rule-pack override) during which the candidate can respond or dispute. | Opportunity to respond. | Notice workflow; final-adverse guard | [PROP] |
-| BR-BGV-009 | A final adverse action notice with required content is sent and recorded before the ATS rejection reason `background_check` is stored. | Compliance trail. | Notice workflow; ATS integration | [PROP] |
-| BR-BGV-010 | A candidate dispute is forwarded to the vendor within 1 business day, pauses adverse action, and the vendor has 30 days to reinvestigate. Disputed items are excluded from adjudication until resolved. | Accuracy and fairness. | Dispute workflow | [PROP] |
-| BR-BGV-011 | A candidate may always obtain a copy of their report (while retained) through the secure portal after step-up authentication. | Transparency. | Portal | [PROP] |
-| BR-BGV-012 | Only users with the adjudicator permission in the ordering organization can view report content, with a reason code and step-up authentication; other users see status only. Support agents never see content. | Least privilege. | Report viewer authz | [PROP] |
-| BR-BGV-013 | Check results and adjudication data never appear in profiles, search, matching, recommendations, reputation or analytics. The only public artifact is the opt-in "Identity verified" mark. | Prevents discriminatory spillover. | Architecture boundary; contract tests on other modules' payloads | [DER] |
-| BR-BGV-014 | Identity documents and biometrics stay with the vendor under contract; the platform stores only the assurance result, document type, country, dates and a name hash. Biometric consent is explicit and a non-biometric alternative is always offered. | Minimization of sensitive data. | Identity adapter and storage | [SRC: SSOT §15 privacy by purpose]; [PROP] |
-| BR-BGV-015 | The identity mark is opt-in, shows only "Identity verified" with date, is valid 24 months, and is withdrawn on legal-name change until re-verified. | Controlled disclosure. | Badge service | [PROP] |
-| BR-BGV-016 | Prior verified results may be reused only when still valid (identity 24 months, employment 12 months, education until disputed), meeting the employer's minimum level, and with the candidate's per-employer consent. Criminal results are never reused across employers. | Avoids stale or out-of-context data. | Reuse resolver | [PROP] |
-| BR-BGV-017 | Verification outcomes are `verified`, `discrepancy`, `unable_to_verify` (not adverse in itself) or `in_progress`. Minor format differences are normalized before a discrepancy is raised. | Avoid false negatives. | Normalizer | [PROP] |
-| BR-BGV-018 | A candidate's decision to decline or withdraw consent is recorded neutrally; employers see only "declined" and the platform shows an information text that the employer should apply policy uniformly. | Avoid penalizing privacy choices unfairly. | Consent flow; employer UI | [PROP] |
-| BR-BGV-019 | Reference checks contact only candidate-nominated referees, use approved questionnaires without protected-attribute topics, and responses are confidential to the hiring team. | Fairness and confidentiality. | Reference service | [DER] from SSOT F-94 |
-| BR-BGV-020 | A candidate's current employer is never contacted without explicit permission for that check. The prospective employer's name is disclosed to verifiers only if the candidate agreed. | Protects candidates' current jobs. | Employment check; reference check | [PROP] |
-| BR-BGV-021 | Right-to-work checks collect only what the national method requires, are applied to all hires uniformly, and are not started before the permitted stage. | Non-discrimination. | Right-to-work service; rule engine | [PROP] |
-| BR-BGV-022 | Only vendors that are contracted, security-reviewed and registered with declared countries, check types, data residency and retention terms may be used. | Third-party risk. | Vendor registry | [SRC: SSOT §13.4 integration layer]; [PROP] |
-| BR-BGV-023 | Orders are idempotent per (request, check type); vendor webhooks are signature-verified, replay-protected (5-minute window), deduplicated by vendor event id and applied in order. | Exactly-once effects. | Order service; webhook intake | [DER] |
-| BR-BGV-024 | Only data needed for the check is sent to the vendor; national ids and similar identifiers are entered on vendor-hosted forms and not stored by the platform. | Minimization. | Adapters | [PROP] |
-| BR-BGV-025 | All BGV data is classified Restricted: encrypted at rest with field-level keys, stored apart from general data, never copied to analytics stores, and accessed through audited services. | Sensitive data protection. | Storage design | [SRC: SSOT §15 field-level encryption]; [PROP] |
-| BR-BGV-026 | Retention defaults (to be set by jurisdiction): report content and raw payloads deleted 12 months after final decision (90 days if no decision); consent, notices and adjudication records kept 5 years or the legal minimum; identity assurance kept for its validity period; unfinished requests purged 30 days after expiry. Legal hold overrides. | Data minimization with legal defensibility. | Retention job | [PROP]; [DEC-REQ] OD-BGV-06 |
-| BR-BGV-027 | Candidates may request access, correction and deletion; deletion is refused only for records within a legal minimum retention, and the response states which categories remain and until when. | Data rights. | DSAR handler with SET | [SRC: SSOT §15.9 privacy]; [PROP] |
-| BR-BGV-028 | A check invitation expires after 30 days without consent; an in-progress request expires 60 days after consent; a result may be used in a decision for 90 days from completion; older results require a re-run with fresh consent. | Currency of data. | Scheduler; adjudication guard | [PROP] |
-| BR-BGV-029 | Withdrawal of consent before ordering cancels the request with no vendor call; after ordering it triggers vendor cancellation and quarantine and deletion of any results received. | Honor consent. | Lifecycle service | [PROP] |
-| BR-BGV-030 | Cancellation costs follow the vendor terms and are recorded in the ledger; employers are shown the possible cost before cancelling after order. | Transparency. | Billing hook | [PROP] |
-| BR-BGV-031 | Employers see an estimate before ordering and pay for employer-initiated checks; candidates are not charged. Candidate-initiated portable verification is priced via BIL (planned). Orders do not proceed if billing is inactive. | Clear economics. | Billing hook | [PROP]; amounts [DEC-REQ] (BIL) |
-| BR-BGV-032 | Fair-hiring monitoring uses aggregates only; cells below k (default 10) are suppressed; no protected attribute is stored by BGV. | Monitoring without profiling. | Analytics job | [SRC: SSOT BR-158 k ≥ 10 default]; [PROP] |
-| BR-BGV-033 | Employer-ordered checks cannot be run on subjects under 18; criminal checks are never available for minors. | Child protection. | Eligibility check using IDN age flag | [DER] |
-| BR-BGV-034 | Every consent, order, status change, report view, decision, notice, dispute and configuration change is written to an append-only, hash-chained audit log. A failed audit write fails the action. Staff break-glass access needs a case reason and notifies the candidate and the org admin. | Accountability. | Audit service | [SRC: SSOT BR-67]; [PROP] |
-| BR-BGV-035 | Sanctions and watchlist screening is available only to organizations that attest a regulatory basis for the role family and covers official lists only; a potential match is a lead requiring human confirmation. | Narrow scope, avoid false positives. | Package builder; adjudication | [PROP] |
-| BR-BGV-036 | Rule packs, vendor enablement and go-live need two different approvers, are versioned with effective dates, and in-flight requests keep their pinned version unless law requires otherwise. | Change control. | Admin console | [SRC: SSOT BR-29 confirmation + audit]; [PROP] |
-| BR-BGV-037 | A vendor may be replaced or failed over only to vendors listed in the consent disclosure; otherwise the candidate must re-consent. | Consent specificity. | Router | [PROP] |
-| BR-BGV-038 | Check data is never used for advertising, product analytics beyond operational metrics, model training or any purpose beyond the consented check. | Purpose limitation. | Data access policy; audits | [SRC: SSOT §15.2 privacy by purpose]; [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                  | Rationale                                   | Enforced where                                                        | Source                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------- |
+| BR-BGV-001 | No check is ordered without a valid, specific, informed consent from the candidate that names the check types, the requesting employer, the vendor(s) and the purpose. Consent is per request and expires with it.                                                                                                                                    | Lawful basis, trust.                        | Order service (rejects orders not covered by consent)                 | [SRC: SSOT §6 Consent "purpose-bound, versioned"]; [DER] |
+| BR-BGV-002 | The disclosure is a standalone document in the candidate's language, versioned and hash-stored. Biometric processing needs its own separate consent.                                                                                                                                                                                                  | Clear, uncluttered disclosure.              | Consent flow                                                          | [PROP]                                                   |
+| BR-BGV-003 | A check may be ordered only if the jurisdiction rule pack permits that type at the current stage (for example after a conditional offer where required). Unknown jurisdiction blocks sensitive checks. Rule engine failure blocks ordering.                                                                                                           | Fair-chance and timing laws.                | Rule engine at initiation and order                                   | [PROP]                                                   |
+| BR-BGV-004 | Employers may order only check types enabled in the catalog and included in a package approved for the role family; checks must be justified by the role.                                                                                                                                                                                             | Proportionality.                            | Package builder; initiation                                           | [PROP]                                                   |
+| BR-BGV-005 | Criminal check scope follows the strictest applicable rule pack: lookback, convictions versus arrests, and exclusion of sealed, expunged and juvenile records. The platform filters out-of-scope records even if a vendor returns them.                                                                                                               | Legal scope control.                        | Result normalizer                                                     | [PROP]                                                   |
+| BR-BGV-006 | The platform makes no automated hiring decision and provides no pass/fail score from check results. Humans adjudicate.                                                                                                                                                                                                                                | Accountability.                             | Product design; ATS integration blocks auto-rejection from BGV status | [DER]                                                    |
+| BR-BGV-007 | Before any adverse decision based on a report, an individualized assessment (nature and gravity, time elapsed, relevance to duties, accuracy, rehabilitation evidence) with written rationale is required; discrepancies and potential matches go to the candidate for explanation before being treated as findings.                                  | Fairness; contestability.                   | Adjudication case workflow                                            | [PROP]                                                   |
+| BR-BGV-008 | A pre-adverse action notice with a copy of the report and rights information is sent before a final adverse action, followed by a waiting period (default 5 business days, rule-pack override) during which the candidate can respond or dispute.                                                                                                     | Opportunity to respond.                     | Notice workflow; final-adverse guard                                  | [PROP]                                                   |
+| BR-BGV-009 | A final adverse action notice with required content is sent and recorded before the ATS rejection reason `background_check` is stored.                                                                                                                                                                                                                | Compliance trail.                           | Notice workflow; ATS integration                                      | [PROP]                                                   |
+| BR-BGV-010 | A candidate dispute is forwarded to the vendor within 1 business day, pauses adverse action, and the vendor has 30 days to reinvestigate. Disputed items are excluded from adjudication until resolved.                                                                                                                                               | Accuracy and fairness.                      | Dispute workflow                                                      | [PROP]                                                   |
+| BR-BGV-011 | A candidate may always obtain a copy of their report (while retained) through the secure portal after step-up authentication.                                                                                                                                                                                                                         | Transparency.                               | Portal                                                                | [PROP]                                                   |
+| BR-BGV-012 | Only users with the adjudicator permission in the ordering organization can view report content, with a reason code and step-up authentication; other users see status only. Support agents never see content.                                                                                                                                        | Least privilege.                            | Report viewer authz                                                   | [PROP]                                                   |
+| BR-BGV-013 | Check results and adjudication data never appear in profiles, search, matching, recommendations, reputation or analytics. The only public artifact is the opt-in "Identity verified" mark.                                                                                                                                                            | Prevents discriminatory spillover.          | Architecture boundary; contract tests on other modules' payloads      | [DER]                                                    |
+| BR-BGV-014 | Identity documents and biometrics stay with the vendor under contract; the platform stores only the assurance result, document type, country, dates and a name hash. Biometric consent is explicit and a non-biometric alternative is always offered.                                                                                                 | Minimization of sensitive data.             | Identity adapter and storage                                          | [SRC: SSOT §15 privacy by purpose]; [PROP]               |
+| BR-BGV-015 | The identity mark is opt-in, shows only "Identity verified" with date, is valid 24 months, and is withdrawn on legal-name change until re-verified.                                                                                                                                                                                                   | Controlled disclosure.                      | Badge service                                                         | [PROP]                                                   |
+| BR-BGV-016 | Prior verified results may be reused only when still valid (identity 24 months, employment 12 months, education until disputed), meeting the employer's minimum level, and with the candidate's per-employer consent. Criminal results are never reused across employers.                                                                             | Avoids stale or out-of-context data.        | Reuse resolver                                                        | [PROP]                                                   |
+| BR-BGV-017 | Verification outcomes are `verified`, `discrepancy`, `unable_to_verify` (not adverse in itself) or `in_progress`. Minor format differences are normalized before a discrepancy is raised.                                                                                                                                                             | Avoid false negatives.                      | Normalizer                                                            | [PROP]                                                   |
+| BR-BGV-018 | A candidate's decision to decline or withdraw consent is recorded neutrally; employers see only "declined" and the platform shows an information text that the employer should apply policy uniformly.                                                                                                                                                | Avoid penalizing privacy choices unfairly.  | Consent flow; employer UI                                             | [PROP]                                                   |
+| BR-BGV-019 | Reference checks contact only candidate-nominated referees, use approved questionnaires without protected-attribute topics, and responses are confidential to the hiring team.                                                                                                                                                                        | Fairness and confidentiality.               | Reference service                                                     | [DER] from SSOT F-94                                     |
+| BR-BGV-020 | A candidate's current employer is never contacted without explicit permission for that check. The prospective employer's name is disclosed to verifiers only if the candidate agreed.                                                                                                                                                                 | Protects candidates' current jobs.          | Employment check; reference check                                     | [PROP]                                                   |
+| BR-BGV-021 | Right-to-work checks collect only what the national method requires, are applied to all hires uniformly, and are not started before the permitted stage.                                                                                                                                                                                              | Non-discrimination.                         | Right-to-work service; rule engine                                    | [PROP]                                                   |
+| BR-BGV-022 | Only vendors that are contracted, security-reviewed and registered with declared countries, check types, data residency and retention terms may be used.                                                                                                                                                                                              | Third-party risk.                           | Vendor registry                                                       | [SRC: SSOT §13.4 integration layer]; [PROP]              |
+| BR-BGV-023 | Orders are idempotent per (request, check type); vendor webhooks are signature-verified, replay-protected (5-minute window), deduplicated by vendor event id and applied in order.                                                                                                                                                                    | Exactly-once effects.                       | Order service; webhook intake                                         | [DER]                                                    |
+| BR-BGV-024 | Only data needed for the check is sent to the vendor; national ids and similar identifiers are entered on vendor-hosted forms and not stored by the platform.                                                                                                                                                                                         | Minimization.                               | Adapters                                                              | [PROP]                                                   |
+| BR-BGV-025 | All BGV data is classified Restricted: encrypted at rest with field-level keys, stored apart from general data, never copied to analytics stores, and accessed through audited services.                                                                                                                                                              | Sensitive data protection.                  | Storage design                                                        | [SRC: SSOT §15 field-level encryption]; [PROP]           |
+| BR-BGV-026 | Retention defaults (to be set by jurisdiction): report content and raw payloads deleted 12 months after final decision (90 days if no decision); consent, notices and adjudication records kept 5 years or the legal minimum; identity assurance kept for its validity period; unfinished requests purged 30 days after expiry. Legal hold overrides. | Data minimization with legal defensibility. | Retention job                                                         | [PROP]; [DEC-REQ] OD-BGV-06                              |
+| BR-BGV-027 | Candidates may request access, correction and deletion; deletion is refused only for records within a legal minimum retention, and the response states which categories remain and until when.                                                                                                                                                        | Data rights.                                | DSAR handler with SET                                                 | [SRC: SSOT §15.9 privacy]; [PROP]                        |
+| BR-BGV-028 | A check invitation expires after 30 days without consent; an in-progress request expires 60 days after consent; a result may be used in a decision for 90 days from completion; older results require a re-run with fresh consent.                                                                                                                    | Currency of data.                           | Scheduler; adjudication guard                                         | [PROP]                                                   |
+| BR-BGV-029 | Withdrawal of consent before ordering cancels the request with no vendor call; after ordering it triggers vendor cancellation and quarantine and deletion of any results received.                                                                                                                                                                    | Honor consent.                              | Lifecycle service                                                     | [PROP]                                                   |
+| BR-BGV-030 | Cancellation costs follow the vendor terms and are recorded in the ledger; employers are shown the possible cost before cancelling after order.                                                                                                                                                                                                       | Transparency.                               | Billing hook                                                          | [PROP]                                                   |
+| BR-BGV-031 | Employers see an estimate before ordering and pay for employer-initiated checks; candidates are not charged. Candidate-initiated portable verification is priced via BIL (planned). Orders do not proceed if billing is inactive.                                                                                                                     | Clear economics.                            | Billing hook                                                          | [PROP]; amounts [DEC-REQ] (BIL)                          |
+| BR-BGV-032 | Fair-hiring monitoring uses aggregates only; cells below k (default 10) are suppressed; no protected attribute is stored by BGV.                                                                                                                                                                                                                      | Monitoring without profiling.               | Analytics job                                                         | [SRC: SSOT BR-158 k ≥ 10 default]; [PROP]                |
+| BR-BGV-033 | Employer-ordered checks cannot be run on subjects under 18; criminal checks are never available for minors.                                                                                                                                                                                                                                           | Child protection.                           | Eligibility check using IDN age flag                                  | [DER]                                                    |
+| BR-BGV-034 | Every consent, order, status change, report view, decision, notice, dispute and configuration change is written to an append-only, hash-chained audit log. A failed audit write fails the action. Staff break-glass access needs a case reason and notifies the candidate and the org admin.                                                          | Accountability.                             | Audit service                                                         | [SRC: SSOT BR-67]; [PROP]                                |
+| BR-BGV-035 | Sanctions and watchlist screening is available only to organizations that attest a regulatory basis for the role family and covers official lists only; a potential match is a lead requiring human confirmation.                                                                                                                                     | Narrow scope, avoid false positives.        | Package builder; adjudication                                         | [PROP]                                                   |
+| BR-BGV-036 | Rule packs, vendor enablement and go-live need two different approvers, are versioned with effective dates, and in-flight requests keep their pinned version unless law requires otherwise.                                                                                                                                                           | Change control.                             | Admin console                                                         | [SRC: SSOT BR-29 confirmation + audit]; [PROP]           |
+| BR-BGV-037 | A vendor may be replaced or failed over only to vendors listed in the consent disclosure; otherwise the candidate must re-consent.                                                                                                                                                                                                                    | Consent specificity.                        | Router                                                                | [PROP]                                                   |
+| BR-BGV-038 | Check data is never used for advertising, product analytics beyond operational metrics, model training or any purpose beyond the consented check.                                                                                                                                                                                                     | Purpose limitation.                         | Data access policy; audits                                            | [SRC: SSOT §15.2 privacy by purpose]; [PROP]             |
 
 ## 6. State machines
 
@@ -1030,19 +1030,19 @@ All rules are `[PROP]`/`[DER]` unless a source is cited; jurisdiction-specific c
 
 States: `draft`, `invited`, `consented`, `ordered`, `in_progress`, `completed`, `declined`, `cancelled`, `expired`, `failed`. Terminal: `completed`, `declined`, `cancelled`, `expired`, `failed`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `draft` | Recruiter starts | application active |
-| `draft` | `invited` | Recruiter confirms | rule evaluation allowed, billing active |
-| `invited` | `consented` | Candidate consents | disclosure current |
-| `invited` | `declined` | Candidate declines | none |
-| `invited` | `expired` | 30 days | none |
-| `consented` | `ordered` | System places orders | consent covers types and vendors |
-| `ordered` | `in_progress` | Vendor accepts | none |
-| `in_progress` | `completed` | All items final | none |
-| `in_progress` | `failed` | Vendor error not recoverable | after retries |
-| `invited`/`consented`/`ordered`/`in_progress` | `cancelled` | Employer cancels or candidate withdraws | BR-BGV-029 |
-| `consented`/`ordered`/`in_progress` | `expired` | 60 days after consent | none |
+| From                                          | To            | Trigger                                 | Guard                                   |
+| --------------------------------------------- | ------------- | --------------------------------------- | --------------------------------------- |
+| `[*]`                                         | `draft`       | Recruiter starts                        | application active                      |
+| `draft`                                       | `invited`     | Recruiter confirms                      | rule evaluation allowed, billing active |
+| `invited`                                     | `consented`   | Candidate consents                      | disclosure current                      |
+| `invited`                                     | `declined`    | Candidate declines                      | none                                    |
+| `invited`                                     | `expired`     | 30 days                                 | none                                    |
+| `consented`                                   | `ordered`     | System places orders                    | consent covers types and vendors        |
+| `ordered`                                     | `in_progress` | Vendor accepts                          | none                                    |
+| `in_progress`                                 | `completed`   | All items final                         | none                                    |
+| `in_progress`                                 | `failed`      | Vendor error not recoverable            | after retries                           |
+| `invited`/`consented`/`ordered`/`in_progress` | `cancelled`   | Employer cancels or candidate withdraws | BR-BGV-029                              |
+| `consented`/`ordered`/`in_progress`           | `expired`     | 60 days after consent                   | none                                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1072,19 +1072,19 @@ stateDiagram-v2
 
 States: `pending_info`, `submitted`, `in_progress`, `clear`, `consider` (record or discrepancy to review), `unable_to_verify`, `quarantined` (consent withdrawn), `cancelled`, `error`. Terminal: `clear`, `consider`, `unable_to_verify`, `quarantined`, `cancelled`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `pending_info` | Item created | none |
-| `pending_info` | `submitted` | Candidate supplies info | complete |
-| `submitted` | `in_progress` | Vendor accepts | none |
-| `in_progress` | `clear` | Result without findings | none |
-| `in_progress` | `consider` | Findings or discrepancy | normalized |
-| `in_progress` | `unable_to_verify` | Source unresponsive or unsupported | SLA elapsed |
-| `in_progress` | `error` | Vendor error | retry limit |
-| `error` | `in_progress` | Retry succeeds | none |
-| any | `cancelled` | Cancel | BR-BGV-029 |
-| any result state | `quarantined` | Consent withdrawn after result | none |
-| `consider` | `consider` (new version) | Dispute correction | version appended |
+| From             | To                       | Trigger                            | Guard            |
+| ---------------- | ------------------------ | ---------------------------------- | ---------------- |
+| `[*]`            | `pending_info`           | Item created                       | none             |
+| `pending_info`   | `submitted`              | Candidate supplies info            | complete         |
+| `submitted`      | `in_progress`            | Vendor accepts                     | none             |
+| `in_progress`    | `clear`                  | Result without findings            | none             |
+| `in_progress`    | `consider`               | Findings or discrepancy            | normalized       |
+| `in_progress`    | `unable_to_verify`       | Source unresponsive or unsupported | SLA elapsed      |
+| `in_progress`    | `error`                  | Vendor error                       | retry limit      |
+| `error`          | `in_progress`            | Retry succeeds                     | none             |
+| any              | `cancelled`              | Cancel                             | BR-BGV-029       |
+| any result state | `quarantined`            | Consent withdrawn after result     | none             |
+| `consider`       | `consider` (new version) | Dispute correction                 | version appended |
 
 ```mermaid
 stateDiagram-v2
@@ -1111,22 +1111,22 @@ stateDiagram-v2
 
 States: `not_started`, `assessing`, `info_requested`, `pre_adverse_sent`, `waiting_period`, `dispute_pending`, `ready_for_final`, `final_adverse_sent`, `cleared`, `closed`. Terminal: `final_adverse_sent`, `cleared`, `closed`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `not_started` | A report is `consider` | none |
-| `not_started` | `assessing` | Adjudicator opens case | adjudicator permission |
-| `assessing` | `info_requested` | Request info from candidate | none |
-| `info_requested` | `assessing` | Info received or 7 days pass | none |
-| `assessing` | `cleared` | Decision to proceed | all factors recorded |
-| `assessing` | `pre_adverse_sent` | Send pre-adverse | all factors recorded |
-| `pre_adverse_sent` | `waiting_period` | Delivery confirmed | none |
-| `waiting_period` | `dispute_pending` | Candidate disputes | none |
-| `dispute_pending` | `assessing` | Dispute resolved | new report version |
-| `waiting_period` | `ready_for_final` | Period elapsed, no dispute | none |
-| `waiting_period` | `assessing` | Candidate responds with context | none |
-| `ready_for_final` | `final_adverse_sent` | Adjudicator confirms and sends | notice recorded |
-| `ready_for_final` | `cleared` | Adjudicator changes decision | none |
-| any | `closed` | Candidate withdrew or request cancelled | none |
+| From               | To                   | Trigger                                 | Guard                  |
+| ------------------ | -------------------- | --------------------------------------- | ---------------------- |
+| `[*]`              | `not_started`        | A report is `consider`                  | none                   |
+| `not_started`      | `assessing`          | Adjudicator opens case                  | adjudicator permission |
+| `assessing`        | `info_requested`     | Request info from candidate             | none                   |
+| `info_requested`   | `assessing`          | Info received or 7 days pass            | none                   |
+| `assessing`        | `cleared`            | Decision to proceed                     | all factors recorded   |
+| `assessing`        | `pre_adverse_sent`   | Send pre-adverse                        | all factors recorded   |
+| `pre_adverse_sent` | `waiting_period`     | Delivery confirmed                      | none                   |
+| `waiting_period`   | `dispute_pending`    | Candidate disputes                      | none                   |
+| `dispute_pending`  | `assessing`          | Dispute resolved                        | new report version     |
+| `waiting_period`   | `ready_for_final`    | Period elapsed, no dispute              | none                   |
+| `waiting_period`   | `assessing`          | Candidate responds with context         | none                   |
+| `ready_for_final`  | `final_adverse_sent` | Adjudicator confirms and sends          | notice recorded        |
+| `ready_for_final`  | `cleared`            | Adjudicator changes decision            | none                   |
+| any                | `closed`             | Candidate withdrew or request cancelled | none                   |
 
 ```mermaid
 stateDiagram-v2
@@ -1220,68 +1220,68 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-| --- | --- | --- | --- | --- | --- |
-| SCR-BGV-001 | Check catalog admin | `/admin/bgv/catalog` | PAD | Define types (FR-BGV-001) | empty, country matrix |
-| SCR-BGV-002 | Screening packages | `/employer/screening/packages` | EAD | Build packages (FR-BGV-001) | draft, needs update |
-| SCR-BGV-003 | Rule pack editor | `/admin/bgv/rules` | PAD | Jurisdiction rules (FR-BGV-002) | draft, awaiting second approval, effective |
-| SCR-BGV-004 | Identity verification start | `/settings/identity` | CAN | Consent and start (FR-BGV-003) | not started, in progress, verified, expired |
-| SCR-BGV-005 | Identity capture (vendor hosted) | external | CAN | Capture and liveness | capturing, failed |
-| SCR-BGV-006 | Identity result and mark controls | `/settings/identity/result` | CAN | Badge toggle, share (FR-BGV-004) | verified, expired |
-| SCR-BGV-007 | Start checks dialog | modal in ATS | REC, HMG | Initiate, rules and estimate (FR-BGV-013) | blocked, allowed with conditions |
-| SCR-BGV-008 | Consent and disclosure | `/checks/:id/consent` | CAN | Consent per type (FR-BGV-014) | unsigned, signed, withdrawn, declined |
-| SCR-BGV-009 | Candidate check list | `/checks` | CAN | All requests (FR-BGV-015) | none, active, completed |
-| SCR-BGV-010 | Candidate check detail | `/checks/:id` | CAN | Timeline, provide info (FR-BGV-015) | info needed, delayed |
-| SCR-BGV-011 | Provide information form | `/checks/:id/info` | CAN | Education, employment, license details | draft, submitted |
-| SCR-BGV-012 | Discrepancy explanation | `/checks/:id/items/:itemId/explain` | CAN | Explain mismatch (FR-BGV-005) | open |
-| SCR-BGV-013 | Candidate report viewer | `/checks/:id/report` | CAN | Own report copy (FR-BGV-023) | step-up required, retained, purged |
-| SCR-BGV-014 | Candidate dispute form | `/checks/:id/dispute` | CAN | Dispute (FR-BGV-024) | open, reinvestigating, resolved |
-| SCR-BGV-015 | Employer check list | `/employer/screening` | REC, HMG, EAD | Requests and statuses | filters, empty |
-| SCR-BGV-016 | Employer check detail (status view) | `/employer/screening/:id` | REC, HMG, EAD | Status only (FR-BGV-019) | pending, review needed |
-| SCR-BGV-017 | Restricted report viewer | `/employer/screening/:id/report` | adjudicators | View report (FR-BGV-019) | reason prompt, step-up, watermark, purged |
-| SCR-BGV-018 | Adjudication case | `/employer/screening/:id/case` | adjudicators | Checklist and decision (FR-BGV-020) | assessing, info requested |
-| SCR-BGV-019 | Pre-adverse notice | `/employer/screening/:id/pre-adverse` | adjudicators | Preview and send (FR-BGV-021) | countdown, dispute pending |
-| SCR-BGV-020 | Final adverse notice | `/employer/screening/:id/final` | adjudicators | Send final (FR-BGV-022) | blocked, ready, sent |
-| SCR-BGV-021 | Reference nomination | `/checks/:id/references` | CAN | Nominate referees (FR-BGV-007) | 0 to 4 referees |
-| SCR-BGV-022 | Reference results | `/employer/screening/:id/references` | REC, HMG | Completed responses | pending, completed |
-| SCR-BGV-023 | Referee response form | `/bgv/ref/:token` | referee | Answer questionnaire (FR-BGV-008) | disclosure, form, declined, expired |
-| SCR-BGV-024 | Right-to-work | `/employer/screening/:id/rtw` | EAD, REC | Method and outcome (FR-BGV-010) | share code, document, outcome |
-| SCR-BGV-025 | Verified profile bundle (portable) | `/settings/verifications` | CAN | Portable checks (FR-BGV-025) | not started, valid, expiring |
-| SCR-BGV-026 | Budget and costs | `/employer/screening/costs` | EAD, FIN | Ledger, budget (FR-BGV-028) | over budget |
-| SCR-BGV-027 | Compliance reports and audit log | `/employer/screening/compliance` | EAD | Reports (FR-BGV-027) | filters, export |
-| SCR-BGV-028 | Fair hiring dashboard | `/employer/screening/fair-hiring` | EAD | Aggregates (FR-BGV-031) | suppressed cells |
-| SCR-BGV-029 | Vendor admin | `/admin/bgv/vendors` | PAD | Adapters and health (FR-BGV-016, 029) | test, live, degraded |
-| SCR-BGV-030 | Webhook monitor | `/admin/bgv/webhooks` | PAD | Intake health (FR-BGV-017) | DLQ |
-| SCR-BGV-031 | Retention and holds | `/admin/bgv/retention` | PAD | Schedules, disposal logs (FR-BGV-026) | hold active |
-| SCR-BGV-032 | Test mode and go-live | `/admin/bgv/test` | PAD, SAD | Sandbox (FR-BGV-030) | test banner, approval |
+| ID          | Name                                | Route proposal                        | Roles         | Purpose                                   | Key states                                  |
+| ----------- | ----------------------------------- | ------------------------------------- | ------------- | ----------------------------------------- | ------------------------------------------- |
+| SCR-BGV-001 | Check catalog admin                 | `/admin/bgv/catalog`                  | PAD           | Define types (FR-BGV-001)                 | empty, country matrix                       |
+| SCR-BGV-002 | Screening packages                  | `/employer/screening/packages`        | EAD           | Build packages (FR-BGV-001)               | draft, needs update                         |
+| SCR-BGV-003 | Rule pack editor                    | `/admin/bgv/rules`                    | PAD           | Jurisdiction rules (FR-BGV-002)           | draft, awaiting second approval, effective  |
+| SCR-BGV-004 | Identity verification start         | `/settings/identity`                  | CAN           | Consent and start (FR-BGV-003)            | not started, in progress, verified, expired |
+| SCR-BGV-005 | Identity capture (vendor hosted)    | external                              | CAN           | Capture and liveness                      | capturing, failed                           |
+| SCR-BGV-006 | Identity result and mark controls   | `/settings/identity/result`           | CAN           | Badge toggle, share (FR-BGV-004)          | verified, expired                           |
+| SCR-BGV-007 | Start checks dialog                 | modal in ATS                          | REC, HMG      | Initiate, rules and estimate (FR-BGV-013) | blocked, allowed with conditions            |
+| SCR-BGV-008 | Consent and disclosure              | `/checks/:id/consent`                 | CAN           | Consent per type (FR-BGV-014)             | unsigned, signed, withdrawn, declined       |
+| SCR-BGV-009 | Candidate check list                | `/checks`                             | CAN           | All requests (FR-BGV-015)                 | none, active, completed                     |
+| SCR-BGV-010 | Candidate check detail              | `/checks/:id`                         | CAN           | Timeline, provide info (FR-BGV-015)       | info needed, delayed                        |
+| SCR-BGV-011 | Provide information form            | `/checks/:id/info`                    | CAN           | Education, employment, license details    | draft, submitted                            |
+| SCR-BGV-012 | Discrepancy explanation             | `/checks/:id/items/:itemId/explain`   | CAN           | Explain mismatch (FR-BGV-005)             | open                                        |
+| SCR-BGV-013 | Candidate report viewer             | `/checks/:id/report`                  | CAN           | Own report copy (FR-BGV-023)              | step-up required, retained, purged          |
+| SCR-BGV-014 | Candidate dispute form              | `/checks/:id/dispute`                 | CAN           | Dispute (FR-BGV-024)                      | open, reinvestigating, resolved             |
+| SCR-BGV-015 | Employer check list                 | `/employer/screening`                 | REC, HMG, EAD | Requests and statuses                     | filters, empty                              |
+| SCR-BGV-016 | Employer check detail (status view) | `/employer/screening/:id`             | REC, HMG, EAD | Status only (FR-BGV-019)                  | pending, review needed                      |
+| SCR-BGV-017 | Restricted report viewer            | `/employer/screening/:id/report`      | adjudicators  | View report (FR-BGV-019)                  | reason prompt, step-up, watermark, purged   |
+| SCR-BGV-018 | Adjudication case                   | `/employer/screening/:id/case`        | adjudicators  | Checklist and decision (FR-BGV-020)       | assessing, info requested                   |
+| SCR-BGV-019 | Pre-adverse notice                  | `/employer/screening/:id/pre-adverse` | adjudicators  | Preview and send (FR-BGV-021)             | countdown, dispute pending                  |
+| SCR-BGV-020 | Final adverse notice                | `/employer/screening/:id/final`       | adjudicators  | Send final (FR-BGV-022)                   | blocked, ready, sent                        |
+| SCR-BGV-021 | Reference nomination                | `/checks/:id/references`              | CAN           | Nominate referees (FR-BGV-007)            | 0 to 4 referees                             |
+| SCR-BGV-022 | Reference results                   | `/employer/screening/:id/references`  | REC, HMG      | Completed responses                       | pending, completed                          |
+| SCR-BGV-023 | Referee response form               | `/bgv/ref/:token`                     | referee       | Answer questionnaire (FR-BGV-008)         | disclosure, form, declined, expired         |
+| SCR-BGV-024 | Right-to-work                       | `/employer/screening/:id/rtw`         | EAD, REC      | Method and outcome (FR-BGV-010)           | share code, document, outcome               |
+| SCR-BGV-025 | Verified profile bundle (portable)  | `/settings/verifications`             | CAN           | Portable checks (FR-BGV-025)              | not started, valid, expiring                |
+| SCR-BGV-026 | Budget and costs                    | `/employer/screening/costs`           | EAD, FIN      | Ledger, budget (FR-BGV-028)               | over budget                                 |
+| SCR-BGV-027 | Compliance reports and audit log    | `/employer/screening/compliance`      | EAD           | Reports (FR-BGV-027)                      | filters, export                             |
+| SCR-BGV-028 | Fair hiring dashboard               | `/employer/screening/fair-hiring`     | EAD           | Aggregates (FR-BGV-031)                   | suppressed cells                            |
+| SCR-BGV-029 | Vendor admin                        | `/admin/bgv/vendors`                  | PAD           | Adapters and health (FR-BGV-016, 029)     | test, live, degraded                        |
+| SCR-BGV-030 | Webhook monitor                     | `/admin/bgv/webhooks`                 | PAD           | Intake health (FR-BGV-017)                | DLQ                                         |
+| SCR-BGV-031 | Retention and holds                 | `/admin/bgv/retention`                | PAD           | Schedules, disposal logs (FR-BGV-026)     | hold active                                 |
+| SCR-BGV-032 | Test mode and go-live               | `/admin/bgv/test`                     | PAD, SAD      | Sandbox (FR-BGV-030)                      | test banner, approval                       |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-| --- | --- | --- | --- | --- |
-| ENT-BGV-01 | CheckType | key, description, requiredData, returnedData, countries, vendors, status | 1:n packages | Permanent |
-| ENT-BGV-02 | CheckPackage | id, orgId, name, version, typeKeys, roleFamilies | n:1 org (EMP) | Permanent while referenced |
-| ENT-BGV-03 | RulePack | id, jurisdiction, version, rules, effectiveFrom, approvers | n:1 jurisdiction | Permanent (history) |
-| ENT-BGV-04 | CheckRequest | id, applicationRef, orgId, candidateRef, packageVersion, rulePackVersion, state, expiresAt | 1:n CheckItem | Restricted; per schedule |
-| ENT-BGV-05 | CheckItem | id, requestId, typeKey, state, subjectData ref, resultCategory | n:1 CheckRequest; 1:1 VendorOrder | Restricted; per schedule |
-| ENT-BGV-06 | ConsentRecord | id, requestId, candidateRef, disclosureVersionHash, types, vendors, signature, ip, device, at, withdrawnAt | n:1 CheckRequest | 5 years or legal minimum |
-| ENT-BGV-07 | DisclosureVersion | id, language, text, hash, rulePack, effectiveFrom | referenced by consents | Permanent |
-| ENT-BGV-08 | VendorAccount | id, vendor, capabilities, countries, secretsRef, status, priority | 1:n VendorOrder | Permanent |
-| ENT-BGV-09 | VendorOrder | id, itemId, vendorId, vendorRef, idempotencyKey, status, costs | n:1 CheckItem | Per schedule |
-| ENT-BGV-10 | CheckResult | id, itemId, version, normalized, rawEncryptedRef, receivedAt | n:1 CheckItem | Restricted; 12 months after decision |
-| ENT-BGV-11 | AdjudicationCase | id, requestId, state, factors, rationale, decision, adjudicators | 1:1 CheckRequest | 5 years or legal minimum |
-| ENT-BGV-12 | AdverseActionNotice | id, caseId, type (pre, final), content hash, sentAt, deliveredAt | n:1 AdjudicationCase | 5 years or legal minimum |
-| ENT-BGV-13 | CandidateDispute | id, itemId, description, state, vendorRef, outcome | n:1 CheckItem | Per schedule |
-| ENT-BGV-14 | IdentityVerificationSession | id, candidateRef, vendor, state, startedAt | 1:1 IdentityAssurance | 30 days |
-| ENT-BGV-15 | IdentityAssurance | id, candidateRef, level, documentType, country, verifiedAt, validUntil, nameHash, shown | n:1 candidate | Validity period |
-| ENT-BGV-16 | ReferenceCheck | id, requestId, refereeName, refereeEmailHash, relationship, state | n:1 CheckRequest | Per schedule |
-| ENT-BGV-17 | ReferenceResponse | id, referenceId, answers, signedAt | 1:1 ReferenceCheck | Restricted; per schedule |
-| ENT-BGV-18 | RightToWorkRecord | id, requestId, method, outcome, expiry, reviewer | n:1 CheckRequest | Per rule pack |
-| ENT-BGV-19 | BgvAuditEntry | id, actorRef, action, targetRef, reason, at, prevHash, hash | append-only | Permanent (no PII) |
-| ENT-BGV-20 | BgvCostLedgerEntry | id, orgId, requestId, itemId, amount, currency, kind | n:1 CheckRequest | 7 years `[PROP]` (finance) |
-| ENT-BGV-21 | RetentionSchedule | id, jurisdiction, dataClass, retentionDays, holdFlag, version | referenced by jobs | Permanent |
-| ENT-BGV-22 | PortableVerification | id, candidateRef, type, result, validUntil, shares | n:1 candidate | Validity period |
-| ENT-BGV-23 | FairHiringMetric | id, orgId, period, cell, counts | aggregate only | 24 months |
+| ID         | Name                        | Key attributes                                                                                             | Relationships                     | Retention class                      |
+| ---------- | --------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------ |
+| ENT-BGV-01 | CheckType                   | key, description, requiredData, returnedData, countries, vendors, status                                   | 1:n packages                      | Permanent                            |
+| ENT-BGV-02 | CheckPackage                | id, orgId, name, version, typeKeys, roleFamilies                                                           | n:1 org (EMP)                     | Permanent while referenced           |
+| ENT-BGV-03 | RulePack                    | id, jurisdiction, version, rules, effectiveFrom, approvers                                                 | n:1 jurisdiction                  | Permanent (history)                  |
+| ENT-BGV-04 | CheckRequest                | id, applicationRef, orgId, candidateRef, packageVersion, rulePackVersion, state, expiresAt                 | 1:n CheckItem                     | Restricted; per schedule             |
+| ENT-BGV-05 | CheckItem                   | id, requestId, typeKey, state, subjectData ref, resultCategory                                             | n:1 CheckRequest; 1:1 VendorOrder | Restricted; per schedule             |
+| ENT-BGV-06 | ConsentRecord               | id, requestId, candidateRef, disclosureVersionHash, types, vendors, signature, ip, device, at, withdrawnAt | n:1 CheckRequest                  | 5 years or legal minimum             |
+| ENT-BGV-07 | DisclosureVersion           | id, language, text, hash, rulePack, effectiveFrom                                                          | referenced by consents            | Permanent                            |
+| ENT-BGV-08 | VendorAccount               | id, vendor, capabilities, countries, secretsRef, status, priority                                          | 1:n VendorOrder                   | Permanent                            |
+| ENT-BGV-09 | VendorOrder                 | id, itemId, vendorId, vendorRef, idempotencyKey, status, costs                                             | n:1 CheckItem                     | Per schedule                         |
+| ENT-BGV-10 | CheckResult                 | id, itemId, version, normalized, rawEncryptedRef, receivedAt                                               | n:1 CheckItem                     | Restricted; 12 months after decision |
+| ENT-BGV-11 | AdjudicationCase            | id, requestId, state, factors, rationale, decision, adjudicators                                           | 1:1 CheckRequest                  | 5 years or legal minimum             |
+| ENT-BGV-12 | AdverseActionNotice         | id, caseId, type (pre, final), content hash, sentAt, deliveredAt                                           | n:1 AdjudicationCase              | 5 years or legal minimum             |
+| ENT-BGV-13 | CandidateDispute            | id, itemId, description, state, vendorRef, outcome                                                         | n:1 CheckItem                     | Per schedule                         |
+| ENT-BGV-14 | IdentityVerificationSession | id, candidateRef, vendor, state, startedAt                                                                 | 1:1 IdentityAssurance             | 30 days                              |
+| ENT-BGV-15 | IdentityAssurance           | id, candidateRef, level, documentType, country, verifiedAt, validUntil, nameHash, shown                    | n:1 candidate                     | Validity period                      |
+| ENT-BGV-16 | ReferenceCheck              | id, requestId, refereeName, refereeEmailHash, relationship, state                                          | n:1 CheckRequest                  | Per schedule                         |
+| ENT-BGV-17 | ReferenceResponse           | id, referenceId, answers, signedAt                                                                         | 1:1 ReferenceCheck                | Restricted; per schedule             |
+| ENT-BGV-18 | RightToWorkRecord           | id, requestId, method, outcome, expiry, reviewer                                                           | n:1 CheckRequest                  | Per rule pack                        |
+| ENT-BGV-19 | BgvAuditEntry               | id, actorRef, action, targetRef, reason, at, prevHash, hash                                                | append-only                       | Permanent (no PII)                   |
+| ENT-BGV-20 | BgvCostLedgerEntry          | id, orgId, requestId, itemId, amount, currency, kind                                                       | n:1 CheckRequest                  | 7 years `[PROP]` (finance)           |
+| ENT-BGV-21 | RetentionSchedule           | id, jurisdiction, dataClass, retentionDays, holdFlag, version                                              | referenced by jobs                | Permanent                            |
+| ENT-BGV-22 | PortableVerification        | id, candidateRef, type, result, validUntil, shares                                                         | n:1 candidate                     | Validity period                      |
+| ENT-BGV-23 | FairHiringMetric            | id, orgId, period, cell, counts                                                                            | aggregate only                    | 24 months                            |
 
 ```mermaid
 erDiagram
@@ -1303,34 +1303,34 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-| --- | --- | --- | --- | --- |
-| EVT-BGV-001 | `bgv.request.created` | Recruiter confirms | requestId, applicationRef, packageVersion | ATS, NTF |
-| EVT-BGV-002 | `bgv.consent.given` | Candidate consents | requestId, types | SET ledger, ATS |
-| EVT-BGV-003 | `bgv.consent.declined` | Candidate declines | requestId | ATS |
-| EVT-BGV-004 | `bgv.consent.withdrawn` | Withdrawal | requestId, stage | ATS, SET ledger |
-| EVT-BGV-005 | `bgv.order.placed` | Vendor order created | itemId, vendor | BIL |
-| EVT-BGV-006 | `bgv.item.status_changed` | Item status update | itemId, from, to (no content) | ATS, NTF |
-| EVT-BGV-007 | `bgv.request.completed` | All items final | requestId, statusSummary | ATS, NTF |
-| EVT-BGV-008 | `bgv.request.cancelled` | Cancellation | requestId, reason | ATS, BIL |
-| EVT-BGV-009 | `bgv.request.expired` | Expiry | requestId | ATS |
-| EVT-BGV-010 | `bgv.report.viewed` | Adjudicator views | requestId, viewerRef, reason | NTF (opt-in), audit |
-| EVT-BGV-011 | `bgv.adjudication.started` | Case opened | caseId | ATS |
-| EVT-BGV-012 | `bgv.adverse.pre_sent` | Pre-adverse sent | caseId, sentAt | ATS, NTF |
-| EVT-BGV-013 | `bgv.adverse.final_sent` | Final notice sent | caseId | ATS |
-| EVT-BGV-014 | `bgv.adjudication.cleared` | Proceed decision | caseId | ATS |
-| EVT-BGV-015 | `bgv.dispute.opened` | Candidate dispute | disputeId | NTF, vendor adapter |
-| EVT-BGV-016 | `bgv.dispute.resolved` | Outcome | disputeId, outcome | ATS, NTF |
-| EVT-BGV-017 | `bgv.identity.verified` | Identity success | assuranceId, level | PRF, NTF |
-| EVT-BGV-018 | `bgv.identity.failed` | Identity failure | sessionId | NTF |
-| EVT-BGV-019 | `bgv.identity.expired` | Validity end or name change | assuranceId | PRF, SRC |
-| EVT-BGV-020 | `bgv.identity.shared` | Shared with employer | assuranceId, orgId | audit |
-| EVT-BGV-021 | `bgv.reference.completed` | Reference submitted | referenceId | NTF |
-| EVT-BGV-022 | `bgv.portable.created` | Portable verification | verificationId, type | EVD, PRF |
-| EVT-BGV-023 | `bgv.vendor.degraded` | SLA breach or circuit open | vendorId | ADM |
-| EVT-BGV-024 | `bgv.retention.disposed` | Disposal job | dataClass, counts | audit |
-| EVT-BGV-025 | `bgv.rulepack.published` | Rule pack effective | jurisdiction, version | ATS, EMP |
-| EVT-BGV-026 | `bgv.fairhiring.alert` | Non-uniform or missing assessment | orgId, type | EAD notifications |
+| ID          | Event                      | Trigger                           | Key payload                               | Consumers           |
+| ----------- | -------------------------- | --------------------------------- | ----------------------------------------- | ------------------- |
+| EVT-BGV-001 | `bgv.request.created`      | Recruiter confirms                | requestId, applicationRef, packageVersion | ATS, NTF            |
+| EVT-BGV-002 | `bgv.consent.given`        | Candidate consents                | requestId, types                          | SET ledger, ATS     |
+| EVT-BGV-003 | `bgv.consent.declined`     | Candidate declines                | requestId                                 | ATS                 |
+| EVT-BGV-004 | `bgv.consent.withdrawn`    | Withdrawal                        | requestId, stage                          | ATS, SET ledger     |
+| EVT-BGV-005 | `bgv.order.placed`         | Vendor order created              | itemId, vendor                            | BIL                 |
+| EVT-BGV-006 | `bgv.item.status_changed`  | Item status update                | itemId, from, to (no content)             | ATS, NTF            |
+| EVT-BGV-007 | `bgv.request.completed`    | All items final                   | requestId, statusSummary                  | ATS, NTF            |
+| EVT-BGV-008 | `bgv.request.cancelled`    | Cancellation                      | requestId, reason                         | ATS, BIL            |
+| EVT-BGV-009 | `bgv.request.expired`      | Expiry                            | requestId                                 | ATS                 |
+| EVT-BGV-010 | `bgv.report.viewed`        | Adjudicator views                 | requestId, viewerRef, reason              | NTF (opt-in), audit |
+| EVT-BGV-011 | `bgv.adjudication.started` | Case opened                       | caseId                                    | ATS                 |
+| EVT-BGV-012 | `bgv.adverse.pre_sent`     | Pre-adverse sent                  | caseId, sentAt                            | ATS, NTF            |
+| EVT-BGV-013 | `bgv.adverse.final_sent`   | Final notice sent                 | caseId                                    | ATS                 |
+| EVT-BGV-014 | `bgv.adjudication.cleared` | Proceed decision                  | caseId                                    | ATS                 |
+| EVT-BGV-015 | `bgv.dispute.opened`       | Candidate dispute                 | disputeId                                 | NTF, vendor adapter |
+| EVT-BGV-016 | `bgv.dispute.resolved`     | Outcome                           | disputeId, outcome                        | ATS, NTF            |
+| EVT-BGV-017 | `bgv.identity.verified`    | Identity success                  | assuranceId, level                        | PRF, NTF            |
+| EVT-BGV-018 | `bgv.identity.failed`      | Identity failure                  | sessionId                                 | NTF                 |
+| EVT-BGV-019 | `bgv.identity.expired`     | Validity end or name change       | assuranceId                               | PRF, SRC            |
+| EVT-BGV-020 | `bgv.identity.shared`      | Shared with employer              | assuranceId, orgId                        | audit               |
+| EVT-BGV-021 | `bgv.reference.completed`  | Reference submitted               | referenceId                               | NTF                 |
+| EVT-BGV-022 | `bgv.portable.created`     | Portable verification             | verificationId, type                      | EVD, PRF            |
+| EVT-BGV-023 | `bgv.vendor.degraded`      | SLA breach or circuit open        | vendorId                                  | ADM                 |
+| EVT-BGV-024 | `bgv.retention.disposed`   | Disposal job                      | dataClass, counts                         | audit               |
+| EVT-BGV-025 | `bgv.rulepack.published`   | Rule pack effective               | jurisdiction, version                     | ATS, EMP            |
+| EVT-BGV-026 | `bgv.fairhiring.alert`     | Non-uniform or missing assessment | orgId, type                               | EAD notifications   |
 
 ### 9.2 Consumed (planned names)
 
@@ -1338,97 +1338,97 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-| --- | --- | --- |
-| Identity verification vendors | Document capture, liveness, data match | Vendor-hosted flow; SDK optional; assurance levels mapped |
-| Background screening vendors | Criminal, education, employment, sanctions, license, right-to-work | One adapter interface (FR-BGV-016); country coverage differs |
-| Government and registry services | Right-to-work share codes, license registries, education registries | Adapters or via vendors |
-| Secret store and KMS (PLT, planned) | Vendor credentials, field encryption | Segregated BGV keys |
-| Email and secure portal links (NTF, planned) | Notices and copies | Delivery receipts required |
-| ATS (planned) | Stage, role description, rejection reason | Boundary contract: status only |
-| BIL (planned) | Usage and invoices | Ledger hooks |
-| SET consent ledger (planned) | Consent mirror and DSAR | Withdrawal events |
-| Legal and compliance process | Rule pack authoring, disclosures, translations | Outside the product; gating for go-live |
+| Dependency                                   | Purpose                                                             | Notes                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Identity verification vendors                | Document capture, liveness, data match                              | Vendor-hosted flow; SDK optional; assurance levels mapped    |
+| Background screening vendors                 | Criminal, education, employment, sanctions, license, right-to-work  | One adapter interface (FR-BGV-016); country coverage differs |
+| Government and registry services             | Right-to-work share codes, license registries, education registries | Adapters or via vendors                                      |
+| Secret store and KMS (PLT, planned)          | Vendor credentials, field encryption                                | Segregated BGV keys                                          |
+| Email and secure portal links (NTF, planned) | Notices and copies                                                  | Delivery receipts required                                   |
+| ATS (planned)                                | Stage, role description, rejection reason                           | Boundary contract: status only                               |
+| BIL (planned)                                | Usage and invoices                                                  | Ledger hooks                                                 |
+| SET consent ledger (planned)                 | Consent mirror and DSAR                                             | Withdrawal events                                            |
+| Legal and compliance process                 | Rule pack authoring, disclosures, translations                      | Outside the product; gating for go-live                      |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why |
-| --- | --- |
-| ATS, JOB (planned) | Stage gating, application context, rejection reason |
-| EMP (planned) | Verified employer organizations, seats, adjudicator permission |
-| EVD | Reuse of verified work history, education, credentials; write-back with consent |
-| PRF | Names, roles, education entries to check; identity mark display |
-| IDN (planned) | Age flag, step-up authentication, account erasure |
-| SET (planned) | Consent ledger, DSAR, retention orchestration |
-| BIL (planned) | Pricing, invoices |
-| NTF (planned) | Delivery of transactional notices |
-| ADM (planned) | Admin console, audit tooling |
+| Depends on         | Why                                                                             |
+| ------------------ | ------------------------------------------------------------------------------- |
+| ATS, JOB (planned) | Stage gating, application context, rejection reason                             |
+| EMP (planned)      | Verified employer organizations, seats, adjudicator permission                  |
+| EVD                | Reuse of verified work history, education, credentials; write-back with consent |
+| PRF                | Names, roles, education entries to check; identity mark display                 |
+| IDN (planned)      | Age flag, step-up authentication, account erasure                               |
+| SET (planned)      | Consent ledger, DSAR, retention orchestration                                   |
+| BIL (planned)      | Pricing, invoices                                                               |
+| NTF (planned)      | Delivery of transactional notices                                               |
+| ADM (planned)      | Admin console, audit tooling                                                    |
 
-| Depended on by | Uses |
-| --- | --- |
-| ATS (planned) | Check status, adverse-action trail |
-| PRF | "Identity verified" mark |
-| SRC | Opt-in identity facet |
-| EVD | Written-back verified education and employment |
-| ANL (planned) | Operational metrics only (no results) |
+| Depended on by | Uses                                           |
+| -------------- | ---------------------------------------------- |
+| ATS (planned)  | Check status, adverse-action trail             |
+| PRF            | "Identity verified" mark                       |
+| SRC            | Opt-in identity facet                          |
+| EVD            | Written-back verified education and employment |
+| ANL (planned)  | Operational metrics only (no results)          |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-| --- | --- | --- | --- |
-| Consent completion rate | Invited requests where the candidate consents | consented / invited | PAD |
-| Consent decline rate | Requests declined | declined / invited | PAD |
-| Time to complete | From consent to completed (by check type) | p50 and p90 of (completedAt − consentedAt) | PAD |
-| Vendor SLA attainment | Orders completed within target | on-time / completed | PAD |
-| Discrepancy rate | Items ending `consider` due to discrepancy | consider(discrepancy) / items | PAD |
-| Dispute rate and correction rate | Disputes per completed report; corrected share | disputes / reports; corrected / resolved | PAD |
-| Adverse-action compliance | Adverse actions with assessment, pre-adverse notice and waiting period | compliant / adverse actions (target 100%) | SAD |
-| Report view audit coverage | Report views with a reason code and log entry | logged / views (target 100%) | SAD |
-| Identity verification success rate | Verified / sessions | verified / created | PAD |
-| Disposal timeliness | Items disposed by schedule | disposed on time / due | SAD |
-| Blocked-by-rule orders | Orders blocked by rule engine | blocked / attempted | PAD |
-| Cost per completed request | Ledger cost per completed request | sum cost / completed | FIN |
+| Metric                             | Definition                                                             | Formula                                    | Owner role |
+| ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------ | ---------- |
+| Consent completion rate            | Invited requests where the candidate consents                          | consented / invited                        | PAD        |
+| Consent decline rate               | Requests declined                                                      | declined / invited                         | PAD        |
+| Time to complete                   | From consent to completed (by check type)                              | p50 and p90 of (completedAt − consentedAt) | PAD        |
+| Vendor SLA attainment              | Orders completed within target                                         | on-time / completed                        | PAD        |
+| Discrepancy rate                   | Items ending `consider` due to discrepancy                             | consider(discrepancy) / items              | PAD        |
+| Dispute rate and correction rate   | Disputes per completed report; corrected share                         | disputes / reports; corrected / resolved   | PAD        |
+| Adverse-action compliance          | Adverse actions with assessment, pre-adverse notice and waiting period | compliant / adverse actions (target 100%)  | SAD        |
+| Report view audit coverage         | Report views with a reason code and log entry                          | logged / views (target 100%)               | SAD        |
+| Identity verification success rate | Verified / sessions                                                    | verified / created                         | PAD        |
+| Disposal timeliness                | Items disposed by schedule                                             | disposed on time / due                     | SAD        |
+| Blocked-by-rule orders             | Orders blocked by rule engine                                          | blocked / attempted                        | PAD        |
+| Cost per completed request         | Ledger cost per completed request                                      | sum cost / completed                       | FIN        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-| --- | --- | --- | --- | --- | --- |
-| OD-BGV-01 | Which jurisdictions launch, and who validates rule packs and disclosures? | US only; US+UK+India; none until counsel signs off | No criminal checks anywhere until counsel approves a rule pack per jurisdiction; identity, education and employment first | Legal counsel + product owner | FR-BGV-002, FR-BGV-011, FR-BGV-014 |
-| OD-BGV-02 | Does background screening fit within SSOT §4.2 non-goals ("not generic HR") and the owner's OS goal? | In scope as hiring support; out of scope except identity/education/employment | In scope, narrowly, as hiring support only | Product owner | Whole module |
-| OD-BGV-03 | May candidates carry criminal check results between employers? | Never; with age limit 30 days; yes | Never (employer-specific) | Legal + product owner | FR-BGV-025, BR-BGV-016 |
-| OD-BGV-04 | Is sanctions and watchlist screening in scope? | Yes (attested orgs); no | Yes, attested orgs only, later release | Product owner | FR-BGV-012 |
-| OD-BGV-05 | Are credit checks, social media screening, driving records or continuous monitoring in scope? | No; some later | No (explicit non-scope) | Product owner + legal | Scope |
-| OD-BGV-06 | Retention periods per data class and jurisdiction | Defaults here; counsel's schedule | Defaults in BR-BGV-026 until counsel sets schedules | Legal | FR-BGV-026 |
-| OD-BGV-07 | Does the ATS collect voluntary demographic data for adverse-impact analysis? | No; voluntary with consent; yes | Voluntary with consent, outside BGV | Legal + product owner | FR-BGV-031 |
-| OD-BGV-08 | Vendor selection and number of vendors at launch | One per type; two for failover | Two vendors per critical type and region where available | Product owner + procurement | FR-BGV-016 |
-| OD-BGV-09 | Platform fee and who bears vendor cost for candidate-initiated checks | Candidate pays; employer sponsors; subscription bundle | Priced in BIL; decision pending | Product owner + finance | FR-BGV-025, FR-BGV-028 |
-| OD-BGV-10 | Should a "compliance reviewer" be a distinct role? | PAD sub-role; new role | PAD sub-role | Product owner | Permission matrix |
-| OD-BGV-11 | Does identity verification apply to all users (e.g., for recruiters and instructors) beyond opt-in? | Opt-in for candidates; required for recruiters and instructors | Opt-in for candidates; required for payout roles via BIL; recruiters via EMP | Product owner | FR-BGV-003 |
-| OD-BGV-12 | Waiting period length and notice delivery fallback | 5 business days; jurisdiction-specific; mail fallback | 5 business days default, rule-pack override | Legal | FR-BGV-021 |
+| ID        | Question                                                                                             | Options                                                                       | Default proposal                                                                                                          | Who decides                   | Blocking                           |
+| --------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------- |
+| OD-BGV-01 | Which jurisdictions launch, and who validates rule packs and disclosures?                            | US only; US+UK+India; none until counsel signs off                            | No criminal checks anywhere until counsel approves a rule pack per jurisdiction; identity, education and employment first | Legal counsel + product owner | FR-BGV-002, FR-BGV-011, FR-BGV-014 |
+| OD-BGV-02 | Does background screening fit within SSOT §4.2 non-goals ("not generic HR") and the owner's OS goal? | In scope as hiring support; out of scope except identity/education/employment | In scope, narrowly, as hiring support only                                                                                | Product owner                 | Whole module                       |
+| OD-BGV-03 | May candidates carry criminal check results between employers?                                       | Never; with age limit 30 days; yes                                            | Never (employer-specific)                                                                                                 | Legal + product owner         | FR-BGV-025, BR-BGV-016             |
+| OD-BGV-04 | Is sanctions and watchlist screening in scope?                                                       | Yes (attested orgs); no                                                       | Yes, attested orgs only, later release                                                                                    | Product owner                 | FR-BGV-012                         |
+| OD-BGV-05 | Are credit checks, social media screening, driving records or continuous monitoring in scope?        | No; some later                                                                | No (explicit non-scope)                                                                                                   | Product owner + legal         | Scope                              |
+| OD-BGV-06 | Retention periods per data class and jurisdiction                                                    | Defaults here; counsel's schedule                                             | Defaults in BR-BGV-026 until counsel sets schedules                                                                       | Legal                         | FR-BGV-026                         |
+| OD-BGV-07 | Does the ATS collect voluntary demographic data for adverse-impact analysis?                         | No; voluntary with consent; yes                                               | Voluntary with consent, outside BGV                                                                                       | Legal + product owner         | FR-BGV-031                         |
+| OD-BGV-08 | Vendor selection and number of vendors at launch                                                     | One per type; two for failover                                                | Two vendors per critical type and region where available                                                                  | Product owner + procurement   | FR-BGV-016                         |
+| OD-BGV-09 | Platform fee and who bears vendor cost for candidate-initiated checks                                | Candidate pays; employer sponsors; subscription bundle                        | Priced in BIL; decision pending                                                                                           | Product owner + finance       | FR-BGV-025, FR-BGV-028             |
+| OD-BGV-10 | Should a "compliance reviewer" be a distinct role?                                                   | PAD sub-role; new role                                                        | PAD sub-role                                                                                                              | Product owner                 | Permission matrix                  |
+| OD-BGV-11 | Does identity verification apply to all users (e.g., for recruiters and instructors) beyond opt-in?  | Opt-in for candidates; required for recruiters and instructors                | Opt-in for candidates; required for payout roles via BIL; recruiters via EMP                                              | Product owner                 | FR-BGV-003                         |
+| OD-BGV-12 | Waiting period length and notice delivery fallback                                                   | 5 business days; jurisdiction-specific; mail fallback                         | 5 business days default, rule-pack override                                                                               | Legal                         | FR-BGV-021                         |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-| --- | --- | --- | --- |
-| RSK-BGV-01 | Non-compliance with consumer reporting, fair-chance or data protection laws | Regulatory action, litigation | Rule engine, counsel-reviewed packs, fail closed, audit |
-| RSK-BGV-02 | Inaccurate vendor data causes wrongful rejection | Harm to candidates, liability | Individualized assessment, pre-adverse notice, disputes, no automated decisions |
-| RSK-BGV-03 | Leak of check data | Severe harm | Restricted classification, segregation, field encryption, watermark, logs, anomaly alerts |
-| RSK-BGV-04 | Employers misuse checks for discrimination or fishing | Harm, brand risk | Packages by role, uniform-policy prompts, fair-hiring monitoring, TSF review |
-| RSK-BGV-05 | Vendor outage or country coverage gaps | Delays | Failover to disclosed vendors, SLA monitoring, status transparency |
-| RSK-BGV-06 | Biometric data handling failures | Privacy harm | Vendor-held data, separate consent, non-biometric alternative |
-| RSK-BGV-07 | Check data bleeds into profiles, search or matching | Discrimination | BR-BGV-013, contract tests on other modules, data access policy |
-| RSK-BGV-08 | Consent flow friction reduces completion | Hiring delays | Clear language, mobile-first, reminders |
-| RSK-BGV-09 | Retention schedule conflicts across jurisdictions | Legal exposure | Jurisdiction-level schedules, holds, counsel sign-off |
-| RSK-BGV-10 | Candidates cannot reach vendors to dispute | Unresolved errors | Platform-forwarded disputes, SLA tracking, escalation |
+| ID         | Risk                                                                        | Impact                        | Mitigation                                                                                |
+| ---------- | --------------------------------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
+| RSK-BGV-01 | Non-compliance with consumer reporting, fair-chance or data protection laws | Regulatory action, litigation | Rule engine, counsel-reviewed packs, fail closed, audit                                   |
+| RSK-BGV-02 | Inaccurate vendor data causes wrongful rejection                            | Harm to candidates, liability | Individualized assessment, pre-adverse notice, disputes, no automated decisions           |
+| RSK-BGV-03 | Leak of check data                                                          | Severe harm                   | Restricted classification, segregation, field encryption, watermark, logs, anomaly alerts |
+| RSK-BGV-04 | Employers misuse checks for discrimination or fishing                       | Harm, brand risk              | Packages by role, uniform-policy prompts, fair-hiring monitoring, TSF review              |
+| RSK-BGV-05 | Vendor outage or country coverage gaps                                      | Delays                        | Failover to disclosed vendors, SLA monitoring, status transparency                        |
+| RSK-BGV-06 | Biometric data handling failures                                            | Privacy harm                  | Vendor-held data, separate consent, non-biometric alternative                             |
+| RSK-BGV-07 | Check data bleeds into profiles, search or matching                         | Discrimination                | BR-BGV-013, contract tests on other modules, data access policy                           |
+| RSK-BGV-08 | Consent flow friction reduces completion                                    | Hiring delays                 | Clear language, mobile-first, reminders                                                   |
+| RSK-BGV-09 | Retention schedule conflicts across jurisdictions                           | Legal exposure                | Jurisdiction-level schedules, holds, counsel sign-off                                     |
+| RSK-BGV-10 | Candidates cannot reach vendors to dispute                                  | Unresolved errors             | Platform-forwarded disputes, SLA tracking, escalation                                     |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-| --- | --- | --- |
-| `SSOT.md` F-81 Identity Verification (priority 3, Ph9) | Identity verification and vendor integration | Raised to a defined flow; scope limited to results and opt-in badge; vendor not chosen (OD-27 in source, OD-BGV-08 here) |
-| `SSOT.md` §13.3 and §13.4 integration register and doctrine | Vendor adapter boundaries | Used for FR-BGV-016 |
-| `SSOT.md` F-94, F-96 | Employment verification, references (reuse with EVD) | Employer-initiated verification and references moved here |
-| `SSOT.md` §15 privacy and field encryption, BR-67, BR-29, BR-158 | Privacy classification, audit, dual approval, k threshold | Applied to BGV |
-| `SSOT.md` §4.2 non-goals | Scope conflict recorded (OD-BGV-02) | None |
-| `SSOT.md`, `docs/`, `Yash_Final_Project_Document/` (searched for "background check", "criminal", "BGV", "Checkr") | No specification found; one unrelated mention in module federation contract | Criminal and sanctions checks, adjudication, adverse action, disputes, retention are all new `[PROP]` |
-| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md` | Not used | n/a |
+| Legacy source                                                                                                     | Used for                                                                    | Dropped or changed                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `SSOT.md` F-81 Identity Verification (priority 3, Ph9)                                                            | Identity verification and vendor integration                                | Raised to a defined flow; scope limited to results and opt-in badge; vendor not chosen (OD-27 in source, OD-BGV-08 here) |
+| `SSOT.md` §13.3 and §13.4 integration register and doctrine                                                       | Vendor adapter boundaries                                                   | Used for FR-BGV-016                                                                                                      |
+| `SSOT.md` F-94, F-96                                                                                              | Employment verification, references (reuse with EVD)                        | Employer-initiated verification and references moved here                                                                |
+| `SSOT.md` §15 privacy and field encryption, BR-67, BR-29, BR-158                                                  | Privacy classification, audit, dual approval, k threshold                   | Applied to BGV                                                                                                           |
+| `SSOT.md` §4.2 non-goals                                                                                          | Scope conflict recorded (OD-BGV-02)                                         | None                                                                                                                     |
+| `SSOT.md`, `docs/`, `Yash_Final_Project_Document/` (searched for "background check", "criminal", "BGV", "Checkr") | No specification found; one unrelated mention in module federation contract | Criminal and sanctions checks, adjudication, adverse action, disputes, retention are all new `[PROP]`                    |
+| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md`                                                                 | Not used                                                                    | n/a                                                                                                                      |

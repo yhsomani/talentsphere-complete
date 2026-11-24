@@ -19,18 +19,18 @@ SRC is the discovery layer of the platform: one global command search, per-entit
 
 ### 1.3 In scope, out of scope, owned vs consumed
 
-| Area | Owned by SRC | Not owned (owner) |
-| --- | --- | --- |
-| Search UI, query processing, ranking, facets, suggestions | Yes | Entity data and detail pages: owning modules (JOB, LRN, ASM, NET, EMP, PRF) |
-| Skills taxonomy, synonyms, skill relationships, emerging-skill queue | Yes | Market signals (demand, salary premium): MKT (planned) |
-| Saved searches and alert scheduling | Yes | Email/push delivery: NTF (planned) |
-| Recruiter talent search, fairness controls, audit | Yes | Talent pools, outreach, pipelines: ATS (planned) |
-| Index pipelines, versions, evaluation | Yes | Underlying engine selection (decision recorded as OD-SRC-01) |
-| Visibility inputs (discoverability, blocks, section visibility) | Consumed (PRF) | Setting them: PRF, SET |
-| Evidence facets (rung, issuer class, freshness) | Consumed (EVD) | Computing them: EVD |
-| Identity-verified facet | Consumed (BGV, opt-in) | Verification: BGV |
-| Personalized recommendations ("jobs for you") | Not owned | AIC (planned); SRC provides search only, but shares the "why this result" format |
-| Plans and entitlements limiting search features | Consumed (BIL) | Defined in BIL |
+| Area                                                                 | Owned by SRC           | Not owned (owner)                                                                |
+| -------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------- |
+| Search UI, query processing, ranking, facets, suggestions            | Yes                    | Entity data and detail pages: owning modules (JOB, LRN, ASM, NET, EMP, PRF)      |
+| Skills taxonomy, synonyms, skill relationships, emerging-skill queue | Yes                    | Market signals (demand, salary premium): MKT (planned)                           |
+| Saved searches and alert scheduling                                  | Yes                    | Email/push delivery: NTF (planned)                                               |
+| Recruiter talent search, fairness controls, audit                    | Yes                    | Talent pools, outreach, pipelines: ATS (planned)                                 |
+| Index pipelines, versions, evaluation                                | Yes                    | Underlying engine selection (decision recorded as OD-SRC-01)                     |
+| Visibility inputs (discoverability, blocks, section visibility)      | Consumed (PRF)         | Setting them: PRF, SET                                                           |
+| Evidence facets (rung, issuer class, freshness)                      | Consumed (EVD)         | Computing them: EVD                                                              |
+| Identity-verified facet                                              | Consumed (BGV, opt-in) | Verification: BGV                                                                |
+| Personalized recommendations ("jobs for you")                        | Not owned              | AIC (planned); SRC provides search only, but shares the "why this result" format |
+| Plans and entitlements limiting search features                      | Consumed (BIL)         | Defined in BIL                                                                   |
 
 ### 1.4 Boundaries that are easy to confuse
 
@@ -42,22 +42,22 @@ SRC is the discovery layer of the platform: one global command search, per-entit
 
 `Y` allowed, `-` not allowed, `V` within viewer permissions, `A` with audit, `L` limited (public data only, capped).
 
-| Capability | GUE | CAN/STD/FRL | INS/MNT | REC | HMG | EAD | IAD/PLO | MOD | SUP | PAD | SAD | API |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Global command search | L | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | - |
-| Search jobs, courses, companies, challenges, content | L | Y | Y | Y | Y | Y | Y | V | V | Y | Y | V |
-| Search people (professional directory) | L (public indexable only) | V | V | V | V | V | V (own institution scope) | A | A | A | A | V |
-| Recruiter talent search | - | - | - | Y (verified org, entitlement) | Y (delegated) | Y | - | - | - | A | A | Y |
-| Save searches and alerts | - | Y | Y | Y | Y | Y | Y | - | - | - | - | - |
-| Manage own recent searches and personalization | - | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | - |
-| View ranking explanation | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| View candidate-side search appearance insights | - | Y (own) | Y (own) | - | - | - | - | - | - | - | - | - |
-| Curate taxonomy and synonyms | - | - | - | - | - | - | - | - | - | Y (taxonomy editor) | Y | - |
-| Propose a skill or synonym | - | Y | Y (course authors) | Y | - | - | - | - | - | - | - | - |
-| Tune ranking, run relevance evaluation | - | - | - | - | - | - | - | - | - | Y (dual approval for release) | Y | - |
-| View fairness audit reports | - | - | - | - | - | Y (own org summary) | - | - | - | Y | Y | - |
-| Run reindex, view index health | - | - | - | - | - | - | - | - | - | Y | Y | - |
-| View search analytics (aggregate) | - | - | - | - | - | Y (own org) | Y (own institution) | - | - | Y | Y | - |
+| Capability                                           | GUE                       | CAN/STD/FRL | INS/MNT            | REC                           | HMG           | EAD                 | IAD/PLO                   | MOD | SUP | PAD                           | SAD | API |
+| ---------------------------------------------------- | ------------------------- | ----------- | ------------------ | ----------------------------- | ------------- | ------------------- | ------------------------- | --- | --- | ----------------------------- | --- | --- |
+| Global command search                                | L                         | Y           | Y                  | Y                             | Y             | Y                   | Y                         | Y   | Y   | Y                             | Y   | -   |
+| Search jobs, courses, companies, challenges, content | L                         | Y           | Y                  | Y                             | Y             | Y                   | Y                         | V   | V   | Y                             | Y   | V   |
+| Search people (professional directory)               | L (public indexable only) | V           | V                  | V                             | V             | V                   | V (own institution scope) | A   | A   | A                             | A   | V   |
+| Recruiter talent search                              | -                         | -           | -                  | Y (verified org, entitlement) | Y (delegated) | Y                   | -                         | -   | -   | A                             | A   | Y   |
+| Save searches and alerts                             | -                         | Y           | Y                  | Y                             | Y             | Y                   | Y                         | -   | -   | -                             | -   | -   |
+| Manage own recent searches and personalization       | -                         | Y           | Y                  | Y                             | Y             | Y                   | Y                         | Y   | Y   | Y                             | Y   | -   |
+| View ranking explanation                             | Y                         | Y           | Y                  | Y                             | Y             | Y                   | Y                         | Y   | Y   | Y                             | Y   | Y   |
+| View candidate-side search appearance insights       | -                         | Y (own)     | Y (own)            | -                             | -             | -                   | -                         | -   | -   | -                             | -   | -   |
+| Curate taxonomy and synonyms                         | -                         | -           | -                  | -                             | -             | -                   | -                         | -   | -   | Y (taxonomy editor)           | Y   | -   |
+| Propose a skill or synonym                           | -                         | Y           | Y (course authors) | Y                             | -             | -                   | -                         | -   | -   | -                             | -   | -   |
+| Tune ranking, run relevance evaluation               | -                         | -           | -                  | -                             | -             | -                   | -                         | -   | -   | Y (dual approval for release) | Y   | -   |
+| View fairness audit reports                          | -                         | -           | -                  | -                             | -             | Y (own org summary) | -                         | -   | -   | Y                             | Y   | -   |
+| Run reindex, view index health                       | -                         | -           | -                  | -                             | -             | -                   | -                         | -   | -   | Y                             | Y   | -   |
+| View search analytics (aggregate)                    | -                         | -           | -                  | -                             | -             | Y (own org)         | Y (own institution)       | -   | -   | Y                             | Y   | -   |
 
 Staff access to people search is for support and moderation inside a case and is audited. "Taxonomy editor" is a PAD sub-role `[PROP]` (OD-SRC-09).
 
@@ -73,14 +73,14 @@ flowchart LR
     F --> E
 ```
 
-| Sub-module | Name | Features |
-| --- | --- | --- |
-| A | Entity search | FR-SRC-001 to 008 |
-| B | Query and results experience | FR-SRC-009 to 016 |
-| C | Saved searches, alerts, history | FR-SRC-017 to 019 |
-| D | Permission and privacy | FR-SRC-020 |
-| E | Recruiter talent search | FR-SRC-021 to 024 |
-| F | Index, taxonomy and platform | FR-SRC-025 to 034 |
+| Sub-module | Name                            | Features                      |
+| ---------- | ------------------------------- | ----------------------------- |
+| A          | Entity search                   | FR-SRC-001 to 008             |
+| B          | Query and results experience    | FR-SRC-009 to 016             |
+| C          | Saved searches, alerts, history | FR-SRC-017 to 019             |
+| D          | Permission and privacy          | FR-SRC-020                    |
+| E          | Recruiter talent search         | FR-SRC-021 to 024, FR-SRC-035 |
+| F          | Index, taxonomy and platform    | FR-SRC-025 to 034             |
 
 ## 4. Feature specifications
 
@@ -1064,54 +1064,87 @@ flowchart LR
   2. Given the engine is down, when a recruiter opens talent search, then the feature shows "unavailable" and no results.
   3. Given the permission service is down, when any search runs, then no results are returned. (negative: fail closed)
 
+### FR-SRC-035 — Contribution and growth signals in talent search
+
+- **Sub-module:** E Recruiter talent search
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.3 F-159 Behavioral Talent Discovery (priority 6, Ph4; dependencies F-123, F-84, F-144) and §9.4 F-159 "contributor ranking, engagement scoring, project activity, learning trajectory, community standing, emerging expertise, peer endorsements; acceptance: discovery based on real activity, no gaming vectors"] [PROP] for the evidence-based narrowing; scope in `OD-SRC-13`
+- **Purpose and outcome:** Recruiters can find candidates by verified recent proof (contributions, learning momentum, emerging skills, community standing, endorsements) that the candidates chose to show, so people with strong recent work but sparse profile text are findable. The system knows it works when signal facets are used, candidates without signals are not excluded by default, and selection-rate audits stay within thresholds.
+- **Roles and permissions:** `REC, HMG, EAD: use the facets in talent search` · `CAN, STD, FRL: opt in per signal category, preview, turn off` · `PAD: configure the signal catalogue, windows and thresholds` · `PAD, SAD: audit`
+- **Preconditions and entry points:** Verified employer organization and talent search entitlement (FR-SRC-021). The candidate is discoverable to recruiters (FR-PRF-016) and has granted the consent purpose `recruiter.activity_signals` in the consent ledger (FR-SET-006), default off. Entry: talent search filter group "Recent proof"; candidate entry: Settings > Privacy > "Show recent verified activity to recruiters".
+- **User interactions and actions:**
+  1. Recruiter: open "Recent proof" in the talent search filters and choose up to 3 signal facets: verified contributions (merged or accepted contributions in the period, FR-EVD-007), learning momentum (assessed course or path completions in the period, FR-EVD-004, FR-EVD-005), emerging skill (a skill newly evidenced in the last {180} days that is flagged emerging, FR-MKT-005), community standing (recognized-contributor label from FR-REP-023), peer attestation (endorsement and attestation count at or above a level, FR-EVD-013, FR-EVD-014).
+  2. Choose the period: 30, 90, 180 or 365 days.
+  3. Read result cards with signal chips in plain words ("3 merged contributions in 90 days, verified") and a link to the evidence tab (FR-EVD-030).
+  4. Optionally sort by "Recent verified proof"; relevance remains the default sort.
+  5. Candidate: open the privacy page, tick the categories to show, press "Preview what recruiters see", and save. Turn any category off at any time.
+- **System behaviour:** Signals are computed nightly from evidence records and learning and recognition events the candidate consented to share (`ENT-SRC-23`) and written to the recruiter field group of the search document (BR-SRC-002). Only evidence-backed activity counts; platform engagement (logins, time on platform, message, view or follow counts, streak length, XP, leaderboard rank) is never a signal (BR-SRC-045). Signals are filters and labels, not rank multipliers; default relevance ranking is unchanged, and no composite talent score exists (BR-SRC-009, BR-AIC-006). A candidate without signals is never excluded or down-ranked unless the recruiter applies a facet, and the UI then states "Filtering by recent proof hides candidates who haven't shared activity" (BR-SRC-046, BR-SRC-040). Disputed, revoked or expired evidence is removed at query time (BR-SRC-001). Anti-gaming discounts from FR-REP-024 apply before a signal is counted. Facet counts are suppressed below 10 (BR-SRC-021). Signal facets are included in the monthly selection-rate audits (BR-SRC-010). Turning a category off removes it from the index within 15 minutes (BR-SRC-003).
+- **UI elements and controls:** "Recent proof" filter group with checkboxes and a period select, signal chips on cards with an info icon explaining the source, sort option, notice text; candidate toggles per category with a preview panel. States: facet disabled with a notice when the signal source is unavailable; empty results with advice to broaden the period.
+- **Configuration options:** Platform: signal catalogue and definitions, minimum thresholds per signal (for example at least 2 contributions), windows (30, 90, 180, 365 days), facet availability by org plan. Org: facet on or off (default on). Candidate: per-category opt-in, default off.
+- **Business rules:** BR-SRC-045, BR-SRC-046, BR-SRC-006, BR-SRC-007, BR-SRC-009
+- **Validation:** At most 3 signal facets per query; period from the allowed list; signal definitions reference registered evidence types and registered skills only.
+- **Inputs and outputs:** In: facets, period, optional sort; candidate consent choices. Out: candidates matching with signal chips and evidence links; candidate preview of exposed signals.
+- **Filters, sorting, search:** Facets as above; sort "Recent verified proof" (explicit selection only); facet counts follow BR-SRC-021.
+- **Notifications and communication:** n/a — recruiters are not alerted per candidate; candidates see only aggregate counts of appearances in FR-SRC-024 and are not told which recruiter or organization searched.
+- **Error handling and edge cases:** Evidence source unavailable: the facet is disabled with a notice and candidates are not excluded. Consent withdrawn while a recruiter views the list: the next read shows "Candidate unavailable" for that signal and the signal chip disappears. Signal computed from a disputed item: dropped at query time. Candidate under 18: never indexed (BR-SRC-007). A recruiter combines facets to approximate a protected attribute: not possible, because no protected attribute or proxy is a facet (BR-SRC-006). Rate limit exceeded: 429 with a retry time.
+- **Dependencies:** FR-SRC-021, FR-SRC-022, FR-SRC-023, FR-SRC-024, FR-EVD-004, FR-EVD-005, FR-EVD-007, FR-EVD-013, FR-EVD-014, FR-EVD-027, FR-EVD-030, FR-MKT-005, FR-REP-023, FR-REP-024, FR-PRF-016, FR-SET-006, ENT-SRC-23.
+- **Security and privacy:** Signals are P2 derived data kept in the recruiter field group only for consenting, discoverable candidates; background-check and private evidence data are never used (BR-SRC-002); every use is logged in the talent search audit (ENT-SRC-14); anti-scraping controls apply (FR-SRC-029).
+- **Acceptance criteria:**
+  - Given a candidate who opted in to "verified contributions", when a recruiter filters for 2 or more verified contributions in 90 days, then the candidate appears with the chip and an evidence link.
+  - Given a candidate who did not opt in, when the recruiter searches without the facet, then the candidate ranks exactly as before and is not marked as lacking signals.
+  - Given a candidate turns off a category, when 15 minutes pass, then no recruiter query can match or display that signal.
+  - Given a recruiter tries to filter by "logins in the last 30 days", when the API receives the request, then it rejects it as an unknown facet (negative).
+
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-| --- | --- | --- | --- | --- |
-| BR-SRC-001 | Every query is evaluated with the viewer's permissions. Results the viewer may not see are never returned, counted, faceted, suggested, highlighted or alerted. Permission is checked at query time against the source of truth for the result page in addition to index-time ACLs; failure to check drops the hit. | Zero leakage. | Query service; hydration | [SRC: SSOT F-147 "0 RLS leakage", F-92 "zero stealth leakage"] |
-| BR-SRC-002 | Only fields allowed for search are indexed, grouped by audience. Contact data, salary expectation, work authorization, background-check data, private evidence, hidden test cases, solutions and private messages are never indexed. Every indexable entity declares an audience policy. | Minimization. | Document builder; schema registry | [DER] from SSOT F-12 and F-92 |
-| BR-SRC-003 | Deletions, visibility reductions, suspensions and erasures propagate to the index within 15 minutes (erasure within 24 h). The query-time check covers the gap. | Privacy changes must be fast. | Indexer; query service | [SRC: SSOT F-92 "consent revocation < 24h"]; 15 min [PROP] |
-| BR-SRC-004 | Ranking inputs are documented per entity, derived from stored features, and the explanation shown to users is generated from the same features. Protected attributes and their proxies are never inputs. | Honest transparency and fairness. | Ranking service; contract tests | [SRC: SSOT F-04 "Why am I seeing this?"] |
-| BR-SRC-005 | Default job ranking weights are skill match 0.45, experience 0.20, location 0.10, title 0.10, organization rating 0.10, recency 0.05 until revised through FR-SRC-027. The organization-rating input is disclosed and is an open decision. | Legacy baseline retained. | Ranking profile `jobs-v1` | [SRC: SSOT F-04 step 2]; [DEC-REQ] OD-SRC-03 |
-| BR-SRC-006 | Talent search never filters, sorts or ranks on name, photo, age or date of birth, gender, pronouns, ethnicity, religion, disability, marital status, nationality or proxies (such as graduation year as an age proxy). Such filters do not exist in the UI or API. | Anti-discrimination. | Filter allowlist; feature allowlist | [PROP]; [DER] |
-| BR-SRC-007 | A candidate appears in talent search only if published, not stealth, discoverable to recruiters (or applied to the searching org), not blocking the recruiter or org, not under 18, not suspended; filters use only fields the candidate shared with recruiters. Enforced at query time. | Candidate control. | Talent query layer | [SRC: SSOT F-92 steps 7–8]; PRF BR-PRF-025, 029, 041 |
-| BR-SRC-008 | Talent search queries, profile views and exports are logged (recruiter, org, parsed query, counts, viewed ids), rate limited, and result windows are capped at 1000. Logs are visible to the org admin and staff. | Accountability and anti-harvesting. | Talent search service | [PROP] |
-| BR-SRC-009 | Talent results show why each candidate matched (criteria) and no hidden score; blind review mode removes names, photos, school names, pronouns and graduation years from payloads; ties may be shuffled. | Explainable, fairer first pass. | Talent search UI and API | [PROP] |
-| BR-SRC-010 | Selection-rate audits for talent search run at least monthly on aggregated, k-anonymized cohorts using voluntary demographic data where lawfully collected; thresholds raise alerts to PAD and the org. | Detect disparate impact. | Fairness job | [PROP]; [DEC-REQ] OD-SRC-04 |
-| BR-SRC-011 | A user may keep up to 25 saved searches (talent searches count separately up to 50 per recruiter), each a structured query with unique name; alerts are new-only with no backfill. | Bounded load; clear semantics. | Saved search service | [SRC: SSOT F-04 step 7]; limits [PROP] |
-| BR-SRC-012 | Alert items are re-checked for permission, status and duplicates at send time; max 3 instant alerts per day per user, overflow goes to the digest; one-click unsubscribe is always present. | Safe, quiet alerts. | Alert job | [PROP] |
-| BR-SRC-013 | Recent searches are kept per user (max 20, 90 days), deletable, pausable, and excluded from others' views. | User control. | History service | [PROP] |
-| BR-SRC-014 | Queries matching identifier patterns (email, phone, national or card numbers) are not stored in history, logs or analytics; autocomplete suggests only queries used by ≥ 20 distinct users; raw query logs are retained 90 days with restricted access. | Prevent leaking personal data via search. | Logging and suggest pipeline | [PROP] |
-| BR-SRC-015 | Personalization is optional, disclosed, applies only to the user's own results, never to recruiter ranking of candidates, and turning it off deletes the profile within 24 h and stops its use immediately. | Control and fairness. | Ranking service | [SRC: SSOT F-147 personalization]; control [PROP] |
-| BR-SRC-016 | Typo tolerance: edit distance 1 for terms of 4–7 characters, 2 for 8 or more, none for shorter terms, quoted phrases, fields or numbers; low-confidence corrections are suggestions, high-confidence ones are announced and reversible; exact matches rank above fuzzy ones. | Predictable. | Query analyzer | [SRC: SSOT F-147 typo tolerance]; thresholds [PROP] |
-| BR-SRC-017 | Synonym and alias expansion is curated, directional where meaningful, shown to the user, switchable, and suppressed for quoted or field-prefixed terms; expanded matches rank below exact ones. | Recall without surprises. | Query analyzer | [SRC: SSOT F-84]; [PROP] |
-| BR-SRC-018 | Skill filters use canonical skill ids; hierarchy expansion is opt-in, one hop by default, with traversal bounded to 5 hops. | Taxonomy integrity. | Filter builder | [SRC: SSOT BR-144, BR-146] |
-| BR-SRC-019 | Pagination is cursor-based, 20 per page default, 100 maximum; total reachable results per query are capped at 1000; guests get no deep paging in people search. | Performance and anti-scraping. | API | [SRC: SSOT F-04 step 1]; cap [PROP] |
-| BR-SRC-020 | Search state (query, filters, sort, tab) is encoded in the URL; invalid or non-permitted parameters are dropped with a notice; URLs contain no personal data other than the typed query. | Shareable and safe. | Web app and API | [SRC: SSOT F-04 step 1] |
-| BR-SRC-021 | Facet and tab counts are computed under permissions, shown as "1000+" above 1000, and suppressed below 5 for people facets (talent facets below 10) to prevent re-identification. | Privacy. | Facet service | [PROP]; [SRC: SSOT BR-158 default k] |
-| BR-SRC-022 | Each entity has a documented default sort and allowed sorts; ties break deterministically; "newest" uses publication date; items lacking the sort attribute are placed last. | Predictable ordering. | Query service | [PROP] |
-| BR-SRC-023 | Zero-result and error states give recovery steps, and responses for hidden, blocked or non-existent entities are indistinguishable. | No dead ends; no existence leak. | Query service; UI | [SRC: SSOT §11.2]; [PROP] |
-| BR-SRC-024 | Freshness targets: jobs and content ≤ 5 min; people and courses ≤ 15 min; deletions and visibility reductions ≤ 15 min. | Quality of results. | Indexer | [PROP] |
-| BR-SRC-025 | Index changes ship as new versions validated against a judgment set and leak canaries, swapped atomically with two approvals, and roll-backable. | Safe change. | Index admin | [PROP] |
-| BR-SRC-026 | Abuse controls apply to all search surfaces: rate limits per role, caps for guests, enumeration-safe responses, anomaly detection, step-up challenges, and honeypots; limiter failure falls back to conservative limits. | Anti-scraping. | Edge and search service | [PROP] |
-| BR-SRC-027 | Queries are limited to 256 characters and 20 terms; talent search allows up to 15 boolean clauses; engine syntax is never passed through. | Safety and cost. | Parser | [PROP] |
-| BR-SRC-028 | Command search actions are filtered by the user's role and context; the palette never reveals pages or entities the user may not access. | Least privilege. | Action registry | [SRC: SSOT F-20]; [DER] |
-| BR-SRC-029 | Search analytics store whitelisted metadata only, report aggregates, hash session ids, truncate IPs, and suppress cells below k = 10. | Privacy. | Analytics pipeline | [SRC: SSOT BR-27, BR-158] |
-| BR-SRC-030 | Ranking profiles, synonym sets and analyzers are versioned, evaluated offline and in shadow against judgment sets, approved by two people, and roll-backable; each release has a changelog. | Controlled quality. | Relevance console | [PROP] |
-| BR-SRC-031 | Candidate-side search appearance insights are aggregates only, name no recruiter or organization, and suppress breakdowns below 5 events. | Privacy both ways. | Insights job | [PROP] |
-| BR-SRC-032 | Fairness data is voluntary, held outside SRC, used in aggregates only with k ≥ 10, and never available per person to recruiters or search. | Lawful, minimal. | Fairness job | [PROP] |
-| BR-SRC-033 | People locations are indexed at city level or coarser; street addresses are never indexed; device location is used for one query only and not stored. | Location privacy. | Document builder; query | [PROP] |
-| BR-SRC-034 | In degraded mode, search falls back only to tiers that enforce identical visibility rules; people and talent search are not served from fallback; permission-service failure returns no results. | Fail closed. | Search gateway | [PROP]; [SRC: SSOT BR-28 honest status] |
-| BR-SRC-035 | Autocomplete and suggestions exclude offensive and sensitive completions and never suggest private individuals' names to unauthorized viewers. | Safe suggestions. | Suggest pipeline | [PROP] |
-| BR-SRC-036 | People search excludes unpublished, suspended, blocked-for-viewer and under-18 profiles and shows only fields visible to the viewer. | Respect PRF settings. | People query | [DER] from PRF |
-| BR-SRC-037 | Alert emails and push messages contain only items and snippets the recipient can see and exclude sensitive fields. | Safe notifications. | Alert templates | [PROP] |
-| BR-SRC-038 | Paid or sponsored placement is not part of organic ranking. Any future promotion must be visually labeled, separate from ranked results, and approved as a scope decision. | Trust; SSOT §4.2 "not an ad network". | Ranking service | [SRC: SSOT §4.2 non-goals]; OD-SRC-08 |
-| BR-SRC-039 | A public "How results are ranked" page per entity lists inputs, exclusions and the last change date, and is updated at each ranking release. | Transparency. | Docs and release process | [SRC: SSOT BR-124 analog] |
-| BR-SRC-040 | Evidence-based filters in talent search default to "Any"; choosing a minimum shows a notice that candidates without evidence are hidden; filters use only recruiter-visible evidence. | Don't penalize unverified candidates silently. | Talent filter builder | [DER]; EVD BR-EVD-025 |
-| BR-SRC-041 | Queries are analyzed per language; unsupported languages fall back to a generic analyzer with a notice; skills resolve to language-independent canonical ids. | Inclusive search. | Analyzer | [PROP] |
-| BR-SRC-042 | Canonical skills are created only by taxonomy editors; merges leave redirects; relationships are directional and `prerequisite_of` is acyclic; traversal is bounded to 5 hops. | Governed taxonomy. | Taxonomy service | [SRC: SSOT BR-141, BR-142, BR-146, BR-147] |
-| BR-SRC-043 | A skill candidate is promoted only with at least 5 independent signals in the window and editor approval; `correlates_with` edges are computed, not manual. | Quality control. | Emerging skills job | [SRC: SSOT BR-143, BR-148] |
-| BR-SRC-044 | Each skill has a decay class that EVD uses for freshness; changing a class recomputes freshness with a note and is versioned. | Consistent freshness. | Taxonomy service | [SRC: SSOT F-123]; [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                                         | Rationale                                                             | Enforced where                              | Source                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------- |
+| BR-SRC-001 | Every query is evaluated with the viewer's permissions. Results the viewer may not see are never returned, counted, faceted, suggested, highlighted or alerted. Permission is checked at query time against the source of truth for the result page in addition to index-time ACLs; failure to check drops the hit.                                                                                          | Zero leakage.                                                         | Query service; hydration                    | [SRC: SSOT F-147 "0 RLS leakage", F-92 "zero stealth leakage"]    |
+| BR-SRC-002 | Only fields allowed for search are indexed, grouped by audience. Contact data, salary expectation, work authorization, background-check data, private evidence, hidden test cases, solutions and private messages are never indexed. Every indexable entity declares an audience policy.                                                                                                                     | Minimization.                                                         | Document builder; schema registry           | [DER] from SSOT F-12 and F-92                                     |
+| BR-SRC-003 | Deletions, visibility reductions, suspensions and erasures propagate to the index within 15 minutes (erasure within 24 h). The query-time check covers the gap.                                                                                                                                                                                                                                              | Privacy changes must be fast.                                         | Indexer; query service                      | [SRC: SSOT F-92 "consent revocation < 24h"]; 15 min [PROP]        |
+| BR-SRC-004 | Ranking inputs are documented per entity, derived from stored features, and the explanation shown to users is generated from the same features. Protected attributes and their proxies are never inputs.                                                                                                                                                                                                     | Honest transparency and fairness.                                     | Ranking service; contract tests             | [SRC: SSOT F-04 "Why am I seeing this?"]                          |
+| BR-SRC-005 | Default job ranking weights are skill match 0.45, experience 0.20, location 0.10, title 0.10, organization rating 0.10, recency 0.05 until revised through FR-SRC-027. The organization-rating input is disclosed and is an open decision.                                                                                                                                                                   | Legacy baseline retained.                                             | Ranking profile `jobs-v1`                   | [SRC: SSOT F-04 step 2]; [DEC-REQ] OD-SRC-03                      |
+| BR-SRC-006 | Talent search never filters, sorts or ranks on name, photo, age or date of birth, gender, pronouns, ethnicity, religion, disability, marital status, nationality or proxies (such as graduation year as an age proxy). Such filters do not exist in the UI or API.                                                                                                                                           | Anti-discrimination.                                                  | Filter allowlist; feature allowlist         | [PROP]; [DER]                                                     |
+| BR-SRC-007 | A candidate appears in talent search only if published, not stealth, discoverable to recruiters (or applied to the searching org), not blocking the recruiter or org, not under 18, not suspended; filters use only fields the candidate shared with recruiters. Enforced at query time.                                                                                                                     | Candidate control.                                                    | Talent query layer                          | [SRC: SSOT F-92 steps 7–8]; PRF BR-PRF-025, 029, 041              |
+| BR-SRC-008 | Talent search queries, profile views and exports are logged (recruiter, org, parsed query, counts, viewed ids), rate limited, and result windows are capped at 1000. Logs are visible to the org admin and staff.                                                                                                                                                                                            | Accountability and anti-harvesting.                                   | Talent search service                       | [PROP]                                                            |
+| BR-SRC-009 | Talent results show why each candidate matched (criteria) and no hidden score; blind review mode removes names, photos, school names, pronouns and graduation years from payloads; ties may be shuffled.                                                                                                                                                                                                     | Explainable, fairer first pass.                                       | Talent search UI and API                    | [PROP]                                                            |
+| BR-SRC-010 | Selection-rate audits for talent search run at least monthly on aggregated, k-anonymized cohorts using voluntary demographic data where lawfully collected; thresholds raise alerts to PAD and the org.                                                                                                                                                                                                      | Detect disparate impact.                                              | Fairness job                                | [PROP]; [DEC-REQ] OD-SRC-04                                       |
+| BR-SRC-011 | A user may keep up to 25 saved searches (talent searches count separately up to 50 per recruiter), each a structured query with unique name; alerts are new-only with no backfill.                                                                                                                                                                                                                           | Bounded load; clear semantics.                                        | Saved search service                        | [SRC: SSOT F-04 step 7]; limits [PROP]                            |
+| BR-SRC-012 | Alert items are re-checked for permission, status and duplicates at send time; max 3 instant alerts per day per user, overflow goes to the digest; one-click unsubscribe is always present.                                                                                                                                                                                                                  | Safe, quiet alerts.                                                   | Alert job                                   | [PROP]                                                            |
+| BR-SRC-013 | Recent searches are kept per user (max 20, 90 days), deletable, pausable, and excluded from others' views.                                                                                                                                                                                                                                                                                                   | User control.                                                         | History service                             | [PROP]                                                            |
+| BR-SRC-014 | Queries matching identifier patterns (email, phone, national or card numbers) are not stored in history, logs or analytics; autocomplete suggests only queries used by ≥ 20 distinct users; raw query logs are retained 90 days with restricted access.                                                                                                                                                      | Prevent leaking personal data via search.                             | Logging and suggest pipeline                | [PROP]                                                            |
+| BR-SRC-015 | Personalization is optional, disclosed, applies only to the user's own results, never to recruiter ranking of candidates, and turning it off deletes the profile within 24 h and stops its use immediately.                                                                                                                                                                                                  | Control and fairness.                                                 | Ranking service                             | [SRC: SSOT F-147 personalization]; control [PROP]                 |
+| BR-SRC-016 | Typo tolerance: edit distance 1 for terms of 4–7 characters, 2 for 8 or more, none for shorter terms, quoted phrases, fields or numbers; low-confidence corrections are suggestions, high-confidence ones are announced and reversible; exact matches rank above fuzzy ones.                                                                                                                                 | Predictable.                                                          | Query analyzer                              | [SRC: SSOT F-147 typo tolerance]; thresholds [PROP]               |
+| BR-SRC-017 | Synonym and alias expansion is curated, directional where meaningful, shown to the user, switchable, and suppressed for quoted or field-prefixed terms; expanded matches rank below exact ones.                                                                                                                                                                                                              | Recall without surprises.                                             | Query analyzer                              | [SRC: SSOT F-84]; [PROP]                                          |
+| BR-SRC-018 | Skill filters use canonical skill ids; hierarchy expansion is opt-in, one hop by default, with traversal bounded to 5 hops.                                                                                                                                                                                                                                                                                  | Taxonomy integrity.                                                   | Filter builder                              | [SRC: SSOT BR-144, BR-146]                                        |
+| BR-SRC-019 | Pagination is cursor-based, 20 per page default, 100 maximum; total reachable results per query are capped at 1000; guests get no deep paging in people search.                                                                                                                                                                                                                                              | Performance and anti-scraping.                                        | API                                         | [SRC: SSOT F-04 step 1]; cap [PROP]                               |
+| BR-SRC-020 | Search state (query, filters, sort, tab) is encoded in the URL; invalid or non-permitted parameters are dropped with a notice; URLs contain no personal data other than the typed query.                                                                                                                                                                                                                     | Shareable and safe.                                                   | Web app and API                             | [SRC: SSOT F-04 step 1]                                           |
+| BR-SRC-021 | Facet and tab counts are computed under permissions, shown as "1000+" above 1000, and suppressed below 5 for people facets (talent facets below 10) to prevent re-identification.                                                                                                                                                                                                                            | Privacy.                                                              | Facet service                               | [PROP]; [SRC: SSOT BR-158 default k]                              |
+| BR-SRC-022 | Each entity has a documented default sort and allowed sorts; ties break deterministically; "newest" uses publication date; items lacking the sort attribute are placed last.                                                                                                                                                                                                                                 | Predictable ordering.                                                 | Query service                               | [PROP]                                                            |
+| BR-SRC-023 | Zero-result and error states give recovery steps, and responses for hidden, blocked or non-existent entities are indistinguishable.                                                                                                                                                                                                                                                                          | No dead ends; no existence leak.                                      | Query service; UI                           | [SRC: SSOT §11.2]; [PROP]                                         |
+| BR-SRC-024 | Freshness targets: jobs and content ≤ 5 min; people and courses ≤ 15 min; deletions and visibility reductions ≤ 15 min.                                                                                                                                                                                                                                                                                      | Quality of results.                                                   | Indexer                                     | [PROP]                                                            |
+| BR-SRC-025 | Index changes ship as new versions validated against a judgment set and leak canaries, swapped atomically with two approvals, and roll-backable.                                                                                                                                                                                                                                                             | Safe change.                                                          | Index admin                                 | [PROP]                                                            |
+| BR-SRC-026 | Abuse controls apply to all search surfaces: rate limits per role, caps for guests, enumeration-safe responses, anomaly detection, step-up challenges, and honeypots; limiter failure falls back to conservative limits.                                                                                                                                                                                     | Anti-scraping.                                                        | Edge and search service                     | [PROP]                                                            |
+| BR-SRC-027 | Queries are limited to 256 characters and 20 terms; talent search allows up to 15 boolean clauses; engine syntax is never passed through.                                                                                                                                                                                                                                                                    | Safety and cost.                                                      | Parser                                      | [PROP]                                                            |
+| BR-SRC-028 | Command search actions are filtered by the user's role and context; the palette never reveals pages or entities the user may not access.                                                                                                                                                                                                                                                                     | Least privilege.                                                      | Action registry                             | [SRC: SSOT F-20]; [DER]                                           |
+| BR-SRC-029 | Search analytics store whitelisted metadata only, report aggregates, hash session ids, truncate IPs, and suppress cells below k = 10.                                                                                                                                                                                                                                                                        | Privacy.                                                              | Analytics pipeline                          | [SRC: SSOT BR-27, BR-158]                                         |
+| BR-SRC-030 | Ranking profiles, synonym sets and analyzers are versioned, evaluated offline and in shadow against judgment sets, approved by two people, and roll-backable; each release has a changelog.                                                                                                                                                                                                                  | Controlled quality.                                                   | Relevance console                           | [PROP]                                                            |
+| BR-SRC-031 | Candidate-side search appearance insights are aggregates only, name no recruiter or organization, and suppress breakdowns below 5 events.                                                                                                                                                                                                                                                                    | Privacy both ways.                                                    | Insights job                                | [PROP]                                                            |
+| BR-SRC-032 | Fairness data is voluntary, held outside SRC, used in aggregates only with k ≥ 10, and never available per person to recruiters or search.                                                                                                                                                                                                                                                                   | Lawful, minimal.                                                      | Fairness job                                | [PROP]                                                            |
+| BR-SRC-033 | People locations are indexed at city level or coarser; street addresses are never indexed; device location is used for one query only and not stored.                                                                                                                                                                                                                                                        | Location privacy.                                                     | Document builder; query                     | [PROP]                                                            |
+| BR-SRC-034 | In degraded mode, search falls back only to tiers that enforce identical visibility rules; people and talent search are not served from fallback; permission-service failure returns no results.                                                                                                                                                                                                             | Fail closed.                                                          | Search gateway                              | [PROP]; [SRC: SSOT BR-28 honest status]                           |
+| BR-SRC-035 | Autocomplete and suggestions exclude offensive and sensitive completions and never suggest private individuals' names to unauthorized viewers.                                                                                                                                                                                                                                                               | Safe suggestions.                                                     | Suggest pipeline                            | [PROP]                                                            |
+| BR-SRC-036 | People search excludes unpublished, suspended, blocked-for-viewer and under-18 profiles and shows only fields visible to the viewer.                                                                                                                                                                                                                                                                         | Respect PRF settings.                                                 | People query                                | [DER] from PRF                                                    |
+| BR-SRC-037 | Alert emails and push messages contain only items and snippets the recipient can see and exclude sensitive fields.                                                                                                                                                                                                                                                                                           | Safe notifications.                                                   | Alert templates                             | [PROP]                                                            |
+| BR-SRC-038 | Paid or sponsored placement is not part of organic ranking. Any future promotion must be visually labeled, separate from ranked results, and approved as a scope decision.                                                                                                                                                                                                                                   | Trust; SSOT §4.2 "not an ad network".                                 | Ranking service                             | [SRC: SSOT §4.2 non-goals]; OD-SRC-08                             |
+| BR-SRC-039 | A public "How results are ranked" page per entity lists inputs, exclusions and the last change date, and is updated at each ranking release.                                                                                                                                                                                                                                                                 | Transparency.                                                         | Docs and release process                    | [SRC: SSOT BR-124 analog]                                         |
+| BR-SRC-040 | Evidence-based filters in talent search default to "Any"; choosing a minimum shows a notice that candidates without evidence are hidden; filters use only recruiter-visible evidence.                                                                                                                                                                                                                        | Don't penalize unverified candidates silently.                        | Talent filter builder                       | [DER]; EVD BR-EVD-025                                             |
+| BR-SRC-041 | Queries are analyzed per language; unsupported languages fall back to a generic analyzer with a notice; skills resolve to language-independent canonical ids.                                                                                                                                                                                                                                                | Inclusive search.                                                     | Analyzer                                    | [PROP]                                                            |
+| BR-SRC-042 | Canonical skills are created only by taxonomy editors; merges leave redirects; relationships are directional and `prerequisite_of` is acyclic; traversal is bounded to 5 hops.                                                                                                                                                                                                                               | Governed taxonomy.                                                    | Taxonomy service                            | [SRC: SSOT BR-141, BR-142, BR-146, BR-147]                        |
+| BR-SRC-043 | A skill candidate is promoted only with at least 5 independent signals in the window and editor approval; `correlates_with` edges are computed, not manual.                                                                                                                                                                                                                                                  | Quality control.                                                      | Emerging skills job                         | [SRC: SSOT BR-143, BR-148]                                        |
+| BR-SRC-044 | Each skill has a decay class that EVD uses for freshness; changing a class recomputes freshness with a note and is versioned.                                                                                                                                                                                                                                                                                | Consistent freshness.                                                 | Taxonomy service                            | [SRC: SSOT F-123]; [PROP]                                         |
+| BR-SRC-045 | Activity signals in talent search come only from candidate-consented, evidence-backed records (verified contributions, assessed completions, emerging-skill evidence, recognition labels, endorsements); platform engagement such as logins, time on platform, message, view or follow counts, streaks, XP and leaderboard rank is never a signal, and signals are filters and labels, not rank multipliers. | Rewards real work, resists gaming and avoids behavioral surveillance. | Signal builder; query service               | [DER] [SRC: SSOT F-159 acceptance: no gaming vectors; BR-AIC-005] |
+| BR-SRC-046 | Candidate consent for activity signals is opt-in per category and revocable; a candidate with no signals is never excluded or down-ranked by default; signal facets are included in selection-rate audits under BR-SRC-010.                                                                                                                                                                                  | Fairness and consent.                                                 | Consent ledger; query service; fairness job | [PROP]                                                            |
 
 ## 6. State machines
 
@@ -1119,14 +1152,14 @@ flowchart LR
 
 States: `active`, `paused` (user or automatic), `suspended` (entitlement or permission lapsed), `deleted`. Terminal: `deleted`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `active` | User saves | under limit |
-| `active` | `paused` | User pauses; 90 days unopened plus 14 days after prompt | none |
-| `paused` | `active` | User resumes | none |
-| `active` | `suspended` | Recruiter entitlement lapses or access lost | none |
-| `suspended` | `active` | Entitlement restored | none |
-| `active`/`paused`/`suspended` | `deleted` | User deletes or account erased | none |
+| From                          | To          | Trigger                                                 | Guard       |
+| ----------------------------- | ----------- | ------------------------------------------------------- | ----------- |
+| `[*]`                         | `active`    | User saves                                              | under limit |
+| `active`                      | `paused`    | User pauses; 90 days unopened plus 14 days after prompt | none        |
+| `paused`                      | `active`    | User resumes                                            | none        |
+| `active`                      | `suspended` | Recruiter entitlement lapses or access lost             | none        |
+| `suspended`                   | `active`    | Entitlement restored                                    | none        |
+| `active`/`paused`/`suspended` | `deleted`   | User deletes or account erased                          | none        |
 
 ```mermaid
 stateDiagram-v2
@@ -1145,17 +1178,17 @@ stateDiagram-v2
 
 States: `building`, `validating`, `ready`, `live`, `retired`, `failed`, `rolled_back`. Terminal: `retired`, `failed`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `building` | PAD creates version | none |
-| `building` | `validating` | Build completes | none |
-| `building` | `failed` | Build error | none |
-| `validating` | `ready` | Parity, quality and canary tests pass | none |
-| `validating` | `failed` | Tests fail | none |
-| `ready` | `live` | Two approvals and swap | change window |
-| `live` | `rolled_back` | Rollback | previous version within window |
-| `live` | `retired` | Replaced and window ends | none |
-| `rolled_back` | `retired` | Retention window ends | none |
+| From          | To            | Trigger                               | Guard                          |
+| ------------- | ------------- | ------------------------------------- | ------------------------------ |
+| `[*]`         | `building`    | PAD creates version                   | none                           |
+| `building`    | `validating`  | Build completes                       | none                           |
+| `building`    | `failed`      | Build error                           | none                           |
+| `validating`  | `ready`       | Parity, quality and canary tests pass | none                           |
+| `validating`  | `failed`      | Tests fail                            | none                           |
+| `ready`       | `live`        | Two approvals and swap                | change window                  |
+| `live`        | `rolled_back` | Rollback                              | previous version within window |
+| `live`        | `retired`     | Replaced and window ends              | none                           |
+| `rolled_back` | `retired`     | Retention window ends                 | none                           |
 
 ```mermaid
 stateDiagram-v2
@@ -1176,15 +1209,15 @@ stateDiagram-v2
 
 States: `candidate`, `active`, `deprecated`, `merged`, `rejected`. Terminal: `merged`, `rejected`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `candidate` | User proposal or emerging detection | ≥ 5 signals for detected |
-| `candidate` | `active` | Editor approves | unique name and aliases |
-| `candidate` | `rejected` | Editor rejects | reason |
-| `candidate` | `merged` | Editor merges into existing | target active |
-| `active` | `deprecated` | Editor deprecates | impact preview confirmed |
-| `deprecated` | `active` | Editor reactivates | none |
-| `active`/`deprecated` | `merged` | Merge | redirect created |
+| From                  | To           | Trigger                             | Guard                    |
+| --------------------- | ------------ | ----------------------------------- | ------------------------ |
+| `[*]`                 | `candidate`  | User proposal or emerging detection | ≥ 5 signals for detected |
+| `candidate`           | `active`     | Editor approves                     | unique name and aliases  |
+| `candidate`           | `rejected`   | Editor rejects                      | reason                   |
+| `candidate`           | `merged`     | Editor merges into existing         | target active            |
+| `active`              | `deprecated` | Editor deprecates                   | impact preview confirmed |
+| `deprecated`          | `active`     | Editor reactivates                  | none                     |
+| `active`/`deprecated` | `merged`     | Merge                               | redirect created         |
 
 ```mermaid
 stateDiagram-v2
@@ -1204,16 +1237,16 @@ stateDiagram-v2
 
 States: `draft`, `evaluating`, `shadow`, `awaiting_approval`, `released`, `rolled_back`, `rejected`. Terminal: `rejected`, `rolled_back`.
 
-| From | To | Trigger | Guard |
-| --- | --- | --- | --- |
-| `[*]` | `draft` | Author creates | none |
-| `draft` | `evaluating` | Run offline evaluation | judgment set coverage |
-| `evaluating` | `shadow` | Metrics pass | thresholds |
-| `evaluating` | `rejected` | Metrics fail and author abandons | none |
-| `shadow` | `awaiting_approval` | Shadow run complete | no errors |
-| `awaiting_approval` | `released` | Second approver releases | different person |
-| `awaiting_approval` | `rejected` | Approver rejects | reason |
-| `released` | `rolled_back` | Rollback | none |
+| From                | To                  | Trigger                          | Guard                 |
+| ------------------- | ------------------- | -------------------------------- | --------------------- |
+| `[*]`               | `draft`             | Author creates                   | none                  |
+| `draft`             | `evaluating`        | Run offline evaluation           | judgment set coverage |
+| `evaluating`        | `shadow`            | Metrics pass                     | thresholds            |
+| `evaluating`        | `rejected`          | Metrics fail and author abandons | none                  |
+| `shadow`            | `awaiting_approval` | Shadow run complete              | no errors             |
+| `awaiting_approval` | `released`          | Second approver releases         | different person      |
+| `awaiting_approval` | `rejected`          | Approver rejects                 | reason                |
+| `released`          | `rolled_back`       | Rollback                         | none                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1249,67 +1282,68 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-| --- | --- | --- | --- | --- | --- |
-| SCR-SRC-001 | Command palette | overlay (`⌘K`) | all | Global search and actions (FR-SRC-001) | empty with recents, results, loading, degraded |
-| SCR-SRC-002 | Search results | `/search` | all | Entity tabs, filters, sort (FR-SRC-002) | results, zero results, error, limited mode |
-| SCR-SRC-003 | Job search | `/jobs` | all | Job search (FR-SRC-003) | results, closed job, no pay |
-| SCR-SRC-004 | People search | `/search?type=people` | all | People search (FR-SRC-004) | results, guest capped |
-| SCR-SRC-005 | Course search | `/learn` | all | Course search (FR-SRC-005) | results, private excluded |
-| SCR-SRC-006 | Company search | `/companies` | all | Company search (FR-SRC-006) | results |
-| SCR-SRC-007 | Challenge search | `/challenges` | all | Challenge search (FR-SRC-007) | results, contest upcoming |
-| SCR-SRC-008 | Content search | `/search?type=content` | all | Content search (FR-SRC-008) | results |
-| SCR-SRC-009 | Filter panel and drawer | component | all | Filters and facets (FR-SRC-012) | desktop, mobile drawer, invalid filter |
-| SCR-SRC-010 | Why this result popover | component | all | Explanation (FR-SRC-015) | loaded, unavailable |
-| SCR-SRC-011 | How results are ranked | `/help/ranking/:entity` | all | Transparency (FR-SRC-015) | per entity, changelog |
-| SCR-SRC-012 | Search settings | `/settings/search` | signed-in | Personalization, history (FR-SRC-016, 019) | on, off, cleared |
-| SCR-SRC-013 | Saved searches | `/searches` | signed-in | Manage (FR-SRC-017) | empty, limit reached, new badge |
-| SCR-SRC-014 | Save search dialog | modal | signed-in | Name and frequency (FR-SRC-017) | valid, duplicate |
-| SCR-SRC-015 | Alert settings and email | `/searches/:id/alerts` | signed-in | Alerts (FR-SRC-018) | none, daily, paused |
-| SCR-SRC-016 | Recruiter talent search | `/recruiter/search` | REC, HMG, EAD | Talent search (FR-SRC-021) | results, blind mode, rate limited |
-| SCR-SRC-017 | Talent candidate side panel | panel | REC, HMG | Quick review with evidence (FR-SRC-021, 023) | loaded, candidate unavailable |
-| SCR-SRC-018 | Talent saved searches | `/recruiter/search/saved` | REC, HMG, EAD | Saved talent searches (FR-SRC-021) | entitlement lapsed |
-| SCR-SRC-019 | Fair search report | `/recruiter/search/fairness` | EAD | Org fairness summary (FR-SRC-022) | insufficient data, alert |
-| SCR-SRC-020 | Search appearances | `/profile/search-appearances` | CAN | Insights (FR-SRC-024) | low volume, stealth |
-| SCR-SRC-021 | Empty and error states | component | all | Recovery (FR-SRC-028) | zero results, error, rate limited |
-| SCR-SRC-022 | Index health | `/admin/search/index` | PAD | Pipelines (FR-SRC-025) | lag, drift, dead letters |
-| SCR-SRC-023 | Index versions | `/admin/search/versions` | PAD | Build, validate, swap (FR-SRC-026) | building, awaiting approval |
-| SCR-SRC-024 | Relevance console | `/admin/search/relevance` | PAD | Profiles and evaluations (FR-SRC-027) | draft, shadow, released |
-| SCR-SRC-025 | Abuse console | `/admin/search/abuse` | PAD, SAD | Signals and blocks (FR-SRC-029) | signals, appeals |
-| SCR-SRC-026 | Leakage audit | `/admin/search/audit` | SAD | Canary and synthetic viewer tests (FR-SRC-020) | pass, fail |
-| SCR-SRC-027 | Taxonomy console | `/admin/taxonomy` | PAD | Skills, relationships (FR-SRC-030) | tree, merge wizard |
-| SCR-SRC-028 | Proposals queue | `/admin/taxonomy/proposals` | PAD | Review proposals (FR-SRC-030) | pending, decided |
-| SCR-SRC-029 | Synonym sets | `/admin/taxonomy/synonyms` | PAD | Synonyms (FR-SRC-014, 030) | test box |
-| SCR-SRC-030 | Search analytics | `/admin/search/analytics` | PAD, EAD, IAD | Aggregates (FR-SRC-031) | suppressed cells |
-| SCR-SRC-031 | Degraded status | banner and `/admin/search/status` | all, PAD | Mode (FR-SRC-034) | live, degraded, down |
-| SCR-SRC-032 | Location picker | component | all | Place resolve (FR-SRC-033) | ambiguous, denied location |
+| ID          | Name                        | Route proposal                    | Roles         | Purpose                                        | Key states                                     |
+| ----------- | --------------------------- | --------------------------------- | ------------- | ---------------------------------------------- | ---------------------------------------------- |
+| SCR-SRC-001 | Command palette             | overlay (`⌘K`)                    | all           | Global search and actions (FR-SRC-001)         | empty with recents, results, loading, degraded |
+| SCR-SRC-002 | Search results              | `/search`                         | all           | Entity tabs, filters, sort (FR-SRC-002)        | results, zero results, error, limited mode     |
+| SCR-SRC-003 | Job search                  | `/jobs`                           | all           | Job search (FR-SRC-003)                        | results, closed job, no pay                    |
+| SCR-SRC-004 | People search               | `/search?type=people`             | all           | People search (FR-SRC-004)                     | results, guest capped                          |
+| SCR-SRC-005 | Course search               | `/learn`                          | all           | Course search (FR-SRC-005)                     | results, private excluded                      |
+| SCR-SRC-006 | Company search              | `/companies`                      | all           | Company search (FR-SRC-006)                    | results                                        |
+| SCR-SRC-007 | Challenge search            | `/challenges`                     | all           | Challenge search (FR-SRC-007)                  | results, contest upcoming                      |
+| SCR-SRC-008 | Content search              | `/search?type=content`            | all           | Content search (FR-SRC-008)                    | results                                        |
+| SCR-SRC-009 | Filter panel and drawer     | component                         | all           | Filters and facets (FR-SRC-012)                | desktop, mobile drawer, invalid filter         |
+| SCR-SRC-010 | Why this result popover     | component                         | all           | Explanation (FR-SRC-015)                       | loaded, unavailable                            |
+| SCR-SRC-011 | How results are ranked      | `/help/ranking/:entity`           | all           | Transparency (FR-SRC-015)                      | per entity, changelog                          |
+| SCR-SRC-012 | Search settings             | `/settings/search`                | signed-in     | Personalization, history (FR-SRC-016, 019)     | on, off, cleared                               |
+| SCR-SRC-013 | Saved searches              | `/searches`                       | signed-in     | Manage (FR-SRC-017)                            | empty, limit reached, new badge                |
+| SCR-SRC-014 | Save search dialog          | modal                             | signed-in     | Name and frequency (FR-SRC-017)                | valid, duplicate                               |
+| SCR-SRC-015 | Alert settings and email    | `/searches/:id/alerts`            | signed-in     | Alerts (FR-SRC-018)                            | none, daily, paused                            |
+| SCR-SRC-016 | Recruiter talent search     | `/recruiter/search`               | REC, HMG, EAD | Talent search (FR-SRC-021)                     | results, blind mode, rate limited              |
+| SCR-SRC-017 | Talent candidate side panel | panel                             | REC, HMG      | Quick review with evidence (FR-SRC-021, 023)   | loaded, candidate unavailable                  |
+| SCR-SRC-018 | Talent saved searches       | `/recruiter/search/saved`         | REC, HMG, EAD | Saved talent searches (FR-SRC-021)             | entitlement lapsed                             |
+| SCR-SRC-019 | Fair search report          | `/recruiter/search/fairness`      | EAD           | Org fairness summary (FR-SRC-022)              | insufficient data, alert                       |
+| SCR-SRC-020 | Search appearances          | `/profile/search-appearances`     | CAN           | Insights (FR-SRC-024)                          | low volume, stealth                            |
+| SCR-SRC-021 | Empty and error states      | component                         | all           | Recovery (FR-SRC-028)                          | zero results, error, rate limited              |
+| SCR-SRC-022 | Index health                | `/admin/search/index`             | PAD           | Pipelines (FR-SRC-025)                         | lag, drift, dead letters                       |
+| SCR-SRC-023 | Index versions              | `/admin/search/versions`          | PAD           | Build, validate, swap (FR-SRC-026)             | building, awaiting approval                    |
+| SCR-SRC-024 | Relevance console           | `/admin/search/relevance`         | PAD           | Profiles and evaluations (FR-SRC-027)          | draft, shadow, released                        |
+| SCR-SRC-025 | Abuse console               | `/admin/search/abuse`             | PAD, SAD      | Signals and blocks (FR-SRC-029)                | signals, appeals                               |
+| SCR-SRC-026 | Leakage audit               | `/admin/search/audit`             | SAD           | Canary and synthetic viewer tests (FR-SRC-020) | pass, fail                                     |
+| SCR-SRC-027 | Taxonomy console            | `/admin/taxonomy`                 | PAD           | Skills, relationships (FR-SRC-030)             | tree, merge wizard                             |
+| SCR-SRC-028 | Proposals queue             | `/admin/taxonomy/proposals`       | PAD           | Review proposals (FR-SRC-030)                  | pending, decided                               |
+| SCR-SRC-029 | Synonym sets                | `/admin/taxonomy/synonyms`        | PAD           | Synonyms (FR-SRC-014, 030)                     | test box                                       |
+| SCR-SRC-030 | Search analytics            | `/admin/search/analytics`         | PAD, EAD, IAD | Aggregates (FR-SRC-031)                        | suppressed cells                               |
+| SCR-SRC-031 | Degraded status             | banner and `/admin/search/status` | all, PAD      | Mode (FR-SRC-034)                              | live, degraded, down                           |
+| SCR-SRC-032 | Location picker             | component                         | all           | Place resolve (FR-SRC-033)                     | ambiguous, denied location                     |
 
 ## 8. Data entities owned
 
-| ID | Name | Key attributes | Relationships | Retention class |
-| --- | --- | --- | --- | --- |
-| ENT-SRC-01 | SearchDocument | entityType, entityId, version, fieldGroups (public, connections, recruiter, owner), audiencePolicy, state, indexedAt | derived from source entities | Derived; follows source |
-| ENT-SRC-02 | SearchQueryLogEntry | id, userHash, entity, redactedQuery, filterKeys, resultCount, latency, clickedPosition, at | n:1 user hash | 90 days |
-| ENT-SRC-03 | RecentSearch | id, userId, entity, query, filters, at | n:1 user | 90 days or until deleted |
-| ENT-SRC-04 | SavedSearch | id, ownerId, kind (general, talent), entity, structuredQuery, name, frequency, state, lastSeenAt | n:1 user; 1:n alert deliveries | Until deleted or erased |
-| ENT-SRC-05 | SearchAlertSubscription | id, savedSearchId, channels, quietHours, lastEvaluatedAt | 1:1 SavedSearch | With saved search |
-| ENT-SRC-06 | AlertDelivery | id, subscriptionId, itemIds, sentAt, idempotencyKey | n:1 Subscription | 90 days |
-| ENT-SRC-07 | SynonymSet | id, terms, type (equivalent, directional), scope, version, status | referenced by analyzers | Versioned permanent |
-| ENT-SRC-08 | TaxonomySkill | id, canonicalName, slug, category, description, aliases, decayClass, status, version | 1:n relationships; referenced by PRF, EVD, JOB, LRN, ASM | Permanent |
-| ENT-SRC-09 | SkillRelationship | id, fromSkillId, toSkillId, type, weight, source (manual, computed) | n:1 skills | Permanent |
-| ENT-SRC-10 | RankingProfile | id, entity, version, weights, features, status, changelog | referenced by queries | Permanent history |
-| ENT-SRC-11 | RelevanceJudgmentSet | id, entity, queries, labels, raters, version | used in evaluations | Permanent, no personal data |
-| ENT-SRC-12 | IndexJob | id, entityType, kind (incremental, reindex, repair), state, counts, startedAt | n:1 IndexVersion | 90 days |
-| ENT-SRC-13 | IndexVersion | id, entityType, schemaHash, state, validationReport, approvers | 1:n IndexJob | 7 days after retired; report permanent |
-| ENT-SRC-14 | TalentSearchAuditEntry | id, recruiterId, orgId, parsedQuery, resultCount, viewedIds, exportedIds, at | n:1 org | 24 months |
-| ENT-SRC-15 | FairnessAuditReport | id, scope, period, metrics, alerts, k | aggregate only | 36 months |
-| ENT-SRC-16 | SearchAppearanceAggregate | profileId, week, count, openCount, topSkills | n:1 profile | 12 months |
-| ENT-SRC-17 | PersonalizationProfile | userId, features, enabledSignals, updatedAt | 1:1 user | Until off or erased |
-| ENT-SRC-18 | BlockedTerm | id, term, scope (suggest, index), reason | read by suggest pipeline | Permanent |
-| ENT-SRC-19 | EmergingSkillCandidate | id, term, signalCount, firstSeen, sources, status | may become TaxonomySkill | 12 months |
-| ENT-SRC-20 | SearchAbuseSignal | id, actorKey, type, severity, action, at | n:1 actor | 90 days |
-| ENT-SRC-21 | PlaceRecord | id, name, hierarchy, coordinates, aliases | referenced by documents | Permanent |
-| ENT-SRC-22 | SearchAnalyticsAggregate | metric, dimensions, period, value, k | aggregate | 24 months |
+| ID         | Name                      | Key attributes                                                                                                                                                            | Relationships                                             | Retention class                                                 |
+| ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------- |
+| ENT-SRC-01 | SearchDocument            | entityType, entityId, version, fieldGroups (public, connections, recruiter, owner), audiencePolicy, state, indexedAt                                                      | derived from source entities                              | Derived; follows source                                         |
+| ENT-SRC-02 | SearchQueryLogEntry       | id, userHash, entity, redactedQuery, filterKeys, resultCount, latency, clickedPosition, at                                                                                | n:1 user hash                                             | 90 days                                                         |
+| ENT-SRC-03 | RecentSearch              | id, userId, entity, query, filters, at                                                                                                                                    | n:1 user                                                  | 90 days or until deleted                                        |
+| ENT-SRC-04 | SavedSearch               | id, ownerId, kind (general, talent), entity, structuredQuery, name, frequency, state, lastSeenAt                                                                          | n:1 user; 1:n alert deliveries                            | Until deleted or erased                                         |
+| ENT-SRC-05 | SearchAlertSubscription   | id, savedSearchId, channels, quietHours, lastEvaluatedAt                                                                                                                  | 1:1 SavedSearch                                           | With saved search                                               |
+| ENT-SRC-06 | AlertDelivery             | id, subscriptionId, itemIds, sentAt, idempotencyKey                                                                                                                       | n:1 Subscription                                          | 90 days                                                         |
+| ENT-SRC-07 | SynonymSet                | id, terms, type (equivalent, directional), scope, version, status                                                                                                         | referenced by analyzers                                   | Versioned permanent                                             |
+| ENT-SRC-08 | TaxonomySkill             | id, canonicalName, slug, category, description, aliases, decayClass, status, version                                                                                      | 1:n relationships; referenced by PRF, EVD, JOB, LRN, ASM  | Permanent                                                       |
+| ENT-SRC-09 | SkillRelationship         | id, fromSkillId, toSkillId, type, weight, source (manual, computed)                                                                                                       | n:1 skills                                                | Permanent                                                       |
+| ENT-SRC-10 | RankingProfile            | id, entity, version, weights, features, status, changelog                                                                                                                 | referenced by queries                                     | Permanent history                                               |
+| ENT-SRC-11 | RelevanceJudgmentSet      | id, entity, queries, labels, raters, version                                                                                                                              | used in evaluations                                       | Permanent, no personal data                                     |
+| ENT-SRC-12 | IndexJob                  | id, entityType, kind (incremental, reindex, repair), state, counts, startedAt                                                                                             | n:1 IndexVersion                                          | 90 days                                                         |
+| ENT-SRC-13 | IndexVersion              | id, entityType, schemaHash, state, validationReport, approvers                                                                                                            | 1:n IndexJob                                              | 7 days after retired; report permanent                          |
+| ENT-SRC-14 | TalentSearchAuditEntry    | id, recruiterId, orgId, parsedQuery, resultCount, viewedIds, exportedIds, at                                                                                              | n:1 org                                                   | 24 months                                                       |
+| ENT-SRC-15 | FairnessAuditReport       | id, scope, period, metrics, alerts, k                                                                                                                                     | aggregate only                                            | 36 months                                                       |
+| ENT-SRC-16 | SearchAppearanceAggregate | profileId, week, count, openCount, topSkills                                                                                                                              | n:1 profile                                               | 12 months                                                       |
+| ENT-SRC-17 | PersonalizationProfile    | userId, features, enabledSignals, updatedAt                                                                                                                               | 1:1 user                                                  | Until off or erased                                             |
+| ENT-SRC-18 | BlockedTerm               | id, term, scope (suggest, index), reason                                                                                                                                  | read by suggest pipeline                                  | Permanent                                                       |
+| ENT-SRC-19 | EmergingSkillCandidate    | id, term, signalCount, firstSeen, sources, status                                                                                                                         | may become TaxonomySkill                                  | 12 months                                                       |
+| ENT-SRC-20 | SearchAbuseSignal         | id, actorKey, type, severity, action, at                                                                                                                                  | n:1 actor                                                 | 90 days                                                         |
+| ENT-SRC-21 | PlaceRecord               | id, name, hierarchy, coordinates, aliases                                                                                                                                 | referenced by documents                                   | Permanent                                                       |
+| ENT-SRC-22 | SearchAnalyticsAggregate  | metric, dimensions, period, value, k                                                                                                                                      | aggregate                                                 | 24 months                                                       |
+| ENT-SRC-23 | CandidateActivitySignal   | candidateId, signalKind (contribution, learning_momentum, emerging_skill, community_standing, attestation), windowDays, value, evidenceRefs[], consentVersion, computedAt | n:1 candidate; derived from EVD, LRN, ASM and REP records | Derived; removed with consent withdrawal or evidence revocation |
 
 ```mermaid
 erDiagram
@@ -1328,30 +1362,30 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload | Consumers |
-| --- | --- | --- | --- | --- |
-| EVT-SRC-001 | `src.search.executed` | Search query completed (redacted) | entity, filterKeys, resultCount, latency | ANL |
-| EVT-SRC-002 | `src.search.zero_results` | Zero results | entity, filterKeys | ANL, taxonomy review |
-| EVT-SRC-003 | `src.result.clicked` | Result opened | entity, position | ANL, ranking evaluation |
-| EVT-SRC-004 | `src.savedsearch.created` | Saved | savedSearchId, kind | ANL |
-| EVT-SRC-005 | `src.savedsearch.deleted` | Deleted | savedSearchId | ANL |
-| EVT-SRC-006 | `src.alert.due` | Alert evaluation produced items | subscriptionId, itemIds | NTF |
-| EVT-SRC-007 | `src.alert.unsubscribed` | One-click unsubscribe | subscriptionId | NTF |
-| EVT-SRC-008 | `src.talent.searched` | Talent search executed | orgId, recruiterId, resultCount | EMP audit, BIL metering |
-| EVT-SRC-009 | `src.talent.profile_viewed_from_search` | Candidate opened from search | candidateRef (hashed), orgId | PRF views, ANL |
-| EVT-SRC-010 | `src.talent.fairness_alert` | Threshold breached | scope, metric | ADM, EAD |
-| EVT-SRC-011 | `src.skill.created` | Skill activated | skillId | PRF, EVD, JOB, LRN |
-| EVT-SRC-012 | `src.skill.updated` | Alias, class or category change | skillId, changes | EVD, indexers |
-| EVT-SRC-013 | `src.skill.deprecated` | Deprecated | skillId, supersededBy | PRF, EVD, JOB, LRN |
-| EVT-SRC-014 | `src.skill.merged` | Merge | fromId, toId | PRF, EVD, JOB, LRN, saved searches |
-| EVT-SRC-015 | `src.skill.proposed` | User or system proposal | proposalId | ADM |
-| EVT-SRC-016 | `src.synonyms.released` | Synonym set released | version | indexers |
-| EVT-SRC-017 | `src.ranking.released` | Ranking profile released | entity, version | docs, ANL |
-| EVT-SRC-018 | `src.index.lag_exceeded` | Lag over threshold | entityType, lag | ADM |
-| EVT-SRC-019 | `src.index.swapped` | Index version live | entityType, version | ADM |
-| EVT-SRC-020 | `src.abuse.detected` | Abuse signal action | actorKey, type, action | ADM, EMP (for orgs) |
-| EVT-SRC-021 | `src.mode.changed` | Live/degraded/down | mode | ADM, status page |
-| EVT-SRC-022 | `src.leak_canary.failed` | Leakage test failure | entityType | SAD, ADM |
+| ID          | Event                                   | Trigger                           | Key payload                              | Consumers                          |
+| ----------- | --------------------------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------- |
+| EVT-SRC-001 | `src.search.executed`                   | Search query completed (redacted) | entity, filterKeys, resultCount, latency | ANL                                |
+| EVT-SRC-002 | `src.search.zero_results`               | Zero results                      | entity, filterKeys                       | ANL, taxonomy review               |
+| EVT-SRC-003 | `src.result.clicked`                    | Result opened                     | entity, position                         | ANL, ranking evaluation            |
+| EVT-SRC-004 | `src.savedsearch.created`               | Saved                             | savedSearchId, kind                      | ANL                                |
+| EVT-SRC-005 | `src.savedsearch.deleted`               | Deleted                           | savedSearchId                            | ANL                                |
+| EVT-SRC-006 | `src.alert.due`                         | Alert evaluation produced items   | subscriptionId, itemIds                  | NTF                                |
+| EVT-SRC-007 | `src.alert.unsubscribed`                | One-click unsubscribe             | subscriptionId                           | NTF                                |
+| EVT-SRC-008 | `src.talent.searched`                   | Talent search executed            | orgId, recruiterId, resultCount          | EMP audit, BIL metering            |
+| EVT-SRC-009 | `src.talent.profile_viewed_from_search` | Candidate opened from search      | candidateRef (hashed), orgId             | PRF views, ANL                     |
+| EVT-SRC-010 | `src.talent.fairness_alert`             | Threshold breached                | scope, metric                            | ADM, EAD                           |
+| EVT-SRC-011 | `src.skill.created`                     | Skill activated                   | skillId                                  | PRF, EVD, JOB, LRN                 |
+| EVT-SRC-012 | `src.skill.updated`                     | Alias, class or category change   | skillId, changes                         | EVD, indexers                      |
+| EVT-SRC-013 | `src.skill.deprecated`                  | Deprecated                        | skillId, supersededBy                    | PRF, EVD, JOB, LRN                 |
+| EVT-SRC-014 | `src.skill.merged`                      | Merge                             | fromId, toId                             | PRF, EVD, JOB, LRN, saved searches |
+| EVT-SRC-015 | `src.skill.proposed`                    | User or system proposal           | proposalId                               | ADM                                |
+| EVT-SRC-016 | `src.synonyms.released`                 | Synonym set released              | version                                  | indexers                           |
+| EVT-SRC-017 | `src.ranking.released`                  | Ranking profile released          | entity, version                          | docs, ANL                          |
+| EVT-SRC-018 | `src.index.lag_exceeded`                | Lag over threshold                | entityType, lag                          | ADM                                |
+| EVT-SRC-019 | `src.index.swapped`                     | Index version live                | entityType, version                      | ADM                                |
+| EVT-SRC-020 | `src.abuse.detected`                    | Abuse signal action               | actorKey, type, action                   | ADM, EMP (for orgs)                |
+| EVT-SRC-021 | `src.mode.changed`                      | Live/degraded/down                | mode                                     | ADM, status page                   |
+| EVT-SRC-022 | `src.leak_canary.failed`                | Leakage test failure              | entityType                               | SAD, ADM                           |
 
 ### 9.2 Consumed (planned names)
 
@@ -1359,102 +1393,103 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Notes |
-| --- | --- | --- |
-| Search engine | Indexing and retrieval | Choice recorded as OD-SRC-01; legacy intent is staged: database full-text first, then hybrid, then dedicated engine; adapter interface keeps the engine replaceable |
-| Vector or semantic retrieval (optional) | Hybrid ranking | Only after evaluation (FR-SRC-027); never used for protected inference |
-| Place dataset provider | Location resolution | Licensed or open dataset; adapter |
-| Outbox and message bus (PLT, planned) | Change events | At-least-once with idempotent consumers |
-| Edge rate limiter and bot protection (PLT, planned) | Abuse controls | CAPTCHA provider optional |
-| Email, push and in-app (NTF, planned) | Alerts | Opt-out class `search_alerts` and `recruiting_alerts` |
-| Analytics pipeline (ANL, planned) | Aggregates | Whitelisted events |
-| Consent and settings (SET, planned) | Personalization, history, region defaults | Consent-first regions |
-| Judgment labeling tool | Relevance evaluation | Internal rater tooling; no real-user data |
+| Dependency                                          | Purpose                                   | Notes                                                                                                                                                               |
+| --------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search engine                                       | Indexing and retrieval                    | Choice recorded as OD-SRC-01; legacy intent is staged: database full-text first, then hybrid, then dedicated engine; adapter interface keeps the engine replaceable |
+| Vector or semantic retrieval (optional)             | Hybrid ranking                            | Only after evaluation (FR-SRC-027); never used for protected inference                                                                                              |
+| Place dataset provider                              | Location resolution                       | Licensed or open dataset; adapter                                                                                                                                   |
+| Outbox and message bus (PLT, planned)               | Change events                             | At-least-once with idempotent consumers                                                                                                                             |
+| Edge rate limiter and bot protection (PLT, planned) | Abuse controls                            | CAPTCHA provider optional                                                                                                                                           |
+| Email, push and in-app (NTF, planned)               | Alerts                                    | Opt-out class `search_alerts` and `recruiting_alerts`                                                                                                               |
+| Analytics pipeline (ANL, planned)                   | Aggregates                                | Whitelisted events                                                                                                                                                  |
+| Consent and settings (SET, planned)                 | Personalization, history, region defaults | Consent-first regions                                                                                                                                               |
+| Judgment labeling tool                              | Relevance evaluation                      | Internal rater tooling; no real-user data                                                                                                                           |
 
 ## 11. Cross-module dependencies
 
-| Depends on | Why |
-| --- | --- |
-| PRF | Profile content, section visibility, discoverability, blocks, open-to-work, preferences |
-| JOB, LRN, ASM, EMP, NET, EVT (planned) | Entities to index and their visibility events |
-| EVD | Evidence facets and strength |
-| BGV | Opt-in identity facet |
-| BIL (planned) | Talent search entitlements and metering |
-| NTF (planned) | Alert delivery |
-| TSF, IDN, SET (planned) | Content removal, age and erasure events, privacy settings |
-| ATS (planned) | Talent pools, aggregates for fairness |
-| MKT (planned) | Skill market signals |
+| Depends on                             | Why                                                                                     |
+| -------------------------------------- | --------------------------------------------------------------------------------------- |
+| PRF                                    | Profile content, section visibility, discoverability, blocks, open-to-work, preferences |
+| JOB, LRN, ASM, EMP, NET, EVT (planned) | Entities to index and their visibility events                                           |
+| EVD                                    | Evidence facets and strength                                                            |
+| BGV                                    | Opt-in identity facet                                                                   |
+| BIL (planned)                          | Talent search entitlements and metering                                                 |
+| NTF (planned)                          | Alert delivery                                                                          |
+| TSF, IDN, SET (planned)                | Content removal, age and erasure events, privacy settings                               |
+| ATS (planned)                          | Talent pools, aggregates for fairness                                                   |
+| MKT (planned)                          | Skill market signals                                                                    |
 
-| Depended on by | Uses |
-| --- | --- |
-| PRF, EVD, JOB, LRN, ASM | Canonical skills, skill redirects |
-| ATS (planned) | Talent search and saved talent searches |
-| AIC (planned) | Taxonomy, explanation format |
-| All modules | Command palette entries and entity search |
-| PWA (planned) | Offline search of recent items and saved searches |
+| Depended on by          | Uses                                              |
+| ----------------------- | ------------------------------------------------- |
+| PRF, EVD, JOB, LRN, ASM | Canonical skills, skill redirects                 |
+| ATS (planned)           | Talent search and saved talent searches           |
+| AIC (planned)           | Taxonomy, explanation format                      |
+| All modules             | Command palette entries and entity search         |
+| PWA (planned)           | Offline search of recent items and saved searches |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-| --- | --- | --- | --- |
-| Search success rate | Searches with at least one click or save | searches with click / searches with results | PAD |
-| Zero-result rate | Searches returning nothing | zero-result searches / searches | PAD |
-| Reformulation rate | Searches followed by a new query within 60 seconds | reformulated / searches | PAD |
-| Autocomplete latency | p95 suggest latency | p95 (target < 100 ms) | PAD (SRE) |
-| Search latency | p95 result latency | p95 (target < 300 ms; talent search < 500 ms) | PAD (SRE) |
-| Index freshness | p95 lag by entity | p95 (indexedAt − sourceChangedAt) | PAD |
-| Leakage defects | Confirmed visibility leaks | count (target 0), canary failures | SAD |
-| Alert engagement | Alerts opened or clicked | clicked / delivered | PAD |
-| Alert unsubscribe rate | Unsubscribes per alert sent | unsubscribed / delivered | PAD |
-| Taxonomy coverage | Tagged items with canonical skills | tagged / items with skill fields | PAD |
-| Proposal turnaround | Median days from proposal to decision | median | PAD |
-| Talent search fairness ratio | Selection-rate ratio by cohort (k ≥ 10) | min cohort rate / max cohort rate | SAD |
-| Abuse block precision | Blocks upheld on appeal | upheld / appeals | PAD |
-| Degraded-mode minutes | Time in non-live mode | sum minutes | PAD (SRE) |
+| Metric                       | Definition                                         | Formula                                       | Owner role |
+| ---------------------------- | -------------------------------------------------- | --------------------------------------------- | ---------- |
+| Search success rate          | Searches with at least one click or save           | searches with click / searches with results   | PAD        |
+| Zero-result rate             | Searches returning nothing                         | zero-result searches / searches               | PAD        |
+| Reformulation rate           | Searches followed by a new query within 60 seconds | reformulated / searches                       | PAD        |
+| Autocomplete latency         | p95 suggest latency                                | p95 (target < 100 ms)                         | PAD (SRE)  |
+| Search latency               | p95 result latency                                 | p95 (target < 300 ms; talent search < 500 ms) | PAD (SRE)  |
+| Index freshness              | p95 lag by entity                                  | p95 (indexedAt − sourceChangedAt)             | PAD        |
+| Leakage defects              | Confirmed visibility leaks                         | count (target 0), canary failures             | SAD        |
+| Alert engagement             | Alerts opened or clicked                           | clicked / delivered                           | PAD        |
+| Alert unsubscribe rate       | Unsubscribes per alert sent                        | unsubscribed / delivered                      | PAD        |
+| Taxonomy coverage            | Tagged items with canonical skills                 | tagged / items with skill fields              | PAD        |
+| Proposal turnaround          | Median days from proposal to decision              | median                                        | PAD        |
+| Talent search fairness ratio | Selection-rate ratio by cohort (k ≥ 10)            | min cohort rate / max cohort rate             | SAD        |
+| Abuse block precision        | Blocks upheld on appeal                            | upheld / appeals                              | PAD        |
+| Degraded-mode minutes        | Time in non-live mode                              | sum minutes                                   | PAD (SRE)  |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-| --- | --- | --- | --- | --- | --- |
-| OD-SRC-01 | Which search engine, and when does the staged maturity move (database FTS to hybrid to dedicated engine)? | Database FTS only; managed engine; self-hosted engine | Start with database FTS plus trigram for R2; adopt a dedicated engine behind the adapter when people search or volume requires it (trigger criteria to be set) | Architecture lead | FR-SRC-025, FR-SRC-026 |
-| OD-SRC-02 | Is semantic or vector retrieval in scope for search (separate from AIC matching)? | No; hybrid after evaluation; yes | Hybrid after offline evaluation and fairness checks | Product owner | FR-SRC-027 |
-| OD-SRC-03 | Is employer rating a legitimate job ranking input (legacy weight 0.10)? | Keep disclosed; remove; make a filter only | Keep disclosed at launch; reconsider after evaluation; never for talent ranking | Product owner | BR-SRC-005, FR-SRC-003 |
-| OD-SRC-04 | Fairness audit requirements for talent search (automated-decision regulations) | Internal monitoring only; formal third-party bias audit | Internal monitoring plus audit-ready documentation; third-party audit per counsel | Legal + product owner | FR-SRC-022 |
-| OD-SRC-05 | Personalization default on or off | On with disclosure; off until opt-in; region-based | On with disclosure except consent-first regions | Product owner + privacy officer | FR-SRC-016 |
-| OD-SRC-06 | Search history retention | 30, 90, 365 days | 90 days | Privacy officer | FR-SRC-019, BR-SRC-013 |
-| OD-SRC-07 | Launch languages for multilingual search | English only; add per demand | English first, others by `[DEC-REQ]` demand | Product owner | FR-SRC-032 |
-| OD-SRC-08 | May promoted placements ever exist (conflict with SSOT §4.2 "not an ad network")? | Never; labeled sponsored slots outside ranking | Never in R0–R5; revisit with explicit scope decision | Product owner | BR-SRC-038 |
-| OD-SRC-09 | Is "taxonomy editor" a distinct role? | PAD sub-role; new role | PAD sub-role | Product owner | Permission matrix |
-| OD-SRC-10 | Can guests search people at all? | No; public indexable only with caps; yes | Public indexable only, 20 results, no pagination | Product owner + privacy officer | FR-SRC-004 |
-| OD-SRC-11 | Should searching people be possible for employers without verified organization status? | No; limited | No (verified orgs only for talent search); normal people search for all signed-in users | Product owner | FR-SRC-021 |
-| OD-SRC-12 | Is a global "search everything including private messages" feature intended? | No; own messages only (MSG) | Own messages only, owned by MSG, not SRC | Product owner | Scope |
+| ID        | Question                                                                                                                                                                                                                     | Options                                                                                                   | Default proposal                                                                                                                                               | Who decides                     | Blocking               |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------------------- |
+| OD-SRC-01 | Which search engine, and when does the staged maturity move (database FTS to hybrid to dedicated engine)?                                                                                                                    | Database FTS only; managed engine; self-hosted engine                                                     | Start with database FTS plus trigram for R2; adopt a dedicated engine behind the adapter when people search or volume requires it (trigger criteria to be set) | Architecture lead               | FR-SRC-025, FR-SRC-026 |
+| OD-SRC-02 | Is semantic or vector retrieval in scope for search (separate from AIC matching)?                                                                                                                                            | No; hybrid after evaluation; yes                                                                          | Hybrid after offline evaluation and fairness checks                                                                                                            | Product owner                   | FR-SRC-027             |
+| OD-SRC-03 | Is employer rating a legitimate job ranking input (legacy weight 0.10)?                                                                                                                                                      | Keep disclosed; remove; make a filter only                                                                | Keep disclosed at launch; reconsider after evaluation; never for talent ranking                                                                                | Product owner                   | BR-SRC-005, FR-SRC-003 |
+| OD-SRC-04 | Fairness audit requirements for talent search (automated-decision regulations)                                                                                                                                               | Internal monitoring only; formal third-party bias audit                                                   | Internal monitoring plus audit-ready documentation; third-party audit per counsel                                                                              | Legal + product owner           | FR-SRC-022             |
+| OD-SRC-05 | Personalization default on or off                                                                                                                                                                                            | On with disclosure; off until opt-in; region-based                                                        | On with disclosure except consent-first regions                                                                                                                | Product owner + privacy officer | FR-SRC-016             |
+| OD-SRC-06 | Search history retention                                                                                                                                                                                                     | 30, 90, 365 days                                                                                          | 90 days                                                                                                                                                        | Privacy officer                 | FR-SRC-019, BR-SRC-013 |
+| OD-SRC-07 | Launch languages for multilingual search                                                                                                                                                                                     | English only; add per demand                                                                              | English first, others by `[DEC-REQ]` demand                                                                                                                    | Product owner                   | FR-SRC-032             |
+| OD-SRC-08 | May promoted placements ever exist (conflict with SSOT §4.2 "not an ad network")?                                                                                                                                            | Never; labeled sponsored slots outside ranking                                                            | Never in R0–R5; revisit with explicit scope decision                                                                                                           | Product owner                   | BR-SRC-038             |
+| OD-SRC-09 | Is "taxonomy editor" a distinct role?                                                                                                                                                                                        | PAD sub-role; new role                                                                                    | PAD sub-role                                                                                                                                                   | Product owner                   | Permission matrix      |
+| OD-SRC-10 | Can guests search people at all?                                                                                                                                                                                             | No; public indexable only with caps; yes                                                                  | Public indexable only, 20 results, no pagination                                                                                                               | Product owner + privacy officer | FR-SRC-004             |
+| OD-SRC-11 | Should searching people be possible for employers without verified organization status?                                                                                                                                      | No; limited                                                                                               | No (verified orgs only for talent search); normal people search for all signed-in users                                                                        | Product owner                   | FR-SRC-021             |
+| OD-SRC-12 | Is a global "search everything including private messages" feature intended?                                                                                                                                                 | No; own messages only (MSG)                                                                               | Own messages only, owned by MSG, not SRC                                                                                                                       | Product owner                   | Scope                  |
+| OD-SRC-13 | Which behavioral or activity signals may recruiters use in discovery, given the SSOT §4.2 limit on ungoverned automated decisions and the fairness risk of engagement-based ranking (SSOT F-159 lists "engagement scoring")? | A: evidence-derived signals only, as filters (FR-SRC-035); B: A plus platform engagement metrics; C: none | A `[PROP]`                                                                                                                                                     | Product owner and fairness lead | FR-SRC-035             |
 
 ## 14. Risks
 
-| ID | Risk | Impact | Mitigation |
-| --- | --- | --- | --- |
-| RSK-SRC-01 | Search leaks hidden or private data through results, counts, suggestions or alerts | Privacy breach, legal exposure | Two-layer permission checks, canary tests in CI and production, field-group indexing, fail closed |
-| RSK-SRC-02 | Talent search produces discriminatory outcomes | Legal and reputational harm | Excluded attributes, blind mode, monitoring, proxy review |
-| RSK-SRC-03 | Scraping of people data | Privacy and competitive harm | Rate limits, caps, anomaly detection, honeypots, watermarking |
-| RSK-SRC-04 | Index lag shows closed jobs or removed content | Poor trust | Freshness targets, reconciliation, query-time status checks |
-| RSK-SRC-05 | Ranking changes degrade relevance unnoticed | User dissatisfaction | Offline and shadow evaluation, approvals, rollback |
-| RSK-SRC-06 | Taxonomy drift and duplicate skills | Poor matching and evidence fragmentation | Governed editing, merge redirects, proposal queue |
-| RSK-SRC-07 | Alert fatigue or alert leaks | Unsubscribes, privacy issues | Caps, digest, permission recheck, content minimization |
-| RSK-SRC-08 | Engine migration causes outages or inconsistent results | Downtime | Adapter interface, versioned indexes, shadow reads, rollback |
-| RSK-SRC-09 | Query logs hold sensitive data | Privacy risk | Redaction, short retention, restricted access |
-| RSK-SRC-10 | Recruiters over-trust evidence filters or rankings | Unfair rejections | Default "Any", explanation, no automatic rejection, training text |
+| ID         | Risk                                                                               | Impact                                   | Mitigation                                                                                        |
+| ---------- | ---------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| RSK-SRC-01 | Search leaks hidden or private data through results, counts, suggestions or alerts | Privacy breach, legal exposure           | Two-layer permission checks, canary tests in CI and production, field-group indexing, fail closed |
+| RSK-SRC-02 | Talent search produces discriminatory outcomes                                     | Legal and reputational harm              | Excluded attributes, blind mode, monitoring, proxy review                                         |
+| RSK-SRC-03 | Scraping of people data                                                            | Privacy and competitive harm             | Rate limits, caps, anomaly detection, honeypots, watermarking                                     |
+| RSK-SRC-04 | Index lag shows closed jobs or removed content                                     | Poor trust                               | Freshness targets, reconciliation, query-time status checks                                       |
+| RSK-SRC-05 | Ranking changes degrade relevance unnoticed                                        | User dissatisfaction                     | Offline and shadow evaluation, approvals, rollback                                                |
+| RSK-SRC-06 | Taxonomy drift and duplicate skills                                                | Poor matching and evidence fragmentation | Governed editing, merge redirects, proposal queue                                                 |
+| RSK-SRC-07 | Alert fatigue or alert leaks                                                       | Unsubscribes, privacy issues             | Caps, digest, permission recheck, content minimization                                            |
+| RSK-SRC-08 | Engine migration causes outages or inconsistent results                            | Downtime                                 | Adapter interface, versioned indexes, shadow reads, rollback                                      |
+| RSK-SRC-09 | Query logs hold sensitive data                                                     | Privacy risk                             | Redaction, short retention, restricted access                                                     |
+| RSK-SRC-10 | Recruiters over-trust evidence filters or rankings                                 | Unfair rejections                        | Default "Any", explanation, no automatic rejection, training text                                 |
 
 ## 15. Legacy source trace
 
-| Legacy source | Used for | Dropped or changed |
-| --- | --- | --- |
-| `SSOT.md` F-20 Command Search (⌘K) | FR-SRC-001, keyboard model | Action registry and role gating added [PROP] |
-| `SSOT.md` F-32 Saved Searches & Job Alerts; F-04 steps 1–2, 7 | Filters, ranking weights, saved searches, new-only alerts, cursor pagination | Alert caps, digest rules and permission re-check added |
-| `SSOT.md` F-34, F-147 Unified Search & Discovery | Unified index, facets, autocomplete, typo tolerance, personalization, analytics, maturity roadmap | `BR-263..BR-268` named but undefined in the legacy registries; rules re-derived as BR-SRC-001..044; SCI-57 not defined in source |
-| `SSOT.md` F-84 Skills Graph & Taxonomy, BR-141..BR-148 | FR-SRC-030, FR-SRC-014, BR-SRC-042, 043 | Market signals moved to MKT (planned); skill graph traversal features (readiness, paths) not owned here |
-| `SSOT.md` F-92 Advanced Recruiter Search | FR-SRC-021, FR-SRC-016 stealth, privacy | Talent pools, outreach credits, analytics moved to ATS (planned); fairness controls added |
-| `SSOT.md` F-123 Skill Decay | Decay class in taxonomy | Freshness calculation owned by EVD |
-| `SSOT.md` F-96, §11.2, §20, §15.7 | Rate limit pattern, UI states, resilience, hardening | Applied to search |
-| `SSOT.md` §4.2 non-goals (not an ad network) | BR-SRC-038, OD-SRC-08 | Paid placement excluded |
-| `docs/reports/AUDIT_EVIDENCE_2026-10-21.json` (test names mention BR-265..267) | Evidence the legacy tests referred to autocomplete, Levenshtein and filters | Not used as status |
-| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md` | Not used | n/a |
+| Legacy source                                                                  | Used for                                                                                          | Dropped or changed                                                                                                               |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` F-20 Command Search (⌘K)                                             | FR-SRC-001, keyboard model                                                                        | Action registry and role gating added [PROP]                                                                                     |
+| `SSOT.md` F-32 Saved Searches & Job Alerts; F-04 steps 1–2, 7                  | Filters, ranking weights, saved searches, new-only alerts, cursor pagination                      | Alert caps, digest rules and permission re-check added                                                                           |
+| `SSOT.md` F-34, F-147 Unified Search & Discovery                               | Unified index, facets, autocomplete, typo tolerance, personalization, analytics, maturity roadmap | `BR-263..BR-268` named but undefined in the legacy registries; rules re-derived as BR-SRC-001..044; SCI-57 not defined in source |
+| `SSOT.md` F-84 Skills Graph & Taxonomy, BR-141..BR-148                         | FR-SRC-030, FR-SRC-014, BR-SRC-042, 043                                                           | Market signals moved to MKT (planned); skill graph traversal features (readiness, paths) not owned here                          |
+| `SSOT.md` F-92 Advanced Recruiter Search                                       | FR-SRC-021, FR-SRC-016 stealth, privacy                                                           | Talent pools, outreach credits, analytics moved to ATS (planned); fairness controls added                                        |
+| `SSOT.md` F-123 Skill Decay                                                    | Decay class in taxonomy                                                                           | Freshness calculation owned by EVD                                                                                               |
+| `SSOT.md` F-96, §11.2, §20, §15.7                                              | Rate limit pattern, UI states, resilience, hardening                                              | Applied to search                                                                                                                |
+| `SSOT.md` §4.2 non-goals (not an ad network)                                   | BR-SRC-038, OD-SRC-08                                                                             | Paid placement excluded                                                                                                          |
+| `docs/reports/AUDIT_EVIDENCE_2026-10-21.json` (test names mention BR-265..267) | Evidence the legacy tests referred to autocomplete, Levenshtein and filters                       | Not used as status                                                                                                               |
+| `ARCHITECTURE.md`, `FEATURE_STATUS_2026-10-21.md`                              | Not used                                                                                          | n/a                                                                                                                              |

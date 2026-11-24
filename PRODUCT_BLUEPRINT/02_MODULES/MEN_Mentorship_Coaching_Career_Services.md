@@ -12,13 +12,13 @@ MEN connects people who want career guidance with people who can give it, and wr
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A candidate finds a suitable, verified mentor or coach | Mentorship request accepted (SM-MEN-02) and first session `completed` (SM-MEN-03) |
-| Mentees leave sessions with agreed actions | Action items created and tracked (FR-MEN-017) |
-| Program owners run cohort mentoring with visible participation but no snooping | Program metrics without note content (BR-MEN-017) |
-| Trust and safety hold: vetted mentors, safe handling of minors, working reporting | Verification completion, report resolution times |
-| Paid sessions flow through the platform with fair cancellation and refunds | Orders paid, payouts via BIL |
+| Outcome                                                                           | How the system knows                                                              |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| A candidate finds a suitable, verified mentor or coach                            | Mentorship request accepted (SM-MEN-02) and first session `completed` (SM-MEN-03) |
+| Mentees leave sessions with agreed actions                                        | Action items created and tracked (FR-MEN-017)                                     |
+| Program owners run cohort mentoring with visible participation but no snooping    | Program metrics without note content (BR-MEN-017)                                 |
+| Trust and safety hold: vetted mentors, safe handling of minors, working reporting | Verification completion, report resolution times                                  |
+| Paid sessions flow through the platform with fair cancellation and refunds        | Orders paid, payouts via BIL                                                      |
 
 ### 1.3 Boundaries
 
@@ -26,58 +26,58 @@ MEN connects people who want career guidance with people who can give it, and wr
 
 **Out of scope (owned elsewhere):**
 
-| Capability | Owner | Relationship |
-|---|---|---|
-| Payments, refunds, payouts, fees | BIL (this batch) | MEN creates orders and earning events (FR-BIL-028, FR-BIL-029) |
-| Identity checks, background checks | BGV (planned), IDN (planned) | MEN requests and reads outcomes |
-| Messaging threads and attachments | MSG (planned) | MEN uses conversations |
-| Video meeting infrastructure | PLT (planned) or external link | See OD-MEN-03 (SSOT OD-33 defers live video) |
-| Calendar and scheduling primitives | INT (planned) | MEN reuses availability and calendar sync |
-| Moderation queue and enforcement | TSF (planned) | MEN raises reports; TSF decides |
-| Professional development plan, career goals | AIC, MKT (planned) | MEN links to plans (FR-MEN-017) |
-| Interview engine, AI feedback | ASM, AIC (planned) | MEN mock interviews can embed these |
-| Alumni network and groups | NET (planned) | MEN provides mentoring on top of affiliation |
-| Notifications | NTF (planned) | MEN emits events |
+| Capability                                  | Owner                          | Relationship                                                   |
+| ------------------------------------------- | ------------------------------ | -------------------------------------------------------------- |
+| Payments, refunds, payouts, fees            | BIL (this batch)               | MEN creates orders and earning events (FR-BIL-028, FR-BIL-029) |
+| Identity checks, background checks          | BGV (planned), IDN (planned)   | MEN requests and reads outcomes                                |
+| Messaging threads and attachments           | MSG (planned)                  | MEN uses conversations                                         |
+| Video meeting infrastructure                | PLT (planned) or external link | See OD-MEN-03 (SSOT OD-33 defers live video)                   |
+| Calendar and scheduling primitives          | INT (planned)                  | MEN reuses availability and calendar sync                      |
+| Moderation queue and enforcement            | TSF (planned)                  | MEN raises reports; TSF decides                                |
+| Professional development plan, career goals | AIC, MKT (planned)             | MEN links to plans (FR-MEN-017)                                |
+| Interview engine, AI feedback               | ASM, AIC (planned)             | MEN mock interviews can embed these                            |
+| Alumni network and groups                   | NET (planned)                  | MEN provides mentoring on top of affiliation                   |
+| Notifications                               | NTF (planned)                  | MEN emits events                                               |
 
-**Non-goal brushes (SSOT §4.2):** (1) *General marketplace*: MEN lists only career-guidance services from an allowlist of categories (BR-MEN-027). (2) *Social network clone*: no feeds or public follows; discovery is a directory. (3) *Generic HR system*: employer-run programs use mentoring tools only, no performance reviews or HR records. Recorded as `OD-MEN-02`.
+**Non-goal brushes (SSOT §4.2):** (1) _General marketplace_: MEN lists only career-guidance services from an allowlist of categories (BR-MEN-027). (2) _Social network clone_: no feeds or public follows; discovery is a directory. (3) _Generic HR system_: employer-run programs use mentoring tools only, no performance reviews or HR records. Recorded as `OD-MEN-02`.
 
 ## 2. Roles and permission matrix
 
 Legend: C create, R read, U update, D delete or withdraw, A approve or act, `own` own record, `—` none.
 
-| Capability | CAN / STD | MNT | IAD / EAD (program admin) | PLO | REC / HMG | FIN | MOD | PAD | SUP |
-|---|---|---|---|---|---|---|---|---|---|
-| Apply as mentor | C own | — | — | — | — | — | — | — | — |
-| Verify mentor | — | respond | — | — | — | — | A (safeguarding items) | A | R |
-| Edit mentor profile and availability | — | U own | — | — | — | — | — | override (audit) | — |
-| Search mentor directory | R | R | R | R | R (limited) | — | R | R | R |
-| Create mentee intake, request mentorship | C own | C own (as mentee) | — | — | — | — | — | — | — |
-| Accept, decline, end mentorship | respond | A | — | — | — | — | — | override | — |
-| Book, cancel, reschedule session | C, U own | U own | — | — | — | — | — | override | assist (audited) |
-| Pay for session, request refund | C own | — | — | — | — | A | — | A | — |
-| Session notes (private) | C own | C own | — | — | — | — | — | — | — |
-| Shared notes, action items | C, U | C, U | — | — | — | — | — | — | — |
-| Rate and give feedback | C own | C own | — | — | — | — | — | R | R |
-| Create and run program | — | — | C, U, A (own org) | R, U (institution) | — | — | — | R | R |
-| Enroll in program | C own | C own (as mentor) | A | A | — | — | — | — | — |
-| Offer resume review, mock interview | — | C own | — | — | — | — | — | — | — |
-| Report safeguarding concern | C | C | C | C | C | — | A | A | C |
-| Suspend mentor | — | — | — | — | — | — | A | A | — |
-| Mentor earnings | — | R own | — | — | — | R, A | — | R | — |
+| Capability                               | CAN / STD | MNT               | IAD / EAD (program admin) | PLO                | REC / HMG   | FIN  | MOD                    | PAD              | SUP              |
+| ---------------------------------------- | --------- | ----------------- | ------------------------- | ------------------ | ----------- | ---- | ---------------------- | ---------------- | ---------------- |
+| Apply as mentor                          | C own     | —                 | —                         | —                  | —           | —    | —                      | —                | —                |
+| Verify mentor                            | —         | respond           | —                         | —                  | —           | —    | A (safeguarding items) | A                | R                |
+| Edit mentor profile and availability     | —         | U own             | —                         | —                  | —           | —    | —                      | override (audit) | —                |
+| Search mentor directory                  | R         | R                 | R                         | R                  | R (limited) | —    | R                      | R                | R                |
+| Create mentee intake, request mentorship | C own     | C own (as mentee) | —                         | —                  | —           | —    | —                      | —                | —                |
+| Accept, decline, end mentorship          | respond   | A                 | —                         | —                  | —           | —    | —                      | override         | —                |
+| Book, cancel, reschedule session         | C, U own  | U own             | —                         | —                  | —           | —    | —                      | override         | assist (audited) |
+| Pay for session, request refund          | C own     | —                 | —                         | —                  | —           | A    | —                      | A                | —                |
+| Session notes (private)                  | C own     | C own             | —                         | —                  | —           | —    | —                      | —                | —                |
+| Shared notes, action items               | C, U      | C, U              | —                         | —                  | —           | —    | —                      | —                | —                |
+| Rate and give feedback                   | C own     | C own             | —                         | —                  | —           | —    | —                      | R                | R                |
+| Create and run program                   | —         | —                 | C, U, A (own org)         | R, U (institution) | —           | —    | —                      | R                | R                |
+| Enroll in program                        | C own     | C own (as mentor) | A                         | A                  | —           | —    | —                      | —                | —                |
+| Offer resume review, mock interview      | —         | C own             | —                         | —                  | —           | —    | —                      | —                | —                |
+| Report safeguarding concern              | C         | C                 | C                         | C                  | C           | —    | A                      | A                | C                |
+| Suspend mentor                           | —         | —                 | —                         | —                  | —           | —    | A                      | A                | —                |
+| Mentor earnings                          | —         | R own             | —                         | —                  | —           | R, A | —                      | R                | —                |
 
 Notes: `MNT` is a role granted when a mentor application is approved; every `MNT` is also a `CAN`. Mentors never see a mentee's applications, messages or private evidence; they see only fields the mentee puts in the request (BR-MEN-022). Program admins never read session notes (BR-MEN-017). `REC` and `HMG` may appear as mentors but follow conflict-of-interest rules (BR-MEN-003).
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Mentor onboarding and trust | FR-MEN-001 to 003 |
-| B | Discovery, matching and requests | FR-MEN-004 to 007 |
-| C | Sessions | FR-MEN-008 to 012 |
-| D | Programs and peer mentorship | FR-MEN-013 to 016 |
-| E | Goals and relationships | FR-MEN-017 to 018 |
-| F | Career services | FR-MEN-019 to 022 |
-| G | Marketplace rules, safety and quality | FR-MEN-023 to 028 |
+| Code | Sub-module                            | Features          |
+| ---- | ------------------------------------- | ----------------- |
+| A    | Mentor onboarding and trust           | FR-MEN-001 to 003 |
+| B    | Discovery, matching and requests      | FR-MEN-004 to 007 |
+| C    | Sessions                              | FR-MEN-008 to 012 |
+| D    | Programs and peer mentorship          | FR-MEN-013 to 016 |
+| E    | Goals and relationships               | FR-MEN-017 to 018 |
+| F    | Career services                       | FR-MEN-019 to 022 |
+| G    | Marketplace rules, safety and quality | FR-MEN-023 to 028 |
 
 ## 4. Feature specifications
 
@@ -797,38 +797,38 @@ Notes: `MNT` is a role granted when a mentor application is approved; every `MNT
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-MEN-001 | Verification levels gate capability: free peer mentoring needs L1; paid sessions and services need L2; work with minors and program lead roles for minors need L3. | Proportionate trust. | Capability guard | [PROP] |
-| BR-MEN-002 | Mentoring of minors happens only inside institution or approved programs with guardian consent, L3 mentors, platform-only communication and sessions, and no recording without guardian consent. | Child safety. | Program, session, messaging guards | [SRC: BR-128] [DEC-REQ] OD-MEN-06 |
-| BR-MEN-003 | A mentor with hiring authority cannot be paid by, or evaluate, a candidate with an open application at the same employer; conflicts are disclosed. | Prevents hidden hiring advantage. | Booking guard, ATS cross-check | [PROP] [SRC: §4.2] |
-| BR-MEN-004 | Paid sessions are paid through the platform; contact details and off-platform payment solicitation are masked and flagged in pre-booking and first-30-day messages; circumvention leads to enforcement. | Marketplace integrity and safety. | Message filter, TSF | [PROP] [DEC-REQ] OD-MEN-07 |
-| BR-MEN-005 | A peer mentorship with no session or message for 30 days auto-closes, warned at 21 days; pauses up to 60 days stop the clock. | Keeps relationships alive. | Sweep job | [SRC: BR-194] |
-| BR-MEN-006 | Alumni mentorship is opt-in only and never enabled by default at graduation. | Consent. | Settings default | [SRC: BR-245] |
-| BR-MEN-007 | A rating requires a completed session; one rating per rater per session; ratings reveal when both submit or after 7 days; a mentor score shows only after 3 ratings. | Honest, unbiased reviews. | Feedback service | [PROP] [SRC: BR-095 pattern] |
-| BR-MEN-008 | Cancellation and no-show rules: mentee cancels at least 24 hours before for a full refund; mentor cancels always refund fully and count against reliability; no-show after 15 minutes. | Predictability. | Booking and refund services | [PROP] |
-| BR-MEN-009 | Private notes are readable only by their author; shared notes and goals only by the pair; AI summaries need both parties' opt-in. | Confidentiality. | Notes service | [PROP] |
-| BR-MEN-010 | Sessions are not recorded unless every participant consents in-session; consent can be withdrawn; recordings retained 30 days by default. | Privacy. | Session room | [SRC: OD-48] [PROP] |
-| BR-MEN-011 | Mentors have a configured capacity (default 10 active mentees); mentees have at most 5 pending requests and one request per mentor per 30 days after a decline. | Quality and anti-spam. | Request service | [PROP] |
-| BR-MEN-012 | Mentor search, suggestions and badges never use payment, plan or promotion; ranking inputs are documented. | No pay-to-rank. | Ranking service | [SRC: §4.2; BR-BIL-004] |
-| BR-MEN-013 | Mentors set their own prices within platform bounds or offer free; the platform fee comes from BIL parameters. | Fair marketplace. | Pricing validation | [PROP] [SRC: OD-28] |
-| BR-MEN-014 | Resume reviewers see only the shared resume version, cannot edit the profile and must not advise fabricating experience or credentials. | Integrity. | Reviewer access scope | [PROP] |
-| BR-MEN-015 | Mock interview scorecards are private to the mentee, advice only and never sent to employers or used in ranking. | Candidate protection. | Visibility rules | [PROP] |
-| BR-MEN-016 | A safeguarding report in a serious category suspends the mentor's new bookings immediately pending review. | Child and participant safety. | Report workflow | [PROP] |
-| BR-MEN-017 | Program organizers see participation metrics and milestone status, never session notes, messages or goals content. | Confidentiality in programs. | Program dashboards | [PROP] |
-| BR-MEN-018 | Program participants may request one re-pair without giving a reason; further re-pairs need organizer approval. | Autonomy. | Pairing service | [PROP] |
-| BR-MEN-019 | Mentor verification expires after 12 months and must be renewed; lapsed mentors are paused. | Current trust. | Verification job | [PROP] |
-| BR-MEN-020 | Group sessions have capacity limits, and minors may join only institution or program groups with guardian consent. | Safety and quality. | Registration guard | [PROP] |
-| BR-MEN-021 | In employer programs no one is paired with a person in their own reporting line; mentors and mentees in the same program are paired with conflict checks. | Power imbalance. | Pairing service | [PROP] |
-| BR-MEN-022 | Mentors see only the mentee fields shared in the request or pairing; intake, profile and messages are otherwise private. | Data minimization. | Field allowlist | [PROP] |
-| BR-MEN-023 | Mentor suspension or removal refunds or reassigns booked sessions and unused package credits. | Fairness to mentees. | Suspension workflow | [PROP] |
-| BR-MEN-024 | Listings and sessions must not guarantee jobs, salary or outcomes; claims are scanned and reviewed. | Honest marketing. | Listing validation | [PROP] |
-| BR-MEN-025 | Session times are stored in UTC with each participant's time zone; all windows (cancel, reveal, edit, availability) are computed server-side. | Correctness across zones. | Time service | [PROP] |
-| BR-MEN-026 | A slot can be booked once; checkout holds a slot for 10 minutes. | No double booking. | Atomic reservation | [PROP] |
-| BR-MEN-027 | Listings are limited to career-guidance categories on an allowlist; legal, medical, therapy, financial planning, immigration advice and job placement for a fee are excluded. | Scope and regulatory safety. | Category validation | [PROP] [SRC: §4.2] |
-| BR-MEN-028 | Paid listings require completed payout onboarding in a supported country. | Payments feasibility. | Publish guard | [PROP] [SRC: BR-BIL-024] |
-| BR-MEN-029 | Expert calls and group sessions follow the same verification, conduct and refund rules as one-to-one sessions. | Consistency. | Shared services | [PROP] |
-| BR-MEN-030 | Employer-run programs use mentoring tools only; compensation, performance and HR records for internal mentors are outside the platform. | SSOT non-goal (generic HR/payroll). | Program scope | [SRC: §4.2] |
+| ID         | Rule                                                                                                                                                                                                    | Rationale                           | Enforced where                     | Source                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------------------------------- | --------------------------------- |
+| BR-MEN-001 | Verification levels gate capability: free peer mentoring needs L1; paid sessions and services need L2; work with minors and program lead roles for minors need L3.                                      | Proportionate trust.                | Capability guard                   | [PROP]                            |
+| BR-MEN-002 | Mentoring of minors happens only inside institution or approved programs with guardian consent, L3 mentors, platform-only communication and sessions, and no recording without guardian consent.        | Child safety.                       | Program, session, messaging guards | [SRC: BR-128] [DEC-REQ] OD-MEN-06 |
+| BR-MEN-003 | A mentor with hiring authority cannot be paid by, or evaluate, a candidate with an open application at the same employer; conflicts are disclosed.                                                      | Prevents hidden hiring advantage.   | Booking guard, ATS cross-check     | [PROP] [SRC: §4.2]                |
+| BR-MEN-004 | Paid sessions are paid through the platform; contact details and off-platform payment solicitation are masked and flagged in pre-booking and first-30-day messages; circumvention leads to enforcement. | Marketplace integrity and safety.   | Message filter, TSF                | [PROP] [DEC-REQ] OD-MEN-07        |
+| BR-MEN-005 | A peer mentorship with no session or message for 30 days auto-closes, warned at 21 days; pauses up to 60 days stop the clock.                                                                           | Keeps relationships alive.          | Sweep job                          | [SRC: BR-194]                     |
+| BR-MEN-006 | Alumni mentorship is opt-in only and never enabled by default at graduation.                                                                                                                            | Consent.                            | Settings default                   | [SRC: BR-245]                     |
+| BR-MEN-007 | A rating requires a completed session; one rating per rater per session; ratings reveal when both submit or after 7 days; a mentor score shows only after 3 ratings.                                    | Honest, unbiased reviews.           | Feedback service                   | [PROP] [SRC: BR-095 pattern]      |
+| BR-MEN-008 | Cancellation and no-show rules: mentee cancels at least 24 hours before for a full refund; mentor cancels always refund fully and count against reliability; no-show after 15 minutes.                  | Predictability.                     | Booking and refund services        | [PROP]                            |
+| BR-MEN-009 | Private notes are readable only by their author; shared notes and goals only by the pair; AI summaries need both parties' opt-in.                                                                       | Confidentiality.                    | Notes service                      | [PROP]                            |
+| BR-MEN-010 | Sessions are not recorded unless every participant consents in-session; consent can be withdrawn; recordings retained 30 days by default.                                                               | Privacy.                            | Session room                       | [SRC: OD-48] [PROP]               |
+| BR-MEN-011 | Mentors have a configured capacity (default 10 active mentees); mentees have at most 5 pending requests and one request per mentor per 30 days after a decline.                                         | Quality and anti-spam.              | Request service                    | [PROP]                            |
+| BR-MEN-012 | Mentor search, suggestions and badges never use payment, plan or promotion; ranking inputs are documented.                                                                                              | No pay-to-rank.                     | Ranking service                    | [SRC: §4.2; BR-BIL-004]           |
+| BR-MEN-013 | Mentors set their own prices within platform bounds or offer free; the platform fee comes from BIL parameters.                                                                                          | Fair marketplace.                   | Pricing validation                 | [PROP] [SRC: OD-28]               |
+| BR-MEN-014 | Resume reviewers see only the shared resume version, cannot edit the profile and must not advise fabricating experience or credentials.                                                                 | Integrity.                          | Reviewer access scope              | [PROP]                            |
+| BR-MEN-015 | Mock interview scorecards are private to the mentee, advice only and never sent to employers or used in ranking.                                                                                        | Candidate protection.               | Visibility rules                   | [PROP]                            |
+| BR-MEN-016 | A safeguarding report in a serious category suspends the mentor's new bookings immediately pending review.                                                                                              | Child and participant safety.       | Report workflow                    | [PROP]                            |
+| BR-MEN-017 | Program organizers see participation metrics and milestone status, never session notes, messages or goals content.                                                                                      | Confidentiality in programs.        | Program dashboards                 | [PROP]                            |
+| BR-MEN-018 | Program participants may request one re-pair without giving a reason; further re-pairs need organizer approval.                                                                                         | Autonomy.                           | Pairing service                    | [PROP]                            |
+| BR-MEN-019 | Mentor verification expires after 12 months and must be renewed; lapsed mentors are paused.                                                                                                             | Current trust.                      | Verification job                   | [PROP]                            |
+| BR-MEN-020 | Group sessions have capacity limits, and minors may join only institution or program groups with guardian consent.                                                                                      | Safety and quality.                 | Registration guard                 | [PROP]                            |
+| BR-MEN-021 | In employer programs no one is paired with a person in their own reporting line; mentors and mentees in the same program are paired with conflict checks.                                               | Power imbalance.                    | Pairing service                    | [PROP]                            |
+| BR-MEN-022 | Mentors see only the mentee fields shared in the request or pairing; intake, profile and messages are otherwise private.                                                                                | Data minimization.                  | Field allowlist                    | [PROP]                            |
+| BR-MEN-023 | Mentor suspension or removal refunds or reassigns booked sessions and unused package credits.                                                                                                           | Fairness to mentees.                | Suspension workflow                | [PROP]                            |
+| BR-MEN-024 | Listings and sessions must not guarantee jobs, salary or outcomes; claims are scanned and reviewed.                                                                                                     | Honest marketing.                   | Listing validation                 | [PROP]                            |
+| BR-MEN-025 | Session times are stored in UTC with each participant's time zone; all windows (cancel, reveal, edit, availability) are computed server-side.                                                           | Correctness across zones.           | Time service                       | [PROP]                            |
+| BR-MEN-026 | A slot can be booked once; checkout holds a slot for 10 minutes.                                                                                                                                        | No double booking.                  | Atomic reservation                 | [PROP]                            |
+| BR-MEN-027 | Listings are limited to career-guidance categories on an allowlist; legal, medical, therapy, financial planning, immigration advice and job placement for a fee are excluded.                           | Scope and regulatory safety.        | Category validation                | [PROP] [SRC: §4.2]                |
+| BR-MEN-028 | Paid listings require completed payout onboarding in a supported country.                                                                                                                               | Payments feasibility.               | Publish guard                      | [PROP] [SRC: BR-BIL-024]          |
+| BR-MEN-029 | Expert calls and group sessions follow the same verification, conduct and refund rules as one-to-one sessions.                                                                                          | Consistency.                        | Shared services                    | [PROP]                            |
+| BR-MEN-030 | Employer-run programs use mentoring tools only; compensation, performance and HR records for internal mentors are outside the platform.                                                                 | SSOT non-goal (generic HR/payroll). | Program scope                      | [SRC: §4.2]                       |
 
 ## 6. State machines
 
@@ -836,17 +836,17 @@ Notes: `MNT` is a role granted when a mentor application is approved; every `MNT
 
 States: `draft`, `submitted`, `in_verification`, `approved`, `rejected`, `paused`, `suspended`, `withdrawn`. Terminal: `rejected`, `withdrawn`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | submitted | Applicant submits | Prohibited-claim scan passed |
-| submitted | in_verification | Reviewer starts | n/a |
-| in_verification | approved | Reviewer approves | Level set |
-| in_verification | rejected | Reviewer rejects | Reason |
-| approved | paused | Mentor pauses or verification lapses | n/a |
-| paused | approved | Mentor resumes | Verification current |
-| approved, paused | suspended | `MOD` or `PAD` suspends | Reason |
-| suspended | approved | Reinstated | Review done |
-| draft, submitted | withdrawn | Applicant withdraws | n/a |
+| From             | To              | Trigger                              | Guard                        |
+| ---------------- | --------------- | ------------------------------------ | ---------------------------- |
+| draft            | submitted       | Applicant submits                    | Prohibited-claim scan passed |
+| submitted        | in_verification | Reviewer starts                      | n/a                          |
+| in_verification  | approved        | Reviewer approves                    | Level set                    |
+| in_verification  | rejected        | Reviewer rejects                     | Reason                       |
+| approved         | paused          | Mentor pauses or verification lapses | n/a                          |
+| paused           | approved        | Mentor resumes                       | Verification current         |
+| approved, paused | suspended       | `MOD` or `PAD` suspends              | Reason                       |
+| suspended        | approved        | Reinstated                           | Review done                  |
+| draft, submitted | withdrawn       | Applicant withdraws                  | n/a                          |
 
 ```mermaid
 stateDiagram-v2
@@ -870,12 +870,12 @@ stateDiagram-v2
 
 States: `sent`, `accepted`, `declined`, `expired`, `withdrawn`. Terminal: all except `sent`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| sent | accepted | Mentor accepts | Capacity available |
-| sent | declined | Mentor declines | Template reason |
-| sent | expired | 7 days pass | n/a |
-| sent | withdrawn | Mentee withdraws | n/a |
+| From | To        | Trigger          | Guard              |
+| ---- | --------- | ---------------- | ------------------ |
+| sent | accepted  | Mentor accepts   | Capacity available |
+| sent | declined  | Mentor declines  | Template reason    |
+| sent | expired   | 7 days pass      | n/a                |
+| sent | withdrawn | Mentee withdraws | n/a                |
 
 ```mermaid
 stateDiagram-v2
@@ -894,19 +894,19 @@ stateDiagram-v2
 
 States: `held`, `confirmed`, `in_progress`, `completed`, `cancelled_by_mentee`, `cancelled_by_mentor`, `no_show_mentee`, `no_show_mentor`, `disputed`, `rated`. Terminal: cancelled and no-show states, `rated`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| held | confirmed | Payment confirmed or free booking | Slot hold valid |
-| held | cancelled_by_mentee | Hold expires | 10 minutes |
-| confirmed | in_progress | Both joined | Within window |
-| in_progress | completed | Session ends | Minimum attendance |
-| confirmed | cancelled_by_mentee | Mentee cancels | Per policy |
-| confirmed | cancelled_by_mentor | Mentor cancels | Full refund |
-| confirmed | no_show_mentee | 15 minutes after start, mentor waited | Attendance log |
-| confirmed | no_show_mentor | 15 minutes after start, mentee waited | Attendance log |
-| completed | rated | At least one feedback submitted | n/a |
-| completed | disputed | Dispute opened | Within 7 days |
-| disputed | completed | Resolved | n/a |
+| From        | To                  | Trigger                               | Guard              |
+| ----------- | ------------------- | ------------------------------------- | ------------------ |
+| held        | confirmed           | Payment confirmed or free booking     | Slot hold valid    |
+| held        | cancelled_by_mentee | Hold expires                          | 10 minutes         |
+| confirmed   | in_progress         | Both joined                           | Within window      |
+| in_progress | completed           | Session ends                          | Minimum attendance |
+| confirmed   | cancelled_by_mentee | Mentee cancels                        | Per policy         |
+| confirmed   | cancelled_by_mentor | Mentor cancels                        | Full refund        |
+| confirmed   | no_show_mentee      | 15 minutes after start, mentor waited | Attendance log     |
+| confirmed   | no_show_mentor      | 15 minutes after start, mentee waited | Attendance log     |
+| completed   | rated               | At least one feedback submitted       | n/a                |
+| completed   | disputed            | Dispute opened                        | Within 7 days      |
+| disputed    | completed           | Resolved                              | n/a                |
 
 ```mermaid
 stateDiagram-v2
@@ -933,16 +933,16 @@ stateDiagram-v2
 
 States: `proposed`, `active`, `paused`, `completed`, `ended_by_mentee`, `ended_by_mentor`, `auto_closed`, `ended_by_platform`. Terminal: all ending states.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| proposed | active | Both confirm agreement | Within 7 days |
-| active | paused | Either pauses | At most 60 days |
-| paused | active | Resume or timer | n/a |
-| active | completed | Planned duration ends or both close | n/a |
-| active, paused | ended_by_mentee | Mentee ends | n/a |
-| active, paused | ended_by_mentor | Mentor ends | Template reason |
-| active | auto_closed | 30 days inactive (peer mode) | Warned at 21 days |
-| active, paused | ended_by_platform | Safeguarding action | Case id |
+| From           | To                | Trigger                             | Guard             |
+| -------------- | ----------------- | ----------------------------------- | ----------------- |
+| proposed       | active            | Both confirm agreement              | Within 7 days     |
+| active         | paused            | Either pauses                       | At most 60 days   |
+| paused         | active            | Resume or timer                     | n/a               |
+| active         | completed         | Planned duration ends or both close | n/a               |
+| active, paused | ended_by_mentee   | Mentee ends                         | n/a               |
+| active, paused | ended_by_mentor   | Mentor ends                         | Template reason   |
+| active         | auto_closed       | 30 days inactive (peer mode)        | Warned at 21 days |
+| active, paused | ended_by_platform | Safeguarding action                 | Case id           |
 
 ```mermaid
 stateDiagram-v2
@@ -969,16 +969,16 @@ stateDiagram-v2
 
 States: `draft`, `published`, `applications_open`, `matching`, `running`, `closed`, `archived`, `suspended`. Terminal: `archived`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| draft | published | Organizer publishes | Requirements valid |
-| published | applications_open | Open date | n/a |
-| applications_open | matching | Close date | n/a |
-| matching | running | Pairings confirmed | At least 1 pair |
-| running | closed | End date | n/a |
-| closed | archived | 12 months or manual | n/a |
-| published, applications_open, matching, running | suspended | `PAD` suspends | Reason |
-| suspended | running | Lifted | n/a |
+| From                                            | To                | Trigger             | Guard              |
+| ----------------------------------------------- | ----------------- | ------------------- | ------------------ |
+| draft                                           | published         | Organizer publishes | Requirements valid |
+| published                                       | applications_open | Open date           | n/a                |
+| applications_open                               | matching          | Close date          | n/a                |
+| matching                                        | running           | Pairings confirmed  | At least 1 pair    |
+| running                                         | closed            | End date            | n/a                |
+| closed                                          | archived          | 12 months or manual | n/a                |
+| published, applications_open, matching, running | suspended         | `PAD` suspends      | Reason             |
+| suspended                                       | running           | Lifted              | n/a                |
 
 ```mermaid
 stateDiagram-v2
@@ -1001,14 +1001,14 @@ stateDiagram-v2
 
 States: `proposed`, `confirmed`, `active`, `repair_requested`, `ended`, `declined`. Terminal: `ended`, `declined`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| proposed | confirmed | Both accept | n/a |
-| proposed | declined | Either declines | n/a |
-| confirmed | active | Kickoff session booked or program start | n/a |
-| active | repair_requested | Participant requests change | Allowed by BR-MEN-018 |
-| repair_requested | ended | New pairing created | n/a |
-| active | ended | Program end or conclusion | n/a |
+| From             | To               | Trigger                                 | Guard                 |
+| ---------------- | ---------------- | --------------------------------------- | --------------------- |
+| proposed         | confirmed        | Both accept                             | n/a                   |
+| proposed         | declined         | Either declines                         | n/a                   |
+| confirmed        | active           | Kickoff session booked or program start | n/a                   |
+| active           | repair_requested | Participant requests change             | Allowed by BR-MEN-018 |
+| repair_requested | ended            | New pairing created                     | n/a                   |
+| active           | ended            | Program end or conclusion               | n/a                   |
 
 ```mermaid
 stateDiagram-v2
@@ -1027,18 +1027,18 @@ stateDiagram-v2
 
 States: `ordered`, `accepted`, `in_progress`, `delivered`, `follow_up`, `completed`, `late`, `refunded`, `disputed`. Terminal: `completed`, `refunded`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| ordered | accepted | Provider accepts | Capacity |
-| accepted | in_progress | Work starts | n/a |
-| in_progress | delivered | Provider delivers | Quality fields present |
-| in_progress | late | Deadline passes | n/a |
-| late | delivered | Late delivery | Partial refund applied |
-| late | refunded | Provider fails | Full refund |
-| delivered | follow_up | Mentee asks follow-up | One included |
-| delivered, follow_up | completed | Accepted or 7 days | n/a |
-| delivered | disputed | Mentee disputes | Within 7 days |
-| disputed | completed, refunded | Decision | n/a |
+| From                 | To                  | Trigger               | Guard                  |
+| -------------------- | ------------------- | --------------------- | ---------------------- |
+| ordered              | accepted            | Provider accepts      | Capacity               |
+| accepted             | in_progress         | Work starts           | n/a                    |
+| in_progress          | delivered           | Provider delivers     | Quality fields present |
+| in_progress          | late                | Deadline passes       | n/a                    |
+| late                 | delivered           | Late delivery         | Partial refund applied |
+| late                 | refunded            | Provider fails        | Full refund            |
+| delivered            | follow_up           | Mentee asks follow-up | One included           |
+| delivered, follow_up | completed           | Accepted or 7 days    | n/a                    |
+| delivered            | disputed            | Mentee disputes       | Within 7 days          |
+| disputed             | completed, refunded | Decision              | n/a                    |
 
 ```mermaid
 stateDiagram-v2
@@ -1063,16 +1063,16 @@ stateDiagram-v2
 
 States: `received`, `triaged`, `under_review`, `action_taken`, `no_action`, `escalated`, `closed`, `appealed`. Terminal: `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| received | triaged | Reviewer opens | Within SLA |
-| triaged | under_review | Evidence gathered | n/a |
-| under_review | action_taken | Decision | Reason |
-| under_review | no_action | Decision | Reason |
-| under_review | escalated | Serious or legal | `PAD` or `SAD` |
-| action_taken, no_action | appealed | Appeal | Within 7 days |
-| appealed | closed | Appeal decided | Different reviewer |
-| action_taken, no_action, escalated | closed | After 7 days or completion | n/a |
+| From                               | To           | Trigger                    | Guard              |
+| ---------------------------------- | ------------ | -------------------------- | ------------------ |
+| received                           | triaged      | Reviewer opens             | Within SLA         |
+| triaged                            | under_review | Evidence gathered          | n/a                |
+| under_review                       | action_taken | Decision                   | Reason             |
+| under_review                       | no_action    | Decision                   | Reason             |
+| under_review                       | escalated    | Serious or legal           | `PAD` or `SAD`     |
+| action_taken, no_action            | appealed     | Appeal                     | Within 7 days      |
+| appealed                           | closed       | Appeal decided             | Different reviewer |
+| action_taken, no_action, escalated | closed       | After 7 days or completion | n/a                |
 
 ```mermaid
 stateDiagram-v2
@@ -1093,38 +1093,38 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-MEN-001 | Become a mentor | `/mentoring/become-a-mentor` | CAN | Application form | draft, blocked claim, submitted |
-| SCR-MEN-002 | Verification status | `/mentoring/verification` | MNT | Checklist | pending, expired |
-| SCR-MEN-003 | Applications review | `/admin/mentoring/applications` | PAD, MOD | Review queue | empty, conflict |
-| SCR-MEN-004 | Availability and rates | `/mentoring/availability` | MNT | Slots, rates | calendar disconnected |
-| SCR-MEN-005 | Mentor directory | `/mentoring` | all | Search | empty, filtered |
-| SCR-MEN-006 | Mentor profile | `/mentors/:slug` | all | Public listing | paused, not accepting |
-| SCR-MEN-007 | Intake | `/mentoring/intake` | CAN, STD | Needs and sharing | saved, warning |
-| SCR-MEN-008 | Suggestions | `/mentoring/suggestions` | CAN, STD | Matches with reasons | none |
-| SCR-MEN-009 | Request form and inbox | `/mentoring/requests` | CAN, MNT | Send and answer | limit reached |
-| SCR-MEN-010 | Booking | `/mentoring/book/:mentor` | CAN, STD | Pick slot, pay | held, taken |
-| SCR-MEN-011 | Session page | `/mentoring/sessions/:id` | participants | Join, agenda, notes | window closed |
-| SCR-MEN-012 | Notes and actions | `/mentoring/sessions/:id/notes` | participants | Private and shared | conflict |
-| SCR-MEN-013 | Feedback | `/mentoring/sessions/:id/feedback` | participants | Rate | hidden until both |
-| SCR-MEN-014 | Relationship and plan | `/mentoring/relationships/:id` | pair | Goals, check-ins | paused |
-| SCR-MEN-015 | Dashboard | `/mentoring/dashboard` | CAN, MNT | Overview | empty |
-| SCR-MEN-016 | Program builder | `/programs/new` | IAD, EAD, PLO | Create program | invalid |
-| SCR-MEN-017 | Program page and apply | `/programs/:id` | all | Apply | closed |
-| SCR-MEN-018 | Program dashboard | `/programs/:id/dashboard` | organizers | Metrics | suppressed |
-| SCR-MEN-019 | Pairing board | `/programs/:id/pairing` | organizers | Assign | capacity |
-| SCR-MEN-020 | Peer mentoring | `/mentoring/peers` | CAN, STD | Opt in, find | not enabled |
-| SCR-MEN-021 | Resume review order and viewer | `/career-services/resume-review` | CAN, MNT | Order, annotate | late |
-| SCR-MEN-022 | Mock interview | `/career-services/mock-interview` | CAN, MNT | Book, scorecard | pending scorecard |
-| SCR-MEN-023 | Packages | `/mentoring/packages` | MNT, CAN | Create, buy | expiring |
-| SCR-MEN-024 | Group sessions and experts | `/mentoring/group`, `/experts` | all | Join, request | full, waitlist |
-| SCR-MEN-025 | Report a concern | modal | all | Safeguarding | submitted |
-| SCR-MEN-026 | Safeguarding queue | `/admin/mentoring/reports` | MOD, PAD | Decide | urgent |
-| SCR-MEN-027 | Quality management | `/admin/mentoring/quality` | PAD, MOD | Flags | flagged |
-| SCR-MEN-028 | Disputes | `/mentoring/disputes`, `/admin/mentoring/disputes` | participants, FIN | Resolve | open, decided |
-| SCR-MEN-029 | Earnings | `/earnings` (BIL SCR-BIL-014) | MNT | Statements | hold |
-| SCR-MEN-030 | Conflict disclosures | `/mentoring/disclosures` | MNT | Declare | incomplete |
+| ID          | Name                           | Route proposal                                     | Roles             | Purpose              | Key states                      |
+| ----------- | ------------------------------ | -------------------------------------------------- | ----------------- | -------------------- | ------------------------------- |
+| SCR-MEN-001 | Become a mentor                | `/mentoring/become-a-mentor`                       | CAN               | Application form     | draft, blocked claim, submitted |
+| SCR-MEN-002 | Verification status            | `/mentoring/verification`                          | MNT               | Checklist            | pending, expired                |
+| SCR-MEN-003 | Applications review            | `/admin/mentoring/applications`                    | PAD, MOD          | Review queue         | empty, conflict                 |
+| SCR-MEN-004 | Availability and rates         | `/mentoring/availability`                          | MNT               | Slots, rates         | calendar disconnected           |
+| SCR-MEN-005 | Mentor directory               | `/mentoring`                                       | all               | Search               | empty, filtered                 |
+| SCR-MEN-006 | Mentor profile                 | `/mentors/:slug`                                   | all               | Public listing       | paused, not accepting           |
+| SCR-MEN-007 | Intake                         | `/mentoring/intake`                                | CAN, STD          | Needs and sharing    | saved, warning                  |
+| SCR-MEN-008 | Suggestions                    | `/mentoring/suggestions`                           | CAN, STD          | Matches with reasons | none                            |
+| SCR-MEN-009 | Request form and inbox         | `/mentoring/requests`                              | CAN, MNT          | Send and answer      | limit reached                   |
+| SCR-MEN-010 | Booking                        | `/mentoring/book/:mentor`                          | CAN, STD          | Pick slot, pay       | held, taken                     |
+| SCR-MEN-011 | Session page                   | `/mentoring/sessions/:id`                          | participants      | Join, agenda, notes  | window closed                   |
+| SCR-MEN-012 | Notes and actions              | `/mentoring/sessions/:id/notes`                    | participants      | Private and shared   | conflict                        |
+| SCR-MEN-013 | Feedback                       | `/mentoring/sessions/:id/feedback`                 | participants      | Rate                 | hidden until both               |
+| SCR-MEN-014 | Relationship and plan          | `/mentoring/relationships/:id`                     | pair              | Goals, check-ins     | paused                          |
+| SCR-MEN-015 | Dashboard                      | `/mentoring/dashboard`                             | CAN, MNT          | Overview             | empty                           |
+| SCR-MEN-016 | Program builder                | `/programs/new`                                    | IAD, EAD, PLO     | Create program       | invalid                         |
+| SCR-MEN-017 | Program page and apply         | `/programs/:id`                                    | all               | Apply                | closed                          |
+| SCR-MEN-018 | Program dashboard              | `/programs/:id/dashboard`                          | organizers        | Metrics              | suppressed                      |
+| SCR-MEN-019 | Pairing board                  | `/programs/:id/pairing`                            | organizers        | Assign               | capacity                        |
+| SCR-MEN-020 | Peer mentoring                 | `/mentoring/peers`                                 | CAN, STD          | Opt in, find         | not enabled                     |
+| SCR-MEN-021 | Resume review order and viewer | `/career-services/resume-review`                   | CAN, MNT          | Order, annotate      | late                            |
+| SCR-MEN-022 | Mock interview                 | `/career-services/mock-interview`                  | CAN, MNT          | Book, scorecard      | pending scorecard               |
+| SCR-MEN-023 | Packages                       | `/mentoring/packages`                              | MNT, CAN          | Create, buy          | expiring                        |
+| SCR-MEN-024 | Group sessions and experts     | `/mentoring/group`, `/experts`                     | all               | Join, request        | full, waitlist                  |
+| SCR-MEN-025 | Report a concern               | modal                                              | all               | Safeguarding         | submitted                       |
+| SCR-MEN-026 | Safeguarding queue             | `/admin/mentoring/reports`                         | MOD, PAD          | Decide               | urgent                          |
+| SCR-MEN-027 | Quality management             | `/admin/mentoring/quality`                         | PAD, MOD          | Flags                | flagged                         |
+| SCR-MEN-028 | Disputes                       | `/mentoring/disputes`, `/admin/mentoring/disputes` | participants, FIN | Resolve              | open, decided                   |
+| SCR-MEN-029 | Earnings                       | `/earnings` (BIL SCR-BIL-014)                      | MNT               | Statements           | hold                            |
+| SCR-MEN-030 | Conflict disclosures           | `/mentoring/disclosures`                           | MNT               | Declare              | incomplete                      |
 
 Accessibility notes: session pages work with keyboard only and screen readers; time zone is always spelled out in text; rating inputs are radio groups with labels; video join control states announce availability; the report form is reachable from every session page within two actions.
 
@@ -1132,29 +1132,29 @@ Accessibility notes: session pages work with keyboard only and screen readers; t
 
 Retention classes: `R-rel` while the relationship plus 12 months, `R-fin` statutory financial (BIL), `R-safe` as legal requirement for safeguarding, `R-short` 90 days.
 
-| ID | Name | Key attributes | Relationships | Retention |
-|---|---|---|---|---|
-| ENT-MEN-01 | MentorProfile | user_id, type, expertise[], bio, categories[], languages[], rate cards, status (SM-MEN-01), level | user | R-rel |
-| ENT-MEN-02 | MentorVerification | mentor_id, level, evidence refs, reviewer, expires_at | MentorProfile | R-safe |
-| ENT-MEN-03 | AvailabilityRule | mentor_id, rrule, timezone, overrides, buffers, capacity | MentorProfile | R-rel |
-| ENT-MEN-04 | MenteeIntake | user_id, goals[], situation, preferences, sharing fields | user | R-rel |
-| ENT-MEN-05 | MentorshipRequest | id, mentee_id, mentor_id, snapshot, state (SM-MEN-02), expires_at | Intake | R-rel |
-| ENT-MEN-06 | Mentorship | id, pair, mode (paid, free, program), agreement, state (SM-MEN-04) | Request or Pairing | R-rel |
-| ENT-MEN-07 | Session | id, mentorship_id?, type, start_utc, tz, state (SM-MEN-03), order_ref, attendance[] | Mentorship, BIL order | R-rel |
-| ENT-MEN-08 | SessionNote | session_id, author_id, visibility (private, shared), body | Session | R-rel |
-| ENT-MEN-09 | SessionFeedback | session_id, rater_id, scores, text, published, reply | Session | R-rel |
-| ENT-MEN-10 | Program | id, organizer (institution or employer), rules, dates, state (SM-MEN-05) | INS, EMP | R-rel |
-| ENT-MEN-11 | ProgramEnrollment | program_id, user_id, role, application | Program | R-rel |
-| ENT-MEN-12 | ProgramPairing | program_id, mentor_id, mentee_id, state (SM-MEN-06), reasons | Program | R-rel |
-| ENT-MEN-13 | GoalPlan | mentorship_id, goals[], milestones[], actions[] | Mentorship | R-rel |
-| ENT-MEN-14 | ServiceOffer | mentor_id, kind (resume review, mock, package), price, turnaround, credits | MentorProfile | R-rel |
-| ENT-MEN-15 | ServiceOrder | offer_id, buyer_id, state (SM-MEN-07), artifacts, order_ref | ServiceOffer | R-rel |
-| ENT-MEN-16 | SafeguardingReport | id, reporter, subject, category, state (SM-MEN-08), evidence_refs | Session, Mentor | R-safe |
-| ENT-MEN-17 | MentorQualityMetric | mentor_id, window, rating, response time, reliability, flags | MentorProfile | R-rel |
-| ENT-MEN-18 | ConflictDisclosure | mentor_id, employer, hiring_role, interests | MentorProfile | R-rel |
-| ENT-MEN-19 | GroupSession | id, host_id, capacity, attendees[], waitlist[] | MentorProfile | R-rel |
-| ENT-MEN-20 | ExpertCallRequest | id, requester_id, expert_id, question, state | MentorProfile | R-rel |
-| ENT-MEN-21 | PolicyAcceptance | user_id, policy, version, at | user | R-safe |
+| ID         | Name                | Key attributes                                                                                    | Relationships         | Retention |
+| ---------- | ------------------- | ------------------------------------------------------------------------------------------------- | --------------------- | --------- |
+| ENT-MEN-01 | MentorProfile       | user_id, type, expertise[], bio, categories[], languages[], rate cards, status (SM-MEN-01), level | user                  | R-rel     |
+| ENT-MEN-02 | MentorVerification  | mentor_id, level, evidence refs, reviewer, expires_at                                             | MentorProfile         | R-safe    |
+| ENT-MEN-03 | AvailabilityRule    | mentor_id, rrule, timezone, overrides, buffers, capacity                                          | MentorProfile         | R-rel     |
+| ENT-MEN-04 | MenteeIntake        | user_id, goals[], situation, preferences, sharing fields                                          | user                  | R-rel     |
+| ENT-MEN-05 | MentorshipRequest   | id, mentee_id, mentor_id, snapshot, state (SM-MEN-02), expires_at                                 | Intake                | R-rel     |
+| ENT-MEN-06 | Mentorship          | id, pair, mode (paid, free, program), agreement, state (SM-MEN-04)                                | Request or Pairing    | R-rel     |
+| ENT-MEN-07 | Session             | id, mentorship_id?, type, start_utc, tz, state (SM-MEN-03), order_ref, attendance[]               | Mentorship, BIL order | R-rel     |
+| ENT-MEN-08 | SessionNote         | session_id, author_id, visibility (private, shared), body                                         | Session               | R-rel     |
+| ENT-MEN-09 | SessionFeedback     | session_id, rater_id, scores, text, published, reply                                              | Session               | R-rel     |
+| ENT-MEN-10 | Program             | id, organizer (institution or employer), rules, dates, state (SM-MEN-05)                          | INS, EMP              | R-rel     |
+| ENT-MEN-11 | ProgramEnrollment   | program_id, user_id, role, application                                                            | Program               | R-rel     |
+| ENT-MEN-12 | ProgramPairing      | program_id, mentor_id, mentee_id, state (SM-MEN-06), reasons                                      | Program               | R-rel     |
+| ENT-MEN-13 | GoalPlan            | mentorship_id, goals[], milestones[], actions[]                                                   | Mentorship            | R-rel     |
+| ENT-MEN-14 | ServiceOffer        | mentor_id, kind (resume review, mock, package), price, turnaround, credits                        | MentorProfile         | R-rel     |
+| ENT-MEN-15 | ServiceOrder        | offer_id, buyer_id, state (SM-MEN-07), artifacts, order_ref                                       | ServiceOffer          | R-rel     |
+| ENT-MEN-16 | SafeguardingReport  | id, reporter, subject, category, state (SM-MEN-08), evidence_refs                                 | Session, Mentor       | R-safe    |
+| ENT-MEN-17 | MentorQualityMetric | mentor_id, window, rating, response time, reliability, flags                                      | MentorProfile         | R-rel     |
+| ENT-MEN-18 | ConflictDisclosure  | mentor_id, employer, hiring_role, interests                                                       | MentorProfile         | R-rel     |
+| ENT-MEN-19 | GroupSession        | id, host_id, capacity, attendees[], waitlist[]                                                    | MentorProfile         | R-rel     |
+| ENT-MEN-20 | ExpertCallRequest   | id, requester_id, expert_id, question, state                                                      | MentorProfile         | R-rel     |
+| ENT-MEN-21 | PolicyAcceptance    | user_id, policy, version, at                                                                      | user                  | R-safe    |
 
 ```mermaid
 erDiagram
@@ -1175,37 +1175,37 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Emitted when | Key payload | Consumers (planned) |
-|---|---|---|---|---|
-| EVT-MEN-001 | `men.application.submitted` | Mentor application submitted | mentor_id | ADM, TSF |
-| EVT-MEN-002 | `men.mentor.approved` | Approved with level | mentor_id, level | NTF, SRC |
-| EVT-MEN-003 | `men.mentor.suspended` | Suspension | mentor_id, reason class | BIL, NTF |
-| EVT-MEN-004 | `men.verification.expiring` | 60 and 14 days | mentor_id | NTF |
-| EVT-MEN-005 | `men.request.sent` | Request sent | request_id | NTF |
-| EVT-MEN-006 | `men.request.accepted` | Accepted | request_id | NTF |
-| EVT-MEN-007 | `men.request.declined` | Declined | request_id | NTF |
-| EVT-MEN-008 | `men.mentorship.started` | Agreement confirmed | mentorship_id | ANL |
-| EVT-MEN-009 | `men.mentorship.ended` | Ended | mentorship_id, by | NTF, ANL |
-| EVT-MEN-010 | `men.session.booked` | Booking confirmed | session_id | NTF, INT |
-| EVT-MEN-011 | `men.session.cancelled` | Cancelled | session_id, by | BIL, NTF |
-| EVT-MEN-012 | `men.session.completed` | Completed | session_id | BIL (earning), REP |
-| EVT-MEN-013 | `men.session.no_show` | No-show marked | session_id, party | BIL, quality |
-| EVT-MEN-014 | `men.feedback.published` | Feedback published | session_id | ANL |
-| EVT-MEN-015 | `men.action.assigned` | Action item created | action_id | NTF |
-| EVT-MEN-016 | `men.goal.completed` | Goal done | goal_id | PRF (achievement offer), REP |
-| EVT-MEN-017 | `men.program.published` | Program published | program_id | NTF |
-| EVT-MEN-018 | `men.pairing.confirmed` | Pairing confirmed | pairing_id | NTF |
-| EVT-MEN-019 | `men.pair.inactive` | Inactivity flagged | pair_id | NTF |
-| EVT-MEN-020 | `men.service.delivered` | Review or scorecard delivered | order_id | NTF, BIL |
-| EVT-MEN-021 | `men.service.late` | Deadline passed | order_id | BIL, quality |
-| EVT-MEN-022 | `men.package.purchased` | Package order paid | order_id | ANL |
-| EVT-MEN-023 | `men.group.registered` | Registration | group_id | NTF |
-| EVT-MEN-024 | `men.report.received` | Safeguarding report | report_id, severity | TSF |
-| EVT-MEN-025 | `men.report.decided` | Decision | report_id | NTF |
-| EVT-MEN-026 | `men.dispute.opened` | Dispute opened | dispute_id | BIL |
-| EVT-MEN-027 | `men.dispute.decided` | Dispute decided | dispute_id, outcome | BIL |
-| EVT-MEN-028 | `men.quality.flagged` | Quality flag | mentor_id | ADM |
-| EVT-MEN-029 | `men.conflict.blocked` | Conflict block | mentor_id | TSF |
+| ID          | Event                       | Emitted when                  | Key payload             | Consumers (planned)          |
+| ----------- | --------------------------- | ----------------------------- | ----------------------- | ---------------------------- |
+| EVT-MEN-001 | `men.application.submitted` | Mentor application submitted  | mentor_id               | ADM, TSF                     |
+| EVT-MEN-002 | `men.mentor.approved`       | Approved with level           | mentor_id, level        | NTF, SRC                     |
+| EVT-MEN-003 | `men.mentor.suspended`      | Suspension                    | mentor_id, reason class | BIL, NTF                     |
+| EVT-MEN-004 | `men.verification.expiring` | 60 and 14 days                | mentor_id               | NTF                          |
+| EVT-MEN-005 | `men.request.sent`          | Request sent                  | request_id              | NTF                          |
+| EVT-MEN-006 | `men.request.accepted`      | Accepted                      | request_id              | NTF                          |
+| EVT-MEN-007 | `men.request.declined`      | Declined                      | request_id              | NTF                          |
+| EVT-MEN-008 | `men.mentorship.started`    | Agreement confirmed           | mentorship_id           | ANL                          |
+| EVT-MEN-009 | `men.mentorship.ended`      | Ended                         | mentorship_id, by       | NTF, ANL                     |
+| EVT-MEN-010 | `men.session.booked`        | Booking confirmed             | session_id              | NTF, INT                     |
+| EVT-MEN-011 | `men.session.cancelled`     | Cancelled                     | session_id, by          | BIL, NTF                     |
+| EVT-MEN-012 | `men.session.completed`     | Completed                     | session_id              | BIL (earning), REP           |
+| EVT-MEN-013 | `men.session.no_show`       | No-show marked                | session_id, party       | BIL, quality                 |
+| EVT-MEN-014 | `men.feedback.published`    | Feedback published            | session_id              | ANL                          |
+| EVT-MEN-015 | `men.action.assigned`       | Action item created           | action_id               | NTF                          |
+| EVT-MEN-016 | `men.goal.completed`        | Goal done                     | goal_id                 | PRF (achievement offer), REP |
+| EVT-MEN-017 | `men.program.published`     | Program published             | program_id              | NTF                          |
+| EVT-MEN-018 | `men.pairing.confirmed`     | Pairing confirmed             | pairing_id              | NTF                          |
+| EVT-MEN-019 | `men.pair.inactive`         | Inactivity flagged            | pair_id                 | NTF                          |
+| EVT-MEN-020 | `men.service.delivered`     | Review or scorecard delivered | order_id                | NTF, BIL                     |
+| EVT-MEN-021 | `men.service.late`          | Deadline passed               | order_id                | BIL, quality                 |
+| EVT-MEN-022 | `men.package.purchased`     | Package order paid            | order_id                | ANL                          |
+| EVT-MEN-023 | `men.group.registered`      | Registration                  | group_id                | NTF                          |
+| EVT-MEN-024 | `men.report.received`       | Safeguarding report           | report_id, severity     | TSF                          |
+| EVT-MEN-025 | `men.report.decided`        | Decision                      | report_id               | NTF                          |
+| EVT-MEN-026 | `men.dispute.opened`        | Dispute opened                | dispute_id              | BIL                          |
+| EVT-MEN-027 | `men.dispute.decided`       | Dispute decided               | dispute_id, outcome     | BIL                          |
+| EVT-MEN-028 | `men.quality.flagged`       | Quality flag                  | mentor_id               | ADM                          |
+| EVT-MEN-029 | `men.conflict.blocked`      | Conflict block                | mentor_id               | TSF                          |
 
 ### 9.2 Consumed
 
@@ -1213,84 +1213,84 @@ erDiagram
 
 ## 10. Integrations and external dependencies
 
-| System | Direction | Purpose | Notes |
-|---|---|---|---|
-| Calendar providers (Google, Microsoft) | Both | Free/busy, event write | OAuth, scopes minimal |
-| Meeting provider or allowlisted external links | Outbound | Session rooms | OD-MEN-03 |
-| Background and identity check vendors | Outbound | Verification levels | Via BGV |
-| Payment (via BIL) | Both | Orders, refunds, payouts | Connected accounts |
-| Email and push | Outbound | Reminders | Via NTF |
-| Message scanning service | Internal | Circumvention and safety flags | Via TSF |
+| System                                         | Direction | Purpose                        | Notes                 |
+| ---------------------------------------------- | --------- | ------------------------------ | --------------------- |
+| Calendar providers (Google, Microsoft)         | Both      | Free/busy, event write         | OAuth, scopes minimal |
+| Meeting provider or allowlisted external links | Outbound  | Session rooms                  | OD-MEN-03             |
+| Background and identity check vendors          | Outbound  | Verification levels            | Via BGV               |
+| Payment (via BIL)                              | Both      | Orders, refunds, payouts       | Connected accounts    |
+| Email and push                                 | Outbound  | Reminders                      | Via NTF               |
+| Message scanning service                       | Internal  | Circumvention and safety flags | Via TSF               |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| BIL (this batch) | Orders FR-BIL-028, refunds FR-BIL-016, payouts FR-BIL-029 | — |
-| INS (this batch) | Affiliation, program audiences, guardian consent | INS (program tie-ins) |
-| IDN, PRF, EVD, BGV (planned) | Identity, profile, verification | REP |
-| MSG (planned) | Threads | — |
-| INT (planned) | Calendar services | — |
-| TSF (planned) | Reports, enforcement | — |
-| NET (planned) | Alumni affiliation and groups | — |
-| ATS, EMP (planned) | Conflict checks | — |
-| AIC, MKT (planned) | Suggestions, plan links | — |
-| NTF, ANL (planned) | Delivery, metrics | — |
+| Depends on                   | For                                                       | Depended on by        |
+| ---------------------------- | --------------------------------------------------------- | --------------------- |
+| BIL (this batch)             | Orders FR-BIL-028, refunds FR-BIL-016, payouts FR-BIL-029 | —                     |
+| INS (this batch)             | Affiliation, program audiences, guardian consent          | INS (program tie-ins) |
+| IDN, PRF, EVD, BGV (planned) | Identity, profile, verification                           | REP                   |
+| MSG (planned)                | Threads                                                   | —                     |
+| INT (planned)                | Calendar services                                         | —                     |
+| TSF (planned)                | Reports, enforcement                                      | —                     |
+| NET (planned)                | Alumni affiliation and groups                             | —                     |
+| ATS, EMP (planned)           | Conflict checks                                           | —                     |
+| AIC, MKT (planned)           | Suggestions, plan links                                   | —                     |
+| NTF, ANL (planned)           | Delivery, metrics                                         | —                     |
 
 ## 12. Module-level metrics
 
-| Metric | Definition | Formula | Owner role |
-|---|---|---|---|
-| Request acceptance rate | Requests accepted | accepted / sent | PAD |
-| Time to first session | Request to first completed session | median(first_completed - accepted) | PAD |
-| Session completion rate | Sessions completed over booked | completed / confirmed | PAD |
-| Mentee repeat rate | Mentees with 2 or more sessions with the same mentor | repeat pairs / pairs | PAD |
-| Program activity rate | Pairs with a session in the last 30 days | active pairs / pairs | IAD, EAD |
-| Safeguarding time to triage | Report received to triaged | median | MOD |
-| Circumvention flag precision | Confirmed over flagged | confirmed / flagged | MOD |
-| Mentor reliability | Late cancels and no-shows per 100 sessions | count / sessions x 100 | PAD |
-| Refund rate (sessions) | Refunded sessions | refunded / paid | FIN |
+| Metric                       | Definition                                           | Formula                            | Owner role |
+| ---------------------------- | ---------------------------------------------------- | ---------------------------------- | ---------- |
+| Request acceptance rate      | Requests accepted                                    | accepted / sent                    | PAD        |
+| Time to first session        | Request to first completed session                   | median(first_completed - accepted) | PAD        |
+| Session completion rate      | Sessions completed over booked                       | completed / confirmed              | PAD        |
+| Mentee repeat rate           | Mentees with 2 or more sessions with the same mentor | repeat pairs / pairs               | PAD        |
+| Program activity rate        | Pairs with a session in the last 30 days             | active pairs / pairs               | IAD, EAD   |
+| Safeguarding time to triage  | Report received to triaged                           | median                             | MOD        |
+| Circumvention flag precision | Confirmed over flagged                               | confirmed / flagged                | MOD        |
+| Mentor reliability           | Late cancels and no-shows per 100 sessions           | count / sessions x 100             | PAD        |
+| Refund rate (sessions)       | Refunded sessions                                    | refunded / paid                    | FIN        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking what |
-|---|---|---|---|---|---|
-| OD-MEN-01 | **Is MEN in scope at all, and what is the minimal slice?** SSOT carries peer mentorship (F-90) and expert network (F-108, F-170) but not a paid coaching marketplace. | A: out of scope. B: free peer and alumni mentorship plus institution and employer programs (FR-MEN-001 to 003 without pricing, 004 to 008, 010 to 018, 024, 027). C: B plus paid 1:1 sessions, resume review, mock interview (adds FR-MEN-009, 019, 020, 021, 023, 025, 026). D: C plus group sessions and expert calls (FR-MEN-022). | B as the minimal slice; C only after OD-MEN-02, OD-MEN-04 and OD-BIL-10 are decided | Founder (DEC-002) | Entire module |
-| OD-MEN-02 | Does a paid coaching marketplace breach the SSOT §4.2 non-goal "general-purpose marketplace"? | Allow only the allowlisted career categories (BR-MEN-027); disallow paid | Allow allowlisted categories if slice C is chosen | Founder | FR-MEN-023 |
-| OD-MEN-03 | Video: external meeting links only, or an in-platform room (SSOT OD-33 defers live video). | External links; vendor room later | External allowlisted links | Founder, Eng | FR-MEN-010 |
-| OD-MEN-04 | Platform commission on mentor sessions, tips, and whether programs may be paid. | Percent fee; tips allowed or not | Fee parameter `[PROP]` 20 percent; no tips; free programs | Founder, Finance | FR-MEN-009, 013, 023 |
-| OD-MEN-05 | Safeguarding SLAs and who staffs review (TSF capacity). | Hours for serious reports | 24 hours triage for serious reports | Ops, Legal | FR-MEN-024 |
-| OD-MEN-06 | Are minors allowed to be mentored at all, and under which legal conditions per country? | No; institution programs only | Institution programs only with L3 mentors and guardian consent (ties to OD-INS-05) | Legal, Founder | BR-MEN-002 |
-| OD-MEN-07 | Non-circumvention rule: duration, detection method, penalties. | 30 days with message filtering; none | 30 days with filtering and review; escape after 5 paid sessions | Product, Legal | BR-MEN-004 |
-| OD-MEN-08 | Recording and AI summaries policy. | Never; opt-in per session | Opt-in per session by all participants; off by default | Legal, AI governance | FR-MEN-010, 011 |
-| OD-MEN-09 | Employer-run programs: can employees mentor internally without the platform treating it as HR? | Allowed with conflict rules | Allowed (BR-MEN-021, BR-MEN-030) | Product | FR-MEN-013 |
-| OD-MEN-10 | Regulated advice exclusion list and country exceptions. | Fixed list vs per-country | Fixed list in BR-MEN-027 | Legal | FR-MEN-023 |
-| OD-MEN-11 | Default mentor capacity and rate bounds. | Capacity 5, 10, 20; rate bounds per currency | Capacity 10; bounds set with Finance | Product, Finance | FR-MEN-003 |
-| OD-MEN-12 | Recognition of external coaching credentials (for example professional coaching bodies) as verified. | Display self-declared; verify with issuer | Display with verification via EVD where possible | Product | FR-MEN-002 |
+| ID        | Question                                                                                                                                                              | Options                                                                                                                                                                                                                                                                                                                               | Default proposal                                                                    | Who decides          | Blocking what        |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------- | -------------------- |
+| OD-MEN-01 | **Is MEN in scope at all, and what is the minimal slice?** SSOT carries peer mentorship (F-90) and expert network (F-108, F-170) but not a paid coaching marketplace. | A: out of scope. B: free peer and alumni mentorship plus institution and employer programs (FR-MEN-001 to 003 without pricing, 004 to 008, 010 to 018, 024, 027). C: B plus paid 1:1 sessions, resume review, mock interview (adds FR-MEN-009, 019, 020, 021, 023, 025, 026). D: C plus group sessions and expert calls (FR-MEN-022). | B as the minimal slice; C only after OD-MEN-02, OD-MEN-04 and OD-BIL-10 are decided | Founder (DEC-002)    | Entire module        |
+| OD-MEN-02 | Does a paid coaching marketplace breach the SSOT §4.2 non-goal "general-purpose marketplace"?                                                                         | Allow only the allowlisted career categories (BR-MEN-027); disallow paid                                                                                                                                                                                                                                                              | Allow allowlisted categories if slice C is chosen                                   | Founder              | FR-MEN-023           |
+| OD-MEN-03 | Video: external meeting links only, or an in-platform room (SSOT OD-33 defers live video).                                                                            | External links; vendor room later                                                                                                                                                                                                                                                                                                     | External allowlisted links                                                          | Founder, Eng         | FR-MEN-010           |
+| OD-MEN-04 | Platform commission on mentor sessions, tips, and whether programs may be paid.                                                                                       | Percent fee; tips allowed or not                                                                                                                                                                                                                                                                                                      | Fee parameter `[PROP]` 20 percent; no tips; free programs                           | Founder, Finance     | FR-MEN-009, 013, 023 |
+| OD-MEN-05 | Safeguarding SLAs and who staffs review (TSF capacity).                                                                                                               | Hours for serious reports                                                                                                                                                                                                                                                                                                             | 24 hours triage for serious reports                                                 | Ops, Legal           | FR-MEN-024           |
+| OD-MEN-06 | Are minors allowed to be mentored at all, and under which legal conditions per country?                                                                               | No; institution programs only                                                                                                                                                                                                                                                                                                         | Institution programs only with L3 mentors and guardian consent (ties to OD-INS-05)  | Legal, Founder       | BR-MEN-002           |
+| OD-MEN-07 | Non-circumvention rule: duration, detection method, penalties.                                                                                                        | 30 days with message filtering; none                                                                                                                                                                                                                                                                                                  | 30 days with filtering and review; escape after 5 paid sessions                     | Product, Legal       | BR-MEN-004           |
+| OD-MEN-08 | Recording and AI summaries policy.                                                                                                                                    | Never; opt-in per session                                                                                                                                                                                                                                                                                                             | Opt-in per session by all participants; off by default                              | Legal, AI governance | FR-MEN-010, 011      |
+| OD-MEN-09 | Employer-run programs: can employees mentor internally without the platform treating it as HR?                                                                        | Allowed with conflict rules                                                                                                                                                                                                                                                                                                           | Allowed (BR-MEN-021, BR-MEN-030)                                                    | Product              | FR-MEN-013           |
+| OD-MEN-10 | Regulated advice exclusion list and country exceptions.                                                                                                               | Fixed list vs per-country                                                                                                                                                                                                                                                                                                             | Fixed list in BR-MEN-027                                                            | Legal                | FR-MEN-023           |
+| OD-MEN-11 | Default mentor capacity and rate bounds.                                                                                                                              | Capacity 5, 10, 20; rate bounds per currency                                                                                                                                                                                                                                                                                          | Capacity 10; bounds set with Finance                                                | Product, Finance     | FR-MEN-003           |
+| OD-MEN-12 | Recognition of external coaching credentials (for example professional coaching bodies) as verified.                                                                  | Display self-declared; verify with issuer                                                                                                                                                                                                                                                                                             | Display with verification via EVD where possible                                    | Product              | FR-MEN-002           |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood and impact | Mitigation |
-|---|---|---|---|
-| RSK-MEN-01 | Harm to participants, especially minors, from unsafe mentors. | Low, severe | Level gates, L3 for minors, platform-only sessions, auto-suspend on serious reports |
-| RSK-MEN-02 | Marketplace leakage: pairs move off-platform, removing the platform's visibility and revenue. | High, medium | Allowed after 5 sessions, value-add features (plans, scheduling) |
-| RSK-MEN-03 | Mentoring turns into pay-to-get-hired (influence on hiring). | Medium, high | BR-MEN-003, BR-MEN-027, ATS conflict check |
-| RSK-MEN-04 | Scope creep into a general services marketplace. | Medium, medium | Category allowlist, OD-MEN-01 and 02 |
-| RSK-MEN-05 | Low liquidity (too few mentors or mentees) making the module feel empty. | High, medium | Start with programs and alumni inside institutions (slice B) |
-| RSK-MEN-06 | Fake reviews and rating manipulation. | Medium, medium | Ratings need completed sessions, hidden until both submit, quarantine |
-| RSK-MEN-07 | Privacy incident from notes or recordings. | Low, high | Private notes author-only, recording consent, short retention |
-| RSK-MEN-08 | Safeguarding staffing cannot keep the SLA. | Medium, high | Gate paid and minor features on staffing (OD-MEN-05) |
-| RSK-MEN-09 | Fabricated experience advice in resume reviews. | Medium, medium | BR-MEN-014, review flags |
-| RSK-MEN-10 | Regulatory classification of coaching and payouts. | Low, high | Provider-managed payouts, allowlist, legal review |
+| ID         | Risk                                                                                          | Likelihood and impact | Mitigation                                                                          |
+| ---------- | --------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
+| RSK-MEN-01 | Harm to participants, especially minors, from unsafe mentors.                                 | Low, severe           | Level gates, L3 for minors, platform-only sessions, auto-suspend on serious reports |
+| RSK-MEN-02 | Marketplace leakage: pairs move off-platform, removing the platform's visibility and revenue. | High, medium          | Allowed after 5 sessions, value-add features (plans, scheduling)                    |
+| RSK-MEN-03 | Mentoring turns into pay-to-get-hired (influence on hiring).                                  | Medium, high          | BR-MEN-003, BR-MEN-027, ATS conflict check                                          |
+| RSK-MEN-04 | Scope creep into a general services marketplace.                                              | Medium, medium        | Category allowlist, OD-MEN-01 and 02                                                |
+| RSK-MEN-05 | Low liquidity (too few mentors or mentees) making the module feel empty.                      | High, medium          | Start with programs and alumni inside institutions (slice B)                        |
+| RSK-MEN-06 | Fake reviews and rating manipulation.                                                         | Medium, medium        | Ratings need completed sessions, hidden until both submit, quarantine               |
+| RSK-MEN-07 | Privacy incident from notes or recordings.                                                    | Low, high             | Private notes author-only, recording consent, short retention                       |
+| RSK-MEN-08 | Safeguarding staffing cannot keep the SLA.                                                    | Medium, high          | Gate paid and minor features on staffing (OD-MEN-05)                                |
+| RSK-MEN-09 | Fabricated experience advice in resume reviews.                                               | Medium, medium        | BR-MEN-014, review flags                                                            |
+| RSK-MEN-10 | Regulatory classification of coaching and payouts.                                            | Low, high             | Provider-managed payouts, allowlist, legal review                                   |
 
 ## 15. Legacy source trace
 
-| Source | Used for | Dropped or changed and why |
-|---|---|---|
+| Source                                                                                                                                                                                                                             | Used for                                                                                   | Dropped or changed and why                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------- | ---------------- | ------------------------------- |
 | SSOT.md F-90 (Peer Mentorship and Advisor Network), F-108 and F-170 (Expert Network), F-125 alumni, F-126 (Interview Prep Marketplace), F-156 (PDP), BR-194, BR-245, WF-50, states "Mentorship Session rated, declined, cancelled" | Peer mentorship, inactivity close, alumni opt-in, expert calls, interview prep, plan links | Paid marketplace and packages are [PROP], gated by OD-MEN-01 |
-| docs/registries/FEATURE_REGISTRY.md F-90, F-108, F-126, F-156, F-170 | Inventory | Priorities not copied |
-| Yash_Final_Project_Document 30_PRIOR_IMPLEMENTATION_REFERENCE/04-FEATURES-AND-WORKFLOWS.md (Mentorship `requested | active | completed | declined`, in-memory API) | State vocabulary | Prior in-memory API not carried |
-| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md | Awareness only | No status copied |
-| Own knowledge (MentorCruise, ADPList, Coursera and edX mentor programs, Calendly and Cal.com scheduling, Upwork-style marketplace rules, safeguarding practice) | Matching, booking, notes, packages, group sessions, safeguarding, marketplace rules | Tagged [PROP] |
+| docs/registries/FEATURE_REGISTRY.md F-90, F-108, F-126, F-156, F-170                                                                                                                                                               | Inventory                                                                                  | Priorities not copied                                        |
+| Yash_Final_Project_Document 30_PRIOR_IMPLEMENTATION_REFERENCE/04-FEATURES-AND-WORKFLOWS.md (Mentorship `requested                                                                                                                  | active                                                                                     | completed                                                    | declined`, in-memory API) | State vocabulary | Prior in-memory API not carried |
+| ARCHITECTURE.md, docs/reports/FEATURE_STATUS_2026-10-21.md                                                                                                                                                                         | Awareness only                                                                             | No status copied                                             |
+| Own knowledge (MentorCruise, ADPList, Coursera and edX mentor programs, Calendly and Cal.com scheduling, Upwork-style marketplace rules, safeguarding practice)                                                                    | Matching, booking, notes, packages, group sessions, safeguarding, marketplace rules        | Tagged [PROP]                                                |
 
 **Conflicts recorded:** (1) Stakeholder "OS" goal versus SSOT §4.2 general-marketplace non-goal: OD-MEN-01 and OD-MEN-02. (2) SSOT OD-33 defers live video: OD-MEN-03. (3) Minors: SSOT BR-128 sets 16+ private profiles with no mentoring rules: OD-MEN-06.

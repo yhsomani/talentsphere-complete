@@ -12,18 +12,19 @@ NTF is the single path by which the platform tells people things outside the scr
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| Important things reach people reliably and on time | Delivery success and latency by class; mandatory classes delivered or surfaced in-app (`NTF-M01`, `NTF-M02`) |
-| People are not spammed | Per-user volume within caps; unsubscribe and complaint rates under thresholds (`NTF-M05`, `NTF-M04`) |
-| Preferences, quiet hours and consent are always honored | Routing decisions stored with reason; zero sends to suppressed addresses (BR-NTF-008) |
-| The badge never lies | Server-authoritative unread count equals the list on every open (BR-NTF-004) [SRC: SSOT Appendix D M-55] |
-| Failures are visible and recoverable | Delivery state machine, retries, dead letters, ops alerts (SM-NTF-01) |
-| Marketing never rides on transactional trust | Separate stream and consent gate (BR-NTF-010) |
+| Outcome                                                 | How the system knows                                                                                         |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Important things reach people reliably and on time      | Delivery success and latency by class; mandatory classes delivered or surfaced in-app (`NTF-M01`, `NTF-M02`) |
+| People are not spammed                                  | Per-user volume within caps; unsubscribe and complaint rates under thresholds (`NTF-M05`, `NTF-M04`)         |
+| Preferences, quiet hours and consent are always honored | Routing decisions stored with reason; zero sends to suppressed addresses (BR-NTF-008)                        |
+| The badge never lies                                    | Server-authoritative unread count equals the list on every open (BR-NTF-004) [SRC: SSOT Appendix D M-55]     |
+| Failures are visible and recoverable                    | Delivery state machine, retries, dead letters, ops alerts (SM-NTF-01)                                        |
+| Marketing never rides on transactional trust            | Separate stream and consent gate (BR-NTF-010)                                                                |
 
 ### 1.3 Scope
 
 **In scope**
+
 - Event intake, routing decision table, notification catalog and preference classes, deduplication and grouping, throttling, retry and failover.
 - In-app center, unread counts, actions (read, archive, snooze), real-time updates.
 - Email delivery, rendering, unsubscribe and suppression, bounce and complaint handling.
@@ -32,6 +33,7 @@ NTF is the single path by which the platform tells people things outside the scr
 - Template console, localization, delivery tracking, user-visible delivery log, deliverability monitoring, marketing campaigns, admin broadcast and banners, team routing, development outbox.
 
 **Out of scope (owned elsewhere)**
+
 - Person-to-person messaging and threads: `MSG` (planned). NTF only notifies that a message arrived.
 - The list of events and their wording: the emitting module defines the event and variables; NTF owns the template mechanism.
 - Consent scopes and legal text: `SET`. NTF consults `comms.marketing_email` and records suppression.
@@ -41,8 +43,8 @@ NTF is the single path by which the platform tells people things outside the scr
 
 ### 1.4 Owned versus consumed
 
-| Owned by NTF | Consumed by NTF |
-|---|---|
+| Owned by NTF                                                                                                                                | Consumed by NTF                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | Notification, delivery, preference, suppression, template, digest, broadcast, reminder, alert subscription, device endpoint, provider event | Domain events and requests from all modules; locale, time zone, consent and account state from `IDN` / `SET`; email, SMS and push providers |
 
 ### 1.5 Design stance
@@ -57,36 +59,36 @@ NTF is the single path by which the platform tells people things outside the scr
 
 Legend: `S` self only · `O` own organization · `G` grant-bound audited · `Y` yes · `R` read-only · `—` no.
 
-| Capability | GUE | CAN/STD | INS/MNT/FRL | REC/HMG | EAD | IAD/PLO/EXA | MOD | SUP | FIN | PAD | SAD | API |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Receive and read own notifications | — | S | S | S | S | S | S | S | S | S | S | — |
-| Set own preferences, quiet hours, digests | — | S | S | S | S | S | S | S | S | S | S | — |
-| Unsubscribe via link (no sign-in) | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | — |
-| Register push and SMS endpoints | — | S | S | S | S | S | S | S | S | S | S | — |
-| Configure org team routing | — | — | — | — | O | O | — | — | — | — | — | — |
-| View a user's delivery metadata | — | S | S | S | S | S | — | G | — | Y | Y | — |
-| Edit and approve templates | — | — | — | — | — | — | — | — | — | Y (maker-checker) | Y | — |
-| Send admin broadcast | — | — | — | — | — | — | — | — | — | Y (approval) | Y | — |
-| Create marketing campaign | — | — | — | — | — | — | — | — | — | Y (consent-gated) | Y | — |
-| View deliverability dashboards | — | — | — | — | — | — | — | R | R | Y | Y | — |
-| Raise notification requests | — | — | — | — | — | — | — | — | — | — | — | Y (platform module service principals) |
-| Suppress or unsuppress an address | — | — | — | — | — | — | — | G | — | Y | Y | — |
+| Capability                                | GUE | CAN/STD | INS/MNT/FRL | REC/HMG | EAD | IAD/PLO/EXA | MOD | SUP | FIN | PAD               | SAD | API                                    |
+| ----------------------------------------- | --- | ------- | ----------- | ------- | --- | ----------- | --- | --- | --- | ----------------- | --- | -------------------------------------- |
+| Receive and read own notifications        | —   | S       | S           | S       | S   | S           | S   | S   | S   | S                 | S   | —                                      |
+| Set own preferences, quiet hours, digests | —   | S       | S           | S       | S   | S           | S   | S   | S   | S                 | S   | —                                      |
+| Unsubscribe via link (no sign-in)         | Y   | Y       | Y           | Y       | Y   | Y           | Y   | Y   | Y   | Y                 | Y   | —                                      |
+| Register push and SMS endpoints           | —   | S       | S           | S       | S   | S           | S   | S   | S   | S                 | S   | —                                      |
+| Configure org team routing                | —   | —       | —           | —       | O   | O           | —   | —   | —   | —                 | —   | —                                      |
+| View a user's delivery metadata           | —   | S       | S           | S       | S   | S           | —   | G   | —   | Y                 | Y   | —                                      |
+| Edit and approve templates                | —   | —       | —           | —       | —   | —           | —   | —   | —   | Y (maker-checker) | Y   | —                                      |
+| Send admin broadcast                      | —   | —       | —           | —       | —   | —           | —   | —   | —   | Y (approval)      | Y   | —                                      |
+| Create marketing campaign                 | —   | —       | —           | —       | —   | —           | —   | —   | —   | Y (consent-gated) | Y   | —                                      |
+| View deliverability dashboards            | —   | —       | —           | —       | —   | —           | —   | R   | R   | Y                 | Y   | —                                      |
+| Raise notification requests               | —   | —       | —           | —       | —   | —           | —   | —   | —   | —                 | —   | Y (platform module service principals) |
+| Suppress or unsuppress an address         | —   | —       | —           | —       | —   | —           | —   | G   | —   | Y                 | Y   | —                                      |
 
 Rule: no staff role can read notification bodies of a user's security messages; support sees template name, channel, state and time only. [DER]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| NTF-A | Core pipeline | FR-NTF-001, 002, 018, 019, 023 |
-| NTF-B | In-app center | FR-NTF-003, 004, 005, 006 |
-| NTF-C | Email | FR-NTF-007, 008, 009, 010 |
-| NTF-D | Push and SMS | FR-NTF-011, 012, 013 |
-| NTF-E | Preferences and timing | FR-NTF-014, 015, 016, 017, 028, 030 |
-| NTF-F | Templates and localization | FR-NTF-020, 021 |
-| NTF-G | Tracking and operations | FR-NTF-022, 026, 031, 032 |
-| NTF-H | Campaigns and broadcast | FR-NTF-024, 025 |
-| NTF-I | Specialized | FR-NTF-027, 029 |
+| Code  | Sub-module                 | Features                                 |
+| ----- | -------------------------- | ---------------------------------------- |
+| NTF-A | Core pipeline              | FR-NTF-001, 002, 018, 019, 023           |
+| NTF-B | In-app center              | FR-NTF-003, 004, 005, 006                |
+| NTF-C | Email                      | FR-NTF-007, 008, 009, 010                |
+| NTF-D | Push and SMS               | FR-NTF-011, 012, 013                     |
+| NTF-E | Preferences and timing     | FR-NTF-014, 015, 016, 017, 028, 030, 033 |
+| NTF-F | Templates and localization | FR-NTF-020, 021                          |
+| NTF-G | Tracking and operations    | FR-NTF-022, 026, 031, 032                |
+| NTF-H | Campaigns and broadcast    | FR-NTF-024, 025                          |
+| NTF-I | Specialized                | FR-NTF-027, 029                          |
 
 ```mermaid
 flowchart LR
@@ -1036,42 +1038,76 @@ Parameter notation: `{braces}` mark `[PROP]` defaults unless a source is cited; 
   - Given a hard-bounced address, when a security notice is raised, then no send occurs and an in-app banner appears.
   - Given 30 mandatory emails in an hour due to a loop, when processed, then the anomaly cap triggers an alert.
 
+### FR-NTF-033 — Personal automation rules
+
+- **Sub-module:** NTF-E Preferences and timing
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.1 F-49 Automation & Agents (title and dependency F-48 only; priority 4, Ph3+); SSOT §14.5 "OS layer" tables `automation_rules`, `automation_runs`, `agents`, `agent_runs`] [PROP] for behavior; agents narrowed by `BR-AIC-001`, `BR-AIC-002`, `BR-AIC-004`; scope in `OD-NTF-09`
+- **Purpose and outcome:** A person defines simple "when this happens, do that for me" rules over their own career events so routine follow-ups (reminders, tasks, collections, calendar entries) are created automatically. The system knows it works when each rule fires exactly once per event, every run is visible to the owner, and nothing is ever sent to another person or changed in an authoritative record.
+- **Roles and permissions:** `all signed-in roles (S): create, edit, pause, resume, delete own rules; read own run log` · `PAD: manage trigger and action catalogue, limits and the kill switch` · `SUP: no access to rule content except through consented view-as (FR-ADM-024)`
+- **Preconditions and entry points:** The trigger exists in the catalogue and its source module is enabled; actions that create tasks need the workbench (FR-ANL-037). Entry: Home > Automations, and "Create a rule from this" on a saved search, an application, a course deadline, a credential or an event registration.
+- **User interactions and actions:**
+  1. Choose a trigger from the catalogue (initial list [PROP]): new listing matches saved search X (FR-SRC-018); my application has had no status change for N days (FR-JOB-025); interview invite received (FR-JOB-030); offer received (FR-JOB-031); course deadline in N days (FR-LRN-049); assessment retake available (FR-ASM-040); credential expires in N days (FR-EVD-019); my connection request unanswered for N days (FR-NET-003); event I registered for starts in N hours (FR-EVT-014); a schedule I set (daily, or weekly on a chosen day and time, in my time zone per FR-NTF-015), which matches the legacy idea of a scheduled weekly job search.
+  2. Add up to 3 conditions on fields of the trigger payload that the user can already see (for example company, work mode, location, number of days).
+  3. Choose up to 3 actions from the allowlist: notify me (channel per my preferences), create a task in my workbench, add the item to one of my collections, create a calendar entry for me (ICS to my own address), snooze one recommendation type for N days, run one of my saved searches and add the new results to one of my collections.
+  4. Name the rule and set the daily run limit (default {10}).
+  5. Press "Preview": the system shows how many times the rule would have fired over the last 30 days of the user's own events, without running any action.
+  6. Save. Pause, resume or delete the rule from the list; open the run log (last 90 days: time, triggering event, action results).
+- **System behaviour:** The rule engine consumes the owner's domain events through the NTF routing pipeline (FR-NTF-001). Evaluation is idempotent per `(ruleId, eventId)`. Actions run through the owning module's API as the member, with the same authorization as the member's own request, and only from the allowlist (BR-NTF-033). Rules contain no model calls and cannot invoke the AI gateway (BR-NTF-034). Limits: {20} active rules per user, the per-rule daily run limit, and {100} runs per user per day. Loop guard: an action whose result would emit an event consumed by the same rule pauses that rule with a notice. A failed action is retried 3 times with backoff; then the run is logged `failed` and the owner gets one in-app notice per rule per day. A rule whose trigger is retired is paused with the reason. The kill switch `ntf.automation` (FR-ADM-015) stops all evaluation and shows "Automations are paused by the platform". No autonomous agent acts for the member; assistant suggestions remain apply-with-review under FR-AIC-008.
+- **UI elements and controls:** Rule list with status chips (active, paused, error), rule builder (trigger select, condition rows, action rows), preview panel with counts, run log table, pause switch, delete with confirmation, example templates in the empty state ("Remind me when an application goes quiet for 14 days").
+- **Configuration options:** User: master switch for automations (default on), per-rule run limit. Platform: trigger and action catalogue, limits ({20} rules, {100} runs per day), kill switch, retention of the run log ({90} days).
+- **Business rules:** BR-NTF-033, BR-NTF-034, BR-NTF-005
+- **Validation:** Rule name 1 to 60 characters, unique per user; 1 trigger, 0 to 3 conditions, 1 to 3 actions; day parameters integer 1 to 90; run limit 1 to 50; an action not on the allowlist returns `422 action_not_allowed`; a trigger parameter the user cannot see returns `422 trigger_not_visible`.
+- **Inputs and outputs:** In: rule definition. Out: saved rule with state, preview counts, run log entries and the actions' results (tasks, notifications, collection entries, calendar files created for the owner).
+- **Filters, sorting, search:** Rules filter by state and trigger module; sort by last run or name. Run log filters by rule, outcome and date.
+- **Notifications and communication:** `ntf.automation_failed` (in-app, once per rule per day, class engagement, opt-out); actions of type "notify me" use the standard pipeline and preference classes.
+- **Error handling and edge cases:** Replayed or re-indexed event: no second run. Source event for an object the user can no longer see: run `skipped` with reason. Daily limit reached: later events are skipped and logged `skipped_limit`. The target collection or workbench item was deleted: that action is `failed` with a reason and the rule keeps running. Time zone: day offsets use the user's zone (FR-NTF-015). Account deactivation: rules are paused and resume on reactivation.
+- **Dependencies:** FR-NTF-001, FR-NTF-005, FR-NTF-015, FR-NTF-028, FR-NTF-030, FR-ANL-037, FR-ADM-015, FR-ADM-024, FR-AIC-008, FR-JOB-025, ENT-NTF-15, ENT-NTF-16.
+- **Security and privacy:** Rules and runs are private to the owner; rule parameters hold no secrets; actions cannot reach other people or authoritative records (BR-NTF-033); run logs are excluded from product analytics beyond aggregate counts above `min_cohort_k`; rules and logs are included in data export and erasure (FR-SET-013, FR-SET-015).
+- **Acceptance criteria:**
+  - Given a rule "when a new listing matches saved search X, create a task", when a matching listing is indexed twice, then exactly one task exists.
+  - Given a rule with an action "message the recruiter", when the user saves it, then the API returns `422 action_not_allowed` and nothing is stored (negative).
+  - Given 20 active rules, when the user creates a 21st, then the API returns `422 limit_reached` (negative).
+  - Given the kill switch is active, when a trigger event occurs, then no action runs and the run log shows `skipped_platform_pause`.
+
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-NTF-001 | Preference classes: mandatory transactional (security, verification, legal, billing) cannot be disabled; time-critical (interview reminder, offer) is channel-selectable and ignores quiet hours; engagement is opt-out; nudge is opt-out and capped; marketing is opt-in. | Law and trust. | Catalog + router | [SRC: Yash BR-T085] |
-| BR-NTF-002 | Routing evaluates in a fixed order, first match wins: suppression, mandatory, time-critical, disabled category, quiet hours, digest, nudge cap, marketing opt-in, otherwise send on enabled channels with in-app always. | Predictable behavior. | Router | [SRC: Yash DT-07] |
-| BR-NTF-003 | Every non-marketing notification creates an in-app item that is the source of truth, regardless of other channels or suppression. | Nothing is lost. | Router | [SRC: Yash DT-07 row 9] |
-| BR-NTF-004 | The unread count is server-authoritative and reconciled on every panel open and page focus; clients show at most one optimistic step beyond the last server value. | The badge cannot lie. | API + client | [SRC: SSOT Appendix D M-55] |
-| BR-NTF-005 | Delivery is idempotent by `(notificationId, channel)`; duplicate requests by idempotency key collapse; the dispatcher is at-least-once with consumer de-duplication. | No duplicate sends. | Dispatcher | [SRC: Yash SM-NOTIFY, ADR-T09; SSOT BR-31] |
-| BR-NTF-006 | Quiet hours default 21:00–08:00 in the user's time zone, DST-safe; they defer non-mandatory, non-time-critical email, push and SMS to the window end; users may change or disable them. | Respect for sleep. | Router + worker | [SRC: Yash BR-T086] |
-| BR-NTF-007 | Nudges ≤ {3} per week and ≤ 1 per day; digests ≤ 1 per day; per-channel daily caps for engagement; anomaly caps for mandatory bursts. | Avoid fatigue. | Router + throttle | [SRC: Yash BR-T087] |
-| BR-NTF-008 | No message is sent to a suppressed address; hard bounces suppress; complaints suppress marketing and engagement; mandatory notices to a hard-bounced address surface in-app instead. | Reputation and consent. | Router + webhook handler | [SRC: Yash SM-NOTIFY forbidden] |
-| BR-NTF-009 | Non-mandatory email carries a working unsubscribe (header and footer); one-click POST applies immediately; GET changes nothing; mandatory email has none and explains why. | Standards and trust. | Email service | [SRC: Yash TEST-MSG-010] |
-| BR-NTF-010 | Marketing and product news need explicit opt-in (`comms.marketing_email`), use a separate sending stream and domain with a legal footer, are paced, and auto-pause on complaint thresholds; transactional trust is never lent to marketing. | Reputation separation. | Campaign service | [SRC: Yash DT-07 row 8, CSC] |
-| BR-NTF-011 | Push subscriptions are created only after a user gesture, browser permission and in-product opt-in; payloads are generic and encrypted; subscriptions are deleted on logout, session revoke and 410; ≤ {10} devices. | Privacy by design. | Push service | [SRC: Yash INTEGRATION_ARCHITECTURE] |
-| BR-NTF-012 | SMS needs a verified number and explicit per-category opt-in, honors STOP and HELP immediately, is limited to time-critical and security categories, and obeys country rules; marketing SMS is not offered. | Carrier and legal rules. | SMS service | [PROP] |
-| BR-NTF-013 | Every notification type is registered in the catalog with class, channels, defaults, TTL and owner; unregistered keys fail CI; a template exists per enabled channel in the default locale. | Governed catalog. | CI + catalog service | [DER] |
-| BR-NTF-014 | Templates are versioned and immutable once published; mandatory-class changes need maker-checker; locale fallback is whole-template, never mixed; legal and consent text versions match their source. | Safe content change. | Template service | [SRC: Yash SPEC-02 §8] |
-| BR-NTF-015 | Retry schedule 1 m, 5 m, 30 m, 2 h, 12 h, maximum 5 attempts; permanent errors fail at once; TTL 72 h for time-sensitive and 7 d for others; expiry is not a failure of intent. | Bounded retries. | Dispatcher | [SRC: Yash SM-NOTIFY t6..t10] |
-| BR-NTF-016 | Mandatory and time-critical lanes have priority and bypass user caps but obey provider limits and anomaly caps. | Reliability. | Throttle | [DER] |
-| BR-NTF-017 | Grouped notifications merge by group key and window; nudges obey cool-downs, dormancy limits and send-time re-checks. | Reduce noise. | Router | [PROP] |
-| BR-NTF-018 | Digest items are generated at send time from live data, exclude inaccessible content and never include mandatory or time-critical notices; empty digests are not sent. | Accuracy. | Digest worker | [SRC: SSOT F-29] |
-| BR-NTF-019 | Emails have complete plain-text parts, accessible markup (contrast, alt text, `lang`), escaped variables and no tracking in mandatory messages; tracking elsewhere only where analytics consent allows. | Accessibility and privacy. | Renderer | [DER] |
-| BR-NTF-020 | Push, lock-screen and in-app titles for entries flagged `sensitiveContent` use generic wording and never carry sensitive details. | Shoulder-surfing safety. | Renderer | [DER] |
-| BR-NTF-021 | Admin broadcasts need approval, map to mandatory, time-critical or engagement classes (never marketing), and critical banners persist until resolved. | Honest operations communication. | Broadcast service | [PROP] |
-| BR-NTF-022 | Org routing expands recipients from assignments and roles at send time; members keep their own preferences; external team channels get minimal data unless detail mode is on and allow-listed; no personal data in push or SMS to teams. | Data minimization. | Org routing | [PROP] |
-| BR-NTF-023 | Provider failover requires a sustained error rate above threshold, uses one idempotency token per delivery across providers, and fails back after health returns; it never double-sends. | Reliability without duplicates. | Dispatcher | [DER] |
-| BR-NTF-024 | A user may hold ≤ {20} alert subscriptions; matches respect the visibility and consent of the matched content; instant alerts are capped per alert per day. | No leakage via alerts. | Alert service | [SRC: SSOT BR-14] |
-| BR-NTF-025 | Delivery rows are retained {90 days} in detail and 24 months aggregated; users can see their own metadata; bodies are not retained beyond delivery. | Storage limitation. | Retention job | [PROP] |
-| BR-NTF-026 | Non-production environments never send real messages unless in explicit allow-list mode; production refuses outbox mode without an override; outbox items are labeled not delivered. | Safety. | Config + boot check | [SRC: CLAUDE.md dev outbox] |
-| BR-NTF-027 | Sending domains authenticate with SPF, DKIM and DMARC alignment; complaint above {0.1%} or hard bounce above {2%} auto-pauses a non-transactional stream. | Deliverability. | Deliverability monitor | [PROP] |
-| BR-NTF-028 | Non-mandatory notifications are not sent to accounts that are not `active` (deactivated, suspended, pending erasure); on erasure queued items for the subject are purged and only privacy receipts remain. | Respect for account state. | Router | [DER] |
-| BR-NTF-029 | Delivery states are truthful: `delivered` only on provider confirmation (email), inbox row (in-app) or acknowledgment (push); the outbox reports `sent` only. | No false delivery claims. | Dispatcher | [SRC: Yash SM-NOTIFY] |
-| BR-NTF-030 | Callers identify recipients by account id; raw addresses and numbers are resolved inside NTF and never returned to callers. | Data minimization. | API | [DER] |
-| BR-NTF-031 | Security notices use a fixed recognizable layout and sender, carry no tracked links, contain no direct sign-in links and state that the platform never asks for passwords or codes by message. | Anti-phishing. | Templates + CI | [DER] |
-| BR-NTF-032 | In-app items and emails use plain language (reading grade ≤ 9) and every actionable message names the action and its target. | Clarity. | Template review | [DER] |
+| ID         | Rule                                                                                                                                                                                                                                                                                                                                                                                                        | Rationale                                                                                            | Enforced where                                              | Source                                     |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------ |
+| BR-NTF-001 | Preference classes: mandatory transactional (security, verification, legal, billing) cannot be disabled; time-critical (interview reminder, offer) is channel-selectable and ignores quiet hours; engagement is opt-out; nudge is opt-out and capped; marketing is opt-in.                                                                                                                                  | Law and trust.                                                                                       | Catalog + router                                            | [SRC: Yash BR-T085]                        |
+| BR-NTF-002 | Routing evaluates in a fixed order, first match wins: suppression, mandatory, time-critical, disabled category, quiet hours, digest, nudge cap, marketing opt-in, otherwise send on enabled channels with in-app always.                                                                                                                                                                                    | Predictable behavior.                                                                                | Router                                                      | [SRC: Yash DT-07]                          |
+| BR-NTF-003 | Every non-marketing notification creates an in-app item that is the source of truth, regardless of other channels or suppression.                                                                                                                                                                                                                                                                           | Nothing is lost.                                                                                     | Router                                                      | [SRC: Yash DT-07 row 9]                    |
+| BR-NTF-004 | The unread count is server-authoritative and reconciled on every panel open and page focus; clients show at most one optimistic step beyond the last server value.                                                                                                                                                                                                                                          | The badge cannot lie.                                                                                | API + client                                                | [SRC: SSOT Appendix D M-55]                |
+| BR-NTF-005 | Delivery is idempotent by `(notificationId, channel)`; duplicate requests by idempotency key collapse; the dispatcher is at-least-once with consumer de-duplication.                                                                                                                                                                                                                                        | No duplicate sends.                                                                                  | Dispatcher                                                  | [SRC: Yash SM-NOTIFY, ADR-T09; SSOT BR-31] |
+| BR-NTF-006 | Quiet hours default 21:00–08:00 in the user's time zone, DST-safe; they defer non-mandatory, non-time-critical email, push and SMS to the window end; users may change or disable them.                                                                                                                                                                                                                     | Respect for sleep.                                                                                   | Router + worker                                             | [SRC: Yash BR-T086]                        |
+| BR-NTF-007 | Nudges ≤ {3} per week and ≤ 1 per day; digests ≤ 1 per day; per-channel daily caps for engagement; anomaly caps for mandatory bursts.                                                                                                                                                                                                                                                                       | Avoid fatigue.                                                                                       | Router + throttle                                           | [SRC: Yash BR-T087]                        |
+| BR-NTF-008 | No message is sent to a suppressed address; hard bounces suppress; complaints suppress marketing and engagement; mandatory notices to a hard-bounced address surface in-app instead.                                                                                                                                                                                                                        | Reputation and consent.                                                                              | Router + webhook handler                                    | [SRC: Yash SM-NOTIFY forbidden]            |
+| BR-NTF-009 | Non-mandatory email carries a working unsubscribe (header and footer); one-click POST applies immediately; GET changes nothing; mandatory email has none and explains why.                                                                                                                                                                                                                                  | Standards and trust.                                                                                 | Email service                                               | [SRC: Yash TEST-MSG-010]                   |
+| BR-NTF-010 | Marketing and product news need explicit opt-in (`comms.marketing_email`), use a separate sending stream and domain with a legal footer, are paced, and auto-pause on complaint thresholds; transactional trust is never lent to marketing.                                                                                                                                                                 | Reputation separation.                                                                               | Campaign service                                            | [SRC: Yash DT-07 row 8, CSC]               |
+| BR-NTF-011 | Push subscriptions are created only after a user gesture, browser permission and in-product opt-in; payloads are generic and encrypted; subscriptions are deleted on logout, session revoke and 410; ≤ {10} devices.                                                                                                                                                                                        | Privacy by design.                                                                                   | Push service                                                | [SRC: Yash INTEGRATION_ARCHITECTURE]       |
+| BR-NTF-012 | SMS needs a verified number and explicit per-category opt-in, honors STOP and HELP immediately, is limited to time-critical and security categories, and obeys country rules; marketing SMS is not offered.                                                                                                                                                                                                 | Carrier and legal rules.                                                                             | SMS service                                                 | [PROP]                                     |
+| BR-NTF-013 | Every notification type is registered in the catalog with class, channels, defaults, TTL and owner; unregistered keys fail CI; a template exists per enabled channel in the default locale.                                                                                                                                                                                                                 | Governed catalog.                                                                                    | CI + catalog service                                        | [DER]                                      |
+| BR-NTF-014 | Templates are versioned and immutable once published; mandatory-class changes need maker-checker; locale fallback is whole-template, never mixed; legal and consent text versions match their source.                                                                                                                                                                                                       | Safe content change.                                                                                 | Template service                                            | [SRC: Yash SPEC-02 §8]                     |
+| BR-NTF-015 | Retry schedule 1 m, 5 m, 30 m, 2 h, 12 h, maximum 5 attempts; permanent errors fail at once; TTL 72 h for time-sensitive and 7 d for others; expiry is not a failure of intent.                                                                                                                                                                                                                             | Bounded retries.                                                                                     | Dispatcher                                                  | [SRC: Yash SM-NOTIFY t6..t10]              |
+| BR-NTF-016 | Mandatory and time-critical lanes have priority and bypass user caps but obey provider limits and anomaly caps.                                                                                                                                                                                                                                                                                             | Reliability.                                                                                         | Throttle                                                    | [DER]                                      |
+| BR-NTF-017 | Grouped notifications merge by group key and window; nudges obey cool-downs, dormancy limits and send-time re-checks.                                                                                                                                                                                                                                                                                       | Reduce noise.                                                                                        | Router                                                      | [PROP]                                     |
+| BR-NTF-018 | Digest items are generated at send time from live data, exclude inaccessible content and never include mandatory or time-critical notices; empty digests are not sent.                                                                                                                                                                                                                                      | Accuracy.                                                                                            | Digest worker                                               | [SRC: SSOT F-29]                           |
+| BR-NTF-019 | Emails have complete plain-text parts, accessible markup (contrast, alt text, `lang`), escaped variables and no tracking in mandatory messages; tracking elsewhere only where analytics consent allows.                                                                                                                                                                                                     | Accessibility and privacy.                                                                           | Renderer                                                    | [DER]                                      |
+| BR-NTF-020 | Push, lock-screen and in-app titles for entries flagged `sensitiveContent` use generic wording and never carry sensitive details.                                                                                                                                                                                                                                                                           | Shoulder-surfing safety.                                                                             | Renderer                                                    | [DER]                                      |
+| BR-NTF-021 | Admin broadcasts need approval, map to mandatory, time-critical or engagement classes (never marketing), and critical banners persist until resolved.                                                                                                                                                                                                                                                       | Honest operations communication.                                                                     | Broadcast service                                           | [PROP]                                     |
+| BR-NTF-022 | Org routing expands recipients from assignments and roles at send time; members keep their own preferences; external team channels get minimal data unless detail mode is on and allow-listed; no personal data in push or SMS to teams.                                                                                                                                                                    | Data minimization.                                                                                   | Org routing                                                 | [PROP]                                     |
+| BR-NTF-023 | Provider failover requires a sustained error rate above threshold, uses one idempotency token per delivery across providers, and fails back after health returns; it never double-sends.                                                                                                                                                                                                                    | Reliability without duplicates.                                                                      | Dispatcher                                                  | [DER]                                      |
+| BR-NTF-024 | A user may hold ≤ {20} alert subscriptions; matches respect the visibility and consent of the matched content; instant alerts are capped per alert per day.                                                                                                                                                                                                                                                 | No leakage via alerts.                                                                               | Alert service                                               | [SRC: SSOT BR-14]                          |
+| BR-NTF-025 | Delivery rows are retained {90 days} in detail and 24 months aggregated; users can see their own metadata; bodies are not retained beyond delivery.                                                                                                                                                                                                                                                         | Storage limitation.                                                                                  | Retention job                                               | [PROP]                                     |
+| BR-NTF-026 | Non-production environments never send real messages unless in explicit allow-list mode; production refuses outbox mode without an override; outbox items are labeled not delivered.                                                                                                                                                                                                                        | Safety.                                                                                              | Config + boot check                                         | [SRC: CLAUDE.md dev outbox]                |
+| BR-NTF-027 | Sending domains authenticate with SPF, DKIM and DMARC alignment; complaint above {0.1%} or hard bounce above {2%} auto-pauses a non-transactional stream.                                                                                                                                                                                                                                                   | Deliverability.                                                                                      | Deliverability monitor                                      | [PROP]                                     |
+| BR-NTF-028 | Non-mandatory notifications are not sent to accounts that are not `active` (deactivated, suspended, pending erasure); on erasure queued items for the subject are purged and only privacy receipts remain.                                                                                                                                                                                                  | Respect for account state.                                                                           | Router                                                      | [DER]                                      |
+| BR-NTF-029 | Delivery states are truthful: `delivered` only on provider confirmation (email), inbox row (in-app) or acknowledgment (push); the outbox reports `sent` only.                                                                                                                                                                                                                                               | No false delivery claims.                                                                            | Dispatcher                                                  | [SRC: Yash SM-NOTIFY]                      |
+| BR-NTF-030 | Callers identify recipients by account id; raw addresses and numbers are resolved inside NTF and never returned to callers.                                                                                                                                                                                                                                                                                 | Data minimization.                                                                                   | API                                                         | [DER]                                      |
+| BR-NTF-031 | Security notices use a fixed recognizable layout and sender, carry no tracked links, contain no direct sign-in links and state that the platform never asks for passwords or codes by message.                                                                                                                                                                                                              | Anti-phishing.                                                                                       | Templates + CI                                              | [DER]                                      |
+| BR-NTF-032 | In-app items and emails use plain language (reading grade ≤ 9) and every actionable message names the action and its target.                                                                                                                                                                                                                                                                                | Clarity.                                                                                             | Template review                                             | [DER]                                      |
+| BR-NTF-033 | Personal automation actions are limited to an allowlist: notify the owner, create the owner's task, add to the owner's collection, create the owner's calendar entry, snooze the owner's own recommendation type. A rule can never message another person, submit, withdraw or decide anything, edit profile, evidence or credentials, move money, publish content, or act on moderation or hiring records. | Keeps automation a convenience layer and inside the SSOT §4.2 limit on ungoverned autonomous action. | Action executor allowlist; CI test over the action registry | [DER] [SRC: SSOT §4.2; BR-AIC-004]         |
+| BR-NTF-034 | Rule evaluation is deterministic and contains no model calls; each run is idempotent per (rule, event), logged for {90} days, capped per rule and per user per day, and a rule that loops or fails 5 consecutive runs is paused with a notice.                                                                                                                                                              | Predictability, cost control and safe failure.                                                       | Rule engine                                                 | [PROP]                                     |
 
 ## 6. State machines
 
@@ -1079,18 +1115,18 @@ Parameter notation: `{braces}` mark `[PROP]` defaults unless a source is cited; 
 
 States: `queued`, `suppressed`, `deferred`, `sending`, `sent`, `delivered`, `failed_retry`, `failed`, `bounced`, `complained`, `expired`. Terminal: `suppressed`, `delivered`, `failed`, `bounced`, `complained`, `expired` (`delivered` may still become `complained`). Source: [SRC: Yash SM-NOTIFY].
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | queued → suppressed | route check | preference off (non-mandatory), suppression list, duplicate, cap |
-| t2 | queued → deferred | quiet hours or digest | not time-critical or mandatory |
-| t3 | deferred → sending | window end | TTL and preferences re-checked |
-| t4 | queued → sending | immediate | — |
-| t5 | sending → sent → delivered | provider response, webhook, inbox row, push ack | — |
-| t6 | sending → failed_retry | 5xx, timeout, 408, 429 | attempts < 5 |
-| t7 | failed_retry → sending | backoff timer | — |
-| t8 | sending, failed_retry → failed | permanent 4xx or attempts exhausted | dead-letter |
-| t9 | sent → bounced or complained | provider webhook | suppression updated |
-| t10 | queued, deferred, failed_retry → expired | TTL passed | 72 h time-sensitive, 7 d others |
+| t   | From → To                                | Trigger                                         | Guard                                                            |
+| --- | ---------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| t1  | queued → suppressed                      | route check                                     | preference off (non-mandatory), suppression list, duplicate, cap |
+| t2  | queued → deferred                        | quiet hours or digest                           | not time-critical or mandatory                                   |
+| t3  | deferred → sending                       | window end                                      | TTL and preferences re-checked                                   |
+| t4  | queued → sending                         | immediate                                       | —                                                                |
+| t5  | sending → sent → delivered               | provider response, webhook, inbox row, push ack | —                                                                |
+| t6  | sending → failed_retry                   | 5xx, timeout, 408, 429                          | attempts < 5                                                     |
+| t7  | failed_retry → sending                   | backoff timer                                   | —                                                                |
+| t8  | sending, failed_retry → failed           | permanent 4xx or attempts exhausted             | dead-letter                                                      |
+| t9  | sent → bounced or complained             | provider webhook                                | suppression updated                                              |
+| t10 | queued, deferred, failed_retry → expired | TTL passed                                      | 72 h time-sensitive, 7 d others                                  |
 
 Forbidden: sending to a suppressed address; re-sending after `bounced` without an address change; any transition out of a terminal state except `delivered → complained`.
 
@@ -1124,14 +1160,14 @@ stateDiagram-v2
 
 States: `draft`, `in_review`, `approved`, `active`, `superseded`, `rejected`. Terminal: `superseded`, `rejected`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → draft | editor creates | — |
-| t2 | draft → in_review | submit | checks pass |
-| t3 | in_review → approved | approver approves | approver differs from author (mandatory class) |
-| t4 | in_review → rejected | approver rejects | reason |
-| t5 | approved → active | publish | previous active becomes superseded |
-| t6 | active → superseded | newer version published or rollback | — |
+| t   | From → To            | Trigger                             | Guard                                          |
+| --- | -------------------- | ----------------------------------- | ---------------------------------------------- |
+| t1  | [*] → draft          | editor creates                      | —                                              |
+| t2  | draft → in_review    | submit                              | checks pass                                    |
+| t3  | in_review → approved | approver approves                   | approver differs from author (mandatory class) |
+| t4  | in_review → rejected | approver rejects                    | reason                                         |
+| t5  | approved → active    | publish                             | previous active becomes superseded             |
+| t6  | active → superseded  | newer version published or rollback | —                                              |
 
 ```mermaid
 stateDiagram-v2
@@ -1149,16 +1185,16 @@ stateDiagram-v2
 
 States: `draft`, `pending_approval`, `scheduled`, `active`, `resolved`, `cancelled`, `expired`. Terminal: `resolved`, `cancelled`, `expired`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → draft | creator | — |
-| t2 | draft → pending_approval | submit | required fields |
-| t3 | pending_approval → scheduled | approve | second approver where required |
-| t4 | pending_approval → draft | reject | reason |
-| t5 | scheduled → active | start time | — |
-| t6 | active → resolved | operator resolves | resolution note |
-| t7 | active → expired | end time | — |
-| t8 | draft, pending_approval, scheduled → cancelled | creator cancels | — |
+| t   | From → To                                      | Trigger           | Guard                          |
+| --- | ---------------------------------------------- | ----------------- | ------------------------------ |
+| t1  | [*] → draft                                    | creator           | —                              |
+| t2  | draft → pending_approval                       | submit            | required fields                |
+| t3  | pending_approval → scheduled                   | approve           | second approver where required |
+| t4  | pending_approval → draft                       | reject            | reason                         |
+| t5  | scheduled → active                             | start time        | —                              |
+| t6  | active → resolved                              | operator resolves | resolution note                |
+| t7  | active → expired                               | end time          | —                              |
+| t8  | draft, pending_approval, scheduled → cancelled | creator cancels   | —                              |
 
 ```mermaid
 stateDiagram-v2
@@ -1181,14 +1217,14 @@ stateDiagram-v2
 
 States: `pending`, `active`, `blocked`, `expired`, `removed`. Terminal: `expired`, `removed`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → pending | opt-in started | gesture and permission, or SMS confirmation reply |
-| t2 | pending → active | confirmed | — |
-| t3 | active → blocked | browser permission denied or STOP | reversible only by the user |
-| t4 | blocked → active | user re-enables | in-product confirmation |
-| t5 | active, blocked → expired | provider 410 or undeliverable | — |
-| t6 | pending, active, blocked → removed | logout, session revoke, user remove, erasure | — |
+| t   | From → To                          | Trigger                                      | Guard                                             |
+| --- | ---------------------------------- | -------------------------------------------- | ------------------------------------------------- |
+| t1  | [*] → pending                      | opt-in started                               | gesture and permission, or SMS confirmation reply |
+| t2  | pending → active                   | confirmed                                    | —                                                 |
+| t3  | active → blocked                   | browser permission denied or STOP            | reversible only by the user                       |
+| t4  | blocked → active                   | user re-enables                              | in-product confirmation                           |
+| t5  | active, blocked → expired          | provider 410 or undeliverable                | —                                                 |
+| t6  | pending, active, blocked → removed | logout, session revoke, user remove, erasure | —                                                 |
 
 ```mermaid
 stateDiagram-v2
@@ -1207,53 +1243,55 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-NTF-001 | Notification bell and panel | top-bar component | all authenticated | Recent items, unread badge | loading, list, empty, offline |
-| SCR-NTF-002 | Notifications page | `/notifications` | all authenticated | Full list, filters, bulk actions | list, empty, bulk mode, archive |
-| SCR-NTF-003 | Notification preferences | `/settings/notifications` | all authenticated | Category by channel matrix, digests | loaded, locked cell, saving |
-| SCR-NTF-004 | Quiet hours and DND | `/settings/notifications/quiet-hours` | all authenticated | Schedule | off, on, DND |
-| SCR-NTF-005 | Push devices | `/settings/notifications/devices` | all authenticated | Manage push devices | none, list, blocked |
-| SCR-NTF-006 | SMS settings | `/settings/notifications/sms` | all authenticated | SMS opt-in | off, pending confirmation, on, stopped |
-| SCR-NTF-007 | Alerts | `/settings/notifications/alerts` | all authenticated | Alert subscriptions | list, paused |
-| SCR-NTF-008 | Reminders | `/reminders` | all authenticated | Scheduled reminders | list, empty |
-| SCR-NTF-009 | Message history | `/settings/notifications/history` | all authenticated | Delivery log | list, empty |
-| SCR-NTF-010 | Unsubscribe confirmation | `/unsubscribe/:token` | GUE, all | One-step unsubscribe, undo | done, expired, mandatory |
-| SCR-NTF-011 | Address problem banner | in-app banner | all authenticated | Undeliverable email help | shown, resolved |
-| SCR-NTF-012 | System banner | app shell | all | Broadcast banners | info, warning, critical |
-| SCR-NTF-013 | Org notification rules | `/org/:id/settings/notifications` | EAD, IAD, EXA | Team routing and channels | rules list, channel failing |
-| SCR-NTF-014 | Notification catalog | `/admin/notifications/catalog` | PAD | Catalog management | list, entry, in review |
-| SCR-NTF-015 | Template editor | `/admin/notifications/templates/:key` | PAD, SAD | Edit, preview, approve | draft, review, active |
-| SCR-NTF-016 | Locale coverage | `/admin/notifications/locales` | PAD | Translation coverage | matrix |
-| SCR-NTF-017 | Delivery operations | `/admin/notifications/deliveries` | PAD, SAD, SUP (G) | Search, timeline, replay | found, not found |
-| SCR-NTF-018 | Dead letters | `/admin/notifications/dead-letters` | PAD | Replay failed | list, replay done |
-| SCR-NTF-019 | Suppression list | `/admin/notifications/suppression` | PAD, SAD | View and unsuppress | list |
-| SCR-NTF-020 | Deliverability dashboard | `/admin/notifications/deliverability` | PAD, SAD | Reputation, DNS | healthy, paused |
-| SCR-NTF-021 | Campaigns | `/admin/notifications/campaigns` | PAD, SAD | Create and send | draft, sending, sent |
-| SCR-NTF-022 | Broadcasts | `/admin/notifications/broadcasts` | PAD, SAD | Create and manage | draft, active, resolved |
-| SCR-NTF-023 | Dev outbox | `/dev/outbox` | non-production only | Captured messages | list, viewer |
-| SCR-NTF-024 | Digest preview | `/settings/notifications/digest-preview` | all authenticated | See what the next digest holds | preview, empty |
+| ID          | Name                        | Route proposal                           | Roles               | Purpose                             | Key states                             |
+| ----------- | --------------------------- | ---------------------------------------- | ------------------- | ----------------------------------- | -------------------------------------- |
+| SCR-NTF-001 | Notification bell and panel | top-bar component                        | all authenticated   | Recent items, unread badge          | loading, list, empty, offline          |
+| SCR-NTF-002 | Notifications page          | `/notifications`                         | all authenticated   | Full list, filters, bulk actions    | list, empty, bulk mode, archive        |
+| SCR-NTF-003 | Notification preferences    | `/settings/notifications`                | all authenticated   | Category by channel matrix, digests | loaded, locked cell, saving            |
+| SCR-NTF-004 | Quiet hours and DND         | `/settings/notifications/quiet-hours`    | all authenticated   | Schedule                            | off, on, DND                           |
+| SCR-NTF-005 | Push devices                | `/settings/notifications/devices`        | all authenticated   | Manage push devices                 | none, list, blocked                    |
+| SCR-NTF-006 | SMS settings                | `/settings/notifications/sms`            | all authenticated   | SMS opt-in                          | off, pending confirmation, on, stopped |
+| SCR-NTF-007 | Alerts                      | `/settings/notifications/alerts`         | all authenticated   | Alert subscriptions                 | list, paused                           |
+| SCR-NTF-008 | Reminders                   | `/reminders`                             | all authenticated   | Scheduled reminders                 | list, empty                            |
+| SCR-NTF-009 | Message history             | `/settings/notifications/history`        | all authenticated   | Delivery log                        | list, empty                            |
+| SCR-NTF-010 | Unsubscribe confirmation    | `/unsubscribe/:token`                    | GUE, all            | One-step unsubscribe, undo          | done, expired, mandatory               |
+| SCR-NTF-011 | Address problem banner      | in-app banner                            | all authenticated   | Undeliverable email help            | shown, resolved                        |
+| SCR-NTF-012 | System banner               | app shell                                | all                 | Broadcast banners                   | info, warning, critical                |
+| SCR-NTF-013 | Org notification rules      | `/org/:id/settings/notifications`        | EAD, IAD, EXA       | Team routing and channels           | rules list, channel failing            |
+| SCR-NTF-014 | Notification catalog        | `/admin/notifications/catalog`           | PAD                 | Catalog management                  | list, entry, in review                 |
+| SCR-NTF-015 | Template editor             | `/admin/notifications/templates/:key`    | PAD, SAD            | Edit, preview, approve              | draft, review, active                  |
+| SCR-NTF-016 | Locale coverage             | `/admin/notifications/locales`           | PAD                 | Translation coverage                | matrix                                 |
+| SCR-NTF-017 | Delivery operations         | `/admin/notifications/deliveries`        | PAD, SAD, SUP (G)   | Search, timeline, replay            | found, not found                       |
+| SCR-NTF-018 | Dead letters                | `/admin/notifications/dead-letters`      | PAD                 | Replay failed                       | list, replay done                      |
+| SCR-NTF-019 | Suppression list            | `/admin/notifications/suppression`       | PAD, SAD            | View and unsuppress                 | list                                   |
+| SCR-NTF-020 | Deliverability dashboard    | `/admin/notifications/deliverability`    | PAD, SAD            | Reputation, DNS                     | healthy, paused                        |
+| SCR-NTF-021 | Campaigns                   | `/admin/notifications/campaigns`         | PAD, SAD            | Create and send                     | draft, sending, sent                   |
+| SCR-NTF-022 | Broadcasts                  | `/admin/notifications/broadcasts`        | PAD, SAD            | Create and manage                   | draft, active, resolved                |
+| SCR-NTF-023 | Dev outbox                  | `/dev/outbox`                            | non-production only | Captured messages                   | list, viewer                           |
+| SCR-NTF-024 | Digest preview              | `/settings/notifications/digest-preview` | all authenticated   | See what the next digest holds      | preview, empty                         |
 
 Accessibility notes for all screens: WCAG 2.2 AA; the bell badge exposes the exact count in its accessible name; new-item announcements use polite live regions; the panel is a dialog with focus return and Escape; the preference matrix is a data table with row and column headers; state is shown by text and icon, not color alone; motion respects reduced-motion settings (FR-SET-021).
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-NTF-01 | NotificationRequest | id, template_key, recipient_ref, variables (redacted), idempotency_key, priority, created_at | Notification | 90 days |
-| ENT-NTF-02 | Notification (in-app item) | id, recipient_ref, context, category, title, body, target_link, created_at, read_at, archived_at, snoozed_until, group_key, group_count, priority | Request, Recipient | read 180 days, unread 365 days, archived 30 days |
-| ENT-NTF-03 | Delivery | id, notification_id, channel, state, decision_reason, attempts, release_at, ttl_at, provider_message_id, error_class, updated_at | Notification | 90 days detail, 24 months aggregated |
-| ENT-NTF-04 | ChannelEndpoint | id, recipient_ref, type (push_web, push_mobile, sms), endpoint (encrypted), device_label, state, opt_in_at, wording_version | Recipient | Until removal or erasure |
-| ENT-NTF-05 | NotificationPreference | recipient_ref, category, channel, enabled, digest_frequency, source, updated_at; quiet-hours fields | Recipient, Catalog | Until erasure |
-| ENT-NTF-06 | SuppressionEntry | address_hash, channel, reason, since, expires_at, source_event | none | By reason; hash only |
-| ENT-NTF-07 | Template and TemplateVersion | key, locale, channel, version, content, status, author, approver, checks | Catalog | Permanent |
-| ENT-NTF-08 | DigestBatch | id, recipient_ref, window_start, status, item_count | Delivery | 90 days |
-| ENT-NTF-09 | Broadcast | id, type, severity, audience_def, channels, start_at, end_at, state, approvals | Notification | 24 months |
-| ENT-NTF-10 | AlertSubscription | id, subscriber_ref, kind, query_ref, frequency, channels, status, last_match_at | Recipient | Until delete or erasure |
-| ENT-NTF-11 | Reminder | id, recipient_ref, template_key, fire_at_utc, local_time, zone, target_ref, state | Recipient | 30 days after fire |
-| ENT-NTF-12 | ProviderEvent | provider, event_id, type, delivery_id, at, signature_ok | Delivery | 30 days |
-| ENT-NTF-13 | CatalogEntry | key, class, channels, defaults, lane, ttl_hours, digest_eligible, groupable, throttle_group, sensitive_content, owner_module, status | Template | Permanent |
-| ENT-NTF-14 | OrgRoutingRule | org_id, event, condition, recipients, channels, detail_mode | Organization | While the org exists |
+| ID         | Entity                       | Key attributes                                                                                                                                    | Relationships      | Retention class                                  |
+| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------ |
+| ENT-NTF-01 | NotificationRequest          | id, template_key, recipient_ref, variables (redacted), idempotency_key, priority, created_at                                                      | Notification       | 90 days                                          |
+| ENT-NTF-02 | Notification (in-app item)   | id, recipient_ref, context, category, title, body, target_link, created_at, read_at, archived_at, snoozed_until, group_key, group_count, priority | Request, Recipient | read 180 days, unread 365 days, archived 30 days |
+| ENT-NTF-03 | Delivery                     | id, notification_id, channel, state, decision_reason, attempts, release_at, ttl_at, provider_message_id, error_class, updated_at                  | Notification       | 90 days detail, 24 months aggregated             |
+| ENT-NTF-04 | ChannelEndpoint              | id, recipient_ref, type (push_web, push_mobile, sms), endpoint (encrypted), device_label, state, opt_in_at, wording_version                       | Recipient          | Until removal or erasure                         |
+| ENT-NTF-05 | NotificationPreference       | recipient_ref, category, channel, enabled, digest_frequency, source, updated_at; quiet-hours fields                                               | Recipient, Catalog | Until erasure                                    |
+| ENT-NTF-06 | SuppressionEntry             | address_hash, channel, reason, since, expires_at, source_event                                                                                    | none               | By reason; hash only                             |
+| ENT-NTF-07 | Template and TemplateVersion | key, locale, channel, version, content, status, author, approver, checks                                                                          | Catalog            | Permanent                                        |
+| ENT-NTF-08 | DigestBatch                  | id, recipient_ref, window_start, status, item_count                                                                                               | Delivery           | 90 days                                          |
+| ENT-NTF-09 | Broadcast                    | id, type, severity, audience_def, channels, start_at, end_at, state, approvals                                                                    | Notification       | 24 months                                        |
+| ENT-NTF-10 | AlertSubscription            | id, subscriber_ref, kind, query_ref, frequency, channels, status, last_match_at                                                                   | Recipient          | Until delete or erasure                          |
+| ENT-NTF-11 | Reminder                     | id, recipient_ref, template_key, fire_at_utc, local_time, zone, target_ref, state                                                                 | Recipient          | 30 days after fire                               |
+| ENT-NTF-12 | ProviderEvent                | provider, event_id, type, delivery_id, at, signature_ok                                                                                           | Delivery           | 30 days                                          |
+| ENT-NTF-13 | CatalogEntry                 | key, class, channels, defaults, lane, ttl_hours, digest_eligible, groupable, throttle_group, sensitive_content, owner_module, status              | Template           | Permanent                                        |
+| ENT-NTF-14 | OrgRoutingRule               | org_id, event, condition, recipients, channels, detail_mode                                                                                       | Organization       | While the org exists                             |
+| ENT-NTF-15 | AutomationRule               | id, ownerId, name, trigger{key, params}, conditions[], actions[], state (active, paused, error), runLimitPerDay, createdAt, lastRunAt             | N:1 user           | Until deleted                                    |
+| ENT-NTF-16 | AutomationRun                | id, ruleId, eventId, outcome (done, partial, failed, skipped), actionResults[], at                                                                | N:1 AutomationRule | 90 days                                          |
 
 ```mermaid
 erDiagram
@@ -1274,117 +1312,119 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload |
-|---|---|---|---|
-| EVT-NTF-001 | ntf.notification.created | in-app item created | notification id, recipient ref, category |
-| EVT-NTF-002 | ntf.notification.read | read action | notification id |
-| EVT-NTF-003 | ntf.delivery.sent | provider accepted | delivery id, channel |
-| EVT-NTF-004 | ntf.delivery.delivered | confirmed | delivery id, channel |
-| EVT-NTF-005 | ntf.delivery.failed | permanent failure | delivery id, error class |
-| EVT-NTF-006 | ntf.delivery.bounced | hard bounce | delivery id |
-| EVT-NTF-007 | ntf.delivery.complained | complaint | delivery id |
-| EVT-NTF-008 | ntf.delivery.suppressed | routing suppress | delivery id, reason |
-| EVT-NTF-009 | ntf.address.suppressed | suppression added | recipient ref, reason |
-| EVT-NTF-010 | ntf.preference.changed | preference write | recipient ref, category, channel |
-| EVT-NTF-011 | ntf.unsubscribed | unsubscribe | recipient ref, category |
-| EVT-NTF-012 | ntf.endpoint.registered | push or SMS endpoint added or removed | recipient ref, type |
-| EVT-NTF-013 | ntf.digest.sent | digest delivered | recipient ref, item count |
-| EVT-NTF-014 | ntf.broadcast.started | broadcast active or resolved | broadcast id |
-| EVT-NTF-015 | ntf.template.published | template active | key, locale, version |
-| EVT-NTF-016 | ntf.alert.matched | alert match | subscription id, count |
-| EVT-NTF-017 | ntf.reminder.fired | reminder sent | reminder id |
-| EVT-NTF-018 | ntf.stream.paused | deliverability pause | stream, reason |
+| ID          | Event                    | Trigger                                                          | Key payload                              |
+| ----------- | ------------------------ | ---------------------------------------------------------------- | ---------------------------------------- |
+| EVT-NTF-001 | ntf.notification.created | in-app item created                                              | notification id, recipient ref, category |
+| EVT-NTF-002 | ntf.notification.read    | read action                                                      | notification id                          |
+| EVT-NTF-003 | ntf.delivery.sent        | provider accepted                                                | delivery id, channel                     |
+| EVT-NTF-004 | ntf.delivery.delivered   | confirmed                                                        | delivery id, channel                     |
+| EVT-NTF-005 | ntf.delivery.failed      | permanent failure                                                | delivery id, error class                 |
+| EVT-NTF-006 | ntf.delivery.bounced     | hard bounce                                                      | delivery id                              |
+| EVT-NTF-007 | ntf.delivery.complained  | complaint                                                        | delivery id                              |
+| EVT-NTF-008 | ntf.delivery.suppressed  | routing suppress                                                 | delivery id, reason                      |
+| EVT-NTF-009 | ntf.address.suppressed   | suppression added                                                | recipient ref, reason                    |
+| EVT-NTF-010 | ntf.preference.changed   | preference write                                                 | recipient ref, category, channel         |
+| EVT-NTF-011 | ntf.unsubscribed         | unsubscribe                                                      | recipient ref, category                  |
+| EVT-NTF-012 | ntf.endpoint.registered  | push or SMS endpoint added or removed                            | recipient ref, type                      |
+| EVT-NTF-013 | ntf.digest.sent          | digest delivered                                                 | recipient ref, item count                |
+| EVT-NTF-014 | ntf.broadcast.started    | broadcast active or resolved                                     | broadcast id                             |
+| EVT-NTF-015 | ntf.template.published   | template active                                                  | key, locale, version                     |
+| EVT-NTF-016 | ntf.alert.matched        | alert match                                                      | subscription id, count                   |
+| EVT-NTF-017 | ntf.reminder.fired       | reminder sent                                                    | reminder id                              |
+| EVT-NTF-018 | ntf.stream.paused        | deliverability pause                                             | stream, reason                           |
+| EVT-NTF-019 | ntf.automation.run       | A rule was evaluated and its actions executed, failed or skipped | rule id, event id, outcome               |
 
 ### 9.2 Consumed
 
-| Event | From | Used for |
-|---|---|---|
-| `notify.request` and module domain events (for example idn.device.new_sign_in; planned ats.application.status_changed, int.interview.scheduled) | All modules | Notifications |
-| idn.account.deactivated, suspended, erasure_pending, erased | IDN | Stop non-mandatory sends; purge queues |
-| idn.session.revoked | IDN | Delete push endpoints of the session |
-| idn.email.changed | IDN | Switch address; clear stale suppression |
-| set.consent.changed (`comms.marketing_email`, `analytics.product`) | SET | Marketing eligibility; tracking |
-| set.setting.changed (locale, time zone) | SET | Rendering and scheduling |
-| set.dsr.erasure_started | SET | Purge subject data |
-| Provider webhooks | Email, SMS, push providers | Delivery states |
+| Event                                                                                                                                           | From                       | Used for                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------------------------- |
+| `notify.request` and module domain events (for example idn.device.new_sign_in; planned ats.application.status_changed, int.interview.scheduled) | All modules                | Notifications                           |
+| idn.account.deactivated, suspended, erasure_pending, erased                                                                                     | IDN                        | Stop non-mandatory sends; purge queues  |
+| idn.session.revoked                                                                                                                             | IDN                        | Delete push endpoints of the session    |
+| idn.email.changed                                                                                                                               | IDN                        | Switch address; clear stale suppression |
+| set.consent.changed (`comms.marketing_email`, `analytics.product`)                                                                              | SET                        | Marketing eligibility; tracking         |
+| set.setting.changed (locale, time zone)                                                                                                         | SET                        | Rendering and scheduling                |
+| set.dsr.erasure_started                                                                                                                         | SET                        | Purge subject data                      |
+| Provider webhooks                                                                                                                               | Email, SMS, push providers | Delivery states                         |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behavior |
-|---|---|---|
-| Transactional and marketing email providers behind a provider-independent port (Brevo is the proposed default, [SRC: SSOT V61-08]) | Email | Retry, failover, in-app remains |
-| SMS provider | SMS | Fallback to email and in-app |
-| Web Push services (browser vendors) with VAPID | Web push | Delete 410 endpoints; in-app remains |
-| APNs and FCM | Mobile push | As above |
-| Slack and Microsoft Teams webhooks | Org team channels | Channel marked failing; in-app fallback |
-| DNS and reputation tools | Deliverability | Alerts |
-| Background job platform (`PLT`) | Dispatch, digests, reminders | Delivery rows mirror job state |
-| Key management service | Encrypting endpoints | Fail closed |
-| Note | Live email delivery is not established by current source; configuring and verifying a provider is an operational task | Labeled outbox in development |
+| Dependency                                                                                                                         | Purpose                                                                                                               | Failure behavior                        |
+| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Transactional and marketing email providers behind a provider-independent port (Brevo is the proposed default, [SRC: SSOT V61-08]) | Email                                                                                                                 | Retry, failover, in-app remains         |
+| SMS provider                                                                                                                       | SMS                                                                                                                   | Fallback to email and in-app            |
+| Web Push services (browser vendors) with VAPID                                                                                     | Web push                                                                                                              | Delete 410 endpoints; in-app remains    |
+| APNs and FCM                                                                                                                       | Mobile push                                                                                                           | As above                                |
+| Slack and Microsoft Teams webhooks                                                                                                 | Org team channels                                                                                                     | Channel marked failing; in-app fallback |
+| DNS and reputation tools                                                                                                           | Deliverability                                                                                                        | Alerts                                  |
+| Background job platform (`PLT`)                                                                                                    | Dispatch, digests, reminders                                                                                          | Delivery rows mirror job state          |
+| Key management service                                                                                                             | Encrypting endpoints                                                                                                  | Fail closed                             |
+| Note                                                                                                                               | Live email delivery is not established by current source; configuring and verifying a provider is an operational task | Labeled outbox in development           |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by | For |
-|---|---|---|---|
-| IDN | Account state, sessions, contacts, locale | All modules | `notify.request` |
-| SET | Consent, locale, time zone, DSR purge | IDN | Security and verification delivery |
-| EMP, ATS (planned) | Org membership and assignees | SET | Notification preferences export |
-| PLT (planned) | Job platform, object storage | ADM (planned) | Operations consoles |
-| SRC, JOB (planned) | Alert matching | REP | Streak and badge notices |
-| INT (planned) | Interview events | MSG (planned) | New-message notices |
-| PWA (planned) | Service worker, installed push | JOB, LRN, INS (planned) | Digests, reminders |
+| Depends on         | For                                       | Depended on by          | For                                |
+| ------------------ | ----------------------------------------- | ----------------------- | ---------------------------------- |
+| IDN                | Account state, sessions, contacts, locale | All modules             | `notify.request`                   |
+| SET                | Consent, locale, time zone, DSR purge     | IDN                     | Security and verification delivery |
+| EMP, ATS (planned) | Org membership and assignees              | SET                     | Notification preferences export    |
+| PLT (planned)      | Job platform, object storage              | ADM (planned)           | Operations consoles                |
+| SRC, JOB (planned) | Alert matching                            | REP                     | Streak and badge notices           |
+| INT (planned)      | Interview events                          | MSG (planned)           | New-message notices                |
+| PWA (planned)      | Service worker, installed push            | JOB, LRN, INS (planned) | Digests, reminders                 |
 
 ## 12. Module-level metrics
 
-| ID | Metric | Definition / formula | Owner |
-|---|---|---|---|
-| NTF-M01 | Mandatory delivery rate | mandatory deliveries delivered or surfaced in-app within 5 min ÷ mandatory requests | Platform engineering |
-| NTF-M02 | Delivery latency | p50 and p95 seconds from request to `sent` by lane | Platform engineering |
-| NTF-M03 | Bounce rate | hard bounces ÷ sent per stream | PAD |
-| NTF-M04 | Complaint rate | complaints ÷ delivered per stream (threshold 0.1%) | PAD |
-| NTF-M05 | Unsubscribe rate | unsubscribes ÷ delivered per category | Product |
-| NTF-M06 | Notifications per user per week | median and p95 by class | Product |
-| NTF-M07 | Unread drift | badge vs list mismatches per 10,000 opens (target 0) | Platform engineering |
-| NTF-M08 | Dead letters | count per day by channel | Platform engineering |
-| NTF-M09 | Quiet-hour violations | non-exempt sends inside quiet hours (target 0) | Platform engineering |
-| NTF-M10 | Preference opt-out rate | opt-outs by category (informational) | Product |
-| NTF-M11 | Digest skip rate | skipped empty ÷ scheduled | Product |
-| NTF-M12 | Template coverage | enabled locales complete ÷ enabled locales | PAD |
+| ID      | Metric                          | Definition / formula                                                                | Owner                |
+| ------- | ------------------------------- | ----------------------------------------------------------------------------------- | -------------------- |
+| NTF-M01 | Mandatory delivery rate         | mandatory deliveries delivered or surfaced in-app within 5 min ÷ mandatory requests | Platform engineering |
+| NTF-M02 | Delivery latency                | p50 and p95 seconds from request to `sent` by lane                                  | Platform engineering |
+| NTF-M03 | Bounce rate                     | hard bounces ÷ sent per stream                                                      | PAD                  |
+| NTF-M04 | Complaint rate                  | complaints ÷ delivered per stream (threshold 0.1%)                                  | PAD                  |
+| NTF-M05 | Unsubscribe rate                | unsubscribes ÷ delivered per category                                               | Product              |
+| NTF-M06 | Notifications per user per week | median and p95 by class                                                             | Product              |
+| NTF-M07 | Unread drift                    | badge vs list mismatches per 10,000 opens (target 0)                                | Platform engineering |
+| NTF-M08 | Dead letters                    | count per day by channel                                                            | Platform engineering |
+| NTF-M09 | Quiet-hour violations           | non-exempt sends inside quiet hours (target 0)                                      | Platform engineering |
+| NTF-M10 | Preference opt-out rate         | opt-outs by category (informational)                                                | Product              |
+| NTF-M11 | Digest skip rate                | skipped empty ÷ scheduled                                                           | Product              |
+| NTF-M12 | Template coverage               | enabled locales complete ÷ enabled locales                                          | PAD                  |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-NTF-01 | Is SMS offered, in which countries, and with which provider? | none, security only, security plus time-critical | security plus time-critical, disabled until a provider is chosen | Owner | FR-NTF-013 |
-| OD-NTF-02 | Email provider and region (Brevo default proposed in V61-08, unratified). | Brevo, other | provider-independent port; decision pending | Owner | FR-NTF-007 |
-| OD-NTF-03 | Digest times and whether 21:00 and 08:00 fall inside quiet hours; allowed digest frequencies (BR-T087 caps 1 per day; instant, daily, weekly are for job alerts only). | deliver at window end, ignore quiet hours | deliver at quiet-hours end; digests daily or weekly | Product director | FR-NTF-016 |
-| OD-NTF-04 | Time zone for scheduled jobs (UTC or user local day; source DOR-010 open). | UTC, user local | user local, scheduled in UTC buckets | Product director | FR-NTF-016, FR-REP-011 |
-| OD-NTF-05 | Are open and click tracking used, and for which classes? | none, engagement only | clicks only for engagement and marketing with analytics consent; no open tracking | Owner and counsel | FR-NTF-008 |
-| OD-NTF-06 | Are native mobile apps planned (affects mobile push)? | PWA only, native later | PWA only (feature is `Could`) | Owner | FR-NTF-012 |
-| OD-NTF-07 | Org-branded sender for employer messages. | allowed, never | never (`Won't-now`); org identity appears in the body | Product director | FR-NTF-007 |
-| OD-NTF-08 | Retention of delivery detail. | 30, 90, 180 days | 90 days | Counsel | FR-NTF-022 |
+| ID        | Question                                                                                                                                                                                                  | Options                                                                                                                                                                              | Default proposal                                                                  | Who decides               | Blocking                               |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | ------------------------- | -------------------------------------- |
+| OD-NTF-01 | Is SMS offered, in which countries, and with which provider?                                                                                                                                              | none, security only, security plus time-critical                                                                                                                                     | security plus time-critical, disabled until a provider is chosen                  | Owner                     | FR-NTF-013                             |
+| OD-NTF-02 | Email provider and region (Brevo default proposed in V61-08, unratified).                                                                                                                                 | Brevo, other                                                                                                                                                                         | provider-independent port; decision pending                                       | Owner                     | FR-NTF-007                             |
+| OD-NTF-03 | Digest times and whether 21:00 and 08:00 fall inside quiet hours; allowed digest frequencies (BR-T087 caps 1 per day; instant, daily, weekly are for job alerts only).                                    | deliver at window end, ignore quiet hours                                                                                                                                            | deliver at quiet-hours end; digests daily or weekly                               | Product director          | FR-NTF-016                             |
+| OD-NTF-04 | Time zone for scheduled jobs (UTC or user local day; source DOR-010 open).                                                                                                                                | UTC, user local                                                                                                                                                                      | user local, scheduled in UTC buckets                                              | Product director          | FR-NTF-016, FR-REP-011                 |
+| OD-NTF-05 | Are open and click tracking used, and for which classes?                                                                                                                                                  | none, engagement only                                                                                                                                                                | clicks only for engagement and marketing with analytics consent; no open tracking | Owner and counsel         | FR-NTF-008                             |
+| OD-NTF-06 | Are native mobile apps planned (affects mobile push)?                                                                                                                                                     | PWA only, native later                                                                                                                                                               | PWA only (feature is `Could`)                                                     | Owner                     | FR-NTF-012                             |
+| OD-NTF-07 | Org-branded sender for employer messages.                                                                                                                                                                 | allowed, never                                                                                                                                                                       | never (`Won't-now`); org identity appears in the body                             | Product director          | FR-NTF-007                             |
+| OD-NTF-08 | Retention of delivery detail.                                                                                                                                                                             | 30, 90, 180 days                                                                                                                                                                     | 90 days                                                                           | Counsel                   | FR-NTF-022                             |
+| OD-NTF-09 | SSOT F-49 names "Automation & Agents". May the platform offer autonomous agents that act for a member (for example auto-apply or auto-message), or only the deterministic owner-only rules of FR-NTF-033? | A: deterministic owner-only rules; B: A plus scheduled agent tasks where every outgoing action needs the member's explicit approval (the legacy F-49 position); C: autonomous agents | A `[PROP]`; C conflicts with SSOT §4.2 and `BR-AIC-004`                           | Product owner and counsel | FR-NTF-033 scope, FR-AIC-008 extension |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-NTF-01 | Reputation damage from complaint spikes harms security email delivery | M / H | Separate streams, auto-pause, warm-up (FR-NTF-031) |
-| RSK-NTF-02 | Notification fatigue drives disablement and churn | H / M | Caps, grouping, digests, nudge budget |
-| RSK-NTF-03 | Phishing by imitating platform emails | M / H | Fixed security layout and phrase, no sign-in links (BR-NTF-031) |
-| RSK-NTF-04 | Provider outage delays security mail | M / M | Failover, in-app source of truth, retries |
-| RSK-NTF-05 | Sensitive detail leaks via lock screen or shared mailbox | M / M | Generic push, `sensitiveContent` flag |
-| RSK-NTF-06 | Loop bug floods a user with mandatory messages | L / M | Anomaly caps and alerts |
-| RSK-NTF-07 | Live delivery assumed from source but never verified | M / M | Outbox labeling and an explicit provider readiness check before launch |
-| RSK-NTF-08 | Quiet-hours or time-zone errors cause wrong-time sends | M / L | DST-safe tests, user-confirmed zone |
+| ID         | Risk                                                                  | Likelihood / impact | Mitigation                                                             |
+| ---------- | --------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------- |
+| RSK-NTF-01 | Reputation damage from complaint spikes harms security email delivery | M / H               | Separate streams, auto-pause, warm-up (FR-NTF-031)                     |
+| RSK-NTF-02 | Notification fatigue drives disablement and churn                     | H / M               | Caps, grouping, digests, nudge budget                                  |
+| RSK-NTF-03 | Phishing by imitating platform emails                                 | M / H               | Fixed security layout and phrase, no sign-in links (BR-NTF-031)        |
+| RSK-NTF-04 | Provider outage delays security mail                                  | M / M               | Failover, in-app source of truth, retries                              |
+| RSK-NTF-05 | Sensitive detail leaks via lock screen or shared mailbox              | M / M               | Generic push, `sensitiveContent` flag                                  |
+| RSK-NTF-06 | Loop bug floods a user with mandatory messages                        | L / M               | Anomaly caps and alerts                                                |
+| RSK-NTF-07 | Live delivery assumed from source but never verified                  | M / M               | Outbox labeling and an explicit provider readiness check before launch |
+| RSK-NTF-08 | Quiet-hours or time-zone errors cause wrong-time sends                | M / L               | DST-safe tests, user-confirmed zone                                    |
 
 ## 15. Legacy source trace
 
-| Legacy source | What was used | What was dropped or changed and why |
-|---|---|---|
-| `SSOT.md` F-14 Notification Center, F-29 digest, §13.6 job `notification.digest`, §13.9 realtime vs polling, Appendix D M-55 badge | In-app center, digest, polling boundary, badge reconciliation | Supabase Realtime assumption replaced by a transport-agnostic stream with polling fallback |
-| `docs/registries/FEATURE_REGISTRY.md` F-14, F-29 | Feature identities | Split into 32 features |
-| `Yash_Final_Project_Document/06_BUSINESS_PROCESSES/DECISION_TABLES.md` DT-07; `STATE_MACHINES.md` SM-NOTIFY; `BUSINESS_RULES_REGISTRY.md` BR-T085..T087 | Routing order, delivery state machine, classes, quiet hours, caps | Values kept as parameters; DOR-010 time-zone question recorded as OD-NTF-04 |
-| `Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/INTEGRATION_ARCHITECTURE.md` push section | VAPID, opt-in, generic payload | — |
-| `Yash_Final_Project_Document/16_QA_AND_TESTING/TEST_CATALOG.md` TEST-MSG-001, 007, 008, 010 | Acceptance cases for quiet hours, mandatory classes, outbox retries, unsubscribe | — |
-| `CLAUDE.md` email section | Provider-independent service, dev outbox, live delivery not established | Used for BR-NTF-026 and the statement in FR-NTF-007 |
-| Industry products (LinkedIn notification settings, Slack digests, Braze and Customer.io channel patterns, RFC 8058) | Preference matrix, grouping, one-click unsubscribe, snooze | Tagged `[PROP]`: FR-NTF-005 snooze, 012, 013, 018 grouping, 024, 025, 027, 031 |
+| Legacy source                                                                                                                                           | What was used                                                                    | What was dropped or changed and why                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `SSOT.md` F-14 Notification Center, F-29 digest, §13.6 job `notification.digest`, §13.9 realtime vs polling, Appendix D M-55 badge                      | In-app center, digest, polling boundary, badge reconciliation                    | Supabase Realtime assumption replaced by a transport-agnostic stream with polling fallback |
+| `docs/registries/FEATURE_REGISTRY.md` F-14, F-29                                                                                                        | Feature identities                                                               | Split into 32 features                                                                     |
+| `Yash_Final_Project_Document/06_BUSINESS_PROCESSES/DECISION_TABLES.md` DT-07; `STATE_MACHINES.md` SM-NOTIFY; `BUSINESS_RULES_REGISTRY.md` BR-T085..T087 | Routing order, delivery state machine, classes, quiet hours, caps                | Values kept as parameters; DOR-010 time-zone question recorded as OD-NTF-04                |
+| `Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/INTEGRATION_ARCHITECTURE.md` push section                                                   | VAPID, opt-in, generic payload                                                   | —                                                                                          |
+| `Yash_Final_Project_Document/16_QA_AND_TESTING/TEST_CATALOG.md` TEST-MSG-001, 007, 008, 010                                                             | Acceptance cases for quiet hours, mandatory classes, outbox retries, unsubscribe | —                                                                                          |
+| `CLAUDE.md` email section                                                                                                                               | Provider-independent service, dev outbox, live delivery not established          | Used for BR-NTF-026 and the statement in FR-NTF-007                                        |
+| Industry products (LinkedIn notification settings, Slack digests, Braze and Customer.io channel patterns, RFC 8058)                                     | Preference matrix, grouping, one-click unsubscribe, snooze                       | Tagged `[PROP]`: FR-NTF-005 snooze, 012, 013, 018 grouping, 024, 025, 027, 031             |

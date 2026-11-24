@@ -15,72 +15,72 @@ So deletion is specified as a gated procedure (section 5), not performed here. E
 
 ## 2. Disposition classes
 
-| Class | Meaning |
-|---|---|
-| **Keep** | Required by code, tests, CI or repository rules, or records as-built truth. Stays. |
+| Class                             | Meaning                                                                                   |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Keep**                          | Required by code, tests, CI or repository rules, or records as-built truth. Stays.        |
 | **Superseded after ratification** | Content has a counterpart in the blueprint. Candidate for deletion once section 5 passes. |
-| **Archive then delete** | Historical working material with no ongoing function. Candidate after section 5. |
-| **Out of scope** | Not project documentation (personal notes, tool output). Owner decides. |
+| **Archive then delete**           | Historical working material with no ongoing function. Candidate after section 5.          |
+| **Out of scope**                  | Not project documentation (personal notes, tool output). Owner decides.                   |
 
 ## 3. Root and `docs/` files
 
-| Legacy file or folder | Class | Blueprint counterpart | Reason |
-|---|---|---|---|
-| `SSOT.md` | Superseded after ratification | Whole blueprint; scope in `01_PRODUCT`, features in `02_MODULES`, registers in `09_REGISTERS` | Founder intent of record until `OD-PRD-31`. Referenced by `CLAUDE.md`, `AGENTS.md`, source comments, migrations. |
-| `ARCHITECTURE.md` | Keep | `04_ARCHITECTURE` is the target; this is the as-built record | Governs what exists. |
-| `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `RETICLE.md` | Keep | n/a | Agent and tooling rules. |
-| `README.md` | Keep (update to link the blueprint after ratification) | n/a | Setup entry point. |
-| `REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`, `docs/reports/*` | Keep | n/a | Dated evidence of what happened; feeds status, not intent. |
-| `BRAIN/` | Keep | n/a | Project memory and execution history. |
-| `docs/INDEX.md` | Keep, add a pointer to the blueprint | `00_START_HERE/README.md` | Index of the legacy set. |
-| `docs/PRICING.md` | Keep | `BIL` (parameters only) | Read by a test; prices are `OD-BIL-01`. |
-| `docs/system-model/06-route-authorization.md` | Keep | `04_ARCHITECTURE/03_API_DESIGN.md` | Read by a test. |
-| `docs/system-model/*` (other) | Superseded after ratification | `04_ARCHITECTURE`, `09_REGISTERS` | Source inventory and flows; as-built coverage notes should move to `ARCHITECTURE.md` first. |
-| `docs/product/PRD.md` | Superseded after ratification | `01_PRODUCT` | |
-| `docs/registries/FEATURE_REGISTRY.md` | Superseded after ratification | `09_REGISTERS/FEATURE_REGISTER.md` plus [`LEGACY_FEATURE_COVERAGE.md`](LEGACY_FEATURE_COVERAGE.md) | Legacy ids `F-01…F-173` are cited in the blueprint `Source` fields; keep a mapping file after deletion. |
-| `docs/registries/BUSINESS_RULE_REGISTRY.md`, `WORKFLOWS_AND_BUSINESS_RULES.md` | Superseded after ratification | `09_REGISTERS/BUSINESS_RULE_REGISTER.md`, `STATE_MACHINE_REGISTER.md` | Legacy `BR-001…248` ids are cited as sources; many were re-derived because the registry lacked text (for example `BR-263…268`). |
-| `docs/experience/*` | Superseded after ratification | `03_EXPERIENCE`, `01_PRODUCT/05_USER_JOURNEYS.md` | |
-| `docs/engineering/TRD.md`, `TARGET_ARCHITECTURE.md`, `adr/*` | Superseded after ratification | `04_ARCHITECTURE`, `06_QUALITY_AND_PERFORMANCE` | ADR-015 and ADR-016 record decisions about built behavior; move them into `ARCHITECTURE.md` before deleting. |
-| `docs/engineering/DATABASE.md`, `API_CONTRACTS.md`, `CODE_STYLE.md`, `PROJECT_MAINTENANCE.md`, `HOSTED_SUPABASE_MIGRATION_GATE.md` | Keep | n/a | Describe built behavior and gates; `CLAUDE.md` points at `CODE_STYLE.md`. |
-| `docs/quality/*` | Superseded after ratification | `05_SECURITY_PRIVACY`, `06_QUALITY_AND_PERFORMANCE`, `07_DEVOPS_AND_OPERATIONS` | `ci.yml` header cites `docs/quality/TESTING.md`; update the comment first (a build file: owner approval). |
-| `docs/governance/*` | Superseded after ratification | `01_PRODUCT/08_STAKEHOLDER_DECISIONS_NEEDED.md`, `09_REGISTERS` | Open conflicts move to the open decisions register. |
-| `docs/superpowers/` | Out of scope | n/a | Agent plans. |
-| `TalentSphere/` (notes vault) | Out of scope | n/a | Personal vault, excluded by `.prettierignore`. |
-| `graphify-out/`, `.omc/` | Out of scope | n/a | Tool output. |
+| Legacy file or folder                                                                                                              | Class                                                  | Blueprint counterpart                                                                              | Reason                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md`                                                                                                                          | Superseded after ratification                          | Whole blueprint; scope in `01_PRODUCT`, features in `02_MODULES`, registers in `09_REGISTERS`      | Founder intent of record until `OD-PRD-31`. Referenced by `CLAUDE.md`, `AGENTS.md`, source comments, migrations.                |
+| `ARCHITECTURE.md`                                                                                                                  | Keep                                                   | `04_ARCHITECTURE` is the target; this is the as-built record                                       | Governs what exists.                                                                                                            |
+| `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `RETICLE.md`                                                                                | Keep                                                   | n/a                                                                                                | Agent and tooling rules.                                                                                                        |
+| `README.md`                                                                                                                        | Keep (update to link the blueprint after ratification) | n/a                                                                                                | Setup entry point.                                                                                                              |
+| `REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`, `docs/reports/*`                                                                    | Keep                                                   | n/a                                                                                                | Dated evidence of what happened; feeds status, not intent.                                                                      |
+| `BRAIN/`                                                                                                                           | Keep                                                   | n/a                                                                                                | Project memory and execution history.                                                                                           |
+| `docs/INDEX.md`                                                                                                                    | Keep, add a pointer to the blueprint                   | `00_START_HERE/README.md`                                                                          | Index of the legacy set.                                                                                                        |
+| `docs/PRICING.md`                                                                                                                  | Keep                                                   | `BIL` (parameters only)                                                                            | Read by a test; prices are `OD-BIL-01`.                                                                                         |
+| `docs/system-model/06-route-authorization.md`                                                                                      | Keep                                                   | `04_ARCHITECTURE/03_API_DESIGN.md`                                                                 | Read by a test.                                                                                                                 |
+| `docs/system-model/*` (other)                                                                                                      | Superseded after ratification                          | `04_ARCHITECTURE`, `09_REGISTERS`                                                                  | Source inventory and flows; as-built coverage notes should move to `ARCHITECTURE.md` first.                                     |
+| `docs/product/PRD.md`                                                                                                              | Superseded after ratification                          | `01_PRODUCT`                                                                                       |                                                                                                                                 |
+| `docs/registries/FEATURE_REGISTRY.md`                                                                                              | Superseded after ratification                          | `09_REGISTERS/FEATURE_REGISTER.md` plus [`LEGACY_FEATURE_COVERAGE.md`](LEGACY_FEATURE_COVERAGE.md) | Legacy ids `F-01…F-173` are cited in the blueprint `Source` fields; keep a mapping file after deletion.                         |
+| `docs/registries/BUSINESS_RULE_REGISTRY.md`, `WORKFLOWS_AND_BUSINESS_RULES.md`                                                     | Superseded after ratification                          | `09_REGISTERS/BUSINESS_RULE_REGISTER.md`, `STATE_MACHINE_REGISTER.md`                              | Legacy `BR-001…248` ids are cited as sources; many were re-derived because the registry lacked text (for example `BR-263…268`). |
+| `docs/experience/*`                                                                                                                | Superseded after ratification                          | `03_EXPERIENCE`, `01_PRODUCT/05_USER_JOURNEYS.md`                                                  |                                                                                                                                 |
+| `docs/engineering/TRD.md`, `TARGET_ARCHITECTURE.md`, `adr/*`                                                                       | Superseded after ratification                          | `04_ARCHITECTURE`, `06_QUALITY_AND_PERFORMANCE`                                                    | ADR-015 and ADR-016 record decisions about built behavior; move them into `ARCHITECTURE.md` before deleting.                    |
+| `docs/engineering/DATABASE.md`, `API_CONTRACTS.md`, `CODE_STYLE.md`, `PROJECT_MAINTENANCE.md`, `HOSTED_SUPABASE_MIGRATION_GATE.md` | Keep                                                   | n/a                                                                                                | Describe built behavior and gates; `CLAUDE.md` points at `CODE_STYLE.md`.                                                       |
+| `docs/quality/*`                                                                                                                   | Superseded after ratification                          | `05_SECURITY_PRIVACY`, `06_QUALITY_AND_PERFORMANCE`, `07_DEVOPS_AND_OPERATIONS`                    | `ci.yml` header cites `docs/quality/TESTING.md`; update the comment first (a build file: owner approval).                       |
+| `docs/governance/*`                                                                                                                | Superseded after ratification                          | `01_PRODUCT/08_STAKEHOLDER_DECISIONS_NEEDED.md`, `09_REGISTERS`                                    | Open conflicts move to the open decisions register.                                                                             |
+| `docs/superpowers/`                                                                                                                | Out of scope                                           | n/a                                                                                                | Agent plans.                                                                                                                    |
+| `TalentSphere/` (notes vault)                                                                                                      | Out of scope                                           | n/a                                                                                                | Personal vault, excluded by `.prettierignore`.                                                                                  |
+| `graphify-out/`, `.omc/`                                                                                                           | Out of scope                                           | n/a                                                                                                | Tool output.                                                                                                                    |
 
 ## 4. `Yash_Final_Project_Document/`
 
 This 31-folder blueprint (about 15 MB) is the largest input. Its content was mined for the module specs and cited as `[SRC: Yash …]`. Disposition: **Superseded after ratification**, with the mapping below, except where noted.
 
-| Legacy folder | Blueprint counterpart | Note |
-|---|---|---|
-| `00_CONTROL_CENTRE` | `00_START_HERE`, `09_REGISTERS` | Control files describe the legacy set itself; drop after ratification. |
-| `01_EXECUTIVE_AND_STRATEGY` | `01_PRODUCT/01` | |
-| `02_STAKEHOLDERS_AND_USERS` | `01_PRODUCT/03`, `04` | |
-| `03_BUSINESS_DOMAINS`, `04_PRODUCT_CAPABILITIES` | `01_PRODUCT/02`, `02_MODULES` | |
-| `05_FEATURE_SPECIFICATIONS` | `02_MODULES` | Feature-level detail re-expressed in the new template. |
-| `06_BUSINESS_PROCESSES` | `01_PRODUCT/05`, module sections 6 (state machines) | |
-| `07_UI_UX_AND_DESIGN_SYSTEM` | `03_EXPERIENCE` | |
-| `08_PWA_AND_MOBILE` | `02_MODULES/PWA_*`, `03_EXPERIENCE/05` | |
-| `09_MODULE_FEDERATION`, `10_FRONTEND_ARCHITECTURE`, `11_BACKEND_ARCHITECTURE` | `04_ARCHITECTURE/01` | Module federation is not adopted by the blueprint (modular monolith); the decision and its alternatives are in `DEC-ARC-*`. |
-| `12_DATA_AND_DATABASE` | `04_ARCHITECTURE/02` | |
-| `13_API_EVENTS_AND_INTEGRATIONS` | `04_ARCHITECTURE/03` to `05`, `02_MODULES/PLT_*` | |
-| `14_SECURITY_PRIVACY_COMPLIANCE` | `05_SECURITY_PRIVACY` | |
-| `15_RELIABILITY_AND_PERFORMANCE` | `06_QUALITY_AND_PERFORMANCE/01` | |
-| `16_QA_AND_TESTING` | `06_QUALITY_AND_PERFORMANCE/02` | |
-| `17_DEVOPS_AND_INFRASTRUCTURE`, `18_OPERATIONS_AND_SUPPORT` | `07_DEVOPS_AND_OPERATIONS` | |
-| `19_BUSINESS_AND_COMMERCIAL_OPERATIONS`, `21_COST_AND_FINOPS` | `02_MODULES/BIL_*`, `07_DEVOPS_AND_OPERATIONS/03` | |
-| `20_ANALYTICS_AND_MEASUREMENT` | `02_MODULES/ANL_*` | |
-| `22_IMPLEMENTATION_ROADMAP`, `23_MIGRATION_AND_EVOLUTION` | `08_ROADMAP` | |
-| `24_RISKS_AND_DECISIONS` | `09_REGISTERS/RISK_REGISTER.md`, `OPEN_DECISIONS_REGISTER.md`, `DECISION_REGISTER.md` | |
-| `25_DIAGRAM_LIBRARY` | `10_MINDMAPS`, Mermaid diagrams in each file | |
-| `26_RESEARCH_AND_REFERENCES` | `02_MODULES` source traces | |
-| `27_INDEPENDENT_REVIEWS` | `09_REGISTERS/INTEGRITY_REPORT.md` | Reviews are history; archive. |
-| `28_TRACEABILITY_AND_COVERAGE` (2.5 MB) | [`LEGACY_FEATURE_COVERAGE.md`](LEGACY_FEATURE_COVERAGE.md), `09_REGISTERS` | Archive then delete after the coverage matrix is accepted. |
-| `29_DEVELOPER_IMPLEMENTATION_GUIDE` | `04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md` | |
-| `30_PRIOR_IMPLEMENTATION_REFERENCE` | none | Describes a prior implementation; keep until the owner confirms it has no remaining use (`OD-PRD-30`). |
-| `31_LEGACY_ARCHIVE` (1.8 MB) | none | Already an archive; archive then delete. |
-| `99_FINAL_MASTER_BLUEPRINT` | `00_START_HERE/README.md` | |
+| Legacy folder                                                                 | Blueprint counterpart                                                                 | Note                                                                                                                        |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `00_CONTROL_CENTRE`                                                           | `00_START_HERE`, `09_REGISTERS`                                                       | Control files describe the legacy set itself; drop after ratification.                                                      |
+| `01_EXECUTIVE_AND_STRATEGY`                                                   | `01_PRODUCT/01`                                                                       |                                                                                                                             |
+| `02_STAKEHOLDERS_AND_USERS`                                                   | `01_PRODUCT/03`, `04`                                                                 |                                                                                                                             |
+| `03_BUSINESS_DOMAINS`, `04_PRODUCT_CAPABILITIES`                              | `01_PRODUCT/02`, `02_MODULES`                                                         |                                                                                                                             |
+| `05_FEATURE_SPECIFICATIONS`                                                   | `02_MODULES`                                                                          | Feature-level detail re-expressed in the new template.                                                                      |
+| `06_BUSINESS_PROCESSES`                                                       | `01_PRODUCT/05`, module sections 6 (state machines)                                   |                                                                                                                             |
+| `07_UI_UX_AND_DESIGN_SYSTEM`                                                  | `03_EXPERIENCE`                                                                       |                                                                                                                             |
+| `08_PWA_AND_MOBILE`                                                           | `02_MODULES/PWA_*`, `03_EXPERIENCE/05`                                                |                                                                                                                             |
+| `09_MODULE_FEDERATION`, `10_FRONTEND_ARCHITECTURE`, `11_BACKEND_ARCHITECTURE` | `04_ARCHITECTURE/01`                                                                  | Module federation is not adopted by the blueprint (modular monolith); the decision and its alternatives are in `DEC-ARC-*`. |
+| `12_DATA_AND_DATABASE`                                                        | `04_ARCHITECTURE/02`                                                                  |                                                                                                                             |
+| `13_API_EVENTS_AND_INTEGRATIONS`                                              | `04_ARCHITECTURE/03` to `05`, `02_MODULES/PLT_*`                                      |                                                                                                                             |
+| `14_SECURITY_PRIVACY_COMPLIANCE`                                              | `05_SECURITY_PRIVACY`                                                                 |                                                                                                                             |
+| `15_RELIABILITY_AND_PERFORMANCE`                                              | `06_QUALITY_AND_PERFORMANCE/01`                                                       |                                                                                                                             |
+| `16_QA_AND_TESTING`                                                           | `06_QUALITY_AND_PERFORMANCE/02`                                                       |                                                                                                                             |
+| `17_DEVOPS_AND_INFRASTRUCTURE`, `18_OPERATIONS_AND_SUPPORT`                   | `07_DEVOPS_AND_OPERATIONS`                                                            |                                                                                                                             |
+| `19_BUSINESS_AND_COMMERCIAL_OPERATIONS`, `21_COST_AND_FINOPS`                 | `02_MODULES/BIL_*`, `07_DEVOPS_AND_OPERATIONS/03`                                     |                                                                                                                             |
+| `20_ANALYTICS_AND_MEASUREMENT`                                                | `02_MODULES/ANL_*`                                                                    |                                                                                                                             |
+| `22_IMPLEMENTATION_ROADMAP`, `23_MIGRATION_AND_EVOLUTION`                     | `08_ROADMAP`                                                                          |                                                                                                                             |
+| `24_RISKS_AND_DECISIONS`                                                      | `09_REGISTERS/RISK_REGISTER.md`, `OPEN_DECISIONS_REGISTER.md`, `DECISION_REGISTER.md` |                                                                                                                             |
+| `25_DIAGRAM_LIBRARY`                                                          | `10_MINDMAPS`, Mermaid diagrams in each file                                          |                                                                                                                             |
+| `26_RESEARCH_AND_REFERENCES`                                                  | `02_MODULES` source traces                                                            |                                                                                                                             |
+| `27_INDEPENDENT_REVIEWS`                                                      | `09_REGISTERS/INTEGRITY_REPORT.md`                                                    | Reviews are history; archive.                                                                                               |
+| `28_TRACEABILITY_AND_COVERAGE` (2.5 MB)                                       | [`LEGACY_FEATURE_COVERAGE.md`](LEGACY_FEATURE_COVERAGE.md), `09_REGISTERS`            | Archive then delete after the coverage matrix is accepted.                                                                  |
+| `29_DEVELOPER_IMPLEMENTATION_GUIDE`                                           | `04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md`                                 |                                                                                                                             |
+| `30_PRIOR_IMPLEMENTATION_REFERENCE`                                           | none                                                                                  | Describes a prior implementation; keep until the owner confirms it has no remaining use (`OD-PRD-30`).                      |
+| `31_LEGACY_ARCHIVE` (1.8 MB)                                                  | none                                                                                  | Already an archive; archive then delete.                                                                                    |
+| `99_FINAL_MASTER_BLUEPRINT`                                                   | `00_START_HERE/README.md`                                                             |                                                                                                                             |
 
 ## 5. Gated deletion procedure
 

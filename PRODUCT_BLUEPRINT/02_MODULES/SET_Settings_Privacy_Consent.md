@@ -12,18 +12,19 @@ SET is where a person controls their presence on the platform and where the plat
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
+| Outcome                                                          | How the system knows                                                                                                                          |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | Recruiters and other parties see only what a person consented to | Read-time consent check on every consented read; consent change takes effect on the first read after commit (BR-SET-003); policy matrix tests |
-| A person can see, change and withdraw every consent in one place | Consent screen lists every scope with purpose text, grantee, date and version (FR-SET-005); metric `SET-M01` |
-| A person can take their data with them and leave completely | Export ready p95 ≤ 4 h; erasure complete ≤ 30 days from request (BR-SET-015); post-erasure sweep finds zero residuals |
-| The platform never silently expands what it does with data | Purpose text is versioned; changed purposes need fresh consent (BR-SET-004) |
-| Settings are findable and honest | Settings search and deep links; every setting states its effect and whether it is mandatory |
-| Preferences follow the person everywhere | Language, time zone and accessibility settings apply to web, installed PWA and emails |
+| A person can see, change and withdraw every consent in one place | Consent screen lists every scope with purpose text, grantee, date and version (FR-SET-005); metric `SET-M01`                                  |
+| A person can take their data with them and leave completely      | Export ready p95 ≤ 4 h; erasure complete ≤ 30 days from request (BR-SET-015); post-erasure sweep finds zero residuals                         |
+| The platform never silently expands what it does with data       | Purpose text is versioned; changed purposes need fresh consent (BR-SET-004)                                                                   |
+| Settings are findable and honest                                 | Settings search and deep links; every setting states its effect and whether it is mandatory                                                   |
+| Preferences follow the person everywhere                         | Language, time zone and accessibility settings apply to web, installed PWA and emails                                                         |
 
 ### 1.3 Scope
 
 **In scope**
+
 - Settings shell, navigation, search and deep links; account settings page (display of identity facts owned by IDN).
 - Profile visibility presets and per-field visibility; "preview as" a recruiter or the public.
 - Consent scopes, the append-only consent ledger, versioned purpose text, per-grantee grants with expiry, re-confirmation, blocklist, search exclusion, access log.
@@ -34,6 +35,7 @@ SET is where a person controls their presence on the platform and where the plat
 - Privacy dashboard; AI and personalization settings; settings change history; managed-account policy locks; guardian consent.
 
 **Out of scope (owned elsewhere)**
+
 - Authentication, credentials, sessions, MFA, account lifecycle states: `IDN` (this blueprint). SET triggers IDN operations (credential removal, account state) through events and calls.
 - Notification preference matrix, quiet hours, channel delivery: `NTF` (this blueprint). SET shows an entry point and the unified unsubscribe landing is owned by NTF (FR-NTF-009).
 - Profile content and résumé: `PRF` (planned). SET owns who may see it, not what it says.
@@ -44,8 +46,8 @@ SET is where a person controls their presence on the platform and where the plat
 
 ### 1.4 Owned versus consumed
 
-| Owned by SET | Consumed by SET |
-|---|---|
+| Owned by SET                                                                                                                                                                                                                                                                                                            | Consumed by SET                                                                                                                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Consent ledger and projection, consent text versions, visibility settings, blocklist, search restriction, data requests and checkpoints, export archives, legal holds, retention policy, preferences, connected-app grants, API tokens, policy documents and acceptance ledger, access-log projection, settings history | Account state and re-authentication (`IDN`); delivery (`NTF`); export and erase contributors from every module that holds personal data; access events from consuming modules; legal-hold decisions from `ADM` / counsel |
 
 ### 1.5 Design stance
@@ -60,37 +62,37 @@ SET is where a person controls their presence on the platform and where the plat
 
 Legend: `S` self only · `O` own organization scope · `G` grant-bound and audited · `Y` yes · `—` no · `R` read-only.
 
-| Capability | GUE | CAN/STD | INS/MNT/FRL | REC/HMG | EAD | IAD/PLO/EXA | MOD | SUP | FIN | PAD | SAD | API |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Cookie consent | Y | — | — | — | — | — | — | — | — | — | — | — |
-| Edit own settings and preferences | — | S | S | S | S | S | S | S | S | S | S | — |
-| Set profile visibility and consents | — | S | S | — | — | — | — | — | — | — | — | — |
-| Grant per-employer or per-institution consent | — | S | S | — | — | — | — | — | — | — | — | — |
-| Request export or erasure | — | S | S | S | S | S | S | S | S | S | S | — |
-| Read the access log of own data | — | S | S | S | S | S | — | — | — | — | — | — |
-| Assist a locked-out subject's DSAR | — | — | — | — | — | — | — | G | — | G | Y | — |
-| Operate DSR queue (replay, extend, reject) | — | — | — | — | — | — | — | — | — | Y | Y | — |
-| Place or lift legal hold | — | — | — | — | — | — | — | — | — | G | Y | — |
-| Create personal API tokens | — | S | S | S | S | S | — | — | — | S | S | — |
-| Review and revoke connected apps | — | S | S | S | S | S | S | S | S | S | S | — |
-| Publish a policy version | — | — | — | — | — | — | — | — | — | Y (change-controlled) | Y | — |
-| Configure regional rules and retention | — | — | — | — | — | — | — | — | — | G | Y | — |
-| Set org-wide managed policies | — | — | — | — | O | O | — | — | — | — | — | — |
-| Read consent ledger aggregates (no personal rows) | — | — | — | — | — | — | — | — | — | R | R (auditor view) | — |
-| Read a subject's raw ledger | — | S | S | S | S | S | — | G | — | G | G | — |
+| Capability                                        | GUE | CAN/STD | INS/MNT/FRL | REC/HMG | EAD | IAD/PLO/EXA | MOD | SUP | FIN | PAD                   | SAD              | API |
+| ------------------------------------------------- | --- | ------- | ----------- | ------- | --- | ----------- | --- | --- | --- | --------------------- | ---------------- | --- |
+| Cookie consent                                    | Y   | —       | —           | —       | —   | —           | —   | —   | —   | —                     | —                | —   |
+| Edit own settings and preferences                 | —   | S       | S           | S       | S   | S           | S   | S   | S   | S                     | S                | —   |
+| Set profile visibility and consents               | —   | S       | S           | —       | —   | —           | —   | —   | —   | —                     | —                | —   |
+| Grant per-employer or per-institution consent     | —   | S       | S           | —       | —   | —           | —   | —   | —   | —                     | —                | —   |
+| Request export or erasure                         | —   | S       | S           | S       | S   | S           | S   | S   | S   | S                     | S                | —   |
+| Read the access log of own data                   | —   | S       | S           | S       | S   | S           | —   | —   | —   | —                     | —                | —   |
+| Assist a locked-out subject's DSAR                | —   | —       | —           | —       | —   | —           | —   | G   | —   | G                     | Y                | —   |
+| Operate DSR queue (replay, extend, reject)        | —   | —       | —           | —       | —   | —           | —   | —   | —   | Y                     | Y                | —   |
+| Place or lift legal hold                          | —   | —       | —           | —       | —   | —           | —   | —   | —   | G                     | Y                | —   |
+| Create personal API tokens                        | —   | S       | S           | S       | S   | S           | —   | —   | —   | S                     | S                | —   |
+| Review and revoke connected apps                  | —   | S       | S           | S       | S   | S           | S   | S   | S   | S                     | S                | —   |
+| Publish a policy version                          | —   | —       | —           | —       | —   | —           | —   | —   | —   | Y (change-controlled) | Y                | —   |
+| Configure regional rules and retention            | —   | —       | —           | —       | —   | —           | —   | —   | —   | G                     | Y                | —   |
+| Set org-wide managed policies                     | —   | —       | —           | —       | O   | O           | —   | —   | —   | —                     | —                | —   |
+| Read consent ledger aggregates (no personal rows) | —   | —       | —           | —       | —   | —           | —   | —   | —   | R                     | R (auditor view) | —   |
+| Read a subject's raw ledger                       | —   | S       | S           | S       | S   | S           | —   | G   | —   | G                     | G                | —   |
 
 Rules: no staff role can read an export archive's contents (support can re-issue, not read). Recruiters and other third parties never read the ledger; they see only the allow or deny outcome. [SRC: Yash SPEC-13 §2, §8]
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| SET-A | Settings shell and account | FR-SET-001, 002 |
-| SET-B | Visibility and consent | FR-SET-003, 004, 005, 006, 007, 008, 009, 010, 011, 012 |
-| SET-C | Data rights | FR-SET-013, 014, 015, 016, 017, 018, 019 |
-| SET-D | Preferences | FR-SET-020, 021, 022 |
-| SET-E | Connected apps and tokens | FR-SET-023, 024, 025 |
-| SET-F | Dashboard, compliance and governance | FR-SET-026, 027, 028, 029, 030, 031, 032 |
+| Code  | Sub-module                           | Features                                                |
+| ----- | ------------------------------------ | ------------------------------------------------------- |
+| SET-A | Settings shell and account           | FR-SET-001, 002                                         |
+| SET-B | Visibility and consent               | FR-SET-003, 004, 005, 006, 007, 008, 009, 010, 011, 012 |
+| SET-C | Data rights                          | FR-SET-013, 014, 015, 016, 017, 018, 019                |
+| SET-D | Preferences                          | FR-SET-020, 021, 022                                    |
+| SET-E | Connected apps and tokens            | FR-SET-023, 024, 025                                    |
+| SET-F | Dashboard, compliance and governance | FR-SET-026, 027, 028, 029, 030, 031, 032                |
 
 ```mermaid
 flowchart LR
@@ -1057,42 +1059,42 @@ Parameter notation: `{braces}` mark `[PROP]` policy defaults unless a source is 
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-SET-001 | A consent record is purpose-bound, versioned, timestamped and carries a grantee; the default for every scope is no consent; recruiter access beyond an application requires a scope. | Lawful, minimal sharing. | Consent service | [SRC: Yash BR-T061] |
-| BR-SET-002 | The consent ledger is append-only (no update or delete by the application role); current state is a rebuildable fold; grants, revokes and expiries are rows. | Auditability. | Database privileges + domain | [SRC: Yash INV-T35] |
-| BR-SET-003 | A revocation is effective on the first read after the revoking transaction commits (read-time check, no consent cache); search index removal ≤ 15 min; already exported data is not recalled and the UI says so. | Honest, immediate control. | Decision function + indexer | [SRC: Yash BR-T063, CSC §6] |
-| BR-SET-004 | A change of meaning to a purpose text creates a new version and the scope is treated as not granted until re-confirmed (after a {14 d} grace); wording-only changes (non-material) leave grants bound to the old version. | Purpose limitation. | Consent service | [SRC: Yash CSC §1] vs [SRC: SPEC-02 AC-22-01-04]; OD-SET-03 |
-| BR-SET-005 | No consent is pre-ticked, bundled with terms, or presented with an asymmetric choice; accept and decline have equal prominence; reading grade ≤ 9. | No dark patterns. | UI standards + review | [SRC: Yash SPEC-02 §4] |
-| BR-SET-006 | Visibility choices that imply a consent scope call the consent API in the same transaction; there is no second flag. | Single source of truth. | Domain layer | [SRC: Yash SPEC-02 §3.3] |
-| BR-SET-007 | Field visibility is one of `private`, `applications`, `discoverable`, `public`; default `private`; contact details can never be `discoverable` or `public`. | Safe defaults. | Domain layer | [SRC: Yash SPEC-02 §3.1] |
-| BR-SET-008 | Per-grantee grants may carry an expiry (default {12 months}, max {24 months}), a reminder 14 days before, and end when the grantee org is closed. | Bounded sharing. | Consent service + worker | [SRC: Yash CSC §3.2] |
-| BR-SET-009 | `search.discoverable` and `profile.public_view` prompt re-confirmation every {12 months}; the prompt is not an expiry. | Keeps consent fresh. | Worker | [SRC: Yash SPEC-02 §5] |
-| BR-SET-010 | A blocklist holds ≤ {200} orgs, applies to search, suggestions, outreach and grants, covers all members of an org, and is never disclosed to the org; the candidate may still apply after an explicit confirmation. | Protects job seekers. | Decision function | [SRC: Yash FEAT-03-09.3, INV-T40] |
-| BR-SET-011 | Search exclusion removes the profile from recruiter search and overrides discoverability without affecting applications or messaging. | Granular restriction. | Indexer + fetch guard | [SRC: Yash BR-T069] |
-| BR-SET-012 | The access log shows accessing organization, purpose and time; individual recruiter names only if org policy allows; support and admin access always appear; retained {24 months}; recruiter privacy modes cannot hide from it. | Transparency. | Access service | [SRC: Yash BR-T068; SSOT BR-133 viewer privacy applies to viewer-side only] |
-| BR-SET-013 | Export: step-up required; one open request per type; ≤ 1 completed per {24 h}; own data only; archive TTL {7 d}; download via one-time URL TTL {15 min} after step-up; the file is never emailed. | Safe delivery. | Privacy service | [SRC: Yash BR-T064] |
-| BR-SET-014 | Every module that owns personal data must register an export contributor and an erase contributor; CI fails otherwise. | Completeness by construction. | CI lint + orchestrator | [SRC: Yash SPEC-13 §5] |
-| BR-SET-015 | Erasure completes within {30 d} of the request (target ≤ 10 d); it may be marked complete only after a sweep finds zero residuals in every store; alerts at day 20, 25, 28; day 30 breach is an incident. | Enforceable deadline. | Orchestrator + monitor | [SRC: Yash BR-T060] |
-| BR-SET-016 | Erasure for a `suspended` account, an account under an open moderation case, or a subject under legal hold is accepted but parked `on_hold`; sole owners of orgs must transfer first. | Evidence preservation. | Orchestrator | [SRC: Yash BR-T124] |
-| BR-SET-017 | Audit, consent and stage-transition history is never rewritten: it holds opaque subject references and erasure deletes the reference-to-identity mapping. | Integrity with erasure. | Data layer | [SRC: Yash BR-T065; SSOT V61-19] |
-| BR-SET-018 | Backups age out within {35 d}; restores replay the erasure log before serving. | Erasure survives restore. | Operations | [SRC: Yash SPEC-13 §9]; value open OD-SET-02 |
-| BR-SET-019 | The erasure receipt lists what was deleted, what was retained and why, and the date; it holds no personal data beyond a salted email hash kept {30 d}. | Transparency. | Privacy service | [SRC: Yash SPEC-13 §3.2] |
-| BR-SET-020 | Rectification, restriction, objection and access requests are answered within {30 d}; identity is verified before any data change or disclosure; extensions are limited, reasoned and notified before the due date. | Rights SLAs. | DSAR queue | [SRC: SSOT §15.9.5] |
-| BR-SET-021 | Staff handling requests see metadata only, never subject content; every action needs a reason and is audited; declines state a reason and the right to complain; holds are never explained to the subject. | Least privilege. | Admin policy | [SRC: Yash SPEC-13 §2] |
-| BR-SET-022 | Every personal-data class has a retention period and a disposal action in a versioned schedule; unscheduled retention is not allowed; legal holds suspend disposal. | Storage limitation. | Retention engine + CI | [SRC: SSOT §15.9.1 5(1)(e)] |
-| BR-SET-023 | Locale must be supported, time zone a valid IANA id; times are stored in UTC and rendered in the user's zone; detection suggests, never silently changes. | Correct time handling. | Preference service | [DER] |
-| BR-SET-024 | Accessibility and display preferences are honored from OS signals as defaults, apply before first paint, and are never used for profiling or shown to third parties. | Inclusion and privacy. | UI + policy | [DER] |
-| BR-SET-025 | Connected apps and accounts receive only minimal, purpose-bound scopes; an app cannot receive data the user has not consented to share; revocation invalidates tokens immediately; idle grants expire after {12 months}. | Delegated-token care. | PLT + decision function | [SRC: SSOT HDN-012] |
-| BR-SET-026 | Personal API tokens are random, hashed, shown once, scoped to the owner's data and current permissions, ≤ {10} active, expire ≤ 365 d (default 90), and are revoked on erasure, suspension and loss of the role. | Least privilege automation. | Token service | [PROP] |
-| BR-SET-027 | Regional rules are versioned configuration; strictest wins on ambiguity; relaxations need dual control; compliance claims in UI require a legal-review flag. | Lawful operation without claims of certification. | Rules engine | [SRC: SSOT §15.9.2, §15.9.3] |
-| BR-SET-028 | Policy versions are immutable once published; material changes need a notice period (default {30 d}) and re-acceptance; acceptance rows are append-only. | Auditable acceptance. | Policy service | [SRC: Yash FEAT-22-06] |
-| BR-SET-029 | AI processing of a person's content requires `ai.assist.process` at call time; no training use; EU-region data goes to EU endpoints or the feature is unavailable. | Lawful AI. | AI gateway | [SRC: SSOT §15.9.3, §15.10] |
-| BR-SET-030 | All settings are defined in a registry with type, default, scope and sensitivity; protected settings need step-up; every change is recorded in history (sensitive values omitted) retained {12 months}. | Consistent, auditable settings. | Settings service | [DER] |
-| BR-SET-031 | Org locks come from a closed catalog that excludes consent scopes, third-party visibility, export, erasure, security and accessibility settings; org defaults can only be more private; locks end when the member leaves. | Org cannot override personal rights. | Settings service | [DER]; OD-SET-09 |
-| BR-SET-032 | Guardian-sourced consent never enables discoverability, outreach, public view or marketing for a minor; majority handover resets guardian grants to off. | Child protection. | Consent service | [PROP] |
-| BR-SET-033 | Non-essential cookies and tags load only after consent in opt-in regions; the Global Privacy Control signal is treated as an opt-out; essential storage needs no consent; choices re-asked at most every 12 months. | Lawful tracking. | Tag loader | [DER] |
-| BR-SET-034 | The privacy dashboard states facts from live data and never shows a derived privacy score. | No gamification of privacy. | UI + review | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                            | Rationale                                         | Enforced where               | Source                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------- |
+| BR-SET-001 | A consent record is purpose-bound, versioned, timestamped and carries a grantee; the default for every scope is no consent; recruiter access beyond an application requires a scope.                                            | Lawful, minimal sharing.                          | Consent service              | [SRC: Yash BR-T061]                                                         |
+| BR-SET-002 | The consent ledger is append-only (no update or delete by the application role); current state is a rebuildable fold; grants, revokes and expiries are rows.                                                                    | Auditability.                                     | Database privileges + domain | [SRC: Yash INV-T35]                                                         |
+| BR-SET-003 | A revocation is effective on the first read after the revoking transaction commits (read-time check, no consent cache); search index removal ≤ 15 min; already exported data is not recalled and the UI says so.                | Honest, immediate control.                        | Decision function + indexer  | [SRC: Yash BR-T063, CSC §6]                                                 |
+| BR-SET-004 | A change of meaning to a purpose text creates a new version and the scope is treated as not granted until re-confirmed (after a {14 d} grace); wording-only changes (non-material) leave grants bound to the old version.       | Purpose limitation.                               | Consent service              | [SRC: Yash CSC §1] vs [SRC: SPEC-02 AC-22-01-04]; OD-SET-03                 |
+| BR-SET-005 | No consent is pre-ticked, bundled with terms, or presented with an asymmetric choice; accept and decline have equal prominence; reading grade ≤ 9.                                                                              | No dark patterns.                                 | UI standards + review        | [SRC: Yash SPEC-02 §4]                                                      |
+| BR-SET-006 | Visibility choices that imply a consent scope call the consent API in the same transaction; there is no second flag.                                                                                                            | Single source of truth.                           | Domain layer                 | [SRC: Yash SPEC-02 §3.3]                                                    |
+| BR-SET-007 | Field visibility is one of `private`, `applications`, `discoverable`, `public`; default `private`; contact details can never be `discoverable` or `public`.                                                                     | Safe defaults.                                    | Domain layer                 | [SRC: Yash SPEC-02 §3.1]                                                    |
+| BR-SET-008 | Per-grantee grants may carry an expiry (default {12 months}, max {24 months}), a reminder 14 days before, and end when the grantee org is closed.                                                                               | Bounded sharing.                                  | Consent service + worker     | [SRC: Yash CSC §3.2]                                                        |
+| BR-SET-009 | `search.discoverable` and `profile.public_view` prompt re-confirmation every {12 months}; the prompt is not an expiry.                                                                                                          | Keeps consent fresh.                              | Worker                       | [SRC: Yash SPEC-02 §5]                                                      |
+| BR-SET-010 | A blocklist holds ≤ {200} orgs, applies to search, suggestions, outreach and grants, covers all members of an org, and is never disclosed to the org; the candidate may still apply after an explicit confirmation.             | Protects job seekers.                             | Decision function            | [SRC: Yash FEAT-03-09.3, INV-T40]                                           |
+| BR-SET-011 | Search exclusion removes the profile from recruiter search and overrides discoverability without affecting applications or messaging.                                                                                           | Granular restriction.                             | Indexer + fetch guard        | [SRC: Yash BR-T069]                                                         |
+| BR-SET-012 | The access log shows accessing organization, purpose and time; individual recruiter names only if org policy allows; support and admin access always appear; retained {24 months}; recruiter privacy modes cannot hide from it. | Transparency.                                     | Access service               | [SRC: Yash BR-T068; SSOT BR-133 viewer privacy applies to viewer-side only] |
+| BR-SET-013 | Export: step-up required; one open request per type; ≤ 1 completed per {24 h}; own data only; archive TTL {7 d}; download via one-time URL TTL {15 min} after step-up; the file is never emailed.                               | Safe delivery.                                    | Privacy service              | [SRC: Yash BR-T064]                                                         |
+| BR-SET-014 | Every module that owns personal data must register an export contributor and an erase contributor; CI fails otherwise.                                                                                                          | Completeness by construction.                     | CI lint + orchestrator       | [SRC: Yash SPEC-13 §5]                                                      |
+| BR-SET-015 | Erasure completes within {30 d} of the request (target ≤ 10 d); it may be marked complete only after a sweep finds zero residuals in every store; alerts at day 20, 25, 28; day 30 breach is an incident.                       | Enforceable deadline.                             | Orchestrator + monitor       | [SRC: Yash BR-T060]                                                         |
+| BR-SET-016 | Erasure for a `suspended` account, an account under an open moderation case, or a subject under legal hold is accepted but parked `on_hold`; sole owners of orgs must transfer first.                                           | Evidence preservation.                            | Orchestrator                 | [SRC: Yash BR-T124]                                                         |
+| BR-SET-017 | Audit, consent and stage-transition history is never rewritten: it holds opaque subject references and erasure deletes the reference-to-identity mapping.                                                                       | Integrity with erasure.                           | Data layer                   | [SRC: Yash BR-T065; SSOT V61-19]                                            |
+| BR-SET-018 | Backups age out within {35 d}; restores replay the erasure log before serving.                                                                                                                                                  | Erasure survives restore.                         | Operations                   | [SRC: Yash SPEC-13 §9]; value open OD-SET-02                                |
+| BR-SET-019 | The erasure receipt lists what was deleted, what was retained and why, and the date; it holds no personal data beyond a salted email hash kept {30 d}.                                                                          | Transparency.                                     | Privacy service              | [SRC: Yash SPEC-13 §3.2]                                                    |
+| BR-SET-020 | Rectification, restriction, objection and access requests are answered within {30 d}; identity is verified before any data change or disclosure; extensions are limited, reasoned and notified before the due date.             | Rights SLAs.                                      | DSAR queue                   | [SRC: SSOT §15.9.5]                                                         |
+| BR-SET-021 | Staff handling requests see metadata only, never subject content; every action needs a reason and is audited; declines state a reason and the right to complain; holds are never explained to the subject.                      | Least privilege.                                  | Admin policy                 | [SRC: Yash SPEC-13 §2]                                                      |
+| BR-SET-022 | Every personal-data class has a retention period and a disposal action in a versioned schedule; unscheduled retention is not allowed; legal holds suspend disposal.                                                             | Storage limitation.                               | Retention engine + CI        | [SRC: SSOT §15.9.1 5(1)(e)]                                                 |
+| BR-SET-023 | Locale must be supported, time zone a valid IANA id; times are stored in UTC and rendered in the user's zone; detection suggests, never silently changes.                                                                       | Correct time handling.                            | Preference service           | [DER]                                                                       |
+| BR-SET-024 | Accessibility and display preferences are honored from OS signals as defaults, apply before first paint, and are never used for profiling or shown to third parties.                                                            | Inclusion and privacy.                            | UI + policy                  | [DER]                                                                       |
+| BR-SET-025 | Connected apps and accounts receive only minimal, purpose-bound scopes; an app cannot receive data the user has not consented to share; revocation invalidates tokens immediately; idle grants expire after {12 months}.        | Delegated-token care.                             | PLT + decision function      | [SRC: SSOT HDN-012]                                                         |
+| BR-SET-026 | Personal API tokens are random, hashed, shown once, scoped to the owner's data and current permissions, ≤ {10} active, expire ≤ 365 d (default 90), and are revoked on erasure, suspension and loss of the role.                | Least privilege automation.                       | Token service                | [PROP]                                                                      |
+| BR-SET-027 | Regional rules are versioned configuration; strictest wins on ambiguity; relaxations need dual control; compliance claims in UI require a legal-review flag.                                                                    | Lawful operation without claims of certification. | Rules engine                 | [SRC: SSOT §15.9.2, §15.9.3]                                                |
+| BR-SET-028 | Policy versions are immutable once published; material changes need a notice period (default {30 d}) and re-acceptance; acceptance rows are append-only.                                                                        | Auditable acceptance.                             | Policy service               | [SRC: Yash FEAT-22-06]                                                      |
+| BR-SET-029 | AI processing of a person's content requires `ai.assist.process` at call time; no training use; EU-region data goes to EU endpoints or the feature is unavailable.                                                              | Lawful AI.                                        | AI gateway                   | [SRC: SSOT §15.9.3, §15.10]                                                 |
+| BR-SET-030 | All settings are defined in a registry with type, default, scope and sensitivity; protected settings need step-up; every change is recorded in history (sensitive values omitted) retained {12 months}.                         | Consistent, auditable settings.                   | Settings service             | [DER]                                                                       |
+| BR-SET-031 | Org locks come from a closed catalog that excludes consent scopes, third-party visibility, export, erasure, security and accessibility settings; org defaults can only be more private; locks end when the member leaves.       | Org cannot override personal rights.              | Settings service             | [DER]; OD-SET-09                                                            |
+| BR-SET-032 | Guardian-sourced consent never enables discoverability, outreach, public view or marketing for a minor; majority handover resets guardian grants to off.                                                                        | Child protection.                                 | Consent service              | [PROP]                                                                      |
+| BR-SET-033 | Non-essential cookies and tags load only after consent in opt-in regions; the Global Privacy Control signal is treated as an opt-out; essential storage needs no consent; choices re-asked at most every 12 months.             | Lawful tracking.                                  | Tag loader                   | [DER]                                                                       |
+| BR-SET-034 | The privacy dashboard states facts from live data and never shows a derived privacy score.                                                                                                                                      | No gamification of privacy.                       | UI + review                  | [PROP]                                                                      |
 
 ## 6. State machines
 
@@ -1100,23 +1102,23 @@ Parameter notation: `{braces}` mark `[PROP]` policy defaults unless a source is 
 
 States: `received`, `verifying`, `cooling_off`, `in_progress`, `on_hold`, `ready`, `completed`, `cancelled`, `rejected`, `failed`, `expired`. Terminal: `completed`, `cancelled`, `rejected`, `expired`. Source: [SRC: Yash SM-DSR] simplified.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → received | request created | step-up or verified guest, one open per type |
-| t2 | received → verifying | needs identity check | assisted or guest request |
-| t3 | received, verifying → cooling_off | erasure verified | erasure only |
-| t4 | received, verifying → in_progress | export or other type verified | — |
-| t5 | cooling_off → cancelled | holder cancels | within {7 d} |
-| t6 | cooling_off → in_progress | cooling-off elapsed | no hold |
-| t7 | cooling_off, in_progress → on_hold | legal hold or moderation case | safe checkpoint |
-| t8 | on_hold → in_progress | hold lifted | automatic resume |
-| t9 | in_progress → ready | export built | all contributors done |
-| t10 | in_progress → completed | sweep clean (erasure) or decision recorded | zero residuals |
-| t11 | in_progress → failed | contributor failure | alert; replay allowed |
-| t12 | failed → in_progress | replay | idempotent |
-| t13 | ready → completed | first download | — |
-| t14 | ready → expired | archive TTL {7 d} | — |
-| t15 | received, verifying → rejected | not verifiable or unfounded | reason and notice |
+| t   | From → To                          | Trigger                                    | Guard                                        |
+| --- | ---------------------------------- | ------------------------------------------ | -------------------------------------------- |
+| t1  | [*] → received                     | request created                            | step-up or verified guest, one open per type |
+| t2  | received → verifying               | needs identity check                       | assisted or guest request                    |
+| t3  | received, verifying → cooling_off  | erasure verified                           | erasure only                                 |
+| t4  | received, verifying → in_progress  | export or other type verified              | —                                            |
+| t5  | cooling_off → cancelled            | holder cancels                             | within {7 d}                                 |
+| t6  | cooling_off → in_progress          | cooling-off elapsed                        | no hold                                      |
+| t7  | cooling_off, in_progress → on_hold | legal hold or moderation case              | safe checkpoint                              |
+| t8  | on_hold → in_progress              | hold lifted                                | automatic resume                             |
+| t9  | in_progress → ready                | export built                               | all contributors done                        |
+| t10 | in_progress → completed            | sweep clean (erasure) or decision recorded | zero residuals                               |
+| t11 | in_progress → failed               | contributor failure                        | alert; replay allowed                        |
+| t12 | failed → in_progress               | replay                                     | idempotent                                   |
+| t13 | ready → completed                  | first download                             | —                                            |
+| t14 | ready → expired                    | archive TTL {7 d}                          | —                                            |
+| t15 | received, verifying → rejected     | not verifiable or unfounded                | reason and notice                            |
 
 Forbidden: cancelling in `in_progress`; `completed` for erasure without a clean sweep; any transition out of a terminal state.
 
@@ -1151,12 +1153,12 @@ stateDiagram-v2
 
 States: `granted`, `revoked`, `expired`, `superseded`. Terminal: all (a re-grant creates a new row). Source: [SRC: Yash SPEC-02 §7].
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → granted | user or system grant | current text version, grain valid |
-| t2 | granted → revoked | user revoke | — |
-| t3 | granted → expired | `expiresAt` reached | server clock |
-| t4 | granted → superseded | material text change not re-confirmed after grace | BR-SET-004 |
+| t   | From → To            | Trigger                                           | Guard                             |
+| --- | -------------------- | ------------------------------------------------- | --------------------------------- |
+| t1  | [*] → granted        | user or system grant                              | current text version, grain valid |
+| t2  | granted → revoked    | user revoke                                       | —                                 |
+| t3  | granted → expired    | `expiresAt` reached                               | server clock                      |
+| t4  | granted → superseded | material text change not re-confirmed after grace | BR-SET-004                        |
 
 ```mermaid
 stateDiagram-v2
@@ -1173,13 +1175,13 @@ stateDiagram-v2
 
 States: `building`, `ready`, `downloaded`, `expired`, `failed`. Terminal: `expired`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → building | request in_progress | — |
-| t2 | building → ready | all parts built and hashed | manifest verified |
-| t3 | building → failed | contributor or storage failure | retry allowed |
-| t4 | ready → downloaded | one-time URL used | step-up |
-| t5 | ready, downloaded → expired | TTL {7 d} | deletion job |
+| t   | From → To                   | Trigger                        | Guard             |
+| --- | --------------------------- | ------------------------------ | ----------------- |
+| t1  | [*] → building              | request in_progress            | —                 |
+| t2  | building → ready            | all parts built and hashed     | manifest verified |
+| t3  | building → failed           | contributor or storage failure | retry allowed     |
+| t4  | ready → downloaded          | one-time URL used              | step-up           |
+| t5  | ready, downloaded → expired | TTL {7 d}                      | deletion job      |
 
 ```mermaid
 stateDiagram-v2
@@ -1197,12 +1199,12 @@ stateDiagram-v2
 
 States: `active`, `due_for_review`, `lifted`. Terminal: `lifted`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → active | placed | case ref, reason code |
-| t2 | active → due_for_review | monthly review date | — |
-| t3 | due_for_review → active | reviewed and kept | note |
-| t4 | active, due_for_review → lifted | counsel instruction | approver |
+| t   | From → To                       | Trigger             | Guard                 |
+| --- | ------------------------------- | ------------------- | --------------------- |
+| t1  | [*] → active                    | placed              | case ref, reason code |
+| t2  | active → due_for_review         | monthly review date | —                     |
+| t3  | due_for_review → active         | reviewed and kept   | note                  |
+| t4  | active, due_for_review → lifted | counsel instruction | approver              |
 
 ```mermaid
 stateDiagram-v2
@@ -1218,11 +1220,11 @@ stateDiagram-v2
 
 States: `active`, `expired`, `revoked`. Terminal: `expired`, `revoked`.
 
-| t | From → To | Trigger | Guard |
-|---|---|---|---|
-| t1 | [*] → active | created or authorized | step-up (tokens) |
-| t2 | active → expired | expiry date or idle {12 months} (apps) | server clock |
-| t3 | active → revoked | user, role loss, suspension, erasure, leak detection | — |
+| t   | From → To        | Trigger                                              | Guard            |
+| --- | ---------------- | ---------------------------------------------------- | ---------------- |
+| t1  | [*] → active     | created or authorized                                | step-up (tokens) |
+| t2  | active → expired | expiry date or idle {12 months} (apps)               | server clock     |
+| t3  | active → revoked | user, role loss, suspension, erasure, leak detection | —                |
 
 ```mermaid
 stateDiagram-v2
@@ -1235,66 +1237,66 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-SET-001 | Settings home and search | `/settings` | all authed | Entry, search | loading, results, offline |
-| SCR-SET-002 | Account | `/settings/account` | all authed | Identity facts, links to IDN | loaded, locked name |
-| SCR-SET-003 | Privacy dashboard | `/settings/privacy` | all authed | Summary cards, quick actions | loaded, partial error |
-| SCR-SET-004 | Profile visibility | `/settings/privacy/visibility` | CAN, STD, INS, MNT, FRL | Presets and matrix | clean, dirty, blocked field |
-| SCR-SET-005 | Preview as | `/settings/privacy/preview` | same | Audience preview | rendered, compare |
-| SCR-SET-006 | Consents | `/settings/privacy/consents` | same | Scope switches, history | loaded, saving, conflict |
-| SCR-SET-007 | Shared with organizations | `/settings/privacy/sharing` | same | Per-grantee grants | list, request pending, expiring |
-| SCR-SET-008 | Hide from employers | `/settings/privacy/blocklist` | same | Blocklist | list, limit |
-| SCR-SET-009 | Who accessed my data | `/settings/privacy/access-log` | CAN, STD, INS, MNT, FRL, REC, HMG, EAD | Access log | empty, list |
-| SCR-SET-010 | Cookie banner | overlay | GUE, all | Cookie choices | undecided, saved |
-| SCR-SET-011 | Privacy choices | `/privacy-choices` | GUE, all | Reopen cookie and GPC choices | saved |
-| SCR-SET-012 | Data and deletion | `/settings/data` | all authed | Export, rectify, delete entry | idle |
-| SCR-SET-013 | Export status | `/settings/data/export` | all authed | Request, status, download | queued, building, ready, expired |
-| SCR-SET-014 | Delete account: consequences and pending | `/settings/data/delete` | all authed | Warn, confirm, countdown, cancel | composing, blocked, cooling-off, in progress, on hold |
-| SCR-SET-015 | Erasure receipt | `/settings/data/receipt/:id` | holder (while exists) | Receipt | shown, expired |
-| SCR-SET-016 | Correct or limit data | `/settings/data/requests/new` | all authed | Rectification, restriction, objection | form, submitted, decided |
-| SCR-SET-017 | Language and region | `/settings/region` | all authed, GUE | Locale, time zone | detected, saved |
-| SCR-SET-018 | Accessibility and display | `/settings/accessibility` | all authed, GUE | Preferences, theme | preview, saved |
-| SCR-SET-019 | Connected apps | `/settings/apps` | all authed | App grants | none, list |
-| SCR-SET-020 | Personal API tokens | `/settings/apps/tokens` | eligible | Create, list, revoke | none, created (reveal), list |
-| SCR-SET-021 | Connected accounts | `/settings/apps/accounts` | all authed | Calendar and others | not connected, connected, reconnect |
-| SCR-SET-022 | AI and recommendations | `/settings/privacy/ai` | all authed | AI consent, key | off, on, key invalid |
-| SCR-SET-023 | Settings history | `/settings/history` | all authed | Changes and undo | list, empty |
-| SCR-SET-024 | Member settings (org) | `/org/:id/settings/members` | EAD, IAD, EXA | Managed locks | unlocked, locked |
-| SCR-SET-025 | Guardian | `/settings/guardian` | guardian | Minor consents | unverified, verified |
-| SCR-SET-026 | DSAR queue | `/admin/privacy/requests` | PAD, SUP | Request operations | empty, list, action pending |
-| SCR-SET-027 | DSAR request detail | `/admin/privacy/requests/:id` | PAD, SUP | Checkpoints, actions | in progress, failed |
-| SCR-SET-028 | Legal holds | `/admin/privacy/holds` | PAD, SAD | Place and review holds | active, due |
-| SCR-SET-029 | Retention schedule | `/admin/privacy/retention` | PAD, SAD | Policies, reports | current, proposed |
-| SCR-SET-030 | Compliance regions | `/admin/privacy/regions` | PAD, SAD | Rule sets | draft, active |
-| SCR-SET-031 | Policy editor | `/admin/policies` | PAD, SAD | Versions, publish | draft, published |
-| SCR-SET-032 | Policy page | `/legal/:policy` | GUE, all | Public policy text, versions | current, older version |
-| SCR-SET-033 | Consent catalog admin | `/admin/privacy/consents` | PAD, SAD | Scope catalog, text versions | draft, published |
+| ID          | Name                                     | Route proposal                 | Roles                                  | Purpose                               | Key states                                            |
+| ----------- | ---------------------------------------- | ------------------------------ | -------------------------------------- | ------------------------------------- | ----------------------------------------------------- |
+| SCR-SET-001 | Settings home and search                 | `/settings`                    | all authed                             | Entry, search                         | loading, results, offline                             |
+| SCR-SET-002 | Account                                  | `/settings/account`            | all authed                             | Identity facts, links to IDN          | loaded, locked name                                   |
+| SCR-SET-003 | Privacy dashboard                        | `/settings/privacy`            | all authed                             | Summary cards, quick actions          | loaded, partial error                                 |
+| SCR-SET-004 | Profile visibility                       | `/settings/privacy/visibility` | CAN, STD, INS, MNT, FRL                | Presets and matrix                    | clean, dirty, blocked field                           |
+| SCR-SET-005 | Preview as                               | `/settings/privacy/preview`    | same                                   | Audience preview                      | rendered, compare                                     |
+| SCR-SET-006 | Consents                                 | `/settings/privacy/consents`   | same                                   | Scope switches, history               | loaded, saving, conflict                              |
+| SCR-SET-007 | Shared with organizations                | `/settings/privacy/sharing`    | same                                   | Per-grantee grants                    | list, request pending, expiring                       |
+| SCR-SET-008 | Hide from employers                      | `/settings/privacy/blocklist`  | same                                   | Blocklist                             | list, limit                                           |
+| SCR-SET-009 | Who accessed my data                     | `/settings/privacy/access-log` | CAN, STD, INS, MNT, FRL, REC, HMG, EAD | Access log                            | empty, list                                           |
+| SCR-SET-010 | Cookie banner                            | overlay                        | GUE, all                               | Cookie choices                        | undecided, saved                                      |
+| SCR-SET-011 | Privacy choices                          | `/privacy-choices`             | GUE, all                               | Reopen cookie and GPC choices         | saved                                                 |
+| SCR-SET-012 | Data and deletion                        | `/settings/data`               | all authed                             | Export, rectify, delete entry         | idle                                                  |
+| SCR-SET-013 | Export status                            | `/settings/data/export`        | all authed                             | Request, status, download             | queued, building, ready, expired                      |
+| SCR-SET-014 | Delete account: consequences and pending | `/settings/data/delete`        | all authed                             | Warn, confirm, countdown, cancel      | composing, blocked, cooling-off, in progress, on hold |
+| SCR-SET-015 | Erasure receipt                          | `/settings/data/receipt/:id`   | holder (while exists)                  | Receipt                               | shown, expired                                        |
+| SCR-SET-016 | Correct or limit data                    | `/settings/data/requests/new`  | all authed                             | Rectification, restriction, objection | form, submitted, decided                              |
+| SCR-SET-017 | Language and region                      | `/settings/region`             | all authed, GUE                        | Locale, time zone                     | detected, saved                                       |
+| SCR-SET-018 | Accessibility and display                | `/settings/accessibility`      | all authed, GUE                        | Preferences, theme                    | preview, saved                                        |
+| SCR-SET-019 | Connected apps                           | `/settings/apps`               | all authed                             | App grants                            | none, list                                            |
+| SCR-SET-020 | Personal API tokens                      | `/settings/apps/tokens`        | eligible                               | Create, list, revoke                  | none, created (reveal), list                          |
+| SCR-SET-021 | Connected accounts                       | `/settings/apps/accounts`      | all authed                             | Calendar and others                   | not connected, connected, reconnect                   |
+| SCR-SET-022 | AI and recommendations                   | `/settings/privacy/ai`         | all authed                             | AI consent, key                       | off, on, key invalid                                  |
+| SCR-SET-023 | Settings history                         | `/settings/history`            | all authed                             | Changes and undo                      | list, empty                                           |
+| SCR-SET-024 | Member settings (org)                    | `/org/:id/settings/members`    | EAD, IAD, EXA                          | Managed locks                         | unlocked, locked                                      |
+| SCR-SET-025 | Guardian                                 | `/settings/guardian`           | guardian                               | Minor consents                        | unverified, verified                                  |
+| SCR-SET-026 | DSAR queue                               | `/admin/privacy/requests`      | PAD, SUP                               | Request operations                    | empty, list, action pending                           |
+| SCR-SET-027 | DSAR request detail                      | `/admin/privacy/requests/:id`  | PAD, SUP                               | Checkpoints, actions                  | in progress, failed                                   |
+| SCR-SET-028 | Legal holds                              | `/admin/privacy/holds`         | PAD, SAD                               | Place and review holds                | active, due                                           |
+| SCR-SET-029 | Retention schedule                       | `/admin/privacy/retention`     | PAD, SAD                               | Policies, reports                     | current, proposed                                     |
+| SCR-SET-030 | Compliance regions                       | `/admin/privacy/regions`       | PAD, SAD                               | Rule sets                             | draft, active                                         |
+| SCR-SET-031 | Policy editor                            | `/admin/policies`              | PAD, SAD                               | Versions, publish                     | draft, published                                      |
+| SCR-SET-032 | Policy page                              | `/legal/:policy`               | GUE, all                               | Public policy text, versions          | current, older version                                |
+| SCR-SET-033 | Consent catalog admin                    | `/admin/privacy/consents`      | PAD, SAD                               | Scope catalog, text versions          | draft, published                                      |
 
 Accessibility notes for all screens: WCAG 2.2 AA; switches have programmatic names and announce state; confirmation messages in live regions; no timed controls except the security re-authentication window; consent text readable by screen readers; status by text and icon, never color alone. [SRC: Yash SPEC-02 §8, SPEC-13 §4]
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-SET-01 | VisibilitySetting | subject_ref, field_key, audience, preset, updated_at, version | Subject | Until erasure |
-| ENT-SET-02 | ConsentLedgerEntry | id, subject_ref, scope, text_version, grantee_type, grantee_id, target_type, target_id, field_set, action, expires_at, source, at | Subject, ConsentText | Permanent (opaque ref; mapping deleted on erasure) |
-| ENT-SET-03 | ConsentCurrent | subject_ref, scope, grantee, target, state, expires_at, epoch | derived from ledger | Rebuildable |
-| ENT-SET-04 | ConsentText | scope, version, locale, text, material, effective_at | catalog | Permanent |
-| ENT-SET-05 | PolicyDocument and PolicyAcceptance | policy_id, version, locale, effective_at, material; acceptance (subject_ref, version, at, method) | Subject | Permanent (acceptance with opaque ref) |
-| ENT-SET-06 | BlockedOrg | subject_ref, org_id or domain, at | Subject | Until erasure |
-| ENT-SET-07 | DataRequest and Checkpoint | id, subject_ref, type, state, requested_at, deadline_at, verified_at, completed_at, outcome, receipt_ref; checkpoint (module, step, status, at) | Subject | 3 years after completion (metadata only) [PROP] |
-| ENT-SET-08 | ExportArchive | request_id, object_key, size, sha256, expires_at, downloads | DataRequest | 7 days |
-| ENT-SET-09 | LegalHold | id, subject_ref, reason_code, case_ref, placed_by, placed_at, lifted_at | Subject | Permanent (restricted) |
-| ENT-SET-10 | AppGrant and ExternalConnection | id, subject_ref, app_or_provider, scopes, granted_at, last_used_at, status, token (encrypted) | Subject | Until revoke or erasure |
-| ENT-SET-11 | PersonalApiToken | id, subject_ref, name, prefix, token_hash, scopes, created_at, expires_at, last_used_at, status | Subject | Until erasure |
-| ENT-SET-12 | AccessLogEntry | subject_ref, accessor_org, accessor_class, purpose, resource_class, at | Subject | 24 months |
-| ENT-SET-13 | ComplianceRuleSet | region, version, parameters, legal_reviewed, effective_at, approved_by | catalog | Permanent |
-| ENT-SET-14 | RetentionPolicy | data_class, module, period, trigger, action, version, approved_by | catalog | Permanent |
-| ENT-SET-15 | SettingChange | subject_ref, key, summary_old, summary_new, source, device_label, at | Subject | 12 months |
-| ENT-SET-16 | ManagedLock | org_id, setting_key, value, reason, created_by, at | Organization | While org exists |
-| ENT-SET-17 | UserPreference | subject_ref, key, value, scope (account/device), updated_at | Subject | Until erasure |
-| ENT-SET-18 | ErasureTombstone and RetainedRecordRef | email_hash_salted, request_id, expires_at; store, category, legal_basis_note | DataRequest | 30 days; retained refs permanent |
+| ID         | Entity                                 | Key attributes                                                                                                                                  | Relationships        | Retention class                                    |
+| ---------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------------------------- |
+| ENT-SET-01 | VisibilitySetting                      | subject_ref, field_key, audience, preset, updated_at, version                                                                                   | Subject              | Until erasure                                      |
+| ENT-SET-02 | ConsentLedgerEntry                     | id, subject_ref, scope, text_version, grantee_type, grantee_id, target_type, target_id, field_set, action, expires_at, source, at               | Subject, ConsentText | Permanent (opaque ref; mapping deleted on erasure) |
+| ENT-SET-03 | ConsentCurrent                         | subject_ref, scope, grantee, target, state, expires_at, epoch                                                                                   | derived from ledger  | Rebuildable                                        |
+| ENT-SET-04 | ConsentText                            | scope, version, locale, text, material, effective_at                                                                                            | catalog              | Permanent                                          |
+| ENT-SET-05 | PolicyDocument and PolicyAcceptance    | policy_id, version, locale, effective_at, material; acceptance (subject_ref, version, at, method)                                               | Subject              | Permanent (acceptance with opaque ref)             |
+| ENT-SET-06 | BlockedOrg                             | subject_ref, org_id or domain, at                                                                                                               | Subject              | Until erasure                                      |
+| ENT-SET-07 | DataRequest and Checkpoint             | id, subject_ref, type, state, requested_at, deadline_at, verified_at, completed_at, outcome, receipt_ref; checkpoint (module, step, status, at) | Subject              | 3 years after completion (metadata only) [PROP]    |
+| ENT-SET-08 | ExportArchive                          | request_id, object_key, size, sha256, expires_at, downloads                                                                                     | DataRequest          | 7 days                                             |
+| ENT-SET-09 | LegalHold                              | id, subject_ref, reason_code, case_ref, placed_by, placed_at, lifted_at                                                                         | Subject              | Permanent (restricted)                             |
+| ENT-SET-10 | AppGrant and ExternalConnection        | id, subject_ref, app_or_provider, scopes, granted_at, last_used_at, status, token (encrypted)                                                   | Subject              | Until revoke or erasure                            |
+| ENT-SET-11 | PersonalApiToken                       | id, subject_ref, name, prefix, token_hash, scopes, created_at, expires_at, last_used_at, status                                                 | Subject              | Until erasure                                      |
+| ENT-SET-12 | AccessLogEntry                         | subject_ref, accessor_org, accessor_class, purpose, resource_class, at                                                                          | Subject              | 24 months                                          |
+| ENT-SET-13 | ComplianceRuleSet                      | region, version, parameters, legal_reviewed, effective_at, approved_by                                                                          | catalog              | Permanent                                          |
+| ENT-SET-14 | RetentionPolicy                        | data_class, module, period, trigger, action, version, approved_by                                                                               | catalog              | Permanent                                          |
+| ENT-SET-15 | SettingChange                          | subject_ref, key, summary_old, summary_new, source, device_label, at                                                                            | Subject              | 12 months                                          |
+| ENT-SET-16 | ManagedLock                            | org_id, setting_key, value, reason, created_by, at                                                                                              | Organization         | While org exists                                   |
+| ENT-SET-17 | UserPreference                         | subject_ref, key, value, scope (account/device), updated_at                                                                                     | Subject              | Until erasure                                      |
+| ENT-SET-18 | ErasureTombstone and RetainedRecordRef | email_hash_salted, request_id, expires_at; store, category, legal_basis_note                                                                    | DataRequest          | 30 days; retained refs permanent                   |
 
 ```mermaid
 erDiagram
@@ -1315,122 +1317,122 @@ erDiagram
 
 ### 9.1 Emitted
 
-| ID | Event | Trigger | Key payload (no personal content) |
-|---|---|---|---|
-| EVT-SET-001 | set.consent.changed | ledger append | subject ref, scope, grantee, action |
-| EVT-SET-002 | set.consent.expired | expiry sweep | subject ref, scope, grantee |
-| EVT-SET-003 | set.visibility.changed | visibility save | subject ref, changed fields |
-| EVT-SET-004 | set.setting.changed | any setting write | subject ref, key |
-| EVT-SET-005 | set.blocklist.changed | add or remove | subject ref, org id |
-| EVT-SET-006 | set.search.restriction_changed | FR-SET-011 | subject ref, value |
-| EVT-SET-007 | set.dsr.requested | request created | request id, type |
-| EVT-SET-008 | set.export.ready | archive built | request id |
-| EVT-SET-009 | set.dsr.erasure_started | cooling-off elapsed | request id |
-| EVT-SET-010 | set.dsr.erasure_released | sweep clean | request id, subject ref |
-| EVT-SET-011 | set.dsr.completed | any request completed | request id, outcome |
-| EVT-SET-012 | set.dsr.failed | contributor failure | request id, module |
-| EVT-SET-013 | set.legalhold.placed / lifted | hold change | hold id |
-| EVT-SET-014 | set.policy.published | policy version published | policy, version, material |
-| EVT-SET-015 | set.policy.accepted | acceptance | subject ref, policy, version |
-| EVT-SET-016 | set.app.connected / revoked | app grant change | subject ref, app |
-| EVT-SET-017 | set.token.created / revoked | token change | subject ref, token id |
-| EVT-SET-018 | set.retention.disposed | purge run | class, counts |
-| EVT-SET-019 | set.rules.changed | compliance rule version active | region, version |
-| EVT-SET-020 | set.lock.applied | managed lock change | org, key |
+| ID          | Event                          | Trigger                        | Key payload (no personal content)   |
+| ----------- | ------------------------------ | ------------------------------ | ----------------------------------- |
+| EVT-SET-001 | set.consent.changed            | ledger append                  | subject ref, scope, grantee, action |
+| EVT-SET-002 | set.consent.expired            | expiry sweep                   | subject ref, scope, grantee         |
+| EVT-SET-003 | set.visibility.changed         | visibility save                | subject ref, changed fields         |
+| EVT-SET-004 | set.setting.changed            | any setting write              | subject ref, key                    |
+| EVT-SET-005 | set.blocklist.changed          | add or remove                  | subject ref, org id                 |
+| EVT-SET-006 | set.search.restriction_changed | FR-SET-011                     | subject ref, value                  |
+| EVT-SET-007 | set.dsr.requested              | request created                | request id, type                    |
+| EVT-SET-008 | set.export.ready               | archive built                  | request id                          |
+| EVT-SET-009 | set.dsr.erasure_started        | cooling-off elapsed            | request id                          |
+| EVT-SET-010 | set.dsr.erasure_released       | sweep clean                    | request id, subject ref             |
+| EVT-SET-011 | set.dsr.completed              | any request completed          | request id, outcome                 |
+| EVT-SET-012 | set.dsr.failed                 | contributor failure            | request id, module                  |
+| EVT-SET-013 | set.legalhold.placed / lifted  | hold change                    | hold id                             |
+| EVT-SET-014 | set.policy.published           | policy version published       | policy, version, material           |
+| EVT-SET-015 | set.policy.accepted            | acceptance                     | subject ref, policy, version        |
+| EVT-SET-016 | set.app.connected / revoked    | app grant change               | subject ref, app                    |
+| EVT-SET-017 | set.token.created / revoked    | token change                   | subject ref, token id               |
+| EVT-SET-018 | set.retention.disposed         | purge run                      | class, counts                       |
+| EVT-SET-019 | set.rules.changed              | compliance rule version active | region, version                     |
+| EVT-SET-020 | set.lock.applied               | managed lock change            | org, key                            |
 
 ### 9.2 Consumed
 
-| Event | From | Used for |
-|---|---|---|
-| idn.account.erasure_pending / erased | IDN | Align request states |
-| idn.account.suspended | IDN | Park erasure `on_hold` |
-| access events (`ats.profile.viewed`, `src.result.viewed`, `evd.artefact.opened`, `idn.support.access_started`) | ATS, SRC, EVD (planned), IDN | Access log |
-| `*.export.contribution`, `*.erase.checkpoint` | every module | Orchestration |
-| tsf.case.opened / closed | TSF (planned) | Hold on erasure |
-| emp.org.closed | EMP (planned) | End grantee grants |
-| plt.app.deleted | PLT (planned) | Remove app grants |
+| Event                                                                                                          | From                         | Used for               |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------- | ---------------------- |
+| idn.account.erasure_pending / erased                                                                           | IDN                          | Align request states   |
+| idn.account.suspended                                                                                          | IDN                          | Park erasure `on_hold` |
+| access events (`ats.profile.viewed`, `src.result.viewed`, `evd.artefact.opened`, `idn.support.access_started`) | ATS, SRC, EVD (planned), IDN | Access log             |
+| `*.export.contribution`, `*.erase.checkpoint`                                                                  | every module                 | Orchestration          |
+| tsf.case.opened / closed                                                                                       | TSF (planned)                | Hold on erasure        |
+| emp.org.closed                                                                                                 | EMP (planned)                | End grantee grants     |
+| plt.app.deleted                                                                                                | PLT (planned)                | Remove app grants      |
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Purpose | Failure behavior |
-|---|---|---|
-| Object storage (export bucket) | Archives with lifecycle expiry | Build fails and resumes; alert |
-| Email provider via `NTF` | Request notices, receipts | Outbox retry; in-app state is authoritative |
-| Identity verification partners (for guardian, assisted DSAR) | Verification | Manual procedure |
-| Consent management or tag manager | Cookie tag loading | Fail closed: no non-essential tags |
-| OAuth providers (calendar, storage, GitHub) | Connected accounts | Needs-reconnect state |
-| AI providers | AI features | Disabled when consent or region rule blocks |
-| Key management service | Encrypting app tokens and AI keys | Writes fail closed |
-| Legal counsel process (offline) | Rule review, holds | Claim wording softens without review flag |
+| Dependency                                                   | Purpose                           | Failure behavior                            |
+| ------------------------------------------------------------ | --------------------------------- | ------------------------------------------- |
+| Object storage (export bucket)                               | Archives with lifecycle expiry    | Build fails and resumes; alert              |
+| Email provider via `NTF`                                     | Request notices, receipts         | Outbox retry; in-app state is authoritative |
+| Identity verification partners (for guardian, assisted DSAR) | Verification                      | Manual procedure                            |
+| Consent management or tag manager                            | Cookie tag loading                | Fail closed: no non-essential tags          |
+| OAuth providers (calendar, storage, GitHub)                  | Connected accounts                | Needs-reconnect state                       |
+| AI providers                                                 | AI features                       | Disabled when consent or region rule blocks |
+| Key management service                                       | Encrypting app tokens and AI keys | Writes fail closed                          |
+| Legal counsel process (offline)                              | Rule review, holds                | Claim wording softens without review flag   |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by | For |
-|---|---|---|---|
-| IDN | Step-up, account state, session revocation | All modules | Consent decision function |
-| NTF | Delivery of privacy notices | SRC, ATS, JOB, INS, EVD, AIC (planned) | Consent predicate and removal events |
-| PRF (planned) | Profile fields, photo | IDN | Policy versions, acceptance ledger |
-| EVD, JOB, LRN, MSG, BIL, REP and every data-owning module | Export and erase contributors | NTF | Locale, time zone, quiet-hour context |
-| PLT (planned) | OAuth app registry, object storage | REP | Gamification opt-out and leaderboard visibility consent (FR-REP-026) |
-| ADM (planned) | DSAR and holds consoles | ADM | DSAR queue, legal holds, retention |
-| TSF (planned) | Case state for holds | INS (planned) | Cohort sharing consent |
+| Depends on                                                | For                                        | Depended on by                         | For                                                                  |
+| --------------------------------------------------------- | ------------------------------------------ | -------------------------------------- | -------------------------------------------------------------------- |
+| IDN                                                       | Step-up, account state, session revocation | All modules                            | Consent decision function                                            |
+| NTF                                                       | Delivery of privacy notices                | SRC, ATS, JOB, INS, EVD, AIC (planned) | Consent predicate and removal events                                 |
+| PRF (planned)                                             | Profile fields, photo                      | IDN                                    | Policy versions, acceptance ledger                                   |
+| EVD, JOB, LRN, MSG, BIL, REP and every data-owning module | Export and erase contributors              | NTF                                    | Locale, time zone, quiet-hour context                                |
+| PLT (planned)                                             | OAuth app registry, object storage         | REP                                    | Gamification opt-out and leaderboard visibility consent (FR-REP-026) |
+| ADM (planned)                                             | DSAR and holds consoles                    | ADM                                    | DSAR queue, legal holds, retention                                   |
+| TSF (planned)                                             | Case state for holds                       | INS (planned)                          | Cohort sharing consent                                               |
 
 ## 12. Module-level metrics
 
-| ID | Metric | Definition / formula | Owner |
-|---|---|---|---|
-| SET-M01 | Consent clarity rate | users who changed a consent after viewing the screen ÷ users who viewed it (not a goal to maximize; monitored for confusion) | Privacy PM |
-| SET-M02 | Consent propagation latency | p95 seconds from commit to first denied read after revoke (target: first read) and index removal ≤ 15 min | Platform engineering |
-| SET-M03 | Export turnaround | p95 hours from request to ready (target ≤ 4) | Privacy PM |
-| SET-M04 | Erasure SLA compliance | erasures completed ≤ 30 days ÷ erasures started (target 100%) | SAD |
-| SET-M05 | Sweep residual rate | requests needing a second sweep ÷ requests | SAD |
-| SET-M06 | Contributor coverage | modules with personal data and both contributors ÷ such modules (target 100%) | Platform engineering |
-| SET-M07 | DSAR SLA compliance | non-erasure requests answered ≤ 30 days ÷ requests | PAD |
-| SET-M08 | Re-confirmation response rate | prompts answered within grace ÷ prompts sent | Privacy PM |
-| SET-M09 | Cookie opt-in rate by region | accepted analytics ÷ visitors (informational) | Privacy PM |
-| SET-M10 | Settings search success | searches ending in a setting open ÷ searches | Product |
-| SET-M11 | Stale grants | per-grantee grants unused 12 months ÷ grants | Privacy PM |
+| ID      | Metric                        | Definition / formula                                                                                                         | Owner                |
+| ------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| SET-M01 | Consent clarity rate          | users who changed a consent after viewing the screen ÷ users who viewed it (not a goal to maximize; monitored for confusion) | Privacy PM           |
+| SET-M02 | Consent propagation latency   | p95 seconds from commit to first denied read after revoke (target: first read) and index removal ≤ 15 min                    | Platform engineering |
+| SET-M03 | Export turnaround             | p95 hours from request to ready (target ≤ 4)                                                                                 | Privacy PM           |
+| SET-M04 | Erasure SLA compliance        | erasures completed ≤ 30 days ÷ erasures started (target 100%)                                                                | SAD                  |
+| SET-M05 | Sweep residual rate           | requests needing a second sweep ÷ requests                                                                                   | SAD                  |
+| SET-M06 | Contributor coverage          | modules with personal data and both contributors ÷ such modules (target 100%)                                                | Platform engineering |
+| SET-M07 | DSAR SLA compliance           | non-erasure requests answered ≤ 30 days ÷ requests                                                                           | PAD                  |
+| SET-M08 | Re-confirmation response rate | prompts answered within grace ÷ prompts sent                                                                                 | Privacy PM           |
+| SET-M09 | Cookie opt-in rate by region  | accepted analytics ÷ visitors (informational)                                                                                | Privacy PM           |
+| SET-M10 | Settings search success       | searches ending in a setting open ÷ searches                                                                                 | Product              |
+| SET-M11 | Stale grants                  | per-grantee grants unused 12 months ÷ grants                                                                                 | Privacy PM           |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Who decides | Blocking |
-|---|---|---|---|---|---|
-| OD-SET-01 | Erasure clocks: cooling-off, completion deadline, deactivation purge cannot all be 30 days from one start. | 7-day cooling-off + 30-day completion; 30-day cancel window | 7 days + 30 days; deactivation retention 12 months (links OD-IDN-04) | Owner and counsel | FR-SET-015 |
-| OD-SET-02 | Backup age-out and restore replay for erasure. | 35 days, 90 days | 35 days with erasure log replay | Security lead and counsel | BR-SET-018 |
-| OD-SET-03 | Treatment of existing grants when purpose text changes: legacy sources conflict (stay active under old version vs treated as not granted). | materiality flag decides; always re-confirm | Materiality flag: material = not granted until re-confirmed, non-material = stays | Privacy lead and counsel | FR-SET-008 |
-| OD-SET-04 | Statutory timelines per region (DSAR, breach notice) and India DPDP mapping. | counsel to supply | Parameters in FR-SET-027, no claims until reviewed | Counsel | FR-SET-027 |
-| OD-SET-05 | `data.research_aggregate` scope: ever offered? | hidden, offered with separate consent | hidden until a research program is defined | Owner | FR-SET-005 |
-| OD-SET-06 | Default expiry for per-employer grants. | 12 months, until revoked | 12 months with 14-day reminder | Product director | FR-SET-007 |
-| OD-SET-07 | Export exclusion list (fraud signals, reporter identities, staff security notes, referee free text). | per item | as listed in FR-SET-013, counsel to review | Counsel | FR-SET-013 |
-| OD-SET-08 | Disposition of attestations a person gave for others on erasure (anonymize vs delete). | anonymize to "former colleague", delete | anonymize (keeps others' verification intact) | Owner | FR-SET-015 |
-| OD-SET-09 | May an institution or employer require data sharing as a condition of managed accounts? | never, only coursework records | coursework records by role; all discretionary sharing by personal consent | Owner and counsel | FR-SET-031 |
-| OD-SET-10 | Adverse-impact monitoring needs demographic data: collection, consent, separation from matching. | voluntary audit-only attributes, none | voluntary audit-only scope, separate store, never used in matching | Owner and counsel | new scope needed (propose `audit.demographics`) |
-| OD-SET-11 | Data residency regions and sub-processor register publication. | US only, US+EU | decision pending; engine supports both | Owner | FR-SET-027 |
-| OD-SET-12 | Does any sale or sharing of personal data exist (affects opt-out UI)? | none, some | none by design | Owner | FR-SET-009, 027 |
+| ID        | Question                                                                                                                                   | Options                                                     | Default proposal                                                                  | Who decides               | Blocking                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------------- |
+| OD-SET-01 | Erasure clocks: cooling-off, completion deadline, deactivation purge cannot all be 30 days from one start.                                 | 7-day cooling-off + 30-day completion; 30-day cancel window | 7 days + 30 days; deactivation retention 12 months (links OD-IDN-04)              | Owner and counsel         | FR-SET-015                                      |
+| OD-SET-02 | Backup age-out and restore replay for erasure.                                                                                             | 35 days, 90 days                                            | 35 days with erasure log replay                                                   | Security lead and counsel | BR-SET-018                                      |
+| OD-SET-03 | Treatment of existing grants when purpose text changes: legacy sources conflict (stay active under old version vs treated as not granted). | materiality flag decides; always re-confirm                 | Materiality flag: material = not granted until re-confirmed, non-material = stays | Privacy lead and counsel  | FR-SET-008                                      |
+| OD-SET-04 | Statutory timelines per region (DSAR, breach notice) and India DPDP mapping.                                                               | counsel to supply                                           | Parameters in FR-SET-027, no claims until reviewed                                | Counsel                   | FR-SET-027                                      |
+| OD-SET-05 | `data.research_aggregate` scope: ever offered?                                                                                             | hidden, offered with separate consent                       | hidden until a research program is defined                                        | Owner                     | FR-SET-005                                      |
+| OD-SET-06 | Default expiry for per-employer grants.                                                                                                    | 12 months, until revoked                                    | 12 months with 14-day reminder                                                    | Product director          | FR-SET-007                                      |
+| OD-SET-07 | Export exclusion list (fraud signals, reporter identities, staff security notes, referee free text).                                       | per item                                                    | as listed in FR-SET-013, counsel to review                                        | Counsel                   | FR-SET-013                                      |
+| OD-SET-08 | Disposition of attestations a person gave for others on erasure (anonymize vs delete).                                                     | anonymize to "former colleague", delete                     | anonymize (keeps others' verification intact)                                     | Owner                     | FR-SET-015                                      |
+| OD-SET-09 | May an institution or employer require data sharing as a condition of managed accounts?                                                    | never, only coursework records                              | coursework records by role; all discretionary sharing by personal consent         | Owner and counsel         | FR-SET-031                                      |
+| OD-SET-10 | Adverse-impact monitoring needs demographic data: collection, consent, separation from matching.                                           | voluntary audit-only attributes, none                       | voluntary audit-only scope, separate store, never used in matching                | Owner and counsel         | new scope needed (propose `audit.demographics`) |
+| OD-SET-11 | Data residency regions and sub-processor register publication.                                                                             | US only, US+EU                                              | decision pending; engine supports both                                            | Owner                     | FR-SET-027                                      |
+| OD-SET-12 | Does any sale or sharing of personal data exist (affects opt-out UI)?                                                                      | none, some                                                  | none by design                                                                    | Owner                     | FR-SET-009, 027                                 |
 
 ## 14. Risks
 
-| ID | Risk | Likelihood / impact | Mitigation |
-|---|---|---|---|
-| RSK-SET-01 | A module forgets an export or erase contributor and residual data survives erasure | M / H | CI lint (BR-SET-014), sweep gate (BR-SET-015) |
-| RSK-SET-02 | Consent caching or CDN caching leaks revoked data | M / H | Read-time evaluation, `private, no-store` on consented endpoints |
-| RSK-SET-03 | Audit immutability conflicts with erasure | M / M | Opaque subject refs and deleting the mapping (BR-SET-017) |
-| RSK-SET-04 | Consent fatigue and dark patterns erode trust | M / M | Equal-prominence rules, plain-language review, dashboard facts only |
-| RSK-SET-05 | Regional rules drift from law | M / H | Versioned rules, counsel review flag, no compliance claims without review |
-| RSK-SET-06 | Backups reintroduce erased data | L / H | Erasure log replay before serving, age-out (BR-SET-018) |
-| RSK-SET-07 | Org locks used to pressure members into sharing | L / M | Closed lock catalog, member-visible reasons, convert-to-personal (BR-SET-031) |
-| RSK-SET-08 | Export archive theft | L / H | Step-up, one-time URL, encryption, short TTL, never emailed |
-| RSK-SET-09 | Large exports overload the build pipeline | M / L | Streaming, parts, throttling, checkpoints |
+| ID         | Risk                                                                               | Likelihood / impact | Mitigation                                                                    |
+| ---------- | ---------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| RSK-SET-01 | A module forgets an export or erase contributor and residual data survives erasure | M / H               | CI lint (BR-SET-014), sweep gate (BR-SET-015)                                 |
+| RSK-SET-02 | Consent caching or CDN caching leaks revoked data                                  | M / H               | Read-time evaluation, `private, no-store` on consented endpoints              |
+| RSK-SET-03 | Audit immutability conflicts with erasure                                          | M / M               | Opaque subject refs and deleting the mapping (BR-SET-017)                     |
+| RSK-SET-04 | Consent fatigue and dark patterns erode trust                                      | M / M               | Equal-prominence rules, plain-language review, dashboard facts only           |
+| RSK-SET-05 | Regional rules drift from law                                                      | M / H               | Versioned rules, counsel review flag, no compliance claims without review     |
+| RSK-SET-06 | Backups reintroduce erased data                                                    | L / H               | Erasure log replay before serving, age-out (BR-SET-018)                       |
+| RSK-SET-07 | Org locks used to pressure members into sharing                                    | L / M               | Closed lock catalog, member-visible reasons, convert-to-personal (BR-SET-031) |
+| RSK-SET-08 | Export archive theft                                                               | L / H               | Step-up, one-time URL, encryption, short TTL, never emailed                   |
+| RSK-SET-09 | Large exports overload the build pipeline                                          | M / L               | Streaming, parts, throttling, checkpoints                                     |
 
 ## 15. Legacy source trace
 
-| Legacy source | What was used | What was dropped or changed and why |
-|---|---|---|
-| `SSOT.md` §15.2, §15.5, §15.9 (GDPR matrix, DSR queue, FERPA severance, residency), V61-07, V61-16, V61-19, V61-27; F-15 Settings; F-60 profile views and privacy | Consent by purpose, erasure clocks, DSR types, field encryption list, residency idea, graduation severance | The 30-day cancel window replaced by proposal 7 days (OD-SET-01); "no sale of personal data" kept as a conditional statement (OD-SET-12); `byo_ai_key` handled as a credential in FR-SET-029 |
-| `docs/registries/FEATURE_REGISTRY.md` F-15, F-60 | Feature identities | Split into 32 features; F-60 premium candidate tier left to `BIL` |
-| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G1_IDENTITY_AND_PROFILE.md` SPEC-02 | Visibility fields, consent scope table, slug and share-link rules (left to `PRF`), blocklist, acceptance criteria | Profile editing, slug and share links belong to `PRF` (planned) |
-| `…/SPEC_G5_ENGAGEMENT_COMMERCE_PRIVACY_INSTITUTIONS.md` SPEC-13 | Export contents, erasure sequence, receipts, legal hold, checkpoints, SM-DSR | Provisional endpoints not copied; archive format kept |
-| `…/00_CONTROL_CENTRE/CONSENT_SCOPE_CATALOGUE.md` | Scope ids, grain model, defaults, revocation effects | `application.share_snapshot` kept implicit per application |
-| `…/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T060..T069, BR-T122, T124 | Privacy rules | Values kept as parameters where source marked open |
-| `…/14_SECURITY_PRIVACY_COMPLIANCE/PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md` (referenced, not all read) | Lifecycle principles | Detailed re-consent wording deferred to FR-SET-008 |
-| Industry products (LinkedIn privacy settings, Google privacy dashboard, Apple privacy page) | Privacy dashboard, access log, connected apps, preview-as | Tagged `[PROP]`: FR-SET-004 audience list, 023, 024, 026, 031, 032 |
+| Legacy source                                                                                                                                                     | What was used                                                                                                     | What was dropped or changed and why                                                                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SSOT.md` §15.2, §15.5, §15.9 (GDPR matrix, DSR queue, FERPA severance, residency), V61-07, V61-16, V61-19, V61-27; F-15 Settings; F-60 profile views and privacy | Consent by purpose, erasure clocks, DSR types, field encryption list, residency idea, graduation severance        | The 30-day cancel window replaced by proposal 7 days (OD-SET-01); "no sale of personal data" kept as a conditional statement (OD-SET-12); `byo_ai_key` handled as a credential in FR-SET-029 |
+| `docs/registries/FEATURE_REGISTRY.md` F-15, F-60                                                                                                                  | Feature identities                                                                                                | Split into 32 features; F-60 premium candidate tier left to `BIL`                                                                                                                            |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G1_IDENTITY_AND_PROFILE.md` SPEC-02                                                                   | Visibility fields, consent scope table, slug and share-link rules (left to `PRF`), blocklist, acceptance criteria | Profile editing, slug and share links belong to `PRF` (planned)                                                                                                                              |
+| `…/SPEC_G5_ENGAGEMENT_COMMERCE_PRIVACY_INSTITUTIONS.md` SPEC-13                                                                                                   | Export contents, erasure sequence, receipts, legal hold, checkpoints, SM-DSR                                      | Provisional endpoints not copied; archive format kept                                                                                                                                        |
+| `…/00_CONTROL_CENTRE/CONSENT_SCOPE_CATALOGUE.md`                                                                                                                  | Scope ids, grain model, defaults, revocation effects                                                              | `application.share_snapshot` kept implicit per application                                                                                                                                   |
+| `…/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T060..T069, BR-T122, T124                                                                                 | Privacy rules                                                                                                     | Values kept as parameters where source marked open                                                                                                                                           |
+| `…/14_SECURITY_PRIVACY_COMPLIANCE/PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md` (referenced, not all read)                                                                | Lifecycle principles                                                                                              | Detailed re-consent wording deferred to FR-SET-008                                                                                                                                           |
+| Industry products (LinkedIn privacy settings, Google privacy dashboard, Apple privacy page)                                                                       | Privacy dashboard, access log, connected apps, preview-as                                                         | Tagged `[PROP]`: FR-SET-004 audience list, 023, 024, 026, 031, 032                                                                                                                           |

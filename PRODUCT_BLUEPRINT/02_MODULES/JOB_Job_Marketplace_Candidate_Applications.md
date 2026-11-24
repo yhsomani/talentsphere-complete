@@ -10,27 +10,27 @@ JOB is the candidate-facing half of hiring. It lets a candidate find jobs that f
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| A candidate finds a relevant listing quickly | Search-to-view and view-to-apply rates; time from first search to first application (see §12) |
-| A candidate never loses application work | Draft recovery success rate; zero draft loss after crash, offline or session expiry |
+| Outcome                                               | How the system knows                                                                                                     |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| A candidate finds a relevant listing quickly          | Search-to-view and view-to-apply rates; time from first search to first application (see §12)                            |
+| A candidate never loses application work              | Draft recovery success rate; zero draft loss after crash, offline or session expiry                                      |
 | A candidate always knows the status of an application | Every application has a candidate-visible status and a timeline; no application stays without a visible next expectation |
-| Listings are trustworthy | Share of live listings that are verified, fresh and responded to; scam reports per 1,000 views |
-| The employer receives a complete, honest application | Applications carry a frozen snapshot of profile, documents and answers |
+| Listings are trustworthy                              | Share of live listings that are verified, fresh and responded to; scam reports per 1,000 views                           |
+| The employer receives a complete, honest application  | Applications carry a frozen snapshot of profile, documents and answers                                                   |
 
 ### 1.3 Boundaries
 
-| In scope (owned by JOB) | Out of scope (owned elsewhere) | Consumed from other modules |
-|---|---|---|
-| Public job feed, search, filters, sorting, job detail | Authoring, approval and publishing of jobs (ATS: FR-ATS-004..010) | Published posting data from ATS; company data from EMP |
-| Saved jobs, hidden jobs and companies, reports, sharing | Moderation decisions on reports (TSF, planned) | Moderation queue and takedown from TSF (planned) |
-| Saved searches and alerts, alert preferences | Notification delivery engine, channels and quiet hours (NTF, planned) | Delivery of alert and status messages through NTF (planned) |
-| Easy apply, application forms, screening answers, attachments, drafts, review and submit | Rendering of the screening question definitions (ATS: FR-ATS-007 owns the definitions) | Profile, resume and evidence data (PRF, EVD planned) |
-| Candidate application tracker, status timeline, withdraw, update | Pipeline stages, scorecards, rejection decisions (ATS) | Status changes emitted by ATS |
-| Interview invite response (candidate side) | Interview scheduling engine (INT) | Slots and invites from INT |
-| Offer view and accept/decline (candidate side) | Offer authoring, approval, letter, e-sign (ATS: FR-ATS-036..039) | Offer record from ATS |
-| Recommendations display, fit explanation | Matching models (AIC, planned) | Scores from AIC (planned) |
-| Ghost-job and scam controls on the candidate side, imported listings, external application tracking, company follow | Account-level trust decisions (TSF, planned) | Risk verdicts from TSF (planned) |
+| In scope (owned by JOB)                                                                                             | Out of scope (owned elsewhere)                                                         | Consumed from other modules                                 |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Public job feed, search, filters, sorting, job detail                                                               | Authoring, approval and publishing of jobs (ATS: FR-ATS-004..010)                      | Published posting data from ATS; company data from EMP      |
+| Saved jobs, hidden jobs and companies, reports, sharing                                                             | Moderation decisions on reports (TSF, planned)                                         | Moderation queue and takedown from TSF (planned)            |
+| Saved searches and alerts, alert preferences                                                                        | Notification delivery engine, channels and quiet hours (NTF, planned)                  | Delivery of alert and status messages through NTF (planned) |
+| Easy apply, application forms, screening answers, attachments, drafts, review and submit                            | Rendering of the screening question definitions (ATS: FR-ATS-007 owns the definitions) | Profile, resume and evidence data (PRF, EVD planned)        |
+| Candidate application tracker, status timeline, withdraw, update                                                    | Pipeline stages, scorecards, rejection decisions (ATS)                                 | Status changes emitted by ATS                               |
+| Interview invite response (candidate side)                                                                          | Interview scheduling engine (INT)                                                      | Slots and invites from INT                                  |
+| Offer view and accept/decline (candidate side)                                                                      | Offer authoring, approval, letter, e-sign (ATS: FR-ATS-036..039)                       | Offer record from ATS                                       |
+| Recommendations display, fit explanation                                                                            | Matching models (AIC, planned)                                                         | Scores from AIC (planned)                                   |
+| Ghost-job and scam controls on the candidate side, imported listings, external application tracking, company follow | Account-level trust decisions (TSF, planned)                                           | Risk verdicts from TSF (planned)                            |
 
 Owned entities: listing projection, saved/hidden items, reports, saved searches and alerts, applications, drafts, answers, document snapshots, status events, feedback, imported listings, external applications, follows, preferences, blocked employers (see §8).
 
@@ -40,36 +40,36 @@ Boundary note: the Application entity is created and owned by JOB. ATS owns the 
 
 Legend: Y = allowed, O = own records only, R = read-only, N = not allowed, A = allowed with audit.
 
-| Capability | GUE | CAN | STD | FRL | REC | HMG | EAD | MOD | SUP | PAD |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Browse and search listings | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| View job detail | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Save, hide, report a job | Report only | Y | Y | Y | N | N | N | N | N | N |
-| Saved searches and alerts | N | O | O | O | N | N | N | N | N | N |
-| Apply (easy or full) | N (sign in prompt) | Y | Y | Y | N | N | N | N | N | N |
-| View own applications | N | O | O | O | N | N | N | N | R via impersonation-free tooling, A | R, A |
-| Withdraw / update own application | N | O | O | O | N | N | N | N | N | N |
-| Respond to interview invite and offer | N | O | O | O | N | N | N | N | N | N |
-| Follow a company | N | Y | Y | Y | N | N | N | N | N | N |
-| Import external jobs | N | N | N | N | N | N | EAD: claim only | N | N | Y, A |
-| Remove or suppress a listing | N | N | N | N | Employer-owned only | N | Employer-owned only | Y, A | N | Y, A |
-| View listing fraud signals | N | N | N | N | N | N | N | Y | N | Y |
+| Capability                            | GUE                | CAN | STD | FRL | REC                 | HMG | EAD                 | MOD  | SUP                                 | PAD  |
+| ------------------------------------- | ------------------ | --- | --- | --- | ------------------- | --- | ------------------- | ---- | ----------------------------------- | ---- |
+| Browse and search listings            | Y                  | Y   | Y   | Y   | Y                   | Y   | Y                   | Y    | Y                                   | Y    |
+| View job detail                       | Y                  | Y   | Y   | Y   | Y                   | Y   | Y                   | Y    | Y                                   | Y    |
+| Save, hide, report a job              | Report only        | Y   | Y   | Y   | N                   | N   | N                   | N    | N                                   | N    |
+| Saved searches and alerts             | N                  | O   | O   | O   | N                   | N   | N                   | N    | N                                   | N    |
+| Apply (easy or full)                  | N (sign in prompt) | Y   | Y   | Y   | N                   | N   | N                   | N    | N                                   | N    |
+| View own applications                 | N                  | O   | O   | O   | N                   | N   | N                   | N    | R via impersonation-free tooling, A | R, A |
+| Withdraw / update own application     | N                  | O   | O   | O   | N                   | N   | N                   | N    | N                                   | N    |
+| Respond to interview invite and offer | N                  | O   | O   | O   | N                   | N   | N                   | N    | N                                   | N    |
+| Follow a company                      | N                  | Y   | Y   | Y   | N                   | N   | N                   | N    | N                                   | N    |
+| Import external jobs                  | N                  | N   | N   | N   | N                   | N   | EAD: claim only     | N    | N                                   | Y, A |
+| Remove or suppress a listing          | N                  | N   | N   | N   | Employer-owned only | N   | Employer-owned only | Y, A | N                                   | Y, A |
+| View listing fraud signals            | N                  | N   | N   | N   | N                   | N   | N                   | Y    | N                                   | Y    |
 
 Recruiters, hiring managers and employer admins cannot apply to jobs using those roles; to apply, a person uses a separate candidate persona or the candidate mode of the same account where IDN (planned) allows it. [SRC: BR-02 legacy] See OD-JOB-05.
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Discovery | FR-JOB-001 to FR-JOB-007 |
-| B | Listing detail, save, hide, report, share | FR-JOB-008 to FR-JOB-013 |
-| C | Saved searches and alerts | FR-JOB-014 to FR-JOB-016 |
-| D | Applying | FR-JOB-017 to FR-JOB-024 |
-| E | Tracking, responses, offers | FR-JOB-025 to FR-JOB-032 |
-| F | Recommendations and fit | FR-JOB-033, FR-JOB-034 |
-| G | Listing integrity | FR-JOB-035, FR-JOB-036, FR-JOB-040 |
-| H | External jobs | FR-JOB-037, FR-JOB-038 |
-| I | Company follow, preferences, data | FR-JOB-039, FR-JOB-041, FR-JOB-042 |
+| Code | Sub-module                                | Features                                           |
+| ---- | ----------------------------------------- | -------------------------------------------------- |
+| A    | Discovery                                 | FR-JOB-001 to FR-JOB-007                           |
+| B    | Listing detail, save, hide, report, share | FR-JOB-008 to FR-JOB-013                           |
+| C    | Saved searches and alerts                 | FR-JOB-014 to FR-JOB-016                           |
+| D    | Applying                                  | FR-JOB-017 to FR-JOB-024                           |
+| E    | Tracking, responses, offers               | FR-JOB-025 to FR-JOB-032, FR-JOB-043 to FR-JOB-045 |
+| F    | Recommendations and fit                   | FR-JOB-033, FR-JOB-034                             |
+| G    | Listing integrity                         | FR-JOB-035, FR-JOB-036, FR-JOB-040                 |
+| H    | External jobs                             | FR-JOB-037, FR-JOB-038                             |
+| I    | Company follow, preferences, data         | FR-JOB-039, FR-JOB-041, FR-JOB-042                 |
 
 ```mermaid
 flowchart LR
@@ -1180,54 +1180,153 @@ flowchart LR
   - Given an employer legal hold, When the candidate deletes an application, Then the employer copy remains and the candidate is told.
   - Negative: Given an expired link, When used, Then 410.
 
+### FR-JOB-043 — Offer comparison
+
+- **Sub-module:** E Tracking, responses, offers
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §7.2 F-128 Offer Comparison Tool (priority 7, Ph4; dependencies F-86, F-98, F-109)] [DER]; referenced by FR-JOB-031 step 3 and FR-MKT-027
+- **Purpose and outcome:** A candidate holding two or more offers compares pay and non-pay terms side by side with market context and decides with full information. The system knows it works when candidates with several offers open the comparison before deciding and no offer data reaches an employer.
+- **Roles and permissions:** `CAN, STD, FRL: create, read, update, delete own comparisons and self-entered offers` · no other role has access
+- **Preconditions and entry points:** At least two offers: platform offers visible to the candidate (state `extended` or `negotiating` in SM-ATS-03, FR-JOB-031) and offers the candidate enters manually. Entry: Applications > Offers tab > "Compare offers", and the "Compare with other offers" control of FR-JOB-031.
+- **User interactions and actions:**
+  1. Select 2 to 4 offers. Press "Add an offer from another employer" to enter one manually: employer name, role title, location, work mode, base pay with currency and period, annual bonus target, sign-on amount, equity (instrument, declared grant value, vesting years), benefits checklist (health, retirement match percent, paid leave days, learning budget, parental leave), start date, expiry date (optional).
+  2. Read the comparison grid: annualized base pay, bonus, sign-on (one time), equity per year at the declared value (a separate row, never silently added to cash), location and work mode, benefits rows, start date, expiry, verified-employer mark, and "pay position" against the market band (FR-MKT-019) as "below", "within" or "above" the range.
+  3. Choose "My priorities": order up to 5 factors (pay, growth, flexibility, stability, learning) to reorder rows; toggle "Include equity at declared value" (default off); toggle "Show only differences".
+  4. Save the comparison with a name (up to 10 saved), export a private PDF, or delete it.
+- **System behaviour:** Platform offers prefill from the current offer version and update when the employer issues a new version, with an "Offer updated" badge. Self-entered offers are private, labelled "self-entered" and never visible to employers (BR-JOB-045). Annualization uses {12} months, {52} weeks and {2,080} hours as default conventions and shows the basis; currency conversion uses dated rates (BR-MKT-034) with the rate date displayed. Equity is excluded from cash totals unless the user opts in, and the valuation-uncertainty note of FR-MKT-021 appears (BR-JOB-046). Pay position is computed only when the market cell meets `min_cohort_k` (BR-MKT-007); otherwise the row reads "Not enough market data". The system computes no overall score and names no winner (BR-JOB-045). Offers that expire, are rescinded or are declined stay in the grid greyed with their state.
+- **UI elements and controls:** Offer picker with checkboxes, "Add offer" form, comparison grid with sticky row labels and a column per offer, priority list (keyboard reorderable), toggles, "Save", "Export PDF", "Delete". States: empty (fewer than two offers: "Add another offer to compare"), loading, error with Retry, rate-unavailable per cell.
+- **Configuration options:** User: default currency for display, include-equity default (off). Platform: maximum offers per comparison ({4}), saved comparisons per user ({10}).
+- **Business rules:** BR-JOB-045, BR-JOB-046
+- **Validation:** 2 to 4 offers; pay greater than 0 with ISO currency and period; bonus, sign-on and equity value at least 0; vesting years 1 to 10 and schedule sums to 100 percent; dates plausible (start not earlier than 1 year ago); text fields up to 500 characters; benefits percentages 0 to 100.
+- **Inputs and outputs:** In: offer selection, self-entered offers, priorities, toggles. Out: comparison view model with annualized values, conversion basis, pay position labels and a saved comparison id.
+- **Filters, sorting, search:** Rows reorder by priority; "Show only differences" filter; no search.
+- **Notifications and communication:** The in-app "Offer updated" badge is driven by the existing `job.offer.received` flow (FR-JOB-031); n/a otherwise.
+- **Error handling and edge cases:** Only one offer: empty state. Mixed currencies without a rate: original currencies are shown with "Rate unavailable" and no total. A platform offer withdrawn while open: the column is greyed and marked "Withdrawn". Duplicate manual entry of the same employer and role: warning, still allowed. Equity with unknown valuation: reported as "valuation unknown" and excluded from totals. Double submit of a save: idempotent by name.
+- **Dependencies:** FR-JOB-031, FR-JOB-032, FR-MKT-019, FR-MKT-021, FR-MKT-034, ENT-JOB-19.
+- **Security and privacy:** Compensation is highly confidential: no indexing, no analytics payload with amounts, access logged; self-entered offers are never shared with employers, recruiters or support (view-as sessions cannot read sealed content, BR-ADM-030); export and erasure through FR-JOB-042.
+- **Acceptance criteria:**
+  - Given a platform offer and a self-entered offer in different currencies, when the candidate opens the comparison, then both annualized base pays are shown with the conversion rate date.
+  - Given equity at a declared value, when "Include equity" is off, then totals exclude equity and the equity row is shown separately.
+  - Given the market cell has fewer than `min_cohort_k` contributors, when the grid renders, then pay position reads "Not enough market data" and no band is shown.
+  - Given an employer or recruiter requests a candidate's comparison id, when the request is made, then the system returns 404 (negative).
+
+### FR-JOB-044 — Offer negotiation guidance
+
+- **Sub-module:** E Tracking, responses, offers
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.1 F-109 Salary Negotiation Guidance (priority 5, Ph8; dependencies F-86, F-98)] [PROP] for behavior; range policy in `OD-JOB-12`
+- **Purpose and outcome:** Before deciding on an offer, the candidate sees how it sits against market data, works through a checklist of negotiable terms, and drafts and practices the conversation, so they negotiate with evidence. Everything sent to the employer is written and sent by the candidate.
+- **Roles and permissions:** `CAN, STD, FRL: use for own offers` · `PAD: manage playbook content via the knowledge base (FR-ADM-025)` · no employer-side access
+- **Preconditions and entry points:** An offer visible to the candidate (FR-JOB-031) or a self-entered offer (FR-JOB-043). Entry: "Negotiation guidance" on the offer view.
+- **User interactions and actions:**
+  1. Open the guidance panel from an offer.
+  2. Read "Where this offer sits": pay against the market reference range for role, level and region (for example the 25th to 75th percentile band) with sample size and data date (FR-MKT-019), and the total-compensation notes of FR-MKT-021.
+  3. Work through the "Negotiable terms" checklist (base pay, sign-on, equity, start date, remote days, title or level, learning budget, review timing, relocation): mark which matter, record "my ask" and a one-line reason for each.
+  4. Read the playbook articles (timing, tone, how to ask for time, what not to say, questions that may be restricted in the candidate's jurisdiction).
+  5. Press "Draft my reply": the drafting assistant (FR-AIC-007) prepares a message from the candidate's own asks and evidence; edit it, copy it, or open it in the recruiter thread (FR-MSG-013) and press Send there.
+  6. Press "Practice": rehearse the conversation in the private practice mode of FR-AIC-004.
+  7. Use "Request more time" (FR-JOB-032) and optionally "Log the outcome" (counter received, final terms, declined).
+- **System behaviour:** Market figures appear only when the cell meets `min_cohort_k` (BR-MKT-007); otherwise the panel states "Not enough market data" and shows the checklist and playbook without numbers. The system never recommends a counter figure and never predicts the chance of acceptance (BR-JOB-047). Nothing is sent to the employer without the candidate pressing Send in the messaging thread; the employer is not told that guidance was opened. Drafts follow the AI rules of FR-AIC-007 (labelled, user reviewed). Playbook text is general information, not legal or financial advice (BR-AIC-031). The worksheet is saved per offer and deleted when the offer record is deleted.
+- **UI elements and controls:** Guidance panel with market card (value, range, sample size, date), checklist rows (priority toggle, "my ask" field, reason field), playbook list, "Draft my reply", "Practice", "Log outcome". States: no market data, AI unavailable ("Drafting is unavailable; here is a template" with a static template), offer expired (read-only).
+- **Configuration options:** User: AI assistance on or off (FR-SET-029). Platform: playbook content, checklist items, jurisdiction notes.
+- **Business rules:** BR-JOB-047
+- **Validation:** "My ask" up to 200 characters; reason up to 300; outcome fields enumerated; at most one worksheet per offer.
+- **Inputs and outputs:** In: priorities, asks, reasons, outcome. Out: worksheet, market card, drafted text (not sent).
+- **Filters, sorting, search:** n/a — a per-offer worksheet; playbook articles are searched through help search (FR-ADM-025).
+- **Notifications and communication:** n/a — no message is sent by this feature; reminders for offer expiry already come from FR-JOB-031.
+- **Error handling and edge cases:** Offer rescinded or expired: the worksheet stays readable, drafting is disabled with a reason. Market service unavailable: the market card shows "Unavailable right now" and the rest works. AI quota exhausted: the static template is offered (FR-AIC-027). Candidate edits an ask after drafting: the draft is marked "Out of date".
+- **Dependencies:** FR-JOB-031, FR-JOB-032, FR-JOB-043, FR-MKT-019, FR-MKT-021, FR-AIC-004, FR-AIC-007, FR-ADM-025, FR-MSG-013, ENT-JOB-20.
+- **Security and privacy:** Worksheet and drafts are private to the candidate; compensation values are excluded from analytics payloads; outcome logs feed MKT aggregates only with the candidate's market-data consent (FR-MKT-034).
+- **Acceptance criteria:**
+  - Given an offer with a market cell above `min_cohort_k`, when the candidate opens guidance, then the market range, sample size and date are shown.
+  - Given the candidate presses "Draft my reply", when the draft appears, then nothing is sent until they press Send in the thread.
+  - Given the market cell is below `min_cohort_k`, when the panel loads, then no numbers are shown and the checklist is still usable.
+  - Given an employer user requests the worksheet id, when the request is made, then the system returns 404 (negative).
+
+### FR-JOB-045 — Pre-start preparation
+
+- **Sub-module:** E Tracking, responses, offers
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7.2 F-141 Onboarding Preparation (priority 1, Ph8; dependencies F-06, F-33)] [PROP] for behavior; boundary against the SSOT §4.2 generic HR non-goal in `OD-JOB-11`
+- **Purpose and outcome:** After a candidate accepts an offer, the employer shares a pre-start pack (welcome note, first-week agenda, team introductions, logistics checklist, optional preparation course) and the candidate completes preparatory steps and asks questions before day one. The system knows it works when packs are opened and checklists completed before the start date. No HR, payroll or identity-document data is collected here.
+- **Roles and permissions:** `CAN, STD, FRL: view and complete own pack` · `REC, HMG: create, edit, publish for an accepted hire (hiring team of the job)` · `EAD: manage pack templates and the org setting` · no other role
+- **Preconditions and entry points:** The offer is `accepted` (SM-ATS-03) or the application is `hired` (SM-JOB-01) and the start date is in the future; the organization has pre-start packs enabled (default off). Entry for the employer: hire handoff (FR-ATS-040) and application detail "Prepare day one". Entry for the candidate: the pre-start notification, the offer view and the application detail.
+- **User interactions and actions:**
+  1. Employer: open "Prepare day one", choose a template or a blank pack.
+  2. Add sections: welcome note (up to 2,000 characters), first-week agenda (up to 10 entries with date, time, place or link), team introductions (up to 8 people; each person must be an active org member who agrees to be shown), logistics checklist (up to 20 items), optional learning link to a course or path (FR-LRN-022).
+  3. For each checklist item choose the type: read, confirm, short answer (up to 300 characters), or file upload (non-sensitive images or PDFs up to 10 MB).
+  4. Publish. Edits after publish notify the candidate.
+  5. Candidate: open the pack, mark items done, answer questions, upload files, add agenda entries to their calendar (ICS), and ask a question in the application's message thread (FR-MSG-013).
+- **System behaviour:** A pack is a structured object tied to the application and offer. Item types are limited to those listed; validators reject items or answers that ask for or contain national identifiers, tax forms, bank details, right-to-work documents, medical information or passwords, and uploads show a warning not to include them (BR-JOB-048). The hiring team sees completion counts per item, not the candidate's private activity. The pack closes at the start date plus {14} days (BR-JOB-049); if the offer is rescinded or the candidate is recorded as "Did not start" (FR-ATS-040) the pack becomes inaccessible at once and uploaded files are deleted within 30 days. Employer edits create versions; the candidate sees "Updated" badges on changed sections.
+- **UI elements and controls:** Pack editor (section cards, item type select, reorder), preview as candidate, publish button; candidate view with progress bar and text count ("3 of 8 done"), item checkboxes, upload control, "Add to calendar", "Ask a question". States: not published ("Your employer hasn't shared a pack yet"), draft preview, published, closed, withdrawn.
+- **Configuration options:** Org: pre-start packs on or off (default off), templates. User: reminders on or off.
+- **Business rules:** BR-JOB-048, BR-JOB-049, BR-JOB-028
+- **Validation:** Welcome note up to 2,000 characters; item title 1 to 120; description up to 500; at most 20 items and 10 agenda entries; uploads image or PDF up to 10 MB with virus scan (FR-PLT-031); blocked-pattern check on titles and answers; a featured person must have an active membership and agree.
+- **Inputs and outputs:** In: pack content, item responses, files. Out: published pack, candidate progress, calendar files.
+- **Filters, sorting, search:** n/a — one pack per application; the employer's hires list shows pack status as a column.
+- **Notifications and communication:** `job.prestart.published` to the candidate (in-app, email; class transactional workflow); reminders 3 days and 1 day before start if items remain (class engagement, opt-out); employer digest when all items are complete.
+- **Error handling and edge cases:** Offer rescinded while the candidate is viewing: banner "This pack is no longer available" and actions disabled. Start date changed by the employer: agenda dates flagged "Check dates". Upload fails scan: rejected with a reason. A featured team member leaves the org: their card is removed. Candidate declines after accepting (no-show): pack withdrawn. Org disables the setting after publishing: existing packs stay until close.
+- **Dependencies:** FR-ATS-040, FR-JOB-031, FR-JOB-032, FR-EMP-015, FR-MSG-013, FR-LRN-022, FR-NTF-028, FR-PLT-031, ENT-JOB-21.
+- **Security and privacy:** Visible only to the candidate and the hiring team; files are scanned, access controlled by signed URLs (FR-PLT-034) and deleted per retention; prohibited categories are blocked to keep the platform outside HR and payroll scope; access is logged.
+- **Acceptance criteria:**
+  - Given an accepted offer and pre-start packs enabled, when the recruiter publishes a pack, then the candidate is notified and sees the pack from the offer view.
+  - Given the recruiter adds a checklist item titled "Upload your passport", when saving, then validation fails with `sensitive_item_not_allowed` (negative).
+  - Given the offer is rescinded after publish, when the candidate opens the pack, then access is denied and uploaded files are scheduled for deletion.
+  - Given the start date plus 14 days has passed, when the candidate opens the pack, then it shows as closed and read-only.
+
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-JOB-001 | Only accounts in a candidate-capable role (CAN, STD, FRL) may submit applications. Recruiter, hiring manager and employer admin roles cannot apply. | Separation of hiring and applying roles; prevents self-dealing. | API authorization on apply command | [SRC: BR-02] |
-| BR-JOB-002 | An application can be created only for a listing that is live, not past its deadline, and not suppressed. Closed or unavailable listings return 410. | Prevents wasted work and phantom applications. | Apply gate, DB check at insert | [SRC: BR-16, BR-038] |
-| BR-JOB-003 | At most one active application per candidate per listing. After a terminal outcome the candidate may reapply only after a cooldown (default 90 days; waived once if withdrawn within 24 hours of submit). | Stops spam and duplicates. | Partial unique index (authority), apply gate | [SRC: BR-15, BR-039; OD-JOB-01] |
-| BR-JOB-004 | Profile completeness must be at or above the threshold (default 70 percent) to apply. | Ensures employers get usable applications. | Apply gate (server) | [SRC: BR-037, BR-061; OD-JOB-02] |
-| BR-JOB-005 | Apply rate limit: 5 submissions per hour and 50 per day per candidate. | Abuse control. | API rate limiter | [SRC: SSOT F-04 security] / daily [PROP] |
-| BR-JOB-006 | Application status is owned by the server, changes only through defined commands, and each change appends a status event; events are never edited or deleted. | Auditable lifecycle. | Domain command, DB append-only | [SRC: BR-17, BR-20] |
-| BR-JOB-007 | The candidate view is a projection that contains only candidate-safe fields. Internal notes, scorecards, ratings, tags, reviewer identities and sourcing data never appear. | Protect hiring team candour and fairness. | Projection serializer plus contract test | [SRC: BR-19] |
-| BR-JOB-008 | Pay is stored as minimum and maximum minor units with ISO 4217 currency and period; displayed ranges must be truthful; where disclosure is required the listing cannot be served without pay. | Pay transparency law and trust. | Listing projection builder | [SRC: BR-179, F-04] [DER] |
-| BR-JOB-009 | Drafts autosave locally every 5 seconds and to the server every 30 seconds, keep the last 10 versions, and expire 90 days after last edit. | Recover work. | Client and draft service | [SRC: BR-18] / expiry [PROP] |
-| BR-JOB-010 | Submit is idempotent on a client-supplied idempotency key. | Network retries must not duplicate. | Apply command | [DER] |
-| BR-JOB-011 | On submit, profile fields, resume and answers are frozen into an immutable snapshot version. Later changes create new versions only through FR-JOB-028. | Evidence integrity. | Application service | [DER] |
-| BR-JOB-012 | Hidden jobs and companies are private to the candidate, reversible, and removed from every candidate surface immediately. Employers are never told. | Candidate control. | Query layer filter | [SRC: BR-13] |
-| BR-JOB-013 | Saved searches: max 25 per candidate; alerts include only listings published after last evaluation (no backfill). | Predictable alert volume. | Saved search service | [SRC: F-04 step 7] / limit [PROP] |
-| BR-JOB-014 | Alert delivery is a service-owned audited scheduler with idempotent delivery keys, honors consent and quiet hours, and unsubscribe takes effect before the next send. | Legal and trust. | Scheduler, NTF (planned) | [SRC: BR-14, BR-31] |
-| BR-JOB-015 | Feed and search return only live, non-suppressed listings from the projection; unpublished, moderated, or hidden-by-user items never appear. | Data safety. | Search index filter | [DER] |
-| BR-JOB-016 | A chronological view is always available; Newest sorts by original publish time; ranking factors are disclosed on demand. | Transparency. | Query and UI | [SRC: BR-124] |
-| BR-JOB-017 | Ranking, filtering, recommendations and fit never use protected attributes or proxies (age, gender, ethnicity, religion, disability, marital status, nationality except stated work eligibility). | Fairness and law. | Feature allowlist, model review | [DER] |
-| BR-JOB-018 | Knockout questions are limited to objective, job-related, platform-approved rule types, disclosed to the candidate before answering, auto-decline only if the employer enabled strict mode, with a reason category and a right to human review. | No hidden automated rejection. | ATS config validation and apply flow | [SRC: BR-171] [PROP] |
-| BR-JOB-019 | Uploaded files are type-checked, size limited (10 MB), virus scanned before text extraction; extracted text is encrypted at rest. | Security. | File service | [SRC: BR-043, BR-044] |
-| BR-JOB-020 | A candidate may withdraw any non-terminal application; the action is irreversible by the candidate; scheduled interviews are cancelled and pending offers are declined. | Candidate autonomy. | Application command | [DER] |
-| BR-JOB-021 | Withdrawal is refused once an offer is accepted; the candidate must contact the employer or ATS unwind applies. | Prevent invalid hire state. | Application command | [DER] |
-| BR-JOB-022 | Post-submit edits are limited to contact details, additional documents and clarification notes; required and knockout answers are locked; each edit creates a version; disabled at offer stage. | Fairness and integrity. | Application command | [PROP] |
-| BR-JOB-023 | Offer decisions are made only by the candidate account, with typed confirmation, once per offer, honoring expiry; support and other roles cannot decide for the candidate. | Consent integrity. | ATS offer command with actor check | [DER] |
-| BR-JOB-024 | Interview slot acceptance is atomic and one accepted slot per invite; an expired or revoked invite cannot be accepted. | No double booking. | INT scheduling command | [DER] |
-| BR-JOB-025 | Rejection always carries a reason category; feedback text is visible only to the candidate; candidates may request feedback within 30 days; the employer is due to reply in 7 days. | Candidate feedback loop. | Projection, task engine | [SRC: BR-217, BR-219, BR-222, BR-218] |
-| BR-JOB-026 | A listing with no employer activity for 21 days and waiting applicants is labelled Inactive and demoted; reconfirmation requested at 30 days; default expiry 60 days. | Ghost-job control. | Freshness job | [PROP] / expiry [SRC: BR-057; OD-JOB-03] |
-| BR-JOB-027 | Reposted listings display the original publish date and a Reposted tag; reposting does not reset freshness sorting. | Honest freshness. | Projection builder | [PROP] |
-| BR-JOB-028 | Listings that request fees, gift cards, bank details or identity numbers are blocked or held; application forms may not request national id numbers, bank details or passwords. | Fraud and privacy. | Publish scan, form validator | [PROP] |
-| BR-JOB-029 | Reporter identity is hidden from the reported employer and public; known only to MOD and PAD. Reports of the same listing by the same user within 30 days merge. | Safe reporting. | Report service | [SRC: BR-136 analogy] [PROP] |
-| BR-JOB-030 | Imported listings are labelled with source, never presented as native, and removed within 24 hours of a valid takedown request. | Honesty and legal. | Import pipeline | [PROP] |
-| BR-JOB-031 | Applying to an imported listing redirects to the source; no candidate data is sent without the candidate submitting on the source. | Privacy. | UI, outbound link policy | [PROP] |
-| BR-JOB-032 | External (self-reported) applications are private to the candidate, labelled self-reported, and never used in employer-facing signals. | Trust of signals. | Tracker, API scope | [PROP] |
-| BR-JOB-033 | Company follows are private; employers see only aggregate follower counts when at least 10. | Privacy. | Employer analytics API | [PROP] aligns [SRC: BR-207 k>=10] |
-| BR-JOB-034 | Only the chosen place is stored; commute origin is coarsened to about 1 km; exact addresses never reach employers. | Location privacy. | Search service | [DER] |
-| BR-JOB-035 | Work-authorization answers are sensitive, used only for eligibility and shown only to the hiring team after submission; never used in ranking. | Sensitive data and non-discrimination. | Form and projection | [DER] |
-| BR-JOB-036 | A blocked employer cannot see the candidate in sourcing or receive outreach, and the candidate must unblock before applying to it. Employers are not told of blocks. | Candidate protection (for example current employer). | Sourcing API, apply gate | [PROP] |
-| BR-JOB-037 | Recommendations respect negative signals immediately; items under confidence 0.5 are suppressed and 0.5 to 0.7 labelled; recommendations carry a reason. | Quality and honesty. | Recommendation assembler | [SRC: BR-065, BR-066] |
-| BR-JOB-038 | Candidate data export is delivered within 30 days (target minutes); deletion honors employer legal holds with disclosure. | Data rights. | Export job | [SRC: BR-063] |
-| BR-JOB-039 | Easy apply is available only when the listing requires no custom questions, cover letter or extra documents; otherwise the full form is used. | Predictable UX. | Listing flag from ATS | [DER] |
-| BR-JOB-040 | Applications with no status event for 90 days after submission become `expired` and show "No response"; the candidate is notified once. | Avoid stale limbo. | Scheduler | [SRC: BR-058] |
-| BR-JOB-041 | When a listing closes, applicants are notified once; existing applications continue under ATS control. | Clarity. | Listing close handler | [DER] |
-| BR-JOB-042 | Machine-translated listing text is labelled as translated, with a toggle to the original. | Honesty. | UI | [PROP] |
-| BR-JOB-043 | Referral codes are valid for 90 days, cannot be self-referrals, and progress sharing with the referrer needs the candidate's consent. | Fraud and privacy. | Referral validator | [SRC: BR-235] [PROP] |
-| BR-JOB-044 | Status notifications are deduplicated per change and batched when more than 3 arrive within 10 minutes. | Avoid notification spam. | Notification dispatcher | [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                      | Rationale                                                                           | Enforced where                               | Source                                                         |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| BR-JOB-001 | Only accounts in a candidate-capable role (CAN, STD, FRL) may submit applications. Recruiter, hiring manager and employer admin roles cannot apply.                                                                                                       | Separation of hiring and applying roles; prevents self-dealing.                     | API authorization on apply command           | [SRC: BR-02]                                                   |
+| BR-JOB-002 | An application can be created only for a listing that is live, not past its deadline, and not suppressed. Closed or unavailable listings return 410.                                                                                                      | Prevents wasted work and phantom applications.                                      | Apply gate, DB check at insert               | [SRC: BR-16, BR-038]                                           |
+| BR-JOB-003 | At most one active application per candidate per listing. After a terminal outcome the candidate may reapply only after a cooldown (default 90 days; waived once if withdrawn within 24 hours of submit).                                                 | Stops spam and duplicates.                                                          | Partial unique index (authority), apply gate | [SRC: BR-15, BR-039; OD-JOB-01]                                |
+| BR-JOB-004 | Profile completeness must be at or above the threshold (default 70 percent) to apply.                                                                                                                                                                     | Ensures employers get usable applications.                                          | Apply gate (server)                          | [SRC: BR-037, BR-061; OD-JOB-02]                               |
+| BR-JOB-005 | Apply rate limit: 5 submissions per hour and 50 per day per candidate.                                                                                                                                                                                    | Abuse control.                                                                      | API rate limiter                             | [SRC: SSOT F-04 security] / daily [PROP]                       |
+| BR-JOB-006 | Application status is owned by the server, changes only through defined commands, and each change appends a status event; events are never edited or deleted.                                                                                             | Auditable lifecycle.                                                                | Domain command, DB append-only               | [SRC: BR-17, BR-20]                                            |
+| BR-JOB-007 | The candidate view is a projection that contains only candidate-safe fields. Internal notes, scorecards, ratings, tags, reviewer identities and sourcing data never appear.                                                                               | Protect hiring team candour and fairness.                                           | Projection serializer plus contract test     | [SRC: BR-19]                                                   |
+| BR-JOB-008 | Pay is stored as minimum and maximum minor units with ISO 4217 currency and period; displayed ranges must be truthful; where disclosure is required the listing cannot be served without pay.                                                             | Pay transparency law and trust.                                                     | Listing projection builder                   | [SRC: BR-179, F-04] [DER]                                      |
+| BR-JOB-009 | Drafts autosave locally every 5 seconds and to the server every 30 seconds, keep the last 10 versions, and expire 90 days after last edit.                                                                                                                | Recover work.                                                                       | Client and draft service                     | [SRC: BR-18] / expiry [PROP]                                   |
+| BR-JOB-010 | Submit is idempotent on a client-supplied idempotency key.                                                                                                                                                                                                | Network retries must not duplicate.                                                 | Apply command                                | [DER]                                                          |
+| BR-JOB-011 | On submit, profile fields, resume and answers are frozen into an immutable snapshot version. Later changes create new versions only through FR-JOB-028.                                                                                                   | Evidence integrity.                                                                 | Application service                          | [DER]                                                          |
+| BR-JOB-012 | Hidden jobs and companies are private to the candidate, reversible, and removed from every candidate surface immediately. Employers are never told.                                                                                                       | Candidate control.                                                                  | Query layer filter                           | [SRC: BR-13]                                                   |
+| BR-JOB-013 | Saved searches: max 25 per candidate; alerts include only listings published after last evaluation (no backfill).                                                                                                                                         | Predictable alert volume.                                                           | Saved search service                         | [SRC: F-04 step 7] / limit [PROP]                              |
+| BR-JOB-014 | Alert delivery is a service-owned audited scheduler with idempotent delivery keys, honors consent and quiet hours, and unsubscribe takes effect before the next send.                                                                                     | Legal and trust.                                                                    | Scheduler, NTF (planned)                     | [SRC: BR-14, BR-31]                                            |
+| BR-JOB-015 | Feed and search return only live, non-suppressed listings from the projection; unpublished, moderated, or hidden-by-user items never appear.                                                                                                              | Data safety.                                                                        | Search index filter                          | [DER]                                                          |
+| BR-JOB-016 | A chronological view is always available; Newest sorts by original publish time; ranking factors are disclosed on demand.                                                                                                                                 | Transparency.                                                                       | Query and UI                                 | [SRC: BR-124]                                                  |
+| BR-JOB-017 | Ranking, filtering, recommendations and fit never use protected attributes or proxies (age, gender, ethnicity, religion, disability, marital status, nationality except stated work eligibility).                                                         | Fairness and law.                                                                   | Feature allowlist, model review              | [DER]                                                          |
+| BR-JOB-018 | Knockout questions are limited to objective, job-related, platform-approved rule types, disclosed to the candidate before answering, auto-decline only if the employer enabled strict mode, with a reason category and a right to human review.           | No hidden automated rejection.                                                      | ATS config validation and apply flow         | [SRC: BR-171] [PROP]                                           |
+| BR-JOB-019 | Uploaded files are type-checked, size limited (10 MB), virus scanned before text extraction; extracted text is encrypted at rest.                                                                                                                         | Security.                                                                           | File service                                 | [SRC: BR-043, BR-044]                                          |
+| BR-JOB-020 | A candidate may withdraw any non-terminal application; the action is irreversible by the candidate; scheduled interviews are cancelled and pending offers are declined.                                                                                   | Candidate autonomy.                                                                 | Application command                          | [DER]                                                          |
+| BR-JOB-021 | Withdrawal is refused once an offer is accepted; the candidate must contact the employer or ATS unwind applies.                                                                                                                                           | Prevent invalid hire state.                                                         | Application command                          | [DER]                                                          |
+| BR-JOB-022 | Post-submit edits are limited to contact details, additional documents and clarification notes; required and knockout answers are locked; each edit creates a version; disabled at offer stage.                                                           | Fairness and integrity.                                                             | Application command                          | [PROP]                                                         |
+| BR-JOB-023 | Offer decisions are made only by the candidate account, with typed confirmation, once per offer, honoring expiry; support and other roles cannot decide for the candidate.                                                                                | Consent integrity.                                                                  | ATS offer command with actor check           | [DER]                                                          |
+| BR-JOB-024 | Interview slot acceptance is atomic and one accepted slot per invite; an expired or revoked invite cannot be accepted.                                                                                                                                    | No double booking.                                                                  | INT scheduling command                       | [DER]                                                          |
+| BR-JOB-025 | Rejection always carries a reason category; feedback text is visible only to the candidate; candidates may request feedback within 30 days; the employer is due to reply in 7 days.                                                                       | Candidate feedback loop.                                                            | Projection, task engine                      | [SRC: BR-217, BR-219, BR-222, BR-218]                          |
+| BR-JOB-026 | A listing with no employer activity for 21 days and waiting applicants is labelled Inactive and demoted; reconfirmation requested at 30 days; default expiry 60 days.                                                                                     | Ghost-job control.                                                                  | Freshness job                                | [PROP] / expiry [SRC: BR-057; OD-JOB-03]                       |
+| BR-JOB-027 | Reposted listings display the original publish date and a Reposted tag; reposting does not reset freshness sorting.                                                                                                                                       | Honest freshness.                                                                   | Projection builder                           | [PROP]                                                         |
+| BR-JOB-028 | Listings that request fees, gift cards, bank details or identity numbers are blocked or held; application forms may not request national id numbers, bank details or passwords.                                                                           | Fraud and privacy.                                                                  | Publish scan, form validator                 | [PROP]                                                         |
+| BR-JOB-029 | Reporter identity is hidden from the reported employer and public; known only to MOD and PAD. Reports of the same listing by the same user within 30 days merge.                                                                                          | Safe reporting.                                                                     | Report service                               | [SRC: BR-136 analogy] [PROP]                                   |
+| BR-JOB-030 | Imported listings are labelled with source, never presented as native, and removed within 24 hours of a valid takedown request.                                                                                                                           | Honesty and legal.                                                                  | Import pipeline                              | [PROP]                                                         |
+| BR-JOB-031 | Applying to an imported listing redirects to the source; no candidate data is sent without the candidate submitting on the source.                                                                                                                        | Privacy.                                                                            | UI, outbound link policy                     | [PROP]                                                         |
+| BR-JOB-032 | External (self-reported) applications are private to the candidate, labelled self-reported, and never used in employer-facing signals.                                                                                                                    | Trust of signals.                                                                   | Tracker, API scope                           | [PROP]                                                         |
+| BR-JOB-033 | Company follows are private; employers see only aggregate follower counts when at least 10.                                                                                                                                                               | Privacy.                                                                            | Employer analytics API                       | [PROP] aligns [SRC: BR-207 k>=10]                              |
+| BR-JOB-034 | Only the chosen place is stored; commute origin is coarsened to about 1 km; exact addresses never reach employers.                                                                                                                                        | Location privacy.                                                                   | Search service                               | [DER]                                                          |
+| BR-JOB-035 | Work-authorization answers are sensitive, used only for eligibility and shown only to the hiring team after submission; never used in ranking.                                                                                                            | Sensitive data and non-discrimination.                                              | Form and projection                          | [DER]                                                          |
+| BR-JOB-036 | A blocked employer cannot see the candidate in sourcing or receive outreach, and the candidate must unblock before applying to it. Employers are not told of blocks.                                                                                      | Candidate protection (for example current employer).                                | Sourcing API, apply gate                     | [PROP]                                                         |
+| BR-JOB-037 | Recommendations respect negative signals immediately; items under confidence 0.5 are suppressed and 0.5 to 0.7 labelled; recommendations carry a reason.                                                                                                  | Quality and honesty.                                                                | Recommendation assembler                     | [SRC: BR-065, BR-066]                                          |
+| BR-JOB-038 | Candidate data export is delivered within 30 days (target minutes); deletion honors employer legal holds with disclosure.                                                                                                                                 | Data rights.                                                                        | Export job                                   | [SRC: BR-063]                                                  |
+| BR-JOB-039 | Easy apply is available only when the listing requires no custom questions, cover letter or extra documents; otherwise the full form is used.                                                                                                             | Predictable UX.                                                                     | Listing flag from ATS                        | [DER]                                                          |
+| BR-JOB-040 | Applications with no status event for 90 days after submission become `expired` and show "No response"; the candidate is notified once.                                                                                                                   | Avoid stale limbo.                                                                  | Scheduler                                    | [SRC: BR-058]                                                  |
+| BR-JOB-041 | When a listing closes, applicants are notified once; existing applications continue under ATS control.                                                                                                                                                    | Clarity.                                                                            | Listing close handler                        | [DER]                                                          |
+| BR-JOB-042 | Machine-translated listing text is labelled as translated, with a toggle to the original.                                                                                                                                                                 | Honesty.                                                                            | UI                                           | [PROP]                                                         |
+| BR-JOB-043 | Referral codes are valid for 90 days, cannot be self-referrals, and progress sharing with the referrer needs the candidate's consent.                                                                                                                     | Fraud and privacy.                                                                  | Referral validator                           | [SRC: BR-235] [PROP]                                           |
+| BR-JOB-044 | Status notifications are deduplicated per change and batched when more than 3 arrive within 10 minutes.                                                                                                                                                   | Avoid notification spam.                                                            | Notification dispatcher                      | [PROP]                                                         |
+| BR-JOB-045 | Self-entered offers and saved comparisons are private to the candidate, never shared with employers, recruiters or support, and never used in matching, ranking or employer-facing signals; the comparison computes no overall score and names no winner. | Candidate autonomy and honest decision support.                                     | Offer comparison service; API scopes         | [DER] [SRC: SSOT BR-199 spirit; BR-AIC-006]                    |
+| BR-JOB-046 | Offer comparison arithmetic is disclosed: annualization uses {12} months, {52} weeks and {2,080} hours unless the offer states otherwise; conversions show the rate and date; equity is shown separately and added to totals only when the user opts in.  | No hidden assumptions in a high-stakes comparison.                                  | Comparison service; UI                       | [PROP]                                                         |
+| BR-JOB-047 | Negotiation guidance never states a recommended counter figure or a probability of acceptance, never contacts the employer on the candidate's behalf, and is invisible to the employer; market numbers appear only above `min_cohort_k`.                  | Avoids false precision and protects the candidate's position.                       | Guidance service; UI copy review             | [DER] [SRC: SSOT BR-183, BR-193 spirit; BR-AIC-004]            |
+| BR-JOB-048 | Pre-start packs may not request, accept or store national identifiers, tax forms, bank details, right-to-work or immigration documents, medical information or passwords; item types are limited to read, confirm, short answer and non-sensitive upload. | Keeps pre-start preparation outside HR and payroll scope and avoids sensitive data. | Pack validators; upload checks               | [DER] [SRC: SSOT §4.2 generic HR/payroll non-goal; BR-JOB-028] |
+| BR-JOB-049 | A pre-start pack exists only after an offer is accepted, is visible only to the candidate and the hiring team, closes at the start date plus {14} days, and is withdrawn when the offer is rescinded or the hire does not start.                          | Limits exposure and ties the pack to a real hire.                                   | Pack lifecycle job                           | [PROP]                                                         |
 
 ## 6. State machines
 
@@ -1235,22 +1334,22 @@ flowchart LR
 
 States: `submitted`, `in_review`, `interviewing`, `offer_extended`, `offer_declined`, `hired`, `rejected`, `withdrawn`, `closed`, `expired`. Terminal: `offer_declined`, `hired`, `rejected`, `withdrawn`, `closed`, `expired`. Draft is a separate machine (SM-JOB-02). ATS stage assignment (configurable stages) maps onto these categories; the mapping is owned by ATS (FR-ATS-011). Names follow V61-18 vocabulary renames as proposed. [SRC: SSOT §10.10, V61-18] [DER] See OD-JOB-10 for the terminal-set disagreement in the legacy files.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | submitted | Candidate submits | Gates pass (FR-JOB-022) |
-| submitted | in_review | Recruiter opens or moves to screening | Actor has ATS permission |
-| submitted | rejected | Recruiter rejects, or strict knockout | Reason category present |
-| in_review | interviewing | Stage mapped to interviewing | none |
-| in_review | rejected | Recruiter rejects | Reason category present |
-| interviewing | in_review | Move back | Reason text required |
-| interviewing | offer_extended | Offer extended | Offer approved, scorecards complete (BR-ATS-025) |
-| interviewing | rejected | Recruiter rejects | Reason category present |
-| offer_extended | hired | Hire completed | Offer accepted (BR-ATS-030) |
-| offer_extended | offer_declined | Candidate declines, or offer expires, or rescinded | BR-JOB-023 |
-| offer_extended | interviewing | Offer rescinded for renegotiation | Employer action |
-| submitted, in_review, interviewing | withdrawn | Candidate withdraws | BR-JOB-020 |
-| any non-terminal | closed | Requisition filled or listing closed and org policy closes applications | Policy |
-| submitted | expired | 90 days without event | BR-JOB-040 |
+| From                               | To             | Trigger                                                                 | Guard                                            |
+| ---------------------------------- | -------------- | ----------------------------------------------------------------------- | ------------------------------------------------ |
+| (none)                             | submitted      | Candidate submits                                                       | Gates pass (FR-JOB-022)                          |
+| submitted                          | in_review      | Recruiter opens or moves to screening                                   | Actor has ATS permission                         |
+| submitted                          | rejected       | Recruiter rejects, or strict knockout                                   | Reason category present                          |
+| in_review                          | interviewing   | Stage mapped to interviewing                                            | none                                             |
+| in_review                          | rejected       | Recruiter rejects                                                       | Reason category present                          |
+| interviewing                       | in_review      | Move back                                                               | Reason text required                             |
+| interviewing                       | offer_extended | Offer extended                                                          | Offer approved, scorecards complete (BR-ATS-025) |
+| interviewing                       | rejected       | Recruiter rejects                                                       | Reason category present                          |
+| offer_extended                     | hired          | Hire completed                                                          | Offer accepted (BR-ATS-030)                      |
+| offer_extended                     | offer_declined | Candidate declines, or offer expires, or rescinded                      | BR-JOB-023                                       |
+| offer_extended                     | interviewing   | Offer rescinded for renegotiation                                       | Employer action                                  |
+| submitted, in_review, interviewing | withdrawn      | Candidate withdraws                                                     | BR-JOB-020                                       |
+| any non-terminal                   | closed         | Requisition filled or listing closed and org policy closes applications | Policy                                           |
+| submitted                          | expired        | 90 days without event                                                   | BR-JOB-040                                       |
 
 ```mermaid
 stateDiagram-v2
@@ -1284,15 +1383,15 @@ stateDiagram-v2
 
 States: `editing`, `abandoned`, `submitted`, `expired`, `deleted`, `read_only_closed`. Terminal: `submitted`, `expired`, `deleted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | editing | Candidate starts application | Gates pass |
-| editing | abandoned | No edit for 24 hours | none |
-| abandoned | editing | Candidate returns | Listing live |
-| editing, abandoned | submitted | Submit | BR-JOB-010 |
-| editing, abandoned | read_only_closed | Listing closes | none |
-| editing, abandoned, read_only_closed | expired | 90 days idle | BR-JOB-009 |
-| any non-terminal | deleted | Candidate deletes | Confirmed |
+| From                                 | To               | Trigger                      | Guard        |
+| ------------------------------------ | ---------------- | ---------------------------- | ------------ |
+| (none)                               | editing          | Candidate starts application | Gates pass   |
+| editing                              | abandoned        | No edit for 24 hours         | none         |
+| abandoned                            | editing          | Candidate returns            | Listing live |
+| editing, abandoned                   | submitted        | Submit                       | BR-JOB-010   |
+| editing, abandoned                   | read_only_closed | Listing closes               | none         |
+| editing, abandoned, read_only_closed | expired          | 90 days idle                 | BR-JOB-009   |
+| any non-terminal                     | deleted          | Candidate deletes            | Confirmed    |
 
 ```mermaid
 stateDiagram-v2
@@ -1317,15 +1416,15 @@ stateDiagram-v2
 
 States: `open`, `under_review`, `actioned`, `dismissed`, `merged`. Terminal: `actioned`, `dismissed`, `merged`. Mirrors the T&S lifecycle [SRC: BR-34].
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | open | Report submitted | Rate limit ok |
-| open | merged | Duplicate by same user within 30 days | none |
-| open | under_review | Moderator picks up | MOD role |
-| open | under_review | Auto-suppression threshold met | BR-JOB-028 |
-| under_review | actioned | Listing suppressed or removed, or employer sanctioned | Reason logged |
-| under_review | dismissed | No violation | Reason logged |
-| open | dismissed | Flag expires after 7 days with no action | [SRC: BR-059] |
+| From         | To           | Trigger                                               | Guard         |
+| ------------ | ------------ | ----------------------------------------------------- | ------------- |
+| (none)       | open         | Report submitted                                      | Rate limit ok |
+| open         | merged       | Duplicate by same user within 30 days                 | none          |
+| open         | under_review | Moderator picks up                                    | MOD role      |
+| open         | under_review | Auto-suppression threshold met                        | BR-JOB-028    |
+| under_review | actioned     | Listing suppressed or removed, or employer sanctioned | Reason logged |
+| under_review | dismissed    | No violation                                          | Reason logged |
+| open         | dismissed    | Flag expires after 7 days with no action              | [SRC: BR-059] |
 
 ```mermaid
 stateDiagram-v2
@@ -1344,14 +1443,14 @@ stateDiagram-v2
 
 States: `active`, `paused`, `suspended`, `deleted`. Terminal: `deleted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | active | Saved with frequency not Off | Channel chosen |
-| active | paused | User pauses; or no matches 90 days after check | none |
-| paused | active | User resumes; pause period ends | none |
-| active | suspended | Email bounce or complaint, or class unsubscribe | none |
-| suspended | active | Address re-verified and re-consented | none |
-| any | deleted | User deletes | none |
+| From      | To        | Trigger                                         | Guard          |
+| --------- | --------- | ----------------------------------------------- | -------------- |
+| (none)    | active    | Saved with frequency not Off                    | Channel chosen |
+| active    | paused    | User pauses; or no matches 90 days after check  | none           |
+| paused    | active    | User resumes; pause period ends                 | none           |
+| active    | suspended | Email bounce or complaint, or class unsubscribe | none           |
+| suspended | active    | Address re-verified and re-consented            | none           |
+| any       | deleted   | User deletes                                    | none           |
 
 ```mermaid
 stateDiagram-v2
@@ -1370,15 +1469,15 @@ stateDiagram-v2
 
 States: `discovered`, `rejected`, `live`, `claimed`, `stale`, `removed`. Terminal: `rejected`, `removed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | discovered | Feed item parsed | Schema valid |
-| discovered | rejected | Validation or fraud failure | Reason logged |
-| discovered | live | Passed checks and dedup | Not duplicate of native |
-| live | claimed | Employer claims and converts to native | Verified employer |
-| live | stale | Missing from two consecutive feeds, or apply URL dead | none |
-| stale | live | Reappears in feed | none |
-| live, stale | removed | Takedown, or stale 14 days | BR-JOB-030 |
+| From        | To         | Trigger                                               | Guard                   |
+| ----------- | ---------- | ----------------------------------------------------- | ----------------------- |
+| (none)      | discovered | Feed item parsed                                      | Schema valid            |
+| discovered  | rejected   | Validation or fraud failure                           | Reason logged           |
+| discovered  | live       | Passed checks and dedup                               | Not duplicate of native |
+| live        | claimed    | Employer claims and converts to native                | Verified employer       |
+| live        | stale      | Missing from two consecutive feeds, or apply URL dead | none                    |
+| stale       | live       | Reappears in feed                                     | none                    |
+| live, stale | removed    | Takedown, or stale 14 days                            | BR-JOB-030              |
 
 ```mermaid
 stateDiagram-v2
@@ -1397,53 +1496,56 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-JOB-001 | Job feed | `/jobs` | GUE, CAN, STD, FRL | Browse tabs | loading, empty, degraded, error |
-| SCR-JOB-002 | Search results | `/jobs/search` | GUE, CAN, STD, FRL | Query and filter | no results, filtered, degraded |
-| SCR-JOB-003 | Job detail | `/jobs/:jobId` | All | Evaluate and apply | live, closed (410), taken down, imported, warning banner |
-| SCR-JOB-004 | Saved jobs | `/jobs/saved` | CAN, STD, FRL | Manage saved | empty, closed items, limit reached |
-| SCR-JOB-005 | Saved searches | `/jobs/searches` | CAN, STD, FRL | Manage searches | empty, paused, suspended |
-| SCR-JOB-006 | Easy apply sheet | modal on `/jobs/:jobId` | CAN, STD, FRL | One-step apply | gates failed, submitting, success |
-| SCR-JOB-007 | Application form | `/jobs/:jobId/apply` | CAN, STD, FRL | Multi-step apply | per step, offline, definition changed, closed |
-| SCR-JOB-008 | Application tracker | `/applications` | CAN, STD, FRL | All applications | tabs, empty, needs action |
-| SCR-JOB-009 | Application detail | `/applications/:applicationId` | CAN, STD, FRL | Timeline and actions | each SM-JOB-01 state, listing removed |
-| SCR-JOB-010 | Interview invite | `/applications/:applicationId/interviews/:inviteId` | CAN, STD, FRL | Respond to invite | pending, expired, confirmed |
-| SCR-JOB-011 | Offer view | `/applications/:applicationId/offer` | CAN, STD, FRL | Review and decide | extended, expired, rescinded, accepted |
-| SCR-JOB-012 | Report dialog | modal | GUE, CAN, STD, FRL | Report listing | submitting, success, rate limited |
-| SCR-JOB-013 | Hidden items | `/settings/jobs/hidden` | CAN, STD, FRL | Unhide | empty, populated |
-| SCR-JOB-014 | Job search preferences | `/settings/jobs` | CAN, STD, FRL | Preferences, blocks | saved, validation errors |
-| SCR-JOB-015 | Alert preferences | `/settings/notifications/jobs` | CAN, STD, FRL | Alert controls | paused, all off |
-| SCR-JOB-016 | Track external job | `/applications/external/new` | CAN, STD, FRL | Self-report | fetched, manual, duplicate |
-| SCR-JOB-017 | Following | `/jobs/following` | CAN, STD, FRL | Followed companies | empty, populated |
-| SCR-JOB-018 | Job data export | `/settings/privacy/jobs-data` | CAN, STD, FRL | Export and delete | queued, ready, expired |
-| SCR-JOB-019 | Listing risk queue | `/admin/jobs/risk` | MOD, PAD | Review suspect listings | empty, high risk first |
-| SCR-JOB-020 | Import sources | `/admin/jobs/imports` | PAD | Configure imports | failing, healthy |
+| ID          | Name                   | Route proposal                                      | Roles              | Purpose                 | Key states                                               |
+| ----------- | ---------------------- | --------------------------------------------------- | ------------------ | ----------------------- | -------------------------------------------------------- |
+| SCR-JOB-001 | Job feed               | `/jobs`                                             | GUE, CAN, STD, FRL | Browse tabs             | loading, empty, degraded, error                          |
+| SCR-JOB-002 | Search results         | `/jobs/search`                                      | GUE, CAN, STD, FRL | Query and filter        | no results, filtered, degraded                           |
+| SCR-JOB-003 | Job detail             | `/jobs/:jobId`                                      | All                | Evaluate and apply      | live, closed (410), taken down, imported, warning banner |
+| SCR-JOB-004 | Saved jobs             | `/jobs/saved`                                       | CAN, STD, FRL      | Manage saved            | empty, closed items, limit reached                       |
+| SCR-JOB-005 | Saved searches         | `/jobs/searches`                                    | CAN, STD, FRL      | Manage searches         | empty, paused, suspended                                 |
+| SCR-JOB-006 | Easy apply sheet       | modal on `/jobs/:jobId`                             | CAN, STD, FRL      | One-step apply          | gates failed, submitting, success                        |
+| SCR-JOB-007 | Application form       | `/jobs/:jobId/apply`                                | CAN, STD, FRL      | Multi-step apply        | per step, offline, definition changed, closed            |
+| SCR-JOB-008 | Application tracker    | `/applications`                                     | CAN, STD, FRL      | All applications        | tabs, empty, needs action                                |
+| SCR-JOB-009 | Application detail     | `/applications/:applicationId`                      | CAN, STD, FRL      | Timeline and actions    | each SM-JOB-01 state, listing removed                    |
+| SCR-JOB-010 | Interview invite       | `/applications/:applicationId/interviews/:inviteId` | CAN, STD, FRL      | Respond to invite       | pending, expired, confirmed                              |
+| SCR-JOB-011 | Offer view             | `/applications/:applicationId/offer`                | CAN, STD, FRL      | Review and decide       | extended, expired, rescinded, accepted                   |
+| SCR-JOB-012 | Report dialog          | modal                                               | GUE, CAN, STD, FRL | Report listing          | submitting, success, rate limited                        |
+| SCR-JOB-013 | Hidden items           | `/settings/jobs/hidden`                             | CAN, STD, FRL      | Unhide                  | empty, populated                                         |
+| SCR-JOB-014 | Job search preferences | `/settings/jobs`                                    | CAN, STD, FRL      | Preferences, blocks     | saved, validation errors                                 |
+| SCR-JOB-015 | Alert preferences      | `/settings/notifications/jobs`                      | CAN, STD, FRL      | Alert controls          | paused, all off                                          |
+| SCR-JOB-016 | Track external job     | `/applications/external/new`                        | CAN, STD, FRL      | Self-report             | fetched, manual, duplicate                               |
+| SCR-JOB-017 | Following              | `/jobs/following`                                   | CAN, STD, FRL      | Followed companies      | empty, populated                                         |
+| SCR-JOB-018 | Job data export        | `/settings/privacy/jobs-data`                       | CAN, STD, FRL      | Export and delete       | queued, ready, expired                                   |
+| SCR-JOB-019 | Listing risk queue     | `/admin/jobs/risk`                                  | MOD, PAD           | Review suspect listings | empty, high risk first                                   |
+| SCR-JOB-020 | Import sources         | `/admin/jobs/imports`                               | PAD                | Configure imports       | failing, healthy                                         |
 
 Accessibility notes: every status conveys meaning in text as well as color; the filter panel and application form are fully keyboard operable with visible focus; error summaries move focus; live regions announce autosave status and result counts; touch targets at least 44 px; timeline is an ordered list with time elements. [DER]
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-JOB-01 | Listing projection | listing id, posting id (ATS), org id, title, location structured, work mode, pay min/max/currency/period, skills, publish date, original publish date, deadline, status, freshness state, source (native/imported) | From ATS posting; has many applications | Life of posting + 24 months |
-| ENT-JOB-02 | Saved job | candidate id, listing id, note, folder, saved at | Candidate, listing | Until deleted |
-| ENT-JOB-03 | Hidden item | candidate id, target type (job/company), target id, reason | Candidate | Until deleted |
-| ENT-JOB-04 | Job report | report id, listing id, reporter id, reason, details, status, outcome | Listing, TSF case (planned) | 12 months after resolution |
-| ENT-JOB-05 | Saved search | candidate id, query object, name, frequency, channels, state, last evaluated at | Candidate; has many alert deliveries | Until deleted |
-| ENT-JOB-06 | Alert delivery | search id, window, listing ids, channel, status, idempotency key | Saved search | 90 days |
-| ENT-JOB-07 | Application | application id, candidate id, listing id, ATS stage id, status, submitted at, referral id, current snapshot version, idempotency key | Candidate, listing, versions, events | Per org retention (FR-ATS-044), candidate copy until deleted |
-| ENT-JOB-08 | Application draft | draft id, candidate id, listing id, form definition version, answers, versions (10), state | Candidate, listing | 90 days idle |
-| ENT-JOB-09 | Application answer | application id, version, question id, value, sensitive flag | Application | With application |
-| ENT-JOB-10 | Application document version | application id, version, file id, type, scan status, extracted text ref (encrypted) | Application | With application |
-| ENT-JOB-11 | Application status event | application id, from, to, actor type, reason category, occurred at, sequence | Application | With application, append-only |
-| ENT-JOB-12 | Application feedback | application id, category, text, requested at, due at, rating | Application | With application |
-| ENT-JOB-13 | Imported listing | source id, external id, raw payload hash, state, listing id | Listing | 12 months after removal |
-| ENT-JOB-14 | External application | candidate id, url, company, title, status, notes, applied date, follow-up date | Candidate | Until deleted |
-| ENT-JOB-15 | Company follow | candidate id, org id, preferences | Candidate, EMP org | Until deleted |
-| ENT-JOB-16 | Job preference | candidate id, titles, pay floor, modes, locations, authorizations, open-to-work level | Candidate | Until deleted |
-| ENT-JOB-17 | Blocked employer | candidate id, org id or domain | Candidate | Until deleted |
-| ENT-JOB-18 | Listing fraud signal | listing id, signal type, weight, score, decision, decided by | Listing | 24 months |
+| ID         | Entity                       | Key attributes                                                                                                                                                                                                                                  | Relationships                           | Retention class                                              |
+| ---------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| ENT-JOB-01 | Listing projection           | listing id, posting id (ATS), org id, title, location structured, work mode, pay min/max/currency/period, skills, publish date, original publish date, deadline, status, freshness state, source (native/imported)                              | From ATS posting; has many applications | Life of posting + 24 months                                  |
+| ENT-JOB-02 | Saved job                    | candidate id, listing id, note, folder, saved at                                                                                                                                                                                                | Candidate, listing                      | Until deleted                                                |
+| ENT-JOB-03 | Hidden item                  | candidate id, target type (job/company), target id, reason                                                                                                                                                                                      | Candidate                               | Until deleted                                                |
+| ENT-JOB-04 | Job report                   | report id, listing id, reporter id, reason, details, status, outcome                                                                                                                                                                            | Listing, TSF case (planned)             | 12 months after resolution                                   |
+| ENT-JOB-05 | Saved search                 | candidate id, query object, name, frequency, channels, state, last evaluated at                                                                                                                                                                 | Candidate; has many alert deliveries    | Until deleted                                                |
+| ENT-JOB-06 | Alert delivery               | search id, window, listing ids, channel, status, idempotency key                                                                                                                                                                                | Saved search                            | 90 days                                                      |
+| ENT-JOB-07 | Application                  | application id, candidate id, listing id, ATS stage id, status, submitted at, referral id, current snapshot version, idempotency key                                                                                                            | Candidate, listing, versions, events    | Per org retention (FR-ATS-044), candidate copy until deleted |
+| ENT-JOB-08 | Application draft            | draft id, candidate id, listing id, form definition version, answers, versions (10), state                                                                                                                                                      | Candidate, listing                      | 90 days idle                                                 |
+| ENT-JOB-09 | Application answer           | application id, version, question id, value, sensitive flag                                                                                                                                                                                     | Application                             | With application                                             |
+| ENT-JOB-10 | Application document version | application id, version, file id, type, scan status, extracted text ref (encrypted)                                                                                                                                                             | Application                             | With application                                             |
+| ENT-JOB-11 | Application status event     | application id, from, to, actor type, reason category, occurred at, sequence                                                                                                                                                                    | Application                             | With application, append-only                                |
+| ENT-JOB-12 | Application feedback         | application id, category, text, requested at, due at, rating                                                                                                                                                                                    | Application                             | With application                                             |
+| ENT-JOB-13 | Imported listing             | source id, external id, raw payload hash, state, listing id                                                                                                                                                                                     | Listing                                 | 12 months after removal                                      |
+| ENT-JOB-14 | External application         | candidate id, url, company, title, status, notes, applied date, follow-up date                                                                                                                                                                  | Candidate                               | Until deleted                                                |
+| ENT-JOB-15 | Company follow               | candidate id, org id, preferences                                                                                                                                                                                                               | Candidate, EMP org                      | Until deleted                                                |
+| ENT-JOB-16 | Job preference               | candidate id, titles, pay floor, modes, locations, authorizations, open-to-work level                                                                                                                                                           | Candidate                               | Until deleted                                                |
+| ENT-JOB-17 | Blocked employer             | candidate id, org id or domain                                                                                                                                                                                                                  | Candidate                               | Until deleted                                                |
+| ENT-JOB-18 | Listing fraud signal         | listing id, signal type, weight, score, decision, decided by                                                                                                                                                                                    | Listing                                 | 24 months                                                    |
+| ENT-JOB-19 | Offer comparison             | id, candidate id, platform offer refs[], self-entered offers[{employer, role, location, work mode, pay components, equity, benefits, start date, expiry}], priorities[], settings, updated at                                                   | Candidate; references ATS offers        | Until deleted                                                |
+| ENT-JOB-20 | Negotiation worksheet        | id, candidate id, offer ref, priorities[], asks[{term, ask, reason}], notes, outcome, updated at                                                                                                                                                | Candidate; offer                        | Deleted with the offer record or on request                  |
+| ENT-JOB-21 | Pre-start pack               | id, application id, offer id, template ref, sections[] (welcome, agenda, team, checklist, learning link), state (draft, published, closed, withdrawn), published at, closes at; item responses[{item id, state, answer, file id, completed at}] | Application, offer                      | Closed pack: 12 months; files 30 days after withdrawal       |
 
 ```mermaid
 erDiagram
@@ -1461,114 +1563,118 @@ erDiagram
 
 ## 9. Events emitted and consumed
 
-| ID | Event | Emitted by | Consumed by |
-|---|---|---|---|
-| EVT-JOB-001 | `job.listing.viewed` | SCR-JOB-003 | ANL (planned), AIC (planned) |
-| EVT-JOB-002 | `job.search.performed` | FR-JOB-002 | ANL, AIC |
-| EVT-JOB-003 | `job.listing.saved` | FR-JOB-010 | AIC, ANL |
-| EVT-JOB-004 | `job.listing.hidden` | FR-JOB-011 | AIC |
-| EVT-JOB-005 | `job.listing.reported` | FR-JOB-012 | TSF (planned) |
-| EVT-JOB-006 | `job.saved_search.created` | FR-JOB-014 | ANL |
-| EVT-JOB-007 | `job.alert.sent` | FR-JOB-015 | NTF (planned), ANL |
-| EVT-JOB-008 | `job.application.draft_saved` | FR-JOB-021 | none (internal) |
-| EVT-JOB-009 | `job.application.submitted` | FR-JOB-023 | ATS inbox (FR-ATS-013), NTF, ANL, EVD (planned) |
-| EVT-JOB-010 | `job.application.status_changed` | JOB projection after ATS change | NTF, ANL |
-| EVT-JOB-011 | `job.application.withdrawn` | FR-JOB-027 | ATS, INT, NTF |
-| EVT-JOB-012 | `job.application.updated` | FR-JOB-028 | ATS |
-| EVT-JOB-013 | `job.application.auto_declined` | FR-JOB-019 | ATS, NTF |
-| EVT-JOB-014 | `job.interview_invite.responded` | FR-JOB-030 | INT, ATS |
-| EVT-JOB-015 | `job.offer.viewed` | FR-JOB-031 | ATS |
-| EVT-JOB-016 | `job.offer.decided` | FR-JOB-032 | ATS, NTF |
-| EVT-JOB-017 | `job.company.followed` | FR-JOB-039 | EMP (planned), AIC |
-| EVT-JOB-018 | `job.listing.imported` | FR-JOB-037 | ANL, TSF |
-| EVT-JOB-019 | `job.listing.flagged_stale` | FR-JOB-035 | ATS, NTF |
-| EVT-JOB-020 | `job.external_application.recorded` | FR-JOB-038 | AIC |
-| EVT-JOB-021 | `job.feedback.requested` | FR-JOB-029 | ATS |
-| EVT-JOB-022 | `job.recommendation.feedback_given` | FR-JOB-033 | AIC |
-| EVT-JOB-023 | `job.export.requested` | FR-JOB-042 | SET (planned) |
-| EVT-JOB-024 | `job.listing.suppressed` | FR-JOB-036 | ATS, EMP |
+| ID          | Event                               | Emitted by                      | Consumed by                                     |
+| ----------- | ----------------------------------- | ------------------------------- | ----------------------------------------------- |
+| EVT-JOB-001 | `job.listing.viewed`                | SCR-JOB-003                     | ANL (planned), AIC (planned)                    |
+| EVT-JOB-002 | `job.search.performed`              | FR-JOB-002                      | ANL, AIC                                        |
+| EVT-JOB-003 | `job.listing.saved`                 | FR-JOB-010                      | AIC, ANL                                        |
+| EVT-JOB-004 | `job.listing.hidden`                | FR-JOB-011                      | AIC                                             |
+| EVT-JOB-005 | `job.listing.reported`              | FR-JOB-012                      | TSF (planned)                                   |
+| EVT-JOB-006 | `job.saved_search.created`          | FR-JOB-014                      | ANL                                             |
+| EVT-JOB-007 | `job.alert.sent`                    | FR-JOB-015                      | NTF (planned), ANL                              |
+| EVT-JOB-008 | `job.application.draft_saved`       | FR-JOB-021                      | none (internal)                                 |
+| EVT-JOB-009 | `job.application.submitted`         | FR-JOB-023                      | ATS inbox (FR-ATS-013), NTF, ANL, EVD (planned) |
+| EVT-JOB-010 | `job.application.status_changed`    | JOB projection after ATS change | NTF, ANL                                        |
+| EVT-JOB-011 | `job.application.withdrawn`         | FR-JOB-027                      | ATS, INT, NTF                                   |
+| EVT-JOB-012 | `job.application.updated`           | FR-JOB-028                      | ATS                                             |
+| EVT-JOB-013 | `job.application.auto_declined`     | FR-JOB-019                      | ATS, NTF                                        |
+| EVT-JOB-014 | `job.interview_invite.responded`    | FR-JOB-030                      | INT, ATS                                        |
+| EVT-JOB-015 | `job.offer.viewed`                  | FR-JOB-031                      | ATS                                             |
+| EVT-JOB-016 | `job.offer.decided`                 | FR-JOB-032                      | ATS, NTF                                        |
+| EVT-JOB-017 | `job.company.followed`              | FR-JOB-039                      | EMP (planned), AIC                              |
+| EVT-JOB-018 | `job.listing.imported`              | FR-JOB-037                      | ANL, TSF                                        |
+| EVT-JOB-019 | `job.listing.flagged_stale`         | FR-JOB-035                      | ATS, NTF                                        |
+| EVT-JOB-020 | `job.external_application.recorded` | FR-JOB-038                      | AIC                                             |
+| EVT-JOB-021 | `job.feedback.requested`            | FR-JOB-029                      | ATS                                             |
+| EVT-JOB-022 | `job.recommendation.feedback_given` | FR-JOB-033                      | AIC                                             |
+| EVT-JOB-023 | `job.export.requested`              | FR-JOB-042                      | SET (planned)                                   |
+| EVT-JOB-024 | `job.listing.suppressed`            | FR-JOB-036                      | ATS, EMP                                        |
+| EVT-JOB-025 | `job.prestart.published`            | FR-JOB-045                      | NTF, ANL (planned)                              |
+| EVT-JOB-026 | `job.prestart.completed`            | FR-JOB-045                      | NTF, ATS                                        |
 
 Consumed: `ats.posting.published`, `ats.posting.closed`, `ats.application.stage_changed`, `ats.offer.extended`, `ats.offer.rescinded`, `ats.rejection.recorded`, `int.interview.scheduled`, `int.invite.issued`, `emp.org.verified`, `tsf.listing.taken_down` (all planned or defined in sibling modules).
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Use | Failure behaviour |
-|---|---|---|
-| Search index service | Feed, search, facets | Degraded database query with badge |
-| Geocoding and routing providers | Location and commute | Radius only with notice |
-| Virus scanner | Documents | Submit held for that file, then error |
-| Email, push providers (via NTF planned) | Alerts, status | Retry with backoff |
-| Partner and licensed job feeds | Import | Source marked failing; existing items persist two runs |
-| Currency rate provider | Approximate conversion | Converted value omitted |
-| Careers page fetcher (SSRF-protected) | External tracking | Manual entry |
+| Dependency                              | Use                    | Failure behaviour                                      |
+| --------------------------------------- | ---------------------- | ------------------------------------------------------ |
+| Search index service                    | Feed, search, facets   | Degraded database query with badge                     |
+| Geocoding and routing providers         | Location and commute   | Radius only with notice                                |
+| Virus scanner                           | Documents              | Submit held for that file, then error                  |
+| Email, push providers (via NTF planned) | Alerts, status         | Retry with backoff                                     |
+| Partner and licensed job feeds          | Import                 | Source marked failing; existing items persist two runs |
+| Currency rate provider                  | Approximate conversion | Converted value omitted                                |
+| Careers page fetcher (SSRF-protected)   | External tracking      | Manual entry                                           |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| ATS (FR-ATS-004..010, 013, 020, 022, 036..040) | Posting data, status, offers | ATS: submitted applications (EVT-JOB-009), candidate responses |
-| INT (FR-INT-008, 009, 013, 032) | Invites, slots, cancellations | INT: withdrawals and responses |
-| EMP (FR-EMP-005, 009, 029, 032) | Company data, claim, lookalike protection, aggregate follow stats | EMP: follow and save aggregates |
-| PRF, EVD (planned) | Resume, skills, credentials, completeness | PRF: application history count |
-| NTF (planned) | Delivery and preferences | none |
-| AIC (planned) | Recommendations, similarity | AIC: feedback signals |
-| TSF (planned) | Report triage, takedowns | TSF: report intake |
-| SET (planned) | Consent, export, erasure | SET: export orchestration |
-| SRC (planned) | Index, taxonomy | none |
-| MSG (planned) | Employer questions | none |
-| LRN, ASM (planned) | Gap-closing suggestions | none |
+| Depends on                                     | For                                                               | Depended on by                                                 |
+| ---------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| ATS (FR-ATS-004..010, 013, 020, 022, 036..040) | Posting data, status, offers                                      | ATS: submitted applications (EVT-JOB-009), candidate responses |
+| INT (FR-INT-008, 009, 013, 032)                | Invites, slots, cancellations                                     | INT: withdrawals and responses                                 |
+| EMP (FR-EMP-005, 009, 029, 032)                | Company data, claim, lookalike protection, aggregate follow stats | EMP: follow and save aggregates                                |
+| PRF, EVD (planned)                             | Resume, skills, credentials, completeness                         | PRF: application history count                                 |
+| NTF (planned)                                  | Delivery and preferences                                          | none                                                           |
+| AIC (planned)                                  | Recommendations, similarity                                       | AIC: feedback signals                                          |
+| TSF (planned)                                  | Report triage, takedowns                                          | TSF: report intake                                             |
+| SET (planned)                                  | Consent, export, erasure                                          | SET: export orchestration                                      |
+| SRC (planned)                                  | Index, taxonomy                                                   | none                                                           |
+| MSG (planned)                                  | Employer questions                                                | none                                                           |
+| LRN, ASM (planned)                             | Gap-closing suggestions                                           | none                                                           |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Search to view rate | Sessions with a listing view / sessions with a search | PAD (product analytics) |
-| Apply conversion | Applications submitted / listing detail views | PAD |
-| Draft recovery rate | Drafts reopened after interruption and submitted / drafts interrupted | PAD |
-| Application completion rate | Submitted / started applications | PAD |
-| Status freshness | Share of active applications with an event in the last 14 days | PAD |
-| Employer response rate | Applications with a recruiter action within 7 days / applications (shown to candidates only with 10 or more) | PAD |
-| Ghost listing rate | Listings flagged Inactive or ghost-reported / live listings | MOD |
-| Scam rate | Confirmed scam listings per 1,000 live listings | MOD |
-| Alert quality | Clicks per alert / alerts sent; unsubscribe rate | PAD |
-| Offer decision latency | Median hours from offer view to decision | PAD |
+| Metric                      | Definition and formula                                                                                       | Owner role              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| Search to view rate         | Sessions with a listing view / sessions with a search                                                        | PAD (product analytics) |
+| Apply conversion            | Applications submitted / listing detail views                                                                | PAD                     |
+| Draft recovery rate         | Drafts reopened after interruption and submitted / drafts interrupted                                        | PAD                     |
+| Application completion rate | Submitted / started applications                                                                             | PAD                     |
+| Status freshness            | Share of active applications with an event in the last 14 days                                               | PAD                     |
+| Employer response rate      | Applications with a recruiter action within 7 days / applications (shown to candidates only with 10 or more) | PAD                     |
+| Ghost listing rate          | Listings flagged Inactive or ghost-reported / live listings                                                  | MOD                     |
+| Scam rate                   | Confirmed scam listings per 1,000 live listings                                                              | MOD                     |
+| Alert quality               | Clicks per alert / alerts sent; unsubscribe rate                                                             | PAD                     |
+| Offer decision latency      | Median hours from offer view to decision                                                                     | PAD                     |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-JOB-01 | Re-application cooldown after a terminal application | 90 days (legacy), shorter after withdrawal, none | 90 days, waived once if withdrawn within 24 hours [PROP] (legacy V61-23 proposes a different rule; unresolved) | Product owner | FR-JOB-022, FR-JOB-027 |
-| OD-JOB-02 | Profile completeness threshold to apply | 70 percent (legacy), lower for easy apply, none | 70 percent, configurable | Product owner | FR-JOB-017, FR-JOB-022 |
-| OD-JOB-03 | Default listing expiry | 60 days (BR-057) vs 45 days (SM-JOB t8 in legacy) | 60 days, employer adjustable 14 to 90 | Product owner | FR-JOB-035, FR-JOB-040 |
-| OD-JOB-04 | Legal effect of accepting an offer on platform | Intent record only; legally binding acceptance via e-sign; both | Intent record plus e-sign hook where employer requires it | Counsel and product owner | FR-JOB-031, FR-JOB-032 |
-| OD-JOB-05 | May a recruiter or hiring manager also apply to jobs from the same account | Separate candidate persona; same account in candidate mode; never | Separate persona, same login with mode switch | Product owner | Section 2 |
-| OD-JOB-06 | Whether sponsored or promoted listings exist (conflicts with SSOT §4.2 non-goal of an ad network) | None; employer boost labelled; none now | None now (Won't-now); if opened, labelled and never default sort | Product owner | FR-JOB-004 |
-| OD-JOB-07 | SSOT allows a recruiter "hide pay" toggle; transparency rules say pay must show where required | Allow hide only where not legally required; never allow | Allow only outside required jurisdictions | Product owner and counsel | FR-JOB-007 |
-| OD-JOB-08 | Scope of imported listings (brushes the non-goal of a general marketplace) | Out of scope; licensed partner feeds only; broad aggregation | Licensed partner feeds only | Product owner | FR-JOB-037 |
-| OD-JOB-09 | May employers show a "Viewed" signal to candidates | Never; employer opt-in; always | Employer opt-in per job | Product owner | FR-JOB-026 |
-| OD-JOB-10 | Application terminal state set (legacy differs: stale_withdrawn, candidate_unresponsive, archived, offer_declined) | Adopt SM-JOB-01 as written; adopt legacy set | SM-JOB-01 with `expired` and `offer_declined`; `candidate_unresponsive` as a flag (see ATS) | Product owner | SM-JOB-01 |
+| ID        | Question                                                                                                                                                                                                                    | Options                                                                                                                          | Default proposal                                                                                               | Decides                   | Blocks                 |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
+| OD-JOB-01 | Re-application cooldown after a terminal application                                                                                                                                                                        | 90 days (legacy), shorter after withdrawal, none                                                                                 | 90 days, waived once if withdrawn within 24 hours [PROP] (legacy V61-23 proposes a different rule; unresolved) | Product owner             | FR-JOB-022, FR-JOB-027 |
+| OD-JOB-02 | Profile completeness threshold to apply                                                                                                                                                                                     | 70 percent (legacy), lower for easy apply, none                                                                                  | 70 percent, configurable                                                                                       | Product owner             | FR-JOB-017, FR-JOB-022 |
+| OD-JOB-03 | Default listing expiry                                                                                                                                                                                                      | 60 days (BR-057) vs 45 days (SM-JOB t8 in legacy)                                                                                | 60 days, employer adjustable 14 to 90                                                                          | Product owner             | FR-JOB-035, FR-JOB-040 |
+| OD-JOB-04 | Legal effect of accepting an offer on platform                                                                                                                                                                              | Intent record only; legally binding acceptance via e-sign; both                                                                  | Intent record plus e-sign hook where employer requires it                                                      | Counsel and product owner | FR-JOB-031, FR-JOB-032 |
+| OD-JOB-05 | May a recruiter or hiring manager also apply to jobs from the same account                                                                                                                                                  | Separate candidate persona; same account in candidate mode; never                                                                | Separate persona, same login with mode switch                                                                  | Product owner             | Section 2              |
+| OD-JOB-06 | Whether sponsored or promoted listings exist (conflicts with SSOT §4.2 non-goal of an ad network)                                                                                                                           | None; employer boost labelled; none now                                                                                          | None now (Won't-now); if opened, labelled and never default sort                                               | Product owner             | FR-JOB-004             |
+| OD-JOB-07 | SSOT allows a recruiter "hide pay" toggle; transparency rules say pay must show where required                                                                                                                              | Allow hide only where not legally required; never allow                                                                          | Allow only outside required jurisdictions                                                                      | Product owner and counsel | FR-JOB-007             |
+| OD-JOB-08 | Scope of imported listings (brushes the non-goal of a general marketplace)                                                                                                                                                  | Out of scope; licensed partner feeds only; broad aggregation                                                                     | Licensed partner feeds only                                                                                    | Product owner             | FR-JOB-037             |
+| OD-JOB-09 | May employers show a "Viewed" signal to candidates                                                                                                                                                                          | Never; employer opt-in; always                                                                                                   | Employer opt-in per job                                                                                        | Product owner             | FR-JOB-026             |
+| OD-JOB-10 | Application terminal state set (legacy differs: stale_withdrawn, candidate_unresponsive, archived, offer_declined)                                                                                                          | Adopt SM-JOB-01 as written; adopt legacy set                                                                                     | SM-JOB-01 with `expired` and `offer_declined`; `candidate_unresponsive` as a flag (see ATS)                    | Product owner             | SM-JOB-01              |
+| OD-JOB-11 | Should employers be able to collect any documents or forms through TalentSphere before day one (for example right-to-work or tax forms), given the SSOT §4.2 non-goal of generic HR or payroll?                             | A: no, preparation content only (FR-JOB-045); B: limited non-sensitive uploads; C: hand off to the employer's HR system only     | A `[PROP]`                                                                                                     | Product owner and counsel | FR-JOB-045             |
+| OD-JOB-12 | Legacy F-109 "suggested range and talking points": may guidance show a personal target range, or only the market reference band (for example the 25th to 75th percentile) with no single recommended figure (`BR-JOB-047`)? | A: market reference band only; B: add a personalized target range derived from the candidate's evidence and level; C: no numbers | A `[PROP]`                                                                                                     | Product owner and counsel | FR-JOB-044             |
 
 ## 14. Risks
 
-| ID | Risk | Mitigation |
-|---|---|---|
-| RSK-JOB-01 | Ghost jobs and stale listings erode trust | FR-JOB-035 freshness, reconfirmation, response-rate transparency |
-| RSK-JOB-02 | Scam listings harm candidates | FR-JOB-036 scoring, holds, reports, verified-employer weighting |
-| RSK-JOB-03 | Ranking or fit introduces bias | BR-JOB-017 feature allowlist, periodic bias review, ranking explanations |
-| RSK-JOB-04 | Status projection leaks internal notes | BR-JOB-007 deny-list contract tests |
-| RSK-JOB-05 | Imported listings create legal or quality exposure | Licensed sources only, takedown SLA, labelling |
-| RSK-JOB-06 | Search latency and degraded mode harm discovery | Fallback query, performance budgets in NFR (planned) |
-| RSK-JOB-07 | Alert volume causes spam complaints | Caps, digest default, one-click unsubscribe |
-| RSK-JOB-08 | Draft or submit duplicated or lost under network faults | Idempotency keys, local plus server autosave |
+| ID         | Risk                                                    | Mitigation                                                               |
+| ---------- | ------------------------------------------------------- | ------------------------------------------------------------------------ |
+| RSK-JOB-01 | Ghost jobs and stale listings erode trust               | FR-JOB-035 freshness, reconfirmation, response-rate transparency         |
+| RSK-JOB-02 | Scam listings harm candidates                           | FR-JOB-036 scoring, holds, reports, verified-employer weighting          |
+| RSK-JOB-03 | Ranking or fit introduces bias                          | BR-JOB-017 feature allowlist, periodic bias review, ranking explanations |
+| RSK-JOB-04 | Status projection leaks internal notes                  | BR-JOB-007 deny-list contract tests                                      |
+| RSK-JOB-05 | Imported listings create legal or quality exposure      | Licensed sources only, takedown SLA, labelling                           |
+| RSK-JOB-06 | Search latency and degraded mode harm discovery         | Fallback query, performance budgets in NFR (planned)                     |
+| RSK-JOB-07 | Alert volume causes spam complaints                     | Caps, digest default, one-click unsubscribe                              |
+| RSK-JOB-08 | Draft or submit duplicated or lost under network faults | Idempotency keys, local plus server autosave                             |
 
 ## 15. Legacy source trace
 
-| Legacy file | Informed | Dropped or changed |
-|---|---|---|
-| SSOT §9.7 F-04, F-05, F-06; §10.15 to §10.16 rules | Search, filters, ranking weights, apply flow, duplicates, cooldown, drafts, saved searches, state machine | Phase labels dropped; job lifecycle moved to ATS; offer acceptance gap closed here |
-| SSOT §10.37 BR-217..224, F-122 | Feedback loop | None |
-| SSOT §10.31 BR-169..176 | Referenced indirectly for human review principle | Interview rules live in INT |
-| docs/registries/FEATURE_REGISTRY.md F-04, F-25, F-28, F-32, F-36, F-117, F-122, F-128, F-142 | Feature seeds | Registry statuses ignored |
-| docs/registries/BUSINESS_RULE_REGISTRY.md BR-036..045, 057, 058, 061, 062 | Gates, scanning, expiry, auto-expire | Numeric ids re-issued as BR-JOB |
-| Yash_Final_Project_Document (not mined in depth) | Not used | n/a |
-| Own knowledge (LinkedIn, Indeed, Greenhouse candidate portals) | Ghost-job labels, scam controls, blocked employers, external tracking, import, referral, fit panel | Tagged [PROP] |
+| Legacy file                                                                                  | Informed                                                                                                  | Dropped or changed                                                                 |
+| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| SSOT §9.7 F-04, F-05, F-06; §10.15 to §10.16 rules                                           | Search, filters, ranking weights, apply flow, duplicates, cooldown, drafts, saved searches, state machine | Phase labels dropped; job lifecycle moved to ATS; offer acceptance gap closed here |
+| SSOT §10.37 BR-217..224, F-122                                                               | Feedback loop                                                                                             | None                                                                               |
+| SSOT §10.31 BR-169..176                                                                      | Referenced indirectly for human review principle                                                          | Interview rules live in INT                                                        |
+| docs/registries/FEATURE_REGISTRY.md F-04, F-25, F-28, F-32, F-36, F-117, F-122, F-128, F-142 | Feature seeds                                                                                             | Registry statuses ignored                                                          |
+| docs/registries/BUSINESS_RULE_REGISTRY.md BR-036..045, 057, 058, 061, 062                    | Gates, scanning, expiry, auto-expire                                                                      | Numeric ids re-issued as BR-JOB                                                    |
+| Yash_Final_Project_Document (not mined in depth)                                             | Not used                                                                                                  | n/a                                                                                |
+| Own knowledge (LinkedIn, Indeed, Greenhouse candidate portals)                               | Ghost-job labels, scam controls, blocked employers, external tracking, import, referral, fit panel        | Tagged [PROP]                                                                      |

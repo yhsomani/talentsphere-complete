@@ -2,7 +2,7 @@
 
 # Mind map: Foundation
 
-Every module, sub-module and feature in this domain (127 features). Feature labels carry the id suffix; the owning module file has the full specification.
+Every module, sub-module and feature in this domain (128 features). Feature labels carry the id suffix; the owning module file has the full specification.
 
 ```mermaid
 mindmap
@@ -109,6 +109,7 @@ mindmap
         NTF-025 Admin broadcast and system banners
         NTF-027 Team and organization notification
         NTF-029 Security and account notifications
+        NTF-033 Personal automation rules
     REP Gamification, Reputation Recognition
       Features
         REP-001 XP rule catalog and award engine

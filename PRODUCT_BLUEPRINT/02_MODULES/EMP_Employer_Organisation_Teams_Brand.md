@@ -10,24 +10,24 @@ EMP is the tenant model for everyone who hires on TalentSphere. It creates and v
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| Only real employers publish jobs | Share of live jobs from verified organisations; scam listings per 1,000 |
-| An employer is productive within one session | Time from sign-up to first published job |
-| Access is least-privilege and auditable | Zero cross-tenant access; every permission change logged |
-| Candidates see an honest employer picture | Verified profile, moderated reviews, reputation shown only with enough data |
-| Employers can integrate with their stack | Webhook delivery success rate; connector health |
+| Outcome                                      | How the system knows                                                        |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| Only real employers publish jobs             | Share of live jobs from verified organisations; scam listings per 1,000     |
+| An employer is productive within one session | Time from sign-up to first published job                                    |
+| Access is least-privilege and auditable      | Zero cross-tenant access; every permission change logged                    |
+| Candidates see an honest employer picture    | Verified profile, moderated reviews, reputation shown only with enough data |
+| Employers can integrate with their stack     | Webhook delivery success rate; connector health                             |
 
 ### 1.3 Boundaries
 
-| In scope (owned by EMP) | Out of scope | Consumed |
-|---|---|---|
-| Org accounts, verification, profile, public page, careers page, brand media, widgets, claims | Job content and pipeline (ATS), listings (JOB) | Postings and jobs from ATS and JOB |
-| Members, invitations, seats, roles, departments, locations, sub-orgs, approval policy, hiring policy | Identity, passwords, MFA mechanics (IDN planned) | Authentication and sessions |
-| Agencies and client relationships | Plans, prices, invoices, payment (BIL planned) | Entitlements and subscription state from BIL |
-| Employer reviews, responses, candidate-experience ratings, reputation | Moderation decisions and trust enforcement (TSF planned) | Moderation and sanctions from TSF |
-| DPA, compliance documents, webhooks, connectors, API keys, SSO and SCIM, security settings, audit | Platform public API gateway (PLT planned) | Gateway and delivery infrastructure |
-| Notification preferences, brand analytics, export and closure | Notification delivery (NTF planned), analytics warehouse (ANL planned) | Delivery, warehouse |
+| In scope (owned by EMP)                                                                              | Out of scope                                                           | Consumed                                     |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------- |
+| Org accounts, verification, profile, public page, careers page, brand media, widgets, claims         | Job content and pipeline (ATS), listings (JOB)                         | Postings and jobs from ATS and JOB           |
+| Members, invitations, seats, roles, departments, locations, sub-orgs, approval policy, hiring policy | Identity, passwords, MFA mechanics (IDN planned)                       | Authentication and sessions                  |
+| Agencies and client relationships                                                                    | Plans, prices, invoices, payment (BIL planned)                         | Entitlements and subscription state from BIL |
+| Employer reviews, responses, candidate-experience ratings, reputation                                | Moderation decisions and trust enforcement (TSF planned)               | Moderation and sanctions from TSF            |
+| DPA, compliance documents, webhooks, connectors, API keys, SSO and SCIM, security settings, audit    | Platform public API gateway (PLT planned)                              | Gateway and delivery infrastructure          |
+| Notification preferences, brand analytics, export and closure                                        | Notification delivery (NTF planned), analytics warehouse (ANL planned) | Delivery, warehouse                          |
 
 EMP is the owner of the `organization_id` tenant boundary used by ATS, INT and JOB. [SRC: BR-080] [DER]
 
@@ -35,35 +35,35 @@ EMP is the owner of the `organization_id` tenant boundary used by ATS, INT and J
 
 Legend: Y allowed, O own records, A audited, N not allowed. Org role names map to the canonical roles: `EAD` Employer Admin, `REC` Recruiter, `HMG` Hiring Manager. Other employer-side roles (Coordinator, Interviewer, Approver, Billing contact, Brand editor, Agency recruiter) are custom or built-in org roles in FR-EMP-012.
 
-| Capability | EAD | REC | HMG | Brand editor | Billing contact | CAN | MOD | PAD | SUP |
-|---|---|---|---|---|---|---|---|---|---|
-| Create org, submit verification | Y | N | N | N | N | N | N | Review A | Assist |
-| Edit company profile and careers page | Y | N | N | Y | N | N | N | Edit with audit | N |
-| Invite and remove members, assign roles | Y | N | N | N | N | N | N | A | N |
-| Manage seats and billing | Y | N | N | N | Y | N | N | A | Assist |
-| Configure approval and hiring policies | Y | N | N | N | N | N | N | N | N |
-| Create sub-orgs, agency relationships | Y | N | N | N | N | N | N | A | N |
-| Post employer reviews | N | N | N | N | N | Verified relationship only | N | N | N |
-| Respond to reviews | Y | Y (if granted) | N | Y | N | N | N | N | N |
-| Moderate reviews | N | N | N | N | N | N | Y, A | Y, A | N |
-| Manage webhooks, API keys, SSO | Y | N | N | N | N | N | N | N | N |
-| View audit log | Y | Own | Own | N | N | N | N | A | A |
-| Sign DPA | Y | N | N | N | N | N | N | N | N |
-| Suspend, restore org | N | N | N | N | N | N | Recommend | Y, A | N |
+| Capability                              | EAD | REC            | HMG | Brand editor | Billing contact | CAN                        | MOD       | PAD             | SUP    |
+| --------------------------------------- | --- | -------------- | --- | ------------ | --------------- | -------------------------- | --------- | --------------- | ------ |
+| Create org, submit verification         | Y   | N              | N   | N            | N               | N                          | N         | Review A        | Assist |
+| Edit company profile and careers page   | Y   | N              | N   | Y            | N               | N                          | N         | Edit with audit | N      |
+| Invite and remove members, assign roles | Y   | N              | N   | N            | N               | N                          | N         | A               | N      |
+| Manage seats and billing                | Y   | N              | N   | N            | Y               | N                          | N         | A               | Assist |
+| Configure approval and hiring policies  | Y   | N              | N   | N            | N               | N                          | N         | N               | N      |
+| Create sub-orgs, agency relationships   | Y   | N              | N   | N            | N               | N                          | N         | A               | N      |
+| Post employer reviews                   | N   | N              | N   | N            | N               | Verified relationship only | N         | N               | N      |
+| Respond to reviews                      | Y   | Y (if granted) | N   | Y            | N               | N                          | N         | N               | N      |
+| Moderate reviews                        | N   | N              | N   | N            | N               | N                          | Y, A      | Y, A            | N      |
+| Manage webhooks, API keys, SSO          | Y   | N              | N   | N            | N               | N                          | N         | N               | N      |
+| View audit log                          | Y   | Own            | Own | N            | N               | N                          | N         | A               | A      |
+| Sign DPA                                | Y   | N              | N   | N            | N               | N                          | N         | N               | N      |
+| Suspend, restore org                    | N   | N              | N   | N            | N               | N                          | Recommend | Y, A            | N      |
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Onboarding and verification | FR-EMP-001 to 003 |
-| B | Profile, brand and careers | FR-EMP-004 to 009 |
-| C | Teams and access | FR-EMP-010 to 015 |
-| D | Structure and agencies | FR-EMP-016 to 018 |
-| E | Reviews and reputation | FR-EMP-019 to 022 |
-| F | Commercial and legal | FR-EMP-023, 024 |
-| G | Integrations | FR-EMP-025 to 027 |
-| H | Security and trust | FR-EMP-028 to 030 |
-| I | Operations | FR-EMP-031 to 033 |
+| Code | Sub-module                  | Features                                  |
+| ---- | --------------------------- | ----------------------------------------- |
+| A    | Onboarding and verification | FR-EMP-001 to 003                         |
+| B    | Profile, brand and careers  | FR-EMP-004 to 009                         |
+| C    | Teams and access            | FR-EMP-010 to 015                         |
+| D    | Structure and agencies      | FR-EMP-016 to 018                         |
+| E    | Reviews and reputation      | FR-EMP-019 to 022, FR-EMP-034, FR-EMP-035 |
+| F    | Commercial and legal        | FR-EMP-023, 024                           |
+| G    | Integrations                | FR-EMP-025 to 027                         |
+| H    | Security and trust          | FR-EMP-028 to 030                         |
+| I    | Operations                  | FR-EMP-031 to 033                         |
 
 ```mermaid
 flowchart LR
@@ -239,7 +239,7 @@ flowchart LR
 
 - **Sub-module:** B Brand
 - **Priority / tier:** Should · R5
-- **Source:** [PROP] [SRC: SSOT F-56]
+- **Source:** [PROP] [SRC: SSOT F-56] · also [SRC: SSOT §7 F-171 Employer Brand Management System]
 - **Purpose and outcome:** Show what working there is like; success is richer pages and better-informed applicants.
 - **Roles and permissions:** `EAD, Brand editor: create` · `Moderation by MOD`
 - **Preconditions and entry points:** `/employers/brand`.
@@ -931,48 +931,111 @@ flowchart LR
   - Given an unresolved offer, When closing, Then blocked with a list.
   - Negative: Given a non-owner, When requesting closure, Then 403.
 
+### FR-EMP-034 — Interview experience repository
+
+- **Sub-module:** E Reviews and reputation
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §7.1 F-87 Interview Experience Repository (priority 7, Ph4; dependencies F-04, F-56, F-88); BR-138 interview questions moderated] [DER]; extends FR-EMP-019, which states the shared review flow in one sentence
+- **Purpose and outcome:** Candidates read how interviews at a company really work and share their own experience, so people prepare with real information. The system knows it works when company pages show moderated experiences with aggregates only above the sample threshold and employers cannot suppress them.
+- **Roles and permissions:** `GUE, CAN, STD, FRL: read published entries` · `CAN, STD, FRL with a verified interview relationship: submit, edit within 14 days, withdraw` · `EAD: read, respond (FR-EMP-020), flag` · `MOD: moderate` · `PAD: configure fields and takedown policy`
+- **Preconditions and entry points:** The submitter has an application or interview with this organization recorded on the platform (BR-EMP-021). Entry: company page "Interviews" tab (FR-EMP-005), the tracker prompt after an interview outcome (FR-JOB-025), company search results (FR-SRC-006).
+- **User interactions and actions:**
+  1. Reader: open the "Interviews" tab. See aggregates (median difficulty, experience split, outcome split, median time from first contact to decision, stage frequency) when at least {10} entries exist, then the list of entries.
+  2. Filter by role family, level, location, outcome and year; sort by most recent or most helpful; open an entry; mark it helpful; report it.
+  3. Submitter: press "Share your interview experience". Enter role title, level, country and city, month and year, stages experienced (recruiter call, technical screen, take-home, panel or onsite, case, presentation, final), total duration in weeks, difficulty 1 to 5, overall experience (positive, neutral, negative), outcome (offer, declined the offer, rejected, no response, withdrew, still in process), how the interview came about (applied online, referral, recruiter, campus, other), process description (up to 2,000 characters), up to 5 questions (each up to 300 characters with a type: behavioral, technical, case, other), tips (up to 500).
+  4. Choose anonymous (default) or display name, accept the guidelines (including "do not share material covered by a confidentiality agreement"), and submit. See status (in review, published, not published with reason).
+- **System behaviour:** Entries use the review pipeline of FR-EMP-019: automated checks for personal data, interviewer names, threats and copied text, then human moderation for flagged items; question text is moderated before public display and interviewer names are removed (BR-EMP-039). One entry per interview relationship per 12 months (BR-EMP-021). Aggregates and any public rating-like values appear only with at least 10 entries in the cell (BR-EMP-024). Employers cannot delete or edit entries; they may respond or flag (BR-EMP-023, BR-EMP-025). Confidential assessment content is removed within {3} business days of a valid takedown request. The submitter's identity is held in the separate encrypted store of `ENT-EMP-12`. Entries are indexed for company and content search under permissions (FR-SRC-025). Entries are never shown to the recruiters who handled the submitter as attributable data and never influence candidate ranking or matching.
+- **UI elements and controls:** Aggregate cards with text values, entry list with chips (stage, outcome, difficulty), filters, "Helpful" button, report menu, submission form with counters and a guidelines checkbox. States: fewer than 10 entries (aggregates hidden: "Not enough entries to summarize yet"), empty ("No experiences shared yet"), in-review banner for the submitter, rejected with reason.
+- **Configuration options:** Platform: field list, stage list, minimum sample (default 10), takedown service level, edit window (default 14 days). User: anonymity default.
+- **Business rules:** BR-EMP-021, BR-EMP-022, BR-EMP-024, BR-EMP-025, BR-EMP-039
+- **Validation:** Role title 2 to 120 characters; difficulty integer 1 to 5; month and year not in the future and not older than 5 years; process text up to 2,000; at most 5 questions of up to 300 characters; no URLs, emails or phone numbers in text; stages from the list.
+- **Inputs and outputs:** In: the entry fields. Out: entry record with moderation status, public entry view, aggregates per cell with sample size.
+- **Filters, sorting, search:** Role family, level, location, outcome, year, difficulty band; sort by recent or helpful; keyword search through content search.
+- **Notifications and communication:** Submitter `emp.interview_experience.published` or `.rejected` (in-app, email, class workflow); employer EAD weekly digest of new entries together with reviews (class workflow, opt-out).
+- **Error handling and edge cases:** No interview relationship: submit is disabled with "You can share after an interview recorded on TalentSphere" and a link to the explanation. Duplicate entry for the same relationship within 12 months: refused with a link to edit. Review bombing velocity: new entries for the organization are held for moderator review. Submitter deletes the account: the anonymized entry stays unless removal is requested. A takedown for confidential content: the question is removed, the rest of the entry stays.
+- **Dependencies:** FR-EMP-005, FR-EMP-019, FR-EMP-020, FR-JOB-025, FR-SRC-006, FR-SRC-025, FR-TSF-012, ENT-EMP-12.
+- **Security and privacy:** Reviewer identity encrypted separately and disclosed only through formal legal process; entries contain no personal data of interviewers; abuse and coordinated posting handled by TSF (FR-TSF-018).
+- **Acceptance criteria:**
+  - Given a candidate who interviewed with an organization on the platform, when they submit a valid entry, then it is `in_moderation` and becomes public after approval with questions shown.
+  - Given 7 published entries, when a guest opens the tab, then entries are listed and no aggregate values are shown.
+  - Given an entry names an interviewer, when moderation runs, then the name is removed or the entry is held with a reason.
+  - Given a person with no interview relationship, when they try to submit, then the system refuses with `relationship_required` (negative).
+
+### FR-EMP-035 — Company culture survey
+
+- **Sub-module:** E Reviews and reputation
+- **Priority / tier:** Could · R5
+- **Source:** [SRC: SSOT §7.2 F-127 Company Culture Assessment (priority 4, Ph5; dependencies F-56, F-75)] [PROP] for the instrument and display; scope in `OD-EMP-11`
+- **Purpose and outcome:** Verified current and former employees, and verified interviewees, answer a short standardized survey so candidates can see how working at a company is described by people with a real relationship to it. The system knows it works when profiles appear only with enough responses, employers cannot see or influence individual answers, and nothing is used to score candidates.
+- **Roles and permissions:** `CAN, STD, FRL with a verified employee or interviewee relationship: submit` · `GUE, CAN, STD, FRL: read published profiles` · `EAD: read aggregates, publish a response per dimension, request moderation of abuse` · `PAD: manage the instrument and versions` · `MOD: review flagged submissions`
+- **Preconditions and entry points:** A verified relationship with the organization (BR-EMP-021). Entry: company page "Culture" tab (FR-EMP-005), the prompt after employment verification or an interview outcome.
+- **User interactions and actions:**
+  1. Employee: open "Share how it works here". Answer 10 statements on a 5-point agreement scale (strongly disagree to strongly agree) covering collaboration, autonomy, work-life balance, learning and growth, inclusion and belonging, management support, recognition, transparency, pace, and flexibility. Each can be left unanswered; at least 6 answers are needed. Submit.
+  2. Interviewee: answer 4 statements about whether the interview process matched what the company says about its culture (clarity of values, respect for time, consistency between interviewers, openness to questions).
+  3. Reader: open the "Culture" tab. See each dimension as a distribution bar with text percentages and the response count, a "last updated" date, and the employer's published reply per dimension.
+  4. Optional: press "Compare with my preferences", set private sliders for up to 5 dimensions, and see them beside the company's distribution; no fit percentage or score is shown.
+- **System behaviour:** One response per verified relationship per 12 months (BR-EMP-041). Employee and interviewee results are shown separately. A dimension appears publicly only with at least {10} responses in the last 24 months (BR-EMP-040); otherwise the tab says "Not enough responses yet". Results are distributions, not a single culture score. Employers see aggregates only, cannot see who responded, cannot incentivize, require or monitor participation, and may publish one reply per dimension (BR-EMP-041). Velocity checks hold bursts from one organization for moderation (FR-TSF-018). Preferences stay private and are never sent to employers or used in matching, ranking or screening (BR-EMP-040, BR-AIC-005). Instrument changes create a new version; versions are shown separately.
+- **UI elements and controls:** Survey form with radio groups, progress text, "Skip" per item, submit; culture tab with accessible distribution charts (text table alternative), reply cards, preference sliders, methodology link. States: not enough responses, loading, error with Retry, already responded ("You answered on <date>").
+- **Configuration options:** Platform: statements and dimensions, minimum responses (default 10), window (default 24 months), survey versions. Organization: reply publishing on or off.
+- **Business rules:** BR-EMP-040, BR-EMP-041, BR-EMP-021, BR-EMP-024
+- **Validation:** Each answer integer 1 to 5; at least 6 of 10 employee answers; reply text up to 1,000 characters per dimension; preferences limited to 5 dimensions.
+- **Inputs and outputs:** In: answers, preferences, employer replies. Out: per-dimension distributions with sample size and date, reply texts.
+- **Filters, sorting, search:** Filter by respondent type (employee, interviewee) and by period; no individual-level filtering.
+- **Notifications and communication:** Employer EAD is told when a profile first reaches the display threshold or a new version publishes (`emp.culture_profile.updated`, in-app, class workflow); respondents get no notification.
+- **Error handling and edge cases:** Duplicate response within 12 months: refused with a link to the date. Respondent's relationship later found invalid: the response is removed from aggregates at the next computation. Organization merges or renames: responses follow the verified organization record. Coordinated submissions: held and reviewed. A respondent under 18: not accepted; the survey requires an adult account.
+- **Dependencies:** FR-EMP-005, FR-EMP-019, FR-EMP-020, FR-EMP-022, FR-TSF-018, FR-EVD-008, ENT-EMP-24.
+- **Security and privacy:** Identity reference stored encrypted and separately; the employer receives only aggregates with k at least 10 (BR-EMP-037); preferences are private personal data included in export and erasure; staff access is audited.
+- **Acceptance criteria:**
+  - Given 12 verified employee responses, when a guest opens the Culture tab, then each dimension shows a distribution with the count 12.
+  - Given 6 responses, when the tab loads, then it shows "Not enough responses yet" and no distribution.
+  - Given an employer admin tries to view the list of respondents, when they request it, then the system returns 403 (negative).
+  - Given a candidate sets preferences, when they compare, then no fit percentage is displayed and the employer cannot read the preferences.
+
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-EMP-001 | An organisation is created by a verified person who becomes its owner (EAD) and must accept the terms and data notice; every organisation has at least one active EAD at all times. | Accountability. | Org creation, member removal | [DER] |
-| BR-EMP-002 | Unverified organisations may draft jobs but cannot publish without platform review; limits on active jobs and sourcing apply until verified. | Fraud control. | Publish workflow | [SRC: BR-036, BR-062] [PROP: limits] |
-| BR-EMP-003 | Verification requires domain control proof plus at least one of registry match or reviewed legal documents; verified status is revalidated at least every 12 months and on risk triggers. | Authenticity. | Verification service | [PROP] [SRC: BR-036] |
-| BR-EMP-004 | Members must use an email on an allowed org domain unless an expiring EAD-approved exception exists; free-mail domains are not accepted for employer accounts. | Identity integrity. | Invitation and sign-in | [PROP] |
-| BR-EMP-005 | Company profile, brand and review-response content is scanned and moderated; prohibited content (hate, discrimination, personal data, misleading claims, scams) is rejected. | Safety. | Content services | [SRC: BR-083 pattern] [PROP] |
-| BR-EMP-006 | Company slugs are unique, permanent (with redirects), and reserved or protected names cannot be claimed. | Trust. | Slug service | [PROP] |
-| BR-EMP-007 | Custom careers domains require DNS verification and enforce HTTPS; removal restores the default URL. | Security. | Domain service | [PROP] |
-| BR-EMP-008 | Brand media requires alt text and captions; featuring a person requires their recorded, revocable consent honored within 24 hours of withdrawal; contrast and accessibility checks must pass before publishing careers pages. | Accessibility and consent. | Publishing checks | [SRC: BR-079 consent pattern] [PROP] |
-| BR-EMP-009 | Embeds and feeds serve only published jobs, check an origin allowlist, and set no tracking cookies on third-party sites. | Privacy and safety. | Embed service | [PROP] |
-| BR-EMP-010 | Unclaimed company profiles are labelled; claims need domain proof; disputes lock sensitive edits until resolved by PAD. | Fair ownership. | Claim workflow | [PROP] |
-| BR-EMP-011 | Invitations are single-use, bound to the invited email, expire in 7 days and can be revoked; max 200 pending. | Access control. | Invitation service | [PROP] |
-| BR-EMP-012 | Seat assignment is atomic and never oversells the last seat; released seats return immediately; members keep read-only access to their past work for 7 days after release. | Commercial integrity. | Seat service | [SRC: BR-074, BR-075 pattern] [PROP] |
-| BR-EMP-013 | Built-in roles are fixed; custom roles cannot exceed the creator's permissions; the last EAD cannot be removed or demoted; billing roles have no candidate data access. | Least privilege. | Role service | [SRC: BR-078 pattern] [DER] |
-| BR-EMP-014 | Permission and role changes take effect within 60 seconds and are audit logged; sensitive actions require re-authentication. | Security. | Authorization layer | [SRC: BR-09, BR-067] [PROP] |
-| BR-EMP-015 | Approval policies are versioned; changes apply to new requests only; a policy must resolve to at least one approver who is not the requester. | Fairness and control. | Policy service | [PROP] |
-| BR-EMP-016 | Organisation data is scoped by `organization_id`; sub-organisations are isolated unless sharing is explicitly enabled with candidate notice; no cross-tenant reads. | Tenant isolation. | Data layer | [SRC: BR-080] |
-| BR-EMP-017 | Organisation hiring policies must lie within platform minimum and maximum bounds, and location-specific legal rules override org settings. | Compliance. | Policy validation | [PROP] |
-| BR-EMP-018 | An agency acts only within an active, client-approved relationship scope and permissions; each request carries a client context that is authorized. | Consent and isolation. | Authorization layer | [PROP] |
-| BR-EMP-019 | Agencies see only their own submitted candidates and the client jobs in scope; clients see agency attribution; no cross-client data for agencies. | Privacy. | Agency workspace | [PROP] |
-| BR-EMP-020 | Terminating a relationship ends agency access immediately; the agency retains only records of candidates it submitted; the DPA governs the remainder. | Data control. | Relationship service | [PROP] |
-| BR-EMP-021 | Only people with a verified relationship (employee via EVD or work email, applicant or interviewee via platform records, contractor) may review; one review per relationship per 12 months. | Authentic reviews. | Review service | [DER] [SRC: F-75] |
-| BR-EMP-022 | Anonymous reviews hide the reviewer's identity from the employer and public, never from PAD and legal process. | Safe speech. | Review storage and API | [SRC: BR-136] |
-| BR-EMP-023 | Company responses are appended and never edit the original review; one response and one follow-up per review. | Fairness. | Review service | [SRC: BR-137] |
-| BR-EMP-024 | Reputation components and ratings are shown publicly only when at least 10 data points support them; badges derive from objective thresholds and cannot be purchased or hidden. | Statistical honesty. | Reputation service | [SRC: BR-207, BR-180 principle] [PROP] |
-| BR-EMP-025 | Employers cannot delete or edit reviews; they may flag them; removal occurs only by moderation under published guidelines. | Integrity. | Moderation workflow | [DER] |
-| BR-EMP-026 | Candidate experience ratings are shown to employers only as de-identified aggregates with sample at least 10, never to the recruiters who handled the candidate. | Anti-retaliation. | Reporting | [PROP] aligns [SRC: BR-220] |
-| BR-EMP-027 | Entitlements come only from BIL subscription state (webhook-owned); limits are enforced server-side; downgrades restrict creation but never delete data. | Commercial integrity. | Entitlement service | [SRC: BR-032, BR-055, BR-056] |
-| BR-EMP-028 | A signed DPA (where required) is a precondition for accessing received applications after 14 days; new versions require re-acceptance within 30 days; sub-processor changes are notified 30 days ahead. | Legal compliance. | Gate in ATS access | [PROP] [DEC-REQ OD-EMP-03] |
-| BR-EMP-029 | Webhooks are https-only, HMAC-signed, retried with backoff over 24 hours, auto-disabled after 50 consecutive failures, and carry minimal personal data. | Reliability and privacy. | Webhook service | [SRC: BR-31] [PROP] |
-| BR-EMP-030 | API keys and connectors are org-bound, scope-limited, never exceed the creator's permissions, are shown once, stored hashed, rotatable and logged. | Least privilege. | Key service | [PROP] |
-| BR-EMP-031 | SCIM deactivation removes access within 5 minutes; SSO enforcement requires a tested configuration and a break-glass owner with 2FA. | Prompt de-provisioning. | SSO service | [PROP] |
-| BR-EMP-032 | Security policies (2FA, session limits, IP rules) are enforced server-side; dangerous actions require re-authentication. | Security. | Auth layer | [DER] |
-| BR-EMP-033 | Employer audit entries are append-only, tamper-evident, and retained 7 years. | Accountability. | Audit service | [SRC: BR-067] [PROP] |
-| BR-EMP-034 | Names, domains and logos are screened for lookalikes against verified organisations and a protected-brand list before verification. | Anti-impersonation. | Screening service | [PROP] |
-| BR-EMP-035 | Sanctions are proportionate (warning, restrict, suspend, terminate); termination needs dual PAD approval; every sanction offers one appeal reviewed by a different PAD; affected candidates are informed neutrally. | Due process. | Sanction workflow | [SRC: BR-068, BR-29] |
-| BR-EMP-036 | Security, legal and approval-deadline notifications are mandatory and cannot be disabled by members. | Safety. | Notification layer | [PROP] |
-| BR-EMP-037 | Employer analytics are aggregate-only with k at least 10 and offer no demographic breakdown. | Privacy. | Analytics service | [SRC: BR-207, BR-201] |
-| BR-EMP-038 | On closure the owner may export all data; export completes within 30 days; a 30-day cooling-off precedes deletion; candidate data is purged per retention rules. | Data rights. | Closure workflow | [SRC: BR-063] [PROP] |
+| ID         | Rule                                                                                                                                                                                                                                                                                        | Rationale                                                           | Enforced where                           | Source                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+| BR-EMP-001 | An organisation is created by a verified person who becomes its owner (EAD) and must accept the terms and data notice; every organisation has at least one active EAD at all times.                                                                                                         | Accountability.                                                     | Org creation, member removal             | [DER]                                             |
+| BR-EMP-002 | Unverified organisations may draft jobs but cannot publish without platform review; limits on active jobs and sourcing apply until verified.                                                                                                                                                | Fraud control.                                                      | Publish workflow                         | [SRC: BR-036, BR-062] [PROP: limits]              |
+| BR-EMP-003 | Verification requires domain control proof plus at least one of registry match or reviewed legal documents; verified status is revalidated at least every 12 months and on risk triggers.                                                                                                   | Authenticity.                                                       | Verification service                     | [PROP] [SRC: BR-036]                              |
+| BR-EMP-004 | Members must use an email on an allowed org domain unless an expiring EAD-approved exception exists; free-mail domains are not accepted for employer accounts.                                                                                                                              | Identity integrity.                                                 | Invitation and sign-in                   | [PROP]                                            |
+| BR-EMP-005 | Company profile, brand and review-response content is scanned and moderated; prohibited content (hate, discrimination, personal data, misleading claims, scams) is rejected.                                                                                                                | Safety.                                                             | Content services                         | [SRC: BR-083 pattern] [PROP]                      |
+| BR-EMP-006 | Company slugs are unique, permanent (with redirects), and reserved or protected names cannot be claimed.                                                                                                                                                                                    | Trust.                                                              | Slug service                             | [PROP]                                            |
+| BR-EMP-007 | Custom careers domains require DNS verification and enforce HTTPS; removal restores the default URL.                                                                                                                                                                                        | Security.                                                           | Domain service                           | [PROP]                                            |
+| BR-EMP-008 | Brand media requires alt text and captions; featuring a person requires their recorded, revocable consent honored within 24 hours of withdrawal; contrast and accessibility checks must pass before publishing careers pages.                                                               | Accessibility and consent.                                          | Publishing checks                        | [SRC: BR-079 consent pattern] [PROP]              |
+| BR-EMP-009 | Embeds and feeds serve only published jobs, check an origin allowlist, and set no tracking cookies on third-party sites.                                                                                                                                                                    | Privacy and safety.                                                 | Embed service                            | [PROP]                                            |
+| BR-EMP-010 | Unclaimed company profiles are labelled; claims need domain proof; disputes lock sensitive edits until resolved by PAD.                                                                                                                                                                     | Fair ownership.                                                     | Claim workflow                           | [PROP]                                            |
+| BR-EMP-011 | Invitations are single-use, bound to the invited email, expire in 7 days and can be revoked; max 200 pending.                                                                                                                                                                               | Access control.                                                     | Invitation service                       | [PROP]                                            |
+| BR-EMP-012 | Seat assignment is atomic and never oversells the last seat; released seats return immediately; members keep read-only access to their past work for 7 days after release.                                                                                                                  | Commercial integrity.                                               | Seat service                             | [SRC: BR-074, BR-075 pattern] [PROP]              |
+| BR-EMP-013 | Built-in roles are fixed; custom roles cannot exceed the creator's permissions; the last EAD cannot be removed or demoted; billing roles have no candidate data access.                                                                                                                     | Least privilege.                                                    | Role service                             | [SRC: BR-078 pattern] [DER]                       |
+| BR-EMP-014 | Permission and role changes take effect within 60 seconds and are audit logged; sensitive actions require re-authentication.                                                                                                                                                                | Security.                                                           | Authorization layer                      | [SRC: BR-09, BR-067] [PROP]                       |
+| BR-EMP-015 | Approval policies are versioned; changes apply to new requests only; a policy must resolve to at least one approver who is not the requester.                                                                                                                                               | Fairness and control.                                               | Policy service                           | [PROP]                                            |
+| BR-EMP-016 | Organisation data is scoped by `organization_id`; sub-organisations are isolated unless sharing is explicitly enabled with candidate notice; no cross-tenant reads.                                                                                                                         | Tenant isolation.                                                   | Data layer                               | [SRC: BR-080]                                     |
+| BR-EMP-017 | Organisation hiring policies must lie within platform minimum and maximum bounds, and location-specific legal rules override org settings.                                                                                                                                                  | Compliance.                                                         | Policy validation                        | [PROP]                                            |
+| BR-EMP-018 | An agency acts only within an active, client-approved relationship scope and permissions; each request carries a client context that is authorized.                                                                                                                                         | Consent and isolation.                                              | Authorization layer                      | [PROP]                                            |
+| BR-EMP-019 | Agencies see only their own submitted candidates and the client jobs in scope; clients see agency attribution; no cross-client data for agencies.                                                                                                                                           | Privacy.                                                            | Agency workspace                         | [PROP]                                            |
+| BR-EMP-020 | Terminating a relationship ends agency access immediately; the agency retains only records of candidates it submitted; the DPA governs the remainder.                                                                                                                                       | Data control.                                                       | Relationship service                     | [PROP]                                            |
+| BR-EMP-021 | Only people with a verified relationship (employee via EVD or work email, applicant or interviewee via platform records, contractor) may review; one review per relationship per 12 months.                                                                                                 | Authentic reviews.                                                  | Review service                           | [DER] [SRC: F-75]                                 |
+| BR-EMP-022 | Anonymous reviews hide the reviewer's identity from the employer and public, never from PAD and legal process.                                                                                                                                                                              | Safe speech.                                                        | Review storage and API                   | [SRC: BR-136]                                     |
+| BR-EMP-023 | Company responses are appended and never edit the original review; one response and one follow-up per review.                                                                                                                                                                               | Fairness.                                                           | Review service                           | [SRC: BR-137]                                     |
+| BR-EMP-024 | Reputation components and ratings are shown publicly only when at least 10 data points support them; badges derive from objective thresholds and cannot be purchased or hidden.                                                                                                             | Statistical honesty.                                                | Reputation service                       | [SRC: BR-207, BR-180 principle] [PROP]            |
+| BR-EMP-025 | Employers cannot delete or edit reviews; they may flag them; removal occurs only by moderation under published guidelines.                                                                                                                                                                  | Integrity.                                                          | Moderation workflow                      | [DER]                                             |
+| BR-EMP-026 | Candidate experience ratings are shown to employers only as de-identified aggregates with sample at least 10, never to the recruiters who handled the candidate.                                                                                                                            | Anti-retaliation.                                                   | Reporting                                | [PROP] aligns [SRC: BR-220]                       |
+| BR-EMP-027 | Entitlements come only from BIL subscription state (webhook-owned); limits are enforced server-side; downgrades restrict creation but never delete data.                                                                                                                                    | Commercial integrity.                                               | Entitlement service                      | [SRC: BR-032, BR-055, BR-056]                     |
+| BR-EMP-028 | A signed DPA (where required) is a precondition for accessing received applications after 14 days; new versions require re-acceptance within 30 days; sub-processor changes are notified 30 days ahead.                                                                                     | Legal compliance.                                                   | Gate in ATS access                       | [PROP] [DEC-REQ OD-EMP-03]                        |
+| BR-EMP-029 | Webhooks are https-only, HMAC-signed, retried with backoff over 24 hours, auto-disabled after 50 consecutive failures, and carry minimal personal data.                                                                                                                                     | Reliability and privacy.                                            | Webhook service                          | [SRC: BR-31] [PROP]                               |
+| BR-EMP-030 | API keys and connectors are org-bound, scope-limited, never exceed the creator's permissions, are shown once, stored hashed, rotatable and logged.                                                                                                                                          | Least privilege.                                                    | Key service                              | [PROP]                                            |
+| BR-EMP-031 | SCIM deactivation removes access within 5 minutes; SSO enforcement requires a tested configuration and a break-glass owner with 2FA.                                                                                                                                                        | Prompt de-provisioning.                                             | SSO service                              | [PROP]                                            |
+| BR-EMP-032 | Security policies (2FA, session limits, IP rules) are enforced server-side; dangerous actions require re-authentication.                                                                                                                                                                    | Security.                                                           | Auth layer                               | [DER]                                             |
+| BR-EMP-033 | Employer audit entries are append-only, tamper-evident, and retained 7 years.                                                                                                                                                                                                               | Accountability.                                                     | Audit service                            | [SRC: BR-067] [PROP]                              |
+| BR-EMP-034 | Names, domains and logos are screened for lookalikes against verified organisations and a protected-brand list before verification.                                                                                                                                                         | Anti-impersonation.                                                 | Screening service                        | [PROP]                                            |
+| BR-EMP-035 | Sanctions are proportionate (warning, restrict, suspend, terminate); termination needs dual PAD approval; every sanction offers one appeal reviewed by a different PAD; affected candidates are informed neutrally.                                                                         | Due process.                                                        | Sanction workflow                        | [SRC: BR-068, BR-29]                              |
+| BR-EMP-036 | Security, legal and approval-deadline notifications are mandatory and cannot be disabled by members.                                                                                                                                                                                        | Safety.                                                             | Notification layer                       | [PROP]                                            |
+| BR-EMP-037 | Employer analytics are aggregate-only with k at least 10 and offer no demographic breakdown.                                                                                                                                                                                                | Privacy.                                                            | Analytics service                        | [SRC: BR-207, BR-201]                             |
+| BR-EMP-038 | On closure the owner may export all data; export completes within 30 days; a 30-day cooling-off precedes deletion; candidate data is purged per retention rules.                                                                                                                            | Data rights.                                                        | Closure workflow                         | [SRC: BR-063] [PROP]                              |
+| BR-EMP-039 | Interview experiences are moderated before public display: interviewer names and personal data are removed, question text is reviewed, and confidential assessment content is removed within {3} business days of a valid takedown request; employers cannot suppress entries.              | Useful but safe and fair information.                               | Review pipeline (FR-EMP-019, FR-EMP-034) | [SRC: SSOT BR-138] [PROP] takedown period         |
+| BR-EMP-040 | Culture survey results are shown only as per-dimension distributions with at least {10} responses in the window; they are never combined into a score used to rank, filter or screen candidates, and a candidate's culture preferences are private and never used in matching or screening. | Culture fit is a known bias vector; keeps the survey informational. | Culture service; matching allowlist      | [DER] [SRC: SSOT §4.2 opaque ranking; BR-AIC-005] |
+| BR-EMP-041 | Culture survey participation is voluntary and open only to verified relationships, once per 12 months; employers cannot incentivize, require or monitor participation or see who responded.                                                                                                 | Honest, unpressured answers.                                        | Survey service; invitation validators    | [PROP]                                            |
 
 ## 6. State machines
 
@@ -980,19 +1043,19 @@ flowchart LR
 
 States: `onboarding`, `pending_verification`, `verified`, `rejected`, `suspended`, `closing`, `closed`. Terminal: `closed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | onboarding | Org created | BR-EMP-001 |
-| onboarding | pending_verification | Verification submitted | Evidence present |
-| pending_verification | verified | Auto or PAD approval | BR-EMP-003, BR-EMP-034 clear |
-| pending_verification | rejected | PAD rejects | Reasons recorded |
-| rejected | pending_verification | Resubmission | Max 3 per 30 days |
-| verified | pending_verification | Revalidation trigger (domain change, risk) | 14-day grace |
-| onboarding, pending_verification, verified | suspended | Sanction | PAD, BR-EMP-035 |
-| suspended | verified | Appeal upheld or sanction lifted | Different reviewer |
-| verified, suspended | closing | Owner requests closure, or termination approved | Re-auth; dual approval for termination |
-| closing | verified | Owner cancels within 30 days | Prior state restored |
-| closing | closed | Cooling-off elapsed | Purge scheduled |
+| From                                       | To                   | Trigger                                         | Guard                                  |
+| ------------------------------------------ | -------------------- | ----------------------------------------------- | -------------------------------------- |
+| (none)                                     | onboarding           | Org created                                     | BR-EMP-001                             |
+| onboarding                                 | pending_verification | Verification submitted                          | Evidence present                       |
+| pending_verification                       | verified             | Auto or PAD approval                            | BR-EMP-003, BR-EMP-034 clear           |
+| pending_verification                       | rejected             | PAD rejects                                     | Reasons recorded                       |
+| rejected                                   | pending_verification | Resubmission                                    | Max 3 per 30 days                      |
+| verified                                   | pending_verification | Revalidation trigger (domain change, risk)      | 14-day grace                           |
+| onboarding, pending_verification, verified | suspended            | Sanction                                        | PAD, BR-EMP-035                        |
+| suspended                                  | verified             | Appeal upheld or sanction lifted                | Different reviewer                     |
+| verified, suspended                        | closing              | Owner requests closure, or termination approved | Re-auth; dual approval for termination |
+| closing                                    | verified             | Owner cancels within 30 days                    | Prior state restored                   |
+| closing                                    | closed               | Cooling-off elapsed                             | Purge scheduled                        |
 
 ```mermaid
 stateDiagram-v2
@@ -1017,15 +1080,15 @@ stateDiagram-v2
 
 States: `invited`, `active`, `suspended`, `expired`, `revoked`, `removed`. Terminal: `expired`, `revoked`, `removed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | invited | EAD invites | BR-EMP-011 |
-| invited | active | Invitee accepts | Email verified, domain rule, seat if needed |
-| invited | expired | 7 days pass | none |
-| invited | revoked | EAD revokes | none |
-| active | suspended | EAD suspends or SCIM deactivates temporarily | none |
-| suspended | active | Reactivated | Seat available |
-| active, suspended | removed | EAD removes or SCIM delete | Reassignment wizard done, last EAD guard |
+| From              | To        | Trigger                                      | Guard                                       |
+| ----------------- | --------- | -------------------------------------------- | ------------------------------------------- |
+| (none)            | invited   | EAD invites                                  | BR-EMP-011                                  |
+| invited           | active    | Invitee accepts                              | Email verified, domain rule, seat if needed |
+| invited           | expired   | 7 days pass                                  | none                                        |
+| invited           | revoked   | EAD revokes                                  | none                                        |
+| active            | suspended | EAD suspends or SCIM deactivates temporarily | none                                        |
+| suspended         | active    | Reactivated                                  | Seat available                              |
+| active, suspended | removed   | EAD removes or SCIM delete                   | Reassignment wizard done, last EAD guard    |
 
 ```mermaid
 stateDiagram-v2
@@ -1046,15 +1109,15 @@ stateDiagram-v2
 
 States: `requested`, `active`, `paused`, `terminated`, `expired`. Terminal: `terminated`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | requested | Invitation by either party | Both orgs verified |
-| requested | active | Both accept terms | BR-EMP-018 |
-| requested | terminated | Declined or withdrawn | none |
-| active | paused | Client pauses, or either org suspended | none |
-| paused | active | Resumed | Both in good standing |
-| active, paused | terminated | Either party ends | BR-EMP-020 |
-| active, paused | expired | Expiry date passes | none |
+| From           | To         | Trigger                                | Guard                 |
+| -------------- | ---------- | -------------------------------------- | --------------------- |
+| (none)         | requested  | Invitation by either party             | Both orgs verified    |
+| requested      | active     | Both accept terms                      | BR-EMP-018            |
+| requested      | terminated | Declined or withdrawn                  | none                  |
+| active         | paused     | Client pauses, or either org suspended | none                  |
+| paused         | active     | Resumed                                | Both in good standing |
+| active, paused | terminated | Either party ends                      | BR-EMP-020            |
+| active, paused | expired    | Expiry date passes                     | none                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1075,16 +1138,16 @@ stateDiagram-v2
 
 States: `submitted`, `in_moderation`, `published`, `flagged`, `removed`, `rejected`. Terminal: `removed`, `rejected`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | submitted | Reviewer submits | BR-EMP-021 |
-| submitted | published | Automated checks pass | Low risk |
-| submitted | in_moderation | Checks flag content or velocity | none |
-| in_moderation | published | Moderator approves | none |
-| in_moderation | rejected | Moderator rejects | Reason to reviewer |
-| published | flagged | Employer or user flags | BR-EMP-025 |
-| flagged | published | Moderator keeps | none |
-| flagged | removed | Moderator removes | Guideline cited |
+| From          | To            | Trigger                         | Guard              |
+| ------------- | ------------- | ------------------------------- | ------------------ |
+| (none)        | submitted     | Reviewer submits                | BR-EMP-021         |
+| submitted     | published     | Automated checks pass           | Low risk           |
+| submitted     | in_moderation | Checks flag content or velocity | none               |
+| in_moderation | published     | Moderator approves              | none               |
+| in_moderation | rejected      | Moderator rejects               | Reason to reviewer |
+| published     | flagged       | Employer or user flags          | BR-EMP-025         |
+| flagged       | published     | Moderator keeps                 | none               |
+| flagged       | removed       | Moderator removes               | Guideline cited    |
 
 ```mermaid
 stateDiagram-v2
@@ -1104,15 +1167,15 @@ stateDiagram-v2
 
 States: `active`, `degraded`, `disabled`, `deleted`. Terminal: `deleted`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | active | Created and test passes | https, public address |
-| active | degraded | 5 consecutive failures | none |
-| degraded | active | A delivery succeeds | none |
-| degraded | disabled | 50 consecutive failures | BR-EMP-029 |
-| active, degraded | disabled | EAD disables | none |
-| disabled | active | EAD re-enables and test passes | none |
-| any | deleted | EAD deletes | none |
+| From             | To       | Trigger                        | Guard                 |
+| ---------------- | -------- | ------------------------------ | --------------------- |
+| (none)           | active   | Created and test passes        | https, public address |
+| active           | degraded | 5 consecutive failures         | none                  |
+| degraded         | active   | A delivery succeeds            | none                  |
+| degraded         | disabled | 50 consecutive failures        | BR-EMP-029            |
+| active, degraded | disabled | EAD disables                   | none                  |
+| disabled         | active   | EAD re-enables and test passes | none                  |
+| any              | deleted  | EAD deletes                    | none                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1132,13 +1195,13 @@ stateDiagram-v2
 
 States: `draft`, `offered`, `signed`, `superseded`, `terminated`. Terminal: `superseded`, `terminated`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | draft | Version authored by PAD | none |
-| draft | offered | Published to orgs | none |
-| offered | signed | EAD signs | Authority attestation |
-| signed | superseded | New version signed | none |
-| signed | terminated | Org closes or terminates | none |
+| From    | To         | Trigger                  | Guard                 |
+| ------- | ---------- | ------------------------ | --------------------- |
+| (none)  | draft      | Version authored by PAD  | none                  |
+| draft   | offered    | Published to orgs        | none                  |
+| offered | signed     | EAD signs                | Authority attestation |
+| signed  | superseded | New version signed       | none                  |
+| signed  | terminated | Org closes or terminates | none                  |
 
 ```mermaid
 stateDiagram-v2
@@ -1155,16 +1218,16 @@ stateDiagram-v2
 
 States: `submitted`, `verifying`, `granted`, `disputed`, `rejected`, `merged`. Terminal: `granted`, `rejected`, `merged`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | submitted | Org starts claim | none |
-| submitted | verifying | Domain proof submitted | none |
-| verifying | granted | Proof valid, no competing owner | BR-EMP-010 |
-| verifying | disputed | Existing owner or second claimant objects | none |
-| disputed | granted | PAD decides for claimant | Reason |
-| disputed | rejected | PAD decides against | Reason |
-| verifying, disputed | merged | Duplicate profile merged | PAD |
-| verifying | rejected | Proof invalid | none |
+| From                | To        | Trigger                                   | Guard      |
+| ------------------- | --------- | ----------------------------------------- | ---------- |
+| (none)              | submitted | Org starts claim                          | none       |
+| submitted           | verifying | Domain proof submitted                    | none       |
+| verifying           | granted   | Proof valid, no competing owner           | BR-EMP-010 |
+| verifying           | disputed  | Existing owner or second claimant objects | none       |
+| disputed            | granted   | PAD decides for claimant                  | Reason     |
+| disputed            | rejected  | PAD decides against                       | Reason     |
+| verifying, disputed | merged    | Duplicate profile merged                  | PAD        |
+| verifying           | rejected  | Proof invalid                             | none       |
 
 ```mermaid
 stateDiagram-v2
@@ -1186,14 +1249,14 @@ stateDiagram-v2
 
 States: `applied`, `appealed`, `upheld`, `reduced`, `lifted`, `expired`. Terminal: `upheld`, `reduced`, `lifted`, `expired`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | applied | PAD applies sanction | BR-EMP-035 |
-| applied | appealed | EAD appeals within 14 days | One appeal |
-| appealed | upheld | Different PAD upholds | none |
-| appealed | reduced | Different PAD reduces | none |
-| appealed, applied | lifted | Different PAD lifts or PAD resolves cause | none |
-| applied | expired | Time-boxed sanction ends | none |
+| From              | To       | Trigger                                   | Guard      |
+| ----------------- | -------- | ----------------------------------------- | ---------- |
+| (none)            | applied  | PAD applies sanction                      | BR-EMP-035 |
+| applied           | appealed | EAD appeals within 14 days                | One appeal |
+| appealed          | upheld   | Different PAD upholds                     | none       |
+| appealed          | reduced  | Different PAD reduces                     | none       |
+| appealed, applied | lifted   | Different PAD lifts or PAD resolves cause | none       |
+| applied           | expired  | Time-boxed sanction ends                  | none       |
 
 ```mermaid
 stateDiagram-v2
@@ -1212,70 +1275,71 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-EMP-001 | Employer start wizard | `/employers/start` | GUE, new owner | Sign-up and checklist | email unverified, claim suggestion |
-| SCR-EMP-002 | Verification | `/employers/verification` | EAD | Submit evidence | each SM-EMP-01 verification state |
-| SCR-EMP-003 | Company profile editor | `/employers/profile` | EAD, Brand editor | Edit | moderation hold, completeness |
-| SCR-EMP-004 | Public company page | `/companies/:slug` | All | Candidate-facing | verified, unverified, suspended |
-| SCR-EMP-005 | Careers page designer | `/employers/careers` | EAD, Brand editor | Theme and sections | domain pending, contrast fail |
-| SCR-EMP-006 | Brand content | `/employers/brand` | EAD, Brand editor | Media | consent pending |
-| SCR-EMP-007 | Embeds and feeds | `/employers/embed` | EAD | Snippets | origin list |
-| SCR-EMP-008 | Claim and dispute | `/companies/:slug/claim` | EAD | Claim | disputed |
-| SCR-EMP-009 | Team | `/employers/team` | EAD | Members | invited, suspended |
-| SCR-EMP-010 | Seats | `/employers/seats` | EAD, Billing | Assign | waitlist, grace |
-| SCR-EMP-011 | Roles | `/employers/roles` | EAD | Custom roles | diff |
-| SCR-EMP-012 | Structure | `/employers/structure` | EAD | Departments, locations | import preview |
-| SCR-EMP-013 | Approval policies | `/employers/approvals` | EAD | Rules | simulator |
-| SCR-EMP-014 | Hiring policies | `/employers/policies` | EAD | Defaults | out of bounds |
-| SCR-EMP-015 | Organisations (sub-orgs) | `/employers/organisations` | EAD | Tree | detach |
-| SCR-EMP-016 | Clients and agencies | `/employers/clients` | EAD | Relationships | paused |
-| SCR-EMP-017 | Agency workspace | `/agency` | Agency recruiter | Client contexts | read-only |
-| SCR-EMP-018 | Reviews (public) | `/companies/:slug/reviews` | All | Browse | small sample |
-| SCR-EMP-019 | Write review | `/companies/:slug/reviews/new` | CAN | Submit | in moderation |
-| SCR-EMP-020 | Reviews inbox | `/employers/reviews` | EAD, Brand editor | Respond, flag | unanswered |
-| SCR-EMP-021 | Reputation breakdown | `/employers/reputation` | EAD | Components | hidden for small sample |
-| SCR-EMP-022 | Billing and usage | `/employers/billing` | EAD, Billing | Entitlements | limit warnings |
-| SCR-EMP-023 | Legal and DPA | `/employers/legal` | EAD | Sign | unsigned banner |
-| SCR-EMP-024 | Webhooks | `/employers/webhooks` | EAD | Endpoints | degraded, disabled |
-| SCR-EMP-025 | Integrations and API keys | `/employers/integrations` | EAD | Connectors | needs reauth |
-| SCR-EMP-026 | SSO and SCIM | `/employers/security/sso` | EAD | Configure | enforced |
-| SCR-EMP-027 | Security and audit | `/employers/security` | EAD | Policies, log | anomaly |
-| SCR-EMP-028 | Notification preferences | `/settings/notifications/employer` | Members | Tune | mandatory locked |
-| SCR-EMP-029 | Insights | `/employers/insights` | EAD, Brand editor | Brand analytics | not enough data |
-| SCR-EMP-030 | Closure and export | `/employers/settings/close` | EAD owner | Export, close | cooling-off |
-| SCR-EMP-031 | Sanction notice and appeal | `/employers/notice` | EAD | Appeal | each SM-EMP-08 state |
-| SCR-EMP-032 | Platform verification queue | `/admin/employers/verification` | PAD | Review | risk sorted |
+| ID          | Name                        | Route proposal                     | Roles             | Purpose                | Key states                         |
+| ----------- | --------------------------- | ---------------------------------- | ----------------- | ---------------------- | ---------------------------------- |
+| SCR-EMP-001 | Employer start wizard       | `/employers/start`                 | GUE, new owner    | Sign-up and checklist  | email unverified, claim suggestion |
+| SCR-EMP-002 | Verification                | `/employers/verification`          | EAD               | Submit evidence        | each SM-EMP-01 verification state  |
+| SCR-EMP-003 | Company profile editor      | `/employers/profile`               | EAD, Brand editor | Edit                   | moderation hold, completeness      |
+| SCR-EMP-004 | Public company page         | `/companies/:slug`                 | All               | Candidate-facing       | verified, unverified, suspended    |
+| SCR-EMP-005 | Careers page designer       | `/employers/careers`               | EAD, Brand editor | Theme and sections     | domain pending, contrast fail      |
+| SCR-EMP-006 | Brand content               | `/employers/brand`                 | EAD, Brand editor | Media                  | consent pending                    |
+| SCR-EMP-007 | Embeds and feeds            | `/employers/embed`                 | EAD               | Snippets               | origin list                        |
+| SCR-EMP-008 | Claim and dispute           | `/companies/:slug/claim`           | EAD               | Claim                  | disputed                           |
+| SCR-EMP-009 | Team                        | `/employers/team`                  | EAD               | Members                | invited, suspended                 |
+| SCR-EMP-010 | Seats                       | `/employers/seats`                 | EAD, Billing      | Assign                 | waitlist, grace                    |
+| SCR-EMP-011 | Roles                       | `/employers/roles`                 | EAD               | Custom roles           | diff                               |
+| SCR-EMP-012 | Structure                   | `/employers/structure`             | EAD               | Departments, locations | import preview                     |
+| SCR-EMP-013 | Approval policies           | `/employers/approvals`             | EAD               | Rules                  | simulator                          |
+| SCR-EMP-014 | Hiring policies             | `/employers/policies`              | EAD               | Defaults               | out of bounds                      |
+| SCR-EMP-015 | Organisations (sub-orgs)    | `/employers/organisations`         | EAD               | Tree                   | detach                             |
+| SCR-EMP-016 | Clients and agencies        | `/employers/clients`               | EAD               | Relationships          | paused                             |
+| SCR-EMP-017 | Agency workspace            | `/agency`                          | Agency recruiter  | Client contexts        | read-only                          |
+| SCR-EMP-018 | Reviews (public)            | `/companies/:slug/reviews`         | All               | Browse                 | small sample                       |
+| SCR-EMP-019 | Write review                | `/companies/:slug/reviews/new`     | CAN               | Submit                 | in moderation                      |
+| SCR-EMP-020 | Reviews inbox               | `/employers/reviews`               | EAD, Brand editor | Respond, flag          | unanswered                         |
+| SCR-EMP-021 | Reputation breakdown        | `/employers/reputation`            | EAD               | Components             | hidden for small sample            |
+| SCR-EMP-022 | Billing and usage           | `/employers/billing`               | EAD, Billing      | Entitlements           | limit warnings                     |
+| SCR-EMP-023 | Legal and DPA               | `/employers/legal`                 | EAD               | Sign                   | unsigned banner                    |
+| SCR-EMP-024 | Webhooks                    | `/employers/webhooks`              | EAD               | Endpoints              | degraded, disabled                 |
+| SCR-EMP-025 | Integrations and API keys   | `/employers/integrations`          | EAD               | Connectors             | needs reauth                       |
+| SCR-EMP-026 | SSO and SCIM                | `/employers/security/sso`          | EAD               | Configure              | enforced                           |
+| SCR-EMP-027 | Security and audit          | `/employers/security`              | EAD               | Policies, log          | anomaly                            |
+| SCR-EMP-028 | Notification preferences    | `/settings/notifications/employer` | Members           | Tune                   | mandatory locked                   |
+| SCR-EMP-029 | Insights                    | `/employers/insights`              | EAD, Brand editor | Brand analytics        | not enough data                    |
+| SCR-EMP-030 | Closure and export          | `/employers/settings/close`        | EAD owner         | Export, close          | cooling-off                        |
+| SCR-EMP-031 | Sanction notice and appeal  | `/employers/notice`                | EAD               | Appeal                 | each SM-EMP-08 state               |
+| SCR-EMP-032 | Platform verification queue | `/admin/employers/verification`    | PAD               | Review                 | risk sorted                        |
 
 Accessibility notes: star inputs and charts have keyboard and text alternatives; the careers page designer enforces contrast and alt text; seat and permission tables use real table markup; wizard progress is announced; destructive actions need explicit confirmation. [DER]
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-EMP-01 | Organisation | org id, legal name, display name, type (employer, agency, institution), state, parent id, domain list, country | Members, jobs | Life + 7 years minimal record |
-| ENT-EMP-02 | Verification case | org, evidence refs (encrypted), checks, decision, reviewer, dates | Organisation | 12 months after decision |
-| ENT-EMP-03 | Company profile and version | slug, fields, media refs, version no., moderation state | Organisation | Life of org |
-| ENT-EMP-04 | Claim and dispute | company profile, claimant, evidence, state | Profile | 24 months |
-| ENT-EMP-05 | Membership and invitation | org, user, email, role ids, state, verification state, exception expiry | Organisation, user | Life + 7 years audit |
-| ENT-EMP-06 | Seat assignment | org, member, seat type, assigned at | Membership | Life of membership |
-| ENT-EMP-07 | Role | org, name, permissions, scope, built-in flag | Members | Life of org |
-| ENT-EMP-08 | Structure item | type (department, location, cost centre), hierarchy, codes, address, zone | Organisation | Life of org |
-| ENT-EMP-09 | Approval policy version | object type, rules, steps, version | Organisation | 7 years |
-| ENT-EMP-10 | Organisation relationship | parent, child, inheritance, sharing mode | Organisations | Life of relationship + 7 years |
-| ENT-EMP-11 | Agency relationship | agency org, client org, scope, permissions, window, state | Organisations | 7 years |
-| ENT-EMP-12 | Review (and interview experience) | company, relationship type, ratings, texts, anonymity, state, identity ref (encrypted, separate store) | Company | Public life + 24 months after removal |
-| ENT-EMP-13 | Candidate experience rating | application ref (pseudonymous), ratings, comment, visibility | Application | 24 months, aggregates indefinitely |
-| ENT-EMP-14 | Entitlement snapshot and usage | org, capability, limit, used, source version | BIL | 24 months |
-| ENT-EMP-15 | DPA acceptance | org, version, signer, time, hash, IP | Organisation | 7 years after termination |
-| ENT-EMP-16 | Webhook endpoint and delivery | url, events, secret ref, state, attempts | Organisation | Deliveries 30 days |
-| ENT-EMP-17 | Connector and API key | provider, scopes, secret ref (vault), key hash, expiry, last used | Organisation | Until revoked + 12 months log |
-| ENT-EMP-18 | SSO and SCIM configuration | protocol, metadata, group mapping, enforcement, token hash | Organisation | Life of org |
-| ENT-EMP-19 | Employer audit entry | actor, action, object, before, after, hash | Organisation | 7 years |
-| ENT-EMP-20 | Sanction and appeal | org, level, reason categories, dates, appeal, decision | Organisation | 7 years |
-| ENT-EMP-21 | Brand content item | type, media refs, consent refs, state, schedule | Organisation | Life of org |
-| ENT-EMP-22 | Careers page configuration | theme, sections, custom domain, verification state | Organisation | Life of org |
-| ENT-EMP-23 | Notification preference | member, event class, channels, frequency, delegate | Member | Life of membership |
+| ID         | Entity                            | Key attributes                                                                                                                                                                | Relationships      | Retention class                           |
+| ---------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ----------------------------------------- |
+| ENT-EMP-01 | Organisation                      | org id, legal name, display name, type (employer, agency, institution), state, parent id, domain list, country                                                                | Members, jobs      | Life + 7 years minimal record             |
+| ENT-EMP-02 | Verification case                 | org, evidence refs (encrypted), checks, decision, reviewer, dates                                                                                                             | Organisation       | 12 months after decision                  |
+| ENT-EMP-03 | Company profile and version       | slug, fields, media refs, version no., moderation state                                                                                                                       | Organisation       | Life of org                               |
+| ENT-EMP-04 | Claim and dispute                 | company profile, claimant, evidence, state                                                                                                                                    | Profile            | 24 months                                 |
+| ENT-EMP-05 | Membership and invitation         | org, user, email, role ids, state, verification state, exception expiry                                                                                                       | Organisation, user | Life + 7 years audit                      |
+| ENT-EMP-06 | Seat assignment                   | org, member, seat type, assigned at                                                                                                                                           | Membership         | Life of membership                        |
+| ENT-EMP-07 | Role                              | org, name, permissions, scope, built-in flag                                                                                                                                  | Members            | Life of org                               |
+| ENT-EMP-08 | Structure item                    | type (department, location, cost centre), hierarchy, codes, address, zone                                                                                                     | Organisation       | Life of org                               |
+| ENT-EMP-09 | Approval policy version           | object type, rules, steps, version                                                                                                                                            | Organisation       | 7 years                                   |
+| ENT-EMP-10 | Organisation relationship         | parent, child, inheritance, sharing mode                                                                                                                                      | Organisations      | Life of relationship + 7 years            |
+| ENT-EMP-11 | Agency relationship               | agency org, client org, scope, permissions, window, state                                                                                                                     | Organisations      | 7 years                                   |
+| ENT-EMP-12 | Review (and interview experience) | company, relationship type, ratings, texts, anonymity, state, identity ref (encrypted, separate store)                                                                        | Company            | Public life + 24 months after removal     |
+| ENT-EMP-13 | Candidate experience rating       | application ref (pseudonymous), ratings, comment, visibility                                                                                                                  | Application        | 24 months, aggregates indefinitely        |
+| ENT-EMP-14 | Entitlement snapshot and usage    | org, capability, limit, used, source version                                                                                                                                  | BIL                | 24 months                                 |
+| ENT-EMP-15 | DPA acceptance                    | org, version, signer, time, hash, IP                                                                                                                                          | Organisation       | 7 years after termination                 |
+| ENT-EMP-16 | Webhook endpoint and delivery     | url, events, secret ref, state, attempts                                                                                                                                      | Organisation       | Deliveries 30 days                        |
+| ENT-EMP-17 | Connector and API key             | provider, scopes, secret ref (vault), key hash, expiry, last used                                                                                                             | Organisation       | Until revoked + 12 months log             |
+| ENT-EMP-18 | SSO and SCIM configuration        | protocol, metadata, group mapping, enforcement, token hash                                                                                                                    | Organisation       | Life of org                               |
+| ENT-EMP-19 | Employer audit entry              | actor, action, object, before, after, hash                                                                                                                                    | Organisation       | 7 years                                   |
+| ENT-EMP-20 | Sanction and appeal               | org, level, reason categories, dates, appeal, decision                                                                                                                        | Organisation       | 7 years                                   |
+| ENT-EMP-21 | Brand content item                | type, media refs, consent refs, state, schedule                                                                                                                               | Organisation       | Life of org                               |
+| ENT-EMP-22 | Careers page configuration        | theme, sections, custom domain, verification state                                                                                                                            | Organisation       | Life of org                               |
+| ENT-EMP-23 | Notification preference           | member, event class, channels, frequency, delegate                                                                                                                            | Member             | Life of membership                        |
+| ENT-EMP-24 | Culture survey response           | company, relationship type (employee current, employee former, interviewee), survey version, answers by item (1 to 5), submitted at, identity ref (encrypted, separate store) | Company            | Detail 24 months; aggregates indefinitely |
 
 ```mermaid
 erDiagram
@@ -1293,113 +1357,117 @@ erDiagram
 
 ## 9. Events emitted and consumed
 
-| ID | Event | Emitted by | Consumed by |
-|---|---|---|---|
-| EVT-EMP-001 | `emp.org.created` | FR-EMP-001 | ANL (planned), ADM |
-| EVT-EMP-002 | `emp.org.verified` | FR-EMP-002 | ATS (publish gate), JOB, TSF |
-| EVT-EMP-003 | `emp.org.verification_rejected` | FR-EMP-002 | NTF |
-| EVT-EMP-004 | `emp.org.suspended` | FR-EMP-030 | ATS, JOB (listings hidden), INT |
-| EVT-EMP-005 | `emp.org.restored` | FR-EMP-030 | ATS, JOB |
-| EVT-EMP-006 | `emp.org.closed` | FR-EMP-033 | ATS, JOB, BIL |
-| EVT-EMP-007 | `emp.profile.published` | FR-EMP-004 | Search index, JOB |
-| EVT-EMP-008 | `emp.claim.granted` | FR-EMP-009 | JOB (imports) |
-| EVT-EMP-009 | `emp.member.invited` | FR-EMP-010 | NTF |
-| EVT-EMP-010 | `emp.member.added` | FR-EMP-010 | ATS, INT |
-| EVT-EMP-011 | `emp.member.removed` | FR-EMP-010, 027 | ATS (reassign), INT (calendar revoke) |
-| EVT-EMP-012 | `emp.role.changed` | FR-EMP-012 | audit |
-| EVT-EMP-013 | `emp.seat.assigned` / `.released` | FR-EMP-011 | BIL |
-| EVT-EMP-014 | `emp.policy.updated` | FR-EMP-014, 015 | ATS, INT |
-| EVT-EMP-015 | `emp.agency.activated` / `.terminated` | FR-EMP-017 | ATS |
-| EVT-EMP-016 | `emp.review.published` | FR-EMP-019 | Search index, reputation |
-| EVT-EMP-017 | `emp.review.responded` | FR-EMP-020 | NTF |
-| EVT-EMP-018 | `emp.experience.rated` | FR-EMP-021 | reputation |
-| EVT-EMP-019 | `emp.reputation.updated` | FR-EMP-022 | JOB |
-| EVT-EMP-020 | `emp.dpa.signed` | FR-EMP-024 | ATS (access gate) |
-| EVT-EMP-021 | `emp.webhook.disabled` | FR-EMP-025 | NTF |
-| EVT-EMP-022 | `emp.apikey.created` / `.revoked` | FR-EMP-026 | audit |
-| EVT-EMP-023 | `emp.sso.enforced` | FR-EMP-027 | IDN (planned) |
-| EVT-EMP-024 | `emp.lookalike.flagged` | FR-EMP-029 | TSF |
-| EVT-EMP-025 | `emp.export.requested` | FR-EMP-033 | PLT |
+| ID          | Event                                  | Emitted by      | Consumed by                           |
+| ----------- | -------------------------------------- | --------------- | ------------------------------------- |
+| EVT-EMP-001 | `emp.org.created`                      | FR-EMP-001      | ANL (planned), ADM                    |
+| EVT-EMP-002 | `emp.org.verified`                     | FR-EMP-002      | ATS (publish gate), JOB, TSF          |
+| EVT-EMP-003 | `emp.org.verification_rejected`        | FR-EMP-002      | NTF                                   |
+| EVT-EMP-004 | `emp.org.suspended`                    | FR-EMP-030      | ATS, JOB (listings hidden), INT       |
+| EVT-EMP-005 | `emp.org.restored`                     | FR-EMP-030      | ATS, JOB                              |
+| EVT-EMP-006 | `emp.org.closed`                       | FR-EMP-033      | ATS, JOB, BIL                         |
+| EVT-EMP-007 | `emp.profile.published`                | FR-EMP-004      | Search index, JOB                     |
+| EVT-EMP-008 | `emp.claim.granted`                    | FR-EMP-009      | JOB (imports)                         |
+| EVT-EMP-009 | `emp.member.invited`                   | FR-EMP-010      | NTF                                   |
+| EVT-EMP-010 | `emp.member.added`                     | FR-EMP-010      | ATS, INT                              |
+| EVT-EMP-011 | `emp.member.removed`                   | FR-EMP-010, 027 | ATS (reassign), INT (calendar revoke) |
+| EVT-EMP-012 | `emp.role.changed`                     | FR-EMP-012      | audit                                 |
+| EVT-EMP-013 | `emp.seat.assigned` / `.released`      | FR-EMP-011      | BIL                                   |
+| EVT-EMP-014 | `emp.policy.updated`                   | FR-EMP-014, 015 | ATS, INT                              |
+| EVT-EMP-015 | `emp.agency.activated` / `.terminated` | FR-EMP-017      | ATS                                   |
+| EVT-EMP-016 | `emp.review.published`                 | FR-EMP-019      | Search index, reputation              |
+| EVT-EMP-017 | `emp.review.responded`                 | FR-EMP-020      | NTF                                   |
+| EVT-EMP-018 | `emp.experience.rated`                 | FR-EMP-021      | reputation                            |
+| EVT-EMP-019 | `emp.reputation.updated`               | FR-EMP-022      | JOB                                   |
+| EVT-EMP-020 | `emp.dpa.signed`                       | FR-EMP-024      | ATS (access gate)                     |
+| EVT-EMP-021 | `emp.webhook.disabled`                 | FR-EMP-025      | NTF                                   |
+| EVT-EMP-022 | `emp.apikey.created` / `.revoked`      | FR-EMP-026      | audit                                 |
+| EVT-EMP-023 | `emp.sso.enforced`                     | FR-EMP-027      | IDN (planned)                         |
+| EVT-EMP-024 | `emp.lookalike.flagged`                | FR-EMP-029      | TSF                                   |
+| EVT-EMP-025 | `emp.export.requested`                 | FR-EMP-033      | PLT                                   |
+| EVT-EMP-026 | `emp.interview_experience.published`   | FR-EMP-034      | SRC, NTF                              |
+| EVT-EMP-027 | `emp.culture_profile.updated`          | FR-EMP-035      | NTF, SRC                              |
 
 Consumed: `ats.application.hired`, `ats.posting.published`, `ats.offer.extended` (webhook relay), `job.application.submitted` (webhook relay), `int.interview.scheduled`, `tsf.case.decided`, `bil.subscription.changed`, `evd.employment.verified`, `idn.user.deleted`.
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Use | Failure behaviour |
-|---|---|---|
-| DNS and registry lookups | Domain and company verification | Manual review path |
-| Risk and sanctions screening provider (BGV planned) | Verification | Manual review |
-| Identity provider (SAML, OIDC), SCIM client | SSO | Break-glass owner |
-| Billing service (BIL planned) | Entitlements | 24-hour cache then deny new paid actions |
-| Certificate and domain automation | Careers custom domains | Stay on default domain |
-| Job boards, HRIS, e-sign providers, external ATS | Connectors | Retries, status, tasks |
-| Media transcoding (PLT planned) | Brand videos | Retry and notice |
+| Dependency                                          | Use                             | Failure behaviour                        |
+| --------------------------------------------------- | ------------------------------- | ---------------------------------------- |
+| DNS and registry lookups                            | Domain and company verification | Manual review path                       |
+| Risk and sanctions screening provider (BGV planned) | Verification                    | Manual review                            |
+| Identity provider (SAML, OIDC), SCIM client         | SSO                             | Break-glass owner                        |
+| Billing service (BIL planned)                       | Entitlements                    | 24-hour cache then deny new paid actions |
+| Certificate and domain automation                   | Careers custom domains          | Stay on default domain                   |
+| Job boards, HRIS, e-sign providers, external ATS    | Connectors                      | Retries, status, tasks                   |
+| Media transcoding (PLT planned)                     | Brand videos                    | Retry and notice                         |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
-| IDN (planned) | Authentication, 2FA, sessions, SSO mechanics | none |
-| BIL (planned) | Subscription state, seats | BIL: seat and usage events |
-| TSF (planned) | Moderation, sanctions, lookalike cases | TSF: case inputs |
-| EVD, BGV (planned) | Employment verification for reviews, screening | none |
-| NTF (planned) | Delivery | none |
-| ADM (planned) | Admin queues, support | ADM: PAD actions |
-| PLT (planned) | Webhook infrastructure, media, API gateway | none |
-| ATS | Approval consumers, hiring policies, webhooks events | ATS: org, roles, policies, DPA gate |
-| JOB | Company follow, listing display, claim of imported listings | JOB: company data, reputation |
-| INT | Locations, calendars, retention policy | INT: org members and locations |
-| ANL (planned) | Aggregates | none |
+| Depends on         | For                                                         | Depended on by                      |
+| ------------------ | ----------------------------------------------------------- | ----------------------------------- |
+| IDN (planned)      | Authentication, 2FA, sessions, SSO mechanics                | none                                |
+| BIL (planned)      | Subscription state, seats                                   | BIL: seat and usage events          |
+| TSF (planned)      | Moderation, sanctions, lookalike cases                      | TSF: case inputs                    |
+| EVD, BGV (planned) | Employment verification for reviews, screening              | none                                |
+| NTF (planned)      | Delivery                                                    | none                                |
+| ADM (planned)      | Admin queues, support                                       | ADM: PAD actions                    |
+| PLT (planned)      | Webhook infrastructure, media, API gateway                  | none                                |
+| ATS                | Approval consumers, hiring policies, webhooks events        | ATS: org, roles, policies, DPA gate |
+| JOB                | Company follow, listing display, claim of imported listings | JOB: company data, reputation       |
+| INT                | Locations, calendars, retention policy                      | INT: org members and locations      |
+| ANL (planned)      | Aggregates                                                  | none                                |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Time to verify | Median hours from verification submission to decision | PAD |
-| Verification pass rate | Verified / submitted (first attempt) | PAD |
-| Onboarding completion | Orgs that publish a first job within 14 days / orgs created | PAD |
-| Verified share of live jobs | Live jobs of verified orgs / live jobs | PAD |
-| Access hygiene | Members inactive over 90 days / active members | EAD |
-| Seat utilization | Assigned seats / purchased seats | EAD |
-| Review moderation latency | Median hours to publish or reject | MOD |
-| Reputation coverage | Verified orgs with at least 10 ratings / verified orgs | PAD |
-| Webhook success rate | Deliveries succeeded first or after retry / deliveries | EAD |
-| DPA coverage | Orgs with a current signed DPA / orgs receiving applications | PAD |
-| Lookalike catches | Confirmed impersonations blocked before verification / total confirmed | MOD |
+| Metric                      | Definition and formula                                                 | Owner role |
+| --------------------------- | ---------------------------------------------------------------------- | ---------- |
+| Time to verify              | Median hours from verification submission to decision                  | PAD        |
+| Verification pass rate      | Verified / submitted (first attempt)                                   | PAD        |
+| Onboarding completion       | Orgs that publish a first job within 14 days / orgs created            | PAD        |
+| Verified share of live jobs | Live jobs of verified orgs / live jobs                                 | PAD        |
+| Access hygiene              | Members inactive over 90 days / active members                         | EAD        |
+| Seat utilization            | Assigned seats / purchased seats                                       | EAD        |
+| Review moderation latency   | Median hours to publish or reject                                      | MOD        |
+| Reputation coverage         | Verified orgs with at least 10 ratings / verified orgs                 | PAD        |
+| Webhook success rate        | Deliveries succeeded first or after retry / deliveries                 | EAD        |
+| DPA coverage                | Orgs with a current signed DPA / orgs receiving applications           | PAD        |
+| Lookalike catches           | Confirmed impersonations blocked before verification / total confirmed | MOD        |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-EMP-01 | Employer verification rigor (registry only, documents, paid check) and manual review SLA | Light, standard, strict | Standard: domain plus registry or documents, 2 business days target | Product owner and T&S | FR-EMP-002 |
-| OD-EMP-02 | Which roles consume paid seats (hiring managers and interviewers free or paid) | All paid; only recruiters paid | Recruiters and coordinators paid; hiring managers and interviewers free with limited permissions | Product owner (commercial) | FR-EMP-011 |
-| OD-EMP-03 | Is a signed DPA a hard gate before access to applications | Hard gate; click-through at onboarding; none | Click-through accepted at onboarding plus signed DPA for enterprise on request; hard gate only after 14 days in jurisdictions that require it | Counsel | FR-EMP-024 |
-| OD-EMP-04 | May verified employers disable the reviews tab | Never; allowed | Never for verified orgs (reviews are candidate-protection) | Product owner | FR-EMP-005, FR-EMP-019 |
-| OD-EMP-05 | May agencies post for an anonymous client | Never; allowed with verified client hidden | Never; client shown | Product owner and T&S | FR-EMP-017 |
-| OD-EMP-06 | Plan prices, seat quotas and limits | Open | Owned by BIL; EMP stores none | Product owner | FR-EMP-023 |
-| OD-EMP-07 | Scope of reviews (employees plus applicants vs applicants only) and the brush with SSOT §4.2 non-goal of a general reviews platform | Candidates only; employees included | Verified employees and applicants included, strictly employer-related | Product owner | FR-EMP-019 |
-| OD-EMP-08 | Whether staffing agencies and recruitment businesses are in scope (brushes the non-goal of generic HR and a general marketplace) | Out; limited | Limited: agency posting and submission only, no payroll or contingent workforce management | Product owner | FR-EMP-017, 018 |
-| OD-EMP-09 | Subsidiary candidate sharing defaults | Isolated; shared | Isolated | Counsel | FR-EMP-016 |
+| ID        | Question                                                                                                                                         | Options                                                                                                                            | Default proposal                                                                                                                              | Decides                         | Blocks                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------------------- |
+| OD-EMP-01 | Employer verification rigor (registry only, documents, paid check) and manual review SLA                                                         | Light, standard, strict                                                                                                            | Standard: domain plus registry or documents, 2 business days target                                                                           | Product owner and T&S           | FR-EMP-002             |
+| OD-EMP-02 | Which roles consume paid seats (hiring managers and interviewers free or paid)                                                                   | All paid; only recruiters paid                                                                                                     | Recruiters and coordinators paid; hiring managers and interviewers free with limited permissions                                              | Product owner (commercial)      | FR-EMP-011             |
+| OD-EMP-03 | Is a signed DPA a hard gate before access to applications                                                                                        | Hard gate; click-through at onboarding; none                                                                                       | Click-through accepted at onboarding plus signed DPA for enterprise on request; hard gate only after 14 days in jurisdictions that require it | Counsel                         | FR-EMP-024             |
+| OD-EMP-04 | May verified employers disable the reviews tab                                                                                                   | Never; allowed                                                                                                                     | Never for verified orgs (reviews are candidate-protection)                                                                                    | Product owner                   | FR-EMP-005, FR-EMP-019 |
+| OD-EMP-05 | May agencies post for an anonymous client                                                                                                        | Never; allowed with verified client hidden                                                                                         | Never; client shown                                                                                                                           | Product owner and T&S           | FR-EMP-017             |
+| OD-EMP-06 | Plan prices, seat quotas and limits                                                                                                              | Open                                                                                                                               | Owned by BIL; EMP stores none                                                                                                                 | Product owner                   | FR-EMP-023             |
+| OD-EMP-07 | Scope of reviews (employees plus applicants vs applicants only) and the brush with SSOT §4.2 non-goal of a general reviews platform              | Candidates only; employees included                                                                                                | Verified employees and applicants included, strictly employer-related                                                                         | Product owner                   | FR-EMP-019             |
+| OD-EMP-08 | Whether staffing agencies and recruitment businesses are in scope (brushes the non-goal of generic HR and a general marketplace)                 | Out; limited                                                                                                                       | Limited: agency posting and submission only, no payroll or contingent workforce management                                                    | Product owner                   | FR-EMP-017, 018        |
+| OD-EMP-09 | Subsidiary candidate sharing defaults                                                                                                            | Isolated; shared                                                                                                                   | Isolated                                                                                                                                      | Counsel                         | FR-EMP-016             |
+| OD-EMP-10 | May people without a platform-recorded interview submit experiences (labelled unverified), or only verified interviewees as BR-EMP-021 requires? | Verified only; verified plus labelled unverified                                                                                   | Verified only `[PROP]`                                                                                                                        | Product owner and Trust lead    | FR-EMP-034             |
+| OD-EMP-11 | Is a structured culture survey in scope, given the fairness risk of culture-fit framing and the SSOT F-127 title "Company Culture Assessment"?   | A: include as informational distributions (FR-EMP-035); B: keep only the culture category rating in reviews (FR-EMP-019); C: defer | A `[PROP]`                                                                                                                                    | Product owner and fairness lead | FR-EMP-035             |
 
 ## 14. Risks
 
-| ID | Risk | Mitigation |
-|---|---|---|
-| RSK-EMP-01 | Fake or lookalike employers harm candidates | Verification, lookalike screening, suspension, reports |
+| ID         | Risk                                                                 | Mitigation                                                                   |
+| ---------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| RSK-EMP-01 | Fake or lookalike employers harm candidates                          | Verification, lookalike screening, suspension, reports                       |
 | RSK-EMP-02 | Review manipulation (employer pressure, competitor attacks, bombing) | Relationship verification, velocity checks, moderation, anonymity protection |
-| RSK-EMP-03 | Cross-tenant data leaks via agencies or sub-orgs | Isolation tests, context-bound authorization, audits |
-| RSK-EMP-04 | Privilege escalation through custom roles or API keys | Creator-bound permissions, re-auth, key scopes |
-| RSK-EMP-05 | Webhook endpoints abused for SSRF or data leaks | URL validation, minimal payloads, signing |
-| RSK-EMP-06 | Billing and entitlement drift between EMP and BIL | Single source of truth in BIL, cached with TTL |
-| RSK-EMP-07 | Legal exposure from reviews or DPA gaps | Moderation guidelines, counsel review, DPA gate |
-| RSK-EMP-08 | SSO misconfiguration locks out an org | Test requirement, break-glass owner |
+| RSK-EMP-03 | Cross-tenant data leaks via agencies or sub-orgs                     | Isolation tests, context-bound authorization, audits                         |
+| RSK-EMP-04 | Privilege escalation through custom roles or API keys                | Creator-bound permissions, re-auth, key scopes                               |
+| RSK-EMP-05 | Webhook endpoints abused for SSRF or data leaks                      | URL validation, minimal payloads, signing                                    |
+| RSK-EMP-06 | Billing and entitlement drift between EMP and BIL                    | Single source of truth in BIL, cached with TTL                               |
+| RSK-EMP-07 | Legal exposure from reviews or DPA gaps                              | Moderation guidelines, counsel review, DPA gate                              |
+| RSK-EMP-08 | SSO misconfiguration locks out an org                                | Test requirement, break-glass owner                                          |
 
 ## 15. Legacy source trace
 
-| Legacy file | Informed | Dropped or changed |
-|---|---|---|
-| SSOT F-56 Organization and Institution Pages, F-75 Employer Insights, F-120 API and Integration Platform (FEATURE_REGISTRY) | Company pages, reviews, integrations | Institution pages belong to INS |
-| BUSINESS_RULE_REGISTRY BR-036, 062, 067, 068, 072..075, 078..080, 136..138, 180, 207, 244 | Verification, audit, termination, seats, isolation, reviews, k thresholds | Numbers re-issued as BR-EMP |
-| SSOT §10.25 Employer Insights Rules | Anonymous reviews, responses, moderation | None |
-| SSOT BR-07 billing conflict note | Entitlement ownership delegated to BIL | Open decision OD-EMP-06 |
-| Own knowledge (Greenhouse, Lever, Workday, LinkedIn Company Pages, Glassdoor, Indeed Company pages, Okta SCIM patterns) | Careers page, brand, agency model, SSO and SCIM, reputation badges, claims | Tagged [PROP] |
+| Legacy file                                                                                                                 | Informed                                                                   | Dropped or changed              |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------- |
+| SSOT F-56 Organization and Institution Pages, F-75 Employer Insights, F-120 API and Integration Platform (FEATURE_REGISTRY) | Company pages, reviews, integrations                                       | Institution pages belong to INS |
+| BUSINESS_RULE_REGISTRY BR-036, 062, 067, 068, 072..075, 078..080, 136..138, 180, 207, 244                                   | Verification, audit, termination, seats, isolation, reviews, k thresholds  | Numbers re-issued as BR-EMP     |
+| SSOT §10.25 Employer Insights Rules                                                                                         | Anonymous reviews, responses, moderation                                   | None                            |
+| SSOT BR-07 billing conflict note                                                                                            | Entitlement ownership delegated to BIL                                     | Open decision OD-EMP-06         |
+| Own knowledge (Greenhouse, Lever, Workday, LinkedIn Company Pages, Glassdoor, Indeed Company pages, Okta SCIM patterns)     | Careers page, brand, agency model, SSO and SCIM, reputation badges, claims | Tagged [PROP]                   |

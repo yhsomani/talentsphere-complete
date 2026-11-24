@@ -10,25 +10,25 @@ INT runs the interview stage of hiring from plan to feedback: it designs structu
 
 ### 1.2 Outcomes
 
-| Outcome | How the system knows |
-|---|---|
-| Interviews are booked fast without email ping-pong | Median time from invite to confirmed slot |
-| No double bookings, missed time zones or silent no-shows | Conflict count zero; no-show rate and reasons recorded |
-| Interviews are structured and comparable | Share of interviews using a plan with competency-linked questions |
-| Recording and AI use are consented and bounded | Zero recordings without a consent record |
-| Feedback is timely | Share of feedback submitted within the due window |
+| Outcome                                                  | How the system knows                                              |
+| -------------------------------------------------------- | ----------------------------------------------------------------- |
+| Interviews are booked fast without email ping-pong       | Median time from invite to confirmed slot                         |
+| No double bookings, missed time zones or silent no-shows | Conflict count zero; no-show rate and reasons recorded            |
+| Interviews are structured and comparable                 | Share of interviews using a plan with competency-linked questions |
+| Recording and AI use are consented and bounded           | Zero recordings without a consent record                          |
+| Feedback is timely                                       | Share of feedback submitted within the due window                 |
 
 ### 1.3 Boundaries
 
-| In scope (owned by INT) | Out of scope | Consumed |
-|---|---|---|
-| Interview plans, rounds, kits, question bank, interviewer qualification | Pipeline stages and scorecards (ATS: FR-ATS-011, 026, 027) | Stage entry events, scorecard templates |
-| Calendar connections, availability, free/busy, conflicts | Identity and OAuth account linking (IDN planned) | Authenticated user identity |
-| Scheduling (recruiter, self-service, panel, negotiation), reschedule, cancel, reminders, candidate hub | Notification delivery (NTF planned) | Delivery services |
-| Video rooms, controls, recording, whiteboard and code editor, live notes | Coding challenge content and sandbox (ASM planned) | Sandbox runtime |
-| AI transcript and summary | AI models (AIC planned) | Model services |
-| Async video interviews | Media storage (PLT planned) | File and media services |
-| Feedback collection tasks and debrief, no-show handling, accommodations | Candidate application and status (JOB) | Candidate responses, application context |
+| In scope (owned by INT)                                                                                | Out of scope                                               | Consumed                                 |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- | ---------------------------------------- |
+| Interview plans, rounds, kits, question bank, interviewer qualification                                | Pipeline stages and scorecards (ATS: FR-ATS-011, 026, 027) | Stage entry events, scorecard templates  |
+| Calendar connections, availability, free/busy, conflicts                                               | Identity and OAuth account linking (IDN planned)           | Authenticated user identity              |
+| Scheduling (recruiter, self-service, panel, negotiation), reschedule, cancel, reminders, candidate hub | Notification delivery (NTF planned)                        | Delivery services                        |
+| Video rooms, controls, recording, whiteboard and code editor, live notes                               | Coding challenge content and sandbox (ASM planned)         | Sandbox runtime                          |
+| AI transcript and summary                                                                              | AI models (AIC planned)                                    | Model services                           |
+| Async video interviews                                                                                 | Media storage (PLT planned)                                | File and media services                  |
+| Feedback collection tasks and debrief, no-show handling, accommodations                                | Candidate application and status (JOB)                     | Candidate responses, application context |
 
 Ownership: INT owns interview instances and artifacts; ATS owns the application stage and scorecards (INT creates scorecard requests on ATS through `API-ATS-03` (planned)). Candidate-side responses are rendered by JOB (FR-JOB-030) and execute INT commands. [DER]
 
@@ -36,33 +36,33 @@ Ownership: INT owns interview instances and artifacts; ATS owns the application 
 
 Legend: Y allowed, O own, A audited, T scoped to the hiring team, N not allowed.
 
-| Capability | REC | Coordinator | HMG | Interviewer | EAD | CAN/STD/FRL | PAD | SUP |
-|---|---|---|---|---|---|---|---|---|
-| Create plans and kits | Y | Y | Y (own jobs) | N | Y | N | N | N |
-| Manage own calendar and availability | O | O | O | O | O | N | N | N |
-| Schedule, reschedule, cancel (employer side) | T | T | T | N | Y | N | N | N |
-| Book, propose, reschedule, cancel own interview | N | N | N | N | N | O (within limits) | N | N |
-| Host and join room | Y | Y | Y | Y (assigned) | Y | O (own) | N | N |
-| Start recording | Host after consent | Host | Host | N | Host | N | N | N |
-| View recording and transcript | T | N | T | Assigned only | Y, A | N | N | N |
-| Submit feedback | Y | N | Y | Y | Y | N | N | N |
-| Manage accommodations | Y | Y | N | Needed adjustments only | Y | O (request) | N | N |
-| Interview ops dashboard | Y | Y | T | N | Y | N | N | N |
-| Delete recording early | N | N | N | N | Y, A | Request | A | N |
+| Capability                                      | REC                | Coordinator | HMG          | Interviewer             | EAD  | CAN/STD/FRL       | PAD | SUP |
+| ----------------------------------------------- | ------------------ | ----------- | ------------ | ----------------------- | ---- | ----------------- | --- | --- |
+| Create plans and kits                           | Y                  | Y           | Y (own jobs) | N                       | Y    | N                 | N   | N   |
+| Manage own calendar and availability            | O                  | O           | O            | O                       | O    | N                 | N   | N   |
+| Schedule, reschedule, cancel (employer side)    | T                  | T           | T            | N                       | Y    | N                 | N   | N   |
+| Book, propose, reschedule, cancel own interview | N                  | N           | N            | N                       | N    | O (within limits) | N   | N   |
+| Host and join room                              | Y                  | Y           | Y            | Y (assigned)            | Y    | O (own)           | N   | N   |
+| Start recording                                 | Host after consent | Host        | Host         | N                       | Host | N                 | N   | N   |
+| View recording and transcript                   | T                  | N           | T            | Assigned only           | Y, A | N                 | N   | N   |
+| Submit feedback                                 | Y                  | N           | Y            | Y                       | Y    | N                 | N   | N   |
+| Manage accommodations                           | Y                  | Y           | N            | Needed adjustments only | Y    | O (request)       | N   | N   |
+| Interview ops dashboard                         | Y                  | Y           | T            | N                       | Y    | N                 | N   | N   |
+| Delete recording early                          | N                  | N           | N            | N                       | Y, A | Request           | A   | N   |
 
 ## 3. Sub-module map
 
-| Code | Sub-module | Features |
-|---|---|---|
-| A | Plans and kits | FR-INT-001 to 003 |
-| B | Calendar and availability | FR-INT-004 to 006 |
-| C | Scheduling | FR-INT-007 to 016 |
-| D | Communications | FR-INT-017, 018 |
-| E | Video rooms | FR-INT-019 to 023 |
-| F | AI notes | FR-INT-024, 025 |
-| G | Async video interviews | FR-INT-026 to 028 |
-| H | Feedback and debrief | FR-INT-029, 030 |
-| I | Exceptions and operations | FR-INT-031 to 034 |
+| Code | Sub-module                | Features          |
+| ---- | ------------------------- | ----------------- |
+| A    | Plans and kits            | FR-INT-001 to 003 |
+| B    | Calendar and availability | FR-INT-004 to 006 |
+| C    | Scheduling                | FR-INT-007 to 016 |
+| D    | Communications            | FR-INT-017, 018   |
+| E    | Video rooms               | FR-INT-019 to 023 |
+| F    | AI notes                  | FR-INT-024, 025   |
+| G    | Async video interviews    | FR-INT-026 to 028 |
+| H    | Feedback and debrief      | FR-INT-029, 030   |
+| I    | Exceptions and operations | FR-INT-031 to 034 |
 
 ```mermaid
 flowchart LR
@@ -963,42 +963,42 @@ flowchart LR
 
 ## 5. Business rule table
 
-| ID | Rule | Rationale | Enforced where | Source |
-|---|---|---|---|---|
-| BR-INT-001 | An interview may be created only for an active, non-terminal application in a stage that has a plan round. | No orphan interviews. | Scheduling command | [DER] |
-| BR-INT-002 | Interviewers must be active employer members on the job's hiring team, hold required qualifications, and have no declared conflict with the candidate. | Quality and fairness. | Matching, scheduling | [PROP] |
-| BR-INT-003 | Offered slots must be free for all required interviewers considering buffers, notice, caps and holidays; soft holds last 24 hours. | No impossible offers. | Availability engine | [DER] |
-| BR-INT-004 | Booking is atomic and rechecks live availability; double booking of a person is impossible; the loser of a race gets fresh slots. | Reliability. | Booking transaction | [DER] |
-| BR-INT-005 | Times are stored as UTC with IANA zone and always displayed with zone label in the viewer's zone. | Avoid wrong-hour no-shows. | UI, notifications | [DER] |
-| BR-INT-006 | Candidates may self-reschedule up to 2 times with at least 24 hours notice; otherwise recruiter approval is needed. | Balance flexibility and cost. | Reschedule command | [PROP] |
-| BR-INT-007 | Late cancellations are recorded but never penalize the candidate automatically. | Fairness. | Cancel command | [PROP] |
-| BR-INT-008 | Reminders default to 24 h and 1 h for candidates and 24 h and 15 min for interviewers; email may be muted, the in-app reminder cannot. | Reduce no-shows. | Reminder service | [PROP] |
-| BR-INT-009 | Calendar access uses minimal scopes, reads busy blocks only, stores tokens encrypted and revokes on disconnect. | Privacy. | Calendar service | [DER] |
-| BR-INT-010 | Candidate calendars are never accessed; candidates receive ICS only. | Privacy. | Calendar service | [DER] |
-| BR-INT-011 | Room join tokens are one-time, bound to interview and participant; candidates wait in a lobby; the room opens 15 minutes before start. | Security. | Room service | [DER] |
-| BR-INT-012 | Recording needs dual consent (candidate consent and employer policy, with interviewer notice); all-party consent rules are honored; a visible indicator is shown; declining has no effect on evaluation. | Consent and law. | Room, recording service | [SRC: BR-169] |
-| BR-INT-013 | Recordings and derived data are encrypted at rest and retained 30 days by default, at most 90 days unless legal hold. | Data minimization. | Retention job | [SRC: BR-170] |
-| BR-INT-014 | Transcription and AI notes require a separate explicit candidate consent recorded before processing. | Consent. | AI gateway | [PROP] [SRC: BR-169] |
-| BR-INT-015 | Interview questions are org-scoped and never visible to candidates before or after the interview through the platform. | Question integrity. | API authorization | [SRC: BR-173] |
-| BR-INT-016 | Interviews follow structured plans: kit questions are linked to competencies; ad hoc questions are allowed but flagged. | Comparability. | Live notes, scorecard | [SRC: BR-176] |
-| BR-INT-017 | Kit questions and live notes are linted for unlawful topics; blocked topics cannot be saved in kits. | Non-discrimination. | Kit editor | [PROP] |
-| BR-INT-018 | Interviewer notes are private until their scorecard is submitted; feedback is due 24 hours after the interview. | Independent judgment. | Feedback service | [PROP] aligns BR-ATS-017 |
-| BR-INT-019 | A candidate no-show never rejects automatically; the recruiter decides; a first excused no-show gets a free reschedule. | Fairness. | No-show workflow | [PROP] |
-| BR-INT-020 | Transcripts are labelled machine-generated with confidence; candidates may request correction or deletion. | Honesty. | Transcript UI | [PROP] |
-| BR-INT-021 | AI summaries are advisory, cite evidence, exclude protected attributes and affect nothing automatically; no voice, face or emotion analysis; confidence below 0.5 suppressed. | Safe AI. | AI gateway | [SRC: BR-171, BR-172, BR-065, BR-066] |
-| BR-INT-022 | Async interview limits (questions, time, retakes, deadline) are disclosed before the candidate starts, and text and audio alternatives are available. | Fairness and accessibility. | Async service | [PROP] |
-| BR-INT-023 | Async timers start only on recording start; interrupted sessions resume; submission is final. | Fairness. | Async service | [PROP] |
-| BR-INT-024 | Self-scheduling links are signed, single-use per request and expire with the invitation. | Security. | Scheduling API | [DER] |
-| BR-INT-025 | Panel interviewers are selected by round-robin or least load among qualified people; matching never uses protected attributes. | Fairness. | Matching | [PROP] |
-| BR-INT-026 | Interviewer load caps apply (default 5 per week, 3 per day); exceeding requires an audited override. | Burnout and quality. | Availability engine | [PROP] |
-| BR-INT-027 | Code execution uses the assessment sandbox limits; artifacts are stored only with candidate consent. | Security and consent. | Editor service | [SRC: BR-175, BR-049, BR-050] |
-| BR-INT-028 | Interviewers who declare a relationship or conflict with a candidate are excluded from that candidate's interviews. | Integrity. | Matching | [PROP] |
-| BR-INT-029 | Scheduling automation fires only after a human stage move and is idempotent per stage entry. | Human oversight. | Automation service | [PROP] |
-| BR-INT-030 | A debrief shows others' feedback only to people who submitted their own, and records decisions with rubric rationale. | Independent judgment. | Debrief service | [PROP] |
-| BR-INT-031 | Candidate-facing interview pages show only candidate-safe information (no questions, no scorecards); location and phone details release 24 hours before; personal phone numbers are not exposed. | Safety and integrity. | Hub, logistics | [PROP] |
-| BR-INT-032 | Accommodation requests are confidential to REC and Coordinator, interviewers see only operational adjustments, and nothing is used in evaluation. | Anti-discrimination. | Accommodation service | [PROP] |
-| BR-INT-033 | When the platform room fails, a fallback (dial-in or alternate link) is offered; platform faults never count against a candidate. | Fairness. | Room telemetry, no-show | [PROP] |
-| BR-INT-034 | Interview status events and access logs are append-only. | Auditability. | Data layer | [SRC: BR-067] |
+| ID         | Rule                                                                                                                                                                                                     | Rationale                     | Enforced where          | Source                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------- | ------------------------------------- |
+| BR-INT-001 | An interview may be created only for an active, non-terminal application in a stage that has a plan round.                                                                                               | No orphan interviews.         | Scheduling command      | [DER]                                 |
+| BR-INT-002 | Interviewers must be active employer members on the job's hiring team, hold required qualifications, and have no declared conflict with the candidate.                                                   | Quality and fairness.         | Matching, scheduling    | [PROP]                                |
+| BR-INT-003 | Offered slots must be free for all required interviewers considering buffers, notice, caps and holidays; soft holds last 24 hours.                                                                       | No impossible offers.         | Availability engine     | [DER]                                 |
+| BR-INT-004 | Booking is atomic and rechecks live availability; double booking of a person is impossible; the loser of a race gets fresh slots.                                                                        | Reliability.                  | Booking transaction     | [DER]                                 |
+| BR-INT-005 | Times are stored as UTC with IANA zone and always displayed with zone label in the viewer's zone.                                                                                                        | Avoid wrong-hour no-shows.    | UI, notifications       | [DER]                                 |
+| BR-INT-006 | Candidates may self-reschedule up to 2 times with at least 24 hours notice; otherwise recruiter approval is needed.                                                                                      | Balance flexibility and cost. | Reschedule command      | [PROP]                                |
+| BR-INT-007 | Late cancellations are recorded but never penalize the candidate automatically.                                                                                                                          | Fairness.                     | Cancel command          | [PROP]                                |
+| BR-INT-008 | Reminders default to 24 h and 1 h for candidates and 24 h and 15 min for interviewers; email may be muted, the in-app reminder cannot.                                                                   | Reduce no-shows.              | Reminder service        | [PROP]                                |
+| BR-INT-009 | Calendar access uses minimal scopes, reads busy blocks only, stores tokens encrypted and revokes on disconnect.                                                                                          | Privacy.                      | Calendar service        | [DER]                                 |
+| BR-INT-010 | Candidate calendars are never accessed; candidates receive ICS only.                                                                                                                                     | Privacy.                      | Calendar service        | [DER]                                 |
+| BR-INT-011 | Room join tokens are one-time, bound to interview and participant; candidates wait in a lobby; the room opens 15 minutes before start.                                                                   | Security.                     | Room service            | [DER]                                 |
+| BR-INT-012 | Recording needs dual consent (candidate consent and employer policy, with interviewer notice); all-party consent rules are honored; a visible indicator is shown; declining has no effect on evaluation. | Consent and law.              | Room, recording service | [SRC: BR-169]                         |
+| BR-INT-013 | Recordings and derived data are encrypted at rest and retained 30 days by default, at most 90 days unless legal hold.                                                                                    | Data minimization.            | Retention job           | [SRC: BR-170]                         |
+| BR-INT-014 | Transcription and AI notes require a separate explicit candidate consent recorded before processing.                                                                                                     | Consent.                      | AI gateway              | [PROP] [SRC: BR-169]                  |
+| BR-INT-015 | Interview questions are org-scoped and never visible to candidates before or after the interview through the platform.                                                                                   | Question integrity.           | API authorization       | [SRC: BR-173]                         |
+| BR-INT-016 | Interviews follow structured plans: kit questions are linked to competencies; ad hoc questions are allowed but flagged.                                                                                  | Comparability.                | Live notes, scorecard   | [SRC: BR-176]                         |
+| BR-INT-017 | Kit questions and live notes are linted for unlawful topics; blocked topics cannot be saved in kits.                                                                                                     | Non-discrimination.           | Kit editor              | [PROP]                                |
+| BR-INT-018 | Interviewer notes are private until their scorecard is submitted; feedback is due 24 hours after the interview.                                                                                          | Independent judgment.         | Feedback service        | [PROP] aligns BR-ATS-017              |
+| BR-INT-019 | A candidate no-show never rejects automatically; the recruiter decides; a first excused no-show gets a free reschedule.                                                                                  | Fairness.                     | No-show workflow        | [PROP]                                |
+| BR-INT-020 | Transcripts are labelled machine-generated with confidence; candidates may request correction or deletion.                                                                                               | Honesty.                      | Transcript UI           | [PROP]                                |
+| BR-INT-021 | AI summaries are advisory, cite evidence, exclude protected attributes and affect nothing automatically; no voice, face or emotion analysis; confidence below 0.5 suppressed.                            | Safe AI.                      | AI gateway              | [SRC: BR-171, BR-172, BR-065, BR-066] |
+| BR-INT-022 | Async interview limits (questions, time, retakes, deadline) are disclosed before the candidate starts, and text and audio alternatives are available.                                                    | Fairness and accessibility.   | Async service           | [PROP]                                |
+| BR-INT-023 | Async timers start only on recording start; interrupted sessions resume; submission is final.                                                                                                            | Fairness.                     | Async service           | [PROP]                                |
+| BR-INT-024 | Self-scheduling links are signed, single-use per request and expire with the invitation.                                                                                                                 | Security.                     | Scheduling API          | [DER]                                 |
+| BR-INT-025 | Panel interviewers are selected by round-robin or least load among qualified people; matching never uses protected attributes.                                                                           | Fairness.                     | Matching                | [PROP]                                |
+| BR-INT-026 | Interviewer load caps apply (default 5 per week, 3 per day); exceeding requires an audited override.                                                                                                     | Burnout and quality.          | Availability engine     | [PROP]                                |
+| BR-INT-027 | Code execution uses the assessment sandbox limits; artifacts are stored only with candidate consent.                                                                                                     | Security and consent.         | Editor service          | [SRC: BR-175, BR-049, BR-050]         |
+| BR-INT-028 | Interviewers who declare a relationship or conflict with a candidate are excluded from that candidate's interviews.                                                                                      | Integrity.                    | Matching                | [PROP]                                |
+| BR-INT-029 | Scheduling automation fires only after a human stage move and is idempotent per stage entry.                                                                                                             | Human oversight.              | Automation service      | [PROP]                                |
+| BR-INT-030 | A debrief shows others' feedback only to people who submitted their own, and records decisions with rubric rationale.                                                                                    | Independent judgment.         | Debrief service         | [PROP]                                |
+| BR-INT-031 | Candidate-facing interview pages show only candidate-safe information (no questions, no scorecards); location and phone details release 24 hours before; personal phone numbers are not exposed.         | Safety and integrity.         | Hub, logistics          | [PROP]                                |
+| BR-INT-032 | Accommodation requests are confidential to REC and Coordinator, interviewers see only operational adjustments, and nothing is used in evaluation.                                                        | Anti-discrimination.          | Accommodation service   | [PROP]                                |
+| BR-INT-033 | When the platform room fails, a fallback (dial-in or alternate link) is offered; platform faults never count against a candidate.                                                                        | Fairness.                     | Room telemetry, no-show | [PROP]                                |
+| BR-INT-034 | Interview status events and access logs are append-only.                                                                                                                                                 | Auditability.                 | Data layer              | [SRC: BR-067]                         |
 
 ## 6. State machines
 
@@ -1006,21 +1006,21 @@ flowchart LR
 
 States: `requested`, `awaiting_candidate`, `scheduled`, `reschedule_pending`, `in_progress`, `completed`, `cancelled`, `no_show_candidate`, `no_show_interviewer`. Terminal: `completed`, `cancelled`, `no_show_candidate`, `no_show_interviewer`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | requested | Created | BR-INT-001 |
-| requested | awaiting_candidate | Invite or slots sent | Slots held |
-| requested | scheduled | Direct booking with candidate confirmation | Flag set |
-| awaiting_candidate | scheduled | Candidate books | BR-INT-004 |
-| awaiting_candidate | cancelled | Invite expired without action and recruiter closes, or cancelled | none |
-| scheduled | reschedule_pending | Reschedule requested | BR-INT-006 |
-| reschedule_pending | scheduled | New slot booked | BR-INT-004 |
-| scheduled | in_progress | Room live or session start | Participants present |
-| in_progress | completed | Host ends or session closes | Duration met or host confirms |
-| scheduled | cancelled | Cancel | Reason |
-| scheduled | no_show_candidate | Candidate absent past wait time | BR-INT-019 |
-| scheduled | no_show_interviewer | Required interviewers absent past wait time | none |
-| no_show_candidate | scheduled (new interview record linked) | Free reschedule | Policy |
+| From               | To                                      | Trigger                                                          | Guard                         |
+| ------------------ | --------------------------------------- | ---------------------------------------------------------------- | ----------------------------- |
+| (none)             | requested                               | Created                                                          | BR-INT-001                    |
+| requested          | awaiting_candidate                      | Invite or slots sent                                             | Slots held                    |
+| requested          | scheduled                               | Direct booking with candidate confirmation                       | Flag set                      |
+| awaiting_candidate | scheduled                               | Candidate books                                                  | BR-INT-004                    |
+| awaiting_candidate | cancelled                               | Invite expired without action and recruiter closes, or cancelled | none                          |
+| scheduled          | reschedule_pending                      | Reschedule requested                                             | BR-INT-006                    |
+| reschedule_pending | scheduled                               | New slot booked                                                  | BR-INT-004                    |
+| scheduled          | in_progress                             | Room live or session start                                       | Participants present          |
+| in_progress        | completed                               | Host ends or session closes                                      | Duration met or host confirms |
+| scheduled          | cancelled                               | Cancel                                                           | Reason                        |
+| scheduled          | no_show_candidate                       | Candidate absent past wait time                                  | BR-INT-019                    |
+| scheduled          | no_show_interviewer                     | Required interviewers absent past wait time                      | none                          |
+| no_show_candidate  | scheduled (new interview record linked) | Free reschedule                                                  | Policy                        |
 
 ```mermaid
 stateDiagram-v2
@@ -1046,16 +1046,16 @@ stateDiagram-v2
 
 States: `issued`, `viewed`, `booked`, `negotiating`, `expired`, `revoked`. Terminal: `booked`, `expired`, `revoked`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | issued | Invite created | Slots or link |
-| issued | viewed | Candidate opens | none |
-| issued, viewed | booked | Slot confirmed | BR-INT-004 |
-| issued, viewed | negotiating | None of these work | Round limit |
-| negotiating | issued | New slots offered | none |
-| negotiating | booked | Matching window booked | none |
-| issued, viewed, negotiating | expired | Expiry reached | BR-INT-024 |
-| issued, viewed, negotiating | revoked | Recruiter revokes or interview cancelled | none |
+| From                        | To          | Trigger                                  | Guard         |
+| --------------------------- | ----------- | ---------------------------------------- | ------------- |
+| (none)                      | issued      | Invite created                           | Slots or link |
+| issued                      | viewed      | Candidate opens                          | none          |
+| issued, viewed              | booked      | Slot confirmed                           | BR-INT-004    |
+| issued, viewed              | negotiating | None of these work                       | Round limit   |
+| negotiating                 | issued      | New slots offered                        | none          |
+| negotiating                 | booked      | Matching window booked                   | none          |
+| issued, viewed, negotiating | expired     | Expiry reached                           | BR-INT-024    |
+| issued, viewed, negotiating | revoked     | Recruiter revokes or interview cancelled | none          |
 
 ```mermaid
 stateDiagram-v2
@@ -1082,15 +1082,15 @@ stateDiagram-v2
 
 States: `created`, `open`, `live`, `ended`, `closed`, `failed`. Terminal: `closed`, `failed`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | created | Interview scheduled | none |
-| created | open | 15 minutes before start | BR-INT-011 |
-| open | live | Host and candidate present | none |
-| live | ended | Host ends or all leave | none |
-| open, live | failed | Media service failure beyond recovery | Fallback offered |
-| ended | closed | Cleanup 30 minutes after scheduled end | Artifacts finalized |
-| open | closed | Never started and window passed | none |
+| From       | To      | Trigger                                | Guard               |
+| ---------- | ------- | -------------------------------------- | ------------------- |
+| (none)     | created | Interview scheduled                    | none                |
+| created    | open    | 15 minutes before start                | BR-INT-011          |
+| open       | live    | Host and candidate present             | none                |
+| live       | ended   | Host ends or all leave                 | none                |
+| open, live | failed  | Media service failure beyond recovery  | Fallback offered    |
+| ended      | closed  | Cleanup 30 minutes after scheduled end | Artifacts finalized |
+| open       | closed  | Never started and window passed        | none                |
 
 ```mermaid
 stateDiagram-v2
@@ -1110,16 +1110,16 @@ stateDiagram-v2
 
 States: `pending_consent`, `ready_to_record`, `recording`, `processing`, `available`, `expired`, `deleted`, `blocked`. Terminal: `expired`, `deleted`, `blocked`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | pending_consent | Interview with recording policy | none |
-| pending_consent | ready_to_record | Consent and policy satisfied | BR-INT-012 |
-| pending_consent | blocked | Candidate declines or all-party consent fails | none |
-| ready_to_record | recording | Host starts | Banner shown |
-| recording | processing | Stop or room end | none |
-| processing | available | Encoded and encrypted | none |
-| available | expired | Retention reached | BR-INT-013 |
-| available | deleted | Early deletion or candidate request | Authorized |
+| From            | To              | Trigger                                       | Guard        |
+| --------------- | --------------- | --------------------------------------------- | ------------ |
+| (none)          | pending_consent | Interview with recording policy               | none         |
+| pending_consent | ready_to_record | Consent and policy satisfied                  | BR-INT-012   |
+| pending_consent | blocked         | Candidate declines or all-party consent fails | none         |
+| ready_to_record | recording       | Host starts                                   | Banner shown |
+| recording       | processing      | Stop or room end                              | none         |
+| processing      | available       | Encoded and encrypted                         | none         |
+| available       | expired         | Retention reached                             | BR-INT-013   |
+| available       | deleted         | Early deletion or candidate request           | Authorized   |
 
 ```mermaid
 stateDiagram-v2
@@ -1140,14 +1140,14 @@ stateDiagram-v2
 
 States: `invited`, `started`, `submitted`, `reviewed`, `expired`, `declined`. Terminal: `reviewed`, `expired`, `declined`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | invited | Invite sent | none |
-| invited | started | First answer recorded | Consent allowed |
-| invited | declined | Candidate declines consent | none |
-| started | submitted | Candidate submits | All answered |
-| submitted | reviewed | Required reviews complete | BR-INT-022 |
-| invited, started | expired | Deadline passed | Extension not granted |
+| From             | To        | Trigger                    | Guard                 |
+| ---------------- | --------- | -------------------------- | --------------------- |
+| (none)           | invited   | Invite sent                | none                  |
+| invited          | started   | First answer recorded      | Consent allowed       |
+| invited          | declined  | Candidate declines consent | none                  |
+| started          | submitted | Candidate submits          | All answered          |
+| submitted        | reviewed  | Required reviews complete  | BR-INT-022            |
+| invited, started | expired   | Deadline passed            | Extension not granted |
 
 ```mermaid
 stateDiagram-v2
@@ -1167,13 +1167,13 @@ stateDiagram-v2
 
 States: `requested`, `submitted`, `overdue`, `escalated`, `waived`. Terminal: `submitted`, `waived`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | requested | Interview completed | Non-observer |
-| requested | overdue | 24 h passed | BR-INT-018 |
-| overdue | escalated | 3 business days | none |
-| requested, overdue, escalated | submitted | Scorecard submitted | none |
-| requested, overdue, escalated | waived | No-show, cancelled, or waived by REC | Reason |
+| From                          | To        | Trigger                              | Guard        |
+| ----------------------------- | --------- | ------------------------------------ | ------------ |
+| (none)                        | requested | Interview completed                  | Non-observer |
+| requested                     | overdue   | 24 h passed                          | BR-INT-018   |
+| overdue                       | escalated | 3 business days                      | none         |
+| requested, overdue, escalated | submitted | Scorecard submitted                  | none         |
+| requested, overdue, escalated | waived    | No-show, cancelled, or waived by REC | Reason       |
 
 ```mermaid
 stateDiagram-v2
@@ -1194,15 +1194,15 @@ stateDiagram-v2
 
 States: `requested`, `under_review`, `approved`, `alternative_offered`, `declined`, `fulfilled`. Terminal: `fulfilled`, `declined`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | requested | Candidate submits | none |
-| requested | under_review | REC opens | none |
-| under_review | approved | Confirmed | none |
-| under_review | alternative_offered | Alternative proposed | none |
-| alternative_offered | approved | Candidate accepts | none |
-| alternative_offered | declined | Candidate declines alternative and cannot be met | Reschedule offered |
-| approved | fulfilled | Adjustment in place before interview | Checklist complete |
+| From                | To                  | Trigger                                          | Guard              |
+| ------------------- | ------------------- | ------------------------------------------------ | ------------------ |
+| (none)              | requested           | Candidate submits                                | none               |
+| requested           | under_review        | REC opens                                        | none               |
+| under_review        | approved            | Confirmed                                        | none               |
+| under_review        | alternative_offered | Alternative proposed                             | none               |
+| alternative_offered | approved            | Candidate accepts                                | none               |
+| alternative_offered | declined            | Candidate declines alternative and cannot be met | Reschedule offered |
+| approved            | fulfilled           | Adjustment in place before interview             | Checklist complete |
 
 ```mermaid
 stateDiagram-v2
@@ -1221,15 +1221,15 @@ stateDiagram-v2
 
 States: `connected`, `needs_reauth`, `revoked`, `error`, `disconnected`. Terminal: `disconnected`.
 
-| From | To | Trigger | Guard |
-|---|---|---|---|
-| (none) | connected | OAuth granted | Scopes minimal |
-| connected | needs_reauth | Token expired or refresh failed | none |
-| needs_reauth | connected | User re-authorizes | none |
-| connected | revoked | Provider reports revocation | none |
-| connected | error | Repeated sync failures | none |
-| error | connected | Sync recovers | none |
-| any non-terminal | disconnected | User disconnects | Tokens revoked |
+| From             | To           | Trigger                         | Guard          |
+| ---------------- | ------------ | ------------------------------- | -------------- |
+| (none)           | connected    | OAuth granted                   | Scopes minimal |
+| connected        | needs_reauth | Token expired or refresh failed | none           |
+| needs_reauth     | connected    | User re-authorizes              | none           |
+| connected        | revoked      | Provider reports revocation     | none           |
+| connected        | error        | Repeated sync failures          | none           |
+| error            | connected    | Sync recovers                   | none           |
+| any non-terminal | disconnected | User disconnects                | Tokens revoked |
 
 ```mermaid
 stateDiagram-v2
@@ -1248,58 +1248,58 @@ stateDiagram-v2
 
 ## 7. Screen inventory
 
-| ID | Name | Route proposal | Roles | Purpose | Key states |
-|---|---|---|---|---|---|
-| SCR-INT-001 | Interview plans | `/interviews/plans` | REC, HMG, EAD | Plans and rounds | versions, in use |
-| SCR-INT-002 | Kits and question bank | `/interviews/kits` | REC, HMG, EAD | Questions | lint blocked |
-| SCR-INT-003 | Interviewer pool | `/interviews/interviewers` | EAD, REC | Qualifications and load | paused |
-| SCR-INT-004 | Calendar settings | `/settings/calendar` | Employer members | Connect and availability | connected, needs reauth |
-| SCR-INT-005 | Scheduler panel | modal on application | REC, Coordinator | Offer, book | no common slots |
-| SCR-INT-006 | Self-schedule page | `/schedule/:token` | Candidate (signed link) | Pick slot | expired, taken, booked |
-| SCR-INT-007 | Negotiation inbox | `/interviews/negotiations` | REC, Coordinator | Proposals | open |
-| SCR-INT-008 | Candidate interview hub | `/interviews/:id/hub` | Candidate | Prepare and join | pre-open, open, cancelled |
-| SCR-INT-009 | Pre-join and lobby | `/room/:id/join` | Participants | Devices, lobby | permission denied |
-| SCR-INT-010 | Live room | `/room/:id` | Participants | Video, chat, tools | live, reconnecting |
-| SCR-INT-011 | Room live notes panel | in room | Interviewers | Notes, markers | offline buffer |
-| SCR-INT-012 | Code and whiteboard | in room | Participants | Collaboration | sandbox down |
-| SCR-INT-013 | Interview record | `/interviews/:id` | Hiring team | Details, recording, transcript | each SM-INT-01 state |
-| SCR-INT-014 | Async setup | `/interviews/async/:id` | REC, HMG | Define | preview |
-| SCR-INT-015 | Async candidate flow | `/async/:token` | Candidate | Answer | resume, expired |
-| SCR-INT-016 | Async review queue | `/interviews/async/review` | Reviewers | Rate | empty |
-| SCR-INT-017 | Feedback tasks | `/interviews/feedback` | Interviewers | Submit feedback | overdue |
-| SCR-INT-018 | Debrief | `/interviews/:id/debrief` | Hiring team | Decide | missing feedback |
-| SCR-INT-019 | Accommodation queue | `/interviews/accommodations` | REC, Coordinator | Fulfil | urgent |
-| SCR-INT-020 | Operations dashboard | `/interviews` | Coordinator, REC, EAD | Overview | risks |
-| SCR-INT-021 | Retention and access log | `/interviews/:id/media` | Hiring team, EAD | Media controls | hold, expiring |
+| ID          | Name                     | Route proposal               | Roles                   | Purpose                        | Key states                |
+| ----------- | ------------------------ | ---------------------------- | ----------------------- | ------------------------------ | ------------------------- |
+| SCR-INT-001 | Interview plans          | `/interviews/plans`          | REC, HMG, EAD           | Plans and rounds               | versions, in use          |
+| SCR-INT-002 | Kits and question bank   | `/interviews/kits`           | REC, HMG, EAD           | Questions                      | lint blocked              |
+| SCR-INT-003 | Interviewer pool         | `/interviews/interviewers`   | EAD, REC                | Qualifications and load        | paused                    |
+| SCR-INT-004 | Calendar settings        | `/settings/calendar`         | Employer members        | Connect and availability       | connected, needs reauth   |
+| SCR-INT-005 | Scheduler panel          | modal on application         | REC, Coordinator        | Offer, book                    | no common slots           |
+| SCR-INT-006 | Self-schedule page       | `/schedule/:token`           | Candidate (signed link) | Pick slot                      | expired, taken, booked    |
+| SCR-INT-007 | Negotiation inbox        | `/interviews/negotiations`   | REC, Coordinator        | Proposals                      | open                      |
+| SCR-INT-008 | Candidate interview hub  | `/interviews/:id/hub`        | Candidate               | Prepare and join               | pre-open, open, cancelled |
+| SCR-INT-009 | Pre-join and lobby       | `/room/:id/join`             | Participants            | Devices, lobby                 | permission denied         |
+| SCR-INT-010 | Live room                | `/room/:id`                  | Participants            | Video, chat, tools             | live, reconnecting        |
+| SCR-INT-011 | Room live notes panel    | in room                      | Interviewers            | Notes, markers                 | offline buffer            |
+| SCR-INT-012 | Code and whiteboard      | in room                      | Participants            | Collaboration                  | sandbox down              |
+| SCR-INT-013 | Interview record         | `/interviews/:id`            | Hiring team             | Details, recording, transcript | each SM-INT-01 state      |
+| SCR-INT-014 | Async setup              | `/interviews/async/:id`      | REC, HMG                | Define                         | preview                   |
+| SCR-INT-015 | Async candidate flow     | `/async/:token`              | Candidate               | Answer                         | resume, expired           |
+| SCR-INT-016 | Async review queue       | `/interviews/async/review`   | Reviewers               | Rate                           | empty                     |
+| SCR-INT-017 | Feedback tasks           | `/interviews/feedback`       | Interviewers            | Submit feedback                | overdue                   |
+| SCR-INT-018 | Debrief                  | `/interviews/:id/debrief`    | Hiring team             | Decide                         | missing feedback          |
+| SCR-INT-019 | Accommodation queue      | `/interviews/accommodations` | REC, Coordinator        | Fulfil                         | urgent                    |
+| SCR-INT-020 | Operations dashboard     | `/interviews`                | Coordinator, REC, EAD   | Overview                       | risks                     |
+| SCR-INT-021 | Retention and access log | `/interviews/:id/media`      | Hiring team, EAD        | Media controls                 | hold, expiring            |
 
 Accessibility notes: the live room provides captions, keyboard control of every function, screen-reader labelled controls, high contrast mode, and no time-limited prompts that cannot be extended; slot pickers are accessible lists; timer rings carry text; all consent screens are plain language. [DER]
 
 ## 8. Data entities owned
 
-| ID | Entity | Key attributes | Relationships | Retention class |
-|---|---|---|---|---|
-| ENT-INT-01 | Interview plan | plan id, job or family, version | Rounds | Life of job + 24 months |
-| ENT-INT-02 | Plan round | order, type, duration, roles, kit, scorecard template, buffers | Plan | With plan |
-| ENT-INT-03 | Interview kit | kit id, questions order, version | Questions | With org |
-| ENT-INT-04 | Question | text, competency, signals, tags, status | Kit | With org |
-| ENT-INT-05 | Interviewer profile | member id, qualifications, load caps, conflicts | EMP member | While member |
-| ENT-INT-06 | Calendar connection | provider, calendars, encrypted token ref, state | Member | Until disconnected |
-| ENT-INT-07 | Availability rule | hours, overrides, buffers, caps, zone | Member | While member |
-| ENT-INT-08 | Interview | id, application id, round, state, start, end, version, mode | Application, plan | Per ATS retention |
-| ENT-INT-09 | Interview participant | interview, member or candidate, role, attendance | Interview | With interview |
-| ENT-INT-10 | Scheduling invitation | token hash, slots, expiry, state, negotiation rounds | Interview | 90 days after expiry |
-| ENT-INT-11 | Reminder | interview, recipient, offset, status | Interview | 90 days |
-| ENT-INT-12 | Room session | room id, window, join log | Interview | 12 months metadata |
-| ENT-INT-13 | Consent record | subject, type (recording, transcript, artifact), text version, decision, time | Interview | Life of artifacts + 24 months |
-| ENT-INT-14 | Recording | storage ref (encrypted), duration, state, retention date | Interview | 30 to 90 days |
-| ENT-INT-15 | Transcript and AI summary | segments, confidence, model version, summary | Recording | Same as recording |
-| ENT-INT-16 | Live note and marker | author, question id, text, timestamp | Interview | Per ATS retention |
-| ENT-INT-17 | Async template | questions, limits, version | Plan round | With plan |
-| ENT-INT-18 | Async response and review | media refs, state, reviewer ratings | Async invitation | Same as recording |
-| ENT-INT-19 | Feedback request | interview, assignee, due, state | Scorecard (ATS) | 12 months |
-| ENT-INT-20 | No-show record | interview, party, reason, decision | Interview | Per ATS retention |
-| ENT-INT-21 | Accommodation request | needs, operational adjustments, state | Interview | Interview + 30 days |
-| ENT-INT-22 | Collaboration artifact | code and whiteboard snapshots, consent ref | Interview | With recording |
+| ID         | Entity                    | Key attributes                                                                | Relationships     | Retention class               |
+| ---------- | ------------------------- | ----------------------------------------------------------------------------- | ----------------- | ----------------------------- |
+| ENT-INT-01 | Interview plan            | plan id, job or family, version                                               | Rounds            | Life of job + 24 months       |
+| ENT-INT-02 | Plan round                | order, type, duration, roles, kit, scorecard template, buffers                | Plan              | With plan                     |
+| ENT-INT-03 | Interview kit             | kit id, questions order, version                                              | Questions         | With org                      |
+| ENT-INT-04 | Question                  | text, competency, signals, tags, status                                       | Kit               | With org                      |
+| ENT-INT-05 | Interviewer profile       | member id, qualifications, load caps, conflicts                               | EMP member        | While member                  |
+| ENT-INT-06 | Calendar connection       | provider, calendars, encrypted token ref, state                               | Member            | Until disconnected            |
+| ENT-INT-07 | Availability rule         | hours, overrides, buffers, caps, zone                                         | Member            | While member                  |
+| ENT-INT-08 | Interview                 | id, application id, round, state, start, end, version, mode                   | Application, plan | Per ATS retention             |
+| ENT-INT-09 | Interview participant     | interview, member or candidate, role, attendance                              | Interview         | With interview                |
+| ENT-INT-10 | Scheduling invitation     | token hash, slots, expiry, state, negotiation rounds                          | Interview         | 90 days after expiry          |
+| ENT-INT-11 | Reminder                  | interview, recipient, offset, status                                          | Interview         | 90 days                       |
+| ENT-INT-12 | Room session              | room id, window, join log                                                     | Interview         | 12 months metadata            |
+| ENT-INT-13 | Consent record            | subject, type (recording, transcript, artifact), text version, decision, time | Interview         | Life of artifacts + 24 months |
+| ENT-INT-14 | Recording                 | storage ref (encrypted), duration, state, retention date                      | Interview         | 30 to 90 days                 |
+| ENT-INT-15 | Transcript and AI summary | segments, confidence, model version, summary                                  | Recording         | Same as recording             |
+| ENT-INT-16 | Live note and marker      | author, question id, text, timestamp                                          | Interview         | Per ATS retention             |
+| ENT-INT-17 | Async template            | questions, limits, version                                                    | Plan round        | With plan                     |
+| ENT-INT-18 | Async response and review | media refs, state, reviewer ratings                                           | Async invitation  | Same as recording             |
+| ENT-INT-19 | Feedback request          | interview, assignee, due, state                                               | Scorecard (ATS)   | 12 months                     |
+| ENT-INT-20 | No-show record            | interview, party, reason, decision                                            | Interview         | Per ATS retention             |
+| ENT-INT-21 | Accommodation request     | needs, operational adjustments, state                                         | Interview         | Interview + 30 days           |
+| ENT-INT-22 | Collaboration artifact    | code and whiteboard snapshots, consent ref                                    | Interview         | With recording                |
 
 ```mermaid
 erDiagram
@@ -1318,103 +1318,103 @@ erDiagram
 
 ## 9. Events emitted and consumed
 
-| ID | Event | Emitted by | Consumed by |
-|---|---|---|---|
-| EVT-INT-001 | `int.invite.issued` | FR-INT-007 | JOB (invite card), NTF (planned) |
-| EVT-INT-002 | `int.interview.scheduled` | FR-INT-008 | ATS, JOB, NTF, calendar sync |
-| EVT-INT-003 | `int.interview.rescheduled` | FR-INT-012 | ATS, JOB, NTF |
-| EVT-INT-004 | `int.interview.cancelled` | FR-INT-013 | ATS, JOB, NTF |
-| EVT-INT-005 | `int.interview.started` | FR-INT-019 | ANL (planned) |
-| EVT-INT-006 | `int.interview.completed` | FR-INT-019 | ATS (scorecard requests), ANL |
-| EVT-INT-007 | `int.interview.no_show` | FR-INT-031 | ATS, NTF, ANL |
-| EVT-INT-008 | `int.negotiation.received` | FR-INT-009 | NTF |
-| EVT-INT-009 | `int.reminder.sent` | FR-INT-017 | ANL |
-| EVT-INT-010 | `int.consent.recorded` | FR-INT-021, 024 | SET (planned), audit |
-| EVT-INT-011 | `int.recording.available` | FR-INT-021 | NTF |
-| EVT-INT-012 | `int.recording.deleted` | FR-INT-033 | audit, SET |
-| EVT-INT-013 | `int.transcript.ready` | FR-INT-024 | NTF |
-| EVT-INT-014 | `int.async.invited` | FR-INT-026 | NTF |
-| EVT-INT-015 | `int.async.submitted` | FR-INT-027 | ATS, NTF |
-| EVT-INT-016 | `int.feedback.requested` | FR-INT-029 | ATS, NTF |
-| EVT-INT-017 | `int.feedback.overdue` | FR-INT-029 | ATS (SLA), NTF |
-| EVT-INT-018 | `int.debrief.decided` | FR-INT-030 | ATS |
-| EVT-INT-019 | `int.accommodation.requested` | FR-INT-032 | NTF |
-| EVT-INT-020 | `int.accommodation.decided` | FR-INT-032 | NTF |
-| EVT-INT-021 | `int.calendar.needs_reauth` | FR-INT-004 | NTF |
-| EVT-INT-022 | `int.room.failed` | FR-INT-019 | ops alerting, ADM (planned) |
+| ID          | Event                         | Emitted by      | Consumed by                      |
+| ----------- | ----------------------------- | --------------- | -------------------------------- |
+| EVT-INT-001 | `int.invite.issued`           | FR-INT-007      | JOB (invite card), NTF (planned) |
+| EVT-INT-002 | `int.interview.scheduled`     | FR-INT-008      | ATS, JOB, NTF, calendar sync     |
+| EVT-INT-003 | `int.interview.rescheduled`   | FR-INT-012      | ATS, JOB, NTF                    |
+| EVT-INT-004 | `int.interview.cancelled`     | FR-INT-013      | ATS, JOB, NTF                    |
+| EVT-INT-005 | `int.interview.started`       | FR-INT-019      | ANL (planned)                    |
+| EVT-INT-006 | `int.interview.completed`     | FR-INT-019      | ATS (scorecard requests), ANL    |
+| EVT-INT-007 | `int.interview.no_show`       | FR-INT-031      | ATS, NTF, ANL                    |
+| EVT-INT-008 | `int.negotiation.received`    | FR-INT-009      | NTF                              |
+| EVT-INT-009 | `int.reminder.sent`           | FR-INT-017      | ANL                              |
+| EVT-INT-010 | `int.consent.recorded`        | FR-INT-021, 024 | SET (planned), audit             |
+| EVT-INT-011 | `int.recording.available`     | FR-INT-021      | NTF                              |
+| EVT-INT-012 | `int.recording.deleted`       | FR-INT-033      | audit, SET                       |
+| EVT-INT-013 | `int.transcript.ready`        | FR-INT-024      | NTF                              |
+| EVT-INT-014 | `int.async.invited`           | FR-INT-026      | NTF                              |
+| EVT-INT-015 | `int.async.submitted`         | FR-INT-027      | ATS, NTF                         |
+| EVT-INT-016 | `int.feedback.requested`      | FR-INT-029      | ATS, NTF                         |
+| EVT-INT-017 | `int.feedback.overdue`        | FR-INT-029      | ATS (SLA), NTF                   |
+| EVT-INT-018 | `int.debrief.decided`         | FR-INT-030      | ATS                              |
+| EVT-INT-019 | `int.accommodation.requested` | FR-INT-032      | NTF                              |
+| EVT-INT-020 | `int.accommodation.decided`   | FR-INT-032      | NTF                              |
+| EVT-INT-021 | `int.calendar.needs_reauth`   | FR-INT-004      | NTF                              |
+| EVT-INT-022 | `int.room.failed`             | FR-INT-019      | ops alerting, ADM (planned)      |
 
 Consumed: `ats.application.stage_changed`, `job.application.withdrawn`, `job.interview_invite.responded`, `ats.scorecard.submitted`, `emp.member.removed`, `ats.data.purged`.
 
 ## 10. Integrations and external dependencies
 
-| Dependency | Use | Failure behaviour |
-|---|---|---|
-| Google Calendar API, Microsoft Graph | Free/busy, events | Mark interviewer calendar unavailable; ICS email fallback |
-| WebRTC media service with TURN | Video rooms | Fallback dial-in or alternate link |
-| Speech-to-text service (AIC planned) | Transcripts | Interview continues without |
-| Code sandbox (ASM planned) | Live coding | Run disabled, edit continues |
-| Media storage and encoder (PLT planned) | Recordings, async | Retry; partial artifact label |
-| Email and SMS (NTF planned) | Invites and reminders | Retry with backoff; in-app fallback |
-| Phone bridge provider (optional) | Number masking | Show numbers to confirmed participants only |
+| Dependency                              | Use                   | Failure behaviour                                         |
+| --------------------------------------- | --------------------- | --------------------------------------------------------- |
+| Google Calendar API, Microsoft Graph    | Free/busy, events     | Mark interviewer calendar unavailable; ICS email fallback |
+| WebRTC media service with TURN          | Video rooms           | Fallback dial-in or alternate link                        |
+| Speech-to-text service (AIC planned)    | Transcripts           | Interview continues without                               |
+| Code sandbox (ASM planned)              | Live coding           | Run disabled, edit continues                              |
+| Media storage and encoder (PLT planned) | Recordings, async     | Retry; partial artifact label                             |
+| Email and SMS (NTF planned)             | Invites and reminders | Retry with backoff; in-app fallback                       |
+| Phone bridge provider (optional)        | Number masking        | Show numbers to confirmed participants only               |
 
 ## 11. Cross-module dependencies
 
-| Depends on | For | Depended on by |
-|---|---|---|
+| Depends on                                          | For                                 | Depended on by                         |
+| --------------------------------------------------- | ----------------------------------- | -------------------------------------- |
 | ATS (FR-ATS-011, 012, 026, 027, 041, 044, 045, 048) | Stages, scorecards, retention, SLAs | ATS: interview events, feedback status |
-| JOB (FR-JOB-012 candidate side, 027, 030) | Candidate invites, withdrawal | JOB: interview cards |
-| EMP (FR-EMP-010, 012, 013, 025) | Members, roles, locations, webhooks | EMP: none |
-| IDN (planned) | Identity, OAuth | none |
-| SET (planned) | Consent records | SET: consent and deletion |
-| NTF (planned) | Delivery | none |
-| ASM (planned) | Sandbox, challenges | ASM: none |
-| AIC (planned) | Transcription, summaries | AIC: none |
-| PLT (planned) | Media, files, webhooks | none |
+| JOB (FR-JOB-012 candidate side, 027, 030)           | Candidate invites, withdrawal       | JOB: interview cards                   |
+| EMP (FR-EMP-010, 012, 013, 025)                     | Members, roles, locations, webhooks | EMP: none                              |
+| IDN (planned)                                       | Identity, OAuth                     | none                                   |
+| SET (planned)                                       | Consent records                     | SET: consent and deletion              |
+| NTF (planned)                                       | Delivery                            | none                                   |
+| ASM (planned)                                       | Sandbox, challenges                 | ASM: none                              |
+| AIC (planned)                                       | Transcription, summaries            | AIC: none                              |
+| PLT (planned)                                       | Media, files, webhooks              | none                                   |
 
 ## 12. Module-level metrics
 
-| Metric | Definition and formula | Owner role |
-|---|---|---|
-| Time to schedule | Median hours from invite issued to interview scheduled | Coordinator |
-| Self-schedule rate | Interviews booked via link / interviews | Coordinator |
-| Reschedule rate | Interviews rescheduled at least once / scheduled | Coordinator |
-| No-show rate | Candidate no-shows / scheduled interviews (and interviewer no-shows reported separately) | REC |
-| On-time feedback rate | Feedback submitted within due / requested | HMG |
-| Structured interview share | Interviews with kit-linked questions / interviews | EAD |
-| Consent capture integrity | Recordings with consent record / recordings (target 100 percent) | EAD |
-| Room reliability | Interviews completed without room failure / interviews started | PAD |
-| Async completion rate | Submitted / invited | REC |
-| Accommodation fulfilment | Fulfilled before interview / requests | REC |
+| Metric                     | Definition and formula                                                                   | Owner role  |
+| -------------------------- | ---------------------------------------------------------------------------------------- | ----------- |
+| Time to schedule           | Median hours from invite issued to interview scheduled                                   | Coordinator |
+| Self-schedule rate         | Interviews booked via link / interviews                                                  | Coordinator |
+| Reschedule rate            | Interviews rescheduled at least once / scheduled                                         | Coordinator |
+| No-show rate               | Candidate no-shows / scheduled interviews (and interviewer no-shows reported separately) | REC         |
+| On-time feedback rate      | Feedback submitted within due / requested                                                | HMG         |
+| Structured interview share | Interviews with kit-linked questions / interviews                                        | EAD         |
+| Consent capture integrity  | Recordings with consent record / recordings (target 100 percent)                         | EAD         |
+| Room reliability           | Interviews completed without room failure / interviews started                           | PAD         |
+| Async completion rate      | Submitted / invited                                                                      | REC         |
+| Accommodation fulfilment   | Fulfilled before interview / requests                                                    | REC         |
 
 ## 13. Open decisions
 
-| ID | Question | Options | Default proposal | Decides | Blocks |
-|---|---|---|---|---|---|
-| OD-INT-01 | Build or buy the video stack | Build on WebRTC; third-party SDK | Third-party SDK behind an abstraction [PROP] | Engineering and product owner | FR-INT-019 to 023 |
-| OD-INT-02 | Calendar integration phase (legacy OD-09 recommends manual scheduling first) | Manual first; calendars at launch | Manual and ICS at R2, calendar sync at R2 end | Product owner | FR-INT-004 |
-| OD-INT-03 | Default recording retention and whether recording is on by default | Off by default; on | Off by default, 30 days when on | Product owner and counsel | FR-INT-021, 033 |
-| OD-INT-04 | Jurisdictions requiring all-party consent and AI notice | Per-jurisdiction rule library | Rule library with strictest default | Counsel | FR-INT-021, 024 |
-| OD-INT-05 | Whether async video interviews are offered at all given fairness concerns | Offer with alternatives; exclude | Offer with text and audio alternatives and no automated scoring | Product owner | FR-INT-026 to 028 |
-| OD-INT-06 | Number masking provider for phone interviews | Provider; none | None at first | Product owner | FR-INT-016 |
-| OD-INT-07 | Candidate reschedule limit and notice | 2 and 24 h proposed | As proposed | Product owner | FR-INT-012 |
+| ID        | Question                                                                     | Options                           | Default proposal                                                | Decides                       | Blocks            |
+| --------- | ---------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------- | ----------------------------- | ----------------- |
+| OD-INT-01 | Build or buy the video stack                                                 | Build on WebRTC; third-party SDK  | Third-party SDK behind an abstraction [PROP]                    | Engineering and product owner | FR-INT-019 to 023 |
+| OD-INT-02 | Calendar integration phase (legacy OD-09 recommends manual scheduling first) | Manual first; calendars at launch | Manual and ICS at R2, calendar sync at R2 end                   | Product owner                 | FR-INT-004        |
+| OD-INT-03 | Default recording retention and whether recording is on by default           | Off by default; on                | Off by default, 30 days when on                                 | Product owner and counsel     | FR-INT-021, 033   |
+| OD-INT-04 | Jurisdictions requiring all-party consent and AI notice                      | Per-jurisdiction rule library     | Rule library with strictest default                             | Counsel                       | FR-INT-021, 024   |
+| OD-INT-05 | Whether async video interviews are offered at all given fairness concerns    | Offer with alternatives; exclude  | Offer with text and audio alternatives and no automated scoring | Product owner                 | FR-INT-026 to 028 |
+| OD-INT-06 | Number masking provider for phone interviews                                 | Provider; none                    | None at first                                                   | Product owner                 | FR-INT-016        |
+| OD-INT-07 | Candidate reschedule limit and notice                                        | 2 and 24 h proposed               | As proposed                                                     | Product owner                 | FR-INT-012        |
 
 ## 14. Risks
 
-| ID | Risk | Mitigation |
-|---|---|---|
-| RSK-INT-01 | Consent gaps lead to unlawful recording | Consent as a hard gate (BR-INT-012), audit metric, rule library |
-| RSK-INT-02 | AI notes become hidden evaluation | BR-INT-021 limits, no scoring, human scorecards |
-| RSK-INT-03 | Calendar provider outages or permission problems | Fallback ICS, health states, alerts |
-| RSK-INT-04 | Time zone errors cause no-shows | BR-INT-005, dual-time display, tests across DST |
-| RSK-INT-05 | Media costs and storage growth | Retention defaults, audio-only option |
-| RSK-INT-06 | Accommodation data misuse | BR-INT-032 separation, restricted access |
-| RSK-INT-07 | Video quality varies across networks | Adaptive bitrate, device test, fallback |
+| ID         | Risk                                             | Mitigation                                                      |
+| ---------- | ------------------------------------------------ | --------------------------------------------------------------- |
+| RSK-INT-01 | Consent gaps lead to unlawful recording          | Consent as a hard gate (BR-INT-012), audit metric, rule library |
+| RSK-INT-02 | AI notes become hidden evaluation                | BR-INT-021 limits, no scoring, human scorecards                 |
+| RSK-INT-03 | Calendar provider outages or permission problems | Fallback ICS, health states, alerts                             |
+| RSK-INT-04 | Time zone errors cause no-shows                  | BR-INT-005, dual-time display, tests across DST                 |
+| RSK-INT-05 | Media costs and storage growth                   | Retention defaults, audio-only option                           |
+| RSK-INT-06 | Accommodation data misuse                        | BR-INT-032 separation, restricted access                        |
+| RSK-INT-07 | Video quality varies across networks             | Adaptive bitrate, device test, fallback                         |
 
 ## 15. Legacy source trace
 
-| Legacy file | Informed | Dropped or changed |
-|---|---|---|
-| SSOT §9.7 F-06 step 5; F-33, F-88, F-93 in FEATURE_REGISTRY | Rooms, recording, scheduling | Calendar phase decision left open (OD-INT-02) |
-| SSOT §10.31 BR-169..176 | Dual consent, retention, AI advisory, company-scoped questions, sandbox reuse, structured rubrics | Re-issued as BR-INT |
-| BUSINESS_RULE_REGISTRY BR-069 | Interviewer inactivity escalation | Auto stale_withdrawn not adopted; see ATS OD-ATS-03 |
-| Own knowledge (Calendly, Cal.com, Greenhouse Scheduling, HireVue, CoderPad) | Self-scheduling, panels, load balancing, async video, collaborative editor, accommodations | Tagged [PROP] |
+| Legacy file                                                                 | Informed                                                                                          | Dropped or changed                                  |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| SSOT §9.7 F-06 step 5; F-33, F-88, F-93 in FEATURE_REGISTRY                 | Rooms, recording, scheduling                                                                      | Calendar phase decision left open (OD-INT-02)       |
+| SSOT §10.31 BR-169..176                                                     | Dual consent, retention, AI advisory, company-scoped questions, sandbox reuse, structured rubrics | Re-issued as BR-INT                                 |
+| BUSINESS_RULE_REGISTRY BR-069                                               | Interviewer inactivity escalation                                                                 | Auto stale_withdrawn not adopted; see ATS OD-ATS-03 |
+| Own knowledge (Calendly, Cal.com, Greenhouse Scheduling, HireVue, CoderPad) | Self-scheduling, panels, load balancing, async video, collaborative editor, accommodations        | Tagged [PROP]                                       |
