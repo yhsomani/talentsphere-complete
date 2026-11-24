@@ -462,3 +462,229 @@ Paths are relative to `/api/v1` unless they start with `/api/public/v1`, `/scim`
 | GET | `/companies/{slug}/reviews` | pub | — | C | Aggregates suppressed below `min_cohort_k` |
 | POST | `/companies/{slug}/reviews` | ses | N(company, author, period) | — | Author identity never disclosed to the org |
 | POST | `/orgs/{orgId}/reviews/{reviewId}/responses` | org:emp.review.respond | K | — | |
+
+### 15.6 Community and messaging: NET, MSG, REP, EVT
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| POST | `/me/connections` | ses | N(unordered pair) | — | Connection request; recipient's message policy and blocks applied |
+| POST | `/me/connections/{connectionId}/acceptance` | ses (addressee) | K | — | |
+| DELETE | `/me/connections/{connectionId}` | ses (either party) | N(id) | — | Withdraw or remove |
+| GET | `/me/connections` | ses | — | C | |
+| PUT | `/me/follows/{targetKind}/{targetId}` | ses | N(target) | — | People, companies, groups, topics |
+| DELETE | `/me/follows/{targetKind}/{targetId}` | ses | N(target) | — | |
+| PUT | `/me/blocks/{accountId}` | ses | N(pair) | — | Hides content and blocks messages both ways |
+| GET | `/feed` | ses | — | C | Ranked feed; 30 s polling plus realtime refresh signal [SRC: SSOT §13.9] |
+| POST | `/posts` | ses | K | — | Moderation pre-check; media must be `available` |
+| PATCH | `/posts/{postId}` | ses (author) | K | — | IM; edit history kept |
+| DELETE | `/posts/{postId}` | ses (author) or plat:tsf.content.remove | N(id) | — | |
+| POST | `/posts/{postId}/comments` | ses | K | — | |
+| PUT | `/posts/{postId}/reactions/me` | ses | N(post, account) | — | |
+| POST | `/groups` | ses or org:net.group.manage | K | — | |
+| POST | `/groups/{groupId}/memberships` | ses | N(group, account) | — | Approval per group setting |
+| POST | `/referral-requests` | ses | K | — | Per-referrer weekly cap |
+| POST | `/referral-requests/{requestId}/decision` | ses (referrer) | K | — | Accepting submits a referral on the job |
+| POST | `/intro-requests` | ses | K | — | Connector must be connected to both |
+| GET | `/me/conversations` | ses | — | C | Ordered by `lastMessageAt` |
+| POST | `/conversations` | ses | K | — | Direct or context-bound; outreach credits for recruiter cold outreach |
+| GET | `/conversations/{conversationId}/messages` | ses (participant) | — | C | Cursor on `seq` |
+| POST | `/conversations/{conversationId}/messages` | ses (participant) | N(clientMessageId) | — | Offline-queueable [SRC: SSOT SCI-03] |
+| PATCH | `/conversations/{conversationId}/messages/{messageId}` | ses (sender) | K | — | Within `msg.edit_window_minutes` |
+| DELETE | `/conversations/{conversationId}/messages/{messageId}` | ses (sender) | N(id) | — | Tombstone |
+| POST | `/conversations/{conversationId}/read-marks` | ses (participant) | N(seq) | — | |
+| GET | `/me/reputation` | ses | — | — | Dimensions with explanations |
+| GET | `/me/xp-ledger` | ses | — | C | |
+| GET | `/leaderboards/{leaderboardCode}` | pub/ses | — | B | Opt-in participants only |
+| PATCH | `/me/badges/{awardId}` | ses | K | — | Visibility |
+| GET | `/events` | pub/ses | — | C | |
+| GET | `/events/{eventId}` | pub/ses | — | — | |
+| POST | `/orgs/{orgId}/events` | org:evt.event.manage | K | — | Platform events via `/admin/events` |
+| POST | `/events/{eventId}/registrations` | ses | N(event, account) | — | Waitlist when full; paid tickets via checkout |
+| DELETE | `/events/{eventId}/registrations/me` | ses | N(event, account) | — | |
+| POST | `/orgs/{orgId}/events/{eventId}/check-ins` | org:evt.event.manage | N(ticket) | — | |
+| POST | `/events/{eventId}/teams` | ses (registered) | K | — | Hackathons |
+| POST | `/events/{eventId}/submissions` | ses (team member) | K | — | Before deadline only |
+| POST | `/orgs/{orgId}/events/{eventId}/judging-scores` | org:evt.judge | N(judge, submission) | — | |
+
+### 15.7 Intelligence: AIC, MKT
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| POST | `/ai/capabilities/{capabilityId}/runs` | ses or org:<capability grant> | K | — | RL-HEAVY; sync up to 30 s or `202`; `403 ai-prohibited`; `402` or `429 quota-exceeded` on budget ([06](06_AI_ARCHITECTURE.md)) |
+| GET | `/ai/runs/{runId}` | run owner | — | — | Output, provenance summary, review state |
+| POST | `/ai/runs/{runId}/application` | run owner | K | — | User accepts a draft; the owning module's use case applies it |
+| POST | `/ai/runs/{runId}/feedback` | run owner | N(run) | — | Rating and reason codes for evals |
+| POST | `/ai/conversations` | ses | K | — | Career assistant |
+| POST | `/ai/conversations/{conversationId}/messages` | ses (owner) | N(clientMessageId) | — | Streams the reply as `text/event-stream` |
+| DELETE | `/ai/conversations/{conversationId}` | ses (owner) | N(id) | — | Deletes memory |
+| GET | `/me/ai-settings` | ses | — | — | Execution preferences, connected providers, consent |
+| PUT | `/me/ai-settings` | ses | N(owner) | — | IM |
+| GET | `/me/recommendations` | ses | — | C | `kind` jobs, courses, people, mentors |
+| POST | `/me/recommendations/{recommendationId}/feedback` | ses | N(recommendation) | — | Dismiss, not relevant, save |
+| GET | `/me/jobs/{jobId}/match-explanation` | ses | — | — | Dimensions and gaps; no single opaque score [SRC: SSOT §18.1] |
+| GET | `/orgs/{orgId}/jobs/{jobId}/candidate-matches` | org:aic.match.read | — | C | Consented discoverable candidates and applicants; RL-HEAVY |
+| POST | `/me/career-goals` | ses | K | — | |
+| GET | `/me/career-plan` | ses | — | — | |
+| POST | `/me/career-plan/regeneration` | ses | K | — | `202` |
+| GET | `/market/skills/{skillId}` | pub | — | — | Signals with source, period, population and methodology [SRC: SSOT §18.4] |
+| GET | `/market/roles/{roleCode}` | pub | — | — | |
+| GET | `/career-paths` | pub | — | B | `fromRole`, `toRole` |
+| GET | `/salaries` | ses | — | B | Cells below `min_cohort_k` suppressed |
+| POST | `/me/salary-reports` | ses | N(account, role, period) | — | Contributes to aggregates; never shown individually |
+
+### 15.8 Trust, governance and operations: TSF, ADM, ANL
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| POST | `/reports` | ses or pub (public content only) | K | — | Target kind and id, reason code |
+| GET | `/me/reports` | ses | — | C | Status only |
+| GET | `/admin/moderation-cases` | plat:tsf.case.read | — | C | Queue, priority, SLA |
+| POST | `/admin/moderation-cases/{caseId}/assignment` | plat:tsf.case.work | K | — | |
+| POST | `/admin/moderation-cases/{caseId}/actions` | plat:tsf.case.action | K! | — | Policy code required |
+| GET | `/me/sanctions` | ses | — | B | |
+| POST | `/me/appeals` | ses | K | — | Against sanction or integrity decision |
+| POST | `/admin/appeals/{appealId}/decision` | plat:tsf.appeal.decide | K! | — | Decider differs from the original actor |
+| POST | `/support-tickets` | ses or pub | K | — | |
+| GET | `/admin/support-tickets` | plat:adm.support.read | — | C | |
+| GET | `/admin/users` | plat:adm.user.read | — | C | Search by email hash or id; audited |
+| POST | `/admin/users/{userId}/suspension` | plat:adm.user.suspend +su | K! | — | |
+| GET | `/admin/organizations` | plat:adm.org.read | — | C | |
+| POST | `/admin/organizations/{orgId}/verification` | plat:adm.org.verify | K! | — | Institution and employer verification |
+| GET | `/admin/audit-events` | plat:adm.audit.read | — | C | |
+| GET | `/orgs/{orgId}/audit-events` | org:adm.audit.read | — | C | Tenant subset |
+| PUT | `/admin/feature-flags/{flagKey}` | plat:adm.flag.manage +su | K | — | IM; kill switches page the owner |
+| PUT | `/admin/config/{configKey}` | plat:adm.config.manage +su | K | — | IM; schema-validated |
+| GET | `/admin/jobs` | plat:adm.ops.read | — | C | Filter queue, kind, status |
+| POST | `/admin/jobs/{jobId}/retry` | plat:adm.ops.retry | K | — | Dead jobs only |
+| GET | `/admin/health` | plat:adm.ops.read | — | — | Dependency and breaker status [SRC: SSOT §13.4] |
+| POST | `/analytics/events` | pub/ses +c:analytics.product | N(batchId) | — | Allowlisted event names and properties [SRC: BE-01-R2 §7] |
+| GET | `/orgs/{orgId}/reports/{reportCode}` | org:anl.report.read | — | — | Suppression below `min_cohort_k` |
+| POST | `/orgs/{orgId}/report-exports` | org:anl.report.export | K | — | `202`; RL-HEAVY |
+| GET | `/admin/metrics/{metricCode}` | plat:anl.metric.read | — | — | |
+
+### 15.9 Institutions and enterprise: INS, ENT
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| GET, POST | `/orgs/{orgId}/departments` | org:ins.structure.manage | — / K | B | |
+| GET, POST | `/orgs/{orgId}/cohorts` | org:ins.cohort.read / manage | — / K | C | |
+| POST | `/orgs/{orgId}/cohorts/{cohortId}/members` | org:ins.cohort.manage | N(cohort, membership) | — | |
+| POST | `/orgs/{orgId}/bulk-imports` | org:ins.import.run or org:ent.import.run | K! | — | `202`; states per UXC-013 [SRC: SSOT §12.17] |
+| GET | `/orgs/{orgId}/bulk-imports/{importId}` | same | — | — | Preview and row errors |
+| POST | `/orgs/{orgId}/bulk-imports/{importId}/commit` | same | K! | — | |
+| POST | `/orgs/{orgId}/course-assignments` | org:ins.assignment.manage or org:ent.assignment.manage | K | — | Allocates seats if the course needs them |
+| GET | `/orgs/{orgId}/learners/{membershipId}/progress` | org:ins.progress.read | — | — | Institution-assigned learning only |
+| GET | `/orgs/{orgId}/license-pools` | org:bil.license.read | — | B | |
+| POST | `/orgs/{orgId}/license-pools/{poolId}/seats` | org:bil.license.assign | N(pool, membership) | — | `409` when exhausted |
+| DELETE | `/orgs/{orgId}/license-pools/{poolId}/seats/{seatId}` | org:bil.license.assign | N(id) | — | Progress kept |
+| POST | `/orgs/{orgId}/placement-drives` | org:ins.placement.manage | K | — | Partner employer org named |
+| GET | `/orgs/{orgId}/placement-drives/{driveId}/eligible-learners` | org:ins.placement.manage | — | C | Learners with `institution.share_profile` consent only |
+| POST | `/orgs/{orgId}/learners/{membershipId}/severance` | org:ins.learner.manage | K! | — | Graduation severance |
+| GET | `/me/institutions` | ses | — | B | Links, consents, severance status |
+| POST | `/lti/1.3/launch` | LTI signed launch | X(nonce) | — | |
+| GET | `/lti/1.3/jwks` | pub | — | — | |
+| GET | `/orgs/{orgId}/workforce` | org:ent.workforce.read | — | C | Shared fields only |
+| PUT | `/me/workforce/{orgId}/profile-sharing` | ses (workforce member) | N(org) | — | Consent `enterprise.workforce_profile` |
+| GET, POST | `/orgs/{orgId}/internal-opportunities` | workforce member or org:ent.opportunity.manage | — / K | C | |
+| POST | `/orgs/{orgId}/internal-opportunities/{opportunityId}/applications` | workforce member | K and N(opportunity, member) | — | Visible to the employee's manager only if the employee opts in [PROP] |
+| GET | `/orgs/{orgId}/skills-inventory` | org:ent.inventory.read | — | — | Aggregates above `min_cohort_k` |
+| POST | `/orgs/{orgId}/hris-syncs` | org:ent.integration.manage | K | — | `202` |
+
+### 15.10 Commercial: BIL
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| GET | `/plans` | pub | — | B | Audience filter |
+| POST | `/billing/checkout-sessions` | ses or org:bil.billing.manage | K! | — | Returns provider redirect URL; redirect success grants nothing [SRC: ARCHITECTURE.md §8 item 5] |
+| POST | `/billing/portal-sessions` | ses or org:bil.billing.manage | K | — | |
+| GET | `/me/subscription` | ses | — | — | `no-store` |
+| GET | `/orgs/{orgId}/subscription` | org:bil.billing.read | — | — | |
+| GET | `/me/entitlements` | ses | — | B | Remaining counts |
+| GET | `/orgs/{orgId}/entitlements` | org:bil.billing.read | — | B | |
+| GET | `/me/orders` | ses | — | C | |
+| GET | `/me/invoices`, `/orgs/{orgId}/invoices` | ses / org:bil.billing.read | — | C | |
+| POST | `/orgs/{orgId}/license-pool-orders` | org:bil.billing.manage | K! | — | Invoice or card |
+| POST | `/me/orders/{orderId}/refund-requests` | ses | K | — | Refund policy rules in BIL |
+| POST | `/admin/refunds` | plat:bil.refund | K! | — | |
+| POST | `/webhooks/stripe` | Stripe signature | N(event id) | — | As-built route exists [SRC: ARCHITECTURE.md §17] |
+
+### 15.11 Career services: MEN, GIG
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| GET | `/mentors` | pub/ses | — | C | |
+| PUT | `/me/mentor-profile` | ses | N(owner) | — | IM |
+| POST | `/mentors/{mentorId}/engagement-requests` | ses | N(mentor, mentee, open) | — | |
+| POST | `/me/mentorship-engagements/{engagementId}/acceptance` | ses (mentor) | K | — | |
+| POST | `/me/mentorship-engagements/{engagementId}/sessions` | ses (participant) | K | — | Paid sessions create an order |
+| POST | `/me/mentorship-engagements/{engagementId}/completion` | ses (participant) | K | — | |
+| POST | `/me/mentorship-engagements/{engagementId}/reviews` | ses (mentee) | N(engagement) | — | |
+| GET | `/gig-projects` | pub/ses | — | C | |
+| POST | `/gig-projects` | ses or org:gig.project.manage | K | — | |
+| POST | `/gig-projects/{projectId}/proposals` | ses (freelancer mode) | N(project, freelancer) | — | |
+| POST | `/gig-projects/{projectId}/proposals/{proposalId}/award` | project client | K! | — | Creates contract |
+| POST | `/gig-contracts/{contractId}/milestones/{milestoneId}/submission` | freelancer | K | — | |
+| POST | `/gig-contracts/{contractId}/milestones/{milestoneId}/acceptance` | client | K! | — | Releases payment when the money-flow decision allows |
+| POST | `/gig-contracts/{contractId}/disputes` | either party | K | — | Routed to TSF |
+
+### 15.12 Platform: PLT, PWA
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| POST | `/files` | ses or org grant per purpose | K | — | Presigned upload (§11) |
+| POST | `/files/{fileId}/parts` | uploader | N(partNumber) | — | Multipart |
+| POST | `/files/{fileId}/completion` | uploader | N(file) | — | `202` scanning |
+| GET | `/files/{fileId}` | policy per purpose | — | — | Status and metadata |
+| POST | `/files/{fileId}/download-url` | policy per purpose | K | — | |
+| DELETE | `/files/{fileId}` | owner | N(id) | — | |
+| GET, POST | `/orgs/{orgId}/webhook-endpoints` | org:plt.webhook.manage | — / K | B | |
+| DELETE | `/orgs/{orgId}/webhook-endpoints/{endpointId}` | org:plt.webhook.manage | N(id) | — | |
+| POST | `/orgs/{orgId}/webhook-endpoints/{endpointId}/test-deliveries` | org:plt.webhook.manage | K | — | |
+| GET | `/orgs/{orgId}/webhook-endpoints/{endpointId}/deliveries` | org:plt.webhook.manage | — | C | |
+| POST | `/orgs/{orgId}/webhook-deliveries/{deliveryId}/redelivery` | org:plt.webhook.manage | K | — | |
+| POST | `/orgs/{orgId}/api-clients` | org:plt.api_client.manage +su | K | — | Secret shown once |
+| POST | `/orgs/{orgId}/api-clients/{clientId}/secret-rotation` | org:plt.api_client.manage +su | K! | — | Old secret valid for `api_client.rotation_overlap_hours` |
+| POST | `/orgs/{orgId}/integrations/{provider}/connection` | org:plt.integration.manage +su | K | — | OAuth or key entry; secret envelope-encrypted |
+| DELETE | `/orgs/{orgId}/integrations/{provider}/connection` | org:plt.integration.manage | N(org, provider) | — | |
+| GET | `/app/version-policy` | pub | — | — | Minimum supported PWA build |
+| POST | `/me/devices` | ses | N(installId) | — | Install registration |
+| POST | `/me/offline-operations` | ses | K per operation | B | Flushes queued writes allowed by the offline contract; each operation revalidated and answered individually |
+| POST | `/extension/pairings` | ses | K | — | Pairs the browser extension to a device session |
+
+### 15.13 Partner API (`/api/public/v1`)
+
+| Method | Path | Auth | Idem. | Page. | Notes |
+|---|---|---|---|---|---|
+| POST | `/api/public/v1/oauth/token` | client credentials | X(credential submission) | — | Opaque token ≤ 1 h |
+| GET, POST, PATCH | `/api/public/v1/jobs[/{jobId}]` | svc:jobs.read / jobs.write | — / K | C | Same rules as first-party job routes |
+| POST | `/api/public/v1/jobs/{jobId}/publication`, `/closure` | svc:jobs.write | K | — | |
+| GET | `/api/public/v1/applications` | svc:applications.read | — | C | `updatedSince` filter for sync |
+| GET | `/api/public/v1/applications/{applicationId}` | svc:applications.read | — | — | Snapshot DTO; consent rules apply |
+| POST | `/api/public/v1/applications/{applicationId}/stage-transitions` | svc:applications.write | K | — | IM |
+| GET | `/api/public/v1/interviews` | svc:interviews.read | — | C | |
+| GET | `/api/public/v1/learners/{externalId}/progress` | svc:learning.read | — | — | Institutions and enterprises |
+| POST | `/api/public/v1/course-assignments` | svc:learning.write | K | — | |
+| GET | `/api/public/v1/credentials/{publicHash}/verification` | svc:credentials.verify or pub | — | — | Machine-readable verification |
+| GET, POST, DELETE | `/api/public/v1/webhook-endpoints` | svc:webhooks.manage | — / K / N(id) | B | |
+
+## 16. Open decisions and risks
+
+| Id | Question | Options | Default proposal | Who decides | Blocking |
+|---|---|---|---|---|---|
+| OD-ARC-21 | Do as-built route paths that differ from this catalog get renamed, aliased or kept? | Rename with deprecation; permanent aliases; keep as-built | Keep the as-built path where it already matches the style rules; otherwise add the target path and deprecate the old one under §8 [DEC-REQ] | Architect | Contract generation |
+| OD-ARC-22 | Partner API scope at first release | Jobs and applications only; plus learning and credentials; full parity | Jobs, applications, interviews and webhooks first; learning and credentials with INS [DEC-REQ] | Product owner | PLT tier |
+| OD-ARC-23 | Rate-limit numbers for RL-PARTNER and business quotas per plan | Defaults in §9; plan-specific | Defaults until load baseline; plan quotas from BIL [DEC-REQ] | Product owner and finance | Partner onboarding |
+
+| Id | Risk | Likelihood | Impact | Mitigation | Owner role |
+|---|---|---|---|---|---|
+| RSK-ARC-16 | Two error shapes in parallel confuse clients | Medium | Medium | One global mapper, generated client handles both, removal date per module | Frontend lead |
+| RSK-ARC-17 | Candidate search API used for scraping | Medium | High | RL-HEAVY, entitlement, per-query audit, result caps, anomaly alerts, live consent join | Security officer |
+
+## 17. Legacy source trace
+
+| Source | Used for | Changed |
+|---|---|---|
+| SSOT §12.18–§12.20, §13.2 | API boundary, envelope intent, CON-001…016, error taxonomy | Envelope and pagination left open (OD-ARC-02) |
+| `Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md` | Problem codes, pagination, idempotency, rate classes, cache rules | Cookie names replaced by the DEC-ARC-006 session cookie; partner audience added |
+| BE-01-R2 §3.4, §4, §5, §7 | Canonical `state-transition-invalid`, idempotency store semantics, rate-limit layering, telemetry routes | Kept |
+| `packages/contracts/src/index.ts`, `apps/api/src/server.ts` | As-built envelope, offset pagination, rate-limit plugin, health routes | Transition plan §7.2 |

@@ -1004,3 +1004,530 @@ flowchart TD
   - F1 — Client does not respond → decision on available evidence.
   - F2 — Chargeback by client's bank → `JRN-FIN-01` chargeback path; freelancer payout clawback rules per terms.
 - **Source:** [PROP]
+
+## 7. Recruiter journeys
+
+### JRN-REC-01 — Accept an org invite and set up the workspace
+
+- **Role · persona · tier:** CAN → REC · P-C Priya · R1
+- **Modules touched:** EMP, IDN, ATS, NTF, INT
+- **Trigger:** Email "Acme added you as a recruiter".
+- **Preconditions:** `EAD` invited Priya's email (`JRN-EAD-02`).
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens invite, signs in or registers | Invite email must match a verified email on the account; if the org enforces SSO, redirected to the org IdP |
+| 2 | Accepts | `REC` grant `active` in `org:Acme`; context switcher shows "Acme — Recruiter" |
+| 3 | Sets notification preferences for new applications (instant, hourly digest, daily) | Stored per context |
+| 4 | Connects calendar | Busy times only are read (no event details) |
+| 5 | Opens the recruiter home | Empty states: "No jobs yet — create a requisition" with a checklist |
+
+- **Success outcome:** Working recruiter context with calendar and notifications.
+- **Failure branches:**
+  - F1 — Invite expired (7 days [PROP]) → "Ask your admin to resend".
+  - F2 — SSO login fails → IdP error shown with the admin contact; no fallback to password when SSO is enforced.
+  - F3 — Seat limit reached → invite cannot be accepted; `EAD` notified to add a seat.
+- **Source:** [SRC: UJ-11]
+
+### JRN-REC-02 — Open a requisition, get approval and publish a job
+
+- **Role · persona · tier:** REC · P-C Priya · R1 (publish), R2 (approvals)
+- **Modules touched:** ATS, JOB, EMP, TSF, BIL, SRC, AIC
+- **Trigger:** Hiring manager asks for a "Backend Engineer II".
+- **Preconditions:** Org verified; job slots available on the plan.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Creates requisition: title, team, headcount, location, work mode, salary range, must-have and nice-to-have skills from taxonomy | Requisition `draft` |
+| 2 | Uses "Draft description" (AI, optional) | Draft labelled AI-assisted; bias-language checker flags terms; recruiter edits (`BR-XCT-041`) |
+| 3 | Submits for approval | Routed to the team's approver (`HMG` or `EAD`), never the requester (`BR-XCT-058`) |
+| 4 | Approver approves | Requisition `approved`; job draft created from it |
+| 5 | Adds screening questions, pipeline template, hiring team | Hiring team members get `t` scope on this job |
+| 6 | Publishes | Automated policy checks (prohibited content, discriminatory requirements, missing employer identity); job `published`; indexed; job slot consumed |
+
+- **Success outcome:** Published job with hiring team; `job.job.published`.
+- **Failure branches:**
+  - F1 — Approver rejects → requisition `returned` with comment.
+  - F2 — Policy check fails → publish blocked with the clause; recruiter edits or requests review.
+  - F3 — No job slot → `402 entitlement-required` with "Close a job or upgrade"; never silently unpublishes another job.
+  - F4 — Salary range missing where the launch jurisdiction requires it (`OD-PRD-10`) → publish blocked for that location.
+- **Source:** [SRC: SSOT J-03; UJ-11]
+
+### JRN-REC-03 — Screen applicants with evidence and move or reject
+
+- **Role · persona · tier:** REC · P-C Priya · R1
+- **Modules touched:** ATS, JOB, EVD, AIC, MSG, NTF, ANL
+- **Trigger:** 120 applications in "New".
+- **Preconditions:** On the job's hiring team.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens the stage list with "Suggested order" toggle | Suggested order with rationale per card (skills matched with rung, missing skills); default view is submission order; never labelled "shortlist" [SRC: STR-01 REV2 BR-T072] |
+| 2 | Opens a candidate | Snapshot: chosen résumé variant, evidence items with rung and issuer class, screening answers; artifacts open only within the snapshot grant |
+| 3 | Moves 15 to "Phone screen" | Stage change recorded with actor; candidate-facing status becomes `in_review` |
+| 4 | Selects 40 and clicks "Reject" | Bulk action requires a reason code and a template; confirmation states the count; each rejection is a human action recorded with the actor (`BR-XCT-021`, `BR-XCT-026`) |
+| 5 | Adds a private note | Visible only to the hiring team |
+
+- **Success outcome:** Every applicant has a human decision or remains in review; rejected candidates are notified.
+- **Failure branches:**
+  - F1 — Candidate revoked an artifact → artifact shows "No longer shared"; snapshot text remains.
+  - F2 — Concurrent edits by two recruiters → last-write conflict shown; stage moves are versioned so a stale move is refused.
+  - F3 — Recruiter tries to filter by age, gender or similar → no such filters exist; free-text notes scanned for protected-attribute terms with a warning [PROP].
+- **Source:** [SRC: SSOT J-03; UJ-11]
+
+### JRN-REC-04 — Search discoverable candidates and send outreach
+
+- **Role · persona · tier:** REC · P-F Farid or P-C Priya · R2
+- **Modules touched:** SRC, PRF, EVD, MSG, SET, BIL, TSF
+- **Trigger:** Few qualified applicants for a niche role.
+- **Preconditions:** Org verified; outreach quota available.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Searches by skills, rung minimum, location, availability | Only profiles with live `search.discoverable` returned; summary fields only if `evidence.share_summary` live |
+| 2 | Opens a summary | Headline, skills with rung, evidence titles; no contact details, no full artifacts |
+| 3 | Sends a first-contact request with role and message | Requires `outreach.recruiter_contact`; quota decremented; message checked for spam patterns |
+| 4 | Candidate accepts (`JRN-CAN-10`) | Thread opens; candidate may apply or share more |
+
+- **Success outcome:** Consented conversation started.
+- **Failure branches:**
+  - F1 — Candidate not accepting requests → "Contact unavailable"; no quota consumed.
+  - F2 — Quota exhausted → `402` with reset date; no ranking or visibility change for paying more (`BR-XCT-020`).
+  - F3 — Many declines and reports → recruiter outreach paused for review.
+- **Source:** [SRC: UJ-12; SSOT BR-130]
+
+```mermaid
+sequenceDiagram
+    participant R as Recruiter
+    participant SRC as Search
+    participant SET as Consent
+    participant BIL as Entitlements
+    participant MSG as Messaging
+    participant C as Candidate
+    R->>SRC: Search by skills and rung
+    SRC->>SET: Filter to live discoverable scopes
+    SET-->>SRC: Allowed subject ids
+    SRC-->>R: Summaries without contact details
+    R->>MSG: Send first contact request
+    MSG->>SET: Check outreach consent
+    MSG->>BIL: Check and decrement outreach quota
+    MSG->>C: Deliver request
+    alt Candidate accepts
+        C->>MSG: Interested
+        MSG-->>R: Thread opened
+    else Candidate declines or blocks
+        C->>MSG: Not interested or block org
+        MSG-->>R: Polite decline or contact unavailable
+    end
+```
+
+### JRN-REC-05 — Schedule a panel interview loop
+
+- **Role · persona · tier:** REC (or coordinator) · P-C Priya · R2
+- **Modules touched:** INT, ATS, MSG, NTF, PLT
+- **Trigger:** Candidate moved to "Onsite".
+- **Preconditions:** Panel members have calendars connected or have set manual availability.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Chooses loop template: four 45-minute interviews, two may be parallel | Template defines interview types and scorecards |
+| 2 | Selects panel members | Each gets `interviewer` grant for this loop |
+| 3 | Sends self-schedule link | System computes feasible loop slots across panel calendars in the candidate's time zone |
+| 4 | Candidate picks a slot | Holds placed, invites sent to panel and candidate with external meeting links |
+| 5 | One interviewer declines | Replacement suggested from a backup pool; candidate not disturbed unless time changes |
+
+- **Success outcome:** Confirmed loop; every interviewer has a scorecard task.
+- **Failure branches:**
+  - F1 — No feasible slot in 10 business days [PROP] → coordinator notified to adjust panel.
+  - F2 — Calendar provider outage → manual scheduling with proposed times.
+  - F3 — Candidate requests accessibility needs → note shared with panel without diagnosis details.
+- **Source:** [SRC: SSOT OD-09; UJ-06]
+
+```mermaid
+sequenceDiagram
+    participant R as Recruiter
+    participant INT as Scheduling
+    participant CAL as Calendar adapter
+    participant C as Candidate
+    participant P as Panel
+    R->>INT: Create loop from template with panel
+    INT->>CAL: Read busy times for panel
+    CAL-->>INT: Busy blocks
+    INT->>C: Self schedule link with feasible slots
+    C->>INT: Pick slot
+    INT->>INT: Hold slot and assign scorecards
+    INT->>P: Invites and scorecard tasks
+    INT->>C: Confirmation with meeting link
+    P-->>INT: One interviewer declines
+    INT->>R: Suggest replacement from backup pool
+```
+
+### JRN-REC-06 — Prepare an offer through the approval chain
+
+- **Role · persona · tier:** REC · P-C Priya · R2
+- **Modules touched:** ATS, EMP, NTF, BGV, MSG
+- **Trigger:** Debrief decision "Hire" (`JRN-HMG-03`).
+- **Preconditions:** Application `interviewing` with a recorded hire decision.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Drafts offer from template: title, level, start date, compensation fields, expiry | Offer `draft`; fields outside the requisition salary range flagged |
+| 2 | Submits for approval | Chain from org policy (for example hiring manager then finance approver); each approver ≠ drafter |
+| 3 | Approvers approve | Offer `approved`; out-of-range requires an extra approver |
+| 4 | Sends | Application `offer_extended`; candidate notified (`JRN-CAN-09`) |
+
+- **Success outcome:** Approved offer delivered.
+- **Failure branches:**
+  - F1 — Approver rejects → back to draft with comment.
+  - F2 — Approver unavailable → delegation if set (04 §5); otherwise escalation to `EAD` after 48 hours [PROP].
+- **Source:** [SRC: SSOT J-03]
+
+### JRN-REC-07 — Agency recruiter submits a candidate to a client
+
+- **Role · persona · tier:** REC (agency) · P-F Farid · R2
+- **Modules touched:** EMP, ATS, JOB, SET, MSG, NTF
+- **Trigger:** Client Globex engaged the agency for three jobs.
+- **Preconditions:** Engagement `active`; candidate is in a conversation with Farid.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Selects candidate and client job | Candidate receives a consent request naming the client and job |
+| 2 | Candidate consents and chooses evidence | Application created at the client with source "Agency: Farid's agency" |
+| 3 | Client hiring team reviews | Farid sees stage class of his submitted candidates only |
+| 4 | Duplicate check | If the candidate already applied directly, the first valid submission owns the candidacy (`BR-XCT-057`) |
+
+- **Success outcome:** Consented agency submission with clear ownership.
+- **Failure branches:**
+  - F1 — Engagement ended → submit blocked.
+  - F2 — Candidate declines → nothing is shared with the client.
+- **Source:** [SRC: SSOT J-10]
+
+### JRN-REC-08 — Participate in a campus placement drive
+
+- **Role · persona · tier:** REC · P-C Priya · R3
+- **Modules touched:** INS, JOB, ATS, INT, NTF
+- **Trigger:** Invitation from City University placement office.
+- **Preconditions:** Org verified.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Accepts drive invitation, selects roles | Drive jobs created as drive-restricted (visible only to eligible students) |
+| 2 | Reviews applicants | Standard pipeline with drive tag; institution-issued credentials highlighted |
+| 3 | Schedules drive-day interviews | Slots within the drive window |
+| 4 | Records offers | Drive outcome updated for the `PLO` |
+
+- **Success outcome:** Offers recorded against the drive.
+- **Failure branches:**
+  - F1 — Recruiter requests student contact list → not provided; only applicants who applied are visible.
+- **Source:** [SRC: SSOT J-09]
+
+## 8. Hiring manager journeys
+
+### JRN-HMG-01 — Define role requirements, scorecard and assessment
+
+- **Role · persona · tier:** HMG · P-S Sara · R2
+- **Modules touched:** ATS, ASM, JOB, SRC
+- **Trigger:** Sara opens a new requisition assigned to her team.
+- **Preconditions:** `HMG` grant on the team.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | States must-have skills with minimum rung | Stored on requisition; used in explanations, never as automatic rejection |
+| 2 | Builds a scorecard: 4 to 6 competencies with behavioral anchors | Scorecard template saved |
+| 3 | Attaches a take-home assessment from the library with `AI_RESTRICTED` mode | Assessment linked; candidates see rules before starting |
+
+- **Success outcome:** Structured evaluation defined before any interview.
+- **Failure branches:**
+  - F1 — Competency wording flagged by bias checker → suggestion; Sara decides.
+- **Source:** [SRC: SSOT J-27]
+
+### JRN-HMG-02 — Review a candidate packet and submit a blind scorecard
+
+- **Role · persona · tier:** HMG (interviewer) · P-E Elena · R2
+- **Modules touched:** INT, ATS, EVD
+- **Trigger:** Interview completed.
+- **Preconditions:** `interviewer` grant on the loop.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens packet | Snapshot, assessment results, her assigned competencies |
+| 2 | Scores each competency with evidence notes | Draft autosaved |
+| 3 | Submits | Scorecard locked; others' scorecards become visible to her only now (`INT.scorecard.view_others`) |
+
+- **Success outcome:** Independent scorecard submitted; `hmg` turnaround measured.
+- **Failure branches:**
+  - F1 — Not submitted within 24 hours [PROP] → reminders; debrief waits or proceeds without it, shown as missing.
+  - F2 — Tries to view others first → blocked with explanation.
+- **Source:** [SRC: UJ-13]
+
+### JRN-HMG-03 — Run the debrief, decide and record a post-hire outcome
+
+- **Role · persona · tier:** HMG · P-S Sara · R2
+- **Modules touched:** ATS, INT, ANL, EVD, NTF
+- **Trigger:** All scorecards in.
+- **Preconditions:** Loop complete.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens debrief | Matrix of competencies by interviewer, evidence notes, disagreements highlighted |
+| 2 | Records decision "Hire" or "No hire" with rationale | Decision stored with actor; triggers `JRN-REC-06` or rejection flow |
+| 3 | 90 days after start [PROP], answers "Is the hire meeting expectations?" | Aggregate outcome stored for org analytics only, never shown to the hired person as a rating and never exported as their evidence (`BR-XCT-001`) |
+
+- **Success outcome:** Decision with rationale; post-hire outcome feeds hiring-quality analytics.
+- **Failure branches:**
+  - F1 — Split panel → decision requires `HMG` rationale explicitly addressing dissent.
+- **Source:** [SRC: SSOT J-27]
+
+## 9. Employer admin journeys
+
+### JRN-EAD-01 — Create and verify an employer organization
+
+- **Role · persona · tier:** CAN → EAD · P-C Priya · R1
+- **Modules touched:** EMP, BGV, IDN, ADM, NTF
+- **Trigger:** "Hire on TalentSphere".
+- **Preconditions:** Verified account.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Enters legal name, display name, website, size, country | Org `unverified`; creator becomes `org_owner` |
+| 2 | Verifies domain by a work email at the domain or a DNS TXT record | Domain `verified` on success |
+| 3 | Optionally submits registration documents | Org `pending_verification` for `PAD` review |
+| 4 | `PAD` approves (`JRN-PAD-02` pattern) | Org `verified`; "Verified employer" badge on jobs |
+
+- **Success outcome:** Verified org able to publish jobs without the "unverified" label.
+- **Failure branches:**
+  - F1 — Domain already claimed by another org → claim dispute to `PAD`; neither gains the badge until resolved.
+  - F2 — Free email domain → org may exist but cannot verify by email; DNS required.
+  - F3 — Risk signals (newly registered domain, job-scam patterns) → manual review before any job publishes.
+- **Source:** [SRC: SSOT J-04; UJ-14]
+
+### JRN-EAD-02 — Invite members, assign roles and enforce SSO
+
+- **Role · persona · tier:** EAD · P-C Priya · R2
+- **Modules touched:** EMP, IDN, NTF, PLT
+- **Trigger:** Team grows.
+- **Preconditions:** Org verified; plan supports SSO.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Invites emails with role (`org_admin`, `recruiter`, `hiring_manager`, `viewer`) | Invites sent; seats checked |
+| 2 | Configures SAML with IdP metadata | Test sign-in required before enabling |
+| 3 | Enables enforcement | Members must sign in via SSO in the org context; personal context unaffected |
+| 4 | Enables SCIM | Deprovisioned users lose org grants within minutes |
+
+- **Success outcome:** Members in correct roles; SSO enforced.
+- **Failure branches:**
+  - F1 — Admin tries to make someone `org_owner` while only `org_admin` → denied (owner only).
+  - F2 — SSO misconfiguration → enforcement blocked until test passes; owner keeps a recovery sign-in path.
+- **Source:** [SRC: UJ-14; USR-01 REV2]
+
+### JRN-EAD-03 — Buy seats, survive a failed payment, downgrade
+
+- **Role · persona · tier:** EAD (owner or billing manager) · R2
+- **Modules touched:** BIL, EMP, JOB, NTF
+- **Trigger:** Card declined at renewal.
+- **Preconditions:** Active subscription.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Receives "Payment failed" | Subscription `past_due`; full entitlements during grace (`OD-PRD-06`) with banner |
+| 2 | Updates card in customer portal | Retry succeeds; `active` |
+| 3 | Alternative: does nothing | Dunning stages; at exhaustion, free-tier entitlements; jobs beyond the free limit stop accepting new applications but are not deleted; data intact (`BR-XCT-045`) |
+
+- **Success outcome:** No data loss; clear status at every stage.
+- **Failure branches:**
+  - F1 — Downgrade below current seat count → owner chooses which members lose seats; removed members keep personal accounts.
+- **Source:** [SRC: COMMERCIAL_OPERATIONS §3–§4]
+
+### JRN-EAD-04 — Offboard a member and run an access review
+
+- **Role · persona · tier:** EAD · R2
+- **Modules touched:** EMP, ATS, INT, IDN, ADM
+- **Trigger:** A recruiter leaves; quarterly access-review prompt.
+- **Preconditions:** Member active.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Clicks "Remove member" | Shows owned jobs, open offers, scheduled interviews |
+| 2 | Reassigns each to a member | Ownership moved; candidates see no disruption |
+| 3 | Confirms | Org grants revoked at once; API keys created by the member stay owned by the org (`BR-XCT-003`) |
+| 4 | Runs access review | List of members, roles, last activity, MFA/SSO status; each confirmed or revoked |
+
+- **Success outcome:** No orphaned work; review recorded in org audit log.
+- **Failure branches:**
+  - F1 — Removing the last owner → blocked.
+  - F2 — Member is mid-offer approval → approval re-routed.
+- **Source:** [SRC: USR-01 §6; UJ-14]
+
+### JRN-EAD-05 — Publish the brand page and respond to reviews
+
+- **Role · persona · tier:** EAD · R2 (reviews gated `OD-PRD-17`)
+- **Modules touched:** EMP, TSF, SRC, NTF
+- **Trigger:** Org wants a public careers presence.
+- **Preconditions:** Org verified.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Edits brand page: about, values, benefits, media, open jobs feed | Draft preview; media scanned |
+| 2 | Publishes | Page public and indexed |
+| 3 | A review appears | Admin can respond publicly once per review; cannot edit, hide or learn the author's identity |
+| 4 | Reports a review as false | `TSF` reviews; review stays visible unless the policy threshold for interim hide is met (`BR-XCT-053`) |
+
+- **Success outcome:** Brand page live; reviews answered without suppression.
+- **Failure branches:**
+  - F1 — Admin attempts to write a review of own org → denied (`BR-XCT-059`).
+- **Source:** [SRC: SSOT J-22, J-24]
+
+## 10. Institution admin journeys
+
+### JRN-IAD-01 — Set up an institution, buy a licence and provision a cohort
+
+- **Role · persona · tier:** CAN → IAD · P-J Dr. Rao · R3
+- **Modules touched:** INS, BIL, IDN, PLT, NTF, BGV
+- **Trigger:** Department signs up.
+- **Preconditions:** Verified account.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Creates institution with official domain | `pending_verification`; `PAD` review |
+| 2 | Buys or is assigned a seat licence (`OD-PRD-07`) | Seats available |
+| 3 | Creates program and cohort; uploads roster CSV (name, email, student id optional) | Validation report: duplicates, invalid emails, over-seat rows; max rows per batch [SRC: SSOT OD-21 5k] |
+| 4 | Confirms | Seats `provisioned`; invites sent (`JRN-STD-01`) |
+
+- **Success outcome:** Cohort provisioned with invites out.
+- **Failure branches:**
+  - F1 — Rows exceed seats → only rows within seats processed after explicit choice.
+  - F2 — Student already on platform with that email → invite attaches grant on claim.
+- **Source:** [SRC: SSOT J-14]
+
+### JRN-IAD-02 — Read cohort skill coverage without seeing private data
+
+- **Role · persona · tier:** IAD · P-J Dr. Rao · R3
+- **Modules touched:** INS, ANL, EVD
+- **Trigger:** Accreditation report due.
+- **Preconditions:** Cohort active.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens skill coverage | Share of learners with evidence per skill, by rung, from institution-run work and shared evidence; cells below `min_cohort_k` suppressed |
+| 2 | Drills to a program | Same suppression; no learner names unless the view is institution-run course grades |
+| 3 | Exports PDF | Export carries suppression and method notes |
+
+- **Success outcome:** Aggregate report with no individual inference.
+- **Failure branches:**
+  - F1 — Filter combination yields small cell → suppressed with "Not enough learners".
+- **Source:** [SRC: USR-01 BR-T100]
+
+### JRN-IAD-03 — Issue institution credentials and correct one
+
+- **Role · persona · tier:** IAD · R3
+- **Modules touched:** INS, EVD, NTF, TSF
+- **Trigger:** Program completion.
+- **Preconditions:** Credential template approved.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Selects completed learners and template | Preview per learner |
+| 2 | Issues | Credentials `active`, issuer class `institution`, verification URLs |
+| 3 | Discovers a wrong name on one | Issues a corrected version; old version `superseded` with link (`BR-XCT-069`) |
+| 4 | Revokes one for academic misconduct | Reason recorded; holder notified; public status "Revoked" |
+
+- **Success outcome:** Credentials valid and correctable with history.
+- **Failure branches:**
+  - F1 — Holder disputes revocation → routed to institution's process; platform tracks the case.
+- **Source:** [SRC: SSOT §6.3]
+
+## 11. Placement officer journeys
+
+### JRN-PLO-01 — Organize a placement drive with employers
+
+- **Role · persona · tier:** PLO · P-I Ivy · R3
+- **Modules touched:** INS, EMP, JOB, INT, NTF
+- **Trigger:** Placement season.
+- **Preconditions:** `PLO` grant.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Creates drive: dates, eligible cohorts, criteria (program, year, credential held) | Drive `draft` |
+| 2 | Invites employers | Invitations to verified orgs (`JRN-REC-08`) |
+| 3 | Publishes to eligible students | Notifications to eligible students only |
+| 4 | Monitors | Applications per role, interviews scheduled, offers; counts only |
+
+- **Success outcome:** Drive with employers and applicants.
+- **Failure branches:**
+  - F1 — Criteria use a protected attribute → not offered as a criterion.
+- **Source:** [SRC: SSOT J-09]
+
+### JRN-PLO-02 — Produce the placement outcome report
+
+- **Role · persona · tier:** PLO · P-I Ivy · R3
+- **Modules touched:** INS, ANL, SET
+- **Trigger:** End of season.
+- **Preconditions:** Drives closed.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens outcomes | Drive offers plus alumni outcomes from `alumni.share_outcomes`; suppressed below `min_cohort_k` |
+| 2 | Exports | Method notes: coverage rate (share of graduates who shared), suppressed cells |
+
+- **Success outcome:** Honest report stating coverage, not a claimed placement rate for non-sharers.
+- **Failure branches:**
+  - F1 — Alumnus revokes sharing → excluded from the next run.
+- **Source:** [SRC: SSOT J-09; CONSENT_SCOPE_CATALOGUE]
+
+## 12. Enterprise talent journeys (gated `OD-PRD-02`, `OD-PRD-20`)
+
+### JRN-EXA-01 — Launch internal mobility and post an internal role
+
+- **Role · persona · tier:** EXA · P-T Tara · R6
+- **Modules touched:** ENT, ATS, JOB, SET, NTF
+- **Trigger:** Leadership asks to fill roles internally first.
+- **Preconditions:** `ENT` enabled for the org.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Configures policy: internal window (10 days [PROP]), whether current manager is notified on application (default no) | Policy saved |
+| 2 | Posts internal role | Visible only to org members with the employee flag |
+| 3 | Employee applies | Application confidential to the hiring team per policy |
+| 4 | Window closes | Role may be published externally |
+
+- **Success outcome:** Internal candidates considered first.
+- **Failure branches:**
+  - F1 — Employee's manager is on the hiring team → employee warned before applying.
+- **Source:** [SRC: SSOT J-16, J-28; PROP]
+
+### JRN-EXA-02 — Assign mandatory learning and track completion
+
+- **Role · persona · tier:** EXA · P-L Tomas · R6
+- **Modules touched:** ENT, LRN, NTF, PLT
+- **Trigger:** Annual security training.
+- **Preconditions:** Course in the internal catalog.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Assigns course to departments with due date | Assignments created; employees notified |
+| 2 | Monitors completion | Counts by department; individual completion of mandated courses visible to `EXA` (lawful basis: employment obligation, `OD-PRD-20`) |
+| 3 | Syncs completions to HRIS | Via `JRN-API-01` style integration |
+
+- **Success outcome:** Completion tracked and synced.
+- **Failure branches:**
+  - F1 — HRIS sync fails → retries; report flags unsynced records.
+- **Source:** [SRC: SSOT J-16]
+
+### JRN-EXA-03 — Run a skills inventory and gap report
+
+- **Role · persona · tier:** EXA · P-T Tara · R6
+- **Modules touched:** ENT, ANL, AIC, MKT, EVD
+- **Trigger:** Workforce planning.
+- **Preconditions:** Employees shared skills to the org (opt-in).
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens inventory | Aggregate skill counts by department and rung; suppressed below `min_cohort_k`; coverage stated |
+| 2 | Compares with target skills | Gap list with learning suggestions |
+| 3 | Exports | No individual names |
+
+- **Success outcome:** Aggregate gap report.
+- **Failure branches:**
+  - F1 — Request for individual skill list → denied (`BR-XCT-001`).
+- **Source:** [SRC: SSOT J-28]

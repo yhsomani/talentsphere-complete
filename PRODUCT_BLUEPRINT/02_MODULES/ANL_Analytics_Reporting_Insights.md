@@ -984,3 +984,434 @@ Service principal `API`: reads tenant aggregates under scoped grants (`FR-ANL-03
   - Given a forecast value, when displayed, then it is labelled "forecast".
   - Given a reconciliation break above tolerance, when viewing, then the tile flags it.
   - Given a non-finance role, when opening, then 403.
+
+## 5. Business rule table
+
+`min_cohort_k` is the single policy parameter for minimum cohort size; default 10 [SRC: SSOT Amendment G, BR-178]. Feature overrides stricter than the default are allowed; values below the default need an owner and counsel decision record.
+
+| ID | Rule | Rationale | Enforced where | Source |
+|---|---|---|---|---|
+| BR-ANL-001 | Every metric has a permanent id, owner role, definition, formula (numerator, denominator, population), source, privacy class, allowed dimensions, consent basis, dedup key, review cadence, integrity check and a decision it supports. A metric without a decision is not registered. Definitions cannot be redefined silently. | One number, one meaning. | Metric registry, query service | [SRC: METRICS_CATALOG §1 principle 2, §8, §9.1] |
+| BR-ANL-002 | Business-critical counts come from server-side domain events (outbox), not client beacons; client events cover only UX interactions the server cannot know. | Accuracy and resistance to blockers and tampering. | Schema registry, ingest | [SRC: METRICS_CATALOG §1 principle 5, §4.1] |
+| BR-ANL-003 | Every analytics field carries a privacy class: P0 no personal data, P1 pseudonymous event, P2 aggregate-only with minimum cohort, P3 special handling (fairness data and anything sensitive). | Proportionate protection. | Data catalogue, ingest | [SRC: METRICS_CATALOG §6.1] |
+| BR-ANL-004 | No aggregate is returned with fewer than `min_cohort_k` distinct people (or the metric's registered unit) in a cell; stricter feature values stay as overrides (learning outcomes 30, career transitions 20); a value below default needs a decision record. | Re-identification control. | Suppression service | [SRC: SSOT BR-178, BR-189, BR-160, V61-04] |
+| BR-ANL-005 | Suppression is complementary (hidden cells cannot be derived from totals, siblings or overlapping queries), counts are rounded, and dimensions per query and query budget per client are capped. | Blocks differencing. | Suppression service | [DER] |
+| BR-ANL-006 | Tenant users (employer, institution, enterprise) see only their own tenant's analytics; tenancy is enforced in the query service, not the UI; cross-tenant benchmarks are anonymous medians above the cohort minimum. | Tenant isolation. | Query service, tests | [SRC: METRICS_CATALOG §5 Access; MET-042] |
+| BR-ANL-007 | ANL provides no individual-level performance tracking or ranking of recruiters, instructors, support agents, moderators or employees; team-level aggregates only, above the cohort minimum. | Analytics must not become staff surveillance. | Dashboard design review, authz | [SRC: METRICS_CATALOG §1 principle 4] |
+| BR-ANL-008 | Person-keyed product analytics beyond what is needed to operate the service requires consent `analytics.product`; the consent reference travels in the event envelope; without consent only identifier-free aggregate counters are kept; experiments additionally require `analytics.experiments`. | Lawful, transparent collection. | Ingest, flag service | [SRC: METRICS_CATALOG §6.2 Consent; INV-T15]; legal basis `OD-ANL-02` |
+| BR-ANL-009 | Events use the standard envelope and property allowlists; no free text, emails, names, phone numbers, message bodies, resume content or tokens; schema changes are additive only; a breaking change is a new event name. | Safety and stability. | Schema registry, ingest | [SRC: METRICS_CATALOG §4.1] |
+| BR-ANL-010 | Product analytics, operational telemetry and the audit log are separate signals: not merged, not stored together by default, not used for each other's purpose; analytics opt-out never shortens audit retention. | Different bases and risks. | Architecture, access control | [SRC: METRICS_CATALOG §9.2] |
+| BR-ANL-011 | Actors are identified by rotating pseudonymous ids; joins to identity happen only in the restricted zone, for an approved, time-boxed purpose, and are audited. | Limits re-identification. | Warehouse zones, access approvals | [SRC: METRICS_CATALOG §4.1, §5] |
+| BR-ANL-012 | Synthetic, test and staff test traffic is tagged at ingest and excluded from every metric. | Clean numbers. | Ingest | [SRC: METRICS_CATALOG §4.1] |
+| BR-ANL-013 | Ingest is idempotent by `event_id`; loaders are replay-safe; late events are accepted for 7 days and reprocessed. | Exactness. | Ingest | [SRC: METRICS_CATALOG §4.1]; late window [PROP] |
+| BR-ANL-014 | Erasure removes or irreversibly de-identifies a person's person-keyed events (pseudonym mapping destroyed); aggregates are not recomputed but small cells are re-evaluated for suppression. | Data rights with analytic continuity. | Erasure job | [SRC: METRICS_CATALOG §5 Retention] |
+| BR-ANL-015 | Fairness and demographic data is voluntary, separately stored (P3), revocable, never visible to recruiters, never a matching or scoring feature, and purpose-limited to audit. | Fairness measurement without discrimination. | Fairness store, authz | [SRC: METRICS_CATALOG §6.4; INV-T19] |
+| BR-ANL-016 | Outcome and trend statements are labelled descriptive or correlational unless produced by a registered experiment; no guarantee or causal claim appears in the product. | Honesty. | UI templates, copy review | [SRC: SSOT BR-193] |
+| BR-ANL-017 | Every widget shows its definition link, data freshness and sample size; stale data (older than twice its cadence) carries a banner; a metric under investigation carries a banner. | Trustworthy dashboards. | Dashboard framework | [DER] |
+| BR-ANL-018 | Every experiment is registered with hypothesis, primary metric, guardrails, population, duration and owner and reviewed by its risk class; experiments on ranking, matching, verification, assessment, moderation, pricing, consent or notification frequency need ethics review; forbidden: pay-to-rank, hiding or downgrading verification status, removing match explanations, weakening consent, security, accessibility or integrity, deceptive pricing; matching experiments must show outcome parity before rollout. | Responsible experimentation. | Experiment registry | [SRC: METRICS_CATALOG §7] |
+| BR-ANL-019 | Dark patterns are prohibited in experiments, consent flows and notification design: confirmshaming, fake urgency, pre-ticked consent, hidden unsubscribe, guilt-based streaks. | User dignity. | Review checklist | [SRC: METRICS_CATALOG §7] |
+| BR-ANL-020 | A guardrail breach (opt-out rate, ticket rate, accessibility regressions, SLO burn, AI cost, refund rate) auto-halts the experiment; every experiment has a kill switch effective within 1 minute. | Fast safety stop. | Flag service | [SRC: METRICS_CATALOG §7]; 1 minute [PROP] |
+| BR-ANL-021 | Minors and users in sensitive circumstances are excluded from experiments unless specifically reviewed. | Protect vulnerable users. | Eligibility filter | [SRC: METRICS_CATALOG §7; OPEN-09] |
+| BR-ANL-022 | Exports contain aggregates only, pass suppression, carry definitions, versions and filters, are watermarked, expire in 7 days and are logged in the audit log; individual-level exports exist only as a data subject's own data-rights export. | Prevents leakage. | Export service | [DER]; limits [PROP] |
+| BR-ANL-023 | A scheduled report runs with the owner's current permissions and verifies each recipient's current access at send time; when the owner loses access the schedule suspends. | No stale access. | Scheduler | [PROP] |
+| BR-ANL-024 | Reports and API calls compile to registered metrics and dimensions and are suppressed after compilation; no filter, grouping or sharing can bypass suppression; non-analysts have no free SQL. | Governed self-service. | Query service | [PROP] |
+| BR-ANL-025 | Metric versions are immutable once certified; dashboards pin metric versions; a certified dashboard uses only certified metrics and includes the counter-metrics or guardrails its metrics require; changes show a "What changed" banner. | Stable and explainable numbers. | Registry, dashboard certification | [SRC: METRICS_CATALOG §8, §9.1]; banner [PROP] |
+| BR-ANL-026 | Analytics queries never run on the transactional primary; the analytics store is read-only to application code and separate when volume or isolation requires it. | Protects the product. | Architecture | [SRC: METRICS_CATALOG §5; OPEN-25] |
+| BR-ANL-027 | Alert rules have an owner, an evaluation window and a deduplication window (default 24 hours); alerts on stale or suppressed data do not evaluate. | Alert quality. | Alert engine | [SRC: METRICS_CATALOG MET-037]; defaults [PROP] |
+| BR-ANL-028 | Certified metrics reconcile to source counts within tolerance (default 0.5%); an inconclusive check counts as failing; failures flag the metric on every surface. | Detect wrong numbers. | Reconciliation jobs | [SRC: METRICS_CATALOG §5, §9.1]; tolerance [PROP] |
+| BR-ANL-029 | Cohort and activity definitions are registered metrics: cohort week by first-event week in tenant time zone, activation within 7 days of registration, "active" per the registered activity list. | Comparable cohorts. | Registry | [SRC: METRICS_CATALOG MET-002, MET-022] |
+| BR-ANL-030 | Institution and placement analytics are cohort-level; faculty and placement staff cannot see non-consented private job-search data; outcome counts include only consenting students; segments must meet the cohort minimum before any message goes out. | Student privacy. | Authz, segment service | [SRC: METRICS_CATALOG §6.2 Institution analytics] |
+| BR-ANL-031 | The candidate dashboard is private to the candidate, built from their own records, ranks them against no one, and shows peer comparisons only as anonymous aggregates above the cohort minimum. | Candidate dignity. | Authz | [DER] |
+| BR-ANL-032 | Learning-to-outcome analytics require at least 30 learners per cell, a feature override stricter than `min_cohort_k`. | Statistical and privacy robustness. | Suppression service | [SRC: SSOT BR-189, V61-04] |
+| BR-ANL-033 | Analyst access requires a role, a training attestation, an approved purpose and a time limit; every query is logged; identity joins need separate approval; individual-level data cannot leave the workspace. | Governed analyst access. | Access service | [SRC: METRICS_CATALOG §5 Access]; attestation [PROP] |
+| BR-ANL-034 | Partner API keys and embed tokens are tenant-scoped, rate-limited, hashed at rest, revocable and subject to the same suppression as the UI. | Safe delivery. | API gateway | [PROP] |
+| BR-ANL-035 | Time is stored in UTC and displayed in the tenant time zone; grains and fiscal periods follow the tenant calendar; money uses minor units and ISO-4217 currency. | Correct period boundaries. | Query service | [DER] from [SRC: SSOT BR-179] |
+| BR-ANL-036 | Cost and revenue metrics are P0 or P2 aggregates readable only by finance and platform roles; forecast values are labelled forecast and never mixed silently with actuals. | Honest finance reporting. | Authz, UI | [SRC: METRICS_CATALOG §3.5, §9.1] |
+| BR-ANL-037 | Every chart has a data-table alternative, does not rely on color alone, and meets WCAG 2.2 AA contrast and keyboard operation. | Accessibility. | Component library | [SRC: METRICS_CATALOG MET-041 accessibility defects]; [DER] |
+
+## 6. State machines
+
+### SM-ANL-01 — Metric definition
+
+States: draft, in_review, certified, deprecated, retired.
+
+Transitions: [new] → draft; draft → in_review (owner submits; guard: required fields complete, integrity check defined); in_review → draft (changes requested); in_review → certified (steward and privacy reviewer approve; guard: integrity check passing, reviewer is not the author); certified → deprecated (steward; guard: no certified dashboard depends on it, successor optional); deprecated → retired (no dependents and retention elapsed); a change to a certified metric creates a new draft version and leaves the certified one unchanged. Terminal: retired.
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> in_review: submit
+    in_review --> draft: changes requested
+    in_review --> certified: approved
+    certified --> deprecated: steward deprecates
+    deprecated --> retired: no dependents
+    retired --> [*]
+```
+
+### SM-ANL-02 — Dashboard
+
+States: draft, published, certified, archived.
+
+Transitions: [new] → draft; draft → published (owner; guard: all metrics published); published → certified (steward; guard: all metrics certified, required guardrails present); certified → published (a metric loses certification or review lapses); published/certified → archived (owner or steward); archived → draft (restore). Terminal: none (archived is restorable); no hard delete of certified history.
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> published: publish
+    published --> certified: certify
+    certified --> published: certification lapses
+    published --> archived: archive
+    certified --> archived: archive
+    archived --> draft: restore
+```
+
+### SM-ANL-03 — Scheduled report
+
+States: active, paused, suspended, expired, deleted.
+
+Transitions: [new] → active; active → paused (owner); paused → active (owner); active → suspended (owner lost access or target report deleted); suspended → active (access restored, owner confirms); active/paused → expired (end date reached); any → deleted (owner or admin). Terminal: deleted, expired.
+
+```mermaid
+stateDiagram-v2
+    [*] --> active
+    active --> paused: pause
+    paused --> active: resume
+    active --> suspended: owner access lost
+    suspended --> active: access restored
+    active --> expired: end date
+    paused --> expired: end date
+    active --> deleted: delete
+    paused --> deleted: delete
+    suspended --> deleted: delete
+    expired --> [*]
+    deleted --> [*]
+```
+
+### SM-ANL-04 — Export job
+
+States: requested, running, ready, failed, expired.
+
+Transitions: [new] → requested; requested → running (worker claims); running → ready (file stored); running → failed (error after retries); ready → expired (7 days); failed → requested (user retries). Terminal: expired.
+
+```mermaid
+stateDiagram-v2
+    [*] --> requested
+    requested --> running: claimed
+    running --> ready: stored
+    running --> failed: error
+    ready --> expired: 7 days
+    failed --> requested: retry
+    expired --> [*]
+```
+
+### SM-ANL-05 — Experiment
+
+States: draft, in_review, approved, running, halted, analyzing, decided, archived.
+
+Transitions: [new] → draft; draft → in_review (submit; guard: not forbidden class); in_review → draft (changes requested) / approved (all required reviewers sign off; reviewer is not the owner); approved → running (launch via flag); running → halted (guardrail breach, SRM, kill switch); halted → running (owner resumes after review) / analyzing (stop); running → analyzing (duration and sample reached); analyzing → decided (decision with sign-off); decided → archived. Terminal: archived.
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> in_review: submit
+    in_review --> draft: changes requested
+    in_review --> approved: signed off
+    approved --> running: launch
+    running --> halted: guardrail or kill switch
+    halted --> running: resume after review
+    halted --> analyzing: stop
+    running --> analyzing: sample reached
+    analyzing --> decided: decision signed off
+    decided --> archived: archive
+    archived --> [*]
+```
+
+### SM-ANL-06 — Data access request
+
+States: submitted, in_review, approved, active, expired, denied, revoked.
+
+Transitions: [new] → submitted; submitted → in_review (privacy lead opens); in_review → approved / denied; approved → active (start date); active → expired (end date); active/approved → revoked (privacy lead, role change, incident). Terminal: expired, denied, revoked.
+
+```mermaid
+stateDiagram-v2
+    [*] --> submitted
+    submitted --> in_review: opened
+    in_review --> approved: approve
+    in_review --> denied: deny
+    approved --> active: start
+    active --> expired: end date
+    active --> revoked: revoke
+    approved --> revoked: revoke
+    expired --> [*]
+    denied --> [*]
+    revoked --> [*]
+```
+
+### SM-ANL-07 — Alert
+
+States: open, acknowledged, snoozed, resolved, suppressed.
+
+Transitions: [new] → open (condition met, outside dedup window); open → acknowledged (recipient); open/acknowledged → snoozed (recipient, bounded duration); snoozed → open (snooze ends and condition persists); open/acknowledged/snoozed → resolved (condition cleared or manual); open → suppressed (duplicate in dedup window, data stale or suppressed). Terminal: resolved, suppressed.
+
+```mermaid
+stateDiagram-v2
+    [*] --> open
+    open --> acknowledged: acknowledge
+    open --> snoozed: snooze
+    acknowledged --> snoozed: snooze
+    snoozed --> open: snooze ends
+    open --> resolved: cleared
+    acknowledged --> resolved: cleared
+    snoozed --> resolved: cleared
+    open --> suppressed: duplicate or stale
+    resolved --> [*]
+    suppressed --> [*]
+```
+
+## 7. Screen inventory
+
+| ID | Name | Route proposal | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-ANL-001 | Candidate dashboard | `/me/progress` | CAN, STD | Own progress and next steps | New user empty, populated, hidden widgets |
+| SCR-ANL-002 | Instructor analytics | `/studio/analytics` | INS | Course performance | Not enough learners, outcome label |
+| SCR-ANL-003 | Recruiter dashboard | `/recruit/home` | REC | Own pipeline health | Stalled candidates, empty |
+| SCR-ANL-004 | Hiring manager dashboard | `/hiring/home` | HMG | Requisition status | Waiting on you |
+| SCR-ANL-005 | Employer admin dashboard | `/employer/analytics` | EAD | Org hiring performance | Benchmark unavailable |
+| SCR-ANL-006 | Institution dashboard | `/institution/analytics` | IAD | Cohort adoption and outcomes | Cohort too small, consent note |
+| SCR-ANL-007 | Placement dashboard | `/institution/placement` | PLO, IAD | Placement funnel, outreach segments | Segment below minimum |
+| SCR-ANL-008 | Enterprise dashboard | `/enterprise/analytics` | EXA | Learning, mobility, skills rollup | Feature not enabled in country |
+| SCR-ANL-009 | Executive and product health | `/admin/analytics` | PAD, Analyst, FIN | North star, inputs, guardrails | Unverified metric, annotation |
+| SCR-ANL-010 | Operations dashboards | `/admin/analytics/ops` | SUP, MOD, FIN, PAD | Support, moderation, finance ops | Stale source |
+| SCR-ANL-011 | Fairness monitoring | `/admin/analytics/fairness` | PAD (RAI), SAD | Adverse-impact audit | Not assessable |
+| SCR-ANL-012 | Funnel analysis | `/analytics/funnels` | Analyst, PAD, tenant admins | Funnel builder and results | Suppressed breakdown |
+| SCR-ANL-013 | Cohort analysis | `/analytics/cohorts` | Analyst, PAD, tenant admins | Retention tables | Partial period |
+| SCR-ANL-014 | Report builder | `/analytics/reports/new` | Roles per matrix | Build and save reports | Blocked dimension, budget exceeded |
+| SCR-ANL-015 | Scheduled reports | `/analytics/schedules` | Owners, admins | Manage schedules | Suspended, failed |
+| SCR-ANL-016 | Experiments | `/admin/analytics/experiments` | PAD, Analyst | Registry, results, decisions | Halted, inconclusive |
+| SCR-ANL-017 | Alerts inbox | `/analytics/alerts` | Owners, admins | Rules and alerts | Open, snoozed |
+| SCR-ANL-018 | Analyst workspace | `/admin/analytics/workspace` | Analyst | Governed querying | Access expired |
+| SCR-ANL-019 | Access requests | `/admin/analytics/access` | Analyst, privacy lead | Request and approve | Pending, expired |
+| SCR-ANL-020 | Metric registry | `/admin/analytics/metrics` | PAD, all read | Definitions and versions | Draft, certified, deprecated |
+| SCR-ANL-021 | Pipeline monitor | `/admin/analytics/pipeline` | PAD | Lag, rejects, replay | Paused source |
+| SCR-ANL-022 | Data catalogue | `/admin/analytics/catalogue` | PAD, privacy lead | Field classification | Unclassified |
+| SCR-ANL-023 | Analytics preferences | `/settings/privacy/analytics` | Signed-in | Consent and own data export | Opt-in, withdrawn |
+| SCR-ANL-024 | Event schema registry | `/admin/analytics/schemas` | PAD, engineers | Schemas and reviews | Breaking change blocked |
+| SCR-ANL-025 | Data quality | `/admin/analytics/quality` | PAD | Reconciliation results | Failing, inconclusive |
+| SCR-ANL-026 | My exports | `/analytics/exports` | Roles per matrix | Download aggregate exports | Ready, expired |
+| SCR-ANL-027 | Dashboard home and saved views | `/analytics` | All with a dashboard | Entry point and saved views | No access |
+| SCR-ANL-028 | API and embed grants | `/settings/analytics/api` | EAD, IAD, EXA, PAD | Grants, embeds, usage | Pending, revoked |
+| SCR-ANL-029 | Unit economics | `/admin/analytics/economics` | FIN, PAD | Revenue, cost, margin | Forecast label, break flagged |
+| SCR-ANL-030 | Changelog and certification | `/admin/analytics/changes` | PAD (steward) | Impact preview, approvals | Review overdue |
+
+## 8. Data entities owned
+
+| ID | Entity | Key attributes | Relationships | Retention class |
+|---|---|---|---|---|
+| ENT-ANL-01 | MetricDefinition | metricId, version, state, owner, formula, privacyClass, dimensions, consentBasis, dedupKey, decisionSupported | 1:N versions; used by dashboards | Permanent |
+| ENT-ANL-02 | DimensionDefinition | dimensionId, name, allowedFor classes, hierarchy | N:M metrics | Permanent |
+| ENT-ANL-03 | EventSchema | eventName, version, properties, source, owner, feedsMetrics | N:M metrics | Permanent |
+| ENT-ANL-04 | DataCatalogueField | fieldId, eventName, class, purpose, retention, owner | N:1 schema | Permanent |
+| ENT-ANL-05 | PipelineRun | sourceModule, window, rowsIn, rowsOut, rejected, lag | N:1 source | 12 months |
+| ENT-ANL-06 | Rollup | metricId, metricVersion, grain, dimensions, windowStart, value, sampleSize, computedAt | N:1 MetricDefinition | Per metric (default 36 months) |
+| ENT-ANL-07 | DashboardDefinition | dashboardId, state, widgets (metricId, version), filters, ownerId or tenantId | N:M metrics | Permanent while active |
+| ENT-ANL-08 | SavedReport | reportId, ownerId, tenantId, metrics, dimensions, filters, visualization | N:1 owner | While owner active |
+| ENT-ANL-09 | ReportSchedule | scheduleId, targetRef, cadence, timezone, format, recipients, state | N:1 report or dashboard | While active |
+| ENT-ANL-10 | ExportJob | jobId, requesterId, scope, state, fileRef, expiresAt | N:1 user | File 7 days; audit 24 months |
+| ENT-ANL-11 | AlertRule | ruleId, metricId, scope, condition, window, dedupWindow, recipients | N:1 metric | While active |
+| ENT-ANL-12 | AlertInstance | alertId, ruleId, value, state, ackBy | N:1 rule | 12 months |
+| ENT-ANL-13 | Experiment | experimentId, hypothesis, variants, primaryMetric, guardrails, riskClass, state, approvals | 1:N exposures | Permanent (learnings) |
+| ENT-ANL-14 | ExperimentExposure | experimentId, pseudonymId, variant, exposedAt | N:1 Experiment | 25 months; de-identified on erasure |
+| ENT-ANL-15 | ExperimentResult | experimentId, effects, intervals, srmCheck, decision, signOffs | N:1 Experiment | Permanent |
+| ENT-ANL-16 | DataAccessGrant | requestId, analystId, datasets, purpose, validFrom, validTo, state, joinApproved | N:1 analyst | 24 months |
+| ENT-ANL-17 | AnalystQueryLog | queryId, analystId, datasets, rowsReturned, at | N:1 grant | 24 months |
+| ENT-ANL-18 | FairnessRecord | pseudonymId, groupCode (voluntary), consentVersion, stageOutcomes | Separate P3 store | Until withdrawal or retention policy |
+| ENT-ANL-19 | ReconciliationRun | metricId, sourceCount, analyticsCount, difference, result | N:1 metric | 24 months |
+| ENT-ANL-20 | SuppressionPolicy | parameter, value, scope, decisionRecordId, version | Versioned | Permanent |
+| ENT-ANL-21 | ApiGrant | grantId, tenantId, scopes, origins, rateTier, keyHash, state | N:1 tenant | While active |
+| ENT-ANL-22 | Annotation | scope, date, text, releaseOrExperimentRef | N:1 dashboard | Permanent |
+| ENT-ANL-23 | ErasureRecord | requestRef, completedAt, scopeSummary | Link to `SET` request | 24 months |
+| ENT-ANL-24 | CostFact | period, category, amountMinor, currency, allocation, source | Aggregate only | 7 years [PROP] |
+
+## 9. Events emitted and consumed
+
+### 9.1 Emitted
+
+| ID | Name | Trigger | Key payload |
+|---|---|---|---|
+| EVT-ANL-001 | analytics.metric.published | Metric certified or new version | metricId, version |
+| EVT-ANL-002 | analytics.metric.deprecated | Metric deprecated | metricId, successorId |
+| EVT-ANL-003 | analytics.dashboard.published | Dashboard published or certified | dashboardId, state |
+| EVT-ANL-004 | analytics.report.saved | Report saved | reportId |
+| EVT-ANL-005 | analytics.schedule.created | Schedule created | scheduleId, cadence |
+| EVT-ANL-006 | analytics.report.delivered | Scheduled run delivered | scheduleId, recipientCount, status |
+| EVT-ANL-007 | analytics.export.requested | Export requested | jobId, format |
+| EVT-ANL-008 | analytics.export.ready | Export ready | jobId |
+| EVT-ANL-009 | analytics.alert.fired | Alert opened | ruleId, metricId |
+| EVT-ANL-010 | analytics.quality.failed | Reconciliation failure | metricId, difference |
+| EVT-ANL-011 | analytics.pipeline.lagging | Lag or reject rate breach | sourceModule, lag |
+| EVT-ANL-012 | analytics.consent.changed | Analytics consent changed | purpose, state |
+| EVT-ANL-013 | analytics.erasure.completed | Erasure done | requestRef |
+| EVT-ANL-014 | analytics.experiment.approved | Experiment approved | experimentId, riskClass |
+| EVT-ANL-015 | analytics.experiment.started | Experiment launched | experimentId |
+| EVT-ANL-016 | analytics.experiment.exposed | Variant applied | experimentId, variant (pseudonymous) |
+| EVT-ANL-017 | analytics.experiment.halted | Guardrail breach or kill | experimentId, reason |
+| EVT-ANL-018 | analytics.experiment.decided | Decision recorded | experimentId, decision |
+| EVT-ANL-019 | analytics.access.approved | Analyst access approved | requestId, joinApproved |
+| EVT-ANL-020 | analytics.access.revoked | Access revoked or expired | requestId |
+| EVT-ANL-021 | analytics.fairness.finding_recorded | Fairness review outcome | modelVersion, outcome |
+| EVT-ANL-022 | analytics.policy.changed | Suppression policy changed | parameter, decisionRecordId |
+| EVT-ANL-023 | analytics.api.grant_changed | API or embed grant changed | grantId, state |
+| EVT-ANL-024 | analytics.dashboard.shared | Snapshot link created | dashboardId, expiresAt |
+
+### 9.2 Consumed
+
+| Source (module) | Event | Use |
+|---|---|---|
+| All modules (outbox) | Domain events listed in 9.3 and each module's emitted-event table | Metrics, funnels, cohorts |
+| `SET` (planned) | consent changed; data-rights request created | Consent filtering; erasure |
+| `IDN` (planned) | account deleted, role changed | Erasure, access revocation |
+| `EMP`, `INS`, `ENT` (planned) | tenant created, cohort changed, unit sync | Tenant scoping, cohort definitions |
+| `BIL` (planned) | entitlement changed, invoice, refund | Business metrics, premium analytics gating |
+| `ADM`, `TSF` (planned) | ticket, report and decision events | Operations metrics |
+| `MKT` | snapshot published | Market widgets in role dashboards |
+
+### 9.3 Product analytics event taxonomy (initial catalogue)
+
+Naming: `<domain>.<entity>.<past_tense_verb>`; server events are business facts; client events are UX interactions only [SRC: METRICS_CATALOG §4.1, §4.2]. Properties are allowlisted enums and opaque ids.
+
+| Event | Source | Trigger | Key properties | Feeds |
+|---|---|---|---|---|
+| account.user.registered | Server | Sign-up completed | role intent, referral class | MET-002, MET-022 |
+| profile.profile.updated | Server | Section saved | sections changed (enum) | MET-003 |
+| evidence.item.created | Server | Evidence saved | type, rung, source class | MET-002, MET-003, MET-008 |
+| evidence.item.verified | Server | Verification transition | from rung, to rung, method class | MET-004, MET-008 |
+| evidence.item.revoked | Server | Revocation | reason class | MET-007 |
+| evidence.item.viewed_by_employer | Server | Consented view | job id, rung | MET-001, MET-015 |
+| verification.request.created, completed | Server | Request lifecycle | type, outcome class | MET-005 |
+| reference.request.sent, answered, expired | Server | Referee flow | latency bucket | MET-006 |
+| assessment.attempt.started, submitted, passed | Server | Attempt lifecycle | assessment id, integrity mode | MET-019 |
+| assessment.integrity.flagged, decided, appealed | Server | Review flow | decision class | MET-020 |
+| course.enrollment.created, completed | Server | Learning | course id | MET-017 |
+| job.posting.published, closed | Server | Job lifecycle | org id (opaque), category | MET-009, MET-010 |
+| application.application.submitted | Server | Apply | job id, evidence count | MET-009, MET-016 |
+| application.stage.changed | Server | Pipeline | from, to, actor type | MET-011, MET-012, MET-052 |
+| interview.interview.scheduled | Server | Scheduling | type | MET-001, MET-011 |
+| messaging.message.sent | Server | Message | thread type only | MET-001 |
+| search.query.performed, search.result.clicked | Client and server | Search | result count bucket, position | MET-053 |
+| match.explanation.viewed | Client | Opens rationale | side | MET-013 |
+| notification.notification.delivered, opened, disabled | Server and client | Notification | class, channel | MET-048 |
+| push.permission.prompted, granted | Client | PWA push | platform class | MET-049 |
+| billing.entitlement.changed | Server | Verified webhook | plan code | MET-026, MET-031 |
+| privacy.consent.changed | Server | Consent | purpose, new state | compliance |
+| privacy.request.completed | Server | Data rights | type, duration bucket | MET-046 |
+| ai.call.completed | Server | Gateway | feature, model class, token buckets, tier | MET-029 |
+| events.registration.confirmed, checked_in | Server | `EVT` | event type | MET-EVT-01, MET-EVT-02 |
+| mkt.benchmark.viewed | Client | `MKT` | kind | MET-ANL-05 |
+| enterprise.learning.completed | Server | `ENT` | mandatory flag | MET-ENT-05 |
+| support.ticket.created, resolved | Server | Ticketing | category | MET-033 |
+| analytics.experiment.exposed | Server | Variant applied | experiment id, variant | experiment analysis |
+
+## 10. Integrations and external dependencies
+
+| Dependency | Purpose | Notes |
+|---|---|---|
+| Analytics warehouse (first-party Postgres schema or separate analytics DB, or managed warehouse) | Store and compute | Choice `OD-ANL-03`; legacy OPEN-25 |
+| Product analytics SaaS (optional) | Visualization, if chosen | Only server-side forwarding with allowlist; no free-capture SDK; `OD-ANL-10` |
+| Feature flag service | Experiment assignment and kill switch | First-party or provider |
+| Object storage and PDF/CSV generator | Exports and scheduled files | Via `PLT` (planned) |
+| Email, in-app, push | Report and alert delivery | Via `NTF` (planned) |
+| Billing provider reports; cloud billing exports; AI gateway usage | Unit economics | Read-only reconciliation inputs |
+| BI embedding libraries | Embedded dashboards | Signed tokens, origin allow-list |
+| Statistical libraries | Experiment analysis, forecasting inputs | Versioned |
+
+## 11. Cross-module dependencies
+
+| Depends on | Why | Depended on by | Why |
+|---|---|---|---|
+| All modules (outbox events) | Source of facts | EVT | Organizer analytics reads rollups and definitions |
+| SET (planned) | Consent and data rights | MKT | Shared suppression policy and metric registry |
+| IDN (planned) | Pseudonymous ids, roles | ENT | Enterprise rollups, thresholds |
+| EMP, INS (planned) | Tenant and cohort scoping | INS (planned) | Institution analytics |
+| BIL (planned) | Revenue, entitlements | EMP (planned) | Employer analytics tiles |
+| NTF, PLT (planned) | Delivery, files, API gateway | ATS, JOB, LRN, STU (planned) | Embedded role widgets |
+| ADM, TSF (planned) | Operations data | ADM (planned) | Operations dashboards |
+| MKT | Market snapshots | AIC (planned) | Fairness and parity checks |
+
+## 12. Module-level metrics
+
+### 12.1 ANL's own metrics
+
+| Metric | Definition | Formula | Owner role |
+|---|---|---|---|
+| MET-ANL-01 Certified metric coverage | Share of displayed widgets that use certified metrics | certified widgets / all widgets | Metric steward |
+| MET-ANL-02 Data freshness attainment | Pipelines within freshness target | on-time runs / runs | Data platform |
+| MET-ANL-03 Reconciliation pass rate | Certified metrics passing integrity checks | passing / certified | Data platform |
+| MET-ANL-04 Suppression rate | Cells suppressed under the cohort minimum | suppressed / candidate cells | Privacy lead |
+| MET-ANL-05 Insight adoption | Active dashboard users per role | users opening a dashboard in 28 days / active users per role | Product |
+| MET-ANL-06 Scheduled report delivery success | Runs delivered on time | delivered / scheduled | Data platform |
+| MET-ANL-07 Alert actionability | Alerts that led to an acknowledgement or resolution | acted / fired | Metric steward |
+| MET-ANL-08 Experiment halt rate | Experiments halted by guardrails | halted / launched | Product, privacy |
+| MET-ANL-09 Analyst access time | Median days from request to decision | median(decision − submitted) | Privacy lead |
+| MET-ANL-10 Erasure completion time | p95 time to complete analytics erasure | p95(done − requested) | Privacy lead |
+
+### 12.2 Dashboard catalogue (role to dashboard to key metrics)
+
+Legacy metric ids are from METRICS_CATALOG §3 [SRC]; all metrics are registered under `FR-ANL-001` before use.
+
+| Role | Dashboard (feature) | Key metrics | Privacy class |
+|---|---|---|---|
+| Candidate, Student | Candidate dashboard (FR-ANL-011) | Own evidence by rung, own application funnel, own course progress, assessment results, goal progress | P1 own data |
+| Instructor | Instructor analytics (FR-ANL-012) | Completion rate, module drop-off, MET-019, MET-017, MET-018 | P2 (outcomes k ≥ 30) |
+| Recruiter | Recruiter dashboard (FR-ANL-013) | MET-009, MET-010, MET-011, MET-012, MET-015 (own), outreach reply rate | P2 |
+| Hiring manager | Hiring manager dashboard (FR-ANL-014) | Time in stage, feedback latency, offer acceptance, time to fill | P2 |
+| Employer admin | Employer admin dashboard (FR-ANL-015) | Funnel, time to hire, source yield, brand reach, seats used, MET-014 summary | P2 |
+| Institution admin | Institution dashboard (FR-ANL-016) | MET-021, completion, evidence per student, consented outcomes | P2 |
+| Placement officer | Placement dashboard (FR-ANL-017) | Placement rate (consenting), time to first offer, employer engagement | P2 |
+| Enterprise admin | Enterprise dashboard (FR-ANL-018) | Mandatory completion, overdue backlog, internal fill rate, inventory coverage | P2 |
+| Platform admin, executives | Executive and health (FR-ANL-019) | MET-001, MET-002, MET-004, MET-009, MET-022, MET-023, MET-024, MET-048, MET-026, MET-029, MET-042 | P0/P2 |
+| Support, moderation, finance | Operations dashboards (FR-ANL-020) | MET-033, MET-034, MET-047, MET-020, MET-032, MET-046, MET-055 | P0 |
+| Responsible-AI reviewer | Fairness monitoring (FR-ANL-021) | MET-014 | P3 |
+| Finance | Unit economics (FR-ANL-036) | MET-027, MET-028, MET-029, MET-030, MET-031, MET-032 | P0 |
+
+## 13. Open decisions
+
+| ID | Question | Options | Default proposal | Who decides | Blocking |
+|---|---|---|---|---|---|
+| OD-ANL-01 | How broad is the first analytics release given "analytics for every role"? | A: all dashboards; B: platform, candidate, recruiter, institution first; C: platform only | B, with minimal viable slice = FR-ANL-001, 002, 003, 004, 005, 006, 007, 008, 009, 010, 011, 019, 028 at R1 to R2; role dashboards follow their feature modules | Product owner | All ANL build |
+| OD-ANL-02 | Consent defaults and legal basis for product analytics per jurisdiction | Opt-in everywhere; opt-in where required, notice elsewhere | Opt-in everywhere until counsel advises (legacy OPEN-08) | Counsel, Privacy | FR-ANL-006 |
+| OD-ANL-03 | Analytics store: Postgres schema, separate analytics DB, or managed warehouse | Options | Postgres schema first, separate store when volume or isolation requires (legacy OPEN-25) | Engineering lead | FR-ANL-002 |
+| OD-ANL-04 | Retention of raw and pseudonymous events and salt rotation | Months | 25 months raw, aggregates longer (legacy OPEN-08) | Counsel, Privacy | FR-ANL-009 |
+| OD-ANL-05 | North-star metric: Evidence-Backed Hiring Conversations per week or Verifiable Career Progress, or a hierarchy | EBHC; VCP; hierarchy | Hierarchy with VCP for candidate outcomes and EBHC for marketplace health (legacy OPEN-51) | Product owner | FR-ANL-019 |
+| OD-ANL-06 | Adverse-impact threshold and legal interpretation | 0.8 ratio or other | 0.8 as a review signal only; counsel interprets | Counsel, Responsible-AI lead | FR-ANL-021 |
+| OD-ANL-07 | Support and moderation SLA targets | Per class | Defined after baseline measurement (legacy OPEN-16) | Support and T&S leads | FR-ANL-020 |
+| OD-ANL-08 | Metric review cadence and owners | Quarterly, semi-annual | Quarterly (legacy OPEN-15) | Metric steward | FR-ANL-001, 035 |
+| OD-ANL-09 | Predictive hiring or success models (SSOT F-168) | Allow; defer; forbid | Defer until fairness and consent gates pass | Product owner, Counsel | FR-ANL-025 |
+| OD-ANL-10 | First-party analytics only or an analytics SaaS | First-party; SaaS with server-side forwarding | First-party; SaaS only server-side and allow-listed | Engineering lead, Privacy | FR-ANL-002, 007 |
+| OD-ANL-11 | Do employer admins see individual recruiter metrics? | Never; team-level; individual with consent of the recruiter | Team-level only | Product owner, Counsel | FR-ANL-013, 015 |
+
+## 14. Risks
+
+| ID | Risk | Impact | Mitigation |
+|---|---|---|---|
+| RSK-ANL-01 | Analytics becomes surveillance of candidates, staff or employees | Trust and legal harm | BR-ANL-007, 030, 031; no individual-level tools in dashboards |
+| RSK-ANL-02 | Re-identification from small cells or repeated queries | Privacy breach | BR-ANL-004, 005, 024; query budgets (FR-ANL-005) |
+| RSK-ANL-03 | Conflicting definitions and silently shifting numbers | Wrong decisions | Registry, versioning, certification, reconciliation (FR-ANL-001, 008, 035) |
+| RSK-ANL-04 | Experimentation harms users or fairness | Harm, reputation | BR-ANL-018..021, guardrails and kill switch |
+| RSK-ANL-05 | Low consent reduces coverage and biases insights | Misleading metrics | Coverage labels, service-fact metrics from server records, `OD-ANL-02` |
+| RSK-ANL-06 | Cost and load of analytic queries affecting the product | Outages | Separate store, query budgets, rollups (BR-ANL-026) |
+| RSK-ANL-07 | Scope breadth across all roles delays core value | Delivery risk | `OD-ANL-01` minimal slice; dashboards follow module readiness |
+| RSK-ANL-08 | Dashboard overload with vanity metrics | Poor decisions | Decision-supported rule (BR-ANL-001), counter-metrics (BR-ANL-025) |
+
+## 15. Legacy source trace
+
+| Source | Used for | Dropped or changed |
+|---|---|---|
+| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` §1 to §9 | Principles, metric catalogue (MET-001..055), event envelope and catalogue, pipeline, privacy classes, experimentation guardrails, three-signal separation | North-star conflict kept open (`OD-ANL-05`); targets omitted as in the source |
+| SSOT §7.1 F-19 Product Analytics, F-31 KPI Aggregation & Rollups | Event pipeline, rollups | Detailed behavior derived |
+| SSOT §7.1 F-46, F-47, F-82 | Institution, faculty and student learning analytics | Student-level views left to `INS`/`LRN` |
+| SSOT §7.1 F-105, F-113, F-154, F-158, F-160, F-166, F-168 | Hiring outcome, recruiter, talent-pool analytics | F-168 predictive modeling deferred (`OD-ANL-09`) |
+| SSOT F-114, F-153; BR-189..BR-193 | Learning outcome analytics, k ≥ 30, correlational labelling | Applied as `BR-ANL-016`, `BR-ANL-032` |
+| SSOT F-119, F-165; METRICS_CATALOG §6.4 | Fairness measurement | Voluntary, separate store |
+| SSOT Amendment G, BR-178, V61-04 | `min_cohort_k` | Lower values only via decision record |
+| docs/product/PRD.md §9 (via METRICS_CATALOG merge) | Verifiable Career Progress as an alternative primary metric | Reconciliation open |
+| SSOT §4.2 non-goals | No ad network, no sales-prospecting suite | No third-party tracking pixels or cross-site tracking |
