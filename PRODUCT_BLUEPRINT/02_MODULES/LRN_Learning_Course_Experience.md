@@ -1080,3 +1080,1783 @@ Notification opt-out classes used below (owned by NTF, planned): `TRANSACTIONAL`
   2. Given focus in the notes text area, when typing the letter `m`, then the video is not muted.
   3. Negative: Given the learner tries to remap `Tab`, when saving, then it is rejected with `reserved_key`.
 
+### FR-LRN-034 — Resume playback and cross-device position
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: YASH-MICRO FEAT-08-03.1; SSOT §9.2 F-07 step 4 "resume-from-last-position"] [DER]
+- **Purpose and outcome:** Learners return to where they stopped, on any device. Success is resume accuracy within 5 seconds.
+- **Roles and permissions:** `CAN, STD: use`
+- **Preconditions and entry points:** Opening any video lesson with a stored position; "Continue" buttons.
+- **User interactions and actions:**
+  1. Open a lesson; if the saved position is 5 seconds or more and under 95 percent, a prompt offers "Resume at 12:04" or "Start over"; default focus is Resume.
+  2. Choose either; the choice applies immediately.
+  3. On another device, the same prompt shows the latest position.
+- **System behavior:** Position events are sent every 15 seconds, on pause, seek, lesson change and page hide. The server stores the position with the highest server timestamp per (enrollment, lesson), tie-broken by `clientSeq` (BR-LRN-013, BR-LRN-016). Position never changes completion. "Start over" resets position but not completion. Version migration maps positions by `lessonKey` if the media asset is unchanged, else resets.
+- **UI elements and controls:** Resume prompt (non-modal banner over the video, auto-resumes after 5 seconds if the user has "Always resume" on), "Start over" button.
+- **Configuration options:** User: always resume without asking (default off), clear all positions.
+- **Business rules:** BR-LRN-013, BR-LRN-016
+- **Validation:** Position clamped to [0, duration]; events with `clientSeq` lower than stored are ignored.
+- **Inputs and outputs:** In: position events. Out: stored position, resume offer.
+- **Filters, sorting, search:** n/a — per lesson.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Offline: last local position is stored and replayed. Clock skew between devices: server time decides. Media replaced by the author: position reset with a note. Position near the end (95 percent or more): no resume prompt, lesson starts from the beginning.
+- **Dependencies:** FR-LRN-026, FR-LRN-027, ENT-LRN-06.
+- **Security and privacy:** Position data is learner-private; instructors see only aggregate drop-off curves.
+- **Acceptance criteria:**
+  1. Given a pause at 120 seconds on a phone, when opening on a laptop, then the prompt offers 2:00.
+  2. Given position events with sequence 7 then 5, when processed, then the stored position is from sequence 7.
+  3. Negative: Given a position at 96 percent, when opening, then no resume prompt shows and playback starts at 0:00.
+
+### FR-LRN-035 — Chapters and scrub previews
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Should · R3
+- **Source:** [PROP] (standard in YouTube, Coursera, Udemy)
+- **Purpose and outcome:** Learners jump to a topic inside a long video and preview frames while scrubbing. Success is use of chapter navigation in videos over 10 minutes.
+- **Roles and permissions:** `CAN, STD, GUE (preview): use`
+- **Preconditions and entry points:** Videos with chapter data; thumbnail sprite generated in the media pipeline (STU-022).
+- **User interactions and actions:**
+  1. See chapter ticks on the progress bar; hover shows the chapter title and a thumbnail at the time.
+  2. Open the chapter list in Settings or the panel and select a chapter to seek.
+  3. Use `Ctrl+Left` and `Ctrl+Right` to move between chapters.
+- **System behavior:** Chapters come from the author (STU-009) or auto-suggestion accepted by the author; each has start time and title (2 to 80 characters). Scrub previews use a sprite sheet with one frame per 5 seconds. Chapters are also listed in the transcript panel. If no chapters exist the control is hidden.
+- **UI elements and controls:** Chapter ticks on the slider, hover card, chapter list with current chapter marked, shortcut hints.
+- **Configuration options:** Author: chapters and titles. Platform: sprite interval.
+- **Business rules:** BR-LRN-015
+- **Validation:** Chapters strictly increasing, first at 0:00, minimum length 10 seconds.
+- **Inputs and outputs:** In: seek. Out: position change.
+- **Filters, sorting, search:** n/a — short list.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Sprite not ready: hover shows time only. Chapter list longer than 50 entries scrolls. Seeking via chapter does not count as watched time.
+- **Dependencies:** FR-STU-009, FR-STU-022, FR-LRN-036.
+- **Security and privacy:** Sprites follow the same authorization as media.
+- **Acceptance criteria:**
+  1. Given a video with 5 chapters, when selecting chapter 3, then the playhead jumps to its start.
+  2. Given hover at 2:10, when the sprite is ready, then a frame near 2:10 shows.
+  3. Negative: Given a video without chapters, when opening controls, then no chapter UI renders.
+
+### FR-LRN-036 — Video completion tracking
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: YASH-G3 SPEC-06 §3.3 (90 percent watched, 25 percent seek-skip); SSOT BR-021, BR-087] [DER]; threshold values [PROP] pending OD-LRN-04
+- **Purpose and outcome:** A video lesson counts complete only when it is honestly watched. Success is no completions earned by dragging to the end.
+- **Roles and permissions:** `CAN, STD: earn completion` · `INS: set per-lesson mode (STU)`
+- **Preconditions and entry points:** Playback of a lesson whose completion rule is `watch`.
+- **User interactions and actions:**
+  1. Watch the video normally; a completion check mark appears when the rule is met.
+  2. If the rule is not met at the end, see "Watch the skipped parts to complete" with ranges highlighted on the progress bar.
+  3. Use "Mark complete" only when the author set the mode to "no minimum".
+- **System behavior:** The player sends watched segments (start and end media seconds, no overlap) not just the position. Server computes unique watched seconds; skipped ranges beyond `seekSkipCreditCapPct` of duration are not credited (BR-LRN-015). Completion when unique watched is at least `videoCompletionThresholdPct` of duration (default 90). Completed is sticky (BR-LRN-013). External providers without `canTrackProgress` fall back to manual "Mark complete" (BR-LRN-033). Playback speed does not affect the computation.
+- **UI elements and controls:** Progress bar with watched-segment shading, check mark, "Mark complete" button (only when allowed), message for skipped ranges.
+- **Configuration options:** Platform: `videoCompletionThresholdPct` (90), `seekSkipCreditCapPct` (25). Author per lesson: `watch` or `none`.
+- **Business rules:** BR-LRN-013, BR-LRN-014, BR-LRN-015, BR-LRN-033
+- **Validation:** Segments within [0, duration], start less than end, at most 1,000 segments per lesson (merged server side).
+- **Inputs and outputs:** In: segment events with `clientSeq`. Out: lesson status, unique watched seconds.
+- **Filters, sorting, search:** n/a — computation.
+- **Notifications and communication:** n/a — completion celebration is in FR-LRN-057.
+- **Error handling and edge cases:** Offline watch: segments replay later. Tampered or impossible segments (more watched than real time elapsed plus 10 percent) are discarded and flagged for abuse review. Video re-uploaded by author: threshold recalculated on the new duration with old coverage mapped by proportion only if the asset is replaced with an equal-length file, else reset.
+- **Dependencies:** FR-LRN-027, FR-LRN-057, ENT-LRN-05.
+- **Security and privacy:** Segment data stays private to the learner; aggregates only for authors.
+- **Acceptance criteria:**
+  1. Given a 10-minute video with 9 minutes watched, when evaluated, then the lesson is complete.
+  2. Given the learner seeks from 0:10 to 9:50 and watches the end, when evaluated, then the lesson is not complete and skipped ranges are shown.
+  3. Negative: Given a forged event claiming 100 percent watched in 5 seconds of real time, when processed, then it is discarded and flagged.
+
+### FR-LRN-037 — Offline download rules
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §19.2; YASH-G3 SPEC-06 §3.3 offline, REVW-15 (downloadable video out of early phases)] [PROP] for the licensing model
+- **Purpose and outcome:** Learners on the installed PWA or mobile download permitted lessons for use without a connection, within rules that protect content and cost. Success is safe offline playback and correct sync.
+- **Roles and permissions:** `CAN, STD: download for enrolled courses` · `INS: allow or disallow per lesson (STU)` · `PAD: global switch`
+- **Preconditions and entry points:** Installed PWA or supported browser storage; active enrollment; lesson flagged downloadable; entitlement allows (not preview, not plan-lapsed).
+- **User interactions and actions:**
+  1. Tap the download icon on a lesson, section or course; choose quality (default 480p).
+  2. Watch download progress; pause, resume or cancel.
+  3. Open "Downloads" to see size, expiry and remove items; see remaining device slots.
+  4. Play offline; progress is stored locally and syncs on reconnect.
+- **System behavior:** The server issues an offline license per (enrollment, lesson, device) with expiry (default 30 days, renewed whenever the device is online and the enrollment is active), device cap (default 3, BR-LRN-032), and DRM-protected renditions where the platform supports it. Text lessons and transcripts download as cached content. Licenses are revoked on drop, expiry, refund and takedown. Progress queued offline replays idempotently; completion is decided only by the server (BR-LRN-014). A storage quota prompt lets the user choose what to keep.
+- **UI elements and controls:** Download icon states (not downloaded, queued, downloading with percent, downloaded, expiring, failed), Downloads manager with total size and delete, device list with remove, Wi-Fi only switch (default on).
+- **Configuration options:** Platform: enabled courses, device cap, license TTL, max size per device [PROP]. User: Wi-Fi only, default quality.
+- **Business rules:** BR-LRN-032, BR-LRN-037
+- **Validation:** License requests need a valid enrollment, device id from the PWA registration, and free storage check; content flagged not downloadable returns `403 not_downloadable`.
+- **Inputs and outputs:** In: lesson list, quality, device id. Out: licenses, encrypted media, manifest.
+- **Filters, sorting, search:** Downloads list sorted by date, size, expiry.
+- **Notifications and communication:** `lrn.download.expiring` (3 days, `LEARNING`) and `lrn.download.revoked` (in-app, `TRANSACTIONAL`).
+- **Error handling and edge cases:** Over the device cap: dialog to remove a device. Storage full: partial download is discarded with a message. Offline past expiry: playback blocked with "Reconnect to renew". Course version changes: downloaded lesson flagged "Update available" and still plays until license expiry. Clock tampering is mitigated by license-embedded server time checks on reconnect.
+- **Dependencies:** PWA (planned) storage and service worker, FR-STU-024, FR-LRN-019, FR-LRN-021, ENT-LRN-07.
+- **Security and privacy:** Encrypted at rest on device; downloads never include other users' data; OD-LRN-05 decides if offline video ships at all.
+- **Acceptance criteria:**
+  1. Given a downloadable lesson, when downloaded and played offline, then it plays and progress syncs on reconnect without double counting.
+  2. Given a fourth device, when requesting a license with a cap of 3, then `409 device_limit` lists devices to remove.
+  3. Negative: Given a refunded enrollment, when the device reconnects, then its licenses are revoked and playback is blocked.
+
+### FR-LRN-038 — Accessible player
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §21.3 to §21.7; YASH-G3 SPEC-06 §8 Accessibility] [DER]
+- **Purpose and outcome:** The player and lesson views meet WCAG 2.2 AA for every user, including screen reader, keyboard-only, low vision, deaf and motion-sensitive learners. Success is an accessibility audit with no blocking defects.
+- **Roles and permissions:** `All learners: use`
+- **Preconditions and entry points:** Every lesson view; accessibility preferences in Learning settings.
+- **User interactions and actions:**
+  1. Navigate every control by Tab in logical order with a visible focus indicator.
+  2. Turn on audio description (a separate narrated track) from Settings when the author provided one.
+  3. Choose reduced motion (no autoplay animations, no confetti), high contrast theme and larger text.
+  4. Use a screen reader to read lesson titles, progress, control names and state changes.
+- **System behavior:** Controls have names, roles and states; slider values are text ("3:12 of 10:40"); status changes use polite live regions sparingly; the timer-like elements never auto-focus. Honors `prefers-reduced-motion`, `prefers-contrast` and `prefers-color-scheme`. Audio description tracks sync to the video as an alternate audio rendition. Sign language video, when supplied, shows as a picture-in-picture overlay. Courses show accessibility badges derived from real assets (captions, transcript, audio description) not author claims (FR-LRN-004).
+- **UI elements and controls:** Skip link to lesson content, accessibility settings panel, audio description toggle, text size control, caption style (FR-LRN-030).
+- **Configuration options:** User: all accessibility preferences stored on the account and applied on every device. Platform: contrast tokens.
+- **Business rules:** BR-LRN-035
+- **Validation:** Contrast of overlay UI at least 4.5:1; touch targets at least 24 by 24 CSS pixels.
+- **Inputs and outputs:** In: preferences. Out: adapted rendering.
+- **Filters, sorting, search:** Catalog facet "Accessibility features".
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Audio description unavailable: toggle disabled with a reason. Conflicting preferences (reduced motion plus autoplay) resolve to the safer option. Learners can report accessibility barriers via FR-LRN-075 with category "Accessibility", which routes to a priority queue.
+- **Dependencies:** FR-STU-028, FR-LRN-030, FR-LRN-031.
+- **Security and privacy:** Accessibility preferences are sensitive; not shared with instructors or institutions.
+- **Acceptance criteria:**
+  1. Given keyboard only, when completing a video lesson and moving to the next, then every control is operable in a logical order.
+  2. Given `prefers-reduced-motion`, when completing a lesson, then no confetti or animated celebration plays.
+  3. Negative: Given a course with captions but no audio description, when filtering by "Audio description", then it is not returned.
+
+### FR-LRN-039 — Protected playback session
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 security "time-limited media tokens"; §13.16] [DER]
+- **Purpose and outcome:** Media is delivered only to authorized, active learners through short-lived signed access, and account sharing is limited. Success is zero unauthorized content access.
+- **Roles and permissions:** `CAN, STD: playback` · `SUP: view session metadata under grant`
+- **Preconditions and entry points:** Every protected media request.
+- **User interactions and actions:**
+  1. Learner presses Play; no extra step is visible.
+  2. If another session started elsewhere past the concurrent limit, the oldest session shows "Playing on another device" with "Play here instead".
+  3. A learner whose access ended sees the reason (expired, refunded, suspended).
+- **System behavior:** The server verifies enrollment and lock state, then issues a playback session with signed manifest and segment tokens (TTL 5 minutes, refreshed silently), bound to enrollment, lesson, device session and optionally IP range [PROP] (BR-LRN-037). Concurrent streams per account are limited (default 2, BR-LRN-036); eviction is graceful. Tokens never appear in logs or analytics URLs. DRM licenses (STU-024) are requested per session where enabled. Abnormal patterns (many distinct devices or locations) raise a sharing flag for TSF (planned) review, never an automatic ban.
+- **UI elements and controls:** "Playing on another device" dialog, "Play here instead" button, access-ended message.
+- **Configuration options:** Platform: token TTL, concurrent limit, IP binding on or off, flag thresholds.
+- **Business rules:** BR-LRN-009, BR-LRN-036, BR-LRN-037
+- **Validation:** Token signature, expiry, binding and enrollment state checked on each segment authorization at the edge.
+- **Inputs and outputs:** In: enrollment, lesson, device session. Out: manifest URL with tokens, license URL.
+- **Filters, sorting, search:** n/a — infrastructure.
+- **Notifications and communication:** `lrn.security.new_device_playback` in-app after a 3rd distinct device in 24 hours (`TRANSACTIONAL`).
+- **Error handling and edge cases:** Token refresh fails: one retry then user message. Clock drift: tokens carry server issue time, tolerance 30 seconds. CDN outage: manifest falls back to the secondary provider where configured. Shared screenshot of a manifest URL is useless after expiry.
+- **Dependencies:** FR-STU-024, PLT (planned) media delivery, ENT-LRN-30.
+- **Security and privacy:** Per-session audit records minimal; no content in URLs; defense in depth with RLS-style enrollment checks.
+- **Acceptance criteria:**
+  1. Given an enrolled learner, when requesting a manifest, then a tokenized URL valid 5 minutes is returned.
+  2. Given a third simultaneous stream with a limit of 2, when it starts, then the oldest stream stops with the notice.
+  3. Negative: Given a token copied to another account's session, when used, then the edge returns `403` because the binding fails.
+
+### FR-LRN-040 — External-provider media and fallback
+
+- **Sub-module:** E. Player and media
+- **Priority / tier:** Should · R2
+- **Source:** [SRC: SSOT §13.12 to §13.16; BR-083..BR-090] [DER]
+- **Purpose and outcome:** Lessons hosted on approved external providers play inside the lesson with honest capability limits, and any provider failure stays contained. Success is no silent broken embeds.
+- **Roles and permissions:** `CAN, STD: view` · `INS: configure via STU-027`
+- **Preconditions and entry points:** Lesson with delivery mode B, C, D or E (external video, playlist embed, playlist import, external link).
+- **User interactions and actions:**
+  1. Open the lesson; the provider player renders in a sandboxed frame.
+  2. Use provider controls; platform controls that the provider cannot support are absent.
+  3. If the provider is down or blocks embedding, see "This video can't be shown here" with "Open on <provider>" and "Report a problem".
+  4. Use "Mark complete" where progress cannot be tracked.
+- **System behavior:** Providers declare capabilities (`canEmbed`, `canTrackProgress`, `supportsCaptions`, `supportsPlaybackSpeed`, and others); the player enables only supported controls (BR-LRN-033). Embeds come only from an allowlisted domain set in CSP `frame-src`; `javascript:`, `data:` and unknown iframes are rejected. A failing provider affects only that lesson (BR-LRN-034). Protected third-party content is never downloaded or proxied. Progress is tracked when the provider exposes it; otherwise manual completion.
+- **UI elements and controls:** Sandboxed frame, provider badge, capability-limited controls, fallback panel, "Mark complete" button.
+- **Configuration options:** Platform: provider allowlist, per-provider capability map. Org: allowlist narrowing server side (BR-LRN-033).
+- **Business rules:** BR-LRN-033, BR-LRN-034
+- **Validation:** URL must match a provider pattern; unsupported providers produce an explicit error at authoring, never a silent embed.
+- **Inputs and outputs:** In: lesson with provider reference. Out: embed or fallback.
+- **Filters, sorting, search:** n/a — lesson view.
+- **Notifications and communication:** n/a — none; repeated failures notify the author via STU.
+- **Error handling and edge cases:** Provider changes embed rules: lesson shows fallback and flags the author. Provider unreachable from a region: fallback link. Provider ads or tracking: embed uses the privacy-enhanced mode where available. Mixed-content or CSP block: reported and fallback shown.
+- **Dependencies:** FR-STU-027, FR-LRN-036, FR-LRN-075.
+- **Security and privacy:** iframe sandbox attributes, no arbitrary HTML or script from authors, SSRF-safe server fetches, third-party privacy disclosure in the lesson footer.
+- **Acceptance criteria:**
+  1. Given a provider that cannot report progress, when the lesson loads, then only "Mark complete" is offered for completion.
+  2. Given the provider fails, when the lesson loads, then other lessons in the course work and the failing one shows the fallback.
+  3. Negative: Given a lesson URL on a non-allowlisted domain, when a learner opens it (bypassing authoring checks), then no frame is rendered and the fallback with an explicit message appears.
+
+### F. Lesson types
+
+### FR-LRN-041 — Reading lessons and downloadable resources
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §13.12 (ARTICLE, PDF); BR-092] [DER]
+- **Purpose and outcome:** Learners read text lessons and download supporting files comfortably on any device. Success is reading completion that reflects real reading.
+- **Roles and permissions:** `CAN, STD: read, download` · `GUE: preview lessons only`
+- **Preconditions and entry points:** Lesson type `reading`; Resources panel.
+- **User interactions and actions:**
+  1. Read the lesson: headings, paragraphs, lists, tables, images with alt text, code blocks with copy button, math, callouts, embedded diagrams.
+  2. Change reading settings: text size, line spacing, serif or sans, theme.
+  3. Open Resources; download a file or open a link; see file type and size first.
+  4. Press "Mark as complete" or scroll to the end to finish, depending on the rule.
+- **System behavior:** Content is a safe, structured document (no arbitrary HTML or script). Reading completion rule per author: `scroll_end` (reached 90 percent of the body and spent at least min(estimated reading time, 30 s) — [PROP] anti-skim), `manual` or `none` (BR-LRN-014 forbids client-side completion for graded types). Estimated reading time is computed (about 200 words per minute). Downloads are served with signed short-lived URLs, scanned files only, and counted. Code blocks support syntax highlighting; copy emits plain text. Reading position is saved per lesson.
+- **UI elements and controls:** Reading pane, table of contents for long lessons, settings popover, "Mark as complete" button, resource list with icons and sizes, "Download all" zip for 2 or more files.
+- **Configuration options:** User: reading preferences (stored). Author: completion rule, downloads allowed per resource.
+- **Business rules:** BR-LRN-009, BR-LRN-013, BR-LRN-014
+- **Validation:** Resource files up to the platform limit (default 500 MB each [PROP]) and allowed types; images require alt text or an explicit "decorative" mark at authoring.
+- **Inputs and outputs:** In: lesson key, resource id. Out: rendered content, file stream.
+- **Filters, sorting, search:** In-lesson browser find; course-wide resource list sorted by lesson order.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Image fails: alt text remains visible. Large table scrolls horizontally with a focusable container. Resource scan pending: item shows "Checking file" and cannot be downloaded. Offline: cached lessons readable (FR-LRN-037).
+- **Dependencies:** FR-STU-010, FR-STU-011, FR-LRN-026.
+- **Security and privacy:** Downloads authorized per enrollment; watermarking optional for paid PDFs [PROP]; no hot-linking.
+- **Acceptance criteria:**
+  1. Given a reading lesson with `scroll_end`, when the learner scrolls to the end after the minimum time, then the lesson completes once.
+  2. Given a resource still scanning, when the learner clicks it, then no file is served and the state is explained.
+  3. Negative: Given a non-enrolled user with a resource URL, when requested, then `403` is returned.
+
+### FR-LRN-042 — In-lesson quizzes
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 6; BR-107, BR-108, BR-109, BR-113] [DER]
+- **Purpose and outcome:** Learners check understanding with quizzes, checkpoints and final exams inside the course, with immediate useful feedback. Success is that quiz results are honest and drive completion rules.
+- **Roles and permissions:** `CAN, STD: attempt` · `INS: author via STU-029`
+- **Preconditions and entry points:** Lesson type `quiz` or `exam`; checkpoint quizzes between lessons; ASM assessment engine (ASM-016, ASM-029).
+- **User interactions and actions:**
+  1. Open the quiz; see attempts left, time limit, passing score, counts toward grade or practice.
+  2. Answer questions (single choice, multiple choice, ordering, matching, fill in the blank, short answer where configured); navigate and flag questions.
+  3. Submit; see score, pass or fail, and per-question feedback and explanations according to the quiz's release policy.
+  4. Retake if attempts remain or the quiz is practice; review past attempts.
+- **System behavior:** The quiz is an ASM assessment in context `course_lesson`. LRN embeds the attempt UI, passes the enrollment and course version, and consumes `assessment.attempt.graded` to set lesson status (BR-LRN-017). Graded quizzes feed the course grade (FR-LRN-062); practice quizzes are unlimited and ungraded. Question order and options may be randomized from a pool; answers are never in the client payload; question versions are pinned per attempt (BR-113). Final exam completion criterion is part of the course completion rule (FR-LRN-058).
+- **UI elements and controls:** Question navigator, flag toggle, timer when timed, "Saved" indicator, Submit with unanswered count, feedback panel per question.
+- **Configuration options:** Author: time limit, passing score, max attempts, grade weight, feedback release (immediate, after submit, after deadline, never), shuffle, pool size. Platform: default attempts (3).
+- **Business rules:** BR-LRN-013, BR-LRN-017, BR-LRN-048
+- **Validation:** Handled by ASM (answer shapes per question type); LRN validates enrollment state and attempt limits.
+- **Inputs and outputs:** In: answers (autosaved). Out: attempt result, lesson status.
+- **Filters, sorting, search:** Attempt history sorted newest first.
+- **Notifications and communication:** `lrn.quiz.passed` and `lrn.quiz.failed` in-app (`LEARNING`) with retake info.
+- **Error handling and edge cases:** Connection loss: ASM autosave and resume rules apply; submission after the deadline is not accepted. Enrollment expires mid-attempt: the attempt may be submitted, but later content stays locked. Instructor edits the quiz after publish: learners continue on their pinned version.
+- **Dependencies:** FR-ASM-005, FR-ASM-016, FR-ASM-029, FR-ASM-030, FR-ASM-040, FR-STU-029, FR-LRN-062.
+- **Security and privacy:** Server-authoritative timer and grading; no AI help during `AI_PROHIBITED` quizzes (ASM).
+- **Acceptance criteria:**
+  1. Given a graded quiz with passing score 70, when the learner scores 70, then the lesson completes and the grade is recorded.
+  2. Given a practice quiz, when retaken 10 times, then every attempt is allowed and none affects the grade.
+  3. Negative: Given the attempt limit is reached, when starting another, then `409 attempts_exhausted` is returned.
+
+### FR-LRN-043 — Interactive coding exercises
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §9.4 F-08 sandbox reuse; BR-112] [PROP] for inline lesson exercises
+- **Purpose and outcome:** Learners practice code inside the lesson with instant feedback, without leaving the course. Success is exercise pass rates and transfer to challenge performance.
+- **Roles and permissions:** `CAN, STD: attempt`
+- **Preconditions and entry points:** Lesson type `practice` configured with a challenge or exercise from ASM (ASM-003, ASM-019).
+- **User interactions and actions:**
+  1. Read the instructions beside an editor preloaded with starter code.
+  2. Run against visible tests; see output and test results.
+  3. Request a hint (limited per exercise) or view the solution after the unlock rule.
+  4. Mark done automatically when all required tests pass.
+- **System behavior:** Uses the ASM sandbox (ASM-023) with course-scoped limits; exercises are practice mode and never mint evidence (ASM-011). Completion rule: all required tests pass. Hints and solution reveal follow ASM-012 rules and are recorded. Code drafts autosave per lesson.
+- **UI elements and controls:** Editor, language label, Run button, test result list, Hint button with remaining count, Reset to starter code.
+- **Configuration options:** Author: starter code, tests, hint count, solution unlock (after N attempts or time).
+- **Business rules:** BR-LRN-013, BR-LRN-017
+- **Validation:** Code size up to 100 KB; language from the exercise's allowlist.
+- **Inputs and outputs:** In: code, run request. Out: test results; lesson status.
+- **Filters, sorting, search:** n/a — single exercise.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Sandbox queue delay: honest "Running" with elapsed time; after 30 seconds suggest retry. Sandbox down: exercise shows "Practice runner is unavailable" and does not block course completion unless the exercise is required (then lesson stays incomplete with explanation). Infinite loop: the test fails by timeout.
+- **Dependencies:** FR-ASM-003, FR-ASM-011, FR-ASM-012, FR-ASM-023, FR-ASM-025.
+- **Security and privacy:** Code is the learner's; instructors see it only for graded submissions; no network in the sandbox.
+- **Acceptance criteria:**
+  1. Given all required tests pass, when the learner runs, then the lesson completes once.
+  2. Given 3 hints configured, when the fourth is requested, then it is refused with the count.
+  3. Negative: Given the sandbox is unavailable, when a required exercise is run, then the lesson remains incomplete and no false pass is shown.
+
+### FR-LRN-044 — Assignment submission
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT §7 F-69; BR-111; WF-30] [DER]
+- **Purpose and outcome:** Learners submit written, file, link or code work against a rubric and receive grades and feedback. Success is on-time, traceable submissions with transparent grading.
+- **Roles and permissions:** `CAN, STD: draft, submit, resubmit (if allowed), view feedback` · `INS: grade via STU-031`
+- **Preconditions and entry points:** Lesson type `assignment`; assignment page.
+- **User interactions and actions:**
+  1. Read the brief, rubric, due date, late policy and allowed formats.
+  2. Write in the editor, attach files, or paste a link or repository URL; save draft automatically.
+  3. Tick the honesty declaration (own work, permitted AI use stated in the brief) and Submit.
+  4. See status Submitted, then In review, then Graded; read score, rubric breakdown and comments; resubmit if the policy allows.
+- **System behavior:** Submission creates an immutable snapshot (BR-LRN-039); resubmission creates a new revision up to the allowed count. Late submissions are flagged and graded per policy (accept with penalty, accept ungraded, reject) (BR-LRN-038). Files are scanned; code submissions can auto-grade through the ASM sandbox. A similarity check (ASM-033) can run on text and code and creates a review flag, never an automatic penalty. Grades flow to the gradebook; a pass sets lesson completion (rule per author).
+- **UI elements and controls:** Brief panel, rubric table, editor, file dropzone with progress, link field, declaration checkbox, Submit and Save draft buttons, status timeline, feedback panel with rubric.
+- **Configuration options:** Author: due date, late policy, formats, max size, revisions, grading mode (instructor, peer, auto, mixed), AI policy statement.
+- **Business rules:** BR-LRN-013, BR-LRN-038, BR-LRN-039, BR-LRN-048
+- **Validation:** Text up to 20,000 characters; files per allowed list with size limits (default 100 MB each, 10 files [PROP]); links must be `https` and not on a blocked list.
+- **Inputs and outputs:** In: content, files, links, declaration. Out: submission id, status, grade and feedback.
+- **Filters, sorting, search:** Submission history by revision.
+- **Notifications and communication:** `lrn.assignment.submitted` (receipt, `TRANSACTIONAL`), `lrn.assignment.graded` (`LEARNING`), `lrn.assignment.due_soon` (`LEARNING`); instructor gets queue items in STU.
+- **Error handling and edge cases:** Upload interruption resumes. Deadline passes during editing: draft kept, submission follows the late policy with the server time shown. Virus found: file rejected with explanation. Two tabs: last-write conflict detected with a merge prompt.
+- **Dependencies:** FR-STU-030, FR-STU-031, FR-ASM-020, FR-ASM-033, SM-LRN-04, ENT-LRN-20.
+- **Security and privacy:** Submissions visible only to the learner, graders and reviewers; plagiarism data limited to reviewers; retention per policy.
+- **Acceptance criteria:**
+  1. Given an assignment with one allowed revision, when submitted twice, then the second revision is accepted and the first snapshot remains unchanged.
+  2. Given a late submission with a 10 percent penalty, when graded, then the penalty is shown separately from the raw score.
+  3. Negative: Given a file with malware, when uploaded, then it is rejected and no submission is created.
+
+### FR-LRN-045 — Peer review
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Could · R3
+- **Source:** [SRC: SSOT §7 F-69; BR-103; WF-30] [DER]
+- **Purpose and outcome:** Learners review each other's work against a rubric and receive peer feedback at scale. Success is reliable review coverage and fair aggregate grades.
+- **Roles and permissions:** `CAN, STD: review assigned submissions, rate review helpfulness` · `INS: configure, adjudicate`
+- **Preconditions and entry points:** Assignment configured for peer review; reviewer has submitted their own work (if required).
+- **User interactions and actions:**
+  1. Open "Review queue": see assigned anonymized submissions with remaining count.
+  2. Score each rubric criterion and write comments (minimum length per author setting).
+  3. Submit the review; flag a submission as inappropriate or off-topic.
+  4. Receive peer reviews on own work; rate each review as helpful or not; dispute a grade to the instructor.
+- **System behavior:** Each submission needs at least two completed reviews (BR-LRN-040); assignments are made automatically with load balancing, avoiding self, same group and known conflicts. Reviews are anonymous to reviewees by default. Aggregation: median of scores across reviewers with outlier detection; a review deviating strongly from others is queued for instructor check. A reviewer's own grade can be withheld until they complete their required reviews (author option). Timeouts reassign unreviewed items.
+- **UI elements and controls:** Queue list, rubric scoring form, comment box with minimum character counter, flag button, review feedback form.
+- **Configuration options:** Author: reviews required per submission (min 2), reviews per learner, anonymity, deadline, reviewer deadline, withhold-until-done.
+- **Business rules:** BR-LRN-039, BR-LRN-040
+- **Validation:** Scores within rubric ranges; comments minimum 20 characters per criterion by default [PROP].
+- **Inputs and outputs:** In: review scores and comments. Out: aggregated grade, feedback.
+- **Filters, sorting, search:** Queue filter by state (to do, done); sorted by deadline.
+- **Notifications and communication:** `lrn.peer.review_assigned`, `lrn.peer.review_received`, `lrn.peer.review_overdue` (`LEARNING`).
+- **Error handling and edge cases:** Too few reviewers in a small cohort: instructor reviews or the threshold falls back with explicit notice. Reviewer abandons: item reassigned after deadline. Abuse (retaliation, offensive comments) reported to the instructor and TSF (planned).
+- **Dependencies:** FR-LRN-044, FR-STU-032, FR-ASM-020, ENT-LRN-21.
+- **Security and privacy:** Anonymity enforced server side; reviewer identity revealed only to instructors.
+- **Acceptance criteria:**
+  1. Given a submission with two completed reviews, when aggregated, then the median of criterion scores is the peer grade.
+  2. Given a reviewer who misses the deadline, when it passes, then their items are reassigned.
+  3. Negative: Given a learner assigned their own submission by a bug, when opening it, then `403 self_review` is returned.
+
+### FR-LRN-046 — Projects and capstone work
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Should · R3
+- **Source:** [SRC: SSOT §7 F-100, F-124; J-20] [DER]
+- **Purpose and outcome:** Learners deliver a substantial project (single or team) reviewed against a rubric, producing portfolio evidence. Success is graded projects that become showcaseable evidence.
+- **Roles and permissions:** `CAN, STD: submit, collaborate` · `INS: review`
+- **Preconditions and entry points:** Lesson type `project`; path capstone (FR-LRN-024).
+- **User interactions and actions:**
+  1. Read the project brief, milestones and rubric.
+  2. Submit milestones (links, repo, files, demo video link) with a written reflection.
+  3. For team projects, invite teammates; every member confirms the team.
+  4. Receive milestone feedback and the final grade; opt to publish to the portfolio (PRF, planned).
+- **System behavior:** Projects extend FR-LRN-044 with milestones with their own due dates, team membership (up to 5 [PROP]) and per-member contribution statements. Grades can be team-level with individual adjustment by the instructor. Evidence minting is rule-based per FR-LRN-071; publishing to the portfolio is learner-controlled and creates a PRF artifact reference.
+- **UI elements and controls:** Milestone timeline, team panel, reflection text box, publish-to-portfolio toggle.
+- **Configuration options:** Author: milestones, team size, reviewer type, individual adjustment on or off.
+- **Business rules:** BR-LRN-039, BR-LRN-048
+- **Validation:** Team of 1 to the max size; members must be enrolled; repository links must be `https`.
+- **Inputs and outputs:** In: milestone submissions, team. Out: grades, feedback.
+- **Filters, sorting, search:** Milestones by due date.
+- **Notifications and communication:** `lrn.project.milestone_due`, `lrn.project.graded` (`LEARNING`).
+- **Error handling and edge cases:** Member leaves the course: team continues with an instructor note. Disputed contributions: instructor adjudicates with a recorded note. Repository becomes private: reviewer sees "Link unreachable" and the submission is flagged.
+- **Dependencies:** FR-LRN-044, FR-STU-030, FR-STU-031, PRF (planned).
+- **Security and privacy:** Team data shared among members only; portfolio publication is opt-in.
+- **Acceptance criteria:**
+  1. Given a team of 3, when all confirm, then the team is locked and the first milestone accepts one team submission.
+  2. Given an individual adjustment, when the instructor sets it, then each member's grade shows the team score and adjustment separately.
+  3. Negative: Given a teammate not enrolled, when invited, then the invitation is refused with `422 not_enrolled`.
+
+### FR-LRN-047 — Live sessions
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Should · R3
+- **Source:** [SRC: SSOT §7 F-107; OD-33] [DER]
+- **Purpose and outcome:** Learners attend scheduled live classes with Q&A, then watch recordings. Success is attendance and recording watch rates, and no missed notices.
+- **Roles and permissions:** `CAN, STD: register, join, ask questions` · `INS: host (STU-047)`
+- **Preconditions and entry points:** Lesson type `live`; schedule in the course (FR-LRN-048); learner enrolled.
+- **User interactions and actions:**
+  1. See upcoming sessions with local time and "Add to calendar".
+  2. Join when the lobby opens (default 10 minutes before); mic and camera are optional for learners per host settings.
+  3. Use chat, raise hand and polls; submit questions that the host can answer.
+  4. After the session, watch the recording and read the Q&A summary.
+- **System behavior:** Sessions run on a room provider via an adapter (OD-LRN-06). Joining issues a signed, single-use room token tied to the enrollment. Attendance is recorded when the learner is present for at least 50 percent of the scheduled duration (BR-LRN-041); the recording consent notice is displayed before joining. Recordings become lessons after processing (STU pipeline) with captions. Attendance completes the lesson if the rule requires attendance, or the recording watch completes it.
+- **UI elements and controls:** Session card with countdown, Join button (enabled in window), lobby device check, chat, hand-raise, poll, "Leave", recording notice.
+- **Configuration options:** Host: capacity, recording on or off, chat on or off, attendance rule. Platform: lobby window.
+- **Business rules:** BR-LRN-041
+- **Validation:** Join only inside the window; capacity limit; token single-use.
+- **Inputs and outputs:** In: join request. Out: room token, attendance record.
+- **Filters, sorting, search:** Schedule list: upcoming, past.
+- **Notifications and communication:** `lrn.live.reminder` at 24 hours and 15 minutes (`LEARNING`), `lrn.live.starting` push, `lrn.live.recording_ready` (`LEARNING`).
+- **Error handling and edge cases:** Provider outage: host and learners are notified, session rescheduled by the host, attendance rule suspended for that session. Session over capacity: waitlist with auto-admit. Learner in another time zone: times always shown in local zone with zone name. Host no-show: session auto-cancelled after 15 minutes with notice.
+- **Dependencies:** FR-STU-047, FR-LRN-048, PLT (planned) live provider, MSG (planned), ENT-LRN-22.
+- **Security and privacy:** Recording consent notice; chat retained per policy and visible to host and enrolled learners only; minors' participation rules follow IDN (planned).
+- **Acceptance criteria:**
+  1. Given a session starting in 10 minutes, when a registered learner clicks Join, then they enter the lobby with a valid room token.
+  2. Given a learner present for 60 percent of the session, when it ends, then attendance is recorded as attended.
+  3. Negative: Given a learner who is not enrolled, when requesting a room token, then `403` is returned.
+
+### FR-LRN-048 — Cohorts and cohort calendar
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Should · R3
+- **Source:** [DER] (live sessions and cohorts in scope per brief; SSOT §9.2 F-07 `expired: cohort end`) [PROP]
+- **Purpose and outcome:** Courses can run as dated cohorts with a shared schedule so learners progress together. Success is cohort completion rates and clear schedules.
+- **Roles and permissions:** `CAN, STD: join a cohort, view schedule` · `INS: create runs (STU)` · `IAD: create institution runs`
+- **Preconditions and entry points:** Cohort-based course; run selection on the detail page.
+- **User interactions and actions:**
+  1. Choose a cohort run (start date, end date, time zone, seats left).
+  2. See the cohort calendar: lessons, deadlines, live sessions, office hours; export to a calendar app (FR-LRN-070).
+  3. View cohort members (opt-in names) and the cohort discussion space.
+  4. Switch cohort before start if seats exist.
+- **System behavior:** A cohort run has enrollment open and close dates, capacity, waitlist, start and end, and a schedule. Enrollment pins to the run (BR-LRN-038); access ends at the run end plus a configured grace period (BR-LRN-011). Lessons may be scheduled to release (FR-LRN-049). Waitlisted learners are auto-admitted in order when a seat frees, with a 24-hour claim window.
+- **UI elements and controls:** Run picker, calendar with list and month views, seats left, "Join waitlist", cohort roster toggle.
+- **Configuration options:** Author: runs, capacity, grace period, roster visibility. Learner: share my name with cohort.
+- **Business rules:** BR-LRN-011, BR-LRN-038
+- **Validation:** Start before end; capacity 1 to 5,000 [PROP]; time zone from IANA list.
+- **Inputs and outputs:** In: run choice. Out: enrollment with run id; calendar.
+- **Filters, sorting, search:** Run picker sorted by start date.
+- **Notifications and communication:** `lrn.cohort.starting` (7 days, 1 day), `lrn.cohort.waitlist_seat` (`TRANSACTIONAL`).
+- **Error handling and edge cases:** Run cancelled: learners offered another run or a refund (FR-LRN-021). Late join after start: allowed only if the author permits and shows missed items. Daylight-saving changes handled by time-zone-aware schedule.
+- **Dependencies:** FR-STU-041, FR-LRN-047, FR-LRN-049, ENT-LRN-23.
+- **Security and privacy:** Roster only for consenting members.
+- **Acceptance criteria:**
+  1. Given a run with 1 seat left, when two learners enroll simultaneously, then one is enrolled and one is waitlisted.
+  2. Given a waitlist seat offered, when 24 hours pass unclaimed, then it moves to the next learner.
+  3. Negative: Given the enrollment close date passed, when enrolling, then `409 closed` is returned.
+
+### FR-LRN-049 — Pacing, deadlines and drip release
+
+- **Sub-module:** F. Lesson types
+- **Priority / tier:** Should · R3
+- **Source:** [DER] [PROP] for drip release
+- **Purpose and outcome:** Authors control when content unlocks and when work is due; learners always see what is due. Success is fewer missed deadlines and clear expectations.
+- **Roles and permissions:** `CAN, STD: view and follow schedule` · `INS: configure (STU)`
+- **Preconditions and entry points:** Course or run with schedule rules; "Due soon" list on dashboard.
+- **User interactions and actions:**
+  1. See locked lessons with their unlock date ("Opens 12 May, 09:00").
+  2. See a Deadlines list with due items sorted by date, with state (not started, in progress, submitted, late).
+  3. Request a deadline extension for an assignment with a reason (FR-LRN-044).
+- **System behavior:** Release modes: `open`, `drip_relative` (N days after enrollment), `drip_absolute` (dates, typical for cohorts), `sequence_gated`. Deadlines are soft (late allowed per policy) or hard. Locks never delete progress; unlock events are timed by a scheduler and emit notifications. Extensions are per learner, granted by the instructor, audited (BR-LRN-038).
+- **UI elements and controls:** Lock labels with date, Deadlines panel, extension request dialog.
+- **Configuration options:** Author: release mode, deadlines, grace window. Platform: reminder offsets.
+- **Business rules:** BR-LRN-018, BR-LRN-038
+- **Validation:** Dates in the course time zone; hard deadline cannot precede release.
+- **Inputs and outputs:** In: schedule rules. Out: lock states, due list.
+- **Filters, sorting, search:** Deadlines by date and course.
+- **Notifications and communication:** `lrn.content.unlocked`, `lrn.deadline.due_soon`, `lrn.deadline.missed` (`LEARNING`).
+- **Error handling and edge cases:** Author shifts dates: learners get a single summary notice. Learner with accommodation (ASM-041) receives extended deadlines recorded as exceptions. Time zone change by learner does not shift course-defined instants.
+- **Dependencies:** FR-LRN-044, FR-LRN-048, FR-STU-013, FR-LRN-070.
+- **Security and privacy:** n/a — no sensitive data beyond learner progress.
+- **Acceptance criteria:**
+  1. Given a lesson dripping at day 7, when day 7 starts, then it unlocks and a notice is created once.
+  2. Given a hard deadline passed, when submitting, then it is rejected with `409 deadline_passed`.
+  3. Negative: Given a learner tries a locked lesson by URL, when the release date has not arrived, then `403 lesson_locked` with the date is returned.
+
+### G. Social learning
+
+### FR-LRN-050 — Course Q&A
+
+- **Sub-module:** G. Social learning
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT §7 F-71, F-107] [DER]
+- **Purpose and outcome:** Learners ask questions tied to a lesson and get answers from instructors and peers. Success is median time to first answer and share of questions resolved.
+- **Roles and permissions:** `CAN, STD: ask, answer, vote, follow` · `INS: answer, endorse, pin, hide in own course` · `MOD: moderate`
+- **Preconditions and entry points:** Q&A panel in the player (pre-filtered to the current lesson); `/learn/courses/:slug/qa`.
+- **User interactions and actions:**
+  1. Search existing questions first; a "similar questions" list appears while typing the title.
+  2. Post a question with title, details, optional timestamp link and code block; choose "Post anonymously to classmates" (instructor still sees the author).
+  3. Answer, upvote helpful answers, follow a thread, and mark one answer as the accepted solution (asker only).
+  4. Instructors endorse answers; staff pin top questions.
+- **System behavior:** Posting needs an active or completed enrollment (BR-LRN-030) and respects rate limits (5 questions and 20 answers per hour [PROP]). Threads have states (SM-LRN-09). Instructor-endorsed and accepted answers rank first. A model-assisted duplicate detector suggests matches but never blocks. Reports go to TSF (planned) via FR-LRN-065-style reporting. Course-scope visibility: enrolled learners and instructors; public Q&A on the detail page only for questions the instructor chose to publish.
+- **UI elements and controls:** Question list with filters, composer (rich text with code block), vote buttons with counts, "Accepted" and "Instructor" badges, follow toggle, anonymous checkbox, report menu.
+- **Configuration options:** Author: Q&A on or off, public questions. User: notify on replies.
+- **Business rules:** BR-LRN-030, BR-LRN-049
+- **Validation:** Title 10 to 150 characters; body up to 5,000; links limited to 3 per post for new accounts; markup sanitized.
+- **Inputs and outputs:** In: question, answer, vote. Out: thread with ranked answers.
+- **Filters, sorting, search:** Filter: this lesson, all, unanswered, my questions, following, instructor-answered. Sort: recent, top, unanswered first. Full-text search within the course.
+- **Notifications and communication:** `lrn.qa.answer_received`, `lrn.qa.accepted`, `lrn.qa.instructor_replied` (`SOCIAL`).
+- **Error handling and edge cases:** Rate limit hit: message with time remaining. Edit window 15 minutes after posting, afterwards edits are marked "edited". Deleted account: posts keep text under "Former learner". Spam: auto-hold new accounts with links for review.
+- **Dependencies:** FR-STU-043, TSF (planned), NTF (planned), ENT-LRN-17.
+- **Security and privacy:** Anonymous to peers only; instructors and moderators can see authors; no personal contact details allowed in posts (auto-detect and warn).
+- **Acceptance criteria:**
+  1. Given an enrolled learner, when posting a question on lesson 4, then it appears in lesson 4's Q&A and the instructor is notified.
+  2. Given an accepted answer, when others view the thread, then it appears first with the badge.
+  3. Negative: Given a non-enrolled user, when calling the post endpoint, then `403` is returned.
+
+### FR-LRN-051 — Discussion forums
+
+- **Sub-module:** G. Social learning
+- **Priority / tier:** Could · R3
+- **Source:** [SRC: SSOT §7 F-71] [DER]
+- **Purpose and outcome:** Learners and instructors discuss topics beyond individual questions, per course and per cohort. Success is healthy participation with low moderation load.
+- **Roles and permissions:** `CAN, STD: post, reply, react` · `INS: create categories, pin, lock, hide` · `MOD: moderate`
+- **Preconditions and entry points:** `/learn/courses/:slug/discuss`; cohort space.
+- **User interactions and actions:**
+  1. Browse threads by category (Announcements, Introductions, Project help, Resources, Off-topic).
+  2. Start a thread; reply with quoting and mentions (`@name` of enrolled members).
+  3. React (like, helpful, insightful), bookmark, follow.
+  4. Report a post.
+- **System behavior:** Posting rules as BR-LRN-030; moderation as BR-LRN-049 (hide, not delete; reason and audit). Mentions notify only enrolled members. Threads can be locked by instructors. Cohort spaces open at the run start and close read-only at the end.
+- **UI elements and controls:** Category sidebar, thread list, composer, reactions, follow and bookmark toggles, locked-thread banner.
+- **Configuration options:** Author: categories, who can start threads, pre-moderation for new members.
+- **Business rules:** BR-LRN-030, BR-LRN-049
+- **Validation:** Title 5 to 150 characters; body up to 10,000; attachments images only up to 5 MB.
+- **Inputs and outputs:** In: posts, reactions. Out: threaded view.
+- **Filters, sorting, search:** Category, following, mine, unanswered; sort recent, top, active; search.
+- **Notifications and communication:** `lrn.discuss.reply`, `lrn.discuss.mention` (`SOCIAL`), digest option daily.
+- **Error handling and edge cases:** Locked thread: composer disabled with reason. Hidden post: placeholder "Hidden by instructor" visible to authors and mods with reason. Flood: rate limits per BR-LRN-030.
+- **Dependencies:** FR-LRN-050, TSF (planned), ENT-LRN-17.
+- **Security and privacy:** Content visible only to enrolled members; export on data request; minors' protections per IDN (planned).
+- **Acceptance criteria:**
+  1. Given a thread, when an instructor locks it, then no new replies are accepted and the banner shows.
+  2. Given a mention of a non-enrolled name, when posting, then no notification is sent and the mention is plain text.
+  3. Negative: Given a hidden post, when a regular learner requests it by id, then the content is not returned, only the placeholder.
+
+### FR-LRN-052 — Notes and bookmarks
+
+- **Sub-module:** G. Social learning
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 4 (notes panel)] [DER]
+- **Purpose and outcome:** Learners keep private time-stamped notes, highlights and bookmarks and find them again across courses. Success is notes retention and export.
+- **Roles and permissions:** `CAN, STD: create, edit, delete, export own`
+- **Preconditions and entry points:** Notes panel and `n` shortcut in the player; "Bookmark" shortcut `b`; `/me/learning/notes`.
+- **User interactions and actions:**
+  1. Press `Shift+n` or Add note; the note is stamped with the video time or text position and lesson.
+  2. Select text in a reading lesson or transcript and choose Highlight or Add note.
+  3. Press `b` to bookmark the current point with an optional label.
+  4. Open My notes: search, filter by course, edit, delete, click an item to jump to its place; export all notes as Markdown or PDF.
+- **System behavior:** Notes are private (BR-LRN-029); they sync across devices with last-write-wins per note plus edit history of the last 5 versions. Anchors reference `lessonKey` and position; on course version change they re-anchor by `lessonKey` and show "Position may have moved" when the media changed. Notes persist after enrollment ends for read-only access for 365 days [PROP] then are exportable on request.
+- **UI elements and controls:** Notes panel with composer, list with timestamps, highlight toolbar, bookmark star, search box, export menu.
+- **Configuration options:** User: auto-pause when typing a note (default on).
+- **Business rules:** BR-LRN-029
+- **Validation:** Note text up to 5,000 characters; up to 5,000 notes per account [PROP].
+- **Inputs and outputs:** In: note, highlight, bookmark. Out: list, export file.
+- **Filters, sorting, search:** Filter by course, lesson, type; sort by recent or position; full-text search.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Offline edits queue and merge on reconnect, conflicts keep both versions with a prompt. Quota exceeded: message and export suggestion. Lesson removed in a new version: notes remain under "Archived lessons".
+- **Dependencies:** FR-LRN-026, FR-LRN-031, FR-LRN-074, ENT-LRN-15, ENT-LRN-16.
+- **Security and privacy:** Never visible to instructors, institutions or recruiters; included in data export and erased with the account.
+- **Acceptance criteria:**
+  1. Given a note at 3:12, when clicked in My notes, then the player opens that lesson at 3:12.
+  2. Given offline note creation, when reconnecting, then the note syncs without duplication.
+  3. Negative: Given an instructor requests a learner's notes by API, when called, then `403` is returned.
+
+### FR-LRN-053 — Instructor announcements
+
+- **Sub-module:** G. Social learning
+- **Priority / tier:** Should · R3
+- **Source:** [SRC: SSOT BR-102 (1 per day per course)] [DER]
+- **Purpose and outcome:** Learners receive timely course updates from instructors without noise. Success is read rate and low mute rate.
+- **Roles and permissions:** `CAN, STD: read, mute` · `INS: post (STU-044)`
+- **Preconditions and entry points:** Announcements tab in the course; bell in the player; email.
+- **User interactions and actions:**
+  1. See unread count; open an announcement with formatted text and links.
+  2. Mark read automatically on view; reply in a comment thread if enabled.
+  3. Mute announcements for a course (the in-app list still shows them).
+- **System behavior:** Posting limit 1 per day per course (BR-LRN-031). Delivery in-app always; email per notification preferences. Muted learners receive no email or push for that course. Announcements are versioned for corrections, with an "Edited" mark.
+- **UI elements and controls:** List with unread dots, detail view, Mute switch, comment box.
+- **Configuration options:** User: mute per course; email on or off.
+- **Business rules:** BR-LRN-031
+- **Validation:** Title 5 to 120 characters; body up to 5,000.
+- **Inputs and outputs:** In: read marks, mute. Out: list.
+- **Filters, sorting, search:** Unread filter; sorted newest first.
+- **Notifications and communication:** `lrn.announcement.posted` in-app, email and push per preference (`LEARNING`).
+- **Error handling and edge cases:** Instructor posts twice in a day: STU blocks the second with `429`. Learner dropped: no further announcements. Announcement links checked for safety.
+- **Dependencies:** FR-STU-044, NTF (planned).
+- **Security and privacy:** Visible to enrolled learners only.
+- **Acceptance criteria:**
+  1. Given a posted announcement, when a learner opens the course, then the unread count increases by one.
+  2. Given mute on, when an announcement is posted, then no email or push is sent but the in-app item appears.
+  3. Negative: Given a second post on the same day, when the instructor submits, then it is refused with the limit message.
+
+### FR-LRN-054 — Study groups
+
+- **Sub-module:** G. Social learning
+- **Priority / tier:** Could · R6
+- **Source:** [SRC: SSOT §7 F-138 "Study Accountability Partners"] [DER]
+- **Purpose and outcome:** Learners form small groups to stay on track together. Success is higher completion among group members.
+- **Roles and permissions:** `CAN, STD: create, join, leave`
+- **Preconditions and entry points:** `/learn/groups`; "Find a study partner" on a course.
+- **User interactions and actions:**
+  1. Create a group for a course or path with a goal and weekly check-in day; or join through an invite link or the matching list.
+  2. Share check-ins ("I completed 3 lessons"), set group goals, send nudges, chat in the group thread.
+  3. Leave the group at any time.
+- **System behavior:** Opt-in only, up to 8 members (BR-LRN-050). Members choose what to share (completion count, streak) per item; nothing is shared by default. Matching suggestions use only declared course, schedule and language, with consent. Moderation: reporting, group owner can remove members, groups with abuse reports go to TSF (planned).
+- **UI elements and controls:** Group card, member list with chosen shared stats, check-in composer, invite link, leave button.
+- **Configuration options:** User: allow matching suggestions (default off).
+- **Business rules:** BR-LRN-050
+- **Validation:** Group name 3 to 60 characters; max 8 members.
+- **Inputs and outputs:** In: group actions. Out: group state.
+- **Filters, sorting, search:** Groups by course and language.
+- **Notifications and communication:** `lrn.group.checkin`, `lrn.group.nudge` (`SOCIAL`).
+- **Error handling and edge cases:** Owner leaves: ownership passes to the longest-standing member or the group closes. Member limit hit: join refused. Minor learners: restricted per IDN (planned).
+- **Dependencies:** MSG (planned), FR-LRN-069, ENT-LRN-26.
+- **Security and privacy:** Private to members; no instructor visibility.
+- **Acceptance criteria:**
+  1. Given a group of 8, when a ninth joins via link, then `409 group_full` is returned.
+  2. Given a member shares only streak, when others view, then completion counts are not shown.
+  3. Negative: Given matching suggestions off, when browsing, then the learner is not offered or exposed to matches.
+
+### H. Progress and credentials
+
+### FR-LRN-055 — Progress tracking
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 5; BR-021; YASH-G3 SPEC-06 §3.3] [DER]
+- **Purpose and outcome:** Progress is recorded reliably, survives refresh, crashes and bad networks, and shows the same everywhere. Success is zero lost completions and progress writes under 200 ms p95.
+- **Roles and permissions:** `CAN, STD: own` · `INS: aggregate and per learner in own course (BR-LRN-028)` · `IAD: scope per assignment`
+- **Preconditions and entry points:** Every lesson interaction; course header progress bar; My learning.
+- **User interactions and actions:**
+  1. Learn normally; the progress bar and lesson check marks update.
+  2. See per-section percent and "x of y lessons".
+  3. Click "Sync status" to see queued events when offline or after errors.
+- **System behavior:** Events `{enrollmentId, lessonKey, courseVersion, kind: started | position | completed | segment, clientSeq}` are accepted in batches; storage keeps max `clientSeq` per kind per lesson; `completed` is sticky; position never regresses completion (BR-LRN-013). Course progress percent = completed required lessons weighted by estimated minutes divided by total required weight (optional lessons excluded), rounded down to a whole percent. Progress is a derived read model; the event log is the source. Idempotency key `(enrollmentId, lessonKey, kind, clientSeq)`.
+- **UI elements and controls:** Progress bar with text percent, lesson check marks with text alternatives, sync indicator with queued count.
+- **Configuration options:** Platform: flush interval (15 s), batch size (up to 100 events).
+- **Business rules:** BR-LRN-013, BR-LRN-014, BR-LRN-028
+- **Validation:** Event schema validated; unknown lesson keys rejected `422`; events for an expired enrollment accepted only if time-stamped before expiry.
+- **Inputs and outputs:** In: event batches. Out: acknowledgement with server state.
+- **Filters, sorting, search:** n/a — computed values.
+- **Notifications and communication:** n/a — milestone messages are FR-LRN-061.
+- **Error handling and edge cases:** Out-of-order or duplicate events: max sequence wins, no regression. Device lost offline: nothing counts until events reach the server. Course version change: progress mapped (FR-LRN-012). Burst writes throttled with `429` and Retry-After.
+- **Dependencies:** FR-LRN-026, FR-LRN-057, ENT-LRN-05.
+- **Security and privacy:** Learner-owned; instructor view limited to what their course needs.
+- **Acceptance criteria:**
+  1. Given 4 of 8 equally weighted required lessons complete, when viewing, then progress shows 50 percent.
+  2. Given the same completion event sent three times, when processed, then the state and counts are unchanged after the first.
+  3. Negative: Given a `started` event arriving after `completed`, when processed, then the lesson remains completed.
+
+### FR-LRN-056 — Learning history
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 10 (`/courses/my-learning`)] [DER]
+- **Purpose and outcome:** Learners see everything they have enrolled in, finished or dropped, and get back into any of it. Success is high resume rate from this page.
+- **Roles and permissions:** `CAN, STD: own`
+- **Preconditions and entry points:** `/me/learning/courses`; "My learning" in navigation.
+- **User interactions and actions:**
+  1. See tabs: In progress, Not started, Paused, Completed, Dropped, Expired, Assigned.
+  2. Each card shows progress, last activity, next lesson, due date, access end, and actions (Continue, Certificate, Manage).
+  3. Search by course title; sort by last accessed, title, progress, due date.
+  4. Open "Learning transcript": a printable and downloadable list of completed courses, hours, dates, certificates and grades.
+- **System behavior:** Reads enrollments and derived progress. Transcript includes only completed enrollments and includes verification links; hours are the author-declared durations, labeled "course hours (not time spent)". Share the transcript through a link with consent scope (EVD planned for evidence rules). Dropped and expired items retain data per retention rules.
+- **UI elements and controls:** Tabs with counts, course cards, search input, sort select, "Download transcript" button, "Share transcript" toggle.
+- **Configuration options:** User: default tab.
+- **Business rules:** BR-LRN-011, BR-LRN-012, BR-LRN-059
+- **Validation:** Search text up to 100 characters.
+- **Inputs and outputs:** In: filter and sort. Out: enrollment list, transcript file.
+- **Filters, sorting, search:** As above; plus date-range filter for transcript.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** No enrollments: empty state with "Browse courses" and recommendations. Unpublished course: card shows "No longer in catalog" but keeps access per BR-LRN-047. Many items (over 200) paginate.
+- **Dependencies:** FR-LRN-055, FR-LRN-059, ENT-LRN-03.
+- **Security and privacy:** Transcript share links expire (default 30 days) and are revocable.
+- **Acceptance criteria:**
+  1. Given 3 in-progress and 2 completed courses, when opening, then tab counts show 3 and 2.
+  2. Given a completed course, when downloading the transcript, then it lists the course, date, certificate id and a verification URL.
+  3. Negative: Given an expired share link, when opened, then it returns `410` and no data.
+
+### FR-LRN-057 — Lesson completion rules
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT BR-021, BR-022, BR-047; YASH-G3 SPEC-06 §3.3] [DER]
+- **Purpose and outcome:** Each lesson type has a precise, visible rule for when it is complete. Success is that learners always know what finishes a lesson.
+- **Roles and permissions:** `CAN, STD: earn completion` · `INS: choose rule per lesson (STU)`
+- **Preconditions and entry points:** Any lesson in an active enrollment.
+- **User interactions and actions:**
+  1. See the rule in the lesson header ("Complete by watching 90 percent", "Pass the quiz with 70 percent", "Submit the assignment", "Attend or watch the recording").
+  2. Complete the lesson; the check mark and a short confirmation appear; the Next button highlights.
+  3. For `manual` lessons press "Mark as complete" (and "Mark as incomplete" to undo before course completion).
+- **System behavior:** Rules by type: video `watch` or `none` (FR-LRN-036), reading `scroll_end`, `manual` or `none`, quiz `pass` (BR-LRN-017), assignment `submitted` or `graded_pass`, practice `all_required_tests`, live `attended` or `recording_watched`, project `milestones_done`. Completion is idempotent and sticky (BR-LRN-013) and emitted as `learning.lesson.completed`; a completed lesson never reverts when the version changes. Optional lessons never block course completion. A short celebration respects reduced motion and is dismissible.
+- **UI elements and controls:** Rule label, check mark, "Mark as complete" and "Mark as incomplete" buttons, celebration toast.
+- **Configuration options:** Author: rule per lesson. Platform: default rules per type.
+- **Business rules:** BR-LRN-013, BR-LRN-014, BR-LRN-017, BR-LRN-018
+- **Validation:** Rule must be valid for the lesson type; `manual` not allowed for graded types.
+- **Inputs and outputs:** In: completion-related events. Out: lesson state, event.
+- **Filters, sorting, search:** n/a — rules.
+- **Notifications and communication:** n/a — in-product only.
+- **Error handling and edge cases:** Lesson completion event fails to persist: retry queue and visible "Saving" state. Manual undo after course completion is blocked. Concurrent manual toggles from two devices resolve to the latest server timestamp except completed-by-rule, which is sticky.
+- **Dependencies:** FR-LRN-036, FR-LRN-041 to 047, FR-LRN-055.
+- **Security and privacy:** n/a — progress data only.
+- **Acceptance criteria:**
+  1. Given a manual reading lesson, when marked complete, then `learning.lesson.completed` is emitted once.
+  2. Given a lesson completed by passing a quiz, when the learner tries to mark it incomplete, then it is refused.
+  3. Negative: Given a client call that sets a quiz lesson completed without a pass, when processed, then `403 rule_not_met` is returned.
+
+### FR-LRN-058 — Course completion engine
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 8; BR-048, BR-109; YASH-G3 SPEC-06 §3.4] [DER]
+- **Purpose and outcome:** Course completion is decided by one pure, version-pinned rule evaluator, so credentials are trustworthy. Success is zero drift between recorded completion and the rule.
+- **Roles and permissions:** `System: evaluate` · `INS: sign off (STU-042), override with reason (own course)` · `PAD: override with audit` · `CAN, STD: view status`
+- **Preconditions and entry points:** After every progress, grade or assessment event; a nightly sweep.
+- **User interactions and actions:**
+  1. See a "What's left" checklist: required lessons, required assessments with minimum score, final exam, instructor sign-off, and overall grade threshold.
+  2. On completion see the completion page with certificate (FR-LRN-059), evidence added (FR-LRN-071), recommended next steps and an invitation to review.
+  3. If sign-off is required see "Awaiting instructor review" and an estimated response time.
+- **System behavior:** Completion rule per version: `{requiredLessonKeys (default all non-optional), requiredAssessments [{id, minScore}], minimumCourseGrade, instructorSignoff}`. Evaluated server side only (BR-LRN-014) against the enrollment's pinned version (BR-LRN-006). On true: enrollment `completed`, emit `learning.course.completed` once (outbox), trigger certificate and evidence jobs. With sign-off, the enrollment stays `active` with `completionPendingSignoff` until sign-off. Overrides require a reason and create an auditable `override` marker that shows on the certificate as "Completed with instructor-approved exception". Recomputation is available for audit and equals the stored result.
+- **UI elements and controls:** Checklist with state per item, completion page, "Awaiting sign-off" status.
+- **Configuration options:** Author: rule in STU-013. Platform: sweep time, sign-off reminder days (3 and 7).
+- **Business rules:** BR-LRN-006, BR-LRN-014, BR-LRN-017, BR-LRN-048
+- **Validation:** Rule must reference lessons and assessments existing in the version; the engine rejects unsatisfiable rules at publish (STU).
+- **Inputs and outputs:** In: events. Out: enrollment state, completion event.
+- **Filters, sorting, search:** n/a — engine.
+- **Notifications and communication:** `lrn.course.completed` (`TRANSACTIONAL`), `lrn.completion.awaiting_signoff` to the learner (in-app) and to the instructor (task).
+- **Error handling and edge cases:** Instructor never signs off: reminders at 3 and 7 days and escalation to the course owner; learner sees status. Assessment later retracted (voided attempt): completion is re-evaluated; a voided pass reverts completion only if the certificate was not yet issued, else raises a human review. Redelivery of events never duplicates completion.
+- **Dependencies:** FR-LRN-057, FR-LRN-062, FR-STU-042, FR-ASM-043, ENT-LRN-03.
+- **Security and privacy:** Overrides audited with actor and reason; instructor cannot sign off for their own enrollment (BR-LRN-019).
+- **Acceptance criteria:**
+  1. Given all required lessons done and the final exam passed, when the last event arrives, then the enrollment is `completed` and `learning.course.completed` is emitted once.
+  2. Given one required assessment not passed, when all lessons finish, then the enrollment stays `active`.
+  3. Negative: Given an instructor who is also the learner, when signing off, then `422 self_signoff` is returned and nothing changes.
+
+### FR-LRN-059 — Certificate issuance
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 8; F-52; OD-18] [DER]
+- **Purpose and outcome:** Completing a course issues a certificate that proves it, with a tamper-evident record. Success is one certificate per completion with reproducible hash.
+- **Roles and permissions:** `System: issue` · `CAN, STD: view, download, share` · `INS: revoke (own course, reason)` · `PAD: revoke, reissue`
+- **Preconditions and entry points:** `learning.course.completed` or program completion; `/me/certificates`.
+- **User interactions and actions:**
+  1. Receive "Your certificate is ready"; open it; see title, learner name, course, instructor, date, hours, skills, certificate id, QR code and verification URL.
+  2. Download as PDF or image, add to a profile or share (FR-LRN-060).
+  3. Choose which name appears (legal name or display name) before first issuance; request correction later.
+- **System behavior:** Issued once per completed enrollment (BR-LRN-023), idempotent on `enrollmentId`. Certificate id is a random unguessable token; content hash (SHA-256 over the canonical certificate payload) is stored and reproducible. Layout is rendered from a template by a worker (PDF and image). Name policy per BR-LRN-059. Validity: perpetual by default (OD-18) or an expiry date for courses flagged `expires` (for example compliance training). Reissue after name correction creates a new version and marks the old `superseded` while keeping it verifiable.
+- **UI elements and controls:** Certificate view with print stylesheet, Download PDF and PNG buttons, "Share" menu, "Request correction" link.
+- **Configuration options:** Platform: template, validity default, name policy. Author: validity period, whether certificate is offered at all.
+- **Business rules:** BR-LRN-023, BR-LRN-024, BR-LRN-025, BR-LRN-059
+- **Validation:** Name 1 to 100 characters, no emoji or URLs; correction needs a reason.
+- **Inputs and outputs:** In: completion event, name choice. Out: certificate record, files, hash.
+- **Filters, sorting, search:** `/me/certificates` sorted by date; filter by type (course, program).
+- **Notifications and communication:** `lrn.certificate.issued` email and in-app (`TRANSACTIONAL`).
+- **Error handling and edge cases:** Rendering fails: certificate record exists with status `pending_render`, retried; learner sees "Preparing"; alert after 3 failures. Duplicate event: no second certificate. Name change after issue: correction flow. Course later retracted for fraud: revocation (FR-LRN-060 shows status).
+- **Dependencies:** FR-LRN-058, EVD (planned), SM-LRN-03, ENT-LRN-09.
+- **Security and privacy:** Certificate id unguessable; public view minimal (FR-LRN-060); PDF metadata excludes email.
+- **Acceptance criteria:**
+  1. Given a completed enrollment, when the issue job runs twice, then one certificate exists.
+  2. Given the stored payload, when recomputing the SHA-256, then it equals the stored hash.
+  3. Negative: Given an incomplete enrollment, when the issue endpoint is called, then `409 not_completed` is returned.
+
+### FR-LRN-060 — Certificate verification and sharing
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 9 (`/verify/{hash}`); F-52; BR-024 style] [DER]
+- **Purpose and outcome:** Anyone can verify a certificate is genuine, current and unrevoked, and learners can share it without exposing more than they choose. Success is verification checks that never confuse revoked with valid.
+- **Roles and permissions:** `GUE, all: verify` · `CAN, STD: share, set visibility, revoke own share link`
+- **Preconditions and entry points:** `/verify/:certId` by link or QR; share menu on the certificate.
+- **User interactions and actions:**
+  1. A verifier opens the link or scans the QR code and sees status (Valid, Revoked, Expired, Superseded), learner display name (if the learner allows), course, issuer, date and hash.
+  2. A verifier can paste a certificate id or upload the PDF to check its hash.
+  3. The learner chooses visibility: public link, link only for named recipients, or private; and can add the certificate to a profile (PRF, planned) or copy a share link; "Add to LinkedIn" opens the external form prefilled.
+- **System behavior:** Public page shows only minimal fields: status, course title, issuer, issue date, expiry, learner name per consent, and the SHA-256. Revoked and expired items stay verifiable with status and reason class (BR-LRN-024). Rate limited. Page is cacheable for 60 seconds. Upload check compares the file's embedded hash to the record. Verification events are counted for the learner (count only).
+- **UI elements and controls:** Status banner with icon and text, details list, hash with copy, "Check a file" uploader, learner-side visibility selector and share buttons.
+- **Configuration options:** Learner: visibility, show name or initials. Platform: cache TTL.
+- **Business rules:** BR-LRN-023, BR-LRN-024, BR-LRN-059
+- **Validation:** Certificate id format and checksum; uploads PDF or PNG up to 10 MB.
+- **Inputs and outputs:** In: certificate id or file. Out: verification result.
+- **Filters, sorting, search:** n/a — lookup.
+- **Notifications and communication:** `lrn.certificate.verified_view` count only in dashboard; no per-viewer notification.
+- **Error handling and edge cases:** Unknown id: "We couldn't find this certificate" with no hints. Private certificate: shows "This credential is not public" without existence confirmation of details. Scraping: rate limit 30 per minute per IP [PROP]. Revoked yet cached: status shows within 60 seconds.
+- **Dependencies:** FR-LRN-059, EVD (planned), PRF (planned), ENT-LRN-09.
+- **Security and privacy:** Minimal public data; no email, no enrollment ids; id enumeration impractical.
+- **Acceptance criteria:**
+  1. Given a valid certificate, when opening its link, then status Valid appears with course, issuer and date.
+  2. Given a revoked certificate, when opening, then status Revoked appears with the reason class and the date.
+  3. Negative: Given a private certificate, when an anonymous user opens the link, then no learner name or course is shown.
+
+### FR-LRN-061 — Learning achievements
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT BR-053 "badges minted only upon verified milestone completion"; F-22] [DER]
+- **Purpose and outcome:** Meaningful learning milestones are recognized visibly and never for empty activity. Success is achievements correlated with real completion, not gaming.
+- **Roles and permissions:** `CAN, STD: view, share` · `REP (planned): award engine`
+- **Preconditions and entry points:** Completion page, dashboard, `/me/learning/achievements`.
+- **User interactions and actions:**
+  1. See earned achievements (for example first course completed, five courses completed, path completed, 7-day streak, first perfect quiz) with date and requirement.
+  2. See locked achievements with progress toward them.
+  3. Share an achievement (private link or profile).
+- **System behavior:** LRN emits milestone events; REP decides awards and values (XP, badges) under its own caps. Achievements are minted only from verified milestones (BR-LRN-014). Revoked completions revoke dependent achievements. In-product celebration respects reduced motion.
+- **UI elements and controls:** Achievement grid with icon, name, date, progress meter with text, share button.
+- **Configuration options:** User: hide achievements from public profile.
+- **Business rules:** BR-LRN-014, BR-LRN-027
+- **Validation:** n/a — awarded by rule.
+- **Inputs and outputs:** In: LRN events. Out: achievements list.
+- **Filters, sorting, search:** Filter earned or locked.
+- **Notifications and communication:** `lrn.achievement.earned` in-app (`LEARNING`).
+- **Error handling and edge cases:** Duplicate event: one award. REP outage: achievements post later; learner sees them when the engine catches up. Streak freeze or reset affects streak achievements per FR-LRN-069.
+- **Dependencies:** REP (planned), FR-LRN-058, FR-LRN-069.
+- **Security and privacy:** Visibility controlled by the learner.
+- **Acceptance criteria:**
+  1. Given five completed courses, when the fifth completes, then the "Five courses" achievement is awarded once.
+  2. Given a completion later revoked, when the revocation is processed, then dependent achievements are revoked.
+  3. Negative: Given a learner who only opens lessons without completing, when evaluating "first course", then no achievement is awarded.
+
+### FR-LRN-062 — Gradebook for learners
+
+- **Sub-module:** H. Progress and credentials
+- **Priority / tier:** Should · R3
+- **Source:** [SRC: SSOT BR-108; YASH-G3 SPEC-06] [DER]
+- **Purpose and outcome:** Learners see every graded item, its weight, their score and their running course grade. Success is no grade surprises.
+- **Roles and permissions:** `CAN, STD: view own` · `INS: view and adjust (STU-031)`
+- **Preconditions and entry points:** `/learn/courses/:slug/grades`; link from the player.
+- **User interactions and actions:**
+  1. See a table of items (quizzes, assignments, projects, exams) with weight, due date, score, status, feedback link.
+  2. See the current grade, the minimum grade needed, and "what if" scores for pending items (calculator).
+  3. Open an item to read feedback and rubric detail; dispute a grade with a reason.
+- **System behavior:** Course grade = sum of weight times score over graded items, with ungraded items shown as pending and excluded from the running percentage but included in the "final if remaining are zero" line (BR-LRN-048). Overrides carry a reason and audit. Disputes go to the instructor queue with a response SLA shown. Rounding: half up to one decimal.
+- **UI elements and controls:** Grade table, what-if inputs, dispute button, grade summary card.
+- **Configuration options:** Author: weights, grading scale labels, minimum course grade.
+- **Business rules:** BR-LRN-048
+- **Validation:** What-if scores 0 to 100; weights sum to 100 (author side).
+- **Inputs and outputs:** In: scores from ASM and assignments. Out: grade view.
+- **Filters, sorting, search:** Sort by due date or weight.
+- **Notifications and communication:** `lrn.grade.posted`, `lrn.grade.changed` (`LEARNING`).
+- **Error handling and edge cases:** Grade changed after completion: certificate unaffected but a note records the change if the rule would no longer hold, which opens human review. Missing score for an excused item: weight redistributed with a visible note.
+- **Dependencies:** FR-LRN-042, FR-LRN-044, FR-STU-031, ENT-LRN-28.
+- **Security and privacy:** Grades are private to the learner and graders; institutions per scope.
+- **Acceptance criteria:**
+  1. Given two graded items weighted 40 and 60 with scores 80 and 90, when viewing, then the grade is 86.0.
+  2. Given a dispute, when submitted, then it appears in the instructor queue with the item and reason.
+  3. Negative: Given another learner's gradebook URL, when opened, then `403` is returned.
+
+### I. Reviews
+
+### FR-LRN-063 — Submit course review
+
+- **Sub-module:** I. Reviews
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT §7 F-72; BR-095, BR-104] [DER]
+- **Purpose and outcome:** Eligible learners rate and review a course so others can choose well. Success is a representative share of completers reviewing, with authentic content.
+- **Roles and permissions:** `CAN, STD: create, edit, delete own review` · `INS: barred from own course (BR-LRN-019)`
+- **Preconditions and entry points:** Enrollment verified and at least 20 percent progress (BR-LRN-020); prompt on completion and after milestones; `/learn/courses/:slug/review`.
+- **User interactions and actions:**
+  1. Choose 1 to 5 stars; optionally rate sub-aspects (content quality, instructor clarity, practice quality, value).
+  2. Write a title and text (optional above 1 star requires text of 20 or more characters); optionally add "What would improve this course".
+  3. Choose display name or "Anonymous learner"; tick "I have not been paid or incentivized for this review".
+  4. Submit; edit or delete later; see it appear.
+- **System behavior:** One review per learner per course, editable (BR-LRN-020). Published immediately unless the auto-moderation filter holds it for review (BR-LRN-022). Edits keep history for moderators. Aggregate and distributions update within 60 seconds and display only above the minimum review count (BR-LRN-021). Reviews tied to a refunded enrollment are excluded from aggregates. Review is tagged with the course version range the learner took. Review prompts snooze for 14 days if dismissed.
+- **UI elements and controls:** Star selector (`radiogroup`), sub-aspect stars, title and text fields with counters, anonymity radio, incentive declaration checkbox, Submit, Delete.
+- **Configuration options:** Platform: minimum progress (20 percent), review prompt timing, sub-aspects.
+- **Business rules:** BR-LRN-019, BR-LRN-020, BR-LRN-021, BR-LRN-022
+- **Validation:** Title up to 100 characters; text up to 3,000; no URLs or contact details (blocked with explanation); one review per learner per course.
+- **Inputs and outputs:** In: rating, text, flags. Out: review record, updated aggregate.
+- **Filters, sorting, search:** n/a — composer.
+- **Notifications and communication:** `lrn.review.published` to learner in-app; `lrn.review.new` to the instructor (`SOCIAL`); `lrn.review.held` to learner when held.
+- **Error handling and edge cases:** Ineligible (under 20 percent): control disabled with "Reach 20 percent progress to review". Refunded: `403 review_ineligible`. Review held: learner sees "Pending review" with an expected time. Edit after instructor reply: the reply stays attached with a note "review edited".
+- **Dependencies:** FR-LRN-055, FR-LRN-064, FR-LRN-065, ENT-LRN-19.
+- **Security and privacy:** Review shows display name by choice; the platform retains real identity for moderators; brigading detection by TSF (planned).
+- **Acceptance criteria:**
+  1. Given 25 percent progress, when submitting a 4-star review, then it is published and the aggregate updates within 60 seconds.
+  2. Given a second review attempt, when submitted, then the existing review is updated, not duplicated.
+  3. Negative: Given 10 percent progress, when calling the create endpoint, then `403 review_ineligible` is returned.
+
+### FR-LRN-064 — Review display and instructor response
+
+- **Sub-module:** I. Reviews
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT §7 F-72, F-148] [DER]
+- **Purpose and outcome:** Visitors read helpful, honest reviews with context, and instructors reply publicly. Success is review usefulness and constructive replies.
+- **Roles and permissions:** `GUE, CAN, STD: read, vote helpful` · `INS: one public reply per review` · `MOD: hide`
+- **Preconditions and entry points:** Reviews section on the course page; instructor studio (STU-045).
+- **User interactions and actions:**
+  1. See the rating summary (average, count, distribution histogram) and individual reviews.
+  2. Filter by stars, by "has text", by course version, by language; sort by most helpful, newest, highest, lowest.
+  3. Vote Helpful or Not helpful; one vote per signed-in user per review.
+  4. Read the instructor reply under a review.
+- **System behavior:** Average is displayed to one decimal only when at least 5 eligible reviews exist (BR-LRN-021); before that "New" and a count. Most-helpful ranking uses a Wilson lower bound on votes with decay for age. Reviews show "Completed" or "In progress" and hours spent bands. Replies are limited to one and cannot be edited after 24 hours (BR-LRN-022). Instructors cannot delete or hide a learner review.
+- **UI elements and controls:** Summary header, histogram with accessible table alternative, filter chips, sort select, review cards, helpful buttons, reply block.
+- **Configuration options:** Platform: minimum review count (5), vote weighting, language filter default.
+- **Business rules:** BR-LRN-021, BR-LRN-022
+- **Validation:** Votes by authenticated users only; reply up to 1,000 characters.
+- **Inputs and outputs:** In: filters, votes. Out: review list, aggregate.
+- **Filters, sorting, search:** As above; search within reviews by keyword.
+- **Notifications and communication:** `lrn.review.reply` to the reviewer (`SOCIAL`).
+- **Error handling and edge cases:** Review text in another language: shown with "Translate" option [PROP]. Hidden by moderation: placeholder to the author only. Aggregate drift from deletions recalculated asynchronously and reconciled nightly.
+- **Dependencies:** FR-LRN-063, FR-STU-045, FR-LRN-065, ENT-LRN-19.
+- **Security and privacy:** Display names only; reviewer identity never exposed to instructors beyond what the reviewer chose.
+- **Acceptance criteria:**
+  1. Given 3 reviews, when viewing the course, then the page shows "New" and "3 reviews" without an average.
+  2. Given 6 reviews averaging 4.33, when viewing, then 4.3 and the distribution show.
+  3. Negative: Given an instructor who tries to reply twice, when submitting the second, then `409 reply_exists` is returned.
+
+### FR-LRN-065 — Review reporting and moderation hand-off
+
+- **Sub-module:** I. Reviews
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §7 F-72; BR-116..BR-128 social rules] [DER]
+- **Purpose and outcome:** Abusive, fake or off-topic reviews are reported and decided consistently, with a path for appeal. Success is median decision time and low overturn rate.
+- **Roles and permissions:** `All signed-in: report` · `INS: report reviews` · `MOD: decide` · `CAN: appeal own removed review`
+- **Preconditions and entry points:** "Report" menu on a review; instructor studio.
+- **User interactions and actions:**
+  1. Choose a reason (spam, abusive, off-topic, fake or incentivized, personal information, other) and optional note.
+  2. Receive a receipt; reporters see the outcome category ("Action taken" or "No action") but not details.
+  3. The review author is told if their review is removed or held with the reason and can appeal once.
+- **System behavior:** Reports create a moderation case in TSF (planned) with the review snapshot (SM-LRN-05 transitions: published, reported, hidden, removed). Rate limits and duplicate detection apply (a user can report a review once). Automated signals: bursts of reviews from related accounts, reviews right after refund, text duplicates; they raise the priority, never decide. Decisions restore, hide or remove and recalculate aggregates.
+- **UI elements and controls:** Report dialog, receipt, appeal form.
+- **Configuration options:** Platform: report reasons, auto-hold threshold (distinct reporters, default 3 [PROP]).
+- **Business rules:** BR-LRN-022
+- **Validation:** One report per user per review; note up to 500 characters.
+- **Inputs and outputs:** In: report. Out: case id, outcome.
+- **Filters, sorting, search:** Moderator queue by reason, priority, course.
+- **Notifications and communication:** `lrn.review.removed` and `lrn.review.appeal_decided` (`TRANSACTIONAL`).
+- **Error handling and edge cases:** Report storm on one review: auto-hold pending review with notice to the author. Appeal on a removed review: second moderator decides. Review of a taken-down course remains but is not displayed.
+- **Dependencies:** TSF (planned), FR-LRN-064, SM-LRN-05.
+- **Security and privacy:** Reporter identity hidden from the review author and instructor.
+- **Acceptance criteria:**
+  1. Given 3 distinct reports, when the threshold is met, then the review is held and a case is opened.
+  2. Given a removal, when the author appeals, then a different moderator decides and the author is notified.
+  3. Negative: Given the same user reports twice, when the second is submitted, then `409 already_reported` is returned.
+
+### J. Personalization and engagement
+
+### FR-LRN-066 — Course recommendations
+
+- **Sub-module:** J. Personalization and engagement
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §18.2; F-155; BR-184..BR-188] [DER]
+- **Purpose and outcome:** Learners see relevant courses with a clear reason. Success is recommendation click-through and enrollments without eroding trust.
+- **Roles and permissions:** `CAN, STD: view, dismiss, reset`
+- **Preconditions and entry points:** Dashboard rails, catalog "Recommended" sort, end-of-course page, empty states.
+- **User interactions and actions:**
+  1. See rails: "Because you completed X", "Close your gap in Y", "Popular in your goal", "Next in your path".
+  2. Tap "Why this?" to see the reasons and the data used.
+  3. Dismiss with "Not interested" (choose reason: too basic, too advanced, not relevant, already know it).
+  4. Reset personalization in settings.
+- **System behavior:** Candidates come from AIC (planned) using the evidence graph, goals, completed courses and behavior, with signals limited to what the learner consented to (BR-LRN-044). Each item carries an explanation string and a source label ("sponsored" placement is not supported). Excludes completed, enrolled, dismissed and not-visible courses. Cold start uses popular-in-category and goal. Impressions and clicks are logged for evaluation without storing sensitive attributes.
+- **UI elements and controls:** Rail cards with reason line, "Why this?" popover, "Not interested" menu, "Reset recommendations" button in settings.
+- **Configuration options:** User: personalization on or off, signals used. Platform: rail composition.
+- **Business rules:** BR-LRN-044
+- **Validation:** Dismiss reason from list.
+- **Inputs and outputs:** In: feedback. Out: ranked items with explanations.
+- **Filters, sorting, search:** Rails are fixed; full list through the catalog sort.
+- **Notifications and communication:** Optional weekly digest of recommendations by email, class `PROMO`, off by default.
+- **Error handling and edge cases:** Recommender down: popular-in-category fallback with generic labels. No consent: generic rails and a note linking to settings. Dismissed course reappears only if a new version is materially different (changed skills or level).
+- **Dependencies:** AIC (planned), FR-LRN-005, ENT-LRN-25.
+- **Security and privacy:** No protected attributes used; explanation transparency; user can export and delete signals.
+- **Acceptance criteria:**
+  1. Given a learner who completed a SQL course, when opening the dashboard, then a rail "Because you completed SQL Basics" shows courses not yet taken.
+  2. Given "Not interested" on a course, when refreshing, then it no longer appears in rails.
+  3. Negative: Given personalization off, when viewing the dashboard, then no personalized reasons appear and no behavior signals are sent to AIC.
+
+### FR-LRN-067 — Learner dashboard
+
+- **Sub-module:** J. Personalization and engagement
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §9.2 F-07 step 10 ("Continue learning" widget)] [DER]
+- **Purpose and outcome:** A single home where learners see what to do next today. Success is sessions that start with Continue.
+- **Roles and permissions:** `CAN, STD: own`
+- **Preconditions and entry points:** `/learn/home`; default landing for learners with active enrollments.
+- **User interactions and actions:**
+  1. See "Continue learning" (most recent lesson with time left), "Due this week", "Live sessions", "Goal progress", "Streak", "Recommended", "Recent achievements".
+  2. Hide or reorder cards; collapse sections.
+  3. Take a quick action: resume, join a live session, open a deadline.
+- **System behavior:** Aggregates read models; each card loads independently with its own skeleton so one failing card does not block others. Time estimates use the lesson durations. For institution-assigned work, assigned items surface first. New learners see a first-steps checklist (choose a goal, enroll in a course, finish a lesson).
+- **UI elements and controls:** Cards with consistent headers, per-card "Hide", reorder handle with keyboard alternative, empty states with actions.
+- **Configuration options:** User: card visibility and order.
+- **Business rules:** BR-LRN-009, BR-LRN-057
+- **Validation:** Card ids from the supported set.
+- **Inputs and outputs:** In: preferences. Out: dashboard model.
+- **Filters, sorting, search:** n/a — cards.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Card service fails: card shows "Couldn't load" with Retry. Many enrollments: only top 5 in "Continue" with "See all". No enrollments: onboarding card with goal selection.
+- **Dependencies:** FR-LRN-056, FR-LRN-066, FR-LRN-068, FR-LRN-069.
+- **Security and privacy:** Data scoped to the learner.
+- **Acceptance criteria:**
+  1. Given an in-progress course, when opening the dashboard, then Continue shows its next lesson and remaining time.
+  2. Given one card's service is down, when loading, then other cards render normally.
+  3. Negative: Given a brand-new account, when opening the dashboard, then no empty tables are shown, only first-steps actions.
+
+### FR-LRN-068 — Goals and weekly commitment
+
+- **Sub-module:** J. Personalization and engagement
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §1.1 Goal; F-95, F-156] [DER]
+- **Purpose and outcome:** Learners set a learning goal and a weekly commitment and see honest progress against both. Success is goal attainment and sustained weekly activity.
+- **Roles and permissions:** `CAN, STD: own`
+- **Preconditions and entry points:** Dashboard goal card; `/me/learning/plan`; onboarding.
+- **User interactions and actions:**
+  1. Choose a career goal (from MKT or AIC goals, planned) or a skill target.
+  2. Set weekly commitment as hours (default 3) or lessons, and preferred days.
+  3. See this week's progress bar and an "on track" or "behind" message.
+  4. Adjust or pause the goal.
+- **System behavior:** Weekly window runs Monday to Sunday in the learner's time zone (BR-LRN-057). Activity counted: media minutes watched, lessons completed, quiz attempts. Missed weeks never produce punitive language. Goal progress derives from gap closure (evidence earned) not from hours. Goal data can inform recommendations only with consent.
+- **UI elements and controls:** Goal picker, commitment slider with text value, progress ring with number, pause switch.
+- **Configuration options:** User: goal, commitment, days, pause.
+- **Business rules:** BR-LRN-043, BR-LRN-057
+- **Validation:** Commitment 0.5 to 40 hours per week; at most 3 active goals.
+- **Inputs and outputs:** In: goal, commitment. Out: progress.
+- **Filters, sorting, search:** n/a — settings.
+- **Notifications and communication:** `lrn.goal.weekly_summary` (`LEARNING`), opt-out.
+- **Error handling and edge cases:** Time zone change mid-week: window keeps the original zone until next week. Over-commitment warning if the plan needs more than 40 hours per week to meet dates.
+- **Dependencies:** FR-LRN-025, FR-LRN-070, MKT (planned), ENT-LRN-13.
+- **Security and privacy:** Goals are sensitive career data; private by default.
+- **Acceptance criteria:**
+  1. Given a 3-hour commitment and 2 hours watched, when viewing midweek, then the ring shows 67 percent.
+  2. Given a goal paused, when the week ends, then no "behind" message is generated.
+  3. Negative: Given a fourth active goal, when creating, then `409 goal_limit` is returned.
+
+### FR-LRN-069 — Streaks
+
+- **Sub-module:** J. Personalization and engagement
+- **Priority / tier:** Could · R4
+- **Source:** [PROP] (consumer-learning standard); [SRC: SSOT §7 F-22 engagement] [DER]
+- **Purpose and outcome:** A gentle consistency signal rewards regular learning without penalizing breaks. Success is more regular sessions without increased drop-off after streak loss.
+- **Roles and permissions:** `CAN, STD: view, opt out`
+- **Preconditions and entry points:** Dashboard card; achievements.
+- **User interactions and actions:**
+  1. See current streak, longest streak and a week strip showing active days.
+  2. Use one "streak freeze" per week automatically on a missed day, or choose to skip a day deliberately.
+  3. Turn streaks off in settings (hides everywhere).
+- **System behavior:** A day counts when at least one qualifying activity (a lesson completed or 5 or more minutes of media watched) occurs in the learner's local day (BR-LRN-027, BR-LRN-057). Streaks are display-only and never gate access. Time zone changes use the day of the new zone without double counting. Streak data feeds achievements (FR-LRN-061).
+- **UI elements and controls:** Streak counter with text, week strip, freeze indicator, opt-out switch.
+- **Configuration options:** User: streaks on or off, freeze auto-use. Platform: qualifying activity thresholds.
+- **Business rules:** BR-LRN-027, BR-LRN-057
+- **Validation:** n/a — derived.
+- **Inputs and outputs:** In: activity events. Out: streak value.
+- **Filters, sorting, search:** n/a — display.
+- **Notifications and communication:** Streak-at-risk reminder in the evening of the learner's day (`LEARNING`), off by default, at most 1 per day.
+- **Error handling and edge cases:** Offline activity credited by event timestamp on sync. Travel across zones: no double days. Opt-out deletes streak history display but keeps raw activity.
+- **Dependencies:** FR-LRN-055, FR-LRN-061, ENT-LRN-14.
+- **Security and privacy:** Private unless the learner shares.
+- **Acceptance criteria:**
+  1. Given activity on 3 consecutive local days, when viewing, then streak is 3.
+  2. Given one missed day and a freeze available, when the next day has activity, then the streak continues and the freeze is consumed.
+  3. Negative: Given 2 minutes watched only, when the day ends, then the day does not count.
+
+### FR-LRN-070 — Reminders, nudges and calendar export
+
+- **Sub-module:** J. Personalization and engagement
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §9.2 F-07 notifications "drop-off reminder 7d, 14d, 30d"] [DER]
+- **Purpose and outcome:** Learners get timely, controllable prompts and can put study time in their calendar. Success is reactivation without opt-out spikes.
+- **Roles and permissions:** `CAN, STD: configure own`
+- **Preconditions and entry points:** Learning settings; plan and goal screens; "Add to calendar" on sessions and study blocks.
+- **User interactions and actions:**
+  1. Choose reminder types: study time, deadlines, live sessions, inactivity, streak, new content.
+  2. Set study blocks (days, time, length) and quiet hours.
+  3. Export blocks and deadlines as a calendar feed (subscription URL) or a one-off `.ics`.
+  4. Snooze or turn off any reminder from the message itself.
+- **System behavior:** Inactivity nudges at 7, 14 and 30 days for active enrollments, each only once per gap (BR-LRN-026). A global cap of 3 non-transactional learning nudges per week and quiet hours are enforced before sending. Channels per NTF (planned). The calendar feed uses a secret URL that can be reset. All timestamps are time-zone aware.
+- **UI elements and controls:** Reminder matrix (type by channel), study block editor, quiet hours pickers, "Reset calendar link" button.
+- **Configuration options:** User: all of the above. Platform: caps, inactivity thresholds.
+- **Business rules:** BR-LRN-026, BR-LRN-057
+- **Validation:** Study block length 10 minutes to 4 hours; no more than 14 blocks per week.
+- **Inputs and outputs:** In: preferences. Out: scheduled reminders, feed.
+- **Filters, sorting, search:** n/a — settings.
+- **Notifications and communication:** `lrn.reminder.study`, `lrn.reminder.inactive_7d`, `lrn.reminder.inactive_14d`, `lrn.reminder.inactive_30d` (`LEARNING`).
+- **Error handling and edge cases:** Over-cap: lowest-priority nudges are dropped and logged. Unsubscribe link in each email works without login. Calendar feed revoked: old URL returns `404`.
+- **Dependencies:** NTF (planned), FR-LRN-025, FR-LRN-049, FR-LRN-068.
+- **Security and privacy:** Feed URL is a bearer secret; shows titles only, never lesson content.
+- **Acceptance criteria:**
+  1. Given 7 days of inactivity on an active course, when the job runs, then one nudge is sent and none repeats until activity resumes.
+  2. Given quiet hours 22:00 to 07:00, when a reminder falls inside, then it is deferred to 07:00.
+  3. Negative: Given 3 nudges already sent this week, when a fourth is due, then it is not sent.
+
+### K. Skills and analytics
+
+### FR-LRN-071 — Skill mapping and evidence hand-off
+
+- **Sub-module:** K. Skills and analytics
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: YASH-G3 SPEC-06 §3.4 evidence minting; SSOT §6.1; V61-17] [DER]
+- **Purpose and outcome:** Finishing a course adds exactly the right, honestly graded evidence to the learner's career evidence graph. Success is one evidence item per qualifying completion and none for mere participation.
+- **Roles and permissions:** `System: hand off` · `CAN, STD: view, choose visibility` · `INS: sign-off feeds the rung`
+- **Preconditions and entry points:** `learning.course.completed`, program completion, assessment pass inside a course.
+- **User interactions and actions:**
+  1. On the completion page see "Evidence added: <skills> at <level>" with the rung label and issuer class ("Platform", "Instructor", "Institution").
+  2. Open the evidence item (EVD, planned) to set visibility or attach the project.
+  3. See "How this was verified" explaining the rule used.
+  4. If no evidence was earned (watch-only course), see why and which assessment would earn it.
+- **System behavior:** The course version carries declared skills with `targetLevel` (claims by the author). On completion the consumer calls the EVD issuer API exactly once with `(issuerRef=course:<id>@<version>, sourceRef=enrollmentId)` (BR-LRN-025). Rung policy (OD-LRN-02): rule-based completion that includes at least one graded, integrity-protected assessment passed yields `authority_verified` with the issuer class (platform for platform-authored, instructor for third-party courses, institution for institution-owned); instructor sign-off yields class `instructor` and never counts as platform-verified; watch-only completion yields no authority-verified evidence. Partial progress never creates evidence (BR-LRN-046). Voided assessment passes or revoked certificates revoke dependent evidence through the human issuer path. Retries are idempotent; failure leaves the enrollment `completed` with "evidence pending" and a dead-letter alert.
+- **UI elements and controls:** Evidence card on completion, "How this was verified" disclosure, link to the EVD item.
+- **Configuration options:** Platform: rung policy table; author: declared skills, levels, which assessments count.
+- **Business rules:** BR-LRN-025, BR-LRN-046
+- **Validation:** Skills must exist in the ontology; levels from the ontology scale; one mint per enrollment id.
+- **Inputs and outputs:** In: completion event. Out: evidence item reference stored on the enrollment.
+- **Filters, sorting, search:** n/a — hand-off.
+- **Notifications and communication:** `lrn.evidence.added` (in-app and email, `LEARNING`); `lrn.evidence.pending` if delayed over 10 minutes.
+- **Error handling and edge cases:** EVD outage: retries with backoff; learner sees "evidence pending". Skill retired in the ontology: mapped to its successor or evidence created at the parent skill with a note. Course retraction: evidence revoked by a human issuer with reason.
+- **Dependencies:** EVD (planned), FR-LRN-058, FR-LRN-059, FR-ASM-045, ENT-LRN-03.
+- **Security and privacy:** Evidence visibility is learner-controlled in EVD; LRN passes no data beyond skills, course and dates.
+- **Acceptance criteria:**
+  1. Given a completed course with a passed graded assessment, when the consumer runs three times, then exactly one `authority_verified` evidence item exists.
+  2. Given a watch-only course, when completed, then no authority-verified item is created and the learner sees the reason.
+  3. Negative: Given a learner at 90 percent progress, when requesting evidence manually, then `409 not_completed` is returned.
+
+### FR-LRN-072 — Learner analytics
+
+- **Sub-module:** K. Skills and analytics
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7 F-82, F-114, F-153; BR-189..BR-193] [DER]
+- **Purpose and outcome:** Learners see their own learning patterns, strengths and gaps and, optionally, how they compare to similar learners. Success is that insights lead to actions without inducing anxiety.
+- **Roles and permissions:** `CAN, STD: own`
+- **Preconditions and entry points:** `/me/learning/insights`; dashboard teaser.
+- **User interactions and actions:**
+  1. See time learned per week, completion pace, quiz performance by topic, strongest and weakest skills, best study times.
+  2. Choose a date range; export the data.
+  3. Opt in to anonymous comparison ("You finish courses faster than 60 percent of learners with similar goals") shown only when the cohort has enough learners.
+  4. Act on suggestions ("Review these 3 topics").
+- **System behavior:** Computes from the learner's own events; comparisons use aggregates with a minimum cohort size of 30 and are off by default (BR-LRN-028). Skill strengths derive from graded results, not time spent. Insights are labeled correlational where they relate learning to outcomes (BR-LRN-028). No rankings of individuals are shown. Suggestions link to adaptive review (FR-LRN-073).
+- **UI elements and controls:** Charts with text tables, date range picker, comparison toggle with explanation, "Suggested actions" list.
+- **Configuration options:** User: comparison opt-in, data export.
+- **Business rules:** BR-LRN-028
+- **Validation:** Date range up to 24 months.
+- **Inputs and outputs:** In: range, opt-in. Out: metrics and suggestions.
+- **Filters, sorting, search:** Filter by course, skill, date range.
+- **Notifications and communication:** Optional monthly summary (`LEARNING`).
+- **Error handling and edge cases:** Insufficient data: "Complete a few lessons to see insights". Cohort too small: comparison hidden with explanation. Charts provide data tables for screen readers.
+- **Dependencies:** FR-LRN-055, FR-LRN-073, ANL (planned).
+- **Security and privacy:** Own data only; comparison never reveals individuals.
+- **Acceptance criteria:**
+  1. Given 4 weeks of activity, when opening insights, then weekly time and pace charts show with matching tables.
+  2. Given comparison opt-in and a cohort of 12, when viewing, then no comparison is shown and the reason is explained.
+  3. Negative: Given an instructor, when requesting a learner's insights by API, then `403` is returned.
+
+### FR-LRN-073 — Adaptive review and spaced repetition
+
+- **Sub-module:** K. Skills and analytics
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §7 F-137, F-155, WF-64] [DER]
+- **Purpose and outcome:** The system schedules short reviews of weak or aging topics so knowledge sticks. Success is better retention on later quizzes.
+- **Roles and permissions:** `CAN, STD: use`
+- **Preconditions and entry points:** "Daily review" card; end-of-lesson "Review later"; insights suggestions.
+- **User interactions and actions:**
+  1. Start a review session of 5 to 15 items drawn from quizzes and flashcards the author or learner marked for review.
+  2. Rate each answer (again, hard, good, easy) or answer the question; see the explanation.
+  3. Add your own flashcards from notes.
+  4. Snooze or turn off.
+- **System behavior:** Intervals follow a spaced schedule based on correctness and self-rating (initial 1, 3, 7, 21 days, adjusted by performance) [PROP]. Items come from course quiz pools flagged `reviewable`, learner flashcards and missed questions. Reviews are suggestions: they never gate access or completion (BR-LRN-051) and never mint evidence. Review data is private.
+- **UI elements and controls:** Review card with Show answer, rating buttons, session progress, flashcard editor.
+- **Configuration options:** User: daily review size, on or off, reminder time.
+- **Business rules:** BR-LRN-051
+- **Validation:** Flashcard front and back up to 500 characters.
+- **Inputs and outputs:** In: ratings. Out: next review dates.
+- **Filters, sorting, search:** Filter by course and topic.
+- **Notifications and communication:** `lrn.review.due` daily at the learner's chosen time (`LEARNING`).
+- **Error handling and edge cases:** Quiz question retired: card removed. Large backlog: capped per day with a notice. Course unenrolled: items remain for 90 days then are archived.
+- **Dependencies:** FR-LRN-042, FR-ASM-018, ENT-LRN-15.
+- **Security and privacy:** Learner-private.
+- **Acceptance criteria:**
+  1. Given a missed quiz question, when the review job runs next day, then it is scheduled for review.
+  2. Given "easy" ratings, when scheduling, then the next interval is longer than after "hard".
+  3. Negative: Given review items overdue, when the learner continues the course, then no lesson is locked because of them.
+
+### FR-LRN-074 — Learning data export and deletion
+
+- **Sub-module:** K. Skills and analytics
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §10.18 BR-063; §15.9 privacy] [DER]
+- **Purpose and outcome:** Learners get a complete copy of their learning data and can delete what is theirs, while credentials stay verifiable where law and policy require. Success is exports delivered within the deadline.
+- **Roles and permissions:** `CAN, STD: request export, delete notes and optional data` · `SET (planned): owns the request workflow`
+- **Preconditions and entry points:** Settings, Privacy (SET planned) and Learning settings.
+- **User interactions and actions:**
+  1. Request an export of learning data; choose format (JSON plus a human-readable PDF).
+  2. Receive a notification when ready and download the archive within 7 days.
+  3. Delete specific data: notes, bookmarks, review history, Q&A posts (anonymized), recommendation signals.
+  4. On account deletion see what will be removed and what is retained (BR-LRN-060).
+- **System behavior:** The export includes enrollments, progress, grades, submissions (own files), notes, bookmarks, reviews, Q&A posts, certificates, preferences and recommendation signals. Deleting a certificate record keeps a tombstone that verifies as "Record removed at the holder's request" without personal data, so third parties can see that a credential was withdrawn (BR-LRN-060). Posts become "Former learner" content to preserve thread integrity.
+- **UI elements and controls:** Export button with status, deletion checklist with preview, confirmation requiring password or re-authentication.
+- **Configuration options:** Platform: export link TTL (7 days), format.
+- **Business rules:** BR-LRN-029, BR-LRN-060
+- **Validation:** Re-authentication required; one export in progress at a time.
+- **Inputs and outputs:** In: request. Out: archive.
+- **Filters, sorting, search:** n/a — request.
+- **Notifications and communication:** `lrn.export.ready` (`TRANSACTIONAL`).
+- **Error handling and edge cases:** Export job fails: retried, learner informed after 24 hours. Legal hold: deletion deferred with reason to the learner. Submissions with other participants (team projects) export only the learner's own contribution.
+- **Dependencies:** SET (planned), FR-LRN-052, FR-LRN-059.
+- **Security and privacy:** Archive encrypted, link single-use; audit of request and download.
+- **Acceptance criteria:**
+  1. Given an export request, when the job completes, then the archive contains notes, progress and certificates and the learner is notified.
+  2. Given deletion of notes, when processed, then no notes remain in primary storage and export shows none.
+  3. Negative: Given a request without re-authentication, when submitted, then it is rejected `401`.
+
+### FR-LRN-075 — Report a content problem
+
+- **Sub-module:** K. Skills and analytics
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT BR-086 provider isolation; §7 F-51] [DER]
+- **Purpose and outcome:** Learners report broken media, wrong content, accessibility barriers, harmful or copyright-infringing content, and get a receipt. Success is time to fix and fewer repeat reports.
+- **Roles and permissions:** `GUE, CAN, STD: report` · `INS: receive for own course` · `MOD: triage safety and copyright` · `SUP: triage technical`
+- **Preconditions and entry points:** "Report a problem" in the player, lesson footer, course page and profile menus.
+- **User interactions and actions:**
+  1. Choose a category (video or audio problem, caption or transcript error, wrong or outdated content, accessibility barrier, inappropriate content, copyright, other) with the lesson and time prefilled.
+  2. Add a note up to 1,000 characters and optional screenshot.
+  3. Submit and receive a reference id; track status in "My reports".
+- **System behavior:** Technical categories route to the course author and platform ops with auto-diagnostics (browser, rendition, network, no personal identifiers beyond the account id). Safety categories route to TSF (planned), copyright to STU-050 process. Repeated identical reports aggregate into one issue with a count and raise priority at thresholds (3 reporters). Reporter receives updates on outcome.
+- **UI elements and controls:** Report dialog with category list, note, screenshot upload, reference confirmation, "My reports" list.
+- **Configuration options:** Platform: categories and routing; thresholds.
+- **Business rules:** BR-LRN-034
+- **Validation:** Category required; note up to 1,000 characters; screenshot up to 5 MB, image types only.
+- **Inputs and outputs:** In: report. Out: reference, status.
+- **Filters, sorting, search:** My reports by status.
+- **Notifications and communication:** `lrn.report.received`, `lrn.report.resolved` (`TRANSACTIONAL`); author gets `lrn.report.new_for_author` (`SOCIAL`).
+- **Error handling and edge cases:** Duplicate flood from one user throttled (5 per hour). Reporter offline: queued. Copyright reporters directed to the formal notice form when they claim to be rights holders.
+- **Dependencies:** TSF (planned), FR-STU-050, FR-STU-026, ENT-LRN-27.
+- **Security and privacy:** Reporter identity is not shown to the author for safety and copyright categories.
+- **Acceptance criteria:**
+  1. Given a broken video, when the learner reports it, then the author receives an issue with lesson, time and diagnostics.
+  2. Given 3 reports on the same lesson, when aggregated, then priority is raised and the count shows to the author.
+  3. Negative: Given a reporter who is not signed in for a safety category, when submitting, then they are asked to sign in or provide a contact email for follow-up.
+
+## 5. Business rules
+
+Parameters in braces are `[PROP]` defaults pending the decisions in section 13.
+
+| ID | Rule | Rationale | Enforced where | Source |
+|---|---|---|---|---|
+| BR-LRN-001 | Only courses in state `published` appear in the public catalog, search and sitemap. `unlisted` courses are reachable only by direct link or invite. Drafts, in-review, unpublished, archived and taken-down courses never appear. | Learners must not see unfinished or removed content. | Catalog read model, search index, API | [SRC: SSOT §10.22 BR-093] [DER] |
+| BR-LRN-002 | Visibility is decided server-side for every list, count, facet and direct read: institution-private, region-blocked and sanctioned items are excluded, and counts exclude them too. | Prevent leakage of private catalog and counts. | API and index filters | [DER] |
+| BR-LRN-003 | Each course has one primary category, up to 3 secondary categories, up to 10 tags, exactly one level from {beginner, intermediate, advanced, all_levels} and one primary language. | Reliable filtering and navigation. | Publish check (STU), taxonomy service | [SRC: SSOT BR-096] [DER] |
+| BR-LRN-004 | Prerequisites marked `required` block enrollment with an explanation; `recommended` ones only warn. Free-text items are never evaluated. | Avoid false blocks; keep honesty. | Eligibility gate | [SRC: SSOT §9.2 F-07 step 7; BR-022] [DER] |
+| BR-LRN-005 | At most one active enrollment per (account, course). Enroll is idempotent on this natural key. | Prevent duplicates and double charges. | DB unique index, enroll service | [SRC: SSOT BR-046] |
+| BR-LRN-006 | An enrollment is pinned to one published course version; completion is judged on that version. Moving to a newer version is optional and never forced; completed enrollments are never reopened. | Fair rules for the learner who started. | Enrollment service | [SRC: SSOT BR-105; YASH-G3 SPEC-06 §3.4] |
+| BR-LRN-007 | Paid access begins only after a verified payment event from BIL (planned); returning from checkout grants nothing. Activation is idempotent on the payment event id. | Redirects can be forged. | Enrollment consumer | [SRC: SSOT BR-115; YASH-G3 SPEC-06 INV-T17] |
+| BR-LRN-008 | Anonymous and non-enrolled viewers can reach only lessons flagged `preview`; every other lesson, manifest and resource returns 403. | Protect paid content. | Content API | [SRC: SSOT BR-094] [DER] |
+| BR-LRN-009 | Every lesson content, media-token and resource request is authorized against the enrollment state (`active`, or `completed` within retention) and lock state at request time. | Zero unauthorized access. | Content API, edge | [SRC: SSOT §9.2 F-07 security] |
+| BR-LRN-010 | Refund eligibility: full refund when requested within `refundWindowDays` {30} of purchase and progress is at most `refundProgressThresholdPct` {20}; otherwise pro-rated per BIL policy; after completion only by human exception with a recorded reason. | Fairness and abuse control. | Refund service, BIL | [SRC: SSOT BR-100; OD-29] [DEC-REQ] OD-LRN-03 |
+| BR-LRN-011 | Access expiry ends access to lessons but preserves progress and never revokes credentials already earned. | Learners keep what they earned. | Expiry sweep | [DER] |
+| BR-LRN-012 | After `dropped` or `expired`, progress is retained {90} days; re-enrollment within that time restores it, after that starts fresh. | Allow return without indefinite storage. | Enrollment service | [SRC: YASH-G3 SPEC-06 §3.2] |
+| BR-LRN-013 | Progress events are idempotent on (enrollmentId, lessonKey, kind, clientSeq); the server keeps the highest `clientSeq`; `completed` is sticky and never reverted by later `started` or `position` events. | Offline replay, out-of-order delivery. | Progress service | [SRC: SSOT BR-021; YASH-G3 SPEC-06 §3.3] |
+| BR-LRN-014 | Completion of lessons graded by rule, and of courses, is decided only by server-side rule evaluation on the pinned version. The client can never assert completion except for lessons whose rule is `manual`. | Trustworthy credentials. | Rule evaluator | [SRC: YASH-G3 SPEC-06 §3.4] |
+| BR-LRN-015 | A video lesson with rule `watch` completes when unique watched time is at least `videoCompletionThresholdPct` {90} of duration; seek-skipped time beyond `seekSkipCreditCapPct` {25} is not credited; media time, not wall time, is used. | Honest completion. | Progress service | [SRC: YASH-G3 SPEC-06 §3.3] [DEC-REQ] OD-LRN-04 |
+| BR-LRN-016 | Resume is offered when the saved position is at least 5 seconds and below 95 percent of duration; the latest server timestamp wins across devices. | Predictable continuity. | Player, progress service | [SRC: YASH-MICRO FEAT-08-03.1] |
+| BR-LRN-017 | Quiz lessons complete on a passing result from ASM; graded quizzes count toward the course grade, practice quizzes are unlimited and ungraded; attempts are bounded by the configured maximum. | Consistent assessment semantics. | Lesson rules, ASM consumer | [SRC: SSOT BR-107, BR-108] |
+| BR-LRN-018 | When a section or course is `sequential`, lesson N+1 is locked until lesson N is complete; default is free navigation. | Author-intended order. | Content API | [SRC: SSOT BR-047] |
+| BR-LRN-019 | An instructor or co-instructor of a course cannot rate or review it and cannot sign off their own enrollment; any learner enrollment they hold never yields ratings or instructor-class evidence for themselves. | Conflict of interest. | Review and sign-off services | [SRC: SSOT BR-104; YASH-MICRO AC-05-04-53] |
+| BR-LRN-020 | A review requires a verified enrollment (active or completed, not refunded) and at least {20} percent progress. One review per learner per course, editable. Reviews on refunded enrollments are excluded from aggregates. | Authentic reviews. | Review service | [SRC: SSOT BR-095] [DER] |
+| BR-LRN-021 | A numeric average rating is shown publicly only when at least {5} eligible reviews exist; before that the course shows "New" and the count. | Avoid misleading small samples. | Catalog and review read models | [PROP] OD-LRN-08 |
+| BR-LRN-022 | Reviews publish immediately unless auto-moderation holds them; instructors may reply once publicly (no edit after 24 hours) and can never edit, hide or delete a learner review; removals follow moderation with appeal. | Fair, tamper-resistant reviews. | Review and moderation services | [DER] |
+| BR-LRN-023 | One certificate is issued per completed enrollment (or per program completion), only after rule-based completion; it has an unguessable id and a reproducible SHA-256 hash of its canonical payload. | Verifiable and non-duplicable. | Certificate service | [SRC: SSOT §9.2 F-07 acceptance; F-52] |
+| BR-LRN-024 | Revoked, expired and superseded certificates remain verifiable with their status and reason class; they are never silently deleted. | Auditability. | Certificate service, verify page | [DER] |
+| BR-LRN-025 | Evidence hand-off happens exactly once per completed enrollment (idempotent on enrollmentId). Authority-verified evidence requires at least one graded integrity-protected assessment passed or an independent instructor sign-off (class `instructor`); watch-only completion yields none. | No inflated authority. | Evidence consumer | [SRC: YASH-G3 SPEC-06 §3.4; V61-17] [DEC-REQ] OD-LRN-02 |
+| BR-LRN-026 | At most {3} non-transactional learning nudges per learner per week; inactivity nudges only at 7, 14 and 30 days once per gap; quiet hours and opt-outs are honored. | Avoid nagging. | Nudge scheduler | [SRC: SSOT §9.2 F-07 notifications] [PROP] |
+| BR-LRN-027 | A streak day counts when at least one qualifying activity (a lesson completed or {5} or more minutes of media watched) occurs in the learner's local day; one freeze per week; streaks never gate access. | Gentle consistency. | Streak service | [PROP] |
+| BR-LRN-028 | Instructors see learner-level data only for their own course and only fields needed (progress, scores, Q&A); aggregate outcome analytics require at least 30 learners with measurable outcomes; individual outcomes are never exposed without consent; analytics are labeled correlational. | Privacy and honest analytics. | Analytics API | [SRC: SSOT BR-189 to BR-193] |
+| BR-LRN-029 | Notes, bookmarks, highlights, flashcards and saved lists are private to the learner and never visible to instructors, institutions or recruiters. | Safe personal study space. | API authorization | [DER] |
+| BR-LRN-030 | Only learners with an active or completed enrollment (and course staff) can post in Q&A and discussions; rate limits {5 questions and 20 answers per hour}; links limited for new accounts. | Quality and spam control. | Social service | [DER] |
+| BR-LRN-031 | Course announcements are limited to 1 per day per course; learners can mute emails and push per course. | Avoid noise. | Announcement service | [SRC: SSOT BR-102] |
+| BR-LRN-032 | Offline downloads only for lessons the author allowed, active enrollments, at most {3} devices, license TTL {30} days renewed online, revoked on drop, expiry, refund and takedown; completion is still decided online. | Protect content and rights. | License service | [PROP] OD-LRN-05 |
+| BR-LRN-033 | External-provider lessons expose only controls the provider's declared capabilities support; unsupported providers are rejected at authoring; embeds come only from allowlisted domains; protected content is never downloaded or proxied. | Honest, safe embeds. | Player, CSP, authoring | [SRC: SSOT BR-084, BR-085, BR-088, BR-090] |
+| BR-LRN-034 | A failing media provider or asset affects only its lesson; the course stays usable and the learner can report the problem. | Containment. | Player | [SRC: SSOT BR-086] |
+| BR-LRN-035 | Every published video lesson has captions or a transcript available to learners; auto-generated text is labeled until the author reviews it. | Accessibility. | Publish check (STU), player | [SRC: YASH-MICRO FEAT-08-03.3] |
+| BR-LRN-036 | At most {2} concurrent playback sessions per account; a newer session evicts the oldest with a message; patterns of sharing are flagged for review, not auto-banned. | Limit account sharing. | Playback session service | [PROP] OD-LRN-09 |
+| BR-LRN-037 | Playback and download authorization uses signed tokens with a TTL of {5} minutes, bound to enrollment, lesson and device session; tokens are never logged or placed in analytics. | Prevent link sharing. | Media edge | [SRC: SSOT §9.2 F-07 security] |
+| BR-LRN-038 | Cohort runs have enrollment open and close times, start, end and a grace period; deadlines are soft or hard; late submissions are flagged and treated per the author's policy; extensions are per learner, audited. | Predictable schedules. | Cohort and assignment services | [SRC: SSOT BR-111] [DER] |
+| BR-LRN-039 | A submission snapshot is immutable once submitted; resubmission creates a new revision within the allowed count; grades attach to a revision. | Fair, auditable grading. | Submission service | [DER] |
+| BR-LRN-040 | Each peer-reviewed submission needs at least 2 completed reviews; reviewers cannot review their own or their group's work; reviews are anonymous to reviewees by default. | Reliable peer grades. | Peer review service | [SRC: SSOT BR-103] |
+| BR-LRN-041 | Live-session attendance is recorded when the learner is present at least {50} percent of the scheduled duration; the recording notice is shown before joining. | Fair attendance and consent. | Live session service | [PROP] |
+| BR-LRN-042 | Sequenced paths unlock courses in the declared order; a program certificate is issued only when all required path courses are complete and any capstone is passed; path progress is derived from member enrollments. | Program integrity. | Path service | [SRC: SSOT BR-106, BR-110] |
+| BR-LRN-043 | Personal learning plans hold at most 50 items and never gate enrollment or access; learning goals are limited to 3 active. | Planning aid, not a lock. | Plan service | [DER] |
+| BR-LRN-044 | Recommendations carry a reason, exclude completed, enrolled and dismissed items, use only data covered by the learner's personalization consent, use no protected attributes, and never mix unlabeled sponsored items. | Trust and fairness. | Recommendation service | [SRC: SSOT BR-184 to BR-188] |
+| BR-LRN-045 | Prerequisites are evaluated at enrollment time only and not re-evaluated afterwards. | Stable enrollments. | Eligibility gate | [SRC: YASH-G3 SPEC-06 §9] |
+| BR-LRN-046 | Skills declared by authors are claims until completion; evidence is created only at rule-based completion, never from partial progress, and is tied to the course version. | Honest skill evidence. | Evidence consumer | [DER] |
+| BR-LRN-047 | Unpublishing or archiving a course blocks new enrollments but preserves access for existing enrollees; safety or legal takedown can revoke access. | Fair treatment of learners. | Catalog and content API | [SRC: SSOT BR-114; YASH-G3 SPEC-06 §3.5] |
+| BR-LRN-048 | Course grade = sum of item weight times score over graded items, rounded half up to 1 decimal; ungraded items are pending; instructor overrides require a reason and are audited and visible to the learner. | Transparent grading. | Gradebook service | [SRC: SSOT BR-108] [DER] |
+| BR-LRN-049 | Moderators and instructors hide posts, never hard-delete them, with a reason and audit; the author sees the placeholder and reason. | Accountable moderation. | Social service | [DER] |
+| BR-LRN-050 | Study groups are opt-in, limited to {8} members; members choose what they share; no default sharing. | Privacy. | Group service | [PROP] |
+| BR-LRN-051 | Adaptive review and spaced repetition are suggestions only; they never gate access or completion and never mint evidence. | Avoid hidden gates. | Review service | [DER] |
+| BR-LRN-052 | Public course pages carry only published catalog data (with structured data and canonical URLs); no learner data appears in public HTML. | Privacy and SEO. | Page rendering | [DER] |
+| BR-LRN-053 | Wishlist holds at most 200 items; comparison holds at most 3 courses. | Bounded lists. | Wishlist API, compare view | [PROP] |
+| BR-LRN-054 | Institution assignments may override advisory prerequisites and, if institution policy permits, enforced ones (recorded); institutions see learner data only within the visibility scope shown to the learner before the first lesson, and never notes or discussions. | Respect learner and institution needs. | Enrollment and analytics services | [SRC: SSOT §10.20 BR-072..BR-082] [DER] |
+| BR-LRN-055 | Access and discount codes are random, stored hashed, and have a use limit and expiry; redemption is atomic and idempotent per (code, account); more than 5 failures in 10 minutes triggers delays, 20 a one-hour lock. | Prevent guessing and over-use. | Redemption service | [PROP] |
+| BR-LRN-056 | Plan-entitled enrollments end after a grace period {7 days} when the entitlement ends; progress and credentials are kept; re-subscription restores access within retention. | Fair subscription behavior. | Entitlement consumer | [SRC: SSOT §9.2 F-07 step 3] [DER] |
+| BR-LRN-057 | Days and weeks for goals and streaks use the learner's profile time zone; time zone changes take effect at the next period boundary. | Consistent counting. | Goal and streak services | [PROP] |
+| BR-LRN-058 | Pause is allowed once per enrollment for at most {90} days on self-paced courses only (not cohort-bound or institution-assigned), and freezes the access clock. | Fair breaks. | Enrollment service | [PROP] |
+| BR-LRN-059 | The certificate name is the learner's chosen legal or display name set before first issuance; corrections need a reason and create a superseding version while the original stays verifiable. | Accurate credentials. | Certificate service | [DER] |
+| BR-LRN-060 | On export or erasure, learning records are exported fully; erasure removes personal content and leaves a tombstone certificate record verifying as "Record removed at the holder's request" without personal data. | Privacy with credential integrity. | Data-rights service | [SRC: SSOT Appendix E V61-19] [DER] |
+| BR-LRN-061 | Search queries linked to an account are retained at most {90} days, used only for relevance and gap reporting, never for advertising; zero-result queries are logged without account ids. | Privacy. | Search logging | [PROP] |
+
+## 6. State machines
+
+### SM-LRN-01 Enrollment
+
+States: `pending_assignment`, `pending_payment`, `active`, `paused`, `completed`, `dropped`, `expired`, `refunded`, `suspended`. Terminal: `completed`, `dropped`, `expired`, `refunded` (a new linked enrollment may follow).
+
+```mermaid
+stateDiagram-v2
+    [*] --> pending_payment: paid course selected
+    [*] --> pending_assignment: institution assigns, consent required
+    [*] --> active: free, invite, plan or consented assignment
+    pending_payment --> active: verified payment event
+    pending_payment --> expired: 24h unpaid
+    pending_assignment --> active: learner accepts
+    active --> paused: pause (self-paced)
+    paused --> active: resume or date reached
+    active --> completed: completion rule satisfied
+    active --> dropped: learner drops
+    active --> expired: access window ends
+    active --> refunded: refund completed
+    active --> suspended: sanction or legal hold
+    suspended --> active: sanction lifted
+    completed --> refunded: human exception refund
+    completed --> [*]
+    dropped --> [*]
+    expired --> [*]
+    refunded --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| (new) | `pending_payment` | Buy | Gate allows; quote valid (BR-LRN-007) |
+| `pending_payment` | `active` | `billing.purchase.fulfilled` | Event verified and not previously applied |
+| `pending_payment` | `expired` | Sweep | 24 hours elapsed |
+| `active` | `completed` | Rule evaluation | Rule satisfied at pinned version; sign-off done if required |
+| `active` | `paused` | Learner | Self-paced, no prior pause (BR-LRN-058) |
+| `active` | `expired` | Sweep | End instant reached and not paused |
+| `completed` | `refunded` | Human exception | Reason recorded; evidence revoked by human issuer |
+| `suspended` | `active` | Moderator or support | Reason recorded |
+
+Forbidden: `completed -> active`; any state to `active` from a payment redirect alone; `refunded -> active` (a new enrollment is created).
+
+### SM-LRN-02 Lesson progress
+
+States: `locked`, `available`, `in_progress`, `completed`. Terminal: none (completed is sticky within the pinned version).
+
+```mermaid
+stateDiagram-v2
+    [*] --> locked: sequential or drip rule
+    [*] --> available: free navigation
+    locked --> available: prerequisite lesson done or date reached
+    available --> in_progress: first event
+    in_progress --> completed: lesson rule satisfied
+    available --> completed: manual or optional rule
+    completed --> completed: replay, no regression
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `locked` | `available` | Prior lesson completion or release time | BR-LRN-018 |
+| `available` or `in_progress` | `completed` | Rule event | BR-LRN-014; sticky |
+| `completed` | `in_progress` | none | Forbidden: completion never reverts (BR-LRN-013) |
+
+### SM-LRN-03 Certificate
+
+States: `pending_render`, `issued`, `superseded`, `revoked`, `expired`, `tombstoned`. Terminal: `revoked`, `expired`, `superseded`, `tombstoned`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> pending_render: completion event
+    pending_render --> issued: render succeeds
+    issued --> superseded: name correction
+    issued --> revoked: fraud, error or refund exception
+    issued --> expired: validity end
+    issued --> tombstoned: holder erasure
+    revoked --> [*]
+    expired --> [*]
+    superseded --> [*]
+    tombstoned --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `pending_render` | `issued` | Worker | Hash computed; one per enrollment |
+| `issued` | `revoked` | Instructor or admin | Reason class and actor recorded |
+| `issued` | `superseded` | Correction approved | New version issued atomically |
+
+### SM-LRN-04 Assignment submission
+
+States: `draft`, `submitted`, `in_review`, `returned`, `graded`, `withdrawn`. Terminal: `graded` (unless a new revision opens), `withdrawn`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> submitted: learner submits
+    submitted --> in_review: grader opens or auto-grade starts
+    in_review --> graded: grade saved
+    in_review --> returned: revision requested
+    returned --> submitted: resubmit
+    submitted --> withdrawn: learner withdraws before review
+    graded --> [*]
+    withdrawn --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `draft` | `submitted` | Submit | Declaration ticked; deadline policy (BR-LRN-038) |
+| `returned` | `submitted` | Resubmit | Revisions remaining (BR-LRN-039) |
+
+### SM-LRN-05 Review
+
+States: `held`, `published`, `reported`, `hidden`, `removed`. Terminal: `removed`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> published: passes auto-check
+    [*] --> held: auto-moderation hold
+    held --> published: approved
+    held --> removed: rejected
+    published --> reported: report threshold
+    reported --> published: no action
+    reported --> hidden: temporary hide
+    hidden --> published: reinstated
+    hidden --> removed: confirmed violation
+    removed --> published: appeal upheld
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `removed` | `published` | Appeal upheld | Second moderator (FR-LRN-065) |
+| `published` | `reported` | Reports | Threshold {3 distinct reporters} |
+
+### SM-LRN-06 Path enrollment
+
+States: `active`, `completed`, `dropped`, `expired`. Terminal: all except `active`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> active
+    active --> completed: all required courses and capstone done
+    active --> dropped: learner leaves
+    active --> expired: path window ends
+    completed --> [*]
+    dropped --> [*]
+    expired --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `active` | `completed` | Derived from members | BR-LRN-042 |
+
+### SM-LRN-07 Offline license
+
+States: `requested`, `active`, `expiring`, `expired`, `revoked`. Terminal: `expired`, `revoked`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> requested
+    requested --> active: device within cap
+    active --> expiring: 3 days left
+    expiring --> active: renewed online
+    active --> expired: ttl elapsed
+    expiring --> expired: ttl elapsed
+    active --> revoked: drop, refund, takedown
+    expiring --> revoked: drop, refund, takedown
+    expired --> [*]
+    revoked --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `requested` | `active` | Server | Device count at most cap (BR-LRN-032) |
+| `active` | `revoked` | Enrollment ends | Applied on next reconnect and by server record |
+
+### SM-LRN-08 Live session attendance
+
+States: `registered`, `joined`, `attended`, `missed`, `cancelled`. Terminal: `attended`, `missed`, `cancelled`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> registered
+    registered --> joined: join in window
+    joined --> attended: present 50 percent or more
+    joined --> missed: left early
+    registered --> missed: session ended unjoined
+    registered --> cancelled: session cancelled
+    attended --> [*]
+    missed --> [*]
+    cancelled --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `joined` | `attended` | Session end | Presence at least {50} percent (BR-LRN-041) |
+
+### SM-LRN-09 Q&A thread
+
+States: `open`, `answered`, `resolved`, `hidden`. Terminal: none (reopenable).
+
+```mermaid
+stateDiagram-v2
+    [*] --> open
+    open --> answered: first answer
+    answered --> resolved: asker accepts answer
+    resolved --> open: asker reopens
+    open --> hidden: moderator or instructor hides
+    answered --> hidden: hides
+    resolved --> hidden: hides
+    hidden --> open: restored
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| any | `hidden` | Moderator or instructor | Reason recorded (BR-LRN-049) |
+
+### SM-LRN-10 Playback session
+
+States: `authorizing`, `playing`, `paused`, `evicted`, `ended`. Terminal: `evicted`, `ended`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> authorizing
+    authorizing --> playing: token issued
+    authorizing --> ended: denied
+    playing --> paused
+    paused --> playing
+    playing --> evicted: newer session over limit
+    paused --> evicted: newer session over limit
+    playing --> ended: lesson end or leave
+    paused --> ended: idle timeout
+    evicted --> [*]
+    ended --> [*]
+```
+
+| From | To | Trigger | Guard |
+|---|---|---|---|
+| `playing` | `evicted` | Third concurrent start | Limit {2} (BR-LRN-036) |
+| `paused` | `ended` | Idle | {30} minutes [PROP] |
+
+## 7. Screen inventory
+
+Key states for every screen include loading (skeleton), empty, error with retry, offline (where cached) and forbidden. Only screen-specific states are listed.
+
+| ID | Name | Route proposal | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-LRN-001 | Learn home | `/learn` | GUE, CAN, STD | Curated rails and entry to catalog | rails loading per rail, personalized vs generic |
+| SCR-LRN-002 | Course catalog and search results | `/learn/courses` | GUE, CAN, STD | List, search, filter, sort (FR-LRN-001 to 004) | zero results, filter conflict, index behind |
+| SCR-LRN-003 | Category page | `/learn/c/:slug` | GUE, CAN, STD | Category description and courses | retired category redirect |
+| SCR-LRN-004 | Skill and goal page | `/learn/skills/:skill`, `/learn/goals/:goalSlug` | GUE, CAN, STD | Skill-based browse and gap view | consent missing, no courses |
+| SCR-LRN-005 | Course comparison | `/learn/compare` | GUE, CAN, STD | Side-by-side compare | course unavailable column |
+| SCR-LRN-006 | Saved courses | `/learn/saved` | CAN, STD | Wishlist | list full, price dropped, unavailable |
+| SCR-LRN-007 | Course detail | `/learn/courses/:slug` | GUE, CAN, STD, INS | Detail, curriculum, reviews, action | not enrolled, enrolled, locked with reason, 410 |
+| SCR-LRN-008 | Enroll confirmation | `/learn/courses/:slug/enroll` | CAN, STD | Confirm free or invite enrollment | gate blocked, success |
+| SCR-LRN-009 | Payment status | `/learn/enrollments/:id/status` | CAN, STD | Pending payment confirmation | processing, failed, succeeded, expired |
+| SCR-LRN-010 | Redeem code | `/learn/redeem` | CAN, STD | Access and discount codes | invalid, exhausted, rate limited |
+| SCR-LRN-011 | Path and track catalog | `/learn/paths` | GUE, CAN, STD | Browse paths and tracks | empty track |
+| SCR-LRN-012 | Path or track detail | `/learn/paths/:slug`, `/learn/tracks/:slug` | GUE, CAN, STD | Path structure and enrollment | sequenced locked members, unavailable member |
+| SCR-LRN-013 | Learner dashboard | `/learn/home` | CAN, STD | What to do next | first-steps, card error |
+| SCR-LRN-014 | My courses and history | `/me/learning/courses` | CAN, STD | Enrollments by state and transcript | tabs with counts, expiring, assigned |
+| SCR-LRN-015 | Learning player | `/learn/courses/:slug/lessons/:lessonKey` | CAN, STD, GUE (preview) | All lesson types, panels, drawer | locked, preview, expired read-only, sync pending |
+| SCR-LRN-016 | Assignment workspace | `/learn/courses/:slug/assignments/:id` | CAN, STD | Brief, draft, submit, feedback | draft, submitted, in review, graded, late |
+| SCR-LRN-017 | Peer review workspace | `/learn/courses/:slug/reviews/:id` | CAN, STD | Review queue and forms | queue empty, overdue |
+| SCR-LRN-018 | Project workspace | `/learn/courses/:slug/projects/:id` | CAN, STD | Milestones and team | team unconfirmed, milestone due |
+| SCR-LRN-019 | Live session lobby and room | `/learn/courses/:slug/live/:id` | CAN, STD | Join live session | too early, open, full, ended, recording |
+| SCR-LRN-020 | Cohort schedule | `/learn/courses/:slug/schedule` | CAN, STD | Calendar and deadlines | no schedule, past |
+| SCR-LRN-021 | Course Q&A | `/learn/courses/:slug/qa` | CAN, STD | Questions and answers | no answers, rate limited |
+| SCR-LRN-022 | Discussion forum | `/learn/courses/:slug/discuss` | CAN, STD | Threads and categories | locked thread, hidden post |
+| SCR-LRN-023 | Notes and bookmarks | `/me/learning/notes` | CAN, STD | Search and export notes | none, quota near |
+| SCR-LRN-024 | Announcements | `/learn/courses/:slug/announcements` | CAN, STD | Instructor updates | none, muted |
+| SCR-LRN-025 | Gradebook | `/learn/courses/:slug/grades` | CAN, STD | Scores, weights, what-if | pending items, disputed |
+| SCR-LRN-026 | Course completion | `/learn/courses/:slug/complete` | CAN, STD | Completion summary and next steps | awaiting sign-off, evidence pending |
+| SCR-LRN-027 | Certificates | `/me/certificates`, `/me/certificates/:id` | CAN, STD | View, download, share | pending render, revoked, superseded |
+| SCR-LRN-028 | Certificate verification | `/verify/:certId` | GUE, all | Public verification | valid, revoked, expired, private, not found |
+| SCR-LRN-029 | Review composer | `/learn/courses/:slug/review` | CAN, STD | Write or edit review | ineligible, held |
+| SCR-LRN-030 | Goals and learning plan | `/me/learning/plan` | CAN, STD | Goals, plan, study blocks | over capacity, paused goal |
+| SCR-LRN-031 | Learning insights | `/me/learning/insights` | CAN, STD | Learner analytics | insufficient data |
+| SCR-LRN-032 | Achievements | `/me/learning/achievements` | CAN, STD | Earned and locked | engine delayed |
+| SCR-LRN-033 | Downloads manager | `/me/learning/downloads` | CAN, STD | Offline lessons and devices | device limit, expiring, storage full |
+| SCR-LRN-034 | Study groups | `/learn/groups` | CAN, STD | Groups and check-ins | full group, no matches |
+| SCR-LRN-035 | Learning settings | `/settings/learning` | CAN, STD | Player, reminders, personalization, accessibility, data export | export in progress |
+| SCR-LRN-036 | Refund request | `/me/learning/orders/:id/refund` | CAN, STD | Refund eligibility and request | eligible, pro-rated, not eligible, processing |
+| SCR-LRN-037 | Report a problem dialog | modal (no route) | GUE, CAN, STD | Content problem report | submitted, duplicate |
+| SCR-LRN-038 | Daily review | `/me/learning/review` | CAN, STD | Spaced repetition session | none due, backlog capped |
+
+## 8. Data entities owned
+
+Retention classes: `ACCT` deleted or anonymized with the account; `TXN` financial record, {7 years} [PROP] OD-LRN-10; `CRED` credential record kept as tombstone after erasure (BR-LRN-060); `LOG90` {90 days}; `AGG` anonymized aggregate; `PUBLIC` published catalog data.
+
+| ID | Entity | Key attributes | Relationships | Retention |
+|---|---|---|---|---|
+| ENT-LRN-01 | CatalogEntry | courseId, versionId, slug, title, summary, categoryIds, tags, level, language, subtitleLanguages, durationMinutes, skills[], priceRef, entitlementKinds, ratingAvg, ratingCount, accessibilityFlags, state, updatedAt | Projection of STU course version; 1..n TaxonomyNode | PUBLIC |
+| ENT-LRN-02 | TaxonomyNode | id, kind (category, tag), name, slug, parentId, state, aliases[], redirectFrom[] | Parent-child; used by CatalogEntry | PUBLIC |
+| ENT-LRN-03 | Enrollment | id, accountId, courseId, versionId, route (self, invite, plan, institution, paid), state, activatedAt, accessEndsAt, completedAt, completionPendingSignoff, certificateId, evidenceRef, assignmentId, cohortRunId, orderRef, restoredFrom | n LessonProgress, 1 Certificate, 0..1 CohortRun | ACCT; order refs TXN |
+| ENT-LRN-04 | EnrollmentEvent | enrollmentId, from, to, trigger, actor, reason, at | Append-only history of Enrollment | CRED (history without personal data after erasure) |
+| ENT-LRN-05 | LessonProgress | enrollmentId, lessonKey, status, watchedSegments, maxClientSeq, completedAt, ruleVersion | Belongs to Enrollment | ACCT |
+| ENT-LRN-06 | PlaybackPosition | enrollmentId, lessonKey, positionSeconds, serverTime, clientSeq, deviceId | Belongs to Enrollment | ACCT |
+| ENT-LRN-07 | OfflineLicense | id, enrollmentId, lessonKey, deviceId, state, issuedAt, expiresAt, revokedReason | Belongs to Enrollment | LOG90 after end |
+| ENT-LRN-08 | AccessCode | id, courseId, type, codeHash, usesAllowed, usesCount, expiresAt, domainRestriction, createdBy | Redemptions per account | ACCT of creator; redemption log LOG90 |
+| ENT-LRN-09 | Certificate | id, enrollmentId or pathEnrollmentId, type (course, program), version, state, payloadHash, nameUsed, issuedAt, expiresAt, revokedReason, supersededBy | 1 Enrollment | CRED |
+| ENT-LRN-10 | LearningPath | id, version, slug, courseRefs[], sequenced, capstone, programRule, state | Many courses | PUBLIC |
+| ENT-LRN-11 | PathEnrollment | id, accountId, pathId, pathVersion, state, progressCache | n Enrollment | ACCT |
+| ENT-LRN-12 | LearningPlan | id, accountId, items[{targetType, targetId, order, targetDate, status}], sharedWith | Items to catalog | ACCT |
+| ENT-LRN-13 | LearningGoal | id, accountId, goalRef, weeklyCommitmentMinutes, days, state | Optional link to plan | ACCT |
+| ENT-LRN-14 | StreakRecord | accountId, current, longest, lastActiveDate, freezeUsedWeek, timezone | One per account | ACCT |
+| ENT-LRN-15 | Note | id, accountId, enrollmentId, lessonKey, type (note, highlight, flashcard), position, body, versionHistory | Belongs to Enrollment | ACCT |
+| ENT-LRN-16 | Bookmark | id, accountId, enrollmentId, lessonKey, position, label | Belongs to Enrollment | ACCT |
+| ENT-LRN-17 | DiscussionThread and Post | id, courseId, cohortRunId, lessonKey, kind (qa, forum), title, state, authorId, anonymousToPeers, acceptedPostId, posts[] | Course | ACCT content becomes "Former learner" on erasure |
+| ENT-LRN-18 | SavedItem | accountId, targetType, targetId, savedAt, priceAtSave | Catalog | ACCT |
+| ENT-LRN-19 | Review | id, accountId, courseId, versionRange, rating, subRatings, title, body, displayMode, state, instructorReply, history | Enrollment | ACCT content; aggregate AGG |
+| ENT-LRN-20 | Submission | id, enrollmentId, assignmentId, revision, content, files[], state, submittedAt, late, grade, rubricScores, feedback | Enrollment | ACCT; grade record CRED if evidence minted |
+| ENT-LRN-21 | PeerReview | id, submissionId, reviewerEnrollmentId, scores, comments, state, helpful | Submission | ACCT |
+| ENT-LRN-22 | LiveAttendance | sessionId, enrollmentId, state, joinedAt, leftAt, presenceSeconds | Session (STU) | LOG90 after grading period |
+| ENT-LRN-23 | CohortRun | id, courseId, start, end, enrollOpen, enrollClose, capacity, waitlist[], timezone, graceDays | Enrollments | ACCT-free (course data) |
+| ENT-LRN-24 | Achievement | accountId, type, awardedAt, sourceEvent, revokedAt | REP (planned) | ACCT |
+| ENT-LRN-25 | RecommendationImpression | accountId, itemId, reason, shownAt, action | Feedback loop | LOG90 |
+| ENT-LRN-26 | StudyGroup | id, name, courseId or pathId, ownerId, members[{accountId, shares[]}], state | Course | ACCT |
+| ENT-LRN-27 | ContentReport | id, reporterId, targetType, targetId, lessonKey, time, category, note, diagnostics, state, outcome | Course, TSF case | ACCT; outcome kept AGG |
+| ENT-LRN-28 | GradeRecord | enrollmentId, itemRef, weight, rawScore, penalties, finalScore, override{by, reason}, at | Enrollment | ACCT |
+| ENT-LRN-29 | RefundRequest | id, enrollmentId, orderRef, reason, eligibility, state, decidedBy, decidedAt | Enrollment, BIL order | TXN |
+| ENT-LRN-30 | PlaybackSession | id, accountId, enrollmentId, lessonKey, deviceSessionId, state, startedAt, lastSeenAt | Enrollment | LOG90 |
+| ENT-LRN-31 | NudgeSchedule | accountId, type, lastSentAt, weekCount, quietHours, calendarFeedSecretHash | Account | ACCT |
+
+```mermaid
+erDiagram
+    CATALOG_ENTRY ||--o{ ENROLLMENT : "enrolled in"
+    ENROLLMENT ||--o{ LESSON_PROGRESS : tracks
+    ENROLLMENT ||--o| CERTIFICATE : earns
+    ENROLLMENT ||--o{ SUBMISSION : submits
+    ENROLLMENT ||--o{ NOTE : writes
+    ENROLLMENT }o--o| COHORT_RUN : "belongs to"
+    LEARNING_PATH ||--o{ PATH_ENROLLMENT : "enrolled in"
+    PATH_ENROLLMENT ||--o{ ENROLLMENT : "groups"
+    ENROLLMENT ||--o{ REVIEW : "may leave"
+    ENROLLMENT ||--o{ OFFLINE_LICENSE : downloads
+    SUBMISSION ||--o{ PEER_REVIEW : "reviewed by"
+    DISCUSSION_THREAD }o--|| CATALOG_ENTRY : "about"
+```
+
+## 9. Events emitted and consumed
+
+### 9.1 Emitted
+
+| ID | Event name | Trigger | Key payload | Consumers |
+|---|---|---|---|---|
+| EVT-LRN-001 | `learning.catalog.viewed` | Catalog list or search shown | anonymous session id, filters, result count | ANL |
+| EVT-LRN-002 | `learning.course.viewed` | Course detail opened | courseId, source | ANL, AIC |
+| EVT-LRN-003 | `learning.enrollment.created` | Enrollment row created | enrollmentId, courseId, versionId, route | NTF, INS, ANL, REP |
+| EVT-LRN-004 | `learning.enrollment.activated` | Enrollment becomes active | enrollmentId, accessEndsAt | NTF, STU analytics |
+| EVT-LRN-005 | `learning.enrollment.paused` | Learner pauses | enrollmentId, resumeAt | NTF |
+| EVT-LRN-006 | `learning.enrollment.resumed` | Resume | enrollmentId | NTF |
+| EVT-LRN-007 | `learning.enrollment.dropped` | Learner drops | enrollmentId, reasonCode | STU analytics, INS |
+| EVT-LRN-008 | `learning.enrollment.expired` | Window ends or unpaid | enrollmentId, cause | NTF, INS |
+| EVT-LRN-009 | `learning.enrollment.refunded` | Refund completed | enrollmentId | EVD, STU, REP |
+| EVT-LRN-010 | `learning.enrollment.migrated` | Learner switches version | enrollmentId, fromVersion, toVersion | ANL |
+| EVT-LRN-011 | `learning.lesson.started` | First lesson event | enrollmentId, lessonKey | ANL |
+| EVT-LRN-012 | `learning.lesson.completed` | Lesson rule met | enrollmentId, lessonKey, ruleKind | REP, ANL, AIC |
+| EVT-LRN-013 | `learning.course.completed` | Completion rule met | enrollmentId, courseId, versionId, gradeFinal | EVD, REP, NTF, INS, AIC |
+| EVT-LRN-014 | `learning.certificate.issued` | Certificate issued | certificateId, enrollmentId, type | NTF, PRF |
+| EVT-LRN-015 | `learning.certificate.revoked` | Revocation | certificateId, reasonClass | EVD, PRF |
+| EVT-LRN-016 | `learning.evidence.requested` | Evidence hand-off | issuerRef, sourceRef, skills[] | EVD |
+| EVT-LRN-017 | `learning.path.enrolled` | Path enrollment | pathEnrollmentId, pathId | ANL |
+| EVT-LRN-018 | `learning.path.completed` | Program rule met | pathEnrollmentId | EVD, NTF, REP |
+| EVT-LRN-019 | `learning.submission.submitted` | Submission | submissionId, assignmentId, late | STU inbox |
+| EVT-LRN-020 | `learning.submission.graded` | Grade saved | submissionId, score | NTF, gradebook |
+| EVT-LRN-021 | `learning.peerreview.completed` | Review submitted | peerReviewId | gradebook |
+| EVT-LRN-022 | `learning.review.published` | Review visible | reviewId, rating | STU, ANL |
+| EVT-LRN-023 | `learning.review.reported` | Report threshold | reviewId, reasons | TSF |
+| EVT-LRN-024 | `learning.qa.question_posted` | Question posted | threadId, lessonKey | STU inbox |
+| EVT-LRN-025 | `learning.live.attended` | Attendance finalized | sessionId, enrollmentId | completion rules |
+| EVT-LRN-026 | `learning.download.licensed` | Offline license issued | licenseId, deviceId | ANL |
+| EVT-LRN-027 | `learning.goal.updated` | Goal or plan changed | goalRef | AIC |
+| EVT-LRN-028 | `learning.streak.updated` | Streak day counted or lost | streak | REP |
+| EVT-LRN-029 | `learning.recommendation.dismissed` | Not interested | itemId, reason | AIC |
+| EVT-LRN-030 | `learning.report.filed` | Content problem filed | reportId, category | STU, TSF |
+| EVT-LRN-031 | `learning.access.extended` | Extension granted | enrollmentId, newEnd | NTF |
+
+### 9.2 Consumed
+
+| Event (producer) | Used by | Effect |
+|---|---|---|
+| `studio.course.published`, `studio.course.unpublished`, `studio.course.taken_down` (STU) | FR-LRN-001, 008, 022 | Update catalog read model and visibility |
+| `assessment.attempt.graded`, `assessment.attempt.voided` (ASM) | FR-LRN-042, 057, 058, 062 | Lesson completion, grade, completion re-evaluation |
+| `billing.purchase.fulfilled`, `billing.refund.completed`, `billing.entitlement.ended` (BIL, planned) | FR-LRN-015, 018, 021 | Activate, refund, expire enrollments |
+| `institution.assignment.created`, `institution.assignment.removed` (INS, planned) | FR-LRN-016 | Create or end institution enrollments |
+| `evidence.item.revoked` (EVD, planned) | FR-LRN-071 | Mark dependent achievements and show status |
+| `trust.case.decided` (TSF, planned) | FR-LRN-065, 075 | Apply review and content decisions |
+| `identity.account.erased` (IDN, planned) | FR-LRN-074 | Run erasure rules |
+
+## 10. Integrations and external dependencies
+
+| Dependency | Direction | Purpose | Failure behavior |
+|---|---|---|---|
+| Media delivery and CDN (PLT planned, STU pipeline) | Outbound | HLS or DASH, signed tokens, DRM licenses | Fallback CDN; lesson-level containment (BR-LRN-034) |
+| Video providers (YouTube, Vimeo and others per allowlist) | Outbound embed | External lessons | Fallback link (FR-LRN-040) |
+| Payment provider via BIL (planned) | Via BIL | Checkout and webhooks | Purchases disabled with banner |
+| Live room provider (adapter, OD-LRN-06) | Outbound | Live sessions | Reschedule flow |
+| Search index (SRC planned) | Outbound | Catalog search | Category browse fallback |
+| Recommendation service (AIC planned) | Outbound | Rails | Popular fallback |
+| Evidence issuer API (EVD planned) | Outbound | Evidence hand-off | Retry, "evidence pending" |
+| Notification service (NTF planned) | Outbound | Templates and channels | Queue and retry |
+| Calendar clients (ICS feed) | Outbound feed | Study and deadline events | Feed reset |
+| LinkedIn "Add to profile" link | Outbound link | Share certificate | Link only; no data pushed |
+| Virus scanning, file storage (PLT planned) | Outbound | Submissions and resources | Hold upload until scanned |
+
+## 11. Cross-module dependencies
+
+| Depends on | What LRN needs |
+|---|---|
+| STU | Published immutable course versions, curriculum, rendition manifests, rules, preview flags, announcements |
+| ASM | Assessment attempts and results inside lessons; sandbox; accommodations |
+| EVD (planned) | Evidence issuer API, skills ontology reads, revocation notices |
+| BIL (planned) | Quotes, checkout, entitlements, refunds |
+| INS (planned) | Assignments, seat control, visibility scopes |
+| IDN (planned) | Accounts, sessions, age and sanctions |
+| SET (planned) | Consent flags, data rights workflow |
+| NTF (planned) | Templates, channels, preferences |
+| SRC (planned) | Index and ranking |
+| AIC (planned) | Recommendations and gap analysis |
+| TSF (planned) | Moderation cases |
+| REP (planned) | XP, badges |
+| PLT (planned) | Media, files, public API |
+
+| Depended on by | What they use |
+|---|---|
+| EVD (planned) | `learning.course.completed` evidence requests |
+| PRF (planned) | Certificates and completed courses on profiles |
+| AIC, MKT (planned) | Learning signals, gap-to-course mapping |
+| JOB, ATS (planned) | Verified course and certificate evidence on candidate profiles (via EVD) |
+| INS (planned) | Completion and progress reports within scope |
+| STU | Enrollments, reviews, Q&A, analytics events |
+| ANL (planned) | Learning events for reporting |
+
+## 12. Module-level metrics
+
+| Metric | Definition and formula | Owner role |
+|---|---|---|
+| Catalog to detail rate | Course detail views from catalog sessions divided by catalog sessions | Learning product owner |
+| Enrollment conversion | Enrollments divided by course detail views, by route | Learning product owner |
+| Time to first lesson | Median minutes from enrollment to first lesson started | Learning product owner |
+| Course completion rate | Completed enrollments divided by enrollments older than the expected duration (cohort-based) | Learning product owner |
+| Weekly active learners | Distinct learners with a qualifying learning activity in a week | Learning product owner |
+| Progress sync failure rate | Failed or retried progress batches divided by batches | Engineering lead |
+| Playback start p95 | 95th percentile ms from Play to first frame (target defined in NFR-PERF, planned) | Engineering lead |
+| Rebuffer ratio | Rebuffering seconds divided by watch seconds | Engineering lead |
+| Evidence integrity | Completed enrollments with exactly one evidence item (when evidence-eligible) divided by evidence-eligible completions | Trust owner |
+| Completion drift | Completed enrollments whose recomputed rule result differs from stored state (target zero) | Engineering lead |
+| Certificate verification success | Verification requests resolving to a valid or definitive status divided by requests | Trust owner |
+| Review authenticity | Removed or flagged reviews divided by published reviews | Trust and safety owner |
+| Refund rate | Refunded enrollments divided by paid enrollments | Finance owner |
+| Accessibility defects open | Count of open accessibility barrier reports older than SLA | Accessibility owner |
+| Nudge opt-out rate | Learners disabling learning reminders divided by learners receiving them | Learning product owner |
+
+## 13. Open decisions
+
+| ID | Question | Options | Default proposal | Who decides | Blocks |
+|---|---|---|---|---|---|
+| OD-LRN-01 | When do paid courses ship and in what form: first-party only first, or an instructor marketplace? | First-party only; marketplace later; both | First-party paid courses first (SSOT V61-21); third-party marketplace gated by a separate decision on seller of record, tax and payouts | Founder, Finance | FR-LRN-015, 018, 021 |
+| OD-LRN-02 | Which evidence rung and issuer class does a completion of a third-party instructor course earn? | Always claimed; authority_verified with instructor class only with graded assessment or independent sign-off; platform class only for platform-authored | Authority-verified with instructor class only with a graded protected assessment or independent sign-off; none for watch-only | Product, Trust | FR-LRN-071 |
+| OD-LRN-03 | Refund window and progress threshold | 14 or 30 days; thresholds 10, 20, 50 percent | 30 days and 20 percent (SSOT OD-29) | Founder, Finance, Legal | FR-LRN-021 |
+| OD-LRN-04 | Video completion threshold and seek-skip cap | 80, 90, 100 percent; cap 10, 25, 50 percent | 90 percent and 25 percent | Product | FR-LRN-036 |
+| OD-LRN-05 | Does downloadable video ship, and with which DRM? | None, text only, DRM video | Text and transcripts first; DRM video when media cost model accepted | Founder, Engineering | FR-LRN-037 |
+| OD-LRN-06 | Live session provider | Build, vendor adapter, defer | Defer; vendor adapter behind an interface (SSOT OD-33) | Founder | FR-LRN-047 |
+| OD-LRN-07 | Certificate validity and legal-name policy | Perpetual or timed; legal or display name | Perpetual default, timed for compliance courses; learner chooses name before first issue (SSOT OD-18) | Product, Legal | FR-LRN-059 |
+| OD-LRN-08 | Minimum reviews before public rating and incentivized review policy | 3, 5, 10 | 5; incentivized reviews prohibited and declared | Product, Trust | FR-LRN-063, 064 |
+| OD-LRN-09 | Concurrent stream limit and account-sharing enforcement | 1, 2, 3; flag only or block | 2 and flag only | Product, Security | FR-LRN-039 |
+| OD-LRN-10 | Retention periods | progress 90 days, notes 365 days, financial 7 years | As proposed; Legal confirms by jurisdiction | Legal | BR-LRN-012, FR-LRN-052 |
+| OD-LRN-11 | Gamification split between LRN and REP | LRN emits events only; or LRN keeps streaks | LRN keeps streak computation and emits events; REP owns XP, badges | Product | FR-LRN-061, 069 |
+| OD-LRN-12 | Default institution visibility of learner data | completion only; completion and scores; full | Completion and scores, with learner disclosure before first lesson | Product, Legal, institutions | FR-LRN-016 |
+| OD-LRN-13 | Personalization consent default | opt-in or opt-out by region | Opt-in for behavioral personalization; generic rails otherwise | Legal, Product | FR-LRN-066 |
+| OD-LRN-14 | "Popular" badge and ranking fairness for new instructors | Pure popularity; blend with quality; exploration slots | Blend with quality and reserve exploration slots for new courses | Product | FR-LRN-001, 004 |
+| OD-LRN-15 | Minors in discussions and live sessions | Block, restrict, allow with guardian rules | Restrict by age band per IDN policy | Legal, Trust | FR-LRN-047, 051 |
+
+## 14. Risks
+
+| ID | Risk | Likelihood and impact | Mitigation |
+|---|---|---|---|
+| RSK-LRN-01 | Completion credentials inflated by watch-only courses, reducing employer trust | Medium, high | BR-LRN-025 rung policy; evidence integrity metric; OD-LRN-02 |
+| RSK-LRN-02 | Media cost (storage, egress, DRM) grows faster than revenue | Medium, high | Adaptive ladder, data saver, download gating, cost dashboards (OD-LRN-05) |
+| RSK-LRN-03 | Progress loss or double counting on poor networks | Medium, high | Idempotent events, queue, reconciliation job, chaos tests |
+| RSK-LRN-04 | Fake or incentivized reviews distort ratings | High, medium | Eligibility rules, moderation, burst detection, review authenticity metric |
+| RSK-LRN-05 | Account sharing and content piracy | High, medium | Tokens, concurrency limits, sharing flags, DRM where justified |
+| RSK-LRN-06 | Accessibility gaps (captions missing, player barriers) | Medium, high | Publish gates (STU), accessibility audit gate, barrier reports with priority |
+| RSK-LRN-07 | Recommendations amplify bias or reveal sensitive inferences | Medium, high | Consent, no protected attributes, explanations, evaluation by AIC (planned) |
+| RSK-LRN-08 | Payment webhook ordering and delays create wrong access | Medium, high | Event-owned activation, idempotency, sweeps, reconciliation |
+| RSK-LRN-09 | Notification fatigue drives opt-outs and lost deliverability | Medium, medium | BR-LRN-026 caps, quiet hours, opt-out metric |
+| RSK-LRN-10 | Scope creep from commerce and live features into a full marketplace | Medium, medium | Tier gating (R5), OD-LRN-01, boundary with STU and BIL |
+| RSK-LRN-11 | Version migration corrupts progress mapping | Low, high | Atomic mapping, preview, tests on lessonKey stability, rollback |
+| RSK-LRN-12 | Privacy exposure of learner data to institutions or instructors | Medium, high | Scope disclosure, field-level authorization, audits, k-thresholds |
+
+## 15. Legacy source trace
+
+| Legacy source | Used for | Dropped or changed and why |
+|---|---|---|
+| `SSOT.md` §9.2 F-07 (LMS), §10.17, §10.21, §10.22 (BR-091..BR-115), §10.34 (BR-189..BR-193), §13.12 to §13.16 (media model), §19 (PWA) | Catalog, detail, enrollment, player, progress, completion, certificate, reviews rules, provider capability model, offline contract | "Sequential module progress" (BR-047) became author-configurable because free navigation is a common learner expectation; the 70 percent final-assessment rule became author-configured because a fixed value is a policy decision (OD) |
+| `SSOT.md` §7 feature rows F-66..F-74, F-82, F-100, F-106, F-107, F-136, F-137, F-155 | Feature coverage list (study groups, Q&A, adaptive learning, micro-learning ideas) | F-66, F-73 and F-74 detail (authoring, commerce, instructor platform) moved to STU; F-136 micro-learning is covered by short lessons, reading and daily review rather than a separate feature |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-06 | Enrollment state machine, idempotency, progress events, version pinning, completion rule, evidence hand-off, refund after completion | Offline video marked open; video threshold values kept as proposals |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` FEAT-08-03.1 to .3 | Resume rule, offline lesson cache, captions and transcript requirement | Cached video excluded by REVW-15 is reopened as a decision (OD-LRN-05) |
+| `docs/registries/FEATURE_REGISTRY.md` F-07, F-52, F-67 to F-72, F-114, F-116 | Cross-check of scope | Registry status is not treated as built |
+| `docs/product/PRD.md`, `docs/experience/JOURNEY_REGISTRY.md` (J-01, J-19, J-20) | Journey framing: learn, prove, showcase; self-paced learner; path with capstone | Journeys are targets, not tests |
+| Own knowledge of Coursera, Udemy, edX, LinkedIn Learning, Khan Academy, YouTube player conventions | Player controls, shortcuts, chapters, streaks, notes, calendar feeds, study groups | Tagged `[PROP]` where used |

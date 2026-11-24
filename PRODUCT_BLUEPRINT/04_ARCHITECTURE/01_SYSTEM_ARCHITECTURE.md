@@ -27,7 +27,7 @@ The product is a career "operating system": identity, evidence, learning, assess
 | 5 | **Correctness under retry.** Every write is safe to retry; every async effect is at-least-once and idempotent. | Idempotency keys, transactional outbox, consumer inbox, fenced job leases. | [SRC: ADR-T09; SSOT CON-005] |
 | 6 | **Evolvability across 30 modules with a small team.** | Modular monolith with enforced boundaries and explicit extraction triggers, not microservices. | [SRC: SSOT §12.1; ADR-001] |
 | 7 | **Cost discipline.** No paid inference for a free user without an active cost policy; no infrastructure before a measured trigger. | AI budget ledger; PostgreSQL-first for queue, search and cache; triggers listed in §21. | [SRC: SSOT §16.4; SSOT §20] |
-| 8 | **PWA reach.** Works on low-end mobile, installable, honest offline behaviour. | Lazy route bundles, read-cache offline, server revalidates any queued write. | [SRC: SSOT §19; ADR-T10] |
+| 8 | **PWA reach.** Works on low-end mobile, installable, honest offline behavior. | Lazy route bundles, read-cache offline, server revalidates any queued write. | [SRC: SSOT §19; ADR-T10] |
 
 ## 2. As-built baseline and where the target outgrows it
 
@@ -44,7 +44,7 @@ The current stack is the starting recommendation. This table records each as-bui
 | Async | `background_jobs` with `FOR UPDATE SKIP LOCKED`, 60 s lease, no claim fencing, most handlers only record events, two mail handlers [SRC: ARCHITECTURE.md §18; migration 00042] | Outbox + dispatcher + consumer inbox; fenced leases; per-kind retry policy; separate worker pools | DEC-ARC-009, DEC-ARC-010 |
 | Auth | Self-issued HMAC session tokens, 24 h, stored in browser `localStorage`, no refresh flow, revocation by cutoff and revoked-session rows [SRC: ARCHITECTURE.md §12] | HttpOnly cookie sessions with server-side session records, rotating refresh, passkeys, OAuth/OIDC/SAML federation; HMAC primitives reused | DEC-ARC-006, DEC-ARC-007, OD-ARC-03 |
 | Authorization | Per-handler checks; some organization actions accept any membership [SRC: ARCHITECTURE.md §12, R-2, U-3] | Central policy package, deny by default, scoped grants | DEC-ARC-005 |
-| Billing | Stripe Checkout, Portal and signed webhook behind `stripe-gateway.ts`; `BILLING_MODE=stripe` opt-in [SRC: ARCHITECTURE.md §17] | Kept as the only payment processor at launch; entitlement service generalised for org seats, licence pools and course purchases | Kept; see [05](05_INTEGRATIONS_AND_ADAPTERS.md) |
+| Billing | Stripe Checkout, Portal and signed webhook behind `stripe-gateway.ts`; `BILLING_MODE=stripe` opt-in [SRC: ARCHITECTURE.md §17] | Kept as the only payment processor at launch; entitlement service generalised for org seats, license pools and course purchases | Kept; see [05](05_INTEGRATIONS_AND_ADAPTERS.md) |
 | Email | Provider-independent service in `apps/worker/src/email`, Brevo adapter, dev outbox [SRC: ARCHITECTURE.md §17] | Kept; the pattern is the template for every adapter | DEC-ARC-021 |
 | AI | Local heuristic assistant; `assertWithinAIQuota` with hard-coded tier limits; no remote model [SRC: ARCHITECTURE.md §20, R-4; `packages/domain/src/ai-gateway.ts`] | AI gateway with provider adapters, budgets, prompt registry, evals, provenance | DEC-ARC-014 |
 | Search | In-process matching over loaded data; no PostgreSQL FTS at runtime [SRC: ARCHITECTURE.md §3] | PostgreSQL FTS + `pg_trgm` + `pgvector` behind `SearchPort` | DEC-ARC-012 |
@@ -184,8 +184,8 @@ A **module** is the unit of code ownership: one backend module folder, one contr
 | Community | NET, REP, EVT | Supporting | Connection, Follow, Post, Group, Referral, ReputationLedger, Badge, CommunityEvent, Hackathon | NET R2, REP R4, EVT R6 |
 | Intelligence and discovery | AIC, SRC, MKT | **Core** (AIC matching), generic (SRC), supporting (MKT) | AIInvocation, Recommendation, MatchExplanation, SearchDocument, SavedSearch, MarketSignal, CareerPath | SRC R1, AIC R1 gateway and R4 features, MKT R6 |
 | Trust and governance | TSF, ADM | Generic, safety-critical | Report, ModerationCase, Sanction, Appeal, AuditEvent, SupportTicket, PlatformConfig | TSF R1, ADM R0 |
-| Institutions and enterprise | INS, ENT | Supporting | Institution profile, Department, Cohort, ManagedLearnerLink, LicencePool, PlacementDrive, WorkforceLink, InternalOpportunity, SkillsInventory | INS R3, ENT R6 |
-| Commercial | BIL | Generic, money-critical | Customer, Subscription, Entitlement, Order, Invoice, LicenceSeat, Payout (gated) | R1 stub, R5 scale |
+| Institutions and enterprise | INS, ENT | Supporting | Institution profile, Department, Cohort, ManagedLearnerLink, LicensePool, PlacementDrive, WorkforceLink, InternalOpportunity, SkillsInventory | INS R3, ENT R6 |
+| Commercial | BIL | Generic, money-critical | Customer, Subscription, Entitlement, Order, Invoice, LicenseSeat, Payout (gated) | R1 stub, R5 scale |
 | Career services | MEN, GIG | Supporting, OS expansion | MentorProfile, Engagement, Session, GigProject, Proposal, Contract, Milestone | R6 |
 | Platform | PLT, ANL, PWA | Generic | FileObject, WebhookEndpoint, ApiClient, IntegrationConnection, AnalyticsEvent, MetricSnapshot, PushSubscription, DeviceInstall | PLT and PWA R0, ANL R1 |
 
@@ -269,7 +269,7 @@ apps/
     modules/<mod>/
       index.ts                public interface: types and functions other modules may call
       plugin.ts               Fastify plugin; registers this module's routes
-      routes/                 thin handlers: parse (contracts) → policy → use case → serialise
+      routes/                 thin handlers: parse (contracts) → policy → use case → serialize
       usecases/               one exported function per use case; one transaction each
       repo/                   SQL for tables this module owns; nothing else
       events.ts               emitted event types; consumer registrations (inline or job mode)
@@ -293,7 +293,7 @@ Adding `packages/policy` and `packages/adapters` and the extra entrypoints chang
 
 | Rule | Statement | Enforced by |
 |---|---|---|
-| M-01 | A route handler contains no business rule. It parses with the contracts schema, calls `policy.authorize`, calls one use case and serialises the result. | Code review; lint bans imports of `repo/` from `routes/` |
+| M-01 | A route handler contains no business rule. It parses with the contracts schema, calls `policy.authorize`, calls one use case and serializes the result. | Code review; lint bans imports of `repo/` from `routes/` |
 | M-02 | A use case runs in exactly one database transaction obtained from `platform/db`; the transaction carries the principal claims (§8.5) and the outbox writer. | `withTx(principal, fn)` is the only way to get a client |
 | M-03 | A use case that changes state emits its events by inserting into `outbox_events` inside the same transaction. | Outbox writer API; test helper asserts emitted events |
 | M-04 | Business rules and state machines are defined once in `packages/domain/src/<mod>`; use cases call them; SQL transition functions read their allowed edges from tables generated from the same definitions. | [SRC: ARCHITECTURE.md INVARIANT-002; BE-01-R2 §9] parity tests |
@@ -386,7 +386,7 @@ There is no impersonation ("log in as user") feature. Support access is a separa
 | Enterprise | An employer organization whose `capabilities` include `enterprise_talent` (granted by an entitlement) | `staff` (EXA) and `workforce` memberships (employees) | Internal mobility and L&D happen inside the same tenant that hires externally, so one company is one tenant [PROP] |
 | Platform | Reserved organization `platform` | Platform staff (MOD, SUP, FIN, PAD, SAD) | Owns platform reference data, moderation and audit |
 
-Membership types are `staff`, `instructor`, `learner`, `workforce`, `mentor` (a mentor attached to an institution or enterprise programme) and `alumni`. Roles inside a membership are scoped grants (for example `ats.pipeline.manage` on organization X), not global roles [SRC: V61-05 scoped-grant model] [DER].
+Membership types are `staff`, `instructor`, `learner`, `workforce`, `mentor` (a mentor attached to an institution or enterprise program) and `alumni`. Roles inside a membership are scoped grants (for example `ats.pipeline.manage` on organization X), not global roles [SRC: V61-05 scoped-grant model] [DER].
 
 ### 8.3 Data ownership classes
 
@@ -394,9 +394,9 @@ Every table belongs to exactly one class ([02 §2](02_DATA_MODEL.md) gives the p
 
 | Class | Meaning | Tenancy columns | Who reads without a grant | Example tables |
 |---|---|---|---|---|
-| OWN-PERSON | Data about and controlled by one person | `owner_account_id` | The owner only | `profiles`, `evidence_items`, `resumes`, `consent_grants`, `learning_progress` (personal enrollments) |
-| OWN-ORG | Data an organization creates about its own operations | `tenant_org_id` | Members with the matching scoped grant | `jobs`, `pipeline_stages`, `scorecards`, `licence_pools`, `org_courses` |
-| SHARED-PARTY | A record that two parties legitimately share, with field-level audiences | `owner_account_id` and `tenant_org_id` | Each party, limited to its audience's fields | `applications`, `interviews`, `offers`, `institution_enrollments`, `mentorship_engagements`, `gig_contracts` |
+| OWN-PERSON | Data about and controlled by one person | `owner_account_id` | The owner only | `profiles`, `evidence`, `resumes`, `consent_grants`, `lesson_progress` (personal enrollments) |
+| OWN-ORG | Data an organization creates about its own operations | `tenant_org_id` | Members with the matching scoped grant | `jobs`, `pipeline_stages`, `scorecards`, `license_pools`, `cohorts` |
+| SHARED-PARTY | A record that two parties legitimately share, with field-level audiences | `owner_account_id` and `tenant_org_id` | Each party, limited to its audience's fields | `job_applications`, `interviews`, `offers`, `enrollments` (institution-assigned), `mentorship_engagements`, `gig_contracts` |
 | PLATFORM | Reference and governance data | none, or `tenant_org_id = platform` | Platform staff with scope; public subsets via views | `skills`, `plans`, `moderation_cases`, `audit_events` |
 | PUBLIC-PROJECTION | Derived, public-safe copies | Inherits from the source | Anyone, including guests | `pv_public_profiles`, `pv_published_jobs`, `pv_credential_verifications` |
 
@@ -522,7 +522,7 @@ OpenTelemetry traces from browser (sampled) through API, outbox (trace context s
 
 A failure domain is a component whose failure must not take down the others. Each row states what users see; "never a false success" applies throughout [SRC: SSOT §13.2].
 
-| Failure domain | Blast radius if it fails | Isolation mechanism | Degraded behaviour users see |
+| Failure domain | Blast radius if it fails | Isolation mechanism | Degraded behavior users see |
 |---|---|---|---|
 | PostgreSQL primary | Whole product for writes | Managed failover; read replica for public reads if present | Read-only banner; public job and profile pages served from CDN cache; writes return `503 upstream-unavailable` |
 | API replica | Requests on that replica | Health-checked load balancer; stateless replicas | Retried by client for idempotent requests |
@@ -616,7 +616,7 @@ All entries are `Proposed`. They become binding only after owner ratification. W
 - **Status:** Proposed.
 - **Context:** `server.ts` holds most routes in one closure of about 13.9k lines [SRC: code]; ownership and review are hard; authorization is inline [SRC: ARCHITECTURE.md R-2].
 - **Options considered:** (a) keep one file with comment blocks per feature; (b) split by HTTP resource; (c) one Fastify plugin per module code with routes, use cases, repositories, events, jobs, privacy participants and policy.
-- **Decision:** (c), with the anatomy and rules M-01…M-07 in §6.3. Migration is incremental: one module plugin at a time, behaviour-preserving, verified by existing tests.
+- **Decision:** (c), with the anatomy and rules M-01…M-07 in §6.3. Migration is incremental: one module plugin at a time, behavior-preserving, verified by existing tests.
 - **Consequences:** clear ownership per module code; the 30-module blueprint maps one-to-one onto folders.
 - **Revisit when:** n/a.
 - **Source:** [SRC: SSOT §12.11 ARCH-013…ARCH-020] [DER].
@@ -775,7 +775,7 @@ All entries are `Proposed`. They become binding only after owner ratification. W
 ### DEC-ARC-022 — Erasure by design
 
 - **Status:** Proposed (OD-ARC-16, OD-ARC-17 in [02](02_DATA_MODEL.md)).
-- **Options considered:** (a) anonymise rows in place by update; (b) hard delete everything, breaking audit; (c) person appears in append-only history only as an opaque `subject_ref`; `subject_identity_map` links it to the account; erasure deletes the map row and hard-deletes or tombstones mutable rows through registered participants.
+- **Options considered:** (a) anonymize rows in place by update; (b) hard delete everything, breaking audit; (c) person appears in append-only history only as an opaque `subject_ref`; `subject_identity_map` links it to the account; erasure deletes the map row and hard-deletes or tombstones mutable rows through registered participants.
 - **Decision:** (c).
 - **Source:** [SRC: V61-19; BE-01-R2 §2 rule 2].
 
@@ -801,7 +801,7 @@ Open decisions for the whole architecture folder are numbered across files. OD-A
 
 | Id | Question | Options | Default proposal | Who decides | Blocking |
 |---|---|---|---|---|---|
-| OD-ARC-01 | Ratify retiring ADR-015 (boot-hydrated Map read model, single writer) in favour of SQL reads everywhere? | Keep ADR-015; ratify DEC-ARC-002 | Ratify DEC-ARC-002 [DEC-REQ] | Product owner with architect | Multiple API replicas; enabling any `ephemeral` module in production |
+| OD-ARC-01 | Ratify retiring ADR-015 (boot-hydrated Map read model, single writer) in favor of SQL reads everywhere? | Keep ADR-015; ratify DEC-ARC-002 | Ratify DEC-ARC-002 [DEC-REQ] | Product owner with architect | Multiple API replicas; enabling any `ephemeral` module in production |
 | OD-ARC-02 | Which success and list envelope and pagination style? | As-built error envelope plus offset pages; SSOT `{success,data,meta}` cursor default 20; target `{items,page}` cursor default 25 with RFC 9457 errors | Target style with RFC 9457; transition period accepting both error shapes in the web client [DEC-REQ] (legacy OPEN-46) | Architect with product owner | Contract generation; all list routes |
 | OD-ARC-03 | Session and identity authority and parameters | Self-issued cookie sessions (DEC-ARC-006/007); managed identity provider; ADR-T06 access plus refresh | Self-issued opaque session cookies; idle 60 min, absolute 30 days [PROP]; password hash upgrade to Argon2id behind the as-built PBKDF2 verifier [DEC-REQ] | Security officer (SAD) and product owner | IDN build; enterprise SSO |
 | OD-ARC-04 | Server-state library in the web client | Keep fetch helper; TanStack Query; other | TanStack Query over `apiJson` [DEC-REQ]; requires a dependency change | Frontend lead with product owner | Web feature-module work at scale |
@@ -821,14 +821,14 @@ Open decisions for the whole architecture folder are numbered across files. OD-A
 
 | Id | Risk | Likelihood | Impact | Mitigation | Owner role |
 |---|---|---|---|---|---|
-| RSK-ARC-01 | Migrating from Map reads to SQL reads changes behaviour in subtle ways (ordering, stale-read assumptions in tests) | Medium | High | Migrate one module at a time behind the existing tests; dual-read comparison in staging for the core loop | Backend lead |
+| RSK-ARC-01 | Migrating from Map reads to SQL reads changes behavior in subtle ways (ordering, stale-read assumptions in tests) | Medium | High | Migrate one module at a time behind the existing tests; dual-read comparison in staging for the core loop | Backend lead |
 | RSK-ARC-02 | RLS under `ts_app` adds latency or blocks legitimate queries | Medium | Medium | Stable helper functions, indexes on tenancy columns, query plans reviewed per module; policy-deny alarms | Database lead |
 | RSK-ARC-03 | In-house SAML and OIDC implementation has protocol flaws | Medium | High | Use maintained libraries; conformance suites; external penetration test before enabling SSO enforcement | Security officer |
 | RSK-ARC-04 | Enterprise tenants infer employees' external job search | Low | Very high | Enterprise boundary rule (§8.4), generated negative tests, stealth exclusion in search | Architect |
 | RSK-ARC-05 | Dispatcher becomes a bottleneck (single leader) | Medium | Medium | Partition dispatch by `aggregate_type` hash with one leader per partition when lag trigger fires | Backend lead |
 | RSK-ARC-06 | Thirty modules in one codebase drift into a "big ball of mud" | High | High | Generated dependency graph, table-ownership lint, `pv_` only cross-module reads, review checklist | Architect |
 | RSK-ARC-07 | Security-critical as-built gaps (simulated assessment scores, course completion minting authority-verified evidence) carry into the target | Medium | Very high | Block verified evidence from assessment and learning until runner and final-assessment rules exist (DEC-ARC-015) [SRC: ARCHITECTURE.md §20] | Architect with ASM and EVD owners |
-| RSK-ARC-08 | Vendor lock-in through provider-specific features leaking into domain logic | Medium | Medium | Ports with capability flags; adapters normalise to domain types; removal drill per provider [SRC: SSOT §13.4 VER-021] | Architect |
+| RSK-ARC-08 | Vendor lock-in through provider-specific features leaking into domain logic | Medium | Medium | Ports with capability flags; adapters normalize to domain types; removal drill per provider [SRC: SSOT §13.4 VER-021] | Architect |
 | RSK-ARC-09 | AI cost overrun from fan-out features (matching, recommendations) | Medium | High | Budget reservation before every call; batch embeddings; free-user invariant [SRC: SSOT §16.4] | AIC owner with finance |
 | RSK-ARC-10 | Realtime gateway leaks data through channel subscriptions | Low | High | Per-subscription policy check; signals carry no personal fields; re-authorize on membership change events | Security officer |
 | RSK-ARC-11 | Build-file restrictions delay structural changes (new packages, entrypoints, dependencies) | High | Medium | Batch the needed build-file changes into one owner-approved change early (see [08 §4](08_TECHNICAL_SPECIFICATION_INDEX.md)) | Architect |
@@ -841,7 +841,7 @@ Open decisions for the whole architecture folder are numbered across files. OD-A
 | [ARCHITECTURE.md](../../ARCHITECTURE.md) §§2–26 | As-built baseline (§2), invariants carried as layering and tenancy rules, risks R-2, R-4, U-3 | ADR-015 single writer proposed for retirement; `JobQueueEngine` proposed for removal |
 | `CLAUDE.md`, `AGENTS.md` | Stack facts, build-file restriction, style rules | None |
 | SSOT §12 (12.1–12.21) | Modular monolith, stack intent, bounded contexts, domain boundary rules, repository layout, API boundary | Supabase Auth, Supabase Queues and Edge Functions read as one candidate host (V61-14); repository layout replaced by module-code folders |
-| SSOT §13 (13.2–13.16) | Error taxonomy, integration doctrine, job catalogues, realtime contract, media pipeline | Dual-queue boundary replaced by queue classes on one fenced engine |
+| SSOT §13 (13.2–13.16) | Error taxonomy, integration doctrine, job catalogs, realtime contract, media pipeline | Dual-queue boundary replaced by queue classes on one fenced engine |
 | SSOT §14.6, §15.5, §16, §17, §19, §20 | RLS model, field encryption, AI gateway, assessment integrity, offline, scale-trigger principle | "Highest role wins" replaced by deny-by-default scoped grants |
 | `Yash_Final_Project_Document/24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T01…T25 | Options and prior proposals for most DEC-ARC entries | ADR-T01 "broad career OS rejected" conflicts with the owner's OS goal; this blueprint follows the owner and keeps OS modules gated (RSK-ARC-12). ADR-T06 token pair replaced by opaque session cookie for the browser (DEC-ARC-006) |
 | `Yash_Final_Project_Document/11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE_REV2.md` | Consumer modes, module graph rules, job backoff table, idempotency store, rate-limit layering, consent at read time | Module list remapped to the 30 module codes |

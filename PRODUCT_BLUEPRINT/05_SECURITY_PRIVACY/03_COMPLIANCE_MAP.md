@@ -1,0 +1,145 @@
+# Compliance Map
+
+> **Not legal advice.** This map lists regimes that may apply to TalentSphere and the engineering controls that would support meeting them. Every row needs counsel review. Applicability depends on facts not yet decided (markets, customer types, user ages, which features launch). Nothing here states that TalentSphere complies with, is certified under, or will be certified under any regime. Legal dates and thresholds change; counsel must confirm current text before any row is relied on [SRC: Yash 14/COMPLIANCE_APPLICABILITY_MATRIX "Important"].
+
+Owner role: counsel (external or internal) with the privacy lead and `SAD`. Decisions are `OD-SEC-17` onward (OD-SEC-01..16 are in [01_SECURITY_ARCHITECTURE.md](01_SECURITY_ARCHITECTURE.md)). Risks continue as `RSK-SEC-15` onward.
+
+## 1. How to use this map
+
+1. The product owner confirms trigger facts in §2 (OD-SEC-17).
+2. Counsel records a determination per regime: `applies`, `applies in part`, `does not apply`, `monitor`, with date and scope.
+3. For each `applies`, the listed controls become release gates; missing controls become backlog items with the module owner.
+4. The map is re-reviewed when a trigger fact changes, a new module is enabled (especially OS-expansion modules gated by `DEC-002`), or yearly.
+
+Status values used below: `candidate` (not yet reviewed) for every row at the time of writing.
+
+## 2. Trigger facts to confirm
+
+| Fact | Why it matters | Default assumption for design [PROP] |
+|---|---|---|
+| Markets where users are offered the service | GDPR, UK GDPR, CCPA, DPDP, local AI and hiring rules | Design for EU, UK, US and India from the start; launch set per OD-SEC-17 |
+| Whether employers use matching, ranking or screening to make or substantially assist hiring decisions | EU AI Act high-risk, NYC LL 144, other AEDT rules | Yes, assume decision support is used by employers |
+| Whether users under 18 (or under 13) can hold accounts | COPPA, GDPR Art 8, DPDP children rules, age-appropriate design codes | Institution path only for under 18 (privacy doc §10) |
+| Whether institutions are schools receiving US federal education funds | FERPA | Yes for some INS customers |
+| Whether the platform obtains background-check reports for employers | FCRA and state equivalents | Only through a consumer reporting agency partner |
+| Whether the platform hosts user-generated content for the public in the EU | DSA | Yes (posts, reviews, profiles) |
+| Whether card payments are taken | PCI DSS | Yes, through provider-hosted checkout only |
+| Whether public sector or education customers buy the product | Section 508, EN 301 549, procurement questionnaires | Yes, eventually |
+| Annual revenue and data volume thresholds | CCPA applicability, DPDP Significant Data Fiduciary designation, DSA size classes | Unknown; do not assume exemption |
+| Whether offers, contracts or consents are signed electronically | ESIGN, UETA, eIDAS | Yes (offers, gig contracts) |
+
+## 3. Regime map
+
+| Ref | Regime | Why a candidate | Main obligations relevant to design (summary, counsel to confirm) | Modules most affected | Controls in this blueprint | OD |
+|---|---|---|---|---|---|---|
+| REG-01 | EU GDPR | Personal data of people in the EU; employment-related processing | Lawful basis (Art 6) and special-category condition (Art 9); transparency (Art 13–14); rights (Art 15–22); privacy by design and default (Art 25); processor contracts (Art 28); records of processing (Art 30); security (Art 32); breach notice to authority within 72 h and to individuals when high risk (Art 33–34); DPIA (Art 35); DPO where required (Art 37); EU representative if no EU establishment (Art 27); transfer rules (Ch V) | All; SET, IDN, AIC, ATS | Privacy doc §4–§14; NFR-PRV-001..048; NFR-SEC-036, 060..066 | OD-SEC-17, 18, 23, 24 |
+| REG-02 | UK GDPR and Data Protection Act 2018, as amended by the Data (Use and Access) Act 2025 | Users in the UK | As REG-01 with UK specifics; amended automated decision-making rules (significant decisions need safeguards: information, ability to contest, human intervention); UK transfer mechanism (IDTA or Addendum); commencement dates of the 2025 amendments to confirm | All | Same as REG-01; fairness doc §5 human oversight | OD-SEC-17 |
+| REG-03 | California CCPA as amended by CPRA, and other US state comprehensive privacy laws | California residents including job applicants and employees; other states depending on thresholds | Notice at collection; right to know, delete, correct; opt-out of sale or sharing (honor Global Privacy Control); limit use of sensitive personal information; service-provider contracts; risk assessments, cybersecurity audits and automated decision-making technology rules under the 2025 regulations (phased dates); no discrimination for exercising rights | SET, ANL, AIC, ATS, BIL | Privacy doc §5.3 rule 5, §8; NFR-PRV-011, 025 | OD-SEC-17, OD-PRV-08 |
+| REG-04 | India Digital Personal Data Protection Act 2023 and DPDP Rules 2025 | Users in India (stakeholder documents reference India) [SRC: SSOT Part I §G] | Notice and consent in clear language with itemized purposes; consent withdrawal as easy as giving; consent managers; verifiable parental consent for under-18 and no tracking or targeted advertising of children; reasonable security safeguards; breach notice to the Data Protection Board and each affected person; erasure when purpose ends; grievance redressal; Significant Data Fiduciary duties if designated (DPIA, audit, India-based DPO); phased commencement to confirm | IDN, SET, NTF, INS | Privacy doc §5, §8, §10; NFR-PRV-002, 007, 034, 035 | OD-SEC-31 |
+| REG-05 | EU AI Act (Regulation (EU) 2024/1689) | AI used for recruitment and selection (filtering applications, evaluating candidates, targeted job ads) and for education (admission, evaluating learning outcomes, monitoring during tests) is listed as high-risk in Annex III points 3 and 4 | Prohibited practices (Art 5) include emotion recognition in workplaces and education, already applicable; AI literacy (Art 4); for high-risk systems the provider needs risk management (Art 9), data governance including bias examination (Art 10, with Art 10(5) allowing special-category data for bias detection under safeguards), technical documentation (Art 11), automatic logging (Art 12), instructions and transparency to deployers (Art 13), human oversight design (Art 14), accuracy, robustness and cybersecurity (Art 15), quality management (Art 17), conformity assessment, EU database registration, post-market monitoring and serious-incident reporting; deployers (employers) must use as instructed, assign human oversight, keep logs, inform workers and affected persons (Art 26); right to explanation (Art 86); chatbot and synthetic content transparency (Art 50). Application dates for high-risk obligations are subject to change by EU legislative proposals; counsel to confirm | AIC, SRC, JOB, ATS, ASM, LRN, INT | Fairness doc §3–§9; NFR-AIG-001..040; NFR-SEC-055..059, 063 | OD-SEC-19 |
+| REG-06 | New York City Local Law 144 (automated employment decision tools) | Employers and employment agencies using a tool that substantially assists hiring or promotion decisions for NYC candidates | Independent bias audit within one year before use; public summary of results (selection or scoring rates and impact ratios by sex, race/ethnicity and intersectional categories); notice to candidates at least 10 business days before use, with job qualifications and characteristics assessed; information on data retention; instructions to request an alternative process or accommodation | AIC, ATS, JOB | Fairness doc §4 metrics, §6 notices; NFR-AIG-010..016 | OD-SEC-20 |
+| REG-07 | Other US AI-in-employment rules (for example Illinois AI Video Interview Act and Human Rights Act amendments on AI, Colorado AI Act, California Civil Rights Council automated-decision regulations, Maryland facial recognition in interviews) | Employers in those states using AI | Notice and consent for AI analysis of video interviews; prohibition of discriminatory AI and of zip codes as proxies; impact assessments and notices for high-risk AI (Colorado; effective date to confirm); record retention of automated-decision data (California) | INT, AIC, ATS | Fairness doc §3 prohibited inputs, §6; INT recording consent | OD-SEC-20 |
+| REG-08 | US equal employment law: Title VII, ADA, ADEA; Uniform Guidelines on Employee Selection Procedures (four-fifths rule); OFCCP for federal contractors | Employer customers' selection procedures, including tools they use | No disparate treatment or unjustified disparate impact; job-relatedness of selection procedures; reasonable accommodation; applicant record retention (generally 1 year, longer for some contractors); federal agency guidance on AI has changed and counsel must confirm current position | JOB, ATS, ASM, INT, AIC | Fairness doc §4 adverse-impact monitoring; accommodation flow; `RET-APPLICATION` | OD-PRV-01, OD-PRV-05 |
+| REG-09 | UK Equality Act 2010 and EU equal treatment directives | Employer customers in the UK and EU | No discrimination on protected characteristics; reasonable adjustments for disabled candidates | JOB, ATS, ASM | Same as REG-08 | OD-SEC-17 |
+| REG-10 | Pay transparency and salary history rules (for example New York, California, Colorado, Washington; EU Pay Transparency Directive with transposition deadline June 2026) | Job postings and recruiter workflows | Salary ranges in job posts for covered locations; no salary-history questions where banned; EU: pay range information before interview, no pay-history questions | JOB, ATS | JOB posting validation rule requiring a range for flagged locations [PROP]; blocked screening question terms | OD-SEC-29 |
+| REG-11 | Fair chance and criminal-history rules (for example NYC Fair Chance Act, California Fair Chance Act) | Background checks and screening questions | No criminal-history questions before a conditional offer where covered; individualized assessment process | JOB, BGV | Blocked screening question terms; BGV gated after offer | OD-SEC-21 |
+| REG-12 | US Fair Credit Reporting Act and state equivalents | Background checks for employment | Standalone disclosure and written authorization; pre-adverse-action notice with report copy and summary of rights; waiting period; adverse-action notice; consumer reporting agency obligations sit with the partner | BGV, ATS | Privacy doc PUR-25; AB-CID-06 controls | OD-SEC-21 |
+| REG-13 | Accessibility: WCAG 2.2 AA (technical standard); ADA (US); Section 508 (US federal customers); European Accessibility Act (applies to certain consumer services since June 2025); EN 301 549 (EU procurement) | Public web and app; public sector and education buyers | Conformance to WCAG 2.2 AA (EN 301 549 currently references WCAG 2.1; counsel and standards updates to confirm); accessibility statement; Accessibility Conformance Report (VPAT) for buyers; feedback mechanism | All UI | NFR-A11Y in [01_NON_FUNCTIONAL_REQUIREMENTS.md](../06_QUALITY_AND_PERFORMANCE/01_NON_FUNCTIONAL_REQUIREMENTS.md) | OD-SEC-30 |
+| REG-14 | PCI DSS v4.0.1 | Card payments | Card data never touches platform systems by using provider-hosted Checkout and Customer Portal; scope likely limited to a self-assessment for fully outsourced e-commerce; confirm current SAQ eligibility (including script-integrity criteria for pages that redirect to payment) with the payment provider and acquirer | BIL | NFR-SEC-031 (CSP, SRI), NFR-SEC-047, 048 | OD-SEC-32 |
+| REG-15 | SOC 2 (AICPA Trust Services Criteria) | Enterprise and institution buyers ask for it | Aspiration only: Type I then Type II report over security (and possibly availability, confidentiality, privacy) | All, ADM, PLT | Security doc §10–§22; NFR-OBS; access reviews | OD-SEC-25 |
+| REG-16 | ISO/IEC 27001:2022, ISO/IEC 27701, ISO/IEC 42001 | Buyer requirements, international customers, AI management | Aspiration only: information security management system, privacy extension, AI management system | All, AIC | Same as REG-15; fairness doc §7 governance | OD-SEC-25 |
+| REG-17 | EU Digital Services Act | Hosting and online platform services with user content for EU users | Points of contact and legal representative; terms of service clarity; notice-and-action with statement of reasons; internal complaint handling and out-of-court dispute settlement for online platforms; trusted flaggers; no dark patterns; recommender system transparency; protection of minors; transparency reports; some duties exempt for micro and small enterprises; very large platform duties only above the user threshold | TSF, NET, EMP, PRF, ADM | TSF moderation flows; privacy doc §15 transparency report; AB-GOV-03 | OD-SEC-26 |
+| REG-18 | COPPA (US, under 13) and amended COPPA Rule | If any user under 13 could hold an account | Verifiable parental consent; limits on retention; no conditioning participation on more data than needed; amended rule compliance dates to confirm | IDN, INS | Age gate (NFR-PRV-034); minimum age per OD-PRV-11 | OD-SEC-22 |
+| REG-19 | FERPA (US) and state student privacy laws (for example SOPIPA) | Institution customers sharing education records | Platform as "school official" under contract with direct control by the institution; no redisclosure without consent; student right to inspect; no targeted advertising from student data | INS, LRN, ASM | Privacy doc §1 roles, PUR-18, PUR-23; severance on graduation [SRC: SSOT §15.9.4] | OD-SEC-27 |
+| REG-20 | Commercial email and electronic marketing: CAN-SPAM (US), UK PECR, EU ePrivacy rules as implemented nationally, Canada CASL | Marketing and lifecycle email, cookies and device storage | Opt-in for marketing (EU, UK, Canada); clear sender identity and postal address; unsubscribe honored promptly; cookie and storage consent except strictly necessary | NTF, ANL | `comms.marketing_email` scope; NFR-PRV-009; one-click unsubscribe | OD-SEC-17 |
+| REG-21 | Electronic signature laws: US ESIGN Act and UETA; EU eIDAS | Offer letters, gig contracts, mentoring agreements, consent records | Intent to sign, consent to electronic records, attribution, record integrity and retention; simple electronic signature is usually enough for these documents; qualified signatures only where a law or customer requires | ATS (offers), GIG, MEN, SET | Signed-document record with signer identity, timestamp, document hash and audit [PROP] | OD-SEC-28 |
+| REG-22 | Breach-notification laws (GDPR, UK GDPR, US state laws, DPDP, sector rules) | Any personal-data incident | Assessment and notice to authorities and individuals within the applicable deadlines; customer notice per contract | All | Security doc §21 | OD-SEC-17 |
+| REG-23 | Subscription and consumer protection rules (auto-renewal disclosure, cancellation as easy as sign-up, distance-selling withdrawal rights, sales tax and VAT) | Paid plans for individuals | Clear renewal terms; online cancellation; refund rules per market; tax calculation | BIL | BIL module rules | OD-SEC-17 |
+| REG-24 | Platform-to-business fairness and marketplace rules (for example EU Platform-to-Business Regulation for business users such as instructors and freelancers) | Instructors, mentors, freelancers selling through the platform | Clear terms, ranking parameter disclosure, notice before suspension with reasons, complaint handling | STU, GIG, MEN, SRC | TSF statement of reasons; ranking transparency (fairness doc §6) | OD-SEC-26 |
+| REG-25 | Sanctions and export screening | Payouts and paid services to people and companies in restricted jurisdictions | Screening of payees and customers against sanctions lists, usually through the payment provider | BIL, GIG, STU | Provider screening; block payouts to restricted locations | OD-SEC-32 |
+
+## 4. Module-to-regime matrix
+
+`●` primary obligations land in this module; `○` the module supplies supporting data or controls. Regimes are the `REG-` refs in §3.
+
+| Module | REG-01/02 GDPR | REG-03 CCPA | REG-04 DPDP | REG-05 AI Act | REG-06/07 AEDT rules | REG-08/09 EEO | REG-10/11 pay and fair chance | REG-12 FCRA | REG-13 a11y | REG-14 PCI | REG-17 DSA | REG-18/19 COPPA, FERPA | REG-20 email | REG-21 e-sign |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| IDN | ● | ● | ● | | | | | | ● | | | ● | | |
+| SET | ● | ● | ● | ○ | ○ | | | | ● | | | ● | ● | ○ |
+| NTF | ○ | ○ | ○ | | | | | | ● | | | | ● | |
+| PRF | ● | ● | ● | | | ○ | | | ● | | ○ | | | |
+| EVD | ● | ● | ● | | | | | | ● | | | | | |
+| BGV | ● | ● | ● | | | ○ | ● | ● | ● | | | | | ○ |
+| SRC | ● | ○ | ○ | ● | ● | ● | | | ● | | ○ | | | |
+| LRN | ○ | ○ | ○ | ● | | | | | ● | | | ● | | |
+| ASM | ● | ○ | ○ | ● | ○ | ● | | | ● | | | ● | | |
+| JOB | ● | ● | ○ | ● | ● | ● | ● | | ● | | ○ | | | |
+| ATS | ● | ● | ○ | ● | ● | ● | ● | ○ | ● | | | | | ● |
+| INT | ● | ○ | ○ | ● | ● | ● | | | ● | | | | | |
+| EMP | ○ | ○ | | | ○ | ○ | ○ | | ● | | ● | | | |
+| NET | ○ | ○ | ○ | | | | | | ● | | ● | ○ | | |
+| MSG | ● | ○ | ○ | | | | | | ● | | ● | ○ | | |
+| AIC | ● | ● | ○ | ● | ● | ● | | | ● | | ○ | ○ | | |
+| TSF | ● | ○ | ○ | ○ | | | | | ● | | ● | ○ | | |
+| INS | ● | ○ | ● | ● | | | | | ● | | | ● | | |
+| BIL | ○ | ● | ○ | | | | | | ● | ● | | | | ○ |
+| MEN | ○ | ○ | ○ | ○ | | | | | ● | ○ | ○ | | | ● |
+| GIG | ○ | ○ | ○ | ○ | | | | | ● | ○ | ○ | | | ● |
+| EVT | ○ | ○ | ○ | | | | | | ● | ○ | ○ | ○ | ○ | |
+| MKT | ● | ○ | ○ | | | | ○ | | ● | | | | | |
+| ENT | ● | ● | ○ | ● | ● | ● | | | ● | | | | | |
+| ANL | ● | ● | ○ | ○ | ● | ● | | | ● | | ○ | ○ | | |
+| ADM | ● | ● | ● | ○ | | | | | ● | | ● | | | |
+| PWA | ○ | ○ | | | | | | | ● | | | | ○ | |
+| PLT | ● | ○ | ○ | | | | | | ○ | ○ | | | | |
+
+## 5. Key compliance workflows the product must support
+
+| Workflow | Trigger | Steps the product supports | Regimes |
+|---|---|---|---|
+| Record of processing | Any change to purposes, data map or processors | Generated from the data map (NFR-PRV-001) and the subprocessor register; exported for counsel | REG-01, 02, 04 |
+| Breach assessment | Security incident with personal data | Scope from audit and access logs; notification templates per regime; decision log with timestamps | REG-01..04, 22 |
+| AEDT notice and alternative process | Employer enables matching or ranking for a job in a covered location | Job-level notice text shown to candidates before use with the required lead time; "Request alternative assessment or accommodation" control routed to the employer | REG-06, 07 |
+| Bias audit data pack | Yearly, or before first use of a tool in a covered location | Export of selection and scoring rates by category with `min_cohort_k` suppression for an independent auditor; publication page for the employer's summary | REG-06, 08 |
+| High-risk AI technical file | Before enabling an Annex III feature for EU users | Model card, data sheet, evaluation results, logging description, human-oversight instructions, change log (fairness doc §7) | REG-05 |
+| Statement of reasons | Content removal, account restriction, demotion | Reason category, legal or terms ground, automated means used or not, how to appeal | REG-17, 24 |
+| Pre-adverse action | Employer intends to act on a background report | Notice with report copy and rights summary; waiting period timer; final adverse-action notice | REG-12 |
+| Pay range check | Job post published to a covered location | Required salary range fields; block publish if missing | REG-10 |
+| Accessibility statement | Each release | Statement with conformance level, known exceptions, contact; Accessibility Conformance Report for buyers | REG-13 |
+
+## 6. Open decisions
+
+| ID | Question | Options | Default proposal | Who decides | Blocking |
+|---|---|---|---|---|---|
+| OD-SEC-17 | Launch markets and the order of expansion | A: design for EU, UK, US, India, launch in a subset; B: one market only | A | Product owner + counsel | Every regime determination |
+| OD-SEC-18 | Controller and processor roles for ATS, INS and ENT processing (privacy doc §1) | A: processor for tenant workflows, controller for marketplace and profiles; B: joint controller for marketplace-originated applications | A | Counsel | Data processing agreements, rights routing |
+| OD-SEC-19 | EU AI Act role and scope: which features are high-risk AI systems, whether TalentSphere is provider, and whether high-risk features launch in the EU before conformity work completes | A: treat matching, ranking, screening, proctoring and learning-outcome evaluation as high-risk and withhold them in the EU until conformity is done; B: launch descriptive-only features in the EU; C: launch all with deployer instructions | A | Counsel + product owner + AI governance | AIC, SRC, ATS, ASM, LRN in EU |
+| OD-SEC-20 | Whether any ranking or matching feature is an automated employment decision tool under NYC LL 144 and similar rules, and who commissions the bias audit | A: assume yes; platform provides audit data packs and commissions a platform-level audit employers can rely on where permitted; B: employers responsible entirely | A | Counsel | AIC and ATS in covered locations |
+| OD-SEC-21 | Background checks: partner consumer reporting agency, which checks, when in the process | A: partner-run, post-offer only, platform orchestrates notices; B: not offered | B until a partner is selected (BGV brushes the "not generic HR" non-goal) | Product owner + counsel | BGV module |
+| OD-SEC-22 | Minimum age per market and whether any under-13 path exists | A: no under-13 accounts anywhere; B: institution-only under-13 with school consent | A | Counsel | IDN, INS |
+| OD-SEC-23 | Appointment of a DPO, EU and UK representatives, India grievance officer | A: appoint when entering the market; B: before launch | B | Counsel + product owner | GDPR, DPDP readiness |
+| OD-SEC-24 | Primary hosting region and EU partition timing | A: single primary region plus approved transfer mechanisms, EU partition later [SRC: SSOT §15.9.3]; B: EU region from launch | A | Product owner + architecture + counsel | Infrastructure, AI routing |
+| OD-SEC-25 | Assurance programme: SOC 2 and ISO 27001 timing | A: SOC 2 Type I before first enterprise contract, Type II after one observation period; ISO later; B: ISO first | A | Product owner + `SAD` | Enterprise sales |
+| OD-SEC-26 | DSA classification (hosting service or online platform) and EU P2B obligations | A: online platform obligations for public content surfaces; B: hosting service only | A | Counsel | TSF, NET, EMP reviews |
+| OD-SEC-27 | FERPA "school official" contract model for INS customers | A: standard institution data agreement; B: per-institution negotiation | A | Counsel | INS onboarding |
+| OD-SEC-28 | E-signature approach for offers and contracts | A: built-in simple electronic signature with audit; B: integrate an e-signature provider | A for gig and mentoring terms, B for offer letters if employers require | Product owner | ATS offers, GIG contracts |
+| OD-SEC-29 | Enforce pay transparency at publishing time or warn only | A: block publish in covered locations; B: warn | A | Product owner + counsel | JOB publishing |
+| OD-SEC-30 | Publish an accessibility statement and Accessibility Conformance Report at launch | A: yes, at launch; B: on buyer request only | A | Product owner | Public sector and education sales |
+| OD-SEC-31 | DPDP readiness: consent manager integration and Significant Data Fiduciary preparation | A: build consent ledger compatible with consent managers, prepare SDF artifacts if volumes approach designation; B: defer | A | Counsel | India launch |
+| OD-SEC-32 | PCI scope confirmation and sanctions screening approach | A: provider-hosted payments only, self-assessment, provider screening; B: embedded card fields | A | `FIN` + counsel | BIL |
+
+## 7. Risks
+
+| ID | Risk | Likelihood / impact | Mitigation | Owner |
+|---|---|---|---|---|
+| RSK-SEC-15 | High-risk AI features launched in the EU without conformity work | Medium / High | OD-SEC-19 gate, feature flags per region | AI governance owner |
+| RSK-SEC-16 | Employers use ranking without required notices or audits and the platform is named in claims | Medium / High | AEDT notice workflow, audit packs, contract terms | Counsel |
+| RSK-SEC-17 | Legal dates and thresholds in this map become stale | High / Medium | Yearly counsel review; every date tagged "to confirm" | Counsel |
+| RSK-SEC-18 | OS-expansion modules (BGV, GIG, MEN, ENT) introduce regulated activities outside the career-platform non-goals | Medium / High | `DEC-002` gate, per-module regime check before build | Product owner |
+
+## 8. Legacy source trace
+
+| Source | Used for | Dropped or changed, and why |
+|---|---|---|
+| Yash 14/COMPLIANCE_APPLICABILITY_MATRIX (CR-01..CR-19) | Regime candidates, trigger approach, "not legal advice" stance | Re-keyed as REG-01..25; added DPDP Rules 2025, pay transparency, fair chance, e-sign, P2B, sanctions |
+| SSOT §15.9 | GDPR matrix, EEOC, CCPA, FERPA, residency | Claims such as "AI never makes consequential decisions" moved to requirements with tests (fairness doc) |

@@ -310,7 +310,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Snapshot cannot be published without provenance fields.
 - **Inputs and outputs:** Out: provenance object attached to every API response.
 - **Filters, sorting, search:** n/a — attached metadata.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Missing provenance: snapshot blocked from publication. Source disabled: dependent insights flagged "source no longer available".
 - **Dependencies:** `FR-MKT-008`, `FR-MKT-009`.
 - **Security and privacy:** Provenance never contains contributor identities.
@@ -387,7 +387,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Same as FR-MKT-012.
 - **Inputs and outputs:** Out: rounded counts, provenance.
 - **Filters, sorting, search:** By tier, region, seniority band.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Platform coverage bias: panel labelled "Platform members, not the whole labor market". Opt-outs lowering a cell below threshold hide it within 24 hours.
 - **Dependencies:** `PRF`, `EVD` (planned), `FR-MKT-034`.
 - **Security and privacy:** Differencing protection (`BR-MKT-008`); employers never get lists.
@@ -412,7 +412,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Both numerator and denominator must pass thresholds.
 - **Inputs and outputs:** Out: ratios, bands, provenance.
 - **Filters, sorting, search:** Skill, role family, region level, period.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Demand-only data (no supply): show demand only, ratio hidden. Coverage warning for regions with low platform penetration.
 - **Dependencies:** `FR-MKT-012`, `FR-MKT-013`.
 - **Security and privacy:** Same suppression as the components.
@@ -437,7 +437,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Interval always displayed with the point estimate.
 - **Inputs and outputs:** Out: forecast series.
 - **Filters, sorting, search:** As FR-MKT-012.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Structural break (new data regime): forecast withheld and note shown. Backtest coverage below target: forecast flagged "low confidence".
 - **Dependencies:** `FR-MKT-012`, `FR-MKT-013`.
 - **Security and privacy:** Aggregates only.
@@ -539,7 +539,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Query params validated against catalogues.
 - **Inputs and outputs:** Out: band and provenance.
 - **Filters, sorting, search:** By role, level, location, industry, company size, experience band.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Insufficient data: empty state, no fabricated range. Currency conversion failure: original currency displayed. Company with 2 reports: hidden.
 - **Dependencies:** `FR-MKT-018`, `JOB` (planned).
 - **Security and privacy:** Aggregates only; the displayed band never allows back-calculation (`BR-MKT-008`).
@@ -589,7 +589,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Units > 0; strike ≥ 0; vesting schedule sums to 100%; dates plausible.
 - **Inputs and outputs:** Out: equity bands and sample count.
 - **Filters, sorting, search:** By role, level, stage, instrument.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Unknown valuation: reported with "valuation unknown" and excluded from value bands. Withdrawal as in FR-MKT-017.
 - **Dependencies:** `FR-MKT-017`, `FR-MKT-018`.
 - **Security and privacy:** Same as salary; company names hidden below threshold.
@@ -641,7 +641,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Start role must exist.
 - **Inputs and outputs:** Out: edges with frequency, time, salary delta, skills, sample, interval.
 - **Filters, sorting, search:** Filter by region, industry, company size; sort by frequency, time, pay change.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Sparse role: skill-similarity mode with label. Role deprecated: redirect to successor. Edge below threshold: hidden, not zeroed.
 - **Dependencies:** `FR-MKT-022`, `FR-MKT-007`, `FR-MKT-033`.
 - **Security and privacy:** No individual transition is retrievable; edges aggregate ≥ threshold.
@@ -691,7 +691,7 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Validation:** Weights sum to 1.0 per model version.
 - **Inputs and outputs:** Out: readiness, factors, range, sample size.
 - **Filters, sorting, search:** n/a — per analysis.
-- **Notifications and communication:** n/a.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** No benchmark for the transition: no time estimate; readiness still shown. Model update: previous results retained with their version.
 - **Dependencies:** `FR-MKT-024`, `FR-MKT-023`.
 - **Security and privacy:** Private; excluded from any employer-facing export or API (`BR-MKT-024`).
@@ -740,8 +740,8 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
 - **Business rules:** `BR-MKT-018`, `BR-MKT-019`, `BR-MKT-020`.
 - **Validation:** Max 3 roles.
 - **Inputs and outputs:** Out: table and optional PDF.
-- **Filters, sorting, search:** n/a.
-- **Notifications and communication:** n/a.
+- **Filters, sorting, search:** n/a — no list or query in this feature.
+- **Notifications and communication:** n/a — no recipient is affected.
 - **Error handling and edge cases:** Missing cells show "Not enough data". Share link revoked by user: 404.
 - **Dependencies:** `FR-MKT-012`, `FR-MKT-019`, `FR-MKT-024`, `FR-MKT-025`.
 - **Security and privacy:** Shared links expire after 30 days by default [PROP].
@@ -978,3 +978,365 @@ Service principal `API`: read aggregates under a scoped grant (`FR-MKT-032`).
   - Given a model version without a review, when releasing, then the gate blocks.
   - Given a group below k, when reviewing, then results show "not assessable".
   - Given the author as reviewer, when approving, then the system rejects.
+
+## 5. Business rule table
+
+`min_cohort_k` is the single policy parameter for minimum sample; default 10 [SRC: SSOT Amendment G, BR-178]. Feature overrides stricter than the default are allowed; lower values need an owner and counsel decision record.
+
+| ID | Rule | Rationale | Enforced where | Source |
+|---|---|---|---|---|
+| BR-MKT-001 | Canonical skills and roles are created and changed only by users with the taxonomy-curator permission; other users may only propose. | Prevents taxonomy pollution. | Taxonomy service, admin console | [SRC: SSOT BR-141] |
+| BR-MKT-002 | Every skill tag on a course, challenge, job, profile or role requirement references a canonical `skillId`; free text is resolved or queued. | Comparable counts and matching. | Skills API, tag validators in consumers | [SRC: SSOT BR-144] |
+| BR-MKT-003 | Skill relationships are directional (`prerequisite_of`, `subskill_of`, `supersedes`) or symmetric (`related_to`); `prerequisite_of` must be acyclic, checked at write; traversal depth is at most 5. | Valid dependency reasoning. | Graph service | [SRC: SSOT BR-142, BR-146, BR-147] |
+| BR-MKT-004 | `correlates_with` edges are computed statistically from aggregates above sample thresholds and are never edited manually. | Objectivity. | Nightly job | [SRC: SSOT BR-143] |
+| BR-MKT-005 | A candidate emerging skill needs at least 5 independent signals (distinct employers, jobs, users, courses or institutions, counted once per source entity; default also at least 3 distinct employer or institution sources) before promotion review. | Avoids hype and manipulation. | Candidate evaluator | [SRC: SSOT BR-148]; independence detail [PROP] (`OD-MKT-06`) |
+| BR-MKT-006 | Taxonomy changes ship only in published, immutable versions with four-eyes approval and automatic reference migration; deprecation requires a successor. | Safe evolution. | Version service | [SRC: SSOT §6.2]; four-eyes [PROP] |
+| BR-MKT-007 | No aggregate is published with fewer than `min_cohort_k` distinct contributors in the cell (default 10); feature overrides: career-transition edges at least 20 [SRC: BR-160]; stricter values are allowed; values below default need a decision record. | Re-identification protection. | Privacy engine (FR-MKT-033) | [SRC: SSOT BR-178, BR-160, BR-158, BR-207, BR-220] |
+| BR-MKT-008 | Suppression is complementary: a suppressed cell must not be derivable from totals, siblings, or overlapping queries; counts are rounded; query dimensions and budgets are capped per client. | Blocks differencing attacks. | Privacy engine | [DER] |
+| BR-MKT-009 | Salary reports carry a weight: 0.5 self-reported, 1.0 employment-verified. | Data quality. | Salary service | [SRC: SSOT BR-177] |
+| BR-MKT-010 | Money is stored and displayed in minor units with an ISO-4217 currency. | Correctness. | Domain types | [SRC: SSOT BR-179] |
+| BR-MKT-011 | Company-specific salary figures are shown only above the threshold (default `min_cohort_k`); the SSOT value of 3 is an override below default and needs an owner and counsel decision; an employer opt-in cannot lower it until decided (`OD-MKT-05`). | Privacy. | Display service | [SRC: SSOT BR-180]; [DEC-REQ] |
+| BR-MKT-012 | Contributors may withdraw any submission at any time; aggregates are recomputed and the contribution removed within 24 hours. | Data rights. | Salary and consent services | [SRC: SSOT BR-181] |
+| BR-MKT-013 | Equity data is aggregated separately and never merged into base-pay percentiles. | Prevents distortion. | Aggregation job | [SRC: SSOT BR-183] |
+| BR-MKT-014 | Reports outside ±3σ (robust) of the cell median, duplicates, bursts and impossible values are flagged and excluded until reviewed; rate limit is 5 reports per user per day. | Data integrity. | Quality service | [SRC: SSOT F-86 step 7] |
+| BR-MKT-015 | Published snapshots are versioned and immutable; compute may run nightly, publication cadence is set by `OD-MKT-02` (SSOT states nightly in F-86 and quarterly in BR-182). | Reproducibility; conflict recorded. | Snapshot service | [SRC: SSOT BR-182, F-86]; conflict recorded |
+| BR-MKT-016 | Career transitions are collected only with explicit opt-in; an individual's transitions are visible only to that individual. | Consent. | Transition service, authz | [SRC: SSOT BR-157, BR-159] |
+| BR-MKT-017 | Updates to the graph or taxonomy never retroactively change published historical snapshots; new data produces a new snapshot version. | Auditability. | Snapshot service | [SRC: SSOT BR-162] |
+| BR-MKT-018 | Every insight or recommendation shows its data sources, sample size, window and, where applicable, a confidence interval. | Transparency. | API contract, UI | [SRC: SSOT BR-163] |
+| BR-MKT-019 | Outcome and trend statements are descriptive or correlational; the product never states or implies a guarantee or causation. | Honesty. | Copy review, UI templates | [DER] from [SRC: SSOT BR-193] |
+| BR-MKT-020 | When data is insufficient the product shows a "not enough data" state; it never fabricates, interpolates silently, or shows zero for suppressed cells. | Trust. | UI and API | [SRC: SSOT F-85 failure modes] |
+| BR-MKT-021 | Every snapshot records sources, window, method version, taxonomy version, sample size, computed-at; a snapshot older than 2× its cadence is flagged stale; snapshots without provenance are not published. | Traceability. | Publication gate | [DER] |
+| BR-MKT-022 | External data is used, displayed and exported only as its license allows, with the required attribution; expired licenses disable the source. | Legal compliance. | Source registry, export | [PROP] |
+| BR-MKT-023 | No individual-level record appears in any export, API response, dashboard or admin view of aggregates. | Privacy. | API gateway, exports | [DER] |
+| BR-MKT-024 | Readiness and path indicators are explainable (factors and weights shown), never use protected attributes or proxies, and are never exposed to employers, recruiters or matching. | Fairness; non-goal on opaque scoring. | Authz, model gate | [SRC: SSOT §4.2, BR-185]; [DER] |
+| BR-MKT-025 | Employer-facing supply and talent views are aggregate only, rounded, and suppressed under threshold; they never list or rank individuals. | Candidate protection. | Employer dashboards | [DER] |
+| BR-MKT-026 | Employer pay-equity analysis uses data the employer uploads, stays inside that tenant, outputs aggregates only, suppresses small cells, and deletes raw rows per retention. | Narrow HR boundary. | Equity job | [PROP] (`OD-MKT-08`) |
+| BR-MKT-027 | Forecasts cover at most 12 months, always show an interval and model version, and need at least 12 months of valid history. | Honest uncertainty. | Forecast job | [SRC: SSOT F-151] |
+| BR-MKT-028 | Institution dashboards are cohort-level only; faculty and administrators cannot see non-consented individual data. | Student privacy. | Authz | [DER] from [SRC: docs/experience, METRICS_CATALOG §6.2] |
+| BR-MKT-029 | Partner API keys are scoped, rate-limited, hashed at rest, auditable and revocable; responses obey the same suppression as the UI. | Safe API. | API gateway | [PROP] |
+| BR-MKT-030 | Reposted jobs (same employer, title and location within 30 days) count once in demand signals. | Accurate demand. | Ingestion | [PROP] |
+| BR-MKT-031 | Geography is published no finer than metro or region where thresholds pass; no street-level or postal-level insight. | Re-identification control. | Display service | [DER] |
+| BR-MKT-032 | Breakdowns by sensitive attributes come only from voluntary, separate, purpose-limited self-identification, subject to threshold and review, and are never used as inputs to any score. | Fairness data handling. | Fairness store | [SRC: SSOT F-119]; [DER] |
+| BR-MKT-033 | Disputes about displayed data are reviewed within the SLA; upheld disputes lead to a corrected version and notification of the filer. | Accountability. | Dispute workflow | [PROP] |
+| BR-MKT-034 | Currency conversion uses dated rates; on conversion failure the original currency is shown and the report is excluded from cross-currency aggregates. | Correctness. | Salary service | [SRC: SSOT F-86 failure modes] |
+
+## 6. State machines
+
+### SM-MKT-01 — Skill lifecycle
+
+States: proposed, under_review, active, deprecated, merged, retired.
+
+Transitions: [new] → proposed (user proposal or detector); [new] → active (curator creates directly); proposed → under_review (curator opens); under_review → active (promote) / retired (dismiss); active → deprecated (curator, guard: successor set); deprecated → merged (migration complete); deprecated → active (reinstate, guard: curator and no conflict); merged → retired (after retention). Terminal: retired. Ids are never reused.
+
+```mermaid
+stateDiagram-v2
+    [*] --> proposed
+    [*] --> active
+    proposed --> under_review: curator opens
+    under_review --> active: promote
+    under_review --> retired: dismiss
+    active --> deprecated: successor set
+    deprecated --> merged: migration complete
+    deprecated --> active: reinstate
+    merged --> retired: retention ends
+    retired --> [*]
+```
+
+### SM-MKT-02 — Taxonomy version
+
+States: draft, validating, approved, published, superseded.
+
+Transitions: [new] → draft; draft → validating (request approval, guard: author submits); validating → draft (checks fail); validating → approved (second curator approves, guard: not the author); approved → published (publish; migration job runs); published → superseded (newer version published). Terminal: superseded (still readable).
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> validating: request approval
+    validating --> draft: checks fail
+    validating --> approved: second curator approves
+    approved --> published: publish
+    published --> superseded: newer published
+    superseded --> [*]
+```
+
+### SM-MKT-03 — Salary report
+
+States: submitted, validating, verified, flagged, rejected, aggregated, withdrawn.
+
+Transitions: [new] → submitted; submitted → validating (automatic); validating → verified (passes rules); validating → flagged (outlier, duplicate, burst); flagged → verified (reviewer accepts) / rejected (reviewer excludes); verified → aggregated (included in a snapshot); aggregated/verified/flagged → withdrawn (contributor or account deletion). Terminal: rejected, withdrawn.
+
+```mermaid
+stateDiagram-v2
+    [*] --> submitted
+    submitted --> validating: auto
+    validating --> verified: passes
+    validating --> flagged: outlier or burst
+    flagged --> verified: accept
+    flagged --> rejected: exclude
+    verified --> aggregated: snapshot
+    aggregated --> withdrawn: withdraw
+    verified --> withdrawn: withdraw
+    flagged --> withdrawn: withdraw
+    rejected --> [*]
+    withdrawn --> [*]
+```
+
+### SM-MKT-04 — Emerging skill candidate
+
+States: detected, monitoring, ready_for_review, promoted, aliased, dismissed, expired.
+
+Transitions: [new] → detected; detected → monitoring (first signals); monitoring → ready_for_review (guard: ≥ 5 independent signals); ready_for_review → promoted / aliased / dismissed (curator); detected/monitoring → expired (window of 180 days with no growth). Terminal: promoted, aliased, dismissed, expired.
+
+```mermaid
+stateDiagram-v2
+    [*] --> detected
+    detected --> monitoring: signals arrive
+    monitoring --> ready_for_review: 5 independent signals
+    ready_for_review --> promoted: curator promotes
+    ready_for_review --> aliased: curator aliases
+    ready_for_review --> dismissed: curator dismisses
+    detected --> expired: no growth
+    monitoring --> expired: no growth
+    promoted --> [*]
+    aliased --> [*]
+    dismissed --> [*]
+    expired --> [*]
+```
+
+### SM-MKT-05 — Dataset snapshot (published insight)
+
+States: computing, validating, published, held, suppressed, stale, failed, superseded.
+
+Transitions: [new] → computing; computing → validating (done); computing → failed (error); validating → published (passes privacy, provenance, anomaly checks); validating → held (anomaly or admin hold); held → published (admin approves) / failed (admin discards); published → stale (age > 2× cadence); published/stale → superseded (newer published); published → suppressed (contributor withdrawal drops a cell under threshold; the cell only). Terminal: failed, superseded.
+
+```mermaid
+stateDiagram-v2
+    [*] --> computing
+    computing --> validating: done
+    computing --> failed: error
+    validating --> published: checks pass
+    validating --> held: anomaly or hold
+    held --> published: approve
+    held --> failed: discard
+    published --> stale: age exceeds 2x cadence
+    published --> suppressed: cell under threshold
+    published --> superseded: newer published
+    stale --> superseded: newer published
+    failed --> [*]
+    superseded --> [*]
+```
+
+### SM-MKT-06 — Dispute
+
+States: open, investigating, upheld, rejected, closed.
+
+Transitions: [new] → open; open → investigating (reviewer assigned); investigating → upheld (evidence supports) / rejected (not supported); upheld → closed (corrective version published, filer notified); rejected → closed (filer notified with reason). Terminal: closed.
+
+```mermaid
+stateDiagram-v2
+    [*] --> open
+    open --> investigating: assigned
+    investigating --> upheld: supported
+    investigating --> rejected: not supported
+    upheld --> closed: correction published
+    rejected --> closed: notified
+    closed --> [*]
+```
+
+### SM-MKT-07 — Career transition record
+
+States: reported, pending_verification, verified, excluded, removed.
+
+Transitions: [new] → reported (opt-in user adds); reported → pending_verification (linked to a work-history item awaiting confirmation); pending_verification → verified (confirmation via verification service); reported/pending_verification → excluded (outlier or conflict, reviewer); any → removed (user removes, opt-out or account deletion). Terminal: removed.
+
+```mermaid
+stateDiagram-v2
+    [*] --> reported
+    reported --> pending_verification: linked history
+    pending_verification --> verified: confirmed
+    reported --> excluded: outlier
+    pending_verification --> excluded: conflict
+    reported --> removed: user removes
+    verified --> removed: user removes
+    excluded --> removed: user removes
+    removed --> [*]
+```
+
+## 7. Screen inventory
+
+| ID | Name | Route proposal | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-MKT-001 | Market insights explorer | `/market` | All | Demand, supply, trend by skill, role, region | Loading, suppressed cell, stale banner, empty |
+| SCR-MKT-002 | Skill detail | `/market/skills/:skillId` | All | Description, relationships, demand, related roles | Deprecated redirect |
+| SCR-MKT-003 | Regional gap map | `/market/gaps` | Signed-in | Heat map and ranked list | Threshold greyed regions |
+| SCR-MKT-004 | Trends and forecast | `/market/trends` | Signed-in | Forecast with intervals | Low confidence, withheld |
+| SCR-MKT-005 | Salary benchmarks | `/salaries` | GUE (national), signed-in | Bands, trend, methodology | Not enough reports, currency failure |
+| SCR-MKT-006 | Career path explorer | `/careers` | All | Role transition graph and details | Sparse role, skill-similarity mode |
+| SCR-MKT-007 | Role detail | `/careers/roles/:roleId` | All | Requirements, pay, demand | Deprecated redirect |
+| SCR-MKT-008 | Skill-gap analysis | `/me/careers/gap` | CAN, STD | Compare skills to target role | Outdated, empty profile |
+| SCR-MKT-009 | Readiness and time estimate | `/me/careers/readiness/:id` | CAN, STD | Factors and range | Insufficient data |
+| SCR-MKT-010 | Action plan | `/me/careers/plan/:id` | CAN, STD | Plan items and progress | Item unavailable |
+| SCR-MKT-011 | Compare careers | `/careers/compare` | CAN, STD | Side-by-side roles | Missing cells |
+| SCR-MKT-012 | Add salary / equity | `/salaries/contribute` | Signed-in | Submit and manage reports | Validation, under review, withdrawn |
+| SCR-MKT-013 | My contributions | `/me/market/contributions` | Signed-in | Salary, transitions, withdrawal | Empty, pending |
+| SCR-MKT-014 | Employer market view | `/employer/market` | REC, HMG, EAD, EXA | Workforce planning, benchmarks | No entitlement, thin data |
+| SCR-MKT-015 | Pay-equity analysis | `/employer/market/equity` | EAD, EXA | Upload and aggregate report | Parsing errors, suppressed cells |
+| SCR-MKT-016 | Market data consent | `/settings/privacy/market` | Signed-in | Contribution consents | Toggles, history |
+| SCR-MKT-017 | Institution market dashboard | `/institution/market` | IAD, PLO | Programme alignment | Unmapped programme |
+| SCR-MKT-018 | Admin: skills catalogue | `/admin/market/skills` | PAD | Create, merge, deprecate | Duplicates, conflicts |
+| SCR-MKT-019 | Admin: taxonomy versions | `/admin/market/versions` | PAD | Draft, approve, publish | Migration progress |
+| SCR-MKT-020 | Admin: data quality and sources | `/admin/market/data` | PAD | Pipeline, sources, quality queue | Alerts, license expiry |
+| SCR-MKT-021 | Admin: privacy policy and fairness | `/admin/market/policy` | PAD, SAD | k parameters, simulation, reviews | Simulation results |
+| SCR-MKT-022 | Partner API and exports | `/settings/market/api` | IAD, EXA, PAD | Grants, keys, usage, exports | Pending, revoked |
+
+## 8. Data entities owned
+
+| ID | Entity | Key attributes | Relationships | Retention class |
+|---|---|---|---|---|
+| ENT-MKT-01 | Skill | skillId (`SK-`), name, category, status, scaleId, successorId, version | N:M aliases, relationships | Permanent reference data |
+| ENT-MKT-02 | SkillAlias | alias, skillId, contextRule | N:1 Skill | Permanent |
+| ENT-MKT-03 | SkillRelationship | fromSkillId, toSkillId, type, strength, source (curated or computed) | Skill to Skill | Permanent; versioned |
+| ENT-MKT-04 | TaxonomyVersion | versionId, state, changeList, approvers, publishedAt | 1:N changes | Permanent |
+| ENT-MKT-05 | EmergingSkillCandidate | term, signals (by distinct source), state, firstSeen | N:1 resulting Skill | 2 years |
+| ENT-MKT-06 | ExternalFrameworkMapping | skillId or roleId, framework, code, relation, releaseVersion | N:1 Skill/Role | With framework license |
+| ENT-MKT-07 | Role | roleId (`RL-`), title, family, levels, status, successorId | 1:N requirements | Permanent reference |
+| ENT-MKT-08 | RoleSkillRequirement | roleId, level, skillId, importance, proficiency | N:1 Role, Skill | Versioned with taxonomy |
+| ENT-MKT-09 | DataSource | sourceId, type, license terms, allowed outputs, expiry, status | 1:N signals | Business record |
+| ENT-MKT-10 | MarketSignal | signalId, type, skillIds, roleId, region, industry, sizeBand, period, sourcePseudonym | N:1 DataSource | 25 months |
+| ENT-MKT-11 | DatasetSnapshot | snapshotId, kind, window, methodVersion, taxonomyVersion, sampleSize, computedAt, state, provenance | 1:N published cells | Permanent (immutable) |
+| ENT-MKT-12 | SalaryReport | reportId, role, level, region, industry, sizeBand, amountMinor, currency, period, weight, state, contributorLink | Link to consent | Personal; deleted on withdrawal; reversible link kept only for withdrawal |
+| ENT-MKT-13 | SalaryAggregate | snapshotId, cell key, percentiles, contributorCount, flags | N:1 Snapshot | Permanent (immutable) |
+| ENT-MKT-14 | EquityReport and Aggregate | instrument, grantValue, vesting, stage; aggregate cells | As salary | As salary |
+| ENT-MKT-15 | CareerTransition | fromRoleId, toRoleId, dates, timeInRole, salaryDeltaBand?, state, contributorLink | Link to consent | Personal; deleted on opt-out |
+| ENT-MKT-16 | ProgressionBenchmark | fromRoleId, toRoleId, region, frequency, medianTime, interval, sample, snapshotId | N:1 Snapshot | Permanent (immutable) |
+| ENT-MKT-17 | GapAnalysis | analysisId, userId, targetRole, level, taxonomyVersion, results | N:1 User | Personal; user-owned, deleted with account |
+| ENT-MKT-18 | ActionPlanLink | planId, userId, itemType, itemRef, status | N:1 GapAnalysis | Personal |
+| ENT-MKT-19 | Forecast | snapshotId, series, interval, modelVersion, backtest | N:1 Snapshot | Permanent |
+| ENT-MKT-20 | SavedMarketView | viewId, ownerId or orgId, filters | N:1 Owner | Business |
+| ENT-MKT-21 | ExportJob | jobId, requesterId, scope, state, expiresAt | N:1 User | 7 days file, audit 24 months |
+| ENT-MKT-22 | ApiGrant | grantId, orgId, scopes, rateTier, keyHash, state | N:1 Org | Business |
+| ENT-MKT-23 | ContributionConsent | userId, purpose, consentVersion, state, at | N:1 User | Append-only, anonymized after deletion |
+| ENT-MKT-24 | Dispute | disputeId, filerId, targetRef, type, state | N:1 target | 24 months |
+| ENT-MKT-25 | SuppressionPolicy | parameter, value, scope, decisionRecordId, version | Permanent audit | Permanent |
+
+## 9. Events emitted and consumed
+
+### 9.1 Emitted
+
+| ID | Name | Trigger | Key payload |
+|---|---|---|---|
+| EVT-MKT-001 | mkt.skill.created | Skill created | skillId, category |
+| EVT-MKT-002 | mkt.skill.deprecated | Skill deprecated | skillId, successorId |
+| EVT-MKT-003 | mkt.skill.proposal_decided | Proposal promoted, aliased, dismissed | candidateId, decision |
+| EVT-MKT-004 | mkt.taxonomy.version_published | Version published | versionId, changeCounts |
+| EVT-MKT-005 | mkt.role.updated | Role or requirements changed | roleId, versionId |
+| EVT-MKT-006 | mkt.source.state_changed | Data source enabled, disabled, expired | sourceId, state |
+| EVT-MKT-007 | mkt.pipeline.alert | Reconciliation or freshness breach | sourceId, kind |
+| EVT-MKT-008 | mkt.snapshot.published | Snapshot published | snapshotId, kind, cellsPublished, cellsSuppressed |
+| EVT-MKT-009 | mkt.snapshot.held | Snapshot held | snapshotId, reason |
+| EVT-MKT-010 | mkt.salary.submitted | Report submitted | reportId (pseudonymous), weight |
+| EVT-MKT-011 | mkt.salary.flagged | Report flagged | reportId, reasonClass |
+| EVT-MKT-012 | mkt.salary.withdrawn | Report withdrawn | reportId |
+| EVT-MKT-013 | mkt.transition.recorded | Transition opt-in recorded | transitionId (pseudonymous) |
+| EVT-MKT-014 | mkt.transition.removed | Transition removed | transitionId |
+| EVT-MKT-015 | mkt.benchmark.viewed | Benchmark viewed | kind, cellClass (no identity beyond pseudonym) |
+| EVT-MKT-016 | mkt.gap.computed | Gap analysis run | targetRoleId, taxonomyVersion |
+| EVT-MKT-017 | mkt.readiness.computed | Readiness computed | modelVersion |
+| EVT-MKT-018 | mkt.plan.created | Action plan created | planId, itemCount |
+| EVT-MKT-019 | mkt.consent.changed | Contribution consent changed | purpose, state |
+| EVT-MKT-020 | mkt.export.requested | Export requested | scope, format |
+| EVT-MKT-021 | mkt.api.grant_changed | Grant approved or revoked | grantId, state |
+| EVT-MKT-022 | mkt.dispute.opened | Dispute filed | disputeId, type |
+| EVT-MKT-023 | mkt.dispute.resolved | Dispute resolved | disputeId, outcome |
+| EVT-MKT-024 | mkt.policy.changed | Suppression policy changed | parameter, decisionRecordId |
+| EVT-MKT-025 | mkt.fairness.review_recorded | Fairness review done | modelVersion, outcome |
+
+### 9.2 Consumed
+
+| Source (module) | Event | Use |
+|---|---|---|
+| `JOB` (planned) | job published, closed | Demand signals, dedupe |
+| `ATS` (planned) | application, hire events | Outcome signals, transitions with consent |
+| `LRN`, `ASM` (planned) | enrollment, completion, assessment passed | Skill supply, learning-to-role signals |
+| `PRF`, `EVD` (planned) | skill added/verified, work history changed | Supply index, transition candidates |
+| `SET` (planned) | consent changed, account deleted | Withdrawal of contributions |
+| `BIL` (planned) | entitlement changed | Premium insight access |
+
+## 10. Integrations and external dependencies
+
+| Dependency | Purpose | Notes |
+|---|---|---|
+| Public frameworks (ESCO, O*NET, SFIA, national occupation codes) | External mappings | Licenses vary; `OD-MKT-03` |
+| Labor-market data providers, salary surveys, statistics agencies | Supplementary demand and pay data | Registry with licensing (FR-MKT-009); `OD-MKT-03` |
+| Exchange rate provider | FX for normalization | Dated rates; failure handling per `BR-MKT-034` |
+| Geo hierarchy dataset | Region polygons and names | Public data |
+| Time-series forecasting library | Forecasts | Internal; versioned |
+| `PLT` API gateway, `NTF` notifications | API delivery, alerts | Consumed |
+
+## 11. Cross-module dependencies
+
+| Depends on | Why | Depended on by | Why |
+|---|---|---|---|
+| JOB (planned) | Job postings and skill tags | JOB | Salary band on job page, skill picker |
+| ATS (planned) | Hire and stage outcomes | ATS | Offer calibration panel |
+| LRN, ASM (planned) | Courses, assessments mapped to skills | LRN | Skill gap to course suggestions, skill ids |
+| PRF, EVD (planned) | User skills and evidence | AIC (planned) | Career assistant uses paths and gaps |
+| SET (planned) | Consent | INS (planned) | Programme alignment dashboards |
+| BIL (planned) | Entitlements | ENT (planned) | Skills inventory uses the taxonomy |
+| INS (planned) | Cohorts | ANL | Market metric definitions |
+| PLT (planned) | API gateway | EVT, GIG, MEN (planned) | Skill tags and plan items |
+
+## 12. Module-level metrics
+
+| Metric | Definition | Formula | Owner role |
+|---|---|---|---|
+| MET-MKT-01 Tag resolution rate | Skill tags resolved automatically to canonical ids | auto-resolved / all tags | Taxonomy curator |
+| MET-MKT-02 Unresolved backlog age | Median age of unresolved terms | median(now − firstSeen) | Taxonomy curator |
+| MET-MKT-03 Cell publication rate | Cells published vs candidate cells | published / candidate | Data owner |
+| MET-MKT-04 Suppression rate | Cells suppressed under threshold | suppressed / candidate | Privacy lead |
+| MET-MKT-05 Snapshot freshness | Share of snapshots not stale | non-stale / published | Data owner |
+| MET-MKT-06 Salary contribution coverage | Verified salary reports per active role family | count of verified reports with distinct contributors ≥ k cells / total cells | Product |
+| MET-MKT-07 Path explorer usage to plan | Gap analyses that become plans | plans / gap analyses | Product |
+| MET-MKT-08 Dispute turnaround | Median days to resolve | median(resolved − opened) | Data owner |
+| MET-MKT-09 Forecast accuracy | Interval coverage of realized values | within interval / forecasts evaluated | Data science |
+
+All are P0 or P2 aggregates [DER].
+
+## 13. Open decisions
+
+| ID | Question | Options | Default proposal | Who decides | Blocking |
+|---|---|---|---|---|---|
+| OD-MKT-01 | Is MKT in scope beyond the taxonomy slice given SSOT §4.2 and the "operating system" goal? | A: full module; B: taxonomy + salary + path explorer only; C: taxonomy only | A, with minimal viable slice = FR-MKT-001, 002, 003, 004, 007, 008, 010, 012, 033 at R1 to R4 (taxonomy and demand, no salary, no paths) | Product owner | Salary, paths, dashboards |
+| OD-MKT-02 | Compute and publication cadence for salary data (SSOT F-86 nightly vs BR-182 quarterly) | Nightly compute with weekly publication; nightly; quarterly | Nightly compute, weekly publication | Product owner | FR-MKT-018 |
+| OD-MKT-03 | Which external data sources and taxonomies, and their licensing and cost | List of providers | None until legal review; use platform data and public statistics only | Product owner, Finance, Counsel | FR-MKT-006, 009 |
+| OD-MKT-04 | Default for including members' skills in aggregate supply counts | Opt-out default (aggregate use allowed) or opt-in | Opt-out default for aggregate, clearly disclosed, counsel to confirm | Counsel, Privacy | FR-MKT-013, 034 |
+| OD-MKT-05 | What `min_cohort_k` counts (distinct people, reports, employers) and whether employers' opt-in may lower the company-level threshold of 3 (BR-180) | People vs reports; override yes/no | Distinct contributors; no lowering without a decision record | Owner, Counsel | FR-MKT-018, 033 |
+| OD-MKT-06 | Independence rule for emerging skill signals | ≥ 3 distinct employer or institution sources, or only count distinct entities | ≥ 3 distinct employer or institution sources and ≥ 5 signals | Taxonomy owner | FR-MKT-005 |
+| OD-MKT-07 | Are market insights free, or gated by plan (employer dashboards, API)? | Free; per plan; per seat | Candidate insights free; employer and API by plan | Commercial owner | FR-MKT-029, 032 |
+| OD-MKT-08 | Employer pay-equity analysis: legal scope, markets, retention of uploads, sensitive group data | Offer, defer | Defer protected-group analysis; offer role/level/location pay gap only | Counsel, Product | FR-MKT-020 |
+| OD-MKT-09 | Dispute SLA | Business days | 10 business days | Data owner | FR-MKT-035 |
+
+## 14. Risks
+
+| ID | Risk | Impact | Mitigation |
+|---|---|---|---|
+| RSK-MKT-01 | Re-identification through small cells or overlapping queries | Privacy breach | Central engine, complementary suppression, query budgets (FR-MKT-033) |
+| RSK-MKT-02 | Platform sample bias presented as "the market" | Misleading insight | Labelling, provenance, external sources (FR-MKT-010, 013) |
+| RSK-MKT-03 | Salary gaming and coordinated false reports | Poor benchmarks | Weights, outlier and burst controls, review (FR-MKT-011, 017) |
+| RSK-MKT-04 | Readiness or path outputs taken as guarantees, or used by employers | Harm, fairness issues | Honest copy, no employer exposure, fairness review (BR-MKT-019, 024; FR-MKT-036) |
+| RSK-MKT-05 | External data license breach | Legal exposure | Source registry, export filter (FR-MKT-009, 031) |
+| RSK-MKT-06 | Taxonomy churn breaks consumers | Regressions across modules | Versioning, migration, immutable snapshots (FR-MKT-004) |
+| RSK-MKT-07 | Scope drift toward HR/payroll | Violates SSOT §4.2 | Narrow employer features, `OD-MKT-01`, `OD-MKT-08` |
+
+## 15. Legacy source trace
+
+| Source | Used for | Dropped or changed |
+|---|---|---|
+| SSOT §6.2 Skill ontology; §10.27 BR-141..BR-148; F-84 | Taxonomy governance, relationships, emerging skills | Detailed F-84 text lives with consumers; MKT owns taxonomy |
+| SSOT F-85 Career Graph and Progression (BR-157..BR-163) | Transitions, benchmarks, opt-in, readiness | Threshold of 20 kept as feature override of `min_cohort_k` |
+| SSOT F-86 Salary Intelligence (BR-177..BR-183) | Salary submission, weights, aggregation, display | Nightly vs quarterly conflict recorded as `OD-MKT-02`; company threshold 3 recorded as `OD-MKT-05` |
+| SSOT F-97, F-151, F-152, F-98 | Demand analytics, forecast, trajectory, equity | Forecast horizon kept at 12 months |
+| SSOT Amendment G, V61-04 | Single `min_cohort_k` parameter | Lower values only via decision record |
+| SSOT F-46, F-158, F-161, F-119, F-165 | Institution, employer views; fairness | Employer equity narrowed; D&I data voluntary only |
+| Yash_Final_Project_Document `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` | Privacy classes P0–P3, aggregation principles | None |
+| docs/registries (F-86, F-97, F-151, F-152) | Feature identity | Status never copied |

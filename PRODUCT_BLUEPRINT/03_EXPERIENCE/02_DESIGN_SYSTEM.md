@@ -171,7 +171,7 @@ Categorical (maximum 6 series; beyond that, group into "Other"):
 | 5 | `#7a5a9c` | 5.36 | `#b79bd6` | 6.88 | cross |
 | 6 | `#3f4a44` | 8.89 | `#c9cfc8` | 10.51 | star |
 
-Sequential (one measure, low to high): `primary.100` to `primary.800` in 5 steps; Diverging: `#a8360a` ... `#e4e7e1` ... `#2f7559`. Rules in section 13.8.
+Sequential (one measure, low to high): `primary.100` to `primary.800` in 5 steps; Diverging: `#a8360a` ... `#e4e7e1` ... `#2f7559`. Rules in section 8.3.
 
 ### 3.5 Typography
 
@@ -362,7 +362,7 @@ Stable vocabulary (concept, icon name): verified shield-check, pending clock, pr
 - **Keyboard:** `Enter` and `Space` activate. Focus order follows DOM.
 - **ARIA:** native `<button type="button">` (forms: `type="submit"` explicitly). Icon-only uses `CMP-IconButton`. Toggle buttons use `aria-pressed`. Menu buttons `aria-haspopup="menu"`, `aria-expanded`.
 - **Do:** verb plus object labels ("Save changes", "Send invite"); keep label at most 3 words (see `06` section 5); give a loading label via `aria-live` only when the outcome needs announcing.
-- **Don't:** use "Click here", "Submit", "OK" alone; disable a submit button to signal invalid fields (show errors instead, section 8.3 of `03`); place two `primary` in one region; use `danger` for non-destructive actions.
+- **Don't:** use "Click here", "Submit", "OK" alone; disable a submit button to signal invalid fields (show errors instead, `03` section 3.4); place two `primary` in one region; use `danger` for non-destructive actions.
 
 #### CMP-IconButton
 
@@ -573,7 +573,7 @@ Image, video and document preview overlay: modal, arrows to move, `Esc` to close
 #### CMP-Notice (inline alert)
 
 - **Anatomy:** status icon, title (optional), message, actions (up to 2), dismiss (optional). **Variants:** info, success, warning, danger; `compact` single-line. Matches as-built `Notice`. [SRC: apps/web/src/components/ui/Notice.tsx]
-- **Behaviour:** inline notices sit directly above the content they concern. Static ones are in the reading order and not live regions. A notice added dynamically after an action uses `role="status"`; errors that block use `role="alert"`. Notices that stop a form submission appear at the top of the form with an anchor list of errors (section 8.5 of `03`).
+- **Behaviour:** inline notices sit directly above the content they concern. Static ones are in the reading order and not live regions. A notice added dynamically after an action uses `role="status"`; errors that block use `role="alert"`. Notices that stop a form submission appear at the top of the form with an anchor list of errors (`03` section 3.5).
 - **Do/Don't:** do explain what happened, what it affects and what to do (error formula in `06` section 3); don't use a notice for marketing.
 
 #### CMP-Banner
@@ -670,3 +670,152 @@ For hierarchical structures (course outline, folder, department tree, skills tax
 | `CMP-Rubric` | Criteria by level matrix with descriptors, selected cell, points | Grid semantics, keyboard cell selection, text for selected level |
 | `CMP-CertificateView` | Document-like surface (serif title), recipient, issuer, date, credential id, QR and URL for verification, download PDF, share | Always has the verification URL in text; PDF is accessible tagged PDF [PROP] |
 
+## 8. Data-display patterns
+
+### 8.1 Choosing the pattern
+
+| Data shape | Pattern | Why |
+|---|---|---|
+| Many records, 4 or more comparable attributes, user sorts and filters, users act in bulk | `CMP-DataTable` | Scanning and comparing across rows |
+| Few records (under 12), rich per-item content (media, description) | Card grid | Each item is a unit |
+| Records with 1 to 3 attributes, mostly navigational | `CMP-List` | Fast scanning, works at every width |
+| One record with many attributes | `CMP-DescriptionList` in a card per topic | Reading, not comparing |
+| Process over time | `CMP-Timeline` or `CMP-ApplicationTracker` | Sequence and dates |
+| Records in stages the user moves | `CMP-KanbanBoard` with a table alternative | Workflow, with list view for access and bulk |
+| Trend, composition, distribution, comparison | `CMP-Chart` | Pattern recognition; always with a data table alternative |
+| Single number with context | `CMP-StatTile` | At-a-glance status |
+
+Rule `NFR-DSY-018`: every board, chart and calendar view has an equivalent list or table view reachable from the same screen (view switcher), because they are the accessible and the low-bandwidth path.
+
+### 8.2 Card, list and table rules
+
+- Card grids: 1 column below 640, 2 from 640, 3 from 1024 (content area, not viewport), 4 only in the wide content area for compact cards (course thumbnails). Gap `--ts-space-4` phone, `--ts-space-6` desktop. Cards in a row share a height; footers align.
+- Lists: dividers between items (`--ts-border-subtle`), no zebra striping. Group headers sticky when the list scrolls.
+- Tables: header sticky under the page header (`--ts-z-sticky`); zebra striping off by default (hover and selection states carry row identity); horizontal rules `--ts-border-subtle`; at most one row action menu per row; row actions that apply to many rows live in the bulk bar.
+- Counts: every list and table shows how many items match ("312 candidates") in a live region that updates after filters change.
+- Sort indicators: arrow icon plus `aria-sort`; unsorted columns show a muted double-arrow on hover and focus only.
+- Empty and loading states are mandatory per `03` section 12, and are the same height as the loaded state's minimum to avoid layout shift.
+- Truncation, dates, money and numbers: dates "12 Mar 2026" in tables (locale aware), relative time ("2 days ago") for activity with absolute time in `<time>` and a tooltip; money with currency code or symbol according to locale and an explicit period ("per year"); numbers with locale grouping; units after the number with a thin space.
+
+### 8.3 Charts
+
+Charts exist to answer a question; the title states the question or the finding ("Applications by stage, last 30 days").
+
+**Anatomy:** title (h3), subtitle (period, filters applied), legend, plot, axes with labels and units, tooltip, optional annotation, "View as table" toggle, download (PNG and CSV where permitted), source and "Updated {time}" line.
+
+**Rules:**
+
+- `NFR-DSY-019` Color is never the only differentiator: each series has a distinct marker shape (section 3.4) or line dash, and direct labels at line ends or bar ends where space allows; the legend is also a toggle (`aria-pressed`) that hides a series.
+- `NFR-DSY-020` Non-text contrast: marks and axis lines are at least 3:1 against the chart background (the palette in section 3.4 satisfies this). Gridlines are decorative (`--ts-border-subtle`) and never carry information.
+- `NFR-DSY-021` Every chart has a text alternative: a one-sentence summary above or in `aria-describedby` ("Applications rose from 120 to 180 between 1 and 30 March; Interview is the largest stage"), and a data table (the "View as table" view) with the same numbers; the SVG is `role="img"` with `aria-labelledby` the title and summary, and the table is the navigable alternative. Interactive points are reachable by keyboard: arrow keys move between data points, the tooltip content is announced.
+- `NFR-DSY-022` Bar charts start at zero; line charts may truncate the axis only with an explicit axis break marker and note; no 3D, no dual-axis charts, no pie charts with more than 5 slices (use donut with at most 5 plus "Other", or a bar chart), no truncation of long labels without an alternative.
+- `NFR-DSY-023` Small samples: when a rate is based on fewer than 5 items (or the privacy threshold in `OD-UX-11`), show the count instead of a percentage, or suppress with "Not enough data". For cohort and demographic breakdowns the minimum group size is the privacy threshold (default 5 [PROP]).
+- Time axes use the user's time zone and say so; missing data shows a gap (not zero) with a legend entry "No data".
+- Sparklines: no axes, a text value adjacent, never the sole carrier.
+- Sequential scales use lightness steps and also numeric labels in cells (heatmaps print the value in each cell at sizes above 40 px).
+- Animation: lines draw in at `--ts-dur-slow` once on first load, skipped under reduced motion; no re-animation on filter change (values tween at `--ts-dur-normal` or jump under reduced motion).
+- Dashboards: at most 8 tiles above the fold on desktop and 4 on phone; the first tile answers the user's primary question for the role.
+- Loading: chart-shaped skeleton of the plot area. Error: the chart region shows a `CMP-ErrorState` compact with Retry; other charts stay.
+
+## 9. Form patterns
+
+Behavioral timing for validation lives in `03` section 3. Visual and structural rules here.
+
+- Single column; label above; 20 px gap between fields (desktop), 16 (phone); sections separated by `h2`/`h3` and 32 to 48 px gap; maximum form width `--ts-content-form` 640.
+- Action bar: primary action left-aligned on desktop forms (reading order puts it after the last field), secondary (Cancel) after it; on phone, primary full width at the bottom, sticky above the on-screen keyboard if the form is long. Destructive form actions (Delete) are separated to the opposite side or into a danger zone section at the bottom of a settings page, with the section titled "Delete or deactivate".
+- Required and optional: all fields are required unless labeled "Optional". Group of mutually dependent fields shows a legend.
+- Help text appears below the label; format examples are in the help ("Example: 2024-05-31"), not in placeholders. Placeholders are only for non-essential examples at muted color and are never the sole instruction.
+- Error message: below the field, danger icon plus text, 14 px; text tells how to fix it. Error summary at the top of the form after a failed submit (section 10 and `03` section 3.5).
+- Inline success: only for checks the user is waiting on (username available), a check icon plus text.
+- Long forms: grouped into sections with a sticky section nav on desktop and a Stepper (wizard) when more than 7 fields per logical stage or more than 3 stages; each stage valid on its own.
+- Read-only view versus edit: view and edit are different modes of one screen when editing is rare (profile sections: view with "Edit" button opening inline or a dialog) and an always-on form for settings; edit in place keeps focus on the field edited and returns it to the Edit button on Save or Cancel.
+- Sensitive fields (government ids, bank details, health): masked by default with Show, never autofilled into non-matching fields, `autocomplete="off"` where appropriate, never logged; a lock icon plus short explanation of why it is requested and who sees it.
+- Defaults: opt-in for marketing and data sharing is off by default; privacy-preserving options are pre-selected (`04` section 8, `06` section 6).
+
+## 10. Feedback patterns
+
+| Need | Component | Timing | Persistence | Announced as |
+|---|---|---|---|---|
+| Result of the user's own quick action (saved, copied, sent) | Toast | Immediately after server confirmation | 6 s | Polite |
+| Result needing the user to act (failed save with retry) | Notice inline near the object, plus SaveIndicator | Immediately | Until resolved | Assertive if blocking |
+| Form submission failed | Error summary at top, field errors | On submit | Until fixed | Assertive once, focus to summary |
+| Section or page level problem (cannot load) | `CMP-ErrorState` in the region | When request fails after retry policy | Until retried | Polite |
+| System condition (offline, maintenance) | Banner | Immediately | While condition holds | Polite (critical: assertive) |
+| New content arrived (messages, jobs) | Inline pill "N new" | On arrival | Until clicked | Polite, rate-limited |
+| Background task progress (upload, export, import) | Progress in place and a task tray entry | While running | Until dismissed or complete | Polite at 25 percent steps |
+| Achievement and recognition (REP) | Inline celebration card, non-blocking | On event | Dismissible | Polite |
+
+Rules: no more than one toast at a time per event; no feedback that blocks the page except dialogs for decisions; success is shown only after confirmation unless the optimistic rule in `03` section 8.4 is met; every error has a retry or a path to help; feedback text follows `06`.
+
+## 11. Overlay selection rules
+
+| Situation | Use | Never |
+|---|---|---|
+| Label for an icon or truncated text | Tooltip | Tooltip for essential information or on touch only elements |
+| Extra info, filters, mini-profile, help | Popover | Popover containing a long form |
+| List of actions | Menu | Menu with more than 9 items, or navigation |
+| Choose one option from a short list on phone | Bottom sheet list | Native-looking custom wheel |
+| Decision or small task (rename, invite, share) | Dialog | A dialog with more than one decision |
+| Destructive or irreversible confirm | AlertDialog | Confirmation for undoable actions |
+| View or edit a record next to a list | Drawer (desktop), full page or sheet (phone) | Drawer over a drawer |
+| Multi-step task (apply, create job, import) | Full-page wizard (`focus` shell) | A dialog wizard on phone |
+| Transient result | Toast | Toast for errors that need action |
+| Persistent page-level status | Banner or Notice | Toast |
+| Media or document preview | Lightbox | |
+
+Stacking: at most one modal layer at a time; a destructive confirmation may appear over a modal; popovers inside a modal render at `--ts-z-popover`. Focus and scroll lock behavior as in `CMP-Dialog`. `NFR-DSY-024`.
+
+## 12. Loading skeletons
+
+- Use skeletons for content regions that load structured data and take more than 300 ms; show nothing before 300 ms (prevents flash); keep skeleton visible at least 400 ms once shown. Spinners only inside buttons or for unstructured waits under 2 seconds.
+- Skeleton shapes mirror the final layout (text lines at 100, 90 and 60 percent widths, avatar circles, card blocks, table rows with column placeholders); heights equal the loaded heights to prevent layout shift (CLS under 0.1, target 0.05).
+- Color `--ts-bg-subtle` on `--ts-bg-surface` (1.2:1, decorative); shimmer gradient moves left to right over 1.4 s infinite; under reduced motion static with no shimmer. A skeleton container has `aria-busy="true"` and a visually hidden "Loading {region}" status; skeleton shapes are `aria-hidden`.
+- After 8 seconds of loading, add the text "This is taking longer than usual" with a Retry; after the request timeout (15 seconds default), show the error state.
+- Optimistic partial: where cached data exists, show cached content with a subtle "Updating" indicator instead of a skeleton (stale-while-revalidate), and mark it stale if older than the screen's freshness limit.
+- Progressive loading order: page chrome (instant), header and primary content (first), secondary regions (independent skeletons that resolve independently), below-the-fold regions (on demand).
+- Images and video: reserved aspect ratio box with dominant color; lazy loaded below the fold; `decoding="async"`.
+- Route transitions: keep the old page visible until the new route's critical data arrives up to 300 ms, then show the new route's skeleton.
+
+## 13. Consolidated design-system rules
+
+| Id | Rule | Test |
+|---|---|---|
+| NFR-DSY-001 | No raw colors, spacing literals, z-index, durations or rgba in feature code | Lint |
+| NFR-DSY-002 | Non-outcome stages render neutral or info; candidate-facing rejection renders neutral | Visual review |
+| NFR-DSY-003 | Font sizes in rem; usable at 200 percent text zoom and 400 percent reflow | Browser zoom test |
+| NFR-DSY-004 | Minimum text size 12 px; inputs 16 px on touch | CSS audit |
+| NFR-DSY-005 | Prose line length 45 to 80 characters | Visual |
+| NFR-DSY-006 | Weight is never the sole emphasis between statuses | Review |
+| NFR-DSY-007 | Text spacing overrides do not clip content | Bookmarklet test |
+| NFR-DSY-008 | Self-hosted fonts with metric-adjusted fallbacks, CLS under 0.01 from swap | Performance test |
+| NFR-DSY-009 | Entrances and exits animate only opacity and transform | CSS lint |
+| NFR-DSY-010 | Reduced motion removes transforms, shimmer, spinners, auto-advance | Emulated media test |
+| NFR-DSY-011 | No auto motion over 5 s without a control; no flashing over 3 per second | Review |
+| NFR-DSY-012 | Motion is tied to cause | Review |
+| NFR-DSY-013 | z-index only via tokens; one portal root | Lint |
+| NFR-DSY-014 | Theme applied before first paint | No flash test |
+| NFR-DSY-015 | Density never reduces targets below 24 px (pointer) or 44 px (coarse) | Target size test |
+| NFR-DSY-016 | Directional icons mirror in RTL, others do not | RTL visual test |
+| NFR-DSY-017 | Icons follow the vocabulary; sparkles reserved for AI | Review |
+| NFR-DSY-018 | Every board, chart, calendar has a list or table equivalent | Screen spec check |
+| NFR-DSY-019 | Charts: marker shape plus color plus direct label; legend toggles | Visual and keyboard |
+| NFR-DSY-020 | Chart marks and axes at least 3:1 | Contrast tool |
+| NFR-DSY-021 | Charts have summary text and a data table alternative | Axe plus manual |
+| NFR-DSY-022 | Bar charts start at zero; no 3D, dual-axis; pie at most 5 slices | Review |
+| NFR-DSY-023 | Suppress small-sample percentages below threshold | Data test |
+| NFR-DSY-024 | One modal layer at a time (except destructive confirm) | Interaction test |
+
+## 14. Conflicts, open decisions, risks
+
+| Id | Item | Detail |
+|---|---|---|
+| C-DSY-01 | Motion durations | Legacy design doc says 120/200/320 ms; `tokens.ts` has 150/250/400. As-built values retained. [SRC: docs/experience/UI_UX_DESIGN_SYSTEM.md §3 vs packages/ui/src/tokens.ts] |
+| C-DSY-02 | Radii | Legacy lists 6/10/16/50%; `tokens.ts` lacks radii. Legacy values adopted. |
+| C-DSY-03 | Legacy doc says "typography scale xs to 4xl"; `tokens.ts` adds fluid 5xl and 6xl | Both retained; 5xl and 6xl for marketing only |
+| OD-DSY-01 | Keep as-built motion durations or legacy ones? | Default: as-built. Decides: design lead. Blocks: motion tokens |
+| OD-DSY-02 | Icon library: continue custom `Icons.tsx` or adopt a Lucide-compatible set | Default: adopt compatible set, keep custom for domain icons. Decides: design lead |
+| OD-DSY-03 | Dark mode image dimming default | Default on at 8 percent. Decides: design lead |
+| OD-UX-11 | Minimum group size for analytics breakdowns | Default 5 [PROP]. Decides: privacy officer. Blocks: ANL, INS reports |
+| RSK-UX-05 | Token drift between CSS and TypeScript | Generate both from one source (section 2.2) |
+| RSK-UX-06 | Spruce brand green equals success green; users confuse "primary action" with "success" | Success always has check icon and text; primary actions never use the check icon |
+| RSK-UX-07 | Component catalogue grows faster than the team can maintain | Promotion rule: second meaningful reuse; each component entry owns tests |
