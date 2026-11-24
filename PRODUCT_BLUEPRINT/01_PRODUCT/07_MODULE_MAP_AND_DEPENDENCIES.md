@@ -249,3 +249,124 @@ Rows depend on columns. `H` hard, `S` soft, `K` kernel co-dependency (the R0 ker
 | EVT | IDN, NTF, TSF, EVD | ASM, NET, REP, BIL, MSG | none |
 | MKT | SRC, ANL, SET | JOB, AIC | AIC (S) |
 | ENT | EMP, ATS, LRN, PRF, ANL, SET | PLT | none |
+
+## 6. Shared services
+
+Built once, owned by one module, used by all. A module that needs one of these never builds its own. [SRC: SSOT §12.1 "keep the shared kernel deliberately small"; DER]
+
+| Service | Owner | Contract (what callers get) | Main callers | Rules enforced |
+|---|---|---|---|---|
+| Authentication and session | `IDN` | Verified principal, active context | All | `BR-XCT-080` |
+| Policy decision | `IDN` | Allow or deny with reason code, evaluated per [04 §2](04_PERMISSION_MATRIX.md#2-evaluation-order) | All routes | `BR-XCT-055` to `BR-XCT-065`, `BR-XCT-017` |
+| Consent check and ledger | `SET` | Live-scope check at read time; grant and revoke commands | All readers of others' data | `BR-XCT-007` to `BR-XCT-013` |
+| Audit | `ADM` | Append-only audit write; scoped audit read | All | `BR-XCT-076` |
+| Notification dispatch | `NTF` | Send by template, class and recipient; preference and quiet-hour handling; digests | All | `BR-XCT-066`, `BR-XCT-067` |
+| Messaging threads | `MSG` | Typed threads (application, outreach, cohort, booking, contract, event team) with membership rules | `ATS`, `NET`, `INS`, `MEN`, `GIG`, `EVT` | `BR-XCT-075`, `BR-XCT-017` |
+| Scheduling and availability | `INT` | Availability rules, calendar busy-time reads, slot holds, invites with external meeting links | `ATS`, `MEN`, `EVT`, `INS` | `BR-XCT-079` |
+| Files and media | `PLT` | Upload, malware scan, transcode, captions, signed URLs (short life) | All | `BR-XCT-008` |
+| Outbox, events and background jobs | `PLT` | Transactional outbox, fenced job leases, retries, dead letters | All | `BR-XCT-076` |
+| Search indexing and taxonomy | `SRC` | Index projections; skill normalization and aliases | `PRF`, `JOB`, `LRN`, `NET`, `AIC`, `MKT` | `BR-XCT-020` |
+| AI gateway | `AIC` | Provider routing, consent and cost checks, AI-mode enforcement, redaction, provenance labels | Any module with AI features | `BR-XCT-036` to `BR-XCT-042` |
+| Entitlement check and metering | `BIL` | `can(principal or tenant, dimension)`; usage increments | All commercial features | `BR-XCT-043`, `BR-XCT-045` |
+| Payments | `BIL` | Checkout sessions, customer portal, payouts (gated), refunds | `LRN`, `MEN`, `GIG`, `EVT`, `STU` | `BR-XCT-044`, `BR-XCT-048`, `BR-XCT-049` |
+| Evidence intake | `EVD` | Submit an outcome as evidence with issuer class and provenance | `LRN`, `ASM`, `BGV`, `INS`, `ATS`, `MEN`, `GIG`, `EVT`, `ENT` | `BR-XCT-068` |
+| Moderation hook | `TSF` | Pre-publish checks, report intake, case creation, takedown command | All UGC | `BR-XCT-050` to `BR-XCT-054` |
+| Aggregation with suppression | `ANL` | k-anonymous aggregates and exports | `INS`, `MKT`, `ENT`, `EMP`, `ANL` | `BR-XCT-029` |
+| Feature flags and kill switches | `ADM` | Flag evaluation per tenant, cohort, percentage | All | — |
+| Localization | `ADM` (reference data) | Locale formats, translated strings, currency display | All UI | `OD-PRD-38` |
+| Offline and push | `PWA` | Cache policies, draft queue, push delivery | `NTF`, `LRN`, `JOB`, `MSG` | `BR-XCT-078` |
+
+## 7. Build-order implications
+
+### 7.1 Dependency layers
+
+Computed from hard dependencies only (kernel co-dependencies treated as one layer). A module can be started when every module in lower layers that it depends on exists. Layer is a technical order; the release tier ([02 §4](02_SCOPE_AND_BOUNDARIES.md#4-release-tier-scope-map-r0-to-r6)) also depends on product gating, so a gated module in a low layer (for example `MKT` in L2) still ships only in R6.
+
+| Layer | Modules | Meaning |
+|---|---|---|
+| L0 | IDN, SET, NTF, ADM, PLT | Kernel, co-built |
+| L1 | ANL, PWA, TSF, BIL, SRC, EMP, REP | All hard dependencies are in lower layers |
+| L2 | PRF, STU, MSG, MKT | All hard dependencies are in lower layers |
+| L3 | EVD, NET, AIC | All hard dependencies are in lower layers |
+| L4 | BGV, LRN, ASM, JOB, GIG, EVT | All hard dependencies are in lower layers |
+| L5 | ATS, INS | All hard dependencies are in lower layers |
+| L6 | INT, ENT | All hard dependencies are in lower layers |
+| L7 | MEN | All hard dependencies are in lower layers |
+
+### 7.2 Implications
+
+1. **The kernel comes first and together.** `IDN`, `SET`, `NTF`, `ADM` (audit) and `PLT` (files, outbox) depend on each other; they are one R0 work package. Shipping any user feature before the kernel means shipping without consent, audit or tenancy. [DER]
+2. **Taxonomy before profiles.** `SRC` (skills taxonomy) must exist before `PRF` and `EVD`, or skills become free text that later needs migration.
+3. **Evidence before learning and hiring.** `LRN`, `ASM`, `JOB` and `INS` all write or read evidence; `EVD` with its ladder and intake contract is on the critical path of R1.
+4. **Employer org before jobs.** `JOB` depends hard on `EMP`; a minimal `EMP` (create, verify domain, members) is R1 even though most of `EMP` is R2.
+5. **`ATS` before `INT`, `INT` before `MEN`.** Scheduling is built generically in `INT` so `MEN` and `EVT` reuse it.
+6. **AI gateway before verified assessments.** `ASM` depends hard on the `AIC` gateway for `AI_PROHIBITED` enforcement even when no AI feature is offered; the gateway's enforcement part is R1, its generation features R4.
+7. **Payments before any marketplace.** `MEN`, `GIG` and paid `EVT` depend hard on `BIL` payments and on `OD-PRD-04`; this is why they sit in R6.
+8. **Soft dependencies are feature flags.** Every `S` edge must degrade cleanly when the target is absent or gated: for example `JOB` without `AIC` uses lexical matching with explanation; `ATS` without `INT` uses manual scheduling; `LRN` without `BIL` offers free courses only.
+9. **Expansion modules never become dependencies of core modules.** The matrix has no `H` edge from a core module to `MEN`, `GIG`, `EVT`, `MKT` or `ENT`; reviewers reject any module spec that adds one (02 §6).
+10. **Critical path for R1.** Kernel → `SRC` → `PRF` → `EVD` → (`BGV`, `LRN` with `STU` minimal, `ASM` with `AIC` gateway) and `EMP` minimal → `JOB` → `ATS` minimal → `INT` manual.
+
+```mermaid
+flowchart LR
+    K["Kernel IDN SET NTF ADM PLT"] --> SR["SRC taxonomy"]
+    K --> EM["EMP minimal"]
+    K --> TS["TSF intake"]
+    SR --> PR["PRF"]
+    PR --> EV["EVD ladder"]
+    EV --> BG["BGV referee"]
+    SR --> ST["STU minimal"]
+    ST --> LR["LRN free catalog"]
+    EV --> LR
+    K --> AG["AIC gateway enforcement"]
+    AG --> AS["ASM"]
+    EV --> AS
+    EM --> JB["JOB"]
+    EV --> JB
+    TS --> JB
+    JB --> AT["ATS minimal"]
+    AT --> IN["INT manual"]
+```
+
+## 8. Key cross-module events
+
+Event names follow `module.entity.action`; module files assign `EVT-` ids. Listed here are the events that connect modules on the main loop. [DER]
+
+| Event | Emitted by | Consumed by | Effect |
+|---|---|---|---|
+| `idn.account.created` | `IDN` | `SET`, `PRF`, `NTF`, `ANL` | Default settings, profile skeleton, welcome |
+| `set.consent.revoked` | `SET` | `SRC`, `AIC`, `EVD`, `JOB`, `INS`, `MSG` | Remove index entries, delete explanations, stop reads |
+| `set.erasure.started` | `SET` | All owning modules | Hide, withdraw, then erase per class |
+| `prf.profile.updated` | `PRF` | `SRC`, `AIC` | Reindex, recompute matches |
+| `evd.evidence.rung_changed` | `EVD` | `PRF`, `SRC`, `AIC`, `JOB`, `REP` | Display updates; flag snapshots if revoked |
+| `bgv.verification.completed` | `BGV` | `EVD`, `NTF` | Rung transition decision |
+| `lrn.course.completed` | `LRN` | `EVD`, `REP`, `INS`, `ENT`, `ANL` | Credential, badge, cohort progress |
+| `asm.attempt.graded` | `ASM` | `EVD`, `LRN`, `ATS`, `TSF` | Credential or hold |
+| `job.application.submitted` | `JOB` | `ATS`, `NTF`, `ANL` | Pipeline card, notifications |
+| `ats.stage.changed` | `ATS` | `JOB`, `NTF`, `INT`, `ANL` | Candidate-visible status, scheduling trigger |
+| `ats.offer.accepted` | `ATS` | `JOB`, `EVD`, `INS`, `BGV`, `ANL` | Hired outcome; employer-confirmation request; placement outcome |
+| `int.scorecard.submitted` | `INT` | `ATS` | Debrief readiness |
+| `tsf.action.taken` | `TSF` | Content owner module, `NTF` | Hide or restore, notice |
+| `bil.entitlement.changed` | `BIL` | All gated-by-plan modules | Quota updates |
+| `ins.graduation.completed` | `INS` | `IDN`, `SET`, `EVD`, `LRN` | Grant change, share end |
+| `men.session.completed`, `gig.contract.completed`, `evt.results.published`, `ent.internal_move.recorded` | Expansion modules | `EVD` | Outcome evidence (gated) |
+
+## 9. Cross-module needs for module authors
+
+| Need | From | To |
+|---|---|---|
+| Publish the application candidate-visible status mapping | `ATS` | `JOB` |
+| Provide the evidence intake contract with issuer classes `platform`, `institution`, `employer_org`, `instructor`, plus peer and client attestations | `EVD` | All emitters |
+| Provide the generic scheduling engine with availability rules and holds | `INT` | `MEN`, `EVT`, `INS` |
+| Provide typed threads with membership rules | `MSG` | `ATS`, `NET`, `INS`, `MEN`, `GIG`, `EVT` |
+| Provide AI-mode enforcement independent of AI generation features | `AIC` | `ASM` |
+| Provide the aggregation service with `min_cohort_k` and complementary suppression | `ANL` | `INS`, `MKT`, `ENT`, `EMP` |
+| Provide grant creation commands with scope types from [04 §4.1](04_PERMISSION_MATRIX.md#41-scope-types) | `IDN` | `EMP`, `INS`, `ADM`, `EVT` |
+| Provide org verification records usable by employers and institutions | `BGV` | `EMP`, `INS` |
+
+## 10. Legacy source trace
+
+| Source | Used for | Dropped or changed |
+|---|---|---|
+| `SSOT.md` §8 foundational systems, §12.4, §12.5, §12.10, §12.11 | Bounded contexts and change ownership | Re-expressed with the 30 module codes |
+| `SSOT.md` Amendment A, Appendix E V61-14 | Outbox and worker instead of vendor queues | Vendor-neutral |
+| `ARCHITECTURE.md` | Awareness that the current code is a modular monolith with a small fetch helper | No build status taken from it |

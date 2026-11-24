@@ -776,3 +776,257 @@ Conventions used by every feature (not repeated in each field):
   - Given a decision of "unlisted private apps only", when a developer submits a public listing, then it is refused.
   - Given a delisted app, when delisted, then its tokens are revoked.
 
+### D. Developer experience
+
+### FR-PLT-028 — Developer portal and application registration
+
+- **Sub-module:** D. Developer experience
+- **Priority / tier:** Should · R2
+- **Source:** [PROP] (modeled on Stripe, GitHub and Twilio developer consoles)
+- **Purpose and outcome:** Developers register applications, obtain credentials, read documentation and monitor their integrations in one place, and customers' admins can see and govern the apps in their org.
+- **Roles and permissions:** `any signed-in user: become a developer (accept developer terms)` · `EAD: approve org apps` · `PAD: review, suspend apps`
+- **Preconditions and entry points:** Signed-in account that accepted the developer terms. Entry: `developers.<domain>` or Settings > Developer.
+- **User interactions and actions:** 1. Open the portal home (docs, quickstart, status, changelog). 2. Click "Create app": name, description, logo, owner contact, homepage URL, privacy policy URL, terms URL, app type (server, single-page, mobile, CLI), redirect URIs, requested scopes with a justification per high-risk scope, environment (sandbox, live). 3. Submit. Sandbox apps are active immediately. 4. Live apps with only low-risk scopes activate after automated checks; apps with medium or high-risk scopes enter review (`SM-PLT-09`). 5. Receive client id and secret (secret shown once). 6. Manage: rotate secret, edit redirect URIs (re-review if scopes widen), view authorized users count, webhook endpoints, logs and usage (FR-PLT-010), delete app.
+- **System behaviour:** App records hold publisher identity, verification status (verified when a business domain is proven by DNS TXT or email at the domain), and policy URLs required for apps requesting user-delegated scopes. Review checks: URL reachability, scope justification quality, privacy policy presence, abuse history of the publisher. Approval is time-limited to a review cycle (12 months) `[PROP]`; changes to scopes or redirect URIs for live apps trigger re-review. Suspended apps' tokens fail within 60 seconds and users with grants are notified. Developer terms define acceptable use (no scraping beyond scope, no resale of data, no ranking or bias circumvention, honoring deletion requests via webhooks `user.data_deleted`). Deleting an app revokes all grants and credentials. Portal activity audited.
+- **UI elements and controls:** App list, create wizard (4 steps), credentials panel, scopes picker with risk labels, review status timeline, usage tabs, delete with typed confirmation.
+- **Configuration options:** Platform: auto-approve rules, review SLA, maximum apps per developer (10 `[PROP]`), required policies.
+- **Business rules:** BR-PLT-034, BR-PLT-004, BR-PLT-035
+- **Validation:** Name 3 to 60 characters unique per developer; https URLs; redirect URIs exact and https (loopback allowed for native/CLI); scope justification ≥ 50 characters for high risk.
+- **Inputs and outputs:** Input: app registration. Output: client credentials, review decision, events `plt.apiclient.registered`, `plt.apiclient.approved`.
+- **Filters, sorting, search:** App list filter by environment and status.
+- **Notifications and communication:** Review outcomes, suspension and secret-expiry notices to the developer (service class).
+- **Error handling and edge cases:** Review rejected: reasons listed with resubmission. Secret leaked: rotate with overlap. Developer account deleted: apps removed and grants revoked.
+- **Dependencies:** FR-PLT-002, FR-PLT-004, FR-PLT-029, FR-ADM-010, ENT-PLT-01, ENT-PLT-21.
+- **Security and privacy:** Publisher verification prevents impersonation of real organizations; secrets hashed.
+- **Acceptance criteria:**
+  - Given an app requesting a high-risk scope with a 10-character justification, when submitted, then validation fails.
+  - Given a live app widening its scopes, when saved, then it returns to review and keeps old scopes active until approved.
+  - Given a suspended app, when a user calls with its token, then the API returns 401 within 60 seconds of suspension.
+
+### FR-PLT-029 — Sandbox environment and test data
+
+- **Sub-module:** D. Developer experience
+- **Priority / tier:** Should · R2
+- **Source:** [PROP]
+- **Purpose and outcome:** Developers build and test against a realistic, isolated copy of the API with synthetic data and test modes of providers, never touching real people's data or money.
+- **Roles and permissions:** `developers: create and use sandbox tenants` · `PAD: manage platform sandbox`
+- **Preconditions and entry points:** Developer account. Entry: portal > Sandbox.
+- **User interactions and actions:** 1. Create a sandbox tenant (organization with seeded data: jobs, candidates, applications, courses, events). 2. Generate sandbox keys and OAuth clients. 3. Trigger scenarios from a "Simulator" panel (candidate applies, stage change, offer accepted, interview scheduled, course completed, webhook failure, rate limit). 4. Reset data to the seed state. 5. Use test provider accounts (test card numbers, test SSO IdP, test calendar).
+- **System behaviour:** Sandbox runs on separate infrastructure or schema with its own API base `sandbox-api` and no connection to production data (BR-PLT-033). Data is synthetic and generated from deterministic seeds with realistic variety (names, skills, time zones, edge cases such as missing salary, long text, non-Latin names). Emails and SMS in the sandbox are captured to a "sandbox outbox" viewer, never sent; payments use provider test mode; file scanning and transcoding run on small samples. Limits: 3 sandbox tenants per developer, data auto-deleted after 90 days of inactivity, reduced rate limits. Webhooks from the sandbox are signed with sandbox secrets and flagged `livemode: false`. Parity: the sandbox always runs the same version as live plus preview features; differences are documented.
+- **UI elements and controls:** Sandbox tenant list, scenario simulator, outbox viewer, reset button, "Switch to live" instructions.
+- **Configuration options:** Platform: seed profiles, limits, inactivity period.
+- **Business rules:** BR-PLT-033
+- **Validation:** Live credentials rejected by sandbox endpoints and vice versa (`wrong_environment`).
+- **Inputs and outputs:** Input: scenario actions. Output: sandbox events and data changes.
+- **Filters, sorting, search:** Outbox viewer filter by channel.
+- **Notifications and communication:** Inactivity deletion warning 14 days before.
+- **Error handling and edge cases:** Seed failure: tenant creation retried automatically and reported. Developer posts real personal data in the sandbox: documentation prohibits; no scanning promise; deleted on inactivity.
+- **Dependencies:** FR-PLT-028, FR-PLT-009, FR-PLT-011, ENT-PLT-22.
+- **Security and privacy:** Strict environment separation; no production data ever copied.
+- **Acceptance criteria:**
+  - Given a live key, when used against the sandbox host, then the API returns 401 `wrong_environment`.
+  - Given the simulator triggers "candidate applies", when run, then a signed webhook with `livemode:false` is delivered.
+  - Given 90 days of inactivity, when passed, then the tenant and data are deleted after a warning.
+
+### E. Files and media
+
+### FR-PLT-030 — File upload service (resumable, direct-to-storage)
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT CON-011 files/uploads allow-list, MIME sniff, size caps, AV] · [SRC: SSOT §15.1 sensitive file controls]
+- **Purpose and outcome:** Users upload resumes, portfolios, evidence, course materials, images and videos reliably on any connection, and the platform accepts only safe files.
+- **Roles and permissions:** `all signed-in roles: upload within their purpose and quota` · `GUE: upload only on specific public forms (contact form, with CAPTCHA)` · `API: upload via files.write scope`
+- **Preconditions and entry points:** Any upload control in any module calls the service with a purpose (for example `resume`, `avatar`, `evidence`, `course_asset`, `message_attachment`, `support_attachment`, `import_file`). 
+- **User interactions and actions:** 1. Choose or drag files into the uploader. 2. See name, size and a progress bar for each, pause and resume, cancel. 3. After upload see "Checking file" then "Ready" or an error. 4. Replace or remove the file.
+- **System behaviour:** Flow: client calls `POST /api/v1/uploads` with purpose, filename, size, declared type, SHA-256 (optional) and `Idempotency-Key`; server checks the purpose policy (allowed types, max size, count limits) and quota (FR-PLT-032) and returns an upload session with a signed target for direct-to-storage upload (single request ≤ 8 MB; multipart/resumable chunks of 5 to 16 MB for larger files using the tus or the storage provider's multipart protocol). The client uploads straight to object storage (bytes do not pass through API servers); on completion calls `POST /uploads/{id}/complete`. The server verifies size and checksum, sniffs the real content type from magic bytes (the declared type is not trusted), rejects mismatches and executable or script types, then sets state `pending_scan` and enqueues scanning (FR-PLT-031). Files in `pending_scan` are not downloadable or embeddable (BR-PLT-022). Images are re-encoded to strip EXIF and metadata; PDFs are checked for active content (JavaScript, launch actions) and flattened or rejected per purpose policy; Office documents with macros are rejected. Purpose policies `[PROP]`: resume (PDF, DOCX, ≤ 10 MB), avatar (JPEG, PNG, WebP ≤ 5 MB), evidence (PDF, images, video up to 500 MB with transcoding), course assets (per STU limits), message attachments (≤ 25 MB), support attachments (≤ 10 MB). Unfinished upload sessions expire after 24 hours and their parts are garbage collected. Filenames are normalized (Unicode NFC, path characters removed, length ≤ 200) and stored separately from the storage key (random id). Object keys are random and non-guessable; buckets are private.
+- **UI elements and controls:** Shared uploader component: drop zone, file picker, per-file row (name, size, status text, progress, cancel, retry), error messages with remedies, paste support, keyboard operable, announced progress for screen readers.
+- **Configuration options:** Platform: purpose policies, chunk sizes, session expiry, storage regions (OD-PLT-06). Org: per-org upload restrictions (for example block video).
+- **Business rules:** BR-PLT-021, BR-PLT-022, BR-PLT-023, BR-PLT-035
+- **Validation:** Size ≤ purpose maximum; type from allow-list by sniffed content; checksum matches if supplied; count limits; filename length; one in-flight session per (user, purpose, checksum) to dedupe.
+- **Inputs and outputs:** Input: file bytes via signed target. Output: file record (`SM-PLT-04`) with id, state, size, type, checksum; events `plt.file.upload_started`, `plt.file.available`.
+- **Filters, sorting, search:** n/a for the service; per-module lists handle display.
+- **Notifications and communication:** None (failure shown inline; support attachments confirm in ticket).
+- **Error handling and edge cases:** Network drop: resumes from the last confirmed chunk, even after app restart if the session is alive (state stored in the client, FR-PWA-013 for retained selections). Type mismatch: "This file isn't a valid PDF". Over quota: "Storage full" with a manage link. Duplicate upload (same checksum, same owner and purpose): returns the existing file (deduplication reference, never cross-tenant). Zero-byte file rejected. Very large file on low bandwidth: warns about data usage in low-bandwidth mode (FR-PWA-027).
+- **Dependencies:** FR-PLT-031, FR-PLT-032, FR-PLT-034, FR-PLT-007, FR-PLT-039, object storage (external), ENT-PLT-13, ENT-PLT-15.
+- **Security and privacy:** Signed upload targets are single-purpose and short-lived (15 minutes); all objects private by default; encryption at rest with tenant-scoped keys for sensitive purposes; files are personal data of their owner.
+- **Acceptance criteria:**
+  - Given a `.pdf` file that is actually an executable, when completed, then the upload is rejected with `type_mismatch` and no object remains available.
+  - Given a connection drop at 60% of a 200 MB upload, when the connection returns, then the upload resumes from the last confirmed chunk.
+  - Given a file in `pending_scan`, when anyone requests its download URL, then the service returns 409 `file_not_ready`.
+
+### FR-PLT-031 — Virus scanning, content validation and quarantine
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT CON-011; §13.15 pipeline: validation, AV scan; §15.1 sensitive file controls] 
+- **Purpose and outcome:** No file reaches another user or a viewer unless it passed malware and policy checks; failures never become visible.
+- **Roles and permissions:** `system` · `SUP: see scan status of a ticket attachment` · `PAD, MOD: review quarantined items (with TSF)`
+- **Preconditions and entry points:** File in `pending_scan` after upload completion.
+- **User interactions and actions:** 1. The owner sees "Checking file" then "Ready". 2. On failure sees "This file couldn't be accepted" with a generic reason class (malware detected, unsupported content, too large after processing). 3. They can upload a different file.
+- **System behaviour:** Scan job (kind `file.scan`, FR-PLT-039) runs: (1) antivirus engine (adapter port: ClamAV or commercial engine, OD-PLT-07) with signature updates at least daily; (2) archive handling (depth and size limits to avoid zip bombs; encrypted archives rejected); (3) type-specific checks (PDF active content, Office macros, SVG scripts sanitized or rejected, image decoding to detect polyglot files); (4) optional content policy checks via TSF hooks (for example image safety classification on avatars and public portfolios) producing a label, never an automatic ban. Results stored (`ENT-PLT-27`): engine, signature version, verdict (`clean`, `infected`, `suspicious`, `error`), time. Verdict `clean` moves the file to `available`; `infected` moves to `quarantined` (object moved to a quarantine bucket, deleted after 30 days `[PROP]`; metadata retained), the owner notified generically, and TSF is informed for repeat offenders; `suspicious` goes to manual review; `error` retries up to 3 times then fails closed (`quarantined` with reason `scan_failed`) (BR-PLT-022). Scan SLA: 95% of files under 60 seconds `[PROP]`. Re-scan: periodic re-scan of files older than 30 days against updated signatures (monthly) with automatic quarantine of newly detected threats and notification to recipients who downloaded it (for shared files) via TSF. Files from imports and emails are scanned the same way.
+- **UI elements and controls:** Status text and icon on the file chip; moderator review queue entries link to TSF.
+- **Configuration options:** Platform: engine, limits, re-scan cadence, quarantine retention.
+- **Business rules:** BR-PLT-021, BR-PLT-022
+- **Validation:** Archive depth ≤ 3, expanded size ≤ 1 GB `[PROP]`, file count ≤ 1000.
+- **Inputs and outputs:** Input: file id. Output: verdict and state change; events `plt.file.available`, `plt.file.quarantined`.
+- **Filters, sorting, search:** Review queue filter by verdict and purpose.
+- **Notifications and communication:** Owner notice on rejection (in-app; email for important purposes like resume).
+- **Error handling and edge cases:** Engine outage: files remain `pending_scan` (not exposed), queue grows, alert at age > 10 minutes; no bypass. False positive: owner can appeal via support; PAD can re-scan with a second engine; never released without a clean verdict from a trusted check.
+- **Dependencies:** FR-PLT-030, FR-PLT-039, TSF (planned), ENT-PLT-27.
+- **Security and privacy:** Quarantine bucket isolated with no public access; scan engines have no network egress to the internet except signature updates.
+- **Acceptance criteria:**
+  - Given an EICAR test file, when scanned, then it is quarantined and never becomes downloadable.
+  - Given the scan engine is down, when a file is uploaded, then it stays `pending_scan` and an alert fires after 10 minutes.
+  - Given a zip containing 2,000 files, when scanned, then it is rejected for exceeding limits.
+
+### FR-PLT-032 — Storage quotas and usage
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Should · R2
+- **Source:** [SRC: SSOT §14 lifecycle; BIL entitlements] · [PROP]
+- **Purpose and outcome:** Storage use is bounded per user, organization and plan, visible to owners, and fails gracefully.
+- **Roles and permissions:** `CAN, STD, FRL, INS, MNT, REC, HMG: view own usage` · `EAD, IAD: view org usage` · `PAD: adjust quotas` · `BIL: sets entitlements`
+- **Preconditions and entry points:** Settings > Storage; uploader checks.
+- **User interactions and actions:** 1. View a usage meter and a breakdown by purpose (resumes, evidence, course assets, attachments). 2. See largest files and delete or archive. 3. At 80% receive a warning; at 100% uploads are blocked with a message and options (delete, upgrade).
+- **System behaviour:** Quota records per principal and per org with `usedBytes`, `limitBytes`, updated transactionally on `available` and deleted transitions with periodic reconciliation. Defaults `[PROP]`: candidate 1 GB, instructor 20 GB, org by plan (set via BIL, OD-PLT-14). Reserved bytes are counted at upload session creation to prevent overshoot. Never delete existing content because a plan lapses; going over quota only blocks new uploads, with a 30-day grace after downgrade. Deduplication within a tenant counts once. Derived renditions are counted separately and do not consume user quota but have platform cost tracking. Alerts to org admins at 80% and 100%.
+- **UI elements and controls:** Usage meter (text values plus bar), breakdown table, file list with sizes and "Delete" actions, upgrade link.
+- **Configuration options:** Platform: defaults by role and plan, grace days. Org: per-member sub-quotas.
+- **Business rules:** BR-PLT-023
+- **Validation:** Reserved plus used ≤ limit; reconciliation job fixes drift within 0.1%.
+- **Inputs and outputs:** Input: file events. Output: quota state, events `plt.storage.quota_threshold`.
+- **Filters, sorting, search:** File list sorted by size or date, filter by purpose.
+- **Notifications and communication:** `storage.quota.warning` email and in-app at 80% and 100% (service class).
+- **Error handling and edge cases:** Concurrent uploads racing the limit: reservation under a lock; the loser gets 413 `quota_exceeded`. Reconciliation finds negative drift: logs and corrects. Downgrade under usage: read-only for uploads with clear message.
+- **Dependencies:** FR-PLT-030, BIL (planned), FR-PLT-005, ENT-PLT-24.
+- **Security and privacy:** Quota views are tenant-scoped.
+- **Acceptance criteria:**
+  - Given 99% usage, when a 50 MB upload is requested exceeding the limit, then the API returns 413 `quota_exceeded` and no session is created.
+  - Given a plan downgrade, when usage exceeds the new limit, then existing files remain and uploads are blocked until under the limit.
+  - Given two concurrent uploads each fitting alone but not together, when requested, then exactly one succeeds.
+
+### FR-PLT-033 — File retention, deletion and legal hold
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT CON-015 data lifecycle, erasure propagates; §14] · [SRC: Yash 18 PROC-09]
+- **Purpose and outcome:** Files live as long as they are needed, are deleted when users or policy require, and are never deleted while a legal hold applies.
+- **Roles and permissions:** `file owners: delete own files` · `SET (system): erasure executions` · `SAD: legal hold` · `PAD: retention policy configuration`
+- **Preconditions and entry points:** User deletion, account erasure, retention expiry, org offboarding, moderation removal.
+- **User interactions and actions:** 1. A user deletes a file; the UI says what will happen ("Removed from your profile now; fully erased within 30 days"). 2. For files attached to submitted applications, deletion removes the file from the owner's library but the employer's copy follows the employer's retention (stated before deletion). 3. Admins view retention rules.
+- **System behaviour:** Retention classes `[PROP]`: `profile_asset` (life of account), `application_attachment` (life of application plus employer policy, default 24 months after close), `evidence` (life of account), `support_attachment` (24 months after ticket close), `import_file` (30 days), `export_file` (24 hours to 7 days), `temp` (24 hours), `quarantine` (30 days), `media_original` (life of content), `message_attachment` (life of message). Deletion is two-phase: soft delete (immediately hidden, recoverable for 30 days), then purge job removes object versions, renditions, CDN cache entries and search index references, writing a deletion record (no content) as evidence. Erasure requests (SET) trigger deletion of all owned files except those under legal hold or required by law, with the exceptions reported to ADM data-request console (FR-ADM-033). Backups age out on their own schedule (documented; erasure is complete within the backup retention window). Shared copies: a file shared with others through a message or application remains for recipients per their retention until they delete or retention ends; the owner's deletion revokes links. Legal hold flag prevents purge and is audited. Orphan detection job finds objects without records and records without objects daily.
+- **UI elements and controls:** Delete buttons with explanatory dialogs, "Recently deleted" list with restore (30 days), org retention policy page (read-only for most).
+- **Configuration options:** Platform: retention classes and durations (OD-PLT-13). Org: application attachment retention within bounds.
+- **Business rules:** BR-PLT-024
+- **Validation:** Hold prevents purge; restore only within window and quota.
+- **Inputs and outputs:** Input: deletion triggers. Output: purge completion records; events `plt.file.deleted`, `plt.file.purged`.
+- **Filters, sorting, search:** "Recently deleted" sorted by deletion date.
+- **Notifications and communication:** Restore-expiry reminder (in-app 3 days before).
+- **Error handling and edge cases:** Purge failure at the storage provider: retried, then alert; the record stays `purge_pending`. Restore after window: unavailable. Hold added during purge: purge halts at the next step and records.
+- **Dependencies:** SET (planned), FR-ADM-033, FR-PLT-039, FR-PLT-036, ENT-PLT-13, ENT-PLT-25.
+- **Security and privacy:** Deletion records contain no content; purge covers all copies including renditions and CDN.
+- **Acceptance criteria:**
+  - Given a user deletes a resume, when 30 days pass, then the object, renditions and CDN entries are purged and a deletion record exists.
+  - Given a file under legal hold, when erasure runs, then it remains and the exception is reported.
+  - Given a deleted file within 30 days, when the user restores it, then it returns with its original links disabled and new links issued.
+
+### FR-PLT-034 — Signed URLs and file access control
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §13.16 media security] · [SRC: Yash 18 PROC-04 signed link delivery] · [DER]
+- **Purpose and outcome:** Private files are reachable only by authorized people for a short time through links that cannot be guessed, shared widely or reused after expiry.
+- **Roles and permissions:** `file owner: view, share` · `recipients: per module authorization` · `API: files.read scope` · `SUP: no access to content (BR-ADM-017)`
+- **Preconditions and entry points:** User or app requests a file for download, preview or embed.
+- **User interactions and actions:** 1. Click a file (or an image renders). 2. The app calls `POST /api/v1/files/{id}/access` with intent (view, download, embed) and receives a signed URL. 3. The browser fetches it. 4. Share links for files the owner chooses to share (for example a portfolio item) expire at a chosen time.
+- **System behaviour:** Authorization happens when issuing the URL: the module's policy (owner, recipient of an application, instructor of a course, support grant) decides; the file service checks file state (`available`) and purpose rules. URLs: HMAC-signed query or cookie-based token, valid 15 minutes by default (max 1 hour; share links up to 30 days with owner choice and revocation), bound to object id and operation (GET only), optionally to the requesting IP range or session for high-sensitivity classes. Responses set `Content-Disposition` (attachment for non-media types), `X-Content-Type-Options: nosniff`, a restrictive CSP for rendered documents, and `Content-Type` from the sniffed type; HTML and SVG are never served inline from the app origin (served from a separate sandbox domain). Public assets (avatars set public, public portfolio images, marketing media) use unsigned CDN URLs under a public prefix with versioned keys. Range requests supported for media. URLs are never logged in full (token redacted). Revoking a share or deleting a file invalidates outstanding tokens via a version counter on the object. Download events for sensitive classes (identity documents, evidence shared with recruiters) are audited.
+- **UI elements and controls:** Share dialog (expiry selector, "Copy link", "Revoke"), download buttons, preview component.
+- **Configuration options:** Platform: default and max TTL per class, IP binding classes.
+- **Business rules:** BR-PLT-025, BR-PLT-041
+- **Validation:** Intent allowed for the file type; TTL within class limit; share expiry ≤ 30 days.
+- **Inputs and outputs:** Input: access request. Output: signed URL with expiry.
+- **Filters, sorting, search:** n/a.
+- **Notifications and communication:** Owner notice when a share link is first opened (optional setting).
+- **Error handling and edge cases:** Expired token: 403 `link_expired` with a re-request path. File deleted: 404. File quarantined after issuance: access denied at fetch time because the object is moved. Clock skew: server time only.
+- **Dependencies:** FR-PLT-030, FR-PLT-036, FR-ADM-009, ENT-PLT-13.
+- **Security and privacy:** Tokens unguessable (≥128 bits); nosniff and separate origin for active content; IP binding for sensitive classes.
+- **Acceptance criteria:**
+  - Given a URL older than 15 minutes, when fetched, then the response is 403 `link_expired`.
+  - Given an SVG upload, when previewed, then it is served from the sandbox origin with a CSP forbidding scripts.
+  - Given a user whose access to an application was removed, when they request a file URL, then no URL is issued.
+
+### FR-PLT-035 — Media transcoding and processing abstraction
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Should · R3
+- **Source:** [SRC: SSOT §13.15 media pipeline (validation, AV, transcode, HLS renditions, thumbnail, caption/transcript, CDN publish); §13.3 Mux / Cloudflare Stream OD-14; F-42] · [SRC: SSOT BR-086 isolated failure]
+- **Purpose and outcome:** Videos, audio and images become playable and fast on any device through a vendor-neutral processing pipeline, and one broken item never breaks a course.
+- **Roles and permissions:** `INS, MNT, CAN, STD: upload media` · `STU (planned): course media` · `PAD: provider and profile configuration`
+- **Preconditions and entry points:** A media-purpose file in `available` state (after scan).
+- **User interactions and actions:** 1. After upload, the owner sees processing status: Uploaded, Processing, Ready, or Failed with a reason and "Try again". 2. When ready, they preview with a player (quality auto, captions, speed). 3. They can replace the source or request captions.
+- **System behaviour:** `MediaProcessingPort`: `submitVideo(sourceRef, profile) → jobRef`, `getStatus`, `getRenditions`, `deleteAsset`, with adapters for a managed video service (Mux or Cloudflare Stream, OD-PLT-08) or self-hosted ffmpeg workers. Pipeline (`SM-PLT-05`): validation (container, codec, duration, resolution limits), transcoding to adaptive HLS renditions (for example 240p, 360p, 720p, 1080p capped by source) plus MP4 fallback, thumbnails and poster frames, audio normalization, optional caption and transcript generation via speech-to-text adapter (language detection, WebVTT output) flagged "auto-generated" until reviewed, then CDN publish. Images: resize renditions (thumbnail, small, medium, large, WebP and AVIF where supported) generated on upload for public or frequent use and on-demand with signed transform parameters for others (allowlist of sizes). Renditions are idempotent by (content hash, profile version); reprocessing on profile change is a background job. Originals are retained (life of content) unless the owner deletes. Failures are isolated to the media item with a clear message; courses continue working (BR-PLT-026). Heavy jobs run on the heavy queue (`media.transcode`, `media.enrich`, retries 3, then DLQ, FR-PLT-039). Cost controls: per-tenant minutes quota and concurrency caps; very long videos need plan entitlement. Protected DRM is out of scope for v1 (OD-PLT-08 notes). Provider webhooks (job complete) are verified (FR-PLT-012).
+- **UI elements and controls:** Status chip (text and icon), progress estimate, error message with retry, player with caption toggle and quality menu, "Generate captions" button.
+- **Configuration options:** Platform: provider, profiles, caps. Org: caption languages, auto-captions on or off.
+- **Business rules:** BR-PLT-026, BR-PLT-021, BR-PLT-040
+- **Validation:** Max duration and resolution per plan; allowed codecs; source must be `available`.
+- **Inputs and outputs:** Input: media file. Output: renditions, poster, captions, state; events `plt.media.transcode_completed`, `plt.media.transcode_failed`.
+- **Filters, sorting, search:** Studio lists filter by processing state.
+- **Notifications and communication:** Email or in-app when processing completes or fails for long jobs (over 5 minutes).
+- **Error handling and edge cases:** Corrupt source: `failed` with "We couldn't read this video. Try exporting it again as MP4". Provider outage: jobs queue and the UI says "Processing is delayed". Duplicate submission of the same source: reuses renditions. Caption failure: media still plays without captions.
+- **Dependencies:** FR-PLT-030, FR-PLT-031, FR-PLT-036, FR-PLT-039, STU and LRN (planned), ENT-PLT-14.
+- **Security and privacy:** Signed playback tokens for private media (FR-PLT-034); captions are content of the owner; vendor retention terms in DPA.
+- **Acceptance criteria:**
+  - Given a valid 500 MB video, when processed, then HLS renditions and a poster exist and the state is Ready.
+  - Given a corrupt source, when processed, then the item shows Failed with the message while the course page still loads.
+  - Given the same source submitted twice, when processed, then renditions are created once.
+
+### FR-PLT-036 — CDN delivery and cache management
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Should · R2
+- **Source:** [SRC: SSOT §13.15 CDN publish; CON-014 caching: only derived reads, keys include tenant and actor] · [PROP]
+- **Purpose and outcome:** Static assets and approved media are served quickly worldwide at low cost, and cached content can be purged precisely and promptly.
+- **Roles and permissions:** `system` · `PAD: purge, configure` · `ADM CMS publish triggers purge`
+- **Preconditions and entry points:** Public assets, hashed bundles, media renditions, CMS pages.
+- **User interactions and actions:** Users see faster loads. PAD can purge by URL, tag or prefix from the console and see hit ratios.
+- **System behaviour:** Caching classes: immutable hashed assets (1 year, `immutable`); public media renditions (versioned URLs, 30 days); public pages (short TTL with stale-while-revalidate); private content is not cached at shared edges unless using signed cookies or tokenized URLs whose cache keys exclude the token but authorization is validated at the edge (edge token verification), `Cache-Control: private` otherwise. Cache keys never include user identifiers for public content and always include tenant for tenant-scoped content (CON-014). Surrogate keys (tags) per resource enable purge by tag (for example `file:{id}`, `page:{key}`). Purge propagation target under 60 seconds `[PROP]`. Image transformation at the edge uses allowlisted sizes only. Security headers set at the edge (HSTS, nosniff, CSP for documents). Bandwidth budget alerts. Origin shielding to protect storage. Low-bandwidth renditions (FR-PWA-027) served from the same CDN. CDN logs have IPs truncated.
+- **UI elements and controls:** Admin purge form (URL, tag, prefix) with dry-run count, hit-ratio and bandwidth charts.
+- **Configuration options:** Platform: TTLs, tags, regions, purge rate limits.
+- **Business rules:** BR-PLT-042, BR-PLT-025
+- **Validation:** Purge pattern must match allowed prefixes; prefix purges require 2P (FR-ADM-010) when broader than one tenant.
+- **Inputs and outputs:** Input: purge request, publish events. Output: purged keys, metrics.
+- **Filters, sorting, search:** Charts by region, asset class.
+- **Notifications and communication:** Alert when hit ratio drops under threshold or purge fails.
+- **Error handling and edge cases:** Purge API failure: retried with alert; entry marked `purge_pending`. Stale content after deletion: deletion pipeline purges by tag as part of purge job (FR-PLT-033). CDN outage: origin fallback with reduced capacity and a degraded flag.
+- **Dependencies:** FR-PLT-033, FR-PLT-034, FR-ADM-029, CDN provider (external).
+- **Security and privacy:** No private content cached publicly; tokens excluded from keys but verified; logs minimized.
+- **Acceptance criteria:**
+  - Given a deleted public image, when the purge job runs, then the URL returns 404 at the edge within 60 seconds.
+  - Given a private file URL, when requested by a user lacking access, then the edge rejects it.
+  - Given a hashed asset, when requested again, then it is served from cache with a one-year TTL.
+
+### FR-PLT-043 — External media embeds and provider allowlist
+
+- **Sub-module:** E. Files and media
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT §10.21 BR-083 to BR-090; §13.16 media security; F-42 provider-agnostic media engine]
+- **Purpose and outcome:** Instructors and authors can reference video and documents hosted elsewhere (video platforms, slide hosts) safely, with unsupported or blocked embeds failing explicitly and never breaking a course.
+- **Roles and permissions:** `INS, MNT, CAN (authors): add embeds` · `IAD: set tenant provider allowlist` · `PAD: maintain global allowlist` · `viewers: play`
+- **Preconditions and entry points:** Author adds an external media item in a studio or post. Entry: "Add from link" in STU and posts.
+- **User interactions and actions:** 1. Paste a URL. 2. The system validates it and shows the title, thumbnail, duration and whether playback and completion tracking are supported. 3. Author ticks the rights attestation "I have the right to use this content". 4. Publish. 5. Viewers play it in a sandboxed frame; if blocked, a clear message and an "Open on provider" link appear.
+- **System behaviour:** Provider registry (YouTube, Vimeo, Loom, Wistia, Google Slides and Docs, and others) with parsers extracting canonical ids, oEmbed metadata fetched through the SSRF-safe fetcher (FR-PLT-041), embed-ability checks (public, embeds allowed, not age-restricted or region-locked where detectable), and capability flags (can report progress, can seek). Validation before publication; invalid, private or embed-blocked links are rejected (BR-PLT-027, SSOT BR-083). Provider embedding restrictions are never bypassed and protected content is never downloaded (SSOT BR-084). Capabilities decide available playback and completion settings (SSOT BR-085). A broken provider affects only that item (SSOT BR-086); progress is stored by the platform where trackable (SSOT BR-087). Unsupported providers produce explicit errors (SSOT BR-088). Authors attest rights before publication (SSOT BR-089). Tenant allowlists are enforced on the server (SSOT BR-090). Rendering: iframes with `sandbox`, `referrerpolicy`, CSP `frame-src` limited to the active allowlist; no arbitrary HTML or scripts from authors; `javascript:` and `data:` URLs rejected. Periodic link health check (kind `media.healthcheck`, weekly) flags dead embeds to authors.
+- **UI elements and controls:** Link field, validation result card (status text, provider, title, thumbnail, capabilities), rights attestation checkbox, error messages, viewer placeholder with "Open on provider".
+- **Configuration options:** Platform: provider registry and capabilities. Tenant: allowlist subset.
+- **Business rules:** BR-PLT-027, BR-PLT-012
+- **Validation:** URL https; provider recognized; attestation required; allowlist match.
+- **Inputs and outputs:** Input: URL. Output: media reference record with provider, id and capabilities.
+- **Filters, sorting, search:** Studio list filter by provider and health.
+- **Notifications and communication:** Weekly digest to authors of dead embeds (in-app and email, operational class).
+- **Error handling and edge cases:** oEmbed times out: author can retry; publication blocked until validated. Provider changes embed policy later: health check flags and viewers see the explicit fallback. Tenant removes a provider from the allowlist: existing items show "Not allowed by your organization".
+- **Dependencies:** FR-PLT-041, STU and LRN (planned), ENT-PLT-26.
+- **Security and privacy:** Sandboxed frames; no third-party scripts in our origin; viewers' playback data stays with providers per their terms (disclosed in the privacy notice).
+- **Acceptance criteria:**
+  - Given a private video link, when validated, then it is rejected with "This video isn't public".
+  - Given a link on a domain not in the tenant allowlist, when published, then the server refuses it.
+  - Given a provider outage, when a course page loads, then only the affected item shows an error.
+

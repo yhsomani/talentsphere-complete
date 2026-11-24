@@ -510,7 +510,7 @@ Phone: header block, match block, tabs "Overview / Company" or stacked sections;
 
 **Analytics:** `ui.apply.view` (step); `ui.apply.step.complete` (step_key); `ui.apply.step.error` (step_key, error_count); `ui.apply.resume.upload.complete`; `ui.apply.submit.click`; `ui.apply.submit.complete`; `ui.apply.abandon` (last_step_key, on exit or 24 hours idle); no answers recorded.
 
-**Accessibility:** `Stepper` as `nav` with `aria-label="Application steps"`, current `aria-current="step"`; step heading is `h1`? the page `h1` is "Apply to {Job}", step heading `h2` focus target on step change with announcement "Step 2 of 5: Resume"; radio groups use `fieldset/legend`; resume previews open in a dialog (focus trap, `Esc`); error summary per step; time-based expiry none; phone sticky bar respects keyboard (hides when keyboard opens only if the Continue button remains reachable via the keyboard `Done`/`Go` key on the last field).
+**Accessibility:** `Stepper` as `nav` with `aria-label="Application steps"`, current `aria-current="step"`; the page `h1` is "Apply to {Job}", step heading is an `h2` and is the focus target on step change with the announcement "Step 2 of 5: Resume"; radio groups use `fieldset/legend`; resume previews open in a dialog (focus trap, `Esc`); error summary per step; time-based expiry none; phone sticky bar respects keyboard (hides when keyboard opens only if the Continue button remains reachable via the keyboard `Done`/`Go` key on the last field).
 
 **Acceptance criteria**
 
@@ -706,7 +706,7 @@ Selection mode: top bar shows "2 selected" [Move] [Message] [...]
 
 **Analytics:** `ui.pipeline.view` (view_mode); `ui.pipeline.card.open`; `ui.pipeline.move.complete` (from_stage_type, to_stage_type, method: drag/keyboard/menu/bulk); `ui.pipeline.reject.complete` (reason_key); `ui.pipeline.filter.change`; `ui.pipeline.bulk.complete` (action, count_bucket); `ui.pipeline.error`.
 
-**Accessibility:** board is a group of `region`s per column labeled "{Stage}, 12 candidates"; cards are `li` items; keyboard drag as `03` section 6 with announcements; the list view (table) is always available and is the default for screen reader users when `prefers-reduced-motion`? no, the default is the user's last choice; every action available in both; selection checkboxes with labels "Select Sam Chen"; match chip includes text; drawer focus management per `CMP-Drawer`; column scroll buttons for keyboard; "N new" pill polite; sticky column headers do not obscure focus.
+**Accessibility:** board is a group of `region`s per column labeled "{Stage}, 12 candidates"; cards are `li` items; keyboard drag as `03` section 6 with announcements; the list view (table) is always available and the view choice is remembered per user (board is never forced); every action is available in both views; selection checkboxes with labels "Select Sam Chen"; match chip includes text; drawer focus management per `CMP-Drawer`; column scroll buttons for keyboard; "N new" pill polite; sticky column headers do not obscure focus.
 
 **Acceptance criteria**
 
@@ -716,3 +716,239 @@ Selection mode: top bar shows "2 selected" [Move] [Message] [...]
 - Negative: given an HMG tries to move a candidate to Offer, when they use any method, then the action is unavailable (`aria-disabled` with "Only recruiters can send offers") and the server rejects direct API attempts with 403.
 - Given a job with 1,500 applicants, when the board loads, then each column loads 50 cards with "Load more" and the list view offers pagination; no browser freeze.
 
+### REFSCR-08 Messaging
+
+**Pattern for:** conversation-based communication (candidate and recruiter messages, mentor chat, institution inbox, support tickets with threads). **Routes:** `/messages` (inbox), `/messages/{conversationId}`, `/messages/requests` (and the org-scoped equivalents under `/employer/{org}/messages`). **Parent:** `/messages` for a conversation. **Roles:** all signed-in users; initiating rules per relationship (below). **Chrome:** `app`. **Title:** "Messages - TalentSphere" / "{Participant name} - Messages - TalentSphere".
+
+**Desktop wireframe (two panes plus optional details)**
+
+```text
++----------------------------+---------------------------------------------+-------------------+
+| Messages        [ New ]    | Sam Chen - Recruiter, Northwind     [i] [..]| DETAILS (opt.)    |
+| [ Search messages ]        | Re: Data Analyst application                | Sam Chen          |
+| [All][Unread][Requests (2)]| ------------------------------------------- | Northwind         |
+| +------------------------+ |  Mon 3 Mar                                  | Linked job:       |
+| | Sam Chen         10:42 | |  Sam: Hi Dana, thanks for applying...       | Data Analyst      |
+| | Can you do Tuesday...  | |                          10:40              | Shared files (2)  |
+| | (*) 2 unread           | |  You: Tuesday 10:00 works.      Delivered   | < Mute > < Block >|
+| +------------------------+ |                          10:42              | < Report >        |
+| | Priya (mentor)  Mon    | |  [ New messages v ]  (pill when scrolled up)|                   |
+| | Thanks for the notes   | | +-----------------------------------------+ |                   |
+| +------------------------+ | | Write a message...             [clip][>] | |                   |
+|                            | +-----------------------------------------+ |                   |
++----------------------------+---------------------------------------------+-------------------+
+```
+
+**Phone:** inbox screen (list) → push to conversation screen with app bar (Back, name, info) and composer sticky at bottom; details open as a bottom sheet. Tablet: two panes without the details pane (details as a drawer).
+
+**Regions and components:** inbox (`CMP-List` of conversations with avatar, name, last message preview (plain text, 1 line, hidden if "Hide details" or sensitive), time, unread badge text, mute icon, pin), search field, tabs (All, Unread, Requests, Archived), thread (`CMP-MessageThread`, `role="log"`), composer (`CMP-Composer`: rich text light, attach, emoji, templates for employer roles, Send), details pane (participants, linked object, shared files, notification and safety controls).
+
+**Rules and behavior**
+
+- **Who can message whom (MSG-owned; the screen enforces display):** candidates may reply in any conversation; candidates may start conversations only with connections, mentors they booked, or employers who messaged first or from an application context; employers (REC, HMG, EAD) may start with candidates who applied, opted in to be contacted, or via sourcing outreach within limits; messages from non-connections land in Requests until accepted; blocked users cannot message.
+- **Sending:** `Enter` sends or inserts newline per setting (default: Enter sends on desktop, newline on phone); send creates a pending message (gray, "Sending" text), then Sent/Delivered/Read (text, not only ticks) where read receipts are enabled (setting; recruiters' read receipts respect candidate privacy rules: read receipts are off by default for candidates); failed sends stay in the thread with "Not sent. Retry or Delete". Optimistic append of the pending state only; the message is not "sent" until the server confirms.
+- **Real time:** new messages append; if the user is within 80 px of the bottom the thread scrolls; otherwise a "New messages (3)" pill; typing indicator; presence only inside conversations (opt-out); reconnection resync (`03` section 11).
+- **Attachments:** `03` section 13 (25 MB, scanned; images inline with alt text field optional; links previews off by default for privacy [PROP]); drag onto thread uploads; paste image supported.
+- **Editing and deleting:** edit within 15 minutes with "Edited" marker (history retained for moderation); delete for me / delete for everyone within 24 hours leaving "Message deleted" placeholder; both with Undo for 8 s except delete for everyone requiring tier 1 confirm.
+- **Safety:** each message menu has Report; conversation menu has Mute, Archive, Block, Report; unsolicited-message warnings ("This person isn't in your network. Be careful sharing personal information"); link safety interstitial for external links from unknown senders; off-platform contact requests flagged by TSF heuristics with a neutral notice.
+- **Search:** inbox search over names and message text, local plus server; results highlight and open the thread at the message.
+- **Templates and automation (employer roles):** canned replies with variables, preview before send; automated messages are labeled "Automated message".
+- **Drafts:** per conversation, autosaved locally and server, shown in inbox as "Draft: ...".
+- **Notification interplay:** viewing a thread marks it read after 1 second of visibility with focus; push suppressed while the thread is open.
+
+**Data:** Conversation (participants, linked object ref, last message, unread count, muted, pinned, archived), Message (sender, body sanitized rich text, attachments, timestamps, status, edited flag, reactions optional), participant privacy flags. Pagination: inbox 30 per load; thread loads newest 50, older on scroll up with "Load earlier" at top. Retention per MSG policy; export in `/settings/data`.
+
+**Actions:** Send (O; queueable offline as "Waiting to send" with W class: queued messages send in order on reconnect, user can cancel), Attach (O), Edit, Delete, React, Mute/Unmute (W), Archive (W, Undo), Pin (W), Block (tier 1 confirm), Report (O dialog), New conversation (recipient Combobox restricted to permitted recipients), Mark all read (W), Accept/Decline request (O).
+
+**States:** loading (inbox rows skeleton, thread skeleton bubbles), empty inbox first use ("No messages yet. Messages from employers, mentors and connections appear here." + "Find people"), empty requests, no search results, thread not found/inaccessible (generic unavailable state), error (inbox Retry; thread Retry with composer preserved), offline (cached threads readable; composer enabled with queued sends; attachments disabled "Needs a connection"), reconnecting indicator, rate limited ("You're sending messages too quickly. Try again in 30 seconds."), blocked or restricted account (composer replaced by notice "You can't send messages to this person"), recipient left platform ("This person's account is closed"), muted, archived, large threads (virtualized after 500 messages), message too long (limit 5,000 characters with counter), rich content paste sanitized, RTL and bidi text (`dir="auto"` per message).
+
+**Permissions:** participants only; staff access to message content only via TSF case with logged justification; employers see only conversations for their org (shared inbox with assignment) and cannot see other recruiters' private notes; candidate-facing sender identity is the recruiter's display name and org.
+
+**Analytics:** `ui.messages.view`; `ui.messages.conversation.open` (relationship_type); `ui.messages.send.complete` (has_attachment, length_bucket); `ui.messages.send.error`; `ui.messages.request.accept`; `ui.messages.block.complete`; `ui.messages.report.complete`; no message text, names or ids of counterparties.
+
+**Accessibility:** inbox is a `list`; each conversation is a link whose name includes name, unread count and time ("Sam Chen, 2 unread, 10:42"); thread `role="log"` with `aria-live="polite"` only for the focused thread and only when the announcement setting is on, announcing "{Name}: {first 100 characters}"; message groups by sender with `<time>`; delivery status is text; composer is a labeled textbox; `Ctrl Enter`/`Enter` behavior documented; attach button labeled; `Up` in empty composer edits last message; focus stays in the composer after sending; "New messages" pill is a button with count; no sound by default; keyboard path to message menu; emoji picker accessible with search and skin tone options; reduced motion removes the typing animation (text only).
+
+**Acceptance criteria**
+
+- Given a user is scrolled up reading older messages, when a new message arrives, then the scroll position does not change and a "New messages (1)" pill appears; activating it scrolls to the bottom and focuses the newest message.
+- Given the network drops while sending, when the user presses Send, then the message shows "Waiting to send", survives a reload, and is delivered once in order on reconnect with no duplicate.
+- Given a non-connection recruiter writes first, when the candidate opens messages, then the message is in Requests with a safety notice and no read receipt is sent until accepted.
+- Negative: given the user is blocked by the other participant, when they open the thread, then the composer is replaced by "You can't send messages to this person" and the API rejects sends with 403 without revealing the block.
+- Given a screen reader user focused in the composer, when a message arrives in the open thread, then it is announced once without moving focus.
+
+### REFSCR-09 Settings (privacy and visibility)
+
+**Pattern for:** account and organization settings, preference matrices, consent management. **Route:** `/settings/privacy` within the settings shell (`/settings/*`). **Parent:** `/settings` (account). **Roles:** all signed-in users (own data). **Chrome:** `app`. **Title:** "Privacy and visibility - Settings - TalentSphere".
+
+**Desktop wireframe**
+
+```text
++--------------------+---------------------------------------------------------------------+
+| SETTINGS           | Privacy and visibility                          Saved just now          |
+| Account            | Control who can see your profile and how your data is used.         |
+| Security           |                                                                     |
+| > Privacy      <cur| PROFILE VISIBILITY                                                  |
+| Consent            | ( ) Private   Only you                                              |
+| Notifications      | (o) Recruiters  Employers on TalentSphere who match your preferences|
+| Connected accounts | ( ) Public    Anyone, including search engines                      |
+| Accessibility      | < Preview what recruiters see >                                     |
+| Language           |                                                                     |
+| Data and export    | WHAT RECRUITERS CAN SEE                                             |
+| Accommodations     | Phone number            [ Off ]  Only after you apply               |
+|                    | Current employer        [ On  ]  Hide from my current employer: [x] |
+|                    | Salary expectations     [ Off ]                                     |
+|                    | Open to work            [ On  ]  Visible only to recruiters         |
+|                    |                                                                     |
+|                    | DATA USE                                                            |
+|                    | Personalized recommendations  [ On ]   < What data is used? >      |
+|                    | Improve TalentSphere with my usage data [ Off ]                     |
+|                    |                                                                     |
+|                    | DELETE OR DEACTIVATE                                                |
+|                    | [ Deactivate account ]   [ Delete my account ]                      |
++--------------------+---------------------------------------------------------------------+
+```
+
+**Phone:** `/settings` is a list of sections (push navigation); each section is a single column; the save indicator sits in the app bar; the danger zone is the last section with extra spacing; sub-nav is the section list itself (no persistent left rail). Tablet: rail replaced by a 240 px sub-nav at 900 and up.
+
+**Structure rules:** Settings shell has a left sub-navigation (`nav` "Settings sections"), one section per route, each section grouped by `h2` headings, controls in `CMP-Field` rows (label left, control right on desktop; stacked on phone). Controls that take immediate effect are `CMP-Switch` or radio groups that save on change; forms that need multiple fields use a Save button section. A page does not mix patterns without a visual divider and clear labeling ("Changes below are saved when you press Save").
+
+**Settings and defaults (this screen)**
+
+| Setting | Control | Default | Effect | Confirm |
+|---|---|---|---|---|
+| Profile visibility | Radio group (Private, Recruiters, Public) | Private [PROP] | Controls profile discoverability and `/u/{handle}` access | Moving to Public shows a tier 1 dialog explaining search engine indexing and its delay in removal |
+| Field-level visibility (phone, current employer, salary, open to work) | Switches | Off for phone and salary, On for open to work (only if Recruiters or Public) | Per-field exposure; "Hide from my current employer" excludes the verified employer domain | none; Undo toast |
+| Hide from specific companies | Combobox adding companies to a block list (up to 100) | empty | Excludes them from seeing the profile | none |
+| Personalized recommendations | Switch | On [DEC-REQ `OD-SET-privacy`: consent-based default in some jurisdictions is Off] | Uses profile and activity for recommendations | Turning off explains the effect |
+| Improve with usage data | Switch | Off | Analytics beyond necessary | none |
+| Search history | Switch plus "Clear history" | On | Local and account search suggestions | Clear is tier 0 with Undo |
+| Message read receipts | Switch | Off | Visible read status | none |
+| Presence | Switch | On within conversations | | none |
+| Deactivate account | Button | n/a | Hides profile and pauses notifications, reversible by sign in | Tier 1 dialog |
+| Delete account | Button | n/a | Tier 3 typed confirm with 14-day cooling-off | Re-authentication required |
+
+**Behavior:** every change saves immediately with `SaveIndicator` (Saving, Saved, Couldn't save. Retry); a failed save reverts the control to its previous state and announces the failure; changes made on another device are reflected on focus (stale values refresh; if the control is being edited, the conflict flow applies); a preview link opens `/profile/preview` showing exactly what a recruiter sees under the current settings; changes are audit logged for privacy-related fields (user-visible "Settings history" under Data and export). Consent-bearing switches show a consent version and date in the detail ("You agreed on 12 Mar 2026 to version 3"), and withdrawal is as easy as granting.
+
+**Data:** SET and PRF preference entities; consent records (SET) with version and timestamp; block list; read model of what is visible.
+
+**States:** loading (section skeleton rows), error (page-level ErrorState with Retry; individual save failures inline), offline (settings readable from cache; changes queued W with "Waiting to sync" per control; consent changes require connection: O, disabled with reason "Privacy changes need a connection so we can apply them everywhere"), permission (none; org-managed policy overrides show "Set by your organization" with a lock icon and reason; institution-managed students see locked rows), restricted account (read-only privacy and export/deletion available per the as-built restricted behavior), conflict (above), rate limited (rapid toggling), session expired (re-auth dialog), long lists (block list virtualized beyond 50), RTL.
+
+**Permissions:** self only; support (SUP) cannot change another user's privacy settings (can view history with justification); org admins can set org-level defaults and locks only in their workspace settings (`/employer/{org}/settings`), not personal privacy.
+
+**Analytics:** `ui.settings_privacy.view`; `ui.settings_privacy.visibility.change` (from, to); `ui.settings_privacy.field.change` (field_key, state); `ui.settings_privacy.consent.change` (consent_key, state); `ui.settings_privacy.preview.open`; `ui.settings_privacy.save.error`; `ui.settings_privacy.delete.start`. No identifiers beyond consent keys.
+
+**Accessibility:** settings nav `aria-current="page"`; radio group `fieldset/legend` with descriptions via `aria-describedby`; each switch has a visible label and description, `role="switch"`; state text "On"/"Off" visible; save status in a polite live region (only the first Saved after an error and failures announced; routine saves announce "Saved" at most once per 10 seconds); danger zone headed and separated; locked rows have text reason not only a lock icon; dialogs per `CMP-AlertDialog`; page remains usable at 400 percent zoom with single column.
+
+**Acceptance criteria**
+
+- Given a user switches "Open to work" off, when the switch changes, then it saves within 1 s, "Saved" appears, and recruiters no longer see the flag in the preview.
+- Given the save request fails, when the user toggles a switch, then the switch returns to its previous position within 150 ms, an inline error with Retry appears, and the failure is announced assertively once.
+- Given an institution locked "Profile visibility" for a student, when the student opens the screen, then the radio group is `aria-disabled`, shows "Set by Northfield University" and lists what is allowed.
+- Negative: given the user selects Public, when the dialog appears, then no change is applied until "Make profile public" is confirmed; cancelling leaves the previous value.
+- Given a screen reader user toggles three switches quickly, when saves complete, then at most one "Saved" announcement is made.
+
+### REFSCR-10 Admin table (moderation cases)
+
+**Pattern for:** operational lists in the Console (support tickets, users, orgs, payments, audit log, verification cases). **Route:** `/console/moderation/cases` with query `status`, `severity`, `type`, `assignee`, `age`, `q`, `sort`, `page`, `open`. **Parent:** `/console/moderation`. **Roles:** MOD (full for assigned queues), PAD (all), SAD (read). **Chrome:** `app` with the staff stripe. **Title:** "Cases - Moderation - Console - TalentSphere".
+
+**Desktop wireframe**
+
+```text
+[Staff] TalentSphere Console                                               Search  Help  Dana M.
++------------------+---------------------------------------------------------------------------+
+| Trust and safety | Cases                                                [ Export ] [ Views v]|
+|  Queue           | [ Search case id, user, text ] [Status v][Severity v][Type v][Assignee v] |
+|  > Cases     <cur| Applied: [Open x] [High x]                          212 cases  Clear all  |
+|  Appeals         | [ ] Case        Type        Severity  Status    Assignee    Age    SLA    |
+|  Policies        | [ ] #4821 Post  Harassment  High      Open      Unassigned  2h     1h 20m |
+| Support          | [ ] #4820 Job   Scam        High      In review Priya R.    5h     DUE    |
+| ...              | [ ] #4819 Msg   Spam        Low       Open      Unassigned  1d     OK     |
+|                  |  ...                                                                      |
+|                  | 25 per page [v]   < Prev  1 2 3 ... 9  Next >                             |
+|                  +---------------------------------------------------------------------------+
+|                  | BULK (when selected): 3 selected  [ Assign to me ] [ Assign to... ] [ ... ]|
++------------------+---------------------------------------------------------------------------+
+Row click or Enter on case id opens a right drawer (?open=4821) with evidence, history, actions.
+```
+
+**Phone:** table becomes a card list (case id, type, severity pill, status, SLA, assignee) with filter sheet; drawer becomes a full-screen detail; bulk actions limited to Assign (destructive moderation actions are desktop only: notice "Open on a larger screen to take enforcement actions").
+
+**Columns (default, reorderable per user, saved view):** Select, Case id (link, frozen), Subject type (icon plus text), Reason category, Severity (pill with icon: High, Medium, Low), Status (Open, In review, Awaiting info, Resolved, Appealed), Assignee, Reporter count, Age (relative; absolute in tooltip), SLA state (text: OK, Due in 1 h 20 m, Overdue; color plus icon), Last activity. Hidden by default: reporter ids (restricted), account age, region.
+
+**Behavior:** default sort SLA ascending then severity descending; sort by header buttons; saved views ("My queue", "Unassigned high severity", custom) stored per user and shareable by link (query string); counts update live (no row reordering without the "N new" pill); row selection model per `03` section 5 with limit 200; bulk actions: Assign (me, person, queue), Change status, Add label. Enforcement actions (remove content, suspend, ban) are only in the case drawer, never bulk (`NFR-SCR-003`), require a reason from a policy-linked list, preview of the notice the user will receive, and for account-level actions tier 4 two-person approval or step-up per policy. Every read of sensitive evidence is audit logged with an auto-recorded reason (opening the drawer) and sensitive images blurred by default with "Show" (tier 0, logged, optional wellness warning). Export (CSV) permitted for MOD leads and PAD, limited to filtered rows (max 10,000), watermarked with exporter and time, audited, excluding personal contact data.
+
+**Data:** Case (TSF), subject summary, reports, policy references, history timeline, SLA computations (TSF rules), assignment. Freshness: real time list refresh with "N new" pill; opened drawer updates live with conflict notice if another agent edits.
+
+**States:** loading (8 skeleton rows), empty queue ("No cases match these filters" and "Queue is clear" variants), error per request (Retry, with request id), partial (a column failing shows "Couldn't load"), offline (console is online-only: banner "The console needs a connection" and actions disabled), permission (items outside the agent's region or queue invisible; direct URL shows unavailable state; no leak), step-up required (re-auth screen in place), rate limited, conflict (case claimed by another agent: toast and row update, action blocked with "Assigned to Priya R."), stale, very large result sets (counts capped "10,000+"; require narrowing for export).
+
+**Permissions (role x capability)**
+
+| Capability | MOD | PAD | SAD | SUP |
+|---|---|---|---|---|
+| View queue and cases in assigned scope | allow | allow (all) | read | deny |
+| Assign to self | allow | allow | deny | deny |
+| Assign to others | MOD lead only | allow | deny | deny |
+| Change status | allow | allow | deny | deny |
+| Enforcement action in drawer | allow with reason | allow | deny | deny |
+| Account-level enforcement (suspend, ban) | request (two-person) | approve | deny | deny |
+| View sensitive evidence (unblurred) | allow, logged | allow, logged | allow, logged | deny |
+| Export | lead only | allow | deny | deny |
+| View audit trail of a case | allow | allow | allow | deny |
+
+**Analytics:** console analytics are operational and internal: `ui.console_cases.view`; `ui.console_cases.filter.change`; `ui.console_cases.bulk.complete` (action, count_bucket); `ui.console_cases.drawer.open`; `ui.console_cases.error`. Content of cases is never in analytics; reviewer activity metrics derive from domain events (`EVT-TSF`, planned), not UI events.
+
+**Accessibility:** native `table` with caption "Moderation cases" (visually hidden), `th scope`, `aria-sort` on sortable headers, row header is the Case id link; selection checkboxes labeled "Select case 4821"; the drawer is a non-modal complementary region with focus managed per `CMP-Drawer` (focus to its title on open, back to the row on close); SLA and severity not color alone (text and icon); live region for "N new cases" polite at most once per minute; keyboard shortcuts in the case drawer documented (`J/K` next/previous case, `A` assign to me, `E` change status) as single-key shortcuts that are disableable and active only in the drawer with focus outside text fields; bulk bar toolbar; sensitive images have text alternatives written by the system ("Image reported as {category}; blurred") and blur toggle accessible; at 200 percent zoom columns collapse to the card layout.
+
+**Acceptance criteria**
+
+- Given 212 open cases, when a moderator filters Severity High and opens a case with `Enter`, then the drawer opens with focus on its title, the URL contains `open=4821`, and `Esc` closes it returning focus to the same row.
+- Given three cases selected, when "Assign to me" is chosen, then all three show the assignee, an audit entry is written per case, and an Undo toast restores previous assignees for 8 s.
+- Given a case is claimed by another moderator while the first has it open, when the first tries to act, then the drawer shows "Assigned to Priya R." and enforcement actions are `aria-disabled`.
+- Negative: given a moderator without export permission, when they open Views, then Export is absent from the DOM and a direct export request is rejected with 403 and audited.
+- Negative: given sensitive evidence, when the case opens, then images are blurred; revealing logs the access and the reveal does not persist after closing the drawer.
+
+## 5. How module screens relate to the reference screens
+
+| Module screen type | Pattern | Differences to specify |
+|---|---|---|
+| Home or dashboard of any workspace | REFSCR-01 | Tiles, data sources, role-specific actions |
+| Search or browse lists (courses, mentors, gigs, events, candidates, students, applications, tickets, users) | REFSCR-02 (or REFSCR-10 in Console) | Filters, card or row design, sort options, permissions |
+| Object pages (course landing, company, candidate profile, application, mentor, gig, event) | REFSCR-03 | Regions, actions, closed or restricted states |
+| Creation or submission wizards (create job, create course, mentor application, checkout, import) | REFSCR-04 | Steps, fields, review, draft rules |
+| Content consumption (lesson, article, recording, webinar) | REFSCR-05 | Completion rule, content types |
+| Timed or integrity sensitive tasks (assessment, coding challenge, exam) | REFSCR-06 | Question types, integrity rules, accommodations |
+| Stage-based workflow (pipeline, mentoring requests, gig proposals, drives) | REFSCR-07 | Stages, gates, card content, roles |
+| Conversation features (messages, mentor chat, support thread, comment threads) | REFSCR-08 | Who can start, retention, safety |
+| Settings, preferences and consent | REFSCR-09 | Settings table, defaults, confirmations |
+| Admin and operational tables | REFSCR-10 | Columns, bulk limits, audit, step-up |
+
+## 6. Consolidated rules
+
+| Id | Rule | Test |
+|---|---|---|
+| NFR-SCR-001 | No screen enters build planning with an unresolved checklist item (CHK-01 to CHK-58) | Review gate |
+| NFR-SCR-002 | Every screen emits `ui.{screen}.view` once per arrival and an `error` event for each error state | Analytics test |
+| NFR-SCR-003 | Enforcement, deletion of other people's data, payments and publication are never bulk actions on phone and require explicit per-item confirmation or tiered approval where bulk exists | Spec review and test |
+| NFR-SCR-004 | Every list, board and chart screen offers a table or list equivalent (`02` `NFR-DSY-018`) | Screen spec |
+| NFR-SCR-005 | Every action lists its offline class (R, W, O, D) | Spec lint |
+| NFR-SCR-006 | Every screen spec states focus on arrival, landmark structure and live announcements | Spec lint |
+| NFR-SCR-007 | Each screen defines its null display and error copy keys per `06` | Copy lint |
+| NFR-SCR-008 | Permission matrix entries map to `BR-` rules enforced server-side | Security test |
+
+## 7. Open decisions and risks
+
+| Id | Question | Options | Default proposal | Decides | Blocks |
+|---|---|---|---|---|---|
+| OD-SCR-01 | Draft expiry for applications | 30, 90, 180 days | 90 days with reminder | Product owner | JOB |
+| OD-SCR-02 | Employer view of candidate contact details before an application advances | Always; after Screen; after candidate consent | After Screen stage, org setting | Product owner and privacy officer | ATS |
+| OD-SCR-03 | Read receipts defaults for candidates and recruiters | Off for candidates, on for recruiters; off for both | Off for both, opt-in | Privacy officer | MSG |
+| OD-SCR-04 | Reject message delay option | Immediate only; delay options | Immediate default, 24-hour delay optional | Product owner | ATS |
+| OD-SCR-05 | Single-key shortcuts inside console drawers | Allowed; disallowed | Allowed, disableable | Security and accessibility lead | ADM |
+
+### 7.1 Risks
+
+| Id | Risk | Mitigation |
+|---|---|---|
+| RSK-SCR-01 | Screen specs become inconsistent across authors | Checklist gate and reference screens as patterns; periodic spec audit |
+| RSK-SCR-02 | Reference screens are treated as pixel designs | They are behavior and structure patterns; visual design follows `02` tokens and components |
+| RSK-SCR-03 | Spec effort too heavy for trivial screens | Template permits "n/a, reason"; trivial variations cite the pattern and list deltas only |
