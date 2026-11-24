@@ -1979,3 +1979,266 @@ stateDiagram-v2
 |---|---|---|---|
 | `invited` | `accepted` | Invitee | Eligible role (BR-STU-013) |
 
+## 7. Screen inventory
+
+Key states for every screen include loading (skeleton), empty, error with retry, forbidden and, for editors, saving and conflict. Only screen-specific states are listed.
+
+| ID | Name | Route proposal | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-STU-001 | Instructor application | `/teach/apply` | CAN | Apply to teach (FR-STU-001) | draft, submitted, needs info, rejected with reapply date |
+| SCR-STU-002 | Application status | `/teach/application` | CAN | Track application | in verification, approved |
+| SCR-STU-003 | Verification center | `/studio/verification` | INS | Identity and expertise (FR-STU-002) | pending, failed, expiring |
+| SCR-STU-004 | Agreements | `/studio/agreements` | INS | Accept terms and declare conflicts (FR-STU-003) | update required, grace ending |
+| SCR-STU-005 | Instructor profile editor | `/studio/profile` | INS | Public teaching profile (FR-STU-004) | hidden by moderation |
+| SCR-STU-006 | Payout setup | `/studio/earnings/payout-setup` | INS Owner | Payout and tax profile (FR-STU-005) | incomplete, verified, restricted, feature off |
+| SCR-STU-007 | Studio home | `/studio` | INS, IAD | Courses and attention list (FR-STU-006) | no courses, attention items |
+| SCR-STU-008 | Course workspace overview | `/studio/courses/:id` | INS | Hub with checklist and status | draft, in review, live, taken down |
+| SCR-STU-009 | Course creation wizard | `/studio/courses/new` | INS, IAD | Start a course (FR-STU-007) | step errors, template pick |
+| SCR-STU-010 | Curriculum builder | `/studio/courses/:id/curriculum` | INS | Sections and lessons, drag and drop (FR-STU-008) | stale version conflict, bulk selection |
+| SCR-STU-011 | Lesson editor | `/studio/courses/:id/lessons/:lessonKey` | INS | Video, text, resource authoring (FR-STU-009 to 011) | media processing, locked by another editor |
+| SCR-STU-012 | Landing page editor | `/studio/courses/:id/landing` | INS | Public page and SEO (FR-STU-014) | image too small, claims warning |
+| SCR-STU-013 | Rules and prerequisites | `/studio/courses/:id/rules` | INS | Completion and navigation rules (FR-STU-013) | unsatisfiable rule, test result |
+| SCR-STU-014 | Skills and objectives | `/studio/courses/:id/skills` | INS | Skill tagging (FR-STU-012) | evidence preview gaps |
+| SCR-STU-015 | Team | `/studio/courses/:id/team` | INS Owner | Co-instructors and ownership (FR-STU-016) | invitation pending, split mismatch |
+| SCR-STU-016 | Versions | `/studio/courses/:id/versions` | INS Owner | Version list and diff (FR-STU-019) | draft exists, patch eligible |
+| SCR-STU-017 | Learner preview | `/studio/courses/:id/preview` | INS, reviewers | Preview as learner (FR-STU-020) | simulated day, media not ready |
+| SCR-STU-018 | Media library | `/studio/library` | INS | Assets and usage (FR-STU-025) | quota near, asset in use |
+| SCR-STU-019 | Asset detail and status | `/studio/library/:assetId` | INS, SUP | Pipeline status (FR-STU-026) | processing step, failed with reason |
+| SCR-STU-020 | Caption editor | `/studio/library/:assetId/captions` | INS | Edit captions (FR-STU-023) | low-confidence highlights, ASR pending |
+| SCR-STU-021 | Quiz settings | `/studio/courses/:id/quizzes/:lessonKey` | INS | Quiz placement and policy (FR-STU-029) | pool too small |
+| SCR-STU-022 | Assignment and rubric editor | `/studio/courses/:id/assignments/:lessonKey` | INS | Assignment authoring (FR-STU-030) | rubric total mismatch |
+| SCR-STU-023 | Grading queue | `/studio/grading` | INS, Assistant | Pending submissions (FR-STU-031) | claimed, late, flagged |
+| SCR-STU-024 | Grading workbench | `/studio/grading/:taskId` | INS, Assistant | Grade and feedback | draft, released, dispute |
+| SCR-STU-025 | Pricing | `/studio/courses/:id/pricing` | INS Owner, FIN | Price and schedule (FR-STU-033) | scheduled change, below minimum |
+| SCR-STU-026 | Promotions | `/studio/courses/:id/promotions` | INS Owner | Coupons (FR-STU-034) | exhausted, expiring |
+| SCR-STU-027 | Earnings and statements | `/studio/earnings` | INS (role-limited), FIN | Revenue views (FR-STU-035, 037) | ledger lag, feature off |
+| SCR-STU-028 | Payouts | `/studio/earnings/payouts` | INS, FIN | Schedule and history (FR-STU-036) | held, failed, paid |
+| SCR-STU-029 | Publish and submit | `/studio/courses/:id/publish` | INS Owner | Checklist, attestation, publish (FR-STU-038, 040, 041, 052) | blocking items, scheduled |
+| SCR-STU-030 | Review queue | `/staff/course-review` | MOD, PAD | Reviewer queue (FR-STU-039) | SLA warning, conflict |
+| SCR-STU-031 | Review workbench | `/staff/course-review/:caseId` | MOD, PAD | Checklist and decision | second reviewer required |
+| SCR-STU-032 | Q&A inbox | `/studio/qa` | INS, Assistant | Answer questions (FR-STU-043) | unanswered backlog |
+| SCR-STU-033 | Announcements | `/studio/courses/:id/announcements` | INS | Author announcements (FR-STU-044) | daily limit reached |
+| SCR-STU-034 | Reviews | `/studio/reviews` | INS | Read, reply, report (FR-STU-045) | reply exists |
+| SCR-STU-035 | Learners | `/studio/courses/:id/learners` | INS, Assistant, Viewer (aggregate) | Roster (FR-STU-046) | private learner, export |
+| SCR-STU-036 | Live schedule and host console | `/studio/courses/:id/live` | INS | Sessions (FR-STU-047) | live, ended, recording processing |
+| SCR-STU-037 | Analytics | `/studio/analytics` | INS, Viewer | Funnels and engagement (FR-STU-048) | insufficient data |
+| SCR-STU-038 | Content moderation console | `/staff/content-moderation` | MOD, PAD | Cases and strikes (FR-STU-049) | emergency takedown |
+| SCR-STU-039 | Copyright notice form | `/legal/copyright` | GUE, CAN | Submit notice (FR-STU-050) | incomplete, receipt |
+| SCR-STU-040 | Copyright case console | `/staff/copyright` | MOD, PAD | Handle notices | counter-notice window running |
+| SCR-STU-041 | Localization | `/studio/courses/:id/languages` | INS, Translator | Translations (FR-STU-051) | outdated track |
+| SCR-STU-042 | Quality | `/studio/quality` | INS | Quality components (FR-STU-053) | insufficient data |
+| SCR-STU-043 | Course import | `/studio/courses/:id/import` | INS | Import wizard (FR-STU-017) | mapping issues |
+| SCR-STU-044 | Sign-off queue | `/studio/signoff` | INS | Completion sign-off (FR-STU-042) | held for review |
+
+## 8. Data entities owned
+
+Retention classes: `ACCT` deleted or anonymized with the account; `TXN` financial record, {7 years} [PROP]; `LEGAL` kept for the legal period; `AUDIT` append-only audit trail; `LOG90` {90 days}; `PUBLIC` published course data (kept while any enrollment or certificate refers to the version).
+
+| ID | Entity | Key attributes | Relationships | Retention |
+|---|---|---|---|---|
+| ENT-STU-01 | InstructorApplication | id, accountId, state, topics[], links[], sampleRef, declarations, decisionReasonCodes, submittedAt, decidedAt | 1 account | LEGAL for decision; materials {24 months} if rejected |
+| ENT-STU-02 | InstructorProfile | accountId, handle, displayName, headline, bio, visibility map, verificationLevels, badgeScopes, state | 1 account; n CourseMember | ACCT |
+| ENT-STU-03 | AgreementAcceptance | accountId, documentId, version, hash, acceptedAt, reauthResult, declarations[] | Account | LEGAL |
+| ENT-STU-04 | PayoutProfileRef | accountId, bilProfileRef, state, lastChangedAt | BIL profile | TXN |
+| ENT-STU-05 | Course | id, ownerType, ownerId, slug, state, currentLiveVersionId, workingVersionId, createdAt | n Version, n CourseMember | PUBLIC |
+| ENT-STU-06 | CourseVersion | id, courseId, number, kind (structural, patch), state, ruleJson, skills[], changeNote, attestationId, checksSnapshot, publishedAt | Course; n Section | PUBLIC; AUDIT of transitions |
+| ENT-STU-07 | Section | id, versionId, key, title, position, releaseRule | n Lesson | PUBLIC |
+| ENT-STU-08 | Lesson | id, versionId, sectionId, lessonKey, type, title, position, flags (preview, optional, downloadable), body or mediaRef, completionRule, estimatedMinutes | Section; MediaAsset | PUBLIC |
+| ENT-STU-09 | MediaAsset | id, ownerId, kind, sourceRef, checksum, state, durationMs, probe, providerRef, protectionLevel, deletedAt | n Rendition, n CaptionTrack | ACCT while referenced; renditions regenerable |
+| ENT-STU-10 | MediaRendition | assetId, profile, codec, bitrate, resolution, manifestRef, validatedAt | Asset | Regenerable |
+| ENT-STU-11 | CaptionTrack | assetId, language, kind (caption, transcript, description), autoGenerated, reviewed, vttRef, confidence | Asset | PUBLIC with asset |
+| ENT-STU-12 | Resource | id, lessonId, name, fileRef, scanState, downloadable | Lesson | PUBLIC with version |
+| ENT-STU-13 | QuizPlacement | lessonId, assessmentRef (ASM), weight, policyOverrides, snapshotVersion | Lesson; ASM assessment | PUBLIC |
+| ENT-STU-14 | AssignmentConfig | lessonId, brief, submissionTypes, dueRule, latePolicy, revisions, rubricRef, gradingMode, aiPolicyText | Lesson; ASM rubric | PUBLIC |
+| ENT-STU-15 | CourseMember | courseId, accountId, role, sharePercent, displayPublic, invitationState | Course; Account | ACCT; AUDIT |
+| ENT-STU-16 | PriceSetting | courseId, mode, tier, regionBands, scheduledChange, effectiveFrom | Course | TXN |
+| ENT-STU-17 | Coupon | id, courseId, type, codeOrHash, limits, window, state, redemptionCount | Course | TXN |
+| ENT-STU-18 | EarningsStatement | memberId, period, lines[], closedAt | BIL ledger | TXN |
+| ENT-STU-19 | PayoutRecord | id, memberId, amount, currency, state, runKey, providerRef | Statement | TXN |
+| ENT-STU-20 | PublishReviewCase | id, versionId, state, reviewerIds, checklistResults, decision, reasons, sla, appeal | Version | LEGAL |
+| ENT-STU-21 | QualityCheckResult | versionId, ruleVersion, findings[], runAt, dismissals[] | Version | LOG90 (latest per version kept) |
+| ENT-STU-22 | ModerationAction | id, targetType, targetId, severity, action, policyRef, reason, actorId, appealState | Course or account | LEGAL |
+| ENT-STU-23 | CopyrightCase | id, claimant, workDescription, targetRefs, state, notices, counterNotice, decisions | Course content | LEGAL |
+| ENT-STU-24 | LocalizationTrack | versionId, language, scope, state (draft, machine, reviewed, outdated), sourceHash | Version | PUBLIC |
+| ENT-STU-25 | LiveSessionPlan | id, courseId, runId, schedule, capacity, recordingFlag, providerRoomRef, state | Course | LOG90 after end; recording per policy |
+| ENT-STU-26 | AnnouncementPost | id, courseId, audience, body, sentAt, stats | Course | ACCT |
+| ENT-STU-27 | QualityScore | scopeId, components[], computedAt, inputs | Course or instructor | AGG private |
+| ENT-STU-28 | DraftRevision | entityId, token, authorId, snapshotRef, at | Lesson or course | {90 days}, last 20 |
+| ENT-STU-29 | RightsAttestation | id, versionId, ownerId, thirdPartyItems[], aiDisclosure, signedAt | Version | LEGAL |
+| ENT-STU-30 | ImportJob | id, courseId, sourceHash, mapping, state, report | Course | LOG90 |
+| ENT-STU-31 | GradingTask | id, submissionRef, graderId, leaseUntil, scores, state, releaseAt, disputes[] | LRN submission | ACCT of learner; AUDIT |
+
+```mermaid
+erDiagram
+    COURSE ||--o{ COURSE_VERSION : has
+    COURSE ||--o{ COURSE_MEMBER : "staffed by"
+    COURSE_VERSION ||--o{ SECTION : contains
+    SECTION ||--o{ LESSON : contains
+    LESSON }o--o| MEDIA_ASSET : uses
+    MEDIA_ASSET ||--o{ MEDIA_RENDITION : "has renditions"
+    MEDIA_ASSET ||--o{ CAPTION_TRACK : "has tracks"
+    COURSE_VERSION ||--o| RIGHTS_ATTESTATION : "attested by"
+    COURSE_VERSION ||--o{ PUBLISH_REVIEW_CASE : "reviewed in"
+    COURSE ||--o{ COUPON : offers
+    LESSON ||--o| QUIZ_PLACEMENT : "may hold"
+    LESSON ||--o| ASSIGNMENT_CONFIG : "may hold"
+    ASSIGNMENT_CONFIG ||--o{ GRADING_TASK : "produces"
+```
+
+## 9. Events emitted and consumed
+
+### 9.1 Emitted
+
+| ID | Event name | Trigger | Key payload | Consumers |
+|---|---|---|---|---|
+| EVT-STU-001 | `studio.instructor.applied` | Application submitted | applicationId | ADM, NTF |
+| EVT-STU-002 | `studio.instructor.approved` | Application approved | accountId | NTF, LRN, ANL |
+| EVT-STU-003 | `studio.instructor.rejected` | Application rejected | accountId, reasonCodes | NTF |
+| EVT-STU-004 | `studio.instructor.verified` | Verification level reached | accountId, level, scope | EVD, LRN |
+| EVT-STU-005 | `studio.instructor.suspended` | Suspension | accountId, reason class | LRN, BIL, TSF |
+| EVT-STU-006 | `studio.course.created` | Course shell created | courseId, ownerType | ANL |
+| EVT-STU-007 | `studio.version.submitted` | Submit for review | versionId | ADM review queue |
+| EVT-STU-008 | `studio.version.approved` | Reviewer approves | versionId | NTF |
+| EVT-STU-009 | `studio.version.changes_requested` | Reviewer requests changes | versionId, items | NTF |
+| EVT-STU-010 | `studio.course.published` | Version goes live | courseId, versionId, snapshotRef | LRN, SRC, ANL |
+| EVT-STU-011 | `studio.course.patched` | Patch published | courseId, versionId, patchId | LRN |
+| EVT-STU-012 | `studio.course.unpublished` | Owner unpublishes | courseId | LRN, SRC |
+| EVT-STU-013 | `studio.course.archived` | Owner archives | courseId | LRN, SRC |
+| EVT-STU-014 | `studio.course.taken_down` | Moderation or legal takedown | courseId, scope, reasonClass | LRN, SRC, BIL |
+| EVT-STU-015 | `studio.media.uploaded` | Upload complete | assetId | pipeline |
+| EVT-STU-016 | `studio.media.ready` | Asset ready | assetId, durationMs | lessons, NTF |
+| EVT-STU-017 | `studio.media.failed` | Processing failed | assetId, reasonClass | NTF, ADM |
+| EVT-STU-018 | `studio.captions.published` | Track reviewed or uploaded | assetId, language | LRN |
+| EVT-STU-019 | `studio.coupon.created` | Coupon created | couponId | BIL |
+| EVT-STU-020 | `studio.coupon.revoked` | Coupon revoked | couponId | BIL |
+| EVT-STU-021 | `studio.price.changed` | Price set or scheduled | courseId, effectiveFrom | BIL, LRN |
+| EVT-STU-022 | `studio.team.changed` | Members, roles, splits | courseId | BIL, LRN |
+| EVT-STU-023 | `studio.signoff.granted` | Instructor sign-off | enrollmentId, signerId | LRN |
+| EVT-STU-024 | `studio.announcement.posted` | Announcement sent | courseId, announcementId | LRN, NTF |
+| EVT-STU-025 | `studio.grading.released` | Grades released | submissionRef | LRN, NTF |
+| EVT-STU-026 | `studio.moderation.action_taken` | Moderator action | targetRef, action | TSF, LRN |
+| EVT-STU-027 | `studio.copyright.content_disabled` | Notice accepted | targetRefs | LRN |
+| EVT-STU-028 | `studio.copyright.content_restored` | Counter-notice window ends | targetRefs | LRN |
+| EVT-STU-029 | `studio.live.scheduled` | Session scheduled | sessionId | LRN, NTF |
+| EVT-STU-030 | `studio.live.cancelled` | Session cancelled | sessionId | LRN, NTF |
+| EVT-STU-031 | `studio.quality.checked` | Checks run on submit | versionId, blockingCount | ANL |
+
+### 9.2 Consumed
+
+| Event (producer) | Used by | Effect |
+|---|---|---|
+| `learning.enrollment.*`, `learning.course.completed`, `learning.lesson.completed` (LRN) | FR-STU-046, 048 | Roster, analytics, sign-off queue |
+| `learning.review.published`, `learning.qa.question_posted`, `learning.submission.submitted`, `learning.report.filed` (LRN) | FR-STU-031, 043, 045 | Inboxes and queues |
+| `assessment.attempt.graded`, `assessment.item.stats_updated` (ASM) | FR-STU-029, 048 | Quiz analytics and completion links |
+| `billing.purchase.fulfilled`, `billing.refund.completed`, `billing.payout.status_changed` (BIL, planned) | FR-STU-035 to 037 | Earnings, refunds, payouts |
+| `verification.result` (BGV, planned) | FR-STU-002 | Verification levels |
+| `trust.case.decided` (TSF, planned) | FR-STU-049 | Apply decisions |
+| `identity.account.erased` (IDN, planned) | all | Erasure rules |
+
+## 10. Integrations and external dependencies
+
+| Dependency | Direction | Purpose | Failure behavior |
+|---|---|---|---|
+| Object storage and CDN (PLT, planned) | Outbound | Uploads, renditions, delivery | Resumable uploads; failover CDN |
+| Transcoding and packaging provider (`MediaProvider` interface; candidates in SSOT OD-03 and OD-14) | Outbound | HLS ladders, thumbnails, DRM packaging | Failover provider; `failed` with reason |
+| ASR and machine translation providers | Outbound | Captions, translations | Manual path; "pending" state |
+| DRM license servers (provider-specific) | Outbound | Premium protection | Block playback with message; ops alert |
+| Virus scanning service (PLT, planned) | Outbound | All uploads | Hold unserved until scanned |
+| Identity verification provider via BGV (planned) | Outbound | Instructor identity | Queue with honest status |
+| Payments, tax and payouts via BIL (planned) | Via BIL | Pricing, coupons, statements, payouts | Features disabled with banner |
+| Live room provider (LRN OD-LRN-06) | Outbound | Live sessions | Reschedule flow |
+| Video providers for external lessons | Outbound metadata | Validation and capabilities | Publish blocked until validated |
+| Email and notification service (NTF, planned) | Outbound | Templates | Retry |
+
+## 11. Cross-module dependencies
+
+| Depends on | What STU needs |
+|---|---|
+| LRN | Enrollments, progress, reviews, Q&A, submissions, certificates, player in preview mode |
+| ASM | Assessment builder, question bank, rubric engine, sandbox, item analytics |
+| BIL (planned) | Price tiers, quotes, coupons validation, statements, payouts, refunds |
+| BGV (planned) | Identity and sanctions checks |
+| EVD (planned) | Evidence rung policy, expertise evidence |
+| IDN (planned) | Accounts, re-authentication |
+| TSF (planned) | Moderation and copyright case workflow |
+| ADM (planned) | Staff console shell, queues, audit |
+| INS (planned) | Institution-owned course workspaces |
+| NTF (planned) | Templates and channels |
+| PLT (planned) | Storage, queue, scanning, ASR, scheduler |
+| ANL (planned) | Aggregations and dashboards |
+
+| Depended on by | What they use |
+|---|---|
+| LRN | Immutable published versions, manifests, rules, announcements, grades, sign-off |
+| SRC (planned) | Catalog documents on publish events |
+| ASM | Course context for in-course assessments |
+| INS (planned) | Institution course authoring and licensing |
+| EVD (planned) | Course evidence declarations and sign-off events |
+| BIL (planned) | Price, coupon, member split and publish events |
+| ADM (planned) | Review, moderation and copyright queues |
+
+## 12. Module-level metrics
+
+| Metric | Definition and formula | Owner role |
+|---|---|---|
+| Application decision time | Median hours from application submit to decision | Instructor operations owner |
+| Instructor activation rate | Approved instructors who publish at least one course within a defined period divided by approved instructors | Learning product owner |
+| First-pass review rate | Submissions approved without a changes-requested round divided by submissions | Content quality owner |
+| Review SLA attainment | Cases decided within SLA divided by cases | Content quality owner |
+| Time to publish | Median days from course creation to first publish | Learning product owner |
+| Media time-to-ready p95 | 95th percentile minutes from upload complete to `ready` | Engineering lead |
+| Media failure rate | Assets ending `failed` divided by assets processed (platform-caused versus user-fixable split) | Engineering lead |
+| Caption coverage | Published video lessons with reviewed captions divided by published video lessons | Accessibility owner |
+| Post-publish defect rate | Learner content problem reports per 1,000 enrollments (LRN FR-LRN-075) | Content quality owner |
+| Q&A first-answer time | Median hours from question to first staff answer | Learning product owner |
+| Takedown and strike rate | Takedowns and strikes per 100 published courses | Trust and safety owner |
+| Copyright SLA attainment | Valid notices acted on within the stated time divided by valid notices | Legal operations owner |
+| Payout accuracy | Payouts matching ledger divided by payouts (target 100 percent) | Finance owner |
+| Earnings dispute rate | Disputed statements divided by statements | Finance owner |
+
+## 13. Open decisions
+
+| ID | Question | Options | Default proposal | Who decides | Blocks |
+|---|---|---|---|---|---|
+| OD-STU-01 | Is a third-party instructor marketplace with payouts in scope, and under what revenue share, seller of record, tax and payout rules? | First-party only; marketplace; both | First-party only first; marketplace behind a separate decision (SSOT V61-21); default share 70/30 as a starting proposal (OD-28) | Founder, Finance, Legal | FR-STU-005, 033, 035, 036 |
+| OD-STU-02 | Review model: all submissions human-reviewed, sampled for trusted instructors, or automated-only for low-risk topics | Full; risk-based sampling; automated | Full review for first course and structural versions; risk-based sampling afterwards; SLA 72 hours (SSOT OD-42) | Operations, Product | FR-STU-038, 039 |
+| OD-STU-03 | Content license and IP terms, including what happens to learner access if an instructor terminates | Perpetual for enrolled learners; limited; per-agreement | Learners keep access for their access period; platform license continues for that period | Legal | BR-STU-047 |
+| OD-STU-04 | Copyright process jurisdiction, windows and agent registration | US DMCA style; EU notice-and-action; both | Both, selected by claimant region, with windows set by Legal | Legal | FR-STU-050 |
+| OD-STU-05 | ASR and machine translation providers and the sensitive-content opt-out | Managed provider; self-hosted model; manual only | Managed provider behind an interface with opt-out for sensitive courses | Engineering, Legal | FR-STU-023, 051 |
+| OD-STU-06 | Verification levels required to publish free and paid courses | Email only; identity for paid; identity for all | Identity required for paid courses and payouts; email for free | Product, Trust | FR-STU-002, BR-STU-037 |
+| OD-STU-07 | Open instructor onboarding or curated invitation | Open application; invite only; mixed | Open application with review, institution invitations as a fast lane | Founder | FR-STU-001 |
+| OD-STU-08 | Strike thresholds and suspension rules | 3 in 12 months; 2; severity-weighted | 3 in 12 months with severity weighting | Trust and safety | FR-STU-049 |
+| OD-STU-09 | Policy on AI-generated or synthetic course content | Prohibit; allow with disclosure; allow with labeling to learners | Allow with mandatory disclosure and learner-visible label for synthetic voices or video | Product, Legal | FR-STU-038, 052 |
+| OD-STU-10 | Price tiers, minimum price and regional bands | Fixed tiers; free-form price | Fixed tiers owned by BIL | Finance, Product | FR-STU-033 |
+| OD-STU-11 | Free-coupon allowance | 0, 20 per month, unlimited | 20 redemptions per month | Product | FR-STU-034 |
+| OD-STU-12 | Media size limits and storage quotas per instructor | Fixed; tiered by status | 10 GB per video, quota by verification level | Product, Engineering | FR-STU-021, 025 |
+| OD-STU-13 | DRM level availability and provider | Signed URLs only; encrypted HLS; multi-DRM | Signed URLs and encrypted HLS first; DRM for premium courses when cost justified (SSOT OD-03, OD-14) | Founder, Engineering | FR-STU-024 |
+
+## 14. Risks
+
+| ID | Risk | Likelihood and impact | Mitigation |
+|---|---|---|---|
+| RSK-STU-01 | Media pipeline cost and latency grow faster than revenue | Medium, high | Provider interface, ladder tuning, quotas, lazy re-processing, cost dashboards |
+| RSK-STU-02 | Low-quality or inaccurate courses reach learners | High, high | Review, quality checks, post-publish reports, quality components, takedown path |
+| RSK-STU-03 | Copyright infringement and unlicensed third-party material | High, high | Attestation, license matrix, notice process, repeat infringer policy |
+| RSK-STU-04 | Instructor fraud (fake credentials, self-sign-off, review manipulation) | Medium, high | Verification levels, independence checks (BR-STU-015), anomaly flags |
+| RSK-STU-05 | Payout errors or compliance gaps (tax, KYC) | Medium, high | Decision gating, BIL ledger source of truth, reconciliation, holds |
+| RSK-STU-06 | Review backlog slows publishing and discourages instructors | Medium, medium | SLA escalation, risk-based sampling, reviewer capacity metrics |
+| RSK-STU-07 | Version and `lessonKey` mistakes corrupt learner progress mapping | Low, high | Permanent keys, structural check, patch eligibility rules, tests |
+| RSK-STU-08 | Accessibility shortfalls (low-quality ASR captions published unreviewed) | Medium, high | Review confirmation, labeling, accessibility metrics, audits |
+| RSK-STU-09 | Instructor privacy overreach into learner data | Medium, medium | Scope limits, suppression thresholds, audits (BR-STU-029) |
+| RSK-STU-10 | Scope creep into a generic marketplace or CMS | Medium, medium | Tier gating, OD-STU-01, boundaries with BIL and PLT |
+| RSK-STU-11 | Provider lock-in for transcoding, ASR or DRM | Medium, medium | Provider-agnostic interfaces and conformance tests |
+
+## 15. Legacy source trace
+
+| Legacy source | Used for | Dropped or changed and why |
+|---|---|---|
+| `SSOT.md` §7 F-66 (Course Creation Studio), F-73 (Course Commerce), F-74 (Instructor Platform), F-148 (Instructor Reputation) | Studio scope, commerce, quality | Detailed specs were absent in the SSOT, so behavior is derived from the rules below and standard practice |
+| `SSOT.md` §10.22 (BR-091..BR-115), §10.21 (BR-083..BR-090), §10.34 (BR-189..BR-193), §13.12 to §13.16 | Submission minimums, preview limit, image rules, versioning, external media rules, coupons, refunds, announcement limit, analytics privacy, media pipeline | Revenue share 70/30 kept as a proposal pending OD-STU-01 |
+| `SSOT.md` WF-24 (Course Publish Review), OD-42 (72 h), OD-28, OD-29, OD-03, OD-14 | Review workflow, SLA, defaults | All marked decisions pending |
+| `SSOT.md` Appendix E V61-21 | First-party-first commerce gating | Marketplace deferred to OD-STU-01 |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_G3_ASSESSMENT_AND_LEARNING.md` SPEC-06 §3.1, §3.4 | Completion rule, sign-off, evidence rung relation | Instructor sign-off class kept separate from platform-verified |
+| `Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md` FEAT-08-03.3, AC-05-04-51 to 54 | Captions gate, independence checks | None |
+| `docs/registries/FEATURE_REGISTRY.md` F-42, F-44, F-51, F-66 to F-74 | Cross-check | Registry status not treated as built |
+| Own knowledge of Udemy, Coursera, Teachable, Mux, YouTube Studio, Thinkific, Descript, DMCA practice | Curriculum builder behavior, media pipeline, coupons, copyright process, analytics | Tagged `[PROP]` where used |

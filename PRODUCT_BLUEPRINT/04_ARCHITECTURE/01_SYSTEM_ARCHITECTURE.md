@@ -177,12 +177,12 @@ A **module** is the unit of code ownership: one backend module folder, one contr
 | Identity and access | IDN | Generic, security-critical | Account, Credential (password, passkey, federated identity), Session, ServicePrincipal, Organization, Membership | R0 |
 | Privacy and account governance | SET | Generic, compliance-critical | ConsentGrant, PrivacySettings, DataSubjectRequest (export, erasure), SubjectIdentityMap | R0 |
 | Communications | NTF, MSG | Supporting | Notification, DeliveryAttempt, ChannelPreference, Conversation, Message | NTF R0, MSG R2 |
-| Career identity | PRF, EVD, BGV | **Core** | Profile, Resume, Portfolio, SkillTaxonomy (sub-module of PRF, OD-ARC-07), Evidence, Attestation, Credential, VerificationRequest, BackgroundCheck | PRF and EVD R1, BGV R4 |
+| Career identity | PRF, EVD, BGV | **Core** | Profile, Resume, Portfolio, Evidence, Attestation, Credential, VerificationRequest, BackgroundCheck | PRF and EVD R1, BGV R4 |
 | Learning | LRN, STU | Supporting | Course, CourseVersion, Enrollment, Progress, LearningPath, Certificate, StudioProject, MediaAsset (content usage) | LRN R1, STU R3 |
 | Assessment | ASM | **Core** | Assessment, ItemBank, Attempt, Submission, RunnerJob, IntegrityCase | R1 (unverified attempts), runner R4 |
 | Hiring | JOB, ATS, INT, EMP | **Core** (JOB, ATS), supporting (INT, EMP) | Job, Application, Requisition, PipelineStage, Scorecard, Offer, Interview, AvailabilitySlot, EmployerPage, Team | R2 |
 | Community | NET, REP, EVT | Supporting | Connection, Follow, Post, Group, Referral, ReputationLedger, Badge, CommunityEvent, Hackathon | NET R2, REP R4, EVT R6 |
-| Intelligence and discovery | AIC, SRC, MKT | **Core** (AIC matching), generic (SRC), supporting (MKT) | AIInvocation, Recommendation, MatchExplanation, SearchDocument, SavedSearch, MarketSignal, CareerPath | SRC R1, AIC R1 gateway and R4 features, MKT R6 |
+| Intelligence and discovery | AIC, SRC, MKT | **Core** (AIC matching), generic (SRC), supporting (MKT) | AIInvocation, Recommendation, MatchExplanation, SearchDocument, SavedSearch, SkillTaxonomy (MKT, released at R1, OD-ARC-07), MarketSignal, CareerPath | SRC R1, AIC R1 gateway and R4 features, MKT R6 |
 | Trust and governance | TSF, ADM | Generic, safety-critical | Report, ModerationCase, Sanction, Appeal, AuditEvent, SupportTicket, PlatformConfig | TSF R1, ADM R0 |
 | Institutions and enterprise | INS, ENT | Supporting | Institution profile, Department, Cohort, ManagedLearnerLink, LicensePool, PlacementDrive, WorkforceLink, InternalOpportunity, SkillsInventory | INS R3, ENT R6 |
 | Commercial | BIL | Generic, money-critical | Customer, Subscription, Entitlement, Order, Invoice, LicenseSeat, Payout (gated) | R1 stub, R5 scale |
@@ -358,7 +358,7 @@ flowchart TB
 | L-06 | The web app never contains authorization decisions that the server does not repeat. UI capability hints come from `GET /api/v1/me/capabilities`. | [SRC: ARCHITECTURE.md INVARIANT-001; ADR-T07] | Security tests |
 | L-07 | `packages/adapters` is server-only and never bundled for the browser. | [SRC: SSOT §12.16 server-only folders] | Vite build check that fails on adapter imports |
 | L-08 | Errors cross layers as `DomainError` (domain, use case) or validation errors (contracts) and are rendered only by the global error mapper. | [SRC: ARCHITECTURE.md INVARIANT-004] | Lint bans `reply.code(4xx/5xx)` in handlers |
-| L-09 | Design tokens come only from `packages/ui/src/tokens.ts`; feature code hard-codes no colour or spacing. | [SRC: CLAUDE.md Style] | Stylelint or lint rule |
+| L-09 | Design tokens come only from `packages/ui/src/tokens.ts`; feature code hard-codes no color or spacing. | [SRC: CLAUDE.md Style] | Stylelint or lint rule |
 | L-10 | No module imports another module's `repo/`, `routes/` or `jobs/`. Cross-module calls go through `index.ts`. | [SRC: SSOT ARCH-016] | dependency-cruiser |
 
 ## 8. Multi-tenancy model
@@ -373,7 +373,7 @@ flowchart TB
 | `token_holder` | Referee, verifier, guest invitee, unsubscribe link user | Single-use capability token, stored as a hash | `token_purpose`, bound resource id |
 | `support_grant` | Support agent working on a user's case | Agent session plus a live, time-boxed `support_access_grants` row consented by the user or an audited policy exception | `agent_account_id`, `subject_account_id`, `grant_id`, allowed scopes |
 
-There is no impersonation ("log in as user") feature. Support access is a separate principal so that every read is attributable and limited [SRC: API-STD `grant-required`; BR-T041] [DER].
+There is no write-capable impersonation ("log in as user"). The read-only, consented, time-boxed "view-as" session that the ADM module specifies (SM-ADM-04, BR-ADM-006) runs as a `support_grant` principal, so every read is attributable and limited [SRC: 02_MODULES ADM BR-ADM-006; API-STD `grant-required`; BR-T041] [DER].
 
 ### 8.2 Tenants
 
@@ -807,7 +807,7 @@ Open decisions for the whole architecture folder are numbered across files. OD-A
 | OD-ARC-04 | Server-state library in the web client | Keep fetch helper; TanStack Query; other | TanStack Query over `apiJson` [DEC-REQ]; requires a dependency change | Frontend lead with product owner | Web feature-module work at scale |
 | OD-ARC-05 | Hosting platform and managed PostgreSQL vendor | As-built Oracle VM with Compose; managed container platform on a major cloud; Supabase-hosted PostgreSQL | Managed containers plus managed PostgreSQL with point-in-time recovery; vendor open [DEC-REQ] (legacy OPEN-14) | Product owner and finance | Production deployment |
 | OD-ARC-06 | Home region and residency partitions | Single region; region plus EU partition; per-customer region | Single region with `data_region` readiness (DEC-ARC-024) [DEC-REQ] | Product owner with counsel | Enterprise and institution sales in regulated markets |
-| OD-ARC-07 | Which module owns the skills taxonomy (no dedicated module code exists)? | PRF sub-module; EVD; MKT; new module code | PRF owns `skills` as a reference sub-module; MKT consumes it for market signals [DEC-REQ] | Product owner | PRF, EVD, JOB, LRN, ASM all reference skills |
+| OD-ARC-07 | Which module owns the skills taxonomy (no dedicated module code exists)? | PRF sub-module; EVD; MKT; new module code | MKT owns the taxonomy (its module spec claims it, ENT-MKT-01); because MKT is OS-expansion scope, the taxonomy sub-module must be built and released at R1 ahead of the rest of MKT, with SRC holding only a search projection (ENT-SRC-08) [DEC-REQ] | Product owner | PRF, EVD, JOB, LRN, ASM all reference skills |
 | OD-ARC-08 | Realtime transport hosting and live interview media vendor | Own gateway; managed realtime service; for video: a WebRTC provider or external meeting links only | Own gateway for signals; WebRTC provider behind `VideoRoomPort` for INT with external-link fallback [DEC-REQ] | Architect and product owner | INT live interviews, MSG presence |
 | OD-ARC-09 | Code runner: self-hosted sandbox or vendor | gVisor or Firecracker self-hosted; vendor API | Decide after a security review spike; until then no verified code scores [DEC-REQ] (legacy OPEN-27) | Security officer and product owner | ASM verified scores; EVD `challenge_pass` credentials |
 | OD-ARC-10 | Numeric trigger values for scale steps S1–S7 | Defaults in §21 or measured baselines | Use §21 defaults until the first load baseline, then replace [DEC-REQ] | Architect | Capacity planning |

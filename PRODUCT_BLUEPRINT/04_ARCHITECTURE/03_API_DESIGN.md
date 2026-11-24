@@ -415,11 +415,11 @@ Paths are relative to `/api/v1` unless they start with `/api/public/v1`, `/scim`
 |---|---|---|---|---|---|
 | GET | `/jobs` | pub/ses | — | C | Published jobs; CDN-cacheable anonymous |
 | GET | `/jobs/{jobId}` | pub/ses | — | — | Closed job returns `410 gone` with the closure date [SRC: SSOT §13.2 F-04 note] |
-| POST | `/orgs/{orgId}/jobs` | org:job.job.create | K | — | Draft; posting entitlement checked at publication |
-| PATCH | `/orgs/{orgId}/jobs/{jobId}` | org:job.job.edit | K | — | IM |
-| POST | `/orgs/{orgId}/jobs/{jobId}/publication` | org:job.job.publish | K! | — | May enter `pending_review` per trust rules |
-| POST | `/orgs/{orgId}/jobs/{jobId}/pause` | org:job.job.publish | K | — | |
-| POST | `/orgs/{orgId}/jobs/{jobId}/closure` | org:job.job.publish | K | — | Reason; open applications handled per ATS rules |
+| POST | `/orgs/{orgId}/jobs` | org:ats.posting.create | K | — | Draft; posting entitlement checked at publication |
+| PATCH | `/orgs/{orgId}/jobs/{jobId}` | org:ats.posting.edit | K | — | IM |
+| POST | `/orgs/{orgId}/jobs/{jobId}/publication` | org:ats.posting.publish | K! | — | May enter `pending_review` per trust rules |
+| POST | `/orgs/{orgId}/jobs/{jobId}/pause` | org:ats.posting.publish | K | — | |
+| POST | `/orgs/{orgId}/jobs/{jobId}/closure` | org:ats.posting.publish | K | — | Reason; open applications handled per ATS rules |
 | POST | `/jobs/{jobId}/applications` | ses +c:application.share_snapshot | K! and N(job, candidate) | — | Creates snapshot; `409 duplicate-application` or `409 reapply-cooldown-active` |
 | GET | `/me/applications` | ses | — | C | Candidate view with candidate-facing stage labels only |
 | GET | `/me/applications/{applicationId}` | ses | — | — | |

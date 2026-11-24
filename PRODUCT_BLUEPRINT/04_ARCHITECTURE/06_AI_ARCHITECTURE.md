@@ -91,8 +91,8 @@ Starting capability list (module specs own the feature detail):
 | `prf.profile.summary_draft` | PRF | draft | user_review | none |
 | `evd.evidence.skill_tagging` | EVD | recommendation | user_review | Keyword match against the taxonomy |
 | `job.application.cover_letter_draft` | JOB | draft | user_review | none |
-| `job.job.description_draft` | JOB | draft | user_review (recruiter) | Templates |
-| `job.job.bias_check` | JOB | analysis | none (advisory) | Word-list check |
+| `ats.posting.description_draft` | ATS | draft | user_review (recruiter) | Templates |
+| `ats.posting.bias_check` | ATS | analysis | none (advisory) | Word-list check |
 | `ats.application.summary` | ATS | decision_support | none for display; never used to auto-reject | none |
 | `aic.match.explain` | AIC | decision_support | none | Rule-based explanation from the matching pipeline |
 | `aic.match.rank` | AIC | decision_support | none; ranking only orders, never filters out | Lexical and rule-based ranking |

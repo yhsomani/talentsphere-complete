@@ -59,7 +59,7 @@ flowchart LR
 | `BackgroundCheckPort` | BGV | `createCandidate`, `orderPackage`, `getReport`, `parseWebhook` | Vendor per region (OD-ARC-26) | Checkr, Certn, Sterling (examples) |
 | `IdentityVerificationPort` | BGV | `createSession`, `getResult`, `parseWebhook` | Vendor (SSOT OD-27) | Persona, Onfido, Veriff (examples) |
 | `ProctoringPort` | ASM | `createSession`, `getFlags` | None (SSOT OD-35) | Vendor |
-| `JobDistributionPort` | JOB | `publish`, `update`, `withdraw` | Google for Jobs structured data plus sitemap (no API call); job boards optional | Indeed, LinkedIn job posting (partner programs; examples) |
+| `JobDistributionPort` | ATS | `publish`, `update`, `withdraw` | Google for Jobs structured data plus sitemap (no API call); job boards optional | Indeed, LinkedIn job posting (partner programs; examples) |
 | `AtsImportPort` | PLT, ATS | `listJobs`, `listCandidates`, `listApplications` | Optional per customer | Greenhouse, Lever, Workday (examples) |
 | `HrisPort` | ENT | `listWorkers`, `listOrgUnits`, `listJobs`, `changesSince` | Optional per customer | Workday, SAP SuccessFactors, BambooHR (examples) [SRC: SSOT §13.3]; unified HRIS API vendor as an option |
 | `LmsInteropPort` | INS | LTI 1.3 launch and deep linking, Names and Roles, Assignment and Grade Services; OneRoster rosters | Standards-based, no vendor | Moodle, Canvas, Blackboard [SRC: SSOT §13.3] |

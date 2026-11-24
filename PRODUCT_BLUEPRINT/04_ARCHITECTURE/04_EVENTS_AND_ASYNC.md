@@ -123,7 +123,7 @@ The starting topic list. **Class** is the delivery class; EC-ORD implies orderin
 | PRF | `prf.profile.updated` | EC-ORD | SRC, AIC (match recompute), MKT |
 | PRF | `prf.profile.visibility_changed` | EC-ORD | SRC (i), NET |
 | PRF | `prf.resume.imported` | EC-STD | NTF |
-| PRF | `prf.skill.created` / `prf.skill.merged` | EC-ORD | SRC, JOB, EVD, LRN, ASM, AIC, MKT |
+| MKT | `mkt.skill.created` / `mkt.skill.merged` | EC-ORD | SRC, JOB, EVD, LRN, ASM, AIC, MKT |
 | EVD | `evd.evidence.created` | EC-ORD | BGV (auto-verification), SRC, AIC |
 | EVD | `evd.evidence.updated` | EC-ORD | SRC, AIC |
 | EVD | `evd.evidence.verified` | EC-ORD + EC-CRIT | PRF (skill confidence), SRC, AIC, JOB (snapshot link status), REP, NTF |
@@ -145,8 +145,8 @@ The starting topic list. **Class** is the delivery class; EC-ORD implies orderin
 | ASM | `asm.attempt.submitted` | EC-ORD | ASM grading job |
 | ASM | `asm.attempt.graded` | EC-ORD + EC-CRIT | EVD (assessment-result evidence; verified only when the attempt is verified), LRN, JOB, ATS, REP, NTF |
 | ASM | `asm.integrity_case.opened` / `asm.integrity_case.decided` | EC-CRIT | TSF, EVD (void evidence on upheld case), NTF |
-| JOB | `job.job.published` / `job.job.updated` | EC-ORD | SRC, AIC, PLT (job distribution, sitemap, partner webhooks), NTF (saved-search alerts via SRC) |
-| JOB | `job.job.closed` / `job.job.taken_down` | EC-ORD | SRC (i), ATS, AIC, PLT (distribution withdrawal) |
+| ATS | `ats.posting.published` / `ats.posting.updated` | EC-ORD | SRC, AIC, PLT (job distribution, sitemap, partner webhooks), NTF (saved-search alerts via SRC) |
+| ATS | `ats.posting.closed` / `ats.posting.taken_down` | EC-ORD | SRC (i), ATS, AIC, PLT (distribution withdrawal) |
 | JOB | `job.application.submitted` | EC-ORD | ATS (pipeline placement), AIC (match explanation), NTF, ANL (i), partner webhooks |
 | JOB | `job.application.withdrawn` | EC-ORD | ATS, INT (cancel future interviews), NTF |
 | ATS | `ats.application.stage_changed` | EC-ORD | JOB (candidate-facing status), NTF, Realtime, ANL (i), partner webhooks |
@@ -326,8 +326,8 @@ Any consumer can replay from `outbox_events` within its 14-day retention by rese
 | `asm.code.run` | ASM | ai | Code item submitted | `attempt_id:item_id:run_no` | runner | Calls `CodeRunnerPort`; disabled until OD-ARC-09 closes |
 | `asm.attempt.expire` | ASM | scheduled | cron every minute | `minute` | default | Server-side deadline enforcement |
 | `asm.similarity.check` | ASM | heavy | Attempt graded (code, essay) | `attempt_id` | default | Produces integrity signals only |
-| `job.job.expire` | JOB | scheduled | cron hourly | `hour` | default | Closes jobs past `expires_at` (default 45 or 60 days is open in SSOT, V61-18) |
-| `job.distribution.push` | JOB | webhook | `job.job.published` / `closed` | `job_id:target:version` | delivery | Job boards, Google for Jobs sitemap ping |
+| `ats.posting.expire` | ATS | scheduled | cron hourly | `hour` | default | Closes jobs past `expires_at` (default 45 or 60 days is open in SSOT, V61-18) |
+| `ats.distribution.push` | ATS | webhook | `ats.posting.published` / `closed` | `job_id:target:version` | delivery | Job boards, Google for Jobs sitemap ping |
 | `ats.stale_application.scan` | ATS | scheduled | cron daily 06:00 UTC | `date` | default | Nudges recruiters on idle applications per org SLA |
 | `ats.bulk_action.run` | ATS | heavy | Bulk action request | `bulk_action_id` | default | Per-item results, each with its own idempotency |
 | `int.calendar.sync` | INT | webhook | Interview scheduled or changed | `interview_id:participant:version` | delivery | Creates or updates calendar events through calendar adapters |
