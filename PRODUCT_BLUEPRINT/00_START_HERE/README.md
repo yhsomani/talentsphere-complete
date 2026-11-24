@@ -15,7 +15,7 @@ The complete, from-scratch definition of the intended product: a career operatin
 | Build or review one feature area       | The module file in [`02_MODULES`](../02_MODULES/) (table below)                                                                                                                   |
 | Decide what is still open              | [Stakeholder decisions](../01_PRODUCT/08_STAKEHOLDER_DECISIONS_NEEDED.md), [open decisions register](../09_REGISTERS/OPEN_DECISIONS_REGISTER.md)                                  |
 | Plan the build                         | [Lifecycle roadmap](../08_ROADMAP/01_LIFECYCLE_ROADMAP.md), [tier plan](../08_ROADMAP/02_TIER_PLAN.md), [technical index](../04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md) |
-| Check consistency                      | [Integrity report](../09_REGISTERS/INTEGRITY_REPORT.md), [acceptance coverage](../09_REGISTERS/ACCEPTANCE_CRITERIA_COVERAGE.md)                                                   |
+| Check consistency                      | [Final audit report](FINAL_AUDIT_REPORT.md), [integrity report](../09_REGISTERS/INTEGRITY_REPORT.md), [acceptance coverage](../09_REGISTERS/ACCEPTANCE_CRITERIA_COVERAGE.md)      |
 | Learn the notation                     | [Conventions](CONVENTIONS.md), [glossary](GLOSSARY.md)                                                                                                                            |
 
 ## Contents
