@@ -1,21 +1,21 @@
 # Test Coverage Map (Branch 18)
 
-> **A test file referencing a route or function is not evidence that the feature works.** Matching is textual: a test is linked to an endpoint when its source contains the endpoint path (with `:param` as a wildcard) near a matching HTTP-method marker; it is linked to a rule when it names the function. The suites were **executed on 2026-11-25** at commit `d8cb4c1` in a throwaway copy of the tracked files (so no protected file in the repository was written); results are in [EXECUTION_RESULTS.json](EXECUTION_RESULTS.json). A passing linked test raises a node to `HIGH` confidence, but the link itself stays path-level.
+> **A test file referencing a route or function is not evidence that the feature works.** Matching is textual: a test is linked to an endpoint when its source contains the endpoint path (with `:param` as a wildcard) near a matching HTTP-method marker; it is linked to a rule when it names the function. The suites were **executed on 2026-11-25** at commit `9b3032f` in a throwaway copy of the tracked files (so no protected file in the repository was written); results are in [EXECUTION_RESULTS.json](EXECUTION_RESULTS.json). A passing linked test raises a node to `HIGH` confidence, but the link itself stays path-level.
 
 ## 0. Execution results
 
 | Suite     | Files | Tests | Passed | Failed | Skipped | Command                                                                                                           |
 | --------- | ----- | ----- | ------ | ------ | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| vitest    | 146   | 1571  | 1571   | 0      | 0       | vitest run (root config: unit, integration, security) after pnpm build, in a throwaway copy of the tracked files  |
-| vitest-pg | 16    | 67    | 67     | 0      | 0       | vitest run --config vitest.pg.config.ts against a local PostgreSQL 16 cluster (TEST_DATABASE_URL), throwaway copy |
+| vitest    | 146   | 1572  | 1572   | 0      | 0       | vitest run (root config: unit, integration, security) after pnpm build, in a throwaway copy of the tracked files  |
+| vitest-pg | 18    | 71    | 71     | 0      | 0       | vitest run --config vitest.pg.config.ts against a local PostgreSQL 16 cluster (TEST_DATABASE_URL), throwaway copy |
 | node-test | 1     | 5     | 5      | 0      | 0       | node --test scripts/tests/migration-integrity.test.mjs (as in ci.yml), throwaway copy                             |
 | e2e       | 61    | 265   | 265    | 0      | 0       | playwright test --trace off (Chromium; API + Vite preview webServers from playwright.config.ts), throwaway copy   |
 
-| Other check                             | Result | Detail                                                                                                                         |
-| --------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| pnpm build (all packages and apps)      | PASS   | needed before the integration tests and e2e, which import compiled workspace packages                                          |
-| pnpm typecheck (tsc -b && tsc -p tests) | PASS   | run in the throwaway copy, where its emitted files are discarded                                                               |
-| pnpm lint (prettier --check)            | PASS   | all matched files formatted, including this branch's documentation edits; GitHub Actions CI on main passed for PRs #89 and #90 |
+| Other check                             | Result | Detail                                                                                        |
+| --------------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| pnpm build (all packages and apps)      | PASS   | needed before the integration tests and e2e, which import compiled workspace packages         |
+| pnpm typecheck (tsc -b && tsc -p tests) | PASS   | run in the throwaway copy, where its emitted files are discarded                              |
+| pnpm lint (prettier --check)            | PASS   | all matched files formatted at the measured commit (before this branch's documentation edits) |
 
 Failing test files: none. Test files in the repository with no result: none. Static `it/test` counts differ from executed counts where a test is generated in a loop or a file is excluded by the runner's config.
 
@@ -42,7 +42,7 @@ Failing test files: none. Test files in the repository with no result: none. Sta
 | tests/unit/certificate-verification-domain.test.ts       | vitest     | 8      | 0      | 0       | 8                 |
 | tests/unit/challenges-assessment-domain.test.ts          | vitest     | 8      | 0      | 0       | 8                 |
 | tests/unit/contracts-url.test.ts                         | vitest     | 16     | 0      | 0       | 5                 |
-| tests/unit/database-migrations.test.ts                   | vitest     | 32     | 0      | 0       | 32                |
+| tests/unit/database-migrations.test.ts                   | vitest     | 33     | 0      | 0       | 33                |
 | tests/unit/email/architecture.test.ts                    | vitest     | 2      | 0      | 0       | 2                 |
 | tests/unit/email/brevo.test.ts                           | vitest     | 9      | 0      | 0       | 1                 |
 | tests/unit/email/service.test.ts                         | vitest     | 14     | 0      | 0       | 14                |
@@ -247,6 +247,8 @@ Failing test files: none. Test files in the repository with no result: none. Sta
 | tests/e2e/work-history-removal.spec.ts                   | playwright | 1      | 0      | 0       | 1                 |
 | scripts/tests/migration-integrity.test.mjs               | node-test  | 5      | 0      | 0       | 5                 |
 | tests/pg/application-drafts.test.ts                      | vitest-pg  | 1      | 0      | 0       | 1                 |
+| tests/pg/connections.test.ts                             | vitest-pg  | 2      | 0      | 0       | 2                 |
+| tests/pg/job-alerts.test.ts                              | vitest-pg  | 2      | 0      | 0       | 2                 |
 
 </details>
 
@@ -257,11 +259,11 @@ Failing test files: none. Test files in the repository with no result: none. Sta
 | scripts/tests     | 1     | 5                    |
 | tests/e2e         | 61    | 327                  |
 | tests/integration | 59    | 518                  |
-| tests/pg          | 16    | 67                   |
+| tests/pg          | 18    | 71                   |
 | tests/security    | 6     | 115                  |
-| tests/unit        | 81    | 852                  |
+| tests/unit        | 81    | 853                  |
 
-Total: 224 files, 1884 cases. Skipped/fixme markers: 1 (tests/e2e/hostile-user.spec.ts×1).
+Total: 226 files, 1889 cases. Skipped/fixme markers: 1 (tests/e2e/hostile-user.spec.ts×1).
 
 CI (`.github/workflows/ci.yml`): steps — Set up pnpm; Set up Node; Install dependencies; Install Playwright Chromium; Lint (Prettier); Typecheck; Unit, integration and security tests; Verify migration history guard; Detect unsafe hosted Supabase migration dependencies; Migrations on a clean database; Verify schema and migration ledger after upgrade; Persistence tests (real PostgreSQL); Build and scan browser bundle for server-only values; End-to-end, accessibility and performance.
 
@@ -278,13 +280,13 @@ CI (`.github/workflows/ci.yml`): steps — Set up pnpm; Set up Node; Install dep
 | alumni        | 11        | 11                    | 0          | 30              |
 | analytics     | 3         | 3                     | 0          | 11              |
 | applications  | 7         | 7                     | 2          | 34              |
-| auth          | 6         | 6                     | 6          | 146             |
+| auth          | 6         | 6                     | 6          | 150             |
 | billing       | 12        | 10                    | 4          | 33              |
 | candidates    | 8         | 8                     | 6          | 50              |
 | career        | 6         | 6                     | 3          | 18              |
 | certificates  | 4         | 4                     | 1          | 13              |
 | challenges    | 5         | 5                     | 3          | 14              |
-| connections   | 6         | 6                     | 3          | 31              |
+| connections   | 6         | 6                     | 3          | 36              |
 | courses       | 7         | 7                     | 4          | 28              |
 | evidence      | 8         | 8                     | 2          | 40              |
 | feature-flags | 1         | 1                     | 0          | 4               |
@@ -294,14 +296,14 @@ CI (`.github/workflows/ci.yml`): steps — Set up pnpm; Set up Node; Install dep
 | internal      | 1         | 1                     | 0          | 21              |
 | interviews    | 13        | 13                    | 0          | 32              |
 | job-templates | 6         | 6                     | 0          | 11              |
-| jobs          | 22        | 22                    | 6          | 172             |
+| jobs          | 22        | 22                    | 6          | 180             |
 | learning      | 4         | 4                     | 0          | 10              |
 | lessons       | 1         | 1                     | 1          | 6               |
 | moderation    | 10        | 10                    | 0          | 35              |
 | modules       | 1         | 1                     | 0          | 1               |
 | networking    | 8         | 8                     | 0          | 14              |
 | notifications | 5         | 5                     | 3          | 25              |
-| organizations | 7         | 6                     | 3          | 55              |
+| organizations | 7         | 6                     | 3          | 56              |
 | portfolio     | 6         | 6                     | 2          | 12              |
 | profile       | 3         | 3                     | 1          | 31              |
 | ready         | 1         | 1                     | 0          | 2               |
@@ -312,7 +314,7 @@ CI (`.github/workflows/ci.yml`): steps — Set up pnpm; Set up Node; Install dep
 | resumes       | 7         | 7                     | 2          | 21              |
 | salaries      | 5         | 5                     | 0          | 13              |
 | search        | 5         | 5                     | 1          | 13              |
-| settings      | 8         | 8                     | 4          | 44              |
+| settings      | 8         | 8                     | 4          | 46              |
 | skills        | 16        | 16                    | 4          | 53              |
 | threads       | 5         | 5                     | 4          | 21              |
 | verify        | 1         | 1                     | 1          | 5               |

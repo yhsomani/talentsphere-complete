@@ -484,261 +484,261 @@ RULE-276,RULE,referenceLinkExpired,packages/domain/src/work-history-graph.ts,589
 RULE-277,RULE,requestEmploymentReference,packages/domain/src/work-history-graph.ts,642,requestEmploymentReference,IMPLEMENTED,HIGH,TEST-078,1 linked test file(s) executed and passed (2026-11-25); link is path-level
 RULE-278,RULE,submitEmploymentReference,packages/domain/src/work-history-graph.ts,720,submitEmploymentReference,IMPLEMENTED,HIGH,TEST-078,1 linked test file(s) executed and passed (2026-11-25); link is path-level
 RULE-279,RULE,buildWorkHistoryGraph,packages/domain/src/work-history-graph.ts,795,buildWorkHistoryGraph,IMPLEMENTED,HIGH,TEST-078,1 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-052,MOD,api/health,apps/api/src/server.ts,777,,IMPLEMENTED,MEDIUM,,
-FEAT-001,FEAT,api/health,apps/api/src/server.ts,777,,IMPLEMENTED,MEDIUM,,
-API-001,API,GET /health,apps/api/src/server.ts,777,GET /health,IMPLEMENTED,HIGH,TEST-087;TEST-141;TEST-143;TEST-145;TEST-151,6 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-053,MOD,api/ready,apps/api/src/server.ts,808,,IMPLEMENTED,MEDIUM,,
-FEAT-002,FEAT,api/ready,apps/api/src/server.ts,808,,IMPLEMENTED,MEDIUM,,
-API-002,API,GET /ready,apps/api/src/server.ts,808,GET /ready,IMPLEMENTED,HIGH,TEST-087;TEST-161,2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-003,API,GET /api/v1/health,apps/api/src/server.ts,830,GET /api/v1/health,IMPLEMENTED,HIGH,TEST-087;TEST-141;TEST-143;TEST-145;TEST-151,no first-party web caller found; 6 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-054,MOD,api/feature-flags,apps/api/src/server.ts,862,,IMPLEMENTED,MEDIUM,,
-FEAT-003,FEAT,api/feature-flags,apps/api/src/server.ts,862,,IMPLEMENTED,MEDIUM,,
-API-004,API,GET /api/v1/feature-flags,apps/api/src/server.ts,862,GET /api/v1/feature-flags,IMPLEMENTED,HIGH,TEST-083;TEST-087;TEST-141;TEST-145,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-055,MOD,api/auth,apps/api/src/server.ts,1063,,IMPLEMENTED,MEDIUM,,
-FEAT-004,FEAT,api/auth/register,apps/api/src/server.ts,1063,,IMPLEMENTED,MEDIUM,,
-API-005,API,POST /api/v1/auth/register,apps/api/src/server.ts,1063,POST /api/v1/auth/register,IMPLEMENTED,HIGH,TEST-082;TEST-083;TEST-084;TEST-085;TEST-086,114 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-005,FEAT,api/auth/login,apps/api/src/server.ts,1103,,IMPLEMENTED,MEDIUM,,
-API-006,API,POST /api/v1/auth/login,apps/api/src/server.ts,1103,POST /api/v1/auth/login,IMPLEMENTED,HIGH,TEST-087;TEST-090;TEST-102;TEST-130;TEST-141,20 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-006,FEAT,api/auth/password,apps/api/src/server.ts,1177,,IMPLEMENTED,MEDIUM,,
-API-007,API,POST /api/v1/auth/password,apps/api/src/server.ts,1177,POST /api/v1/auth/password,IMPLEMENTED,HIGH,TEST-142;TEST-150,2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-007,FEAT,api/auth/sign-out,apps/api/src/server.ts,1250,,IMPLEMENTED,MEDIUM,,
-API-008,API,POST /api/v1/auth/sign-out,apps/api/src/server.ts,1250,POST /api/v1/auth/sign-out,IMPLEMENTED,HIGH,TEST-102;TEST-146;TEST-150,3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-008,FEAT,api/auth/sign-out-others,apps/api/src/server.ts,1276,,IMPLEMENTED,MEDIUM,,
-API-009,API,POST /api/v1/auth/sign-out-others,apps/api/src/server.ts,1276,POST /api/v1/auth/sign-out-others,IMPLEMENTED,HIGH,TEST-102;TEST-146,2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-009,FEAT,api/auth/session,apps/api/src/server.ts,1304,,IMPLEMENTED,MEDIUM,,
-API-010,API,GET /api/v1/auth/session,apps/api/src/server.ts,1304,GET /api/v1/auth/session,IMPLEMENTED,HIGH,TEST-142;TEST-146;TEST-150;TEST-164;TEST-209,5 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-056,MOD,api/profile,apps/api/src/server.ts,1325,,IMPLEMENTED,MEDIUM,,
-FEAT-010,FEAT,api/profile/me,apps/api/src/server.ts,1325,,IMPLEMENTED,MEDIUM,,
-API-011,API,GET /api/v1/profile/me,apps/api/src/server.ts,1325,GET /api/v1/profile/me,IMPLEMENTED,HIGH,TEST-082;TEST-090;TEST-096;TEST-102;TEST-104,no first-party web caller found; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-012,API,PATCH /api/v1/profile/me,apps/api/src/server.ts,1334,PATCH /api/v1/profile/me,IMPLEMENTED,HIGH,TEST-082;TEST-090;TEST-091;TEST-096;TEST-104,10 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-011,FEAT,api/profile,apps/api/src/server.ts,1349,,IMPLEMENTED,MEDIUM,,
-API-013,API,GET /api/v1/profile/:id,apps/api/src/server.ts,1349,GET /api/v1/profile/:id,IMPLEMENTED,HIGH,TEST-082;TEST-090;TEST-096;TEST-102;TEST-104,no first-party web caller found; 11 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-057,MOD,api/evidence,apps/api/src/server.ts,1488,,IMPLEMENTED,MEDIUM,,
-FEAT-012,FEAT,api/evidence,apps/api/src/server.ts,1488,,IMPLEMENTED,MEDIUM,,
-API-014,API,POST /api/v1/evidence,apps/api/src/server.ts,1488,POST /api/v1/evidence,IMPLEMENTED,HIGH,TEST-096;TEST-103;TEST-104;TEST-109;TEST-135,no first-party web caller found; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-015,API,GET /api/v1/evidence/:id,apps/api/src/server.ts,1532,GET /api/v1/evidence/:id,IMPLEMENTED,HIGH,TEST-025;TEST-095;TEST-103;TEST-104;TEST-111,no first-party web caller found; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-013,FEAT,api/evidence/mine,apps/api/src/server.ts,1574,,IMPLEMENTED,MEDIUM,,
-API-016,API,GET /api/v1/evidence/mine,apps/api/src/server.ts,1574,GET /api/v1/evidence/mine,IMPLEMENTED,HIGH,TEST-103;TEST-104;TEST-111;TEST-142;TEST-176,5 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-014,FEAT,api/evidence/subject,apps/api/src/server.ts,1582,,IMPLEMENTED,MEDIUM,,
-API-017,API,GET /api/v1/evidence/subject/:subjectId,apps/api/src/server.ts,1582,GET /api/v1/evidence/subject/:subjectId,IMPLEMENTED,HIGH,TEST-096;TEST-104;TEST-145,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-015,FEAT,api/evidence/verify,apps/api/src/server.ts,1634,,IMPLEMENTED,MEDIUM,,
-API-018,API,POST /api/v1/evidence/:id/verify,apps/api/src/server.ts,1634,POST /api/v1/evidence/:id/verify,IMPLEMENTED,HIGH,TEST-103;TEST-179;TEST-181,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-016,FEAT,api/evidence/dispute,apps/api/src/server.ts,1682,,IMPLEMENTED,MEDIUM,,
-API-019,API,POST /api/v1/evidence/:id/dispute,apps/api/src/server.ts,1682,POST /api/v1/evidence/:id/dispute,IMPLEMENTED,HIGH,TEST-103;TEST-104;TEST-181,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-017,FEAT,api/evidence/revoke,apps/api/src/server.ts,1723,,IMPLEMENTED,MEDIUM,,
-API-020,API,POST /api/v1/evidence/:id/revoke,apps/api/src/server.ts,1723,POST /api/v1/evidence/:id/revoke,IMPLEMENTED,HIGH,TEST-103;TEST-109;TEST-181,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-018,FEAT,api/evidence/verify-public,apps/api/src/server.ts,1764,,IMPLEMENTED,MEDIUM,,
-API-021,API,GET /api/v1/evidence/:id/verify-public,apps/api/src/server.ts,1764,GET /api/v1/evidence/:id/verify-public,IMPLEMENTED,HIGH,TEST-103;TEST-145;TEST-181,3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-058,MOD,api/skills,apps/api/src/server.ts,1779,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-FEAT-019,FEAT,api/skills,apps/api/src/server.ts,1779,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-API-022,API,GET /api/v1/skills,apps/api/src/server.ts,1779,GET /api/v1/skills,UNKNOWN,LOW,TEST-084;TEST-089;TEST-101;TEST-108;TEST-117,"handler has no detectable logic, schema, store or rule call"
-API-023,API,POST /api/v1/skills,apps/api/src/server.ts,1783,POST /api/v1/skills,IMPLEMENTED,HIGH,TEST-103;TEST-145;TEST-213,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-020,FEAT,api/skills/relationships,apps/api/src/server.ts,1813,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-024,API,POST /api/v1/skills/relationships,apps/api/src/server.ts,1813,POST /api/v1/skills/relationships,IMPLEMENTED,HIGH,TEST-103;TEST-213,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-021,FEAT,api/skills/graph,apps/api/src/server.ts,1842,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-025,API,GET /api/v1/skills/:id/graph,apps/api/src/server.ts,1842,GET /api/v1/skills/:id/graph,IMPLEMENTED,HIGH,TEST-103;TEST-145;TEST-181,ephemeral: state held in process memory; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-059,MOD,api/organizations,apps/api/src/server.ts,1885,,IMPLEMENTED,MEDIUM,,
-FEAT-022,FEAT,api/organizations,apps/api/src/server.ts,1885,,IMPLEMENTED,MEDIUM,,
-API-026,API,POST /api/v1/organizations,apps/api/src/server.ts,1885,POST /api/v1/organizations,IMPLEMENTED,HIGH,TEST-085;TEST-088;TEST-089;TEST-097;TEST-100,38 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-023,FEAT,api/organizations/mine,apps/api/src/server.ts,1919,,IMPLEMENTED,MEDIUM,,
-API-027,API,GET /api/v1/organizations/mine,apps/api/src/server.ts,1919,GET /api/v1/organizations/mine,IMPLEMENTED,MEDIUM,,
-FEAT-024,FEAT,api/organizations/jobs,apps/api/src/server.ts,1932,,IMPLEMENTED,MEDIUM,,
-API-028,API,GET /api/v1/organizations/:id/jobs,apps/api/src/server.ts,1932,GET /api/v1/organizations/:id/jobs,IMPLEMENTED,HIGH,TEST-142,1 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-029,API,GET /api/v1/organizations/:id,apps/api/src/server.ts,1956,GET /api/v1/organizations/:id,IMPLEMENTED,HIGH,TEST-100;TEST-125;TEST-145;TEST-180,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-025,FEAT,api/organizations/members,apps/api/src/server.ts,1968,,IMPLEMENTED,MEDIUM,,
-API-030,API,POST /api/v1/organizations/:id/members,apps/api/src/server.ts,1968,POST /api/v1/organizations/:id/members,IMPLEMENTED,HIGH,TEST-097;TEST-101;TEST-112;TEST-120;TEST-126,no first-party web caller found; 8 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-060,MOD,api/jobs,apps/api/src/server.ts,2042,,IMPLEMENTED,MEDIUM,,
-FEAT-026,FEAT,api/jobs,apps/api/src/server.ts,2042,,IMPLEMENTED,MEDIUM,,
-API-031,API,POST /api/v1/jobs,apps/api/src/server.ts,2042,POST /api/v1/jobs,IMPLEMENTED,HIGH,TEST-088;TEST-089;TEST-097;TEST-101;TEST-109,30 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-032,API,GET /api/v1/jobs,apps/api/src/server.ts,2109,GET /api/v1/jobs,IMPLEMENTED,HIGH,TEST-056;TEST-097;TEST-101;TEST-109;TEST-112,26 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-033,API,GET /api/v1/jobs/:id,apps/api/src/server.ts,2123,GET /api/v1/jobs/:id,IMPLEMENTED,HIGH,TEST-055;TEST-108;TEST-128;TEST-142;TEST-145,14 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-027,FEAT,api/jobs/status,apps/api/src/server.ts,2143,,IMPLEMENTED,MEDIUM,,
-API-034,API,PATCH /api/v1/jobs/:id/status,apps/api/src/server.ts,2143,PATCH /api/v1/jobs/:id/status,IMPLEMENTED,HIGH,TEST-088;TEST-089;TEST-097;TEST-101;TEST-109,30 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-061,MOD,api/job-templates,apps/api/src/server.ts,2191,,IMPLEMENTED,MEDIUM,,
-FEAT-028,FEAT,api/job-templates,apps/api/src/server.ts,2191,,IMPLEMENTED,MEDIUM,,5/5 endpoints ephemeral
-API-035,API,POST /api/v1/job-templates,apps/api/src/server.ts,2191,POST /api/v1/job-templates,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-036,API,GET /api/v1/job-templates,apps/api/src/server.ts,2258,GET /api/v1/job-templates,IMPLEMENTED,HIGH,TEST-108,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-037,API,GET /api/v1/job-templates/:id,apps/api/src/server.ts,2299,GET /api/v1/job-templates/:id,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-038,API,PATCH /api/v1/job-templates/:id,apps/api/src/server.ts,2325,PATCH /api/v1/job-templates/:id,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-039,API,DELETE /api/v1/job-templates/:id,apps/api/src/server.ts,2409,DELETE /api/v1/job-templates/:id,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-029,FEAT,api/job-templates/instantiate,apps/api/src/server.ts,2456,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-040,API,POST /api/v1/job-templates/:id/instantiate,apps/api/src/server.ts,2456,POST /api/v1/job-templates/:id/instantiate,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-030,FEAT,api/jobs/save-as-template,apps/api/src/server.ts,2534,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-041,API,POST /api/v1/jobs/:id/save-as-template,apps/api/src/server.ts,2534,POST /api/v1/jobs/:id/save-as-template,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-062,MOD,api/salaries,apps/api/src/server.ts,2597,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-FEAT-031,FEAT,api/salaries/reports,apps/api/src/server.ts,2597,,PARTIALLY_IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-042,API,POST /api/v1/salaries/reports,apps/api/src/server.ts,2597,POST /api/v1/salaries/reports,IMPLEMENTED,HIGH,TEST-101;TEST-127;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-043,API,GET /api/v1/salaries/reports/my,apps/api/src/server.ts,2659,GET /api/v1/salaries/reports/my,UNKNOWN,LOW,TEST-127,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory; no first-party web caller found"
-API-044,API,DELETE /api/v1/salaries/reports/:id,apps/api/src/server.ts,2665,DELETE /api/v1/salaries/reports/:id,IMPLEMENTED,HIGH,TEST-127;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-032,FEAT,api/salaries/benchmarks,apps/api/src/server.ts,2697,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-045,API,GET /api/v1/salaries/benchmarks,apps/api/src/server.ts,2697,GET /api/v1/salaries/benchmarks,IMPLEMENTED,HIGH,TEST-101;TEST-127;TEST-145;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-033,FEAT,api/salaries/company,apps/api/src/server.ts,2715,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-046,API,GET /api/v1/salaries/company/:companyName,apps/api/src/server.ts,2715,GET /api/v1/salaries/company/:companyName,IMPLEMENTED,HIGH,TEST-127;TEST-145;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-034,FEAT,api/jobs/apply,apps/api/src/server.ts,2727,,IMPLEMENTED,MEDIUM,,
-API-047,API,POST /api/v1/jobs/:id/apply,apps/api/src/server.ts,2727,POST /api/v1/jobs/:id/apply,IMPLEMENTED,HIGH,TEST-088;TEST-089;TEST-097;TEST-101;TEST-109,26 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-063,MOD,api/applications,apps/api/src/server.ts,2820,,IMPLEMENTED,MEDIUM,,
-FEAT-035,FEAT,api/applications/my,apps/api/src/server.ts,2820,,IMPLEMENTED,MEDIUM,,
-API-048,API,GET /api/v1/applications/my,apps/api/src/server.ts,2820,GET /api/v1/applications/my,IMPLEMENTED,HIGH,TEST-097;TEST-151;TEST-187;TEST-194,4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-036,FEAT,api/applications,apps/api/src/server.ts,2844,,IMPLEMENTED,MEDIUM,,
-API-049,API,GET /api/v1/applications/:id,apps/api/src/server.ts,2844,GET /api/v1/applications/:id,IMPLEMENTED,HIGH,TEST-088;TEST-097;TEST-120;TEST-137;TEST-142,no first-party web caller found; 12 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-037,FEAT,api/jobs/applications,apps/api/src/server.ts,2874,,IMPLEMENTED,MEDIUM,,
-API-050,API,GET /api/v1/jobs/:id/applications,apps/api/src/server.ts,2874,GET /api/v1/jobs/:id/applications,IMPLEMENTED,HIGH,TEST-097;TEST-109;TEST-151;TEST-187,4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-038,FEAT,api/applications/transition,apps/api/src/server.ts,2928,,IMPLEMENTED,MEDIUM,,
-API-051,API,POST /api/v1/applications/:id/transition,apps/api/src/server.ts,2928,POST /api/v1/applications/:id/transition,IMPLEMENTED,HIGH,TEST-097;TEST-109;TEST-137;TEST-142;TEST-150,9 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-039,FEAT,api/applications/feedback,apps/api/src/server.ts,3018,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-052,API,POST /api/v1/applications/:id/feedback,apps/api/src/server.ts,3018,POST /api/v1/applications/:id/feedback,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-053,API,GET /api/v1/applications/:id/feedback,apps/api/src/server.ts,3103,GET /api/v1/applications/:id/feedback,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-054,API,POST /api/v1/applications/:id/feedback/request,apps/api/src/server.ts,3144,POST /api/v1/applications/:id/feedback/request,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-040,FEAT,api/organizations/feedback-templates,apps/api/src/server.ts,3196,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-055,API,POST /api/v1/organizations/:orgId/feedback-templates,apps/api/src/server.ts,3196,POST /api/v1/organizations/:orgId/feedback-templates,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-056,API,GET /api/v1/organizations/:orgId/feedback-templates,apps/api/src/server.ts,3240,GET /api/v1/organizations/:orgId/feedback-templates,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-064,MOD,api/feedback,apps/api/src/server.ts,3262,,IMPLEMENTED,MEDIUM,,
-FEAT-041,FEAT,api/feedback/aggregate-insights,apps/api/src/server.ts,3262,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-057,API,GET /api/v1/feedback/aggregate-insights,apps/api/src/server.ts,3262,GET /api/v1/feedback/aggregate-insights,IMPLEMENTED,HIGH,TEST-089;TEST-145,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-042,FEAT,api/skills/freshness,apps/api/src/server.ts,3272,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-058,API,POST /api/v1/skills/freshness,apps/api/src/server.ts,3272,POST /api/v1/skills/freshness,IMPLEMENTED,HIGH,TEST-084;TEST-131;TEST-173;TEST-211,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-059,API,GET /api/v1/skills/freshness/my,apps/api/src/server.ts,3313,GET /api/v1/skills/freshness/my,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-065,MOD,api/candidates,apps/api/src/server.ts,3324,,IMPLEMENTED,MEDIUM,,
-FEAT-043,FEAT,api/candidates/skills,apps/api/src/server.ts,3324,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-060,API,GET /api/v1/candidates/:candidateProfileId/skills/freshness,apps/api/src/server.ts,3324,GET /api/v1/candidates/:candidateProfileId/skills/freshness,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-044,FEAT,api/skills/reverify,apps/api/src/server.ts,3363,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-061,API,POST /api/v1/skills/:skillId/reverify,apps/api/src/server.ts,3363,POST /api/v1/skills/:skillId/reverify,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-062,API,POST /api/v1/skills/freshness/refresh-all,apps/api/src/server.ts,3416,POST /api/v1/skills/freshness/refresh-all,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-066,MOD,api/interviews,apps/api/src/server.ts,3452,,IMPLEMENTED,MEDIUM,,
-FEAT-045,FEAT,api/interviews/questions,apps/api/src/server.ts,3452,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-063,API,POST /api/v1/interviews/questions,apps/api/src/server.ts,3452,POST /api/v1/interviews/questions,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-064,API,GET /api/v1/interviews/questions,apps/api/src/server.ts,3494,GET /api/v1/interviews/questions,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-046,FEAT,api/interviews/assessments,apps/api/src/server.ts,3567,,IMPLEMENTED,MEDIUM,,11/11 endpoints ephemeral
-API-065,API,POST /api/v1/interviews/assessments,apps/api/src/server.ts,3567,POST /api/v1/interviews/assessments,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-066,API,GET /api/v1/interviews/assessments/:id,apps/api/src/server.ts,3663,GET /api/v1/interviews/assessments/:id,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-067,API,POST /api/v1/interviews/assessments/:id/join,apps/api/src/server.ts,3695,POST /api/v1/interviews/assessments/:id/join,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-068,API,POST /api/v1/interviews/assessments/:id/consent,apps/api/src/server.ts,3723,POST /api/v1/interviews/assessments/:id/consent,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-069,API,POST /api/v1/interviews/assessments/:id/end,apps/api/src/server.ts,3744,POST /api/v1/interviews/assessments/:id/end,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-070,API,POST /api/v1/interviews/assessments/:id/code,apps/api/src/server.ts,3780,POST /api/v1/interviews/assessments/:id/code,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-071,API,POST /api/v1/interviews/assessments/:id/scorecard,apps/api/src/server.ts,3830,POST /api/v1/interviews/assessments/:id/scorecard,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-072,API,POST /api/v1/interviews/assessments/:id/scorecard/compensate,apps/api/src/server.ts,3906,POST /api/v1/interviews/assessments/:id/scorecard/compensate,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-073,API,GET /api/v1/interviews/assessments/:id/scorecards,apps/api/src/server.ts,3966,GET /api/v1/interviews/assessments/:id/scorecards,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-074,API,POST /api/v1/interviews/assessments/:id/ai-feedback,apps/api/src/server.ts,3998,POST /api/v1/interviews/assessments/:id/ai-feedback,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-075,API,POST /api/v1/interviews/assessments/:id/review,apps/api/src/server.ts,4018,POST /api/v1/interviews/assessments/:id/review,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-067,MOD,api/reputation,apps/api/src/server.ts,4044,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-FEAT-047,FEAT,api/reputation/signals,apps/api/src/server.ts,4044,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-076,API,POST /api/v1/reputation/signals,apps/api/src/server.ts,4044,POST /api/v1/reputation/signals,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-048,FEAT,api/reputation/users,apps/api/src/server.ts,4107,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-077,API,GET /api/v1/reputation/users/:userId,apps/api/src/server.ts,4107,GET /api/v1/reputation/users/:userId,IMPLEMENTED,HIGH,TEST-121;TEST-122;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-049,FEAT,api/reputation/my,apps/api/src/server.ts,4179,,PARTIALLY_IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-078,API,GET /api/v1/reputation/my/signals,apps/api/src/server.ts,4179,GET /api/v1/reputation/my/signals,UNKNOWN,LOW,TEST-121;TEST-203,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory; no first-party web caller found"
-FEAT-050,FEAT,api/reputation/recovery,apps/api/src/server.ts,4185,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-079,API,POST /api/v1/reputation/recovery,apps/api/src/server.ts,4185,POST /api/v1/reputation/recovery,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-080,API,POST /api/v1/reputation/recovery/:planId/tasks/:taskId/complete,apps/api/src/server.ts,4216,POST /api/v1/reputation/recovery/:planId/tasks/:taskId/complete,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-051,FEAT,api/reputation/recalculate-all,apps/api/src/server.ts,4281,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-081,API,POST /api/v1/reputation/recalculate-all,apps/api/src/server.ts,4281,POST /api/v1/reputation/recalculate-all,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-052,FEAT,api/reputation/instructors,apps/api/src/server.ts,4336,,IMPLEMENTED,MEDIUM,,5/5 endpoints ephemeral
-API-082,API,GET /api/v1/reputation/instructors/:instructorId,apps/api/src/server.ts,4336,GET /api/v1/reputation/instructors/:instructorId,IMPLEMENTED,HIGH,TEST-106;TEST-126;TEST-145;TEST-185,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-083,API,POST /api/v1/reputation/instructors/:instructorId/metrics,apps/api/src/server.ts,4363,POST /api/v1/reputation/instructors/:instructorId/metrics,IMPLEMENTED,HIGH,TEST-106;TEST-185,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-084,API,POST /api/v1/reputation/instructors/:instructorId/endorse,apps/api/src/server.ts,4417,POST /api/v1/reputation/instructors/:instructorId/endorse,IMPLEMENTED,HIGH,TEST-106,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-085,API,POST /api/v1/reputation/instructors/:instructorId/reviews,apps/api/src/server.ts,4467,POST /api/v1/reputation/instructors/:instructorId/reviews,IMPLEMENTED,HIGH,TEST-106;TEST-126;TEST-185,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-086,API,POST /api/v1/reputation/instructors/recompute,apps/api/src/server.ts,4516,POST /api/v1/reputation/instructors/recompute,IMPLEMENTED,HIGH,TEST-106,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-053,FEAT,api/reputation/organizations,apps/api/src/server.ts,4547,,IMPLEMENTED,MEDIUM,,4/4 endpoints ephemeral
-API-087,API,GET /api/v1/reputation/organizations/:organizationId,apps/api/src/server.ts,4547,GET /api/v1/reputation/organizations/:organizationId,IMPLEMENTED,HIGH,TEST-100;TEST-145;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-088,API,POST /api/v1/reputation/organizations/:organizationId/reviews,apps/api/src/server.ts,4570,POST /api/v1/reputation/organizations/:organizationId/reviews,IMPLEMENTED,HIGH,TEST-100;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-089,API,POST /api/v1/reputation/organizations/:organizationId/metrics,apps/api/src/server.ts,4654,POST /api/v1/reputation/organizations/:organizationId/metrics,IMPLEMENTED,HIGH,TEST-100;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-090,API,GET /api/v1/reputation/organizations/:organizationId/reviews,apps/api/src/server.ts,4699,GET /api/v1/reputation/organizations/:organizationId/reviews,IMPLEMENTED,HIGH,TEST-100;TEST-145;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-068,MOD,api/challenges,apps/api/src/server.ts,4729,,IMPLEMENTED,MEDIUM,,
-FEAT-054,FEAT,api/challenges,apps/api/src/server.ts,4729,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-091,API,GET /api/v1/challenges,apps/api/src/server.ts,4729,GET /api/v1/challenges,IMPLEMENTED,HIGH,TEST-145;TEST-170;TEST-176,ephemeral: state held in process memory; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-092,API,GET /api/v1/challenges/:id,apps/api/src/server.ts,4734,GET /api/v1/challenges/:id,IMPLEMENTED,HIGH,TEST-095;TEST-145,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-093,API,POST /api/v1/challenges,apps/api/src/server.ts,4746,POST /api/v1/challenges,IMPLEMENTED,HIGH,TEST-095,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-055,FEAT,api/challenges/start-session,apps/api/src/server.ts,4778,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-094,API,POST /api/v1/challenges/:id/start-session,apps/api/src/server.ts,4778,POST /api/v1/challenges/:id/start-session,IMPLEMENTED,HIGH,TEST-084;TEST-095;TEST-170;TEST-176,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-056,FEAT,api/challenges/submit,apps/api/src/server.ts,4811,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-095,API,POST /api/v1/challenges/:id/submit,apps/api/src/server.ts,4811,POST /api/v1/challenges/:id/submit,IMPLEMENTED,HIGH,TEST-095;TEST-124;TEST-170;TEST-176,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-069,MOD,api/ai,apps/api/src/server.ts,4918,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-FEAT-057,FEAT,api/ai/assistant,apps/api/src/server.ts,4918,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-096,API,POST /api/v1/ai/assistant/query,apps/api/src/server.ts,4918,POST /api/v1/ai/assistant/query,IMPLEMENTED,HIGH,TEST-095;TEST-170;TEST-176,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-070,MOD,api/xp,apps/api/src/server.ts,4936,,IMPLEMENTED,MEDIUM,,
-FEAT-058,FEAT,api/xp/ledger,apps/api/src/server.ts,4936,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-097,API,GET /api/v1/xp/ledger,apps/api/src/server.ts,4936,GET /api/v1/xp/ledger,IMPLEMENTED,HIGH,TEST-095,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-071,MOD,api/courses,apps/api/src/server.ts,4963,,IMPLEMENTED,MEDIUM,,
-FEAT-059,FEAT,api/courses,apps/api/src/server.ts,4963,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-098,API,GET /api/v1/courses,apps/api/src/server.ts,4963,GET /api/v1/courses,IMPLEMENTED,HIGH,TEST-111;TEST-145;TEST-170;TEST-175,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-099,API,POST /api/v1/courses,apps/api/src/server.ts,4995,POST /api/v1/courses,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-100,API,GET /api/v1/courses/:id,apps/api/src/server.ts,5042,GET /api/v1/courses/:id,IMPLEMENTED,HIGH,TEST-055;TEST-094;TEST-110;TEST-111;TEST-145,ephemeral: state held in process memory; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-060,FEAT,api/courses/modules,apps/api/src/server.ts,5085,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-101,API,POST /api/v1/courses/:id/modules,apps/api/src/server.ts,5085,POST /api/v1/courses/:id/modules,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-072,MOD,api/modules,apps/api/src/server.ts,5130,,IMPLEMENTED,MEDIUM,,
-FEAT-061,FEAT,api/modules/lessons,apps/api/src/server.ts,5130,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-102,API,POST /api/v1/modules/:id/lessons,apps/api/src/server.ts,5130,POST /api/v1/modules/:id/lessons,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-062,FEAT,api/courses/publish,apps/api/src/server.ts,5190,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-103,API,POST /api/v1/courses/:id/publish,apps/api/src/server.ts,5190,POST /api/v1/courses/:id/publish,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-063,FEAT,api/courses/enroll,apps/api/src/server.ts,5232,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-104,API,POST /api/v1/courses/:id/enroll,apps/api/src/server.ts,5232,POST /api/v1/courses/:id/enroll,IMPLEMENTED,HIGH,TEST-094;TEST-110;TEST-111;TEST-126;TEST-170,ephemeral: state held in process memory; 9 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-064,FEAT,api/courses/progress,apps/api/src/server.ts,5265,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-105,API,GET /api/v1/courses/:id/progress,apps/api/src/server.ts,5265,GET /api/v1/courses/:id/progress,IMPLEMENTED,HIGH,TEST-111;TEST-170,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-073,MOD,api/lessons,apps/api/src/server.ts,5317,,IMPLEMENTED,MEDIUM,,
-FEAT-065,FEAT,api/lessons/complete,apps/api/src/server.ts,5317,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-106,API,POST /api/v1/lessons/:id/complete,apps/api/src/server.ts,5317,POST /api/v1/lessons/:id/complete,IMPLEMENTED,HIGH,TEST-094;TEST-111;TEST-170;TEST-175;TEST-179,ephemeral: state held in process memory; 6 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-074,MOD,api/certificates,apps/api/src/server.ts,5474,,IMPLEMENTED,MEDIUM,,
-FEAT-066,FEAT,api/certificates,apps/api/src/server.ts,5474,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-107,API,GET /api/v1/certificates/:certificateNumber,apps/api/src/server.ts,5474,GET /api/v1/certificates/:certificateNumber,IMPLEMENTED,HIGH,TEST-094;TEST-111;TEST-145;TEST-170;TEST-175,ephemeral: state held in process memory; no first-party web caller found; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-075,MOD,api/verify,apps/api/src/server.ts,5497,,IMPLEMENTED,MEDIUM,,
-FEAT-067,FEAT,api/verify,apps/api/src/server.ts,5497,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-108,API,GET /api/v1/verify/:hash,apps/api/src/server.ts,5497,GET /api/v1/verify/:hash,IMPLEMENTED,HIGH,TEST-094;TEST-145;TEST-175;TEST-179;TEST-217,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-068,FEAT,api/certificates/verify,apps/api/src/server.ts,5545,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-109,API,GET /api/v1/certificates/verify/:hash,apps/api/src/server.ts,5545,GET /api/v1/certificates/verify/:hash,IMPLEMENTED,HIGH,TEST-094;TEST-145;TEST-175,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-069,FEAT,api/certificates/my,apps/api/src/server.ts,5567,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-110,API,GET /api/v1/certificates/my,apps/api/src/server.ts,5567,GET /api/v1/certificates/my,IMPLEMENTED,HIGH,TEST-094;TEST-175,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-070,FEAT,api/certificates/revoke,apps/api/src/server.ts,5592,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-111,API,POST /api/v1/certificates/:certificateNumber/revoke,apps/api/src/server.ts,5592,POST /api/v1/certificates/:certificateNumber/revoke,IMPLEMENTED,HIGH,TEST-094;TEST-175;TEST-179,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-076,MOD,api/threads,apps/api/src/server.ts,5728,,IMPLEMENTED,MEDIUM,,
-FEAT-071,FEAT,api/threads,apps/api/src/server.ts,5728,,IMPLEMENTED,MEDIUM,,
-API-112,API,GET /api/v1/threads,apps/api/src/server.ts,5728,GET /api/v1/threads,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-116;TEST-155,4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-113,API,POST /api/v1/threads,apps/api/src/server.ts,5760,POST /api/v1/threads,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-116;TEST-155;TEST-191,6 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-114,API,GET /api/v1/threads/:id,apps/api/src/server.ts,5851,GET /api/v1/threads/:id,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-155,3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-072,FEAT,api/threads/messages,apps/api/src/server.ts,5894,,IMPLEMENTED,MEDIUM,,
-API-115,API,POST /api/v1/threads/:id/messages,apps/api/src/server.ts,5894,POST /api/v1/threads/:id/messages,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-116;TEST-155;TEST-191,6 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-073,FEAT,api/threads/read,apps/api/src/server.ts,5955,,IMPLEMENTED,MEDIUM,,
-API-116,API,POST /api/v1/threads/:id/read,apps/api/src/server.ts,5955,POST /api/v1/threads/:id/read,IMPLEMENTED,HIGH,TEST-113;TEST-155,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-077,MOD,api/notifications,apps/api/src/server.ts,5983,,IMPLEMENTED,MEDIUM,,
-FEAT-074,FEAT,api/notifications,apps/api/src/server.ts,5983,,IMPLEMENTED,MEDIUM,,
-API-117,API,GET /api/v1/notifications,apps/api/src/server.ts,5983,GET /api/v1/notifications,IMPLEMENTED,HIGH,TEST-097;TEST-112;TEST-115;TEST-116;TEST-150,10 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-075,FEAT,api/notifications/summary,apps/api/src/server.ts,6014,,IMPLEMENTED,MEDIUM,,
-API-118,API,GET /api/v1/notifications/summary,apps/api/src/server.ts,6014,GET /api/v1/notifications/summary,IMPLEMENTED,HIGH,TEST-056;TEST-097;TEST-112;TEST-156,4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-076,FEAT,api/notifications/mark-read,apps/api/src/server.ts,6023,,IMPLEMENTED,MEDIUM,,
-API-119,API,POST /api/v1/notifications/mark-read,apps/api/src/server.ts,6023,POST /api/v1/notifications/mark-read,IMPLEMENTED,HIGH,TEST-097;TEST-116;TEST-156;TEST-191,4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-077,FEAT,api/notifications/preferences,apps/api/src/server.ts,6053,,IMPLEMENTED,MEDIUM,,
-API-120,API,GET /api/v1/notifications/preferences,apps/api/src/server.ts,6053,GET /api/v1/notifications/preferences,IMPLEMENTED,HIGH,TEST-097;TEST-116;TEST-156,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-121,API,PATCH /api/v1/notifications/preferences,apps/api/src/server.ts,6069,PATCH /api/v1/notifications/preferences,IMPLEMENTED,HIGH,TEST-097;TEST-116;TEST-156;TEST-191,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-078,FEAT,api/ai/conversations,apps/api/src/server.ts,6128,,PARTIALLY_IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-122,API,POST /api/v1/ai/conversations,apps/api/src/server.ts,6128,POST /api/v1/ai/conversations,IMPLEMENTED,HIGH,TEST-084;TEST-125,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-123,API,GET /api/v1/ai/conversations,apps/api/src/server.ts,6142,GET /api/v1/ai/conversations,UNKNOWN,LOW,TEST-125,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory; no first-party web caller found"
-API-124,API,GET /api/v1/ai/conversations/:id,apps/api/src/server.ts,6148,GET /api/v1/ai/conversations/:id,IMPLEMENTED,HIGH,TEST-084,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-079,FEAT,api/ai/career-assistant,apps/api/src/server.ts,6168,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-125,API,POST /api/v1/ai/career-assistant/chat,apps/api/src/server.ts,6168,POST /api/v1/ai/career-assistant/chat,IMPLEMENTED,HIGH,TEST-084;TEST-118;TEST-143;TEST-191,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-080,FEAT,api/ai/usage,apps/api/src/server.ts,6271,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-126,API,GET /api/v1/ai/usage,apps/api/src/server.ts,6271,GET /api/v1/ai/usage,IMPLEMENTED,HIGH,TEST-084;TEST-118;TEST-191,ephemeral: state held in process memory; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-078,MOD,api/resumes,apps/api/src/server.ts,6300,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-FEAT-081,FEAT,api/resumes,apps/api/src/server.ts,6300,,PARTIALLY_IMPLEMENTED,MEDIUM,,4/4 endpoints ephemeral
-API-127,API,POST /api/v1/resumes,apps/api/src/server.ts,6300,POST /api/v1/resumes,IMPLEMENTED,HIGH,TEST-123;TEST-126;TEST-141;TEST-206;TEST-224,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-128,API,GET /api/v1/resumes,apps/api/src/server.ts,6314,GET /api/v1/resumes,UNKNOWN,LOW,TEST-123;TEST-141;TEST-199;TEST-200;TEST-217,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory"
-API-129,API,GET /api/v1/resumes/:id,apps/api/src/server.ts,6320,GET /api/v1/resumes/:id,IMPLEMENTED,HIGH,TEST-123;TEST-141,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-130,API,PATCH /api/v1/resumes/:id,apps/api/src/server.ts,6339,PATCH /api/v1/resumes/:id,IMPLEMENTED,HIGH,TEST-123;TEST-141,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-082,FEAT,api/resumes/export,apps/api/src/server.ts,6370,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-131,API,POST /api/v1/resumes/:id/export,apps/api/src/server.ts,6370,POST /api/v1/resumes/:id/export,IMPLEMENTED,HIGH,TEST-123;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-083,FEAT,api/resumes/exports,apps/api/src/server.ts,6411,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-132,API,GET /api/v1/resumes/:id/exports,apps/api/src/server.ts,6411,GET /api/v1/resumes/:id/exports,IMPLEMENTED,HIGH,TEST-123;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-133,API,DELETE /api/v1/resumes/exports/:exportId,apps/api/src/server.ts,6439,DELETE /api/v1/resumes/exports/:exportId,IMPLEMENTED,HIGH,TEST-123;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-079,MOD,api/connections,apps/api/src/server.ts,6482,,IMPLEMENTED,MEDIUM,,
-FEAT-084,FEAT,api/connections/request,apps/api/src/server.ts,6482,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-134,API,POST /api/v1/connections/request,apps/api/src/server.ts,6482,POST /api/v1/connections/request,IMPLEMENTED,HIGH,TEST-096;TEST-101;TEST-113;TEST-115;TEST-116,ephemeral: state held in process memory; 13 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-085,FEAT,api/connections,apps/api/src/server.ts,6551,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-135,API,GET /api/v1/connections,apps/api/src/server.ts,6551,GET /api/v1/connections,IMPLEMENTED,HIGH,TEST-101;TEST-115,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-086,FEAT,api/connections/status,apps/api/src/server.ts,6598,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-136,API,GET /api/v1/connections/status/:targetUserId,apps/api/src/server.ts,6598,GET /api/v1/connections/status/:targetUserId,IMPLEMENTED,HIGH,TEST-115;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-087,FEAT,api/connections/respond,apps/api/src/server.ts,6620,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-137,API,POST /api/v1/connections/:id/respond,apps/api/src/server.ts,6620,POST /api/v1/connections/:id/respond,IMPLEMENTED,HIGH,TEST-096;TEST-101;TEST-113;TEST-115;TEST-116,ephemeral: state held in process memory; 12 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-088,FEAT,api/connections/withdraw,apps/api/src/server.ts,6688,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-138,API,POST /api/v1/connections/:id/withdraw,apps/api/src/server.ts,6688,POST /api/v1/connections/:id/withdraw,IMPLEMENTED,HIGH,TEST-115,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-139,API,DELETE /api/v1/connections/:id,apps/api/src/server.ts,6724,DELETE /api/v1/connections/:id,IMPLEMENTED,HIGH,TEST-115,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-052,MOD,api/health,apps/api/src/server.ts,776,,IMPLEMENTED,MEDIUM,,
+FEAT-001,FEAT,api/health,apps/api/src/server.ts,776,,IMPLEMENTED,MEDIUM,,
+API-001,API,GET /health,apps/api/src/server.ts,776,GET /health,IMPLEMENTED,HIGH,TEST-087;TEST-141;TEST-143;TEST-145;TEST-151,6 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-053,MOD,api/ready,apps/api/src/server.ts,807,,IMPLEMENTED,MEDIUM,,
+FEAT-002,FEAT,api/ready,apps/api/src/server.ts,807,,IMPLEMENTED,MEDIUM,,
+API-002,API,GET /ready,apps/api/src/server.ts,807,GET /ready,IMPLEMENTED,HIGH,TEST-087;TEST-161,2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-003,API,GET /api/v1/health,apps/api/src/server.ts,829,GET /api/v1/health,IMPLEMENTED,HIGH,TEST-087;TEST-141;TEST-143;TEST-145;TEST-151,no first-party web caller found; 6 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-054,MOD,api/feature-flags,apps/api/src/server.ts,861,,IMPLEMENTED,MEDIUM,,
+FEAT-003,FEAT,api/feature-flags,apps/api/src/server.ts,861,,IMPLEMENTED,MEDIUM,,
+API-004,API,GET /api/v1/feature-flags,apps/api/src/server.ts,861,GET /api/v1/feature-flags,IMPLEMENTED,HIGH,TEST-083;TEST-087;TEST-141;TEST-145,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-055,MOD,api/auth,apps/api/src/server.ts,1062,,IMPLEMENTED,MEDIUM,,
+FEAT-004,FEAT,api/auth/register,apps/api/src/server.ts,1062,,IMPLEMENTED,MEDIUM,,
+API-005,API,POST /api/v1/auth/register,apps/api/src/server.ts,1062,POST /api/v1/auth/register,IMPLEMENTED,HIGH,TEST-082;TEST-083;TEST-084;TEST-085;TEST-086,116 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-005,FEAT,api/auth/login,apps/api/src/server.ts,1102,,IMPLEMENTED,MEDIUM,,
+API-006,API,POST /api/v1/auth/login,apps/api/src/server.ts,1102,POST /api/v1/auth/login,IMPLEMENTED,HIGH,TEST-087;TEST-090;TEST-102;TEST-130;TEST-141,22 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-006,FEAT,api/auth/password,apps/api/src/server.ts,1176,,IMPLEMENTED,MEDIUM,,
+API-007,API,POST /api/v1/auth/password,apps/api/src/server.ts,1176,POST /api/v1/auth/password,IMPLEMENTED,HIGH,TEST-142;TEST-150,2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-007,FEAT,api/auth/sign-out,apps/api/src/server.ts,1249,,IMPLEMENTED,MEDIUM,,
+API-008,API,POST /api/v1/auth/sign-out,apps/api/src/server.ts,1249,POST /api/v1/auth/sign-out,IMPLEMENTED,HIGH,TEST-102;TEST-146;TEST-150,3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-008,FEAT,api/auth/sign-out-others,apps/api/src/server.ts,1275,,IMPLEMENTED,MEDIUM,,
+API-009,API,POST /api/v1/auth/sign-out-others,apps/api/src/server.ts,1275,POST /api/v1/auth/sign-out-others,IMPLEMENTED,HIGH,TEST-102;TEST-146,2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-009,FEAT,api/auth/session,apps/api/src/server.ts,1303,,IMPLEMENTED,MEDIUM,,
+API-010,API,GET /api/v1/auth/session,apps/api/src/server.ts,1303,GET /api/v1/auth/session,IMPLEMENTED,HIGH,TEST-142;TEST-146;TEST-150;TEST-164;TEST-209,5 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-056,MOD,api/profile,apps/api/src/server.ts,1324,,IMPLEMENTED,MEDIUM,,
+FEAT-010,FEAT,api/profile/me,apps/api/src/server.ts,1324,,IMPLEMENTED,MEDIUM,,
+API-011,API,GET /api/v1/profile/me,apps/api/src/server.ts,1324,GET /api/v1/profile/me,IMPLEMENTED,HIGH,TEST-082;TEST-090;TEST-096;TEST-102;TEST-104,no first-party web caller found; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-012,API,PATCH /api/v1/profile/me,apps/api/src/server.ts,1333,PATCH /api/v1/profile/me,IMPLEMENTED,HIGH,TEST-082;TEST-090;TEST-091;TEST-096;TEST-104,10 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-011,FEAT,api/profile,apps/api/src/server.ts,1348,,IMPLEMENTED,MEDIUM,,
+API-013,API,GET /api/v1/profile/:id,apps/api/src/server.ts,1348,GET /api/v1/profile/:id,IMPLEMENTED,HIGH,TEST-082;TEST-090;TEST-096;TEST-102;TEST-104,no first-party web caller found; 11 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-057,MOD,api/evidence,apps/api/src/server.ts,1487,,IMPLEMENTED,MEDIUM,,
+FEAT-012,FEAT,api/evidence,apps/api/src/server.ts,1487,,IMPLEMENTED,MEDIUM,,
+API-014,API,POST /api/v1/evidence,apps/api/src/server.ts,1487,POST /api/v1/evidence,IMPLEMENTED,HIGH,TEST-096;TEST-103;TEST-104;TEST-109;TEST-135,no first-party web caller found; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-015,API,GET /api/v1/evidence/:id,apps/api/src/server.ts,1531,GET /api/v1/evidence/:id,IMPLEMENTED,HIGH,TEST-025;TEST-095;TEST-103;TEST-104;TEST-111,no first-party web caller found; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-013,FEAT,api/evidence/mine,apps/api/src/server.ts,1573,,IMPLEMENTED,MEDIUM,,
+API-016,API,GET /api/v1/evidence/mine,apps/api/src/server.ts,1573,GET /api/v1/evidence/mine,IMPLEMENTED,HIGH,TEST-103;TEST-104;TEST-111;TEST-142;TEST-176,5 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-014,FEAT,api/evidence/subject,apps/api/src/server.ts,1581,,IMPLEMENTED,MEDIUM,,
+API-017,API,GET /api/v1/evidence/subject/:subjectId,apps/api/src/server.ts,1581,GET /api/v1/evidence/subject/:subjectId,IMPLEMENTED,HIGH,TEST-096;TEST-104;TEST-145,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-015,FEAT,api/evidence/verify,apps/api/src/server.ts,1633,,IMPLEMENTED,MEDIUM,,
+API-018,API,POST /api/v1/evidence/:id/verify,apps/api/src/server.ts,1633,POST /api/v1/evidence/:id/verify,IMPLEMENTED,HIGH,TEST-103;TEST-179;TEST-181,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-016,FEAT,api/evidence/dispute,apps/api/src/server.ts,1681,,IMPLEMENTED,MEDIUM,,
+API-019,API,POST /api/v1/evidence/:id/dispute,apps/api/src/server.ts,1681,POST /api/v1/evidence/:id/dispute,IMPLEMENTED,HIGH,TEST-103;TEST-104;TEST-181,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-017,FEAT,api/evidence/revoke,apps/api/src/server.ts,1722,,IMPLEMENTED,MEDIUM,,
+API-020,API,POST /api/v1/evidence/:id/revoke,apps/api/src/server.ts,1722,POST /api/v1/evidence/:id/revoke,IMPLEMENTED,HIGH,TEST-103;TEST-109;TEST-181,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-018,FEAT,api/evidence/verify-public,apps/api/src/server.ts,1763,,IMPLEMENTED,MEDIUM,,
+API-021,API,GET /api/v1/evidence/:id/verify-public,apps/api/src/server.ts,1763,GET /api/v1/evidence/:id/verify-public,IMPLEMENTED,HIGH,TEST-103;TEST-145;TEST-181,3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-058,MOD,api/skills,apps/api/src/server.ts,1778,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+FEAT-019,FEAT,api/skills,apps/api/src/server.ts,1778,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+API-022,API,GET /api/v1/skills,apps/api/src/server.ts,1778,GET /api/v1/skills,UNKNOWN,LOW,TEST-084;TEST-089;TEST-101;TEST-108;TEST-117,"handler has no detectable logic, schema, store or rule call"
+API-023,API,POST /api/v1/skills,apps/api/src/server.ts,1782,POST /api/v1/skills,IMPLEMENTED,HIGH,TEST-103;TEST-145;TEST-213,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-020,FEAT,api/skills/relationships,apps/api/src/server.ts,1812,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-024,API,POST /api/v1/skills/relationships,apps/api/src/server.ts,1812,POST /api/v1/skills/relationships,IMPLEMENTED,HIGH,TEST-103;TEST-213,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-021,FEAT,api/skills/graph,apps/api/src/server.ts,1841,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-025,API,GET /api/v1/skills/:id/graph,apps/api/src/server.ts,1841,GET /api/v1/skills/:id/graph,IMPLEMENTED,HIGH,TEST-103;TEST-145;TEST-181,ephemeral: state held in process memory; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-059,MOD,api/organizations,apps/api/src/server.ts,1884,,IMPLEMENTED,MEDIUM,,
+FEAT-022,FEAT,api/organizations,apps/api/src/server.ts,1884,,IMPLEMENTED,MEDIUM,,
+API-026,API,POST /api/v1/organizations,apps/api/src/server.ts,1884,POST /api/v1/organizations,IMPLEMENTED,HIGH,TEST-085;TEST-088;TEST-089;TEST-097;TEST-100,39 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-023,FEAT,api/organizations/mine,apps/api/src/server.ts,1918,,IMPLEMENTED,MEDIUM,,
+API-027,API,GET /api/v1/organizations/mine,apps/api/src/server.ts,1918,GET /api/v1/organizations/mine,IMPLEMENTED,MEDIUM,,
+FEAT-024,FEAT,api/organizations/jobs,apps/api/src/server.ts,1931,,IMPLEMENTED,MEDIUM,,
+API-028,API,GET /api/v1/organizations/:id/jobs,apps/api/src/server.ts,1931,GET /api/v1/organizations/:id/jobs,IMPLEMENTED,HIGH,TEST-142,1 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-029,API,GET /api/v1/organizations/:id,apps/api/src/server.ts,1955,GET /api/v1/organizations/:id,IMPLEMENTED,HIGH,TEST-100;TEST-125;TEST-145;TEST-180,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-025,FEAT,api/organizations/members,apps/api/src/server.ts,1967,,IMPLEMENTED,MEDIUM,,
+API-030,API,POST /api/v1/organizations/:id/members,apps/api/src/server.ts,1967,POST /api/v1/organizations/:id/members,IMPLEMENTED,HIGH,TEST-097;TEST-101;TEST-112;TEST-120;TEST-126,no first-party web caller found; 8 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-060,MOD,api/jobs,apps/api/src/server.ts,2041,,IMPLEMENTED,MEDIUM,,
+FEAT-026,FEAT,api/jobs,apps/api/src/server.ts,2041,,IMPLEMENTED,MEDIUM,,
+API-031,API,POST /api/v1/jobs,apps/api/src/server.ts,2041,POST /api/v1/jobs,IMPLEMENTED,HIGH,TEST-088;TEST-089;TEST-097;TEST-101;TEST-109,31 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-032,API,GET /api/v1/jobs,apps/api/src/server.ts,2105,GET /api/v1/jobs,IMPLEMENTED,HIGH,TEST-056;TEST-097;TEST-101;TEST-109;TEST-112,27 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-033,API,GET /api/v1/jobs/:id,apps/api/src/server.ts,2119,GET /api/v1/jobs/:id,IMPLEMENTED,HIGH,TEST-055;TEST-108;TEST-128;TEST-142;TEST-145,15 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-027,FEAT,api/jobs/status,apps/api/src/server.ts,2139,,IMPLEMENTED,MEDIUM,,
+API-034,API,PATCH /api/v1/jobs/:id/status,apps/api/src/server.ts,2139,PATCH /api/v1/jobs/:id/status,IMPLEMENTED,HIGH,TEST-088;TEST-089;TEST-097;TEST-101;TEST-109,31 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-061,MOD,api/job-templates,apps/api/src/server.ts,2186,,IMPLEMENTED,MEDIUM,,
+FEAT-028,FEAT,api/job-templates,apps/api/src/server.ts,2186,,IMPLEMENTED,MEDIUM,,5/5 endpoints ephemeral
+API-035,API,POST /api/v1/job-templates,apps/api/src/server.ts,2186,POST /api/v1/job-templates,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-036,API,GET /api/v1/job-templates,apps/api/src/server.ts,2253,GET /api/v1/job-templates,IMPLEMENTED,HIGH,TEST-108,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-037,API,GET /api/v1/job-templates/:id,apps/api/src/server.ts,2294,GET /api/v1/job-templates/:id,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-038,API,PATCH /api/v1/job-templates/:id,apps/api/src/server.ts,2320,PATCH /api/v1/job-templates/:id,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-039,API,DELETE /api/v1/job-templates/:id,apps/api/src/server.ts,2404,DELETE /api/v1/job-templates/:id,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-029,FEAT,api/job-templates/instantiate,apps/api/src/server.ts,2451,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-040,API,POST /api/v1/job-templates/:id/instantiate,apps/api/src/server.ts,2451,POST /api/v1/job-templates/:id/instantiate,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-030,FEAT,api/jobs/save-as-template,apps/api/src/server.ts,2529,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-041,API,POST /api/v1/jobs/:id/save-as-template,apps/api/src/server.ts,2529,POST /api/v1/jobs/:id/save-as-template,IMPLEMENTED,HIGH,TEST-108;TEST-186,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-062,MOD,api/salaries,apps/api/src/server.ts,2592,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+FEAT-031,FEAT,api/salaries/reports,apps/api/src/server.ts,2592,,PARTIALLY_IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-042,API,POST /api/v1/salaries/reports,apps/api/src/server.ts,2592,POST /api/v1/salaries/reports,IMPLEMENTED,HIGH,TEST-101;TEST-127;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-043,API,GET /api/v1/salaries/reports/my,apps/api/src/server.ts,2654,GET /api/v1/salaries/reports/my,UNKNOWN,LOW,TEST-127,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory; no first-party web caller found"
+API-044,API,DELETE /api/v1/salaries/reports/:id,apps/api/src/server.ts,2660,DELETE /api/v1/salaries/reports/:id,IMPLEMENTED,HIGH,TEST-127;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-032,FEAT,api/salaries/benchmarks,apps/api/src/server.ts,2692,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-045,API,GET /api/v1/salaries/benchmarks,apps/api/src/server.ts,2692,GET /api/v1/salaries/benchmarks,IMPLEMENTED,HIGH,TEST-101;TEST-127;TEST-145;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-033,FEAT,api/salaries/company,apps/api/src/server.ts,2710,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-046,API,GET /api/v1/salaries/company/:companyName,apps/api/src/server.ts,2710,GET /api/v1/salaries/company/:companyName,IMPLEMENTED,HIGH,TEST-127;TEST-145;TEST-207,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-034,FEAT,api/jobs/apply,apps/api/src/server.ts,2722,,IMPLEMENTED,MEDIUM,,
+API-047,API,POST /api/v1/jobs/:id/apply,apps/api/src/server.ts,2722,POST /api/v1/jobs/:id/apply,IMPLEMENTED,HIGH,TEST-088;TEST-089;TEST-097;TEST-101;TEST-109,26 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-063,MOD,api/applications,apps/api/src/server.ts,2815,,IMPLEMENTED,MEDIUM,,
+FEAT-035,FEAT,api/applications/my,apps/api/src/server.ts,2815,,IMPLEMENTED,MEDIUM,,
+API-048,API,GET /api/v1/applications/my,apps/api/src/server.ts,2815,GET /api/v1/applications/my,IMPLEMENTED,HIGH,TEST-097;TEST-151;TEST-187;TEST-194,4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-036,FEAT,api/applications,apps/api/src/server.ts,2839,,IMPLEMENTED,MEDIUM,,
+API-049,API,GET /api/v1/applications/:id,apps/api/src/server.ts,2839,GET /api/v1/applications/:id,IMPLEMENTED,HIGH,TEST-088;TEST-097;TEST-120;TEST-137;TEST-142,no first-party web caller found; 12 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-037,FEAT,api/jobs/applications,apps/api/src/server.ts,2869,,IMPLEMENTED,MEDIUM,,
+API-050,API,GET /api/v1/jobs/:id/applications,apps/api/src/server.ts,2869,GET /api/v1/jobs/:id/applications,IMPLEMENTED,HIGH,TEST-097;TEST-109;TEST-151;TEST-187,4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-038,FEAT,api/applications/transition,apps/api/src/server.ts,2923,,IMPLEMENTED,MEDIUM,,
+API-051,API,POST /api/v1/applications/:id/transition,apps/api/src/server.ts,2923,POST /api/v1/applications/:id/transition,IMPLEMENTED,HIGH,TEST-097;TEST-109;TEST-137;TEST-142;TEST-150,9 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-039,FEAT,api/applications/feedback,apps/api/src/server.ts,3013,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-052,API,POST /api/v1/applications/:id/feedback,apps/api/src/server.ts,3013,POST /api/v1/applications/:id/feedback,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-053,API,GET /api/v1/applications/:id/feedback,apps/api/src/server.ts,3098,GET /api/v1/applications/:id/feedback,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-054,API,POST /api/v1/applications/:id/feedback/request,apps/api/src/server.ts,3139,POST /api/v1/applications/:id/feedback/request,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-040,FEAT,api/organizations/feedback-templates,apps/api/src/server.ts,3191,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-055,API,POST /api/v1/organizations/:orgId/feedback-templates,apps/api/src/server.ts,3191,POST /api/v1/organizations/:orgId/feedback-templates,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-056,API,GET /api/v1/organizations/:orgId/feedback-templates,apps/api/src/server.ts,3235,GET /api/v1/organizations/:orgId/feedback-templates,IMPLEMENTED,HIGH,TEST-089;TEST-169,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-064,MOD,api/feedback,apps/api/src/server.ts,3257,,IMPLEMENTED,MEDIUM,,
+FEAT-041,FEAT,api/feedback/aggregate-insights,apps/api/src/server.ts,3257,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-057,API,GET /api/v1/feedback/aggregate-insights,apps/api/src/server.ts,3257,GET /api/v1/feedback/aggregate-insights,IMPLEMENTED,HIGH,TEST-089;TEST-145,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-042,FEAT,api/skills/freshness,apps/api/src/server.ts,3267,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-058,API,POST /api/v1/skills/freshness,apps/api/src/server.ts,3267,POST /api/v1/skills/freshness,IMPLEMENTED,HIGH,TEST-084;TEST-131;TEST-173;TEST-211,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-059,API,GET /api/v1/skills/freshness/my,apps/api/src/server.ts,3308,GET /api/v1/skills/freshness/my,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-065,MOD,api/candidates,apps/api/src/server.ts,3319,,IMPLEMENTED,MEDIUM,,
+FEAT-043,FEAT,api/candidates/skills,apps/api/src/server.ts,3319,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-060,API,GET /api/v1/candidates/:candidateProfileId/skills/freshness,apps/api/src/server.ts,3319,GET /api/v1/candidates/:candidateProfileId/skills/freshness,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-044,FEAT,api/skills/reverify,apps/api/src/server.ts,3358,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-061,API,POST /api/v1/skills/:skillId/reverify,apps/api/src/server.ts,3358,POST /api/v1/skills/:skillId/reverify,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-062,API,POST /api/v1/skills/freshness/refresh-all,apps/api/src/server.ts,3411,POST /api/v1/skills/freshness/refresh-all,IMPLEMENTED,HIGH,TEST-131;TEST-211,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-066,MOD,api/interviews,apps/api/src/server.ts,3447,,IMPLEMENTED,MEDIUM,,
+FEAT-045,FEAT,api/interviews/questions,apps/api/src/server.ts,3447,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-063,API,POST /api/v1/interviews/questions,apps/api/src/server.ts,3447,POST /api/v1/interviews/questions,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-064,API,GET /api/v1/interviews/questions,apps/api/src/server.ts,3489,GET /api/v1/interviews/questions,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-046,FEAT,api/interviews/assessments,apps/api/src/server.ts,3562,,IMPLEMENTED,MEDIUM,,11/11 endpoints ephemeral
+API-065,API,POST /api/v1/interviews/assessments,apps/api/src/server.ts,3562,POST /api/v1/interviews/assessments,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-066,API,GET /api/v1/interviews/assessments/:id,apps/api/src/server.ts,3658,GET /api/v1/interviews/assessments/:id,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-067,API,POST /api/v1/interviews/assessments/:id/join,apps/api/src/server.ts,3690,POST /api/v1/interviews/assessments/:id/join,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-068,API,POST /api/v1/interviews/assessments/:id/consent,apps/api/src/server.ts,3718,POST /api/v1/interviews/assessments/:id/consent,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-069,API,POST /api/v1/interviews/assessments/:id/end,apps/api/src/server.ts,3739,POST /api/v1/interviews/assessments/:id/end,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-070,API,POST /api/v1/interviews/assessments/:id/code,apps/api/src/server.ts,3775,POST /api/v1/interviews/assessments/:id/code,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-071,API,POST /api/v1/interviews/assessments/:id/scorecard,apps/api/src/server.ts,3825,POST /api/v1/interviews/assessments/:id/scorecard,IMPLEMENTED,HIGH,TEST-137;TEST-142;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-072,API,POST /api/v1/interviews/assessments/:id/scorecard/compensate,apps/api/src/server.ts,3901,POST /api/v1/interviews/assessments/:id/scorecard/compensate,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-073,API,GET /api/v1/interviews/assessments/:id/scorecards,apps/api/src/server.ts,3961,GET /api/v1/interviews/assessments/:id/scorecards,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-074,API,POST /api/v1/interviews/assessments/:id/ai-feedback,apps/api/src/server.ts,3993,POST /api/v1/interviews/assessments/:id/ai-feedback,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-075,API,POST /api/v1/interviews/assessments/:id/review,apps/api/src/server.ts,4013,POST /api/v1/interviews/assessments/:id/review,IMPLEMENTED,HIGH,TEST-137;TEST-216,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-067,MOD,api/reputation,apps/api/src/server.ts,4039,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+FEAT-047,FEAT,api/reputation/signals,apps/api/src/server.ts,4039,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-076,API,POST /api/v1/reputation/signals,apps/api/src/server.ts,4039,POST /api/v1/reputation/signals,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-048,FEAT,api/reputation/users,apps/api/src/server.ts,4102,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-077,API,GET /api/v1/reputation/users/:userId,apps/api/src/server.ts,4102,GET /api/v1/reputation/users/:userId,IMPLEMENTED,HIGH,TEST-121;TEST-122;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-049,FEAT,api/reputation/my,apps/api/src/server.ts,4174,,PARTIALLY_IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-078,API,GET /api/v1/reputation/my/signals,apps/api/src/server.ts,4174,GET /api/v1/reputation/my/signals,UNKNOWN,LOW,TEST-121;TEST-203,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory; no first-party web caller found"
+FEAT-050,FEAT,api/reputation/recovery,apps/api/src/server.ts,4180,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-079,API,POST /api/v1/reputation/recovery,apps/api/src/server.ts,4180,POST /api/v1/reputation/recovery,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-080,API,POST /api/v1/reputation/recovery/:planId/tasks/:taskId/complete,apps/api/src/server.ts,4211,POST /api/v1/reputation/recovery/:planId/tasks/:taskId/complete,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-051,FEAT,api/reputation/recalculate-all,apps/api/src/server.ts,4276,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-081,API,POST /api/v1/reputation/recalculate-all,apps/api/src/server.ts,4276,POST /api/v1/reputation/recalculate-all,IMPLEMENTED,HIGH,TEST-121;TEST-203,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-052,FEAT,api/reputation/instructors,apps/api/src/server.ts,4331,,IMPLEMENTED,MEDIUM,,5/5 endpoints ephemeral
+API-082,API,GET /api/v1/reputation/instructors/:instructorId,apps/api/src/server.ts,4331,GET /api/v1/reputation/instructors/:instructorId,IMPLEMENTED,HIGH,TEST-106;TEST-126;TEST-145;TEST-185,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-083,API,POST /api/v1/reputation/instructors/:instructorId/metrics,apps/api/src/server.ts,4358,POST /api/v1/reputation/instructors/:instructorId/metrics,IMPLEMENTED,HIGH,TEST-106;TEST-185,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-084,API,POST /api/v1/reputation/instructors/:instructorId/endorse,apps/api/src/server.ts,4412,POST /api/v1/reputation/instructors/:instructorId/endorse,IMPLEMENTED,HIGH,TEST-106,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-085,API,POST /api/v1/reputation/instructors/:instructorId/reviews,apps/api/src/server.ts,4462,POST /api/v1/reputation/instructors/:instructorId/reviews,IMPLEMENTED,HIGH,TEST-106;TEST-126;TEST-185,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-086,API,POST /api/v1/reputation/instructors/recompute,apps/api/src/server.ts,4511,POST /api/v1/reputation/instructors/recompute,IMPLEMENTED,HIGH,TEST-106,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-053,FEAT,api/reputation/organizations,apps/api/src/server.ts,4542,,IMPLEMENTED,MEDIUM,,4/4 endpoints ephemeral
+API-087,API,GET /api/v1/reputation/organizations/:organizationId,apps/api/src/server.ts,4542,GET /api/v1/reputation/organizations/:organizationId,IMPLEMENTED,HIGH,TEST-100;TEST-145;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-088,API,POST /api/v1/reputation/organizations/:organizationId/reviews,apps/api/src/server.ts,4565,POST /api/v1/reputation/organizations/:organizationId/reviews,IMPLEMENTED,HIGH,TEST-100;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-089,API,POST /api/v1/reputation/organizations/:organizationId/metrics,apps/api/src/server.ts,4649,POST /api/v1/reputation/organizations/:organizationId/metrics,IMPLEMENTED,HIGH,TEST-100;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-090,API,GET /api/v1/reputation/organizations/:organizationId/reviews,apps/api/src/server.ts,4694,GET /api/v1/reputation/organizations/:organizationId/reviews,IMPLEMENTED,HIGH,TEST-100;TEST-145;TEST-180,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-068,MOD,api/challenges,apps/api/src/server.ts,4724,,IMPLEMENTED,MEDIUM,,
+FEAT-054,FEAT,api/challenges,apps/api/src/server.ts,4724,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-091,API,GET /api/v1/challenges,apps/api/src/server.ts,4724,GET /api/v1/challenges,IMPLEMENTED,HIGH,TEST-145;TEST-170;TEST-176,ephemeral: state held in process memory; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-092,API,GET /api/v1/challenges/:id,apps/api/src/server.ts,4729,GET /api/v1/challenges/:id,IMPLEMENTED,HIGH,TEST-095;TEST-145,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-093,API,POST /api/v1/challenges,apps/api/src/server.ts,4741,POST /api/v1/challenges,IMPLEMENTED,HIGH,TEST-095,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-055,FEAT,api/challenges/start-session,apps/api/src/server.ts,4773,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-094,API,POST /api/v1/challenges/:id/start-session,apps/api/src/server.ts,4773,POST /api/v1/challenges/:id/start-session,IMPLEMENTED,HIGH,TEST-084;TEST-095;TEST-170;TEST-176,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-056,FEAT,api/challenges/submit,apps/api/src/server.ts,4806,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-095,API,POST /api/v1/challenges/:id/submit,apps/api/src/server.ts,4806,POST /api/v1/challenges/:id/submit,IMPLEMENTED,HIGH,TEST-095;TEST-124;TEST-170;TEST-176,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-069,MOD,api/ai,apps/api/src/server.ts,4913,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+FEAT-057,FEAT,api/ai/assistant,apps/api/src/server.ts,4913,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-096,API,POST /api/v1/ai/assistant/query,apps/api/src/server.ts,4913,POST /api/v1/ai/assistant/query,IMPLEMENTED,HIGH,TEST-095;TEST-170;TEST-176,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-070,MOD,api/xp,apps/api/src/server.ts,4931,,IMPLEMENTED,MEDIUM,,
+FEAT-058,FEAT,api/xp/ledger,apps/api/src/server.ts,4931,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-097,API,GET /api/v1/xp/ledger,apps/api/src/server.ts,4931,GET /api/v1/xp/ledger,IMPLEMENTED,HIGH,TEST-095,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-071,MOD,api/courses,apps/api/src/server.ts,4958,,IMPLEMENTED,MEDIUM,,
+FEAT-059,FEAT,api/courses,apps/api/src/server.ts,4958,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-098,API,GET /api/v1/courses,apps/api/src/server.ts,4958,GET /api/v1/courses,IMPLEMENTED,HIGH,TEST-111;TEST-145;TEST-170;TEST-175,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-099,API,POST /api/v1/courses,apps/api/src/server.ts,4990,POST /api/v1/courses,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-100,API,GET /api/v1/courses/:id,apps/api/src/server.ts,5037,GET /api/v1/courses/:id,IMPLEMENTED,HIGH,TEST-055;TEST-094;TEST-110;TEST-111;TEST-145,ephemeral: state held in process memory; 10 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-060,FEAT,api/courses/modules,apps/api/src/server.ts,5080,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-101,API,POST /api/v1/courses/:id/modules,apps/api/src/server.ts,5080,POST /api/v1/courses/:id/modules,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-072,MOD,api/modules,apps/api/src/server.ts,5125,,IMPLEMENTED,MEDIUM,,
+FEAT-061,FEAT,api/modules/lessons,apps/api/src/server.ts,5125,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-102,API,POST /api/v1/modules/:id/lessons,apps/api/src/server.ts,5125,POST /api/v1/modules/:id/lessons,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-062,FEAT,api/courses/publish,apps/api/src/server.ts,5185,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-103,API,POST /api/v1/courses/:id/publish,apps/api/src/server.ts,5185,POST /api/v1/courses/:id/publish,IMPLEMENTED,HIGH,TEST-111,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-063,FEAT,api/courses/enroll,apps/api/src/server.ts,5227,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-104,API,POST /api/v1/courses/:id/enroll,apps/api/src/server.ts,5227,POST /api/v1/courses/:id/enroll,IMPLEMENTED,HIGH,TEST-094;TEST-110;TEST-111;TEST-126;TEST-170,ephemeral: state held in process memory; 9 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-064,FEAT,api/courses/progress,apps/api/src/server.ts,5260,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-105,API,GET /api/v1/courses/:id/progress,apps/api/src/server.ts,5260,GET /api/v1/courses/:id/progress,IMPLEMENTED,HIGH,TEST-111;TEST-170,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-073,MOD,api/lessons,apps/api/src/server.ts,5312,,IMPLEMENTED,MEDIUM,,
+FEAT-065,FEAT,api/lessons/complete,apps/api/src/server.ts,5312,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-106,API,POST /api/v1/lessons/:id/complete,apps/api/src/server.ts,5312,POST /api/v1/lessons/:id/complete,IMPLEMENTED,HIGH,TEST-094;TEST-111;TEST-170;TEST-175;TEST-179,ephemeral: state held in process memory; 6 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-074,MOD,api/certificates,apps/api/src/server.ts,5469,,IMPLEMENTED,MEDIUM,,
+FEAT-066,FEAT,api/certificates,apps/api/src/server.ts,5469,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-107,API,GET /api/v1/certificates/:certificateNumber,apps/api/src/server.ts,5469,GET /api/v1/certificates/:certificateNumber,IMPLEMENTED,HIGH,TEST-094;TEST-111;TEST-145;TEST-170;TEST-175,ephemeral: state held in process memory; no first-party web caller found; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-075,MOD,api/verify,apps/api/src/server.ts,5492,,IMPLEMENTED,MEDIUM,,
+FEAT-067,FEAT,api/verify,apps/api/src/server.ts,5492,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-108,API,GET /api/v1/verify/:hash,apps/api/src/server.ts,5492,GET /api/v1/verify/:hash,IMPLEMENTED,HIGH,TEST-094;TEST-145;TEST-175;TEST-179;TEST-217,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-068,FEAT,api/certificates/verify,apps/api/src/server.ts,5540,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-109,API,GET /api/v1/certificates/verify/:hash,apps/api/src/server.ts,5540,GET /api/v1/certificates/verify/:hash,IMPLEMENTED,HIGH,TEST-094;TEST-145;TEST-175,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-069,FEAT,api/certificates/my,apps/api/src/server.ts,5562,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-110,API,GET /api/v1/certificates/my,apps/api/src/server.ts,5562,GET /api/v1/certificates/my,IMPLEMENTED,HIGH,TEST-094;TEST-175,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-070,FEAT,api/certificates/revoke,apps/api/src/server.ts,5587,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-111,API,POST /api/v1/certificates/:certificateNumber/revoke,apps/api/src/server.ts,5587,POST /api/v1/certificates/:certificateNumber/revoke,IMPLEMENTED,HIGH,TEST-094;TEST-175;TEST-179,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-076,MOD,api/threads,apps/api/src/server.ts,5723,,IMPLEMENTED,MEDIUM,,
+FEAT-071,FEAT,api/threads,apps/api/src/server.ts,5723,,IMPLEMENTED,MEDIUM,,
+API-112,API,GET /api/v1/threads,apps/api/src/server.ts,5723,GET /api/v1/threads,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-116;TEST-155,4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-113,API,POST /api/v1/threads,apps/api/src/server.ts,5755,POST /api/v1/threads,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-116;TEST-155;TEST-191,6 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-114,API,GET /api/v1/threads/:id,apps/api/src/server.ts,5846,GET /api/v1/threads/:id,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-155,3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-072,FEAT,api/threads/messages,apps/api/src/server.ts,5889,,IMPLEMENTED,MEDIUM,,
+API-115,API,POST /api/v1/threads/:id/messages,apps/api/src/server.ts,5889,POST /api/v1/threads/:id/messages,IMPLEMENTED,HIGH,TEST-112;TEST-113;TEST-116;TEST-155;TEST-191,6 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-073,FEAT,api/threads/read,apps/api/src/server.ts,5950,,IMPLEMENTED,MEDIUM,,
+API-116,API,POST /api/v1/threads/:id/read,apps/api/src/server.ts,5950,POST /api/v1/threads/:id/read,IMPLEMENTED,HIGH,TEST-113;TEST-155,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-077,MOD,api/notifications,apps/api/src/server.ts,5978,,IMPLEMENTED,MEDIUM,,
+FEAT-074,FEAT,api/notifications,apps/api/src/server.ts,5978,,IMPLEMENTED,MEDIUM,,
+API-117,API,GET /api/v1/notifications,apps/api/src/server.ts,5978,GET /api/v1/notifications,IMPLEMENTED,HIGH,TEST-097;TEST-112;TEST-115;TEST-116;TEST-150,10 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-075,FEAT,api/notifications/summary,apps/api/src/server.ts,6009,,IMPLEMENTED,MEDIUM,,
+API-118,API,GET /api/v1/notifications/summary,apps/api/src/server.ts,6009,GET /api/v1/notifications/summary,IMPLEMENTED,HIGH,TEST-056;TEST-097;TEST-112;TEST-156,4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-076,FEAT,api/notifications/mark-read,apps/api/src/server.ts,6018,,IMPLEMENTED,MEDIUM,,
+API-119,API,POST /api/v1/notifications/mark-read,apps/api/src/server.ts,6018,POST /api/v1/notifications/mark-read,IMPLEMENTED,HIGH,TEST-097;TEST-116;TEST-156;TEST-191,4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-077,FEAT,api/notifications/preferences,apps/api/src/server.ts,6048,,IMPLEMENTED,MEDIUM,,
+API-120,API,GET /api/v1/notifications/preferences,apps/api/src/server.ts,6048,GET /api/v1/notifications/preferences,IMPLEMENTED,HIGH,TEST-097;TEST-116;TEST-156,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-121,API,PATCH /api/v1/notifications/preferences,apps/api/src/server.ts,6064,PATCH /api/v1/notifications/preferences,IMPLEMENTED,HIGH,TEST-097;TEST-116;TEST-156;TEST-191,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-078,FEAT,api/ai/conversations,apps/api/src/server.ts,6123,,PARTIALLY_IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-122,API,POST /api/v1/ai/conversations,apps/api/src/server.ts,6123,POST /api/v1/ai/conversations,IMPLEMENTED,HIGH,TEST-084;TEST-125,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-123,API,GET /api/v1/ai/conversations,apps/api/src/server.ts,6137,GET /api/v1/ai/conversations,UNKNOWN,LOW,TEST-125,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory; no first-party web caller found"
+API-124,API,GET /api/v1/ai/conversations/:id,apps/api/src/server.ts,6143,GET /api/v1/ai/conversations/:id,IMPLEMENTED,HIGH,TEST-084,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-079,FEAT,api/ai/career-assistant,apps/api/src/server.ts,6163,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-125,API,POST /api/v1/ai/career-assistant/chat,apps/api/src/server.ts,6163,POST /api/v1/ai/career-assistant/chat,IMPLEMENTED,HIGH,TEST-084;TEST-118;TEST-143;TEST-191,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-080,FEAT,api/ai/usage,apps/api/src/server.ts,6266,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-126,API,GET /api/v1/ai/usage,apps/api/src/server.ts,6266,GET /api/v1/ai/usage,IMPLEMENTED,HIGH,TEST-084;TEST-118;TEST-191,ephemeral: state held in process memory; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-078,MOD,api/resumes,apps/api/src/server.ts,6295,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+FEAT-081,FEAT,api/resumes,apps/api/src/server.ts,6295,,PARTIALLY_IMPLEMENTED,MEDIUM,,4/4 endpoints ephemeral
+API-127,API,POST /api/v1/resumes,apps/api/src/server.ts,6295,POST /api/v1/resumes,IMPLEMENTED,HIGH,TEST-123;TEST-126;TEST-141;TEST-206;TEST-224,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-128,API,GET /api/v1/resumes,apps/api/src/server.ts,6309,GET /api/v1/resumes,UNKNOWN,LOW,TEST-123;TEST-141;TEST-199;TEST-200;TEST-217,"handler has no detectable logic, schema, store or rule call; ephemeral: state held in process memory"
+API-129,API,GET /api/v1/resumes/:id,apps/api/src/server.ts,6315,GET /api/v1/resumes/:id,IMPLEMENTED,HIGH,TEST-123;TEST-141,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-130,API,PATCH /api/v1/resumes/:id,apps/api/src/server.ts,6334,PATCH /api/v1/resumes/:id,IMPLEMENTED,HIGH,TEST-123;TEST-141,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-082,FEAT,api/resumes/export,apps/api/src/server.ts,6365,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-131,API,POST /api/v1/resumes/:id/export,apps/api/src/server.ts,6365,POST /api/v1/resumes/:id/export,IMPLEMENTED,HIGH,TEST-123;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-083,FEAT,api/resumes/exports,apps/api/src/server.ts,6406,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-132,API,GET /api/v1/resumes/:id/exports,apps/api/src/server.ts,6406,GET /api/v1/resumes/:id/exports,IMPLEMENTED,HIGH,TEST-123;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-133,API,DELETE /api/v1/resumes/exports/:exportId,apps/api/src/server.ts,6434,DELETE /api/v1/resumes/exports/:exportId,IMPLEMENTED,HIGH,TEST-123;TEST-206,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-079,MOD,api/connections,apps/api/src/server.ts,6477,,IMPLEMENTED,MEDIUM,,
+FEAT-084,FEAT,api/connections/request,apps/api/src/server.ts,6477,,IMPLEMENTED,MEDIUM,,
+API-134,API,POST /api/v1/connections/request,apps/api/src/server.ts,6477,POST /api/v1/connections/request,IMPLEMENTED,HIGH,TEST-096;TEST-101;TEST-113;TEST-115;TEST-116,14 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-085,FEAT,api/connections,apps/api/src/server.ts,6547,,IMPLEMENTED,MEDIUM,,
+API-135,API,GET /api/v1/connections,apps/api/src/server.ts,6547,GET /api/v1/connections,IMPLEMENTED,HIGH,TEST-101;TEST-115;TEST-225,3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-086,FEAT,api/connections/status,apps/api/src/server.ts,6594,,IMPLEMENTED,MEDIUM,,
+API-136,API,GET /api/v1/connections/status/:targetUserId,apps/api/src/server.ts,6594,GET /api/v1/connections/status/:targetUserId,IMPLEMENTED,HIGH,TEST-115;TEST-206;TEST-225,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-087,FEAT,api/connections/respond,apps/api/src/server.ts,6616,,IMPLEMENTED,MEDIUM,,
+API-137,API,POST /api/v1/connections/:id/respond,apps/api/src/server.ts,6616,POST /api/v1/connections/:id/respond,IMPLEMENTED,HIGH,TEST-096;TEST-101;TEST-113;TEST-115;TEST-116,13 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-088,FEAT,api/connections/withdraw,apps/api/src/server.ts,6686,,IMPLEMENTED,MEDIUM,,
+API-138,API,POST /api/v1/connections/:id/withdraw,apps/api/src/server.ts,6686,POST /api/v1/connections/:id/withdraw,IMPLEMENTED,HIGH,TEST-115,no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-139,API,DELETE /api/v1/connections/:id,apps/api/src/server.ts,6723,DELETE /api/v1/connections/:id,IMPLEMENTED,HIGH,TEST-115;TEST-225,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
 MOD-080,MOD,api/networking,apps/api/src/server.ts,6791,,IMPLEMENTED,MEDIUM,,
 FEAT-089,FEAT,api/networking/warm-intros,apps/api/src/server.ts,6791,,IMPLEMENTED,MEDIUM,,8/8 endpoints ephemeral
 API-140,API,POST /api/v1/networking/warm-intros/preferences,apps/api/src/server.ts,6791,POST /api/v1/networking/warm-intros/preferences,IMPLEMENTED,HIGH,TEST-125;TEST-138;TEST-219,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
@@ -861,252 +861,252 @@ FEAT-121,FEAT,api/settings/erasure,apps/api/src/server.ts,10321,,IMPLEMENTED,MED
 API-216,API,POST /api/v1/settings/erasure/request,apps/api/src/server.ts,10321,POST /api/v1/settings/erasure/request,IMPLEMENTED,HIGH,TEST-130;TEST-151;TEST-171,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
 API-217,API,GET /api/v1/settings/erasure/status,apps/api/src/server.ts,10346,GET /api/v1/settings/erasure/status,IMPLEMENTED,HIGH,TEST-130;TEST-151,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
 API-218,API,POST /api/v1/settings/erasure/cancel,apps/api/src/server.ts,10361,POST /api/v1/settings/erasure/cancel,IMPLEMENTED,HIGH,TEST-130;TEST-151;TEST-171,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-219,API,POST /api/v1/settings/erasure/execute,apps/api/src/server.ts,10383,POST /api/v1/settings/erasure/execute,IMPLEMENTED,HIGH,TEST-097;TEST-101;TEST-102;TEST-112;TEST-130,ephemeral: state held in process memory; 13 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-090,MOD,api/billing,apps/api/src/server.ts,10833,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-FEAT-122,FEAT,api/billing/checkout,apps/api/src/server.ts,10833,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-API-220,API,POST /api/v1/billing/checkout [disabled-mode],apps/api/src/server.ts,10833,POST /api/v1/billing/checkout [disabled-mode],UNKNOWN,LOW,TEST-134;TEST-149,"handler has no detectable logic, schema, store or rule call; no first-party web caller found; billing disabled-mode stub (stripeOff)"
-FEAT-123,FEAT,api/billing/portal,apps/api/src/server.ts,10837,,PARTIALLY_IMPLEMENTED,MEDIUM,,
-API-221,API,POST /api/v1/billing/portal [disabled-mode],apps/api/src/server.ts,10837,POST /api/v1/billing/portal [disabled-mode],UNKNOWN,LOW,,"handler has no detectable logic, schema, store or rule call; no first-party web caller found; billing disabled-mode stub (stripeOff)"
-FEAT-124,FEAT,api/billing/stripe-webhook,apps/api/src/server.ts,10841,,IMPLEMENTED,MEDIUM,,
-API-222,API,POST /api/v1/billing/stripe-webhook [disabled-mode],apps/api/src/server.ts,10841,POST /api/v1/billing/stripe-webhook [disabled-mode],IMPLEMENTED,HIGH,TEST-134;TEST-145;TEST-149,no first-party web caller found; billing disabled-mode stub (stripeOff); 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-125,FEAT,api/billing/plans,apps/api/src/server.ts,10890,,IMPLEMENTED,MEDIUM,,
-API-223,API,GET /api/v1/billing/plans,apps/api/src/server.ts,10890,GET /api/v1/billing/plans,IMPLEMENTED,HIGH,TEST-092;TEST-134;TEST-141;TEST-145;TEST-177,6 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-126,FEAT,api/billing/subscription,apps/api/src/server.ts,10900,,IMPLEMENTED,MEDIUM,,
-API-224,API,GET /api/v1/billing/subscription,apps/api/src/server.ts,10900,GET /api/v1/billing/subscription,IMPLEMENTED,HIGH,TEST-092;TEST-134;TEST-149;TEST-150;TEST-184,6 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-127,FEAT,api/billing/subscribe,apps/api/src/server.ts,10930,,IMPLEMENTED,MEDIUM,,
-API-225,API,POST /api/v1/billing/subscribe,apps/api/src/server.ts,10930,POST /api/v1/billing/subscribe,IMPLEMENTED,HIGH,TEST-092;TEST-118;TEST-183,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-128,FEAT,api/billing/cancel,apps/api/src/server.ts,11044,,IMPLEMENTED,MEDIUM,,
-API-226,API,POST /api/v1/billing/cancel,apps/api/src/server.ts,11044,POST /api/v1/billing/cancel,IMPLEMENTED,HIGH,TEST-092,no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-129,FEAT,api/billing/invoices,apps/api/src/server.ts,11093,,IMPLEMENTED,MEDIUM,,
-API-227,API,GET /api/v1/billing/invoices,apps/api/src/server.ts,11093,GET /api/v1/billing/invoices,IMPLEMENTED,HIGH,TEST-092;TEST-134;TEST-149,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-130,FEAT,api/billing/webhook,apps/api/src/server.ts,11123,,IMPLEMENTED,MEDIUM,,
-API-228,API,POST /api/v1/billing/webhook,apps/api/src/server.ts,11123,POST /api/v1/billing/webhook,IMPLEMENTED,HIGH,TEST-092;TEST-141;TEST-145;TEST-183,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-091,MOD,api/admin,apps/api/src/server.ts,11197,,IMPLEMENTED,MEDIUM,,
-FEAT-131,FEAT,api/admin/users,apps/api/src/server.ts,11197,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
-API-229,API,GET /api/v1/admin/users,apps/api/src/server.ts,11197,GET /api/v1/admin/users,IMPLEMENTED,HIGH,TEST-083;TEST-141;TEST-183;TEST-184,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-230,API,PATCH /api/v1/admin/users/:id/status,apps/api/src/server.ts,11233,PATCH /api/v1/admin/users/:id/status,IMPLEMENTED,HIGH,TEST-083;TEST-142;TEST-146;TEST-183;TEST-205,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-231,API,PATCH /api/v1/admin/users/:id/roles,apps/api/src/server.ts,11290,PATCH /api/v1/admin/users/:id/roles,IMPLEMENTED,HIGH,TEST-083;TEST-111;TEST-114;TEST-126;TEST-142,ephemeral: state held in process memory; no first-party web caller found; 7 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-132,FEAT,api/admin/feature-flags,apps/api/src/server.ts,11345,,IMPLEMENTED,MEDIUM,,
-API-232,API,GET /api/v1/admin/feature-flags,apps/api/src/server.ts,11345,GET /api/v1/admin/feature-flags,IMPLEMENTED,HIGH,TEST-083;TEST-141,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-233,API,PUT /api/v1/admin/feature-flags/:key,apps/api/src/server.ts,11357,PUT /api/v1/admin/feature-flags/:key,IMPLEMENTED,HIGH,TEST-083;TEST-183,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-133,FEAT,api/admin/audit-logs,apps/api/src/server.ts,11399,,IMPLEMENTED,MEDIUM,,
-API-234,API,GET /api/v1/admin/audit-logs,apps/api/src/server.ts,11399,GET /api/v1/admin/audit-logs,IMPLEMENTED,HIGH,TEST-083,1 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-134,FEAT,api/admin/health-diagnostics,apps/api/src/server.ts,11421,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-235,API,GET /api/v1/admin/health-diagnostics,apps/api/src/server.ts,11421,GET /api/v1/admin/health-diagnostics,IMPLEMENTED,HIGH,TEST-042;TEST-083;TEST-107;TEST-133;TEST-141,6 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-135,FEAT,api/admin/maintenance,apps/api/src/server.ts,11473,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-236,API,POST /api/v1/admin/maintenance,apps/api/src/server.ts,11473,POST /api/v1/admin/maintenance,IMPLEMENTED,HIGH,TEST-083;TEST-145,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-092,MOD,api/search,apps/api/src/server.ts,11502,,IMPLEMENTED,MEDIUM,,
-FEAT-136,FEAT,api/search,apps/api/src/server.ts,11502,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-237,API,GET /api/v1/search,apps/api/src/server.ts,11502,GET /api/v1/search,IMPLEMENTED,HIGH,TEST-107;TEST-129;TEST-145;TEST-183;TEST-218,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-137,FEAT,api/search/autocomplete,apps/api/src/server.ts,11754,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-238,API,GET /api/v1/search/autocomplete,apps/api/src/server.ts,11754,GET /api/v1/search/autocomplete,IMPLEMENTED,HIGH,TEST-129;TEST-145;TEST-218,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-138,FEAT,api/search/commands,apps/api/src/server.ts,11836,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-239,API,GET /api/v1/search/commands,apps/api/src/server.ts,11836,GET /api/v1/search/commands,IMPLEMENTED,HIGH,TEST-129;TEST-145;TEST-183,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-139,FEAT,api/search/history,apps/api/src/server.ts,11846,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-240,API,GET /api/v1/search/history,apps/api/src/server.ts,11846,GET /api/v1/search/history,IMPLEMENTED,HIGH,TEST-129,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-241,API,DELETE /api/v1/search/history,apps/api/src/server.ts,11856,DELETE /api/v1/search/history,IMPLEMENTED,HIGH,TEST-129,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-093,MOD,api/moderation,apps/api/src/server.ts,11879,,IMPLEMENTED,MEDIUM,,
-FEAT-140,FEAT,api/moderation/scan,apps/api/src/server.ts,11879,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-242,API,POST /api/v1/moderation/scan,apps/api/src/server.ts,11879,POST /api/v1/moderation/scan,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-141,FEAT,api/moderation/reports,apps/api/src/server.ts,11886,,IMPLEMENTED,MEDIUM,,7/7 endpoints ephemeral
-API-243,API,POST /api/v1/moderation/reports,apps/api/src/server.ts,11886,POST /api/v1/moderation/reports,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-244,API,GET /api/v1/moderation/reports/my,apps/api/src/server.ts,11954,GET /api/v1/moderation/reports/my,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-142;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-245,API,GET /api/v1/moderation/reports,apps/api/src/server.ts,11979,GET /api/v1/moderation/reports,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-246,API,GET /api/v1/moderation/reports/:id,apps/api/src/server.ts,12001,GET /api/v1/moderation/reports/:id,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-142;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-247,API,PATCH /api/v1/moderation/reports/:id/status,apps/api/src/server.ts,12022,PATCH /api/v1/moderation/reports/:id/status,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-248,API,POST /api/v1/moderation/reports/:id/resolve,apps/api/src/server.ts,12045,POST /api/v1/moderation/reports/:id/resolve,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-249,API,POST /api/v1/moderation/reports/:id/appeal,apps/api/src/server.ts,12182,POST /api/v1/moderation/reports/:id/appeal,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-142,FEAT,api/moderation/appeals,apps/api/src/server.ts,12219,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-250,API,GET /api/v1/moderation/appeals,apps/api/src/server.ts,12219,GET /api/v1/moderation/appeals,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-251,API,POST /api/v1/moderation/appeals/:id/review,apps/api/src/server.ts,12228,POST /api/v1/moderation/appeals/:id/review,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-143,FEAT,api/jobs/saved-searches,apps/api/src/server.ts,12277,,IMPLEMENTED,MEDIUM,,
-API-252,API,POST /api/v1/jobs/saved-searches,apps/api/src/server.ts,12277,POST /api/v1/jobs/saved-searches,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-253,API,GET /api/v1/jobs/saved-searches,apps/api/src/server.ts,12295,GET /api/v1/jobs/saved-searches,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-254,API,GET /api/v1/jobs/saved-searches/:id,apps/api/src/server.ts,12302,GET /api/v1/jobs/saved-searches/:id,IMPLEMENTED,HIGH,TEST-128;TEST-159,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-255,API,PATCH /api/v1/jobs/saved-searches/:id,apps/api/src/server.ts,12319,PATCH /api/v1/jobs/saved-searches/:id,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-256,API,DELETE /api/v1/jobs/saved-searches/:id,apps/api/src/server.ts,12339,DELETE /api/v1/jobs/saved-searches/:id,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-257,API,POST /api/v1/jobs/saved-searches/:id/run,apps/api/src/server.ts,12357,POST /api/v1/jobs/saved-searches/:id/run,IMPLEMENTED,HIGH,TEST-128;TEST-208,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-144,FEAT,api/jobs/alerts,apps/api/src/server.ts,12376,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-258,API,GET /api/v1/jobs/alerts,apps/api/src/server.ts,12376,GET /api/v1/jobs/alerts,IMPLEMENTED,HIGH,TEST-128;TEST-208,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-259,API,PATCH /api/v1/jobs/alerts/:id/read,apps/api/src/server.ts,12385,PATCH /api/v1/jobs/alerts/:id/read,IMPLEMENTED,HIGH,TEST-128;TEST-208,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-145,FEAT,api/jobs/save,apps/api/src/server.ts,12404,,IMPLEMENTED,MEDIUM,,
-API-260,API,POST /api/v1/jobs/:id/save,apps/api/src/server.ts,12404,POST /api/v1/jobs/:id/save,IMPLEMENTED,HIGH,TEST-128;TEST-208,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-261,API,DELETE /api/v1/jobs/:id/save,apps/api/src/server.ts,12421,DELETE /api/v1/jobs/:id/save,IMPLEMENTED,HIGH,TEST-128;TEST-208,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-146,FEAT,api/jobs/saved,apps/api/src/server.ts,12432,,IMPLEMENTED,MEDIUM,,
-API-262,API,GET /api/v1/jobs/saved,apps/api/src/server.ts,12432,GET /api/v1/jobs/saved,IMPLEMENTED,HIGH,TEST-128;TEST-158;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-147,FEAT,api/jobs/draft,apps/api/src/server.ts,12445,,IMPLEMENTED,MEDIUM,,
-API-263,API,PUT /api/v1/jobs/:jobId/draft,apps/api/src/server.ts,12445,PUT /api/v1/jobs/:jobId/draft,IMPLEMENTED,HIGH,TEST-088;TEST-126;TEST-168;TEST-224,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-264,API,GET /api/v1/jobs/:jobId/draft,apps/api/src/server.ts,12505,GET /api/v1/jobs/:jobId/draft,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-265,API,DELETE /api/v1/jobs/:jobId/draft,apps/api/src/server.ts,12529,DELETE /api/v1/jobs/:jobId/draft,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-266,API,POST /api/v1/jobs/:jobId/draft/restore,apps/api/src/server.ts,12549,POST /api/v1/jobs/:jobId/draft/restore,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-148,FEAT,api/applications/drafts,apps/api/src/server.ts,12582,,IMPLEMENTED,MEDIUM,,
-API-267,API,GET /api/v1/applications/drafts,apps/api/src/server.ts,12582,GET /api/v1/applications/drafts,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-094,MOD,api/analytics,apps/api/src/server.ts,12615,,IMPLEMENTED,MEDIUM,,
-FEAT-149,FEAT,api/analytics/events,apps/api/src/server.ts,12615,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
-API-268,API,POST /api/v1/analytics/events,apps/api/src/server.ts,12615,POST /api/v1/analytics/events,IMPLEMENTED,HIGH,TEST-086;TEST-101;TEST-145;TEST-148;TEST-167,ephemeral: state held in process memory; no first-party web caller found; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-269,API,GET /api/v1/analytics/events,apps/api/src/server.ts,12680,GET /api/v1/analytics/events,IMPLEMENTED,HIGH,TEST-086;TEST-101;TEST-145;TEST-167,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-150,FEAT,api/analytics/kpis,apps/api/src/server.ts,12699,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-270,API,GET /api/v1/analytics/kpis,apps/api/src/server.ts,12699,GET /api/v1/analytics/kpis,IMPLEMENTED,HIGH,TEST-086;TEST-167,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-151,FEAT,api/candidates/work-history,apps/api/src/server.ts,12785,,IMPLEMENTED,MEDIUM,,
-API-271,API,POST /api/v1/candidates/work-history,apps/api/src/server.ts,12785,POST /api/v1/candidates/work-history,IMPLEMENTED,HIGH,TEST-097;TEST-098;TEST-099;TEST-103;TEST-139,14 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-272,API,POST /api/v1/candidates/work-history/:id/verify-email,apps/api/src/server.ts,12863,POST /api/v1/candidates/work-history/:id/verify-email,IMPLEMENTED,HIGH,TEST-098;TEST-139;TEST-140;TEST-160;TEST-221,5 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-273,API,POST /api/v1/candidates/work-history/:id/references/request,apps/api/src/server.ts,13006,POST /api/v1/candidates/work-history/:id/references/request,IMPLEMENTED,HIGH,TEST-097;TEST-098;TEST-103;TEST-139;TEST-140,10 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-095,MOD,api/references,apps/api/src/server.ts,13118,,IMPLEMENTED,MEDIUM,,
-FEAT-152,FEAT,api/references,apps/api/src/server.ts,13118,,IMPLEMENTED,MEDIUM,,
-API-274,API,GET /api/v1/references/:refId,apps/api/src/server.ts,13118,GET /api/v1/references/:refId,IMPLEMENTED,HIGH,TEST-097;TEST-139;TEST-140;TEST-145;TEST-151,8 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-275,API,POST /api/v1/candidates/work-history/references/:refId/submit,apps/api/src/server.ts,13154,POST /api/v1/candidates/work-history/references/:refId/submit,IMPLEMENTED,HIGH,TEST-097;TEST-103;TEST-139;TEST-140;TEST-145,7 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-276,API,GET /api/v1/candidates/:candidateId/work-history,apps/api/src/server.ts,13315,GET /api/v1/candidates/:candidateId/work-history,IMPLEMENTED,HIGH,TEST-139;TEST-140;TEST-145;TEST-151;TEST-160,7 linked test file(s) executed and passed (2026-11-25); link is path-level
-FEAT-153,FEAT,api/candidates/work-history-graph,apps/api/src/server.ts,13364,,IMPLEMENTED,MEDIUM,,
-API-277,API,GET /api/v1/candidates/:candidateId/work-history-graph,apps/api/src/server.ts,13364,GET /api/v1/candidates/:candidateId/work-history-graph,IMPLEMENTED,HIGH,TEST-139;TEST-145;TEST-221,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-API-278,API,DELETE /api/v1/candidates/work-history/:id,apps/api/src/server.ts,13408,DELETE /api/v1/candidates/work-history/:id,IMPLEMENTED,HIGH,TEST-140;TEST-160,2 linked test file(s) executed and passed (2026-11-25); link is path-level
-MOD-096,MOD,api/internal,apps/api/src/server.ts,13462,,IMPLEMENTED,MEDIUM,,
-FEAT-154,FEAT,api/internal/worker-jobs,apps/api/src/server.ts,13462,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
-API-279,API,GET /api/v1/internal/worker-jobs,apps/api/src/server.ts,13462,GET /api/v1/internal/worker-jobs,IMPLEMENTED,HIGH,TEST-083;TEST-092;TEST-097;TEST-102;TEST-103,ephemeral: state held in process memory; dev/test only: returns 404 when NODE_ENV is not development or test; no first-party web caller found; 21 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-219,API,POST /api/v1/settings/erasure/execute,apps/api/src/server.ts,10383,POST /api/v1/settings/erasure/execute,IMPLEMENTED,HIGH,TEST-097;TEST-101;TEST-102;TEST-112;TEST-130,ephemeral: state held in process memory; 15 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-090,MOD,api/billing,apps/api/src/server.ts,10832,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+FEAT-122,FEAT,api/billing/checkout,apps/api/src/server.ts,10832,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+API-220,API,POST /api/v1/billing/checkout [disabled-mode],apps/api/src/server.ts,10832,POST /api/v1/billing/checkout [disabled-mode],UNKNOWN,LOW,TEST-134;TEST-149,"handler has no detectable logic, schema, store or rule call; no first-party web caller found; billing disabled-mode stub (stripeOff)"
+FEAT-123,FEAT,api/billing/portal,apps/api/src/server.ts,10836,,PARTIALLY_IMPLEMENTED,MEDIUM,,
+API-221,API,POST /api/v1/billing/portal [disabled-mode],apps/api/src/server.ts,10836,POST /api/v1/billing/portal [disabled-mode],UNKNOWN,LOW,,"handler has no detectable logic, schema, store or rule call; no first-party web caller found; billing disabled-mode stub (stripeOff)"
+FEAT-124,FEAT,api/billing/stripe-webhook,apps/api/src/server.ts,10840,,IMPLEMENTED,MEDIUM,,
+API-222,API,POST /api/v1/billing/stripe-webhook [disabled-mode],apps/api/src/server.ts,10840,POST /api/v1/billing/stripe-webhook [disabled-mode],IMPLEMENTED,HIGH,TEST-134;TEST-145;TEST-149,no first-party web caller found; billing disabled-mode stub (stripeOff); 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-125,FEAT,api/billing/plans,apps/api/src/server.ts,10889,,IMPLEMENTED,MEDIUM,,
+API-223,API,GET /api/v1/billing/plans,apps/api/src/server.ts,10889,GET /api/v1/billing/plans,IMPLEMENTED,HIGH,TEST-092;TEST-134;TEST-141;TEST-145;TEST-177,6 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-126,FEAT,api/billing/subscription,apps/api/src/server.ts,10899,,IMPLEMENTED,MEDIUM,,
+API-224,API,GET /api/v1/billing/subscription,apps/api/src/server.ts,10899,GET /api/v1/billing/subscription,IMPLEMENTED,HIGH,TEST-092;TEST-134;TEST-149;TEST-150;TEST-184,6 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-127,FEAT,api/billing/subscribe,apps/api/src/server.ts,10929,,IMPLEMENTED,MEDIUM,,
+API-225,API,POST /api/v1/billing/subscribe,apps/api/src/server.ts,10929,POST /api/v1/billing/subscribe,IMPLEMENTED,HIGH,TEST-092;TEST-118;TEST-183,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-128,FEAT,api/billing/cancel,apps/api/src/server.ts,11043,,IMPLEMENTED,MEDIUM,,
+API-226,API,POST /api/v1/billing/cancel,apps/api/src/server.ts,11043,POST /api/v1/billing/cancel,IMPLEMENTED,HIGH,TEST-092,no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-129,FEAT,api/billing/invoices,apps/api/src/server.ts,11092,,IMPLEMENTED,MEDIUM,,
+API-227,API,GET /api/v1/billing/invoices,apps/api/src/server.ts,11092,GET /api/v1/billing/invoices,IMPLEMENTED,HIGH,TEST-092;TEST-134;TEST-149,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-130,FEAT,api/billing/webhook,apps/api/src/server.ts,11122,,IMPLEMENTED,MEDIUM,,
+API-228,API,POST /api/v1/billing/webhook,apps/api/src/server.ts,11122,POST /api/v1/billing/webhook,IMPLEMENTED,HIGH,TEST-092;TEST-141;TEST-145;TEST-183,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-091,MOD,api/admin,apps/api/src/server.ts,11196,,IMPLEMENTED,MEDIUM,,
+FEAT-131,FEAT,api/admin/users,apps/api/src/server.ts,11196,,IMPLEMENTED,MEDIUM,,3/3 endpoints ephemeral
+API-229,API,GET /api/v1/admin/users,apps/api/src/server.ts,11196,GET /api/v1/admin/users,IMPLEMENTED,HIGH,TEST-083;TEST-141;TEST-183;TEST-184,ephemeral: state held in process memory; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-230,API,PATCH /api/v1/admin/users/:id/status,apps/api/src/server.ts,11232,PATCH /api/v1/admin/users/:id/status,IMPLEMENTED,HIGH,TEST-083;TEST-142;TEST-146;TEST-183;TEST-205,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-231,API,PATCH /api/v1/admin/users/:id/roles,apps/api/src/server.ts,11289,PATCH /api/v1/admin/users/:id/roles,IMPLEMENTED,HIGH,TEST-083;TEST-111;TEST-114;TEST-126;TEST-142,ephemeral: state held in process memory; no first-party web caller found; 7 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-132,FEAT,api/admin/feature-flags,apps/api/src/server.ts,11344,,IMPLEMENTED,MEDIUM,,
+API-232,API,GET /api/v1/admin/feature-flags,apps/api/src/server.ts,11344,GET /api/v1/admin/feature-flags,IMPLEMENTED,HIGH,TEST-083;TEST-141,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-233,API,PUT /api/v1/admin/feature-flags/:key,apps/api/src/server.ts,11356,PUT /api/v1/admin/feature-flags/:key,IMPLEMENTED,HIGH,TEST-083;TEST-183,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-133,FEAT,api/admin/audit-logs,apps/api/src/server.ts,11398,,IMPLEMENTED,MEDIUM,,
+API-234,API,GET /api/v1/admin/audit-logs,apps/api/src/server.ts,11398,GET /api/v1/admin/audit-logs,IMPLEMENTED,HIGH,TEST-083,1 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-134,FEAT,api/admin/health-diagnostics,apps/api/src/server.ts,11420,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-235,API,GET /api/v1/admin/health-diagnostics,apps/api/src/server.ts,11420,GET /api/v1/admin/health-diagnostics,IMPLEMENTED,HIGH,TEST-042;TEST-083;TEST-107;TEST-133;TEST-141,6 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-135,FEAT,api/admin/maintenance,apps/api/src/server.ts,11472,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-236,API,POST /api/v1/admin/maintenance,apps/api/src/server.ts,11472,POST /api/v1/admin/maintenance,IMPLEMENTED,HIGH,TEST-083;TEST-145,ephemeral: state held in process memory; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-092,MOD,api/search,apps/api/src/server.ts,11501,,IMPLEMENTED,MEDIUM,,
+FEAT-136,FEAT,api/search,apps/api/src/server.ts,11501,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-237,API,GET /api/v1/search,apps/api/src/server.ts,11501,GET /api/v1/search,IMPLEMENTED,HIGH,TEST-107;TEST-129;TEST-145;TEST-183;TEST-218,ephemeral: state held in process memory; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-137,FEAT,api/search/autocomplete,apps/api/src/server.ts,11753,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-238,API,GET /api/v1/search/autocomplete,apps/api/src/server.ts,11753,GET /api/v1/search/autocomplete,IMPLEMENTED,HIGH,TEST-129;TEST-145;TEST-218,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-138,FEAT,api/search/commands,apps/api/src/server.ts,11835,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-239,API,GET /api/v1/search/commands,apps/api/src/server.ts,11835,GET /api/v1/search/commands,IMPLEMENTED,HIGH,TEST-129;TEST-145;TEST-183,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-139,FEAT,api/search/history,apps/api/src/server.ts,11845,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-240,API,GET /api/v1/search/history,apps/api/src/server.ts,11845,GET /api/v1/search/history,IMPLEMENTED,HIGH,TEST-129,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-241,API,DELETE /api/v1/search/history,apps/api/src/server.ts,11855,DELETE /api/v1/search/history,IMPLEMENTED,HIGH,TEST-129,ephemeral: state held in process memory; no first-party web caller found; 1 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-093,MOD,api/moderation,apps/api/src/server.ts,11878,,IMPLEMENTED,MEDIUM,,
+FEAT-140,FEAT,api/moderation/scan,apps/api/src/server.ts,11878,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-242,API,POST /api/v1/moderation/scan,apps/api/src/server.ts,11878,POST /api/v1/moderation/scan,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-141,FEAT,api/moderation/reports,apps/api/src/server.ts,11885,,IMPLEMENTED,MEDIUM,,7/7 endpoints ephemeral
+API-243,API,POST /api/v1/moderation/reports,apps/api/src/server.ts,11885,POST /api/v1/moderation/reports,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-244,API,GET /api/v1/moderation/reports/my,apps/api/src/server.ts,11953,GET /api/v1/moderation/reports/my,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-142;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-245,API,GET /api/v1/moderation/reports,apps/api/src/server.ts,11978,GET /api/v1/moderation/reports,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-246,API,GET /api/v1/moderation/reports/:id,apps/api/src/server.ts,12000,GET /api/v1/moderation/reports/:id,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-142;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-247,API,PATCH /api/v1/moderation/reports/:id/status,apps/api/src/server.ts,12021,PATCH /api/v1/moderation/reports/:id/status,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-248,API,POST /api/v1/moderation/reports/:id/resolve,apps/api/src/server.ts,12044,POST /api/v1/moderation/reports/:id/resolve,IMPLEMENTED,HIGH,TEST-114;TEST-124;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-249,API,POST /api/v1/moderation/reports/:id/appeal,apps/api/src/server.ts,12181,POST /api/v1/moderation/reports/:id/appeal,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-142,FEAT,api/moderation/appeals,apps/api/src/server.ts,12218,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-250,API,GET /api/v1/moderation/appeals,apps/api/src/server.ts,12218,GET /api/v1/moderation/appeals,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-251,API,POST /api/v1/moderation/appeals/:id/review,apps/api/src/server.ts,12227,POST /api/v1/moderation/appeals/:id/review,IMPLEMENTED,HIGH,TEST-114;TEST-145;TEST-193,ephemeral: state held in process memory; no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-143,FEAT,api/jobs/saved-searches,apps/api/src/server.ts,12276,,IMPLEMENTED,MEDIUM,,
+API-252,API,POST /api/v1/jobs/saved-searches,apps/api/src/server.ts,12276,POST /api/v1/jobs/saved-searches,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208;TEST-226,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-253,API,GET /api/v1/jobs/saved-searches,apps/api/src/server.ts,12294,GET /api/v1/jobs/saved-searches,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208;TEST-226,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-254,API,GET /api/v1/jobs/saved-searches/:id,apps/api/src/server.ts,12301,GET /api/v1/jobs/saved-searches/:id,IMPLEMENTED,HIGH,TEST-128;TEST-159,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-255,API,PATCH /api/v1/jobs/saved-searches/:id,apps/api/src/server.ts,12318,PATCH /api/v1/jobs/saved-searches/:id,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-256,API,DELETE /api/v1/jobs/saved-searches/:id,apps/api/src/server.ts,12338,DELETE /api/v1/jobs/saved-searches/:id,IMPLEMENTED,HIGH,TEST-128;TEST-159;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-257,API,POST /api/v1/jobs/saved-searches/:id/run,apps/api/src/server.ts,12356,POST /api/v1/jobs/saved-searches/:id/run,IMPLEMENTED,HIGH,TEST-128;TEST-208,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-144,FEAT,api/jobs/alerts,apps/api/src/server.ts,12375,,IMPLEMENTED,MEDIUM,,
+API-258,API,GET /api/v1/jobs/alerts,apps/api/src/server.ts,12375,GET /api/v1/jobs/alerts,IMPLEMENTED,HIGH,TEST-128;TEST-208;TEST-226,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-259,API,PATCH /api/v1/jobs/alerts/:id/read,apps/api/src/server.ts,12382,PATCH /api/v1/jobs/alerts/:id/read,IMPLEMENTED,HIGH,TEST-128;TEST-208;TEST-226,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-145,FEAT,api/jobs/save,apps/api/src/server.ts,12393,,IMPLEMENTED,MEDIUM,,
+API-260,API,POST /api/v1/jobs/:id/save,apps/api/src/server.ts,12393,POST /api/v1/jobs/:id/save,IMPLEMENTED,HIGH,TEST-128;TEST-208,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-261,API,DELETE /api/v1/jobs/:id/save,apps/api/src/server.ts,12410,DELETE /api/v1/jobs/:id/save,IMPLEMENTED,HIGH,TEST-128;TEST-208,no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-146,FEAT,api/jobs/saved,apps/api/src/server.ts,12421,,IMPLEMENTED,MEDIUM,,
+API-262,API,GET /api/v1/jobs/saved,apps/api/src/server.ts,12421,GET /api/v1/jobs/saved,IMPLEMENTED,HIGH,TEST-128;TEST-158;TEST-208,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-147,FEAT,api/jobs/draft,apps/api/src/server.ts,12434,,IMPLEMENTED,MEDIUM,,
+API-263,API,PUT /api/v1/jobs/:jobId/draft,apps/api/src/server.ts,12434,PUT /api/v1/jobs/:jobId/draft,IMPLEMENTED,HIGH,TEST-088;TEST-126;TEST-168;TEST-224,no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-264,API,GET /api/v1/jobs/:jobId/draft,apps/api/src/server.ts,12494,GET /api/v1/jobs/:jobId/draft,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-265,API,DELETE /api/v1/jobs/:jobId/draft,apps/api/src/server.ts,12518,DELETE /api/v1/jobs/:jobId/draft,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-266,API,POST /api/v1/jobs/:jobId/draft/restore,apps/api/src/server.ts,12538,POST /api/v1/jobs/:jobId/draft/restore,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-148,FEAT,api/applications/drafts,apps/api/src/server.ts,12571,,IMPLEMENTED,MEDIUM,,
+API-267,API,GET /api/v1/applications/drafts,apps/api/src/server.ts,12571,GET /api/v1/applications/drafts,IMPLEMENTED,HIGH,TEST-088;TEST-168;TEST-224,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-094,MOD,api/analytics,apps/api/src/server.ts,12604,,IMPLEMENTED,MEDIUM,,
+FEAT-149,FEAT,api/analytics/events,apps/api/src/server.ts,12604,,IMPLEMENTED,MEDIUM,,2/2 endpoints ephemeral
+API-268,API,POST /api/v1/analytics/events,apps/api/src/server.ts,12604,POST /api/v1/analytics/events,IMPLEMENTED,HIGH,TEST-086;TEST-101;TEST-145;TEST-148;TEST-167,ephemeral: state held in process memory; no first-party web caller found; 5 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-269,API,GET /api/v1/analytics/events,apps/api/src/server.ts,12669,GET /api/v1/analytics/events,IMPLEMENTED,HIGH,TEST-086;TEST-101;TEST-145;TEST-167,ephemeral: state held in process memory; no first-party web caller found; 4 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-150,FEAT,api/analytics/kpis,apps/api/src/server.ts,12688,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-270,API,GET /api/v1/analytics/kpis,apps/api/src/server.ts,12688,GET /api/v1/analytics/kpis,IMPLEMENTED,HIGH,TEST-086;TEST-167,ephemeral: state held in process memory; no first-party web caller found; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-151,FEAT,api/candidates/work-history,apps/api/src/server.ts,12774,,IMPLEMENTED,MEDIUM,,
+API-271,API,POST /api/v1/candidates/work-history,apps/api/src/server.ts,12774,POST /api/v1/candidates/work-history,IMPLEMENTED,HIGH,TEST-097;TEST-098;TEST-099;TEST-103;TEST-139,14 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-272,API,POST /api/v1/candidates/work-history/:id/verify-email,apps/api/src/server.ts,12852,POST /api/v1/candidates/work-history/:id/verify-email,IMPLEMENTED,HIGH,TEST-098;TEST-139;TEST-140;TEST-160;TEST-221,5 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-273,API,POST /api/v1/candidates/work-history/:id/references/request,apps/api/src/server.ts,12995,POST /api/v1/candidates/work-history/:id/references/request,IMPLEMENTED,HIGH,TEST-097;TEST-098;TEST-103;TEST-139;TEST-140,10 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-095,MOD,api/references,apps/api/src/server.ts,13107,,IMPLEMENTED,MEDIUM,,
+FEAT-152,FEAT,api/references,apps/api/src/server.ts,13107,,IMPLEMENTED,MEDIUM,,
+API-274,API,GET /api/v1/references/:refId,apps/api/src/server.ts,13107,GET /api/v1/references/:refId,IMPLEMENTED,HIGH,TEST-097;TEST-139;TEST-140;TEST-145;TEST-151,8 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-275,API,POST /api/v1/candidates/work-history/references/:refId/submit,apps/api/src/server.ts,13143,POST /api/v1/candidates/work-history/references/:refId/submit,IMPLEMENTED,HIGH,TEST-097;TEST-103;TEST-139;TEST-140;TEST-145,7 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-276,API,GET /api/v1/candidates/:candidateId/work-history,apps/api/src/server.ts,13304,GET /api/v1/candidates/:candidateId/work-history,IMPLEMENTED,HIGH,TEST-139;TEST-140;TEST-145;TEST-151;TEST-160,7 linked test file(s) executed and passed (2026-11-25); link is path-level
+FEAT-153,FEAT,api/candidates/work-history-graph,apps/api/src/server.ts,13353,,IMPLEMENTED,MEDIUM,,
+API-277,API,GET /api/v1/candidates/:candidateId/work-history-graph,apps/api/src/server.ts,13353,GET /api/v1/candidates/:candidateId/work-history-graph,IMPLEMENTED,HIGH,TEST-139;TEST-145;TEST-221,no first-party web caller found; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
+API-278,API,DELETE /api/v1/candidates/work-history/:id,apps/api/src/server.ts,13397,DELETE /api/v1/candidates/work-history/:id,IMPLEMENTED,HIGH,TEST-140;TEST-160,2 linked test file(s) executed and passed (2026-11-25); link is path-level
+MOD-096,MOD,api/internal,apps/api/src/server.ts,13451,,IMPLEMENTED,MEDIUM,,
+FEAT-154,FEAT,api/internal/worker-jobs,apps/api/src/server.ts,13451,,IMPLEMENTED,MEDIUM,,1/1 endpoints ephemeral
+API-279,API,GET /api/v1/internal/worker-jobs,apps/api/src/server.ts,13451,GET /api/v1/internal/worker-jobs,IMPLEMENTED,HIGH,TEST-083;TEST-092;TEST-097;TEST-102;TEST-103,ephemeral: state held in process memory; dev/test only: returns 404 when NODE_ENV is not development or test; no first-party web caller found; 21 linked test file(s) executed and passed (2026-11-25); link is path-level
 API-280,API,POST /api/v1/billing/checkout,apps/api/src/billing-stripe.ts,278,POST /api/v1/billing/checkout,IMPLEMENTED,HIGH,TEST-134;TEST-149,billing stripe-mode handler; 2 linked test file(s) executed and passed (2026-11-25); link is path-level
 API-281,API,POST /api/v1/billing/portal,apps/api/src/billing-stripe.ts,330,POST /api/v1/billing/portal,IMPLEMENTED,MEDIUM,,billing stripe-mode handler
 API-282,API,POST /api/v1/billing/stripe-webhook,apps/api/src/billing-stripe.ts,353,POST /api/v1/billing/stripe-webhook,IMPLEMENTED,HIGH,TEST-134;TEST-145;TEST-149,no first-party web caller found; billing stripe-mode handler; 3 linked test file(s) executed and passed (2026-11-25); link is path-level
-ERR-001,ERR,UNAUTHENTICATED: You signed out of this session. Sign in again.,apps/api/src/server.ts,911,,,,,
-ERR-002,ERR,UNAUTHENTICATED: This account no longer exists.,apps/api/src/server.ts,922,,,,,
-ERR-003,ERR,UNAUTHENTICATED: This account has been closed.,apps/api/src/server.ts,928,,,,,
-ERR-004,ERR,UNAUTHENTICATED: This session was ended from another device. Sign in again.,apps/api/src/server.ts,937,,,,,
-ERR-005,ERR,FORBIDDEN: This account is restricted. You can still export or delete your data.,apps/api/src/server.ts,945,,,,,
-ERR-006,ERR,UNAUTHENTICATED: Missing or malformed Authorization header.,apps/api/src/server.ts,959,,,,,
-ERR-007,ERR,UNAUTHENTICATED: Your session has expired or is no longer valid. Sign in again.,apps/api/src/server.ts,964,,,,,
-ERR-008,ERR,CONFLICT: An account with this email address already exists.,apps/api/src/server.ts,1070,,,,,
-ERR-009,ERR,"RATE_LIMIT_EXCEEDED: Too many sign-in attempts for this account. Wait 15 minutes, then try ",apps/api/src/server.ts,1113,,,,,
-ERR-010,ERR,UNAUTHENTICATED: Invalid email or password.,apps/api/src/server.ts,1125,,,,,
-ERR-011,ERR,UNAUTHENTICATED: Sign in again to change your password.,apps/api/src/server.ts,1200,,,,,
-ERR-012,ERR,VALIDATION_FAILED: Your current password is not correct.,apps/api/src/server.ts,1203,,,,,
-ERR-013,ERR,VALIDATION_FAILED: Choose a new password that is different from the current one.,apps/api/src/server.ts,1208,,,,,
-ERR-014,ERR,UNAUTHENTICATED: Sign in again to manage your sessions.,apps/api/src/server.ts,1280,,,,,
-ERR-015,ERR,NOT_FOUND: Profile not found.,apps/api/src/server.ts,1329,,,,,
-ERR-016,ERR,NOT_FOUND: Profile with ID ${id} not found.,apps/api/src/server.ts,1355,,,,,
-ERR-017,ERR,FORBIDDEN: This profile is private or restricted to authorized roles.,apps/api/src/server.ts,1366,,,,,
-ERR-018,ERR,NOT_FOUND: Profile required before creating evidence.,apps/api/src/server.ts,1494,,,,,
-ERR-019,ERR,NOT_FOUND: Canonical skill ${skillId} does not exist (BR-144).,apps/api/src/server.ts,1512,,,,,
-ERR-020,ERR,NOT_FOUND: Evidence with ID ${id} not found.,apps/api/src/server.ts,1538,,,,,
-ERR-021,ERR,FORBIDDEN: Access to this evidence is restricted by profile privacy.,apps/api/src/server.ts,1552,,,,,
-ERR-022,ERR,NOT_FOUND: Profile with ID ${subjectId} not found.,apps/api/src/server.ts,1588,,,,,
-ERR-023,ERR,FORBIDDEN: Access to evidence is restricted by subject privacy settings.,apps/api/src/server.ts,1600,,,,,
-ERR-024,ERR,UNAUTHORIZED: Skills taxonomy is curated by Platform Admin only (BR-141).,apps/api/src/server.ts,1786,,,,,
-ERR-025,ERR,"CONFLICT: Skill with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,1794,,,,,
-ERR-026,ERR,UNAUTHORIZED: Only Platform Admins may define skill relationships (BR-141).,apps/api/src/server.ts,1816,,,,,
-ERR-027,ERR,NOT_FOUND: Source skill ${input.sourceSkillId} not found.,apps/api/src/server.ts,1824,,,,,
-ERR-028,ERR,NOT_FOUND: Target skill ${input.targetSkillId} not found.,apps/api/src/server.ts,1827,,,,,
-ERR-029,ERR,NOT_FOUND: Skill with ID ${id} not found.,apps/api/src/server.ts,1848,,,,,
-ERR-030,ERR,"CONFLICT: Organization with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,1890,,,,,
-ERR-031,ERR,NOT_FOUND: Organization with ID ${id} not found.,apps/api/src/server.ts,1938,,,,,
-ERR-032,ERR,FORBIDDEN: Only members of this organization can see its jobs.,apps/api/src/server.ts,1941,,,,,
-ERR-033,ERR,FORBIDDEN: Only organization owner or admin can add members.,apps/api/src/server.ts,1984,,,,,
-ERR-034,ERR,NOT_FOUND: No account exists for that user id.,apps/api/src/server.ts,1990,,,,,
-ERR-035,ERR,CONFLICT: That user is already a member of this organization.,apps/api/src/server.ts,1997,,,,,
-ERR-036,ERR,FORBIDDEN: You do not belong to the organization for this job posting (BR-12).,apps/api/src/server.ts,2051,,,,,
-ERR-037,ERR,NOT_FOUND: Job with ID ${id} not found.,apps/api/src/server.ts,2133,,,,,
-ERR-038,ERR,FORBIDDEN: Recruiters may only create templates for their assigned organization (,apps/api/src/server.ts,2200,,,,,
-ERR-039,ERR,VALIDATION_FAILED: Skill ID ${skillId} is not a valid canonical skill (BR-144).,apps/api/src/server.ts,2209,,,,,
-ERR-040,ERR,FORBIDDEN: Access to templates is restricted to organization members (BR-12).,apps/api/src/server.ts,2274,,,,,
-ERR-041,ERR,NOT_FOUND: Job template with ID ${id} not found.,apps/api/src/server.ts,2307,,,,,
-ERR-042,ERR,FORBIDDEN: Access to template is restricted to organization members (BR-12).,apps/api/src/server.ts,2315,,,,,
-ERR-043,ERR,FORBIDDEN: Only recruiters of this organization can instantiate jobs from its tem,apps/api/src/server.ts,2473,,,,,
-ERR-044,ERR,FORBIDDEN: Only recruiters of this organization can save its jobs as templates (B,apps/api/src/server.ts,2551,,,,,
-ERR-045,ERR,RATE_LIMIT_EXCEEDED: Daily salary submission limit reached (5 submissions/day).,apps/api/src/server.ts,2605,,,,,
-ERR-046,ERR,NOT_FOUND: Salary report with ID ${id} not found.,apps/api/src/server.ts,2673,,,,,
-ERR-047,ERR,NOT_FOUND: Profile required before submitting job applications.,apps/api/src/server.ts,2736,,,,,
-ERR-048,ERR,NOT_FOUND: Job with ID ${jobId} not found.,apps/api/src/server.ts,2741,,,,,
-ERR-049,ERR,NOT_FOUND: Evidence item ${evId} not found.,apps/api/src/server.ts,2748,,,,,
-ERR-050,ERR,FORBIDDEN: Evidence item ${evId} does not belong to your profile.,apps/api/src/server.ts,2751,,,,,
-ERR-051,ERR,NOT_FOUND: Application ${id} not found.,apps/api/src/server.ts,2851,,,,,
-ERR-052,ERR,FORBIDDEN: Access to application is restricted.,apps/api/src/server.ts,2862,,,,,
-ERR-053,ERR,FORBIDDEN: Access to candidate applications is restricted to authorized recruiter,apps/api/src/server.ts,2890,,,,,
-ERR-054,ERR,NOT_FOUND: Application with ID ${id} not found.,apps/api/src/server.ts,2937,,,,,
-ERR-055,ERR,NOT_FOUND: Associated job for application ${id} not found.,apps/api/src/server.ts,3032,,,,,
-ERR-056,ERR,FORBIDDEN: Only recruiters of the hiring organization can provide feedback (BR-12,apps/api/src/server.ts,3040,,,,,
-ERR-057,ERR,NOT_FOUND: No feedback recorded for application ${id}.,apps/api/src/server.ts,3116,,,,,
-ERR-058,ERR,FORBIDDEN: Application feedback is private and visible only to the candidate (BR-,apps/api/src/server.ts,3128,,,,,
-ERR-059,ERR,FORBIDDEN: Candidates may only request feedback for their own applications.,apps/api/src/server.ts,3157,,,,,
-ERR-060,ERR,FORBIDDEN: Only organization members can configure feedback templates (BR-224).,apps/api/src/server.ts,3208,,,,,
-ERR-061,ERR,FORBIDDEN: Access to feedback templates is restricted to organization members.,apps/api/src/server.ts,3251,,,,,
-ERR-062,ERR,NOT_FOUND: Candidate profile required to track skill freshness.,apps/api/src/server.ts,3276,,,,,
-ERR-063,ERR,VALIDATION_FAILED: Skill ID ${input.skillId} is not a valid canonical skill (BR-144).,apps/api/src/server.ts,3281,,,,,
-ERR-064,ERR,NOT_FOUND: Candidate profile ${candidateProfileId} not found.,apps/api/src/server.ts,3335,,,,,
-ERR-065,ERR,FORBIDDEN: Skill freshness is private to the candidate and visible to recruiters ,apps/api/src/server.ts,3350,,,,,
-ERR-066,ERR,NOT_FOUND: Candidate profile required for skill re-verification.,apps/api/src/server.ts,3370,,,,,
-ERR-067,ERR,FORBIDDEN: Only a platform admin can recompute every freshness score.,apps/api/src/server.ts,3423,,,,,
-ERR-068,ERR,FORBIDDEN: User is not authorized to create questions for this organization.,apps/api/src/server.ts,3460,,,,,
-ERR-069,ERR,VALIDATION_FAILED: orgId query parameter is required.,apps/api/src/server.ts,3500,,,,,
-ERR-070,ERR,FORBIDDEN: Interview question bank is company-scoped and not accessible to candid,apps/api/src/server.ts,3509,,,,,
-ERR-071,ERR,FORBIDDEN: User is not a member of the requested organization.,apps/api/src/server.ts,3519,,,,,
-ERR-072,ERR,FORBIDDEN: Only the hiring team can do this for this interview.,apps/api/src/server.ts,3552,,,,,
-ERR-073,ERR,FORBIDDEN: Access to this interview assessment is restricted.,apps/api/src/server.ts,3562,,,,,
-ERR-074,ERR,FORBIDDEN: User is not authorized to schedule interviews for this organization.,apps/api/src/server.ts,3575,,,,,
-ERR-075,ERR,NOT_FOUND: Candidate profile ${input.candidateProfileId} not found.,apps/api/src/server.ts,3583,,,,,
-ERR-076,ERR,VALIDATION_FAILED: The interviewer must be a member of the hiring organization.,apps/api/src/server.ts,3595,,,,,
-ERR-077,ERR,VALIDATION_FAILED: applicationId must be an application to one of this organization's job,apps/api/src/server.ts,3612,,,,,
-ERR-078,ERR,VALIDATION_FAILED: questionIds must be questions from this organization's own question ba,apps/api/src/server.ts,3624,,,,,
-ERR-079,ERR,NOT_FOUND: Interview assessment ${id} not found.,apps/api/src/server.ts,3670,,,,,
-ERR-080,ERR,"VALIDATION_FAILED: Invalid resolution '${resolution}'. Must be completed, cancelled, or n",apps/api/src/server.ts,3759,,,,,
-ERR-081,ERR,SERVICE_UNAVAILABLE: Automated code execution is unavailable until a real isolated sandbox ,apps/api/src/server.ts,3794,,,,,
-ERR-082,ERR,NOT_FOUND: That question is not part of this interview.,apps/api/src/server.ts,3805,,,,,
-ERR-083,ERR,FORBIDDEN: Candidates are not authorized to submit interview scorecards.,apps/api/src/server.ts,3843,,,,,
-ERR-084,ERR,FORBIDDEN: Candidates are not authorized to submit scorecard compensations.,apps/api/src/server.ts,3918,,,,,
-ERR-085,ERR,NOT_FOUND: No existing scorecard found to compensate.,apps/api/src/server.ts,3927,,,,,
-ERR-086,ERR,FORBIDDEN: Reputation signals are recorded by moderators and platform admins.,apps/api/src/server.ts,4051,,,,,
-ERR-087,ERR,NOT_FOUND: User ${targetUserId} not found.,apps/api/src/server.ts,4061,,,,,
-ERR-088,ERR,NOT_FOUND: User ${userId} not found.,apps/api/src/server.ts,4122,,,,,
-ERR-089,ERR,FORBIDDEN: Reputation is visible to the candidate and to hiring teams they applie,apps/api/src/server.ts,4149,,,,,
-ERR-090,ERR,NOT_FOUND: Penalty signal ${input.penaltySignalId} not found.,apps/api/src/server.ts,4192,,,,,
-ERR-091,ERR,NOT_FOUND: Recovery plan ${planId} not found.,apps/api/src/server.ts,4227,,,,,
-ERR-092,ERR,FORBIDDEN: A recovery task is confirmed by a moderator or platform admin.,apps/api/src/server.ts,4233,,,,,
-ERR-093,ERR,FORBIDDEN: Only a platform admin can recompute every reputation score.,apps/api/src/server.ts,4288,,,,,
-ERR-094,ERR,FORBIDDEN: Only the instructor or platform administrator can update operational m,apps/api/src/server.ts,4373,,,,,
-ERR-095,ERR,CONFLICT: You have already endorsed this instructor for this skill domain.,apps/api/src/server.ts,4437,,,,,
-ERR-096,ERR,FORBIDDEN: Instructors cannot review themselves.,apps/api/src/server.ts,4475,,,,,
-ERR-097,ERR,"NOT_FOUND: Organization with ID ""${organizationId}"" not found.",apps/api/src/server.ts,4554,,,,,
-ERR-098,ERR,CONFLICT: You have already submitted a review for this employer.,apps/api/src/server.ts,4586,,,,,
-ERR-099,ERR,FORBIDDEN: Access denied to submit operational metrics for this employer.,apps/api/src/server.ts,4669,,,,,
-ERR-100,ERR,NOT_FOUND: Challenge with ID ${id} not found.,apps/api/src/server.ts,4740,,,,,
-ERR-101,ERR,"CONFLICT: Challenge with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,4751,,,,,
-ERR-102,ERR,NOT_FOUND: Candidate profile required before starting assessment.,apps/api/src/server.ts,4786,,,,,
-ERR-103,ERR,NOT_FOUND: Challenge with ID ${challengeId} not found.,apps/api/src/server.ts,4794,,,,,
-ERR-104,ERR,NOT_FOUND: Candidate profile required.,apps/api/src/server.ts,4820,,,,,
-ERR-105,ERR,NOT_FOUND: Assessment session not found.,apps/api/src/server.ts,4837,,,,,
-ERR-106,ERR,"FORBIDDEN: Only instructors, course authors and platform admins can create course",apps/api/src/server.ts,5001,,,,,
-ERR-107,ERR,NOT_FOUND: Profile not found. Please create a profile first.,apps/api/src/server.ts,5008,,,,,
-ERR-108,ERR,"CONFLICT: Course with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,5013,,,,,
-ERR-109,ERR,"NOT_FOUND: Course with ID or slug ""${id}"" not found.",apps/api/src/server.ts,5048,,,,,
-ERR-110,ERR,"NOT_FOUND: Course with ID ""${id}"" not found.",apps/api/src/server.ts,5092,,,,,
-ERR-111,ERR,FORBIDDEN: Only the course instructor or platform admin can add modules.,apps/api/src/server.ts,5097,,,,,
-ERR-112,ERR,CONFLICT: Module with orderIndex ${input.orderIndex} already exists in this cour,apps/api/src/server.ts,5108,,,,,
-ERR-113,ERR,"NOT_FOUND: Module with ID ""${id}"" not found.",apps/api/src/server.ts,5137,,,,,
-ERR-114,ERR,FORBIDDEN: Only the course instructor or platform admin can add lessons.,apps/api/src/server.ts,5146,,,,,
-ERR-115,ERR,"NOT_FOUND: Prerequisite lesson with ID ""${input.prerequisiteLessonId}"" not found.",apps/api/src/server.ts,5154,,,,,
-ERR-116,ERR,CONFLICT: Lesson with orderIndex ${input.orderIndex} already exists in this modu,apps/api/src/server.ts,5164,,,,,
-ERR-117,ERR,FORBIDDEN: Only the course instructor or platform admin can publish this course.,apps/api/src/server.ts,5202,,,,,
-ERR-118,ERR,VALIDATION_FAILED: Course publish requirements not met: ${readiness.errors.join('; ')},apps/api/src/server.ts,5216,,,,,
-ERR-119,ERR,FORBIDDEN: You cannot enrol in a course you teach.,apps/api/src/server.ts,5249,,,,,
-ERR-120,ERR,"NOT_FOUND: Lesson with ID ""${id}"" not found.",apps/api/src/server.ts,5324,,,,,
-ERR-121,ERR,NOT_FOUND: Module for lesson not found.,apps/api/src/server.ts,5329,,,,,
-ERR-122,ERR,NOT_FOUND: Course for lesson not found.,apps/api/src/server.ts,5334,,,,,
-ERR-123,ERR,FORBIDDEN: You must be actively enrolled in the course to complete lessons.,apps/api/src/server.ts,5344,,,,,
-ERR-124,ERR,"NOT_FOUND: Certificate ""${certificateNumber}"" not found.",apps/api/src/server.ts,5480,,,,,
-ERR-125,ERR,"NOT_FOUND: No credential or verification proof found matching hash ""${hash}"".",apps/api/src/server.ts,5537,,,,,
-ERR-126,ERR,"NOT_FOUND: Certificate with verification proof hash ""${hash}"" not found.",apps/api/src/server.ts,5551,,,,,
-ERR-127,ERR,NOT_FOUND: Recipient profile not found.,apps/api/src/server.ts,5770,,,,,
-ERR-128,ERR,VALIDATION_FAILED: Cannot start a direct message thread solely with yourself.,apps/api/src/server.ts,5773,,,,,
-ERR-129,ERR,FORBIDDEN: You can message people you are connected with. A hiring team and a can,apps/api/src/server.ts,5779,,,,,
-ERR-130,ERR,"NOT_FOUND: Thread with ID ""${id}"" not found.",apps/api/src/server.ts,5863,,,,,
-ERR-131,ERR,"NOT_FOUND: Conversation with ID ""${id}"" not found.",apps/api/src/server.ts,6156,,,,,
-ERR-132,ERR,FORBIDDEN: Access denied to conversation.,apps/api/src/server.ts,6160,,,,,
-ERR-133,ERR,"NOT_FOUND: Conversation with ID ""${input.conversationId}"" not found.",apps/api/src/server.ts,6198,,,,,
-ERR-134,ERR,"NOT_FOUND: Resume with ID ""${resumeId}"" not found.",apps/api/src/server.ts,6293,,,,,
-ERR-135,ERR,FORBIDDEN: Access denied to resume.,apps/api/src/server.ts,6296,,,,,
-ERR-136,ERR,"NOT_FOUND: Resume with ID ""${id}"" not found.",apps/api/src/server.ts,6328,,,,,
-ERR-137,ERR,"NOT_FOUND: Resume export with ID ""${exportId}"" not found.",apps/api/src/server.ts,6447,,,,,
-ERR-138,ERR,FORBIDDEN: Access denied to resume export.,apps/api/src/server.ts,6451,,,,,
-ERR-139,ERR,NOT_FOUND: Recipient user not found.,apps/api/src/server.ts,6493,,,,,
-ERR-140,ERR,"NOT_FOUND: Connection request with ID ""${id}"" not found.",apps/api/src/server.ts,6628,,,,,
-ERR-141,ERR,"NOT_FOUND: Connection with ID ""${id}"" not found.",apps/api/src/server.ts,6732,,,,,
-ERR-142,ERR,FORBIDDEN: Access denied to connection.,apps/api/src/server.ts,6736,,,,,
+ERR-001,ERR,UNAUTHENTICATED: You signed out of this session. Sign in again.,apps/api/src/server.ts,910,,,,,
+ERR-002,ERR,UNAUTHENTICATED: This account no longer exists.,apps/api/src/server.ts,921,,,,,
+ERR-003,ERR,UNAUTHENTICATED: This account has been closed.,apps/api/src/server.ts,927,,,,,
+ERR-004,ERR,UNAUTHENTICATED: This session was ended from another device. Sign in again.,apps/api/src/server.ts,936,,,,,
+ERR-005,ERR,FORBIDDEN: This account is restricted. You can still export or delete your data.,apps/api/src/server.ts,944,,,,,
+ERR-006,ERR,UNAUTHENTICATED: Missing or malformed Authorization header.,apps/api/src/server.ts,958,,,,,
+ERR-007,ERR,UNAUTHENTICATED: Your session has expired or is no longer valid. Sign in again.,apps/api/src/server.ts,963,,,,,
+ERR-008,ERR,CONFLICT: An account with this email address already exists.,apps/api/src/server.ts,1069,,,,,
+ERR-009,ERR,"RATE_LIMIT_EXCEEDED: Too many sign-in attempts for this account. Wait 15 minutes, then try ",apps/api/src/server.ts,1112,,,,,
+ERR-010,ERR,UNAUTHENTICATED: Invalid email or password.,apps/api/src/server.ts,1124,,,,,
+ERR-011,ERR,UNAUTHENTICATED: Sign in again to change your password.,apps/api/src/server.ts,1199,,,,,
+ERR-012,ERR,VALIDATION_FAILED: Your current password is not correct.,apps/api/src/server.ts,1202,,,,,
+ERR-013,ERR,VALIDATION_FAILED: Choose a new password that is different from the current one.,apps/api/src/server.ts,1207,,,,,
+ERR-014,ERR,UNAUTHENTICATED: Sign in again to manage your sessions.,apps/api/src/server.ts,1279,,,,,
+ERR-015,ERR,NOT_FOUND: Profile not found.,apps/api/src/server.ts,1328,,,,,
+ERR-016,ERR,NOT_FOUND: Profile with ID ${id} not found.,apps/api/src/server.ts,1354,,,,,
+ERR-017,ERR,FORBIDDEN: This profile is private or restricted to authorized roles.,apps/api/src/server.ts,1365,,,,,
+ERR-018,ERR,NOT_FOUND: Profile required before creating evidence.,apps/api/src/server.ts,1493,,,,,
+ERR-019,ERR,NOT_FOUND: Canonical skill ${skillId} does not exist (BR-144).,apps/api/src/server.ts,1511,,,,,
+ERR-020,ERR,NOT_FOUND: Evidence with ID ${id} not found.,apps/api/src/server.ts,1537,,,,,
+ERR-021,ERR,FORBIDDEN: Access to this evidence is restricted by profile privacy.,apps/api/src/server.ts,1551,,,,,
+ERR-022,ERR,NOT_FOUND: Profile with ID ${subjectId} not found.,apps/api/src/server.ts,1587,,,,,
+ERR-023,ERR,FORBIDDEN: Access to evidence is restricted by subject privacy settings.,apps/api/src/server.ts,1599,,,,,
+ERR-024,ERR,UNAUTHORIZED: Skills taxonomy is curated by Platform Admin only (BR-141).,apps/api/src/server.ts,1785,,,,,
+ERR-025,ERR,"CONFLICT: Skill with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,1793,,,,,
+ERR-026,ERR,UNAUTHORIZED: Only Platform Admins may define skill relationships (BR-141).,apps/api/src/server.ts,1815,,,,,
+ERR-027,ERR,NOT_FOUND: Source skill ${input.sourceSkillId} not found.,apps/api/src/server.ts,1823,,,,,
+ERR-028,ERR,NOT_FOUND: Target skill ${input.targetSkillId} not found.,apps/api/src/server.ts,1826,,,,,
+ERR-029,ERR,NOT_FOUND: Skill with ID ${id} not found.,apps/api/src/server.ts,1847,,,,,
+ERR-030,ERR,"CONFLICT: Organization with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,1889,,,,,
+ERR-031,ERR,NOT_FOUND: Organization with ID ${id} not found.,apps/api/src/server.ts,1937,,,,,
+ERR-032,ERR,FORBIDDEN: Only members of this organization can see its jobs.,apps/api/src/server.ts,1940,,,,,
+ERR-033,ERR,FORBIDDEN: Only organization owner or admin can add members.,apps/api/src/server.ts,1983,,,,,
+ERR-034,ERR,NOT_FOUND: No account exists for that user id.,apps/api/src/server.ts,1989,,,,,
+ERR-035,ERR,CONFLICT: That user is already a member of this organization.,apps/api/src/server.ts,1996,,,,,
+ERR-036,ERR,FORBIDDEN: You do not belong to the organization for this job posting (BR-12).,apps/api/src/server.ts,2050,,,,,
+ERR-037,ERR,NOT_FOUND: Job with ID ${id} not found.,apps/api/src/server.ts,2129,,,,,
+ERR-038,ERR,FORBIDDEN: Recruiters may only create templates for their assigned organization (,apps/api/src/server.ts,2195,,,,,
+ERR-039,ERR,VALIDATION_FAILED: Skill ID ${skillId} is not a valid canonical skill (BR-144).,apps/api/src/server.ts,2204,,,,,
+ERR-040,ERR,FORBIDDEN: Access to templates is restricted to organization members (BR-12).,apps/api/src/server.ts,2269,,,,,
+ERR-041,ERR,NOT_FOUND: Job template with ID ${id} not found.,apps/api/src/server.ts,2302,,,,,
+ERR-042,ERR,FORBIDDEN: Access to template is restricted to organization members (BR-12).,apps/api/src/server.ts,2310,,,,,
+ERR-043,ERR,FORBIDDEN: Only recruiters of this organization can instantiate jobs from its tem,apps/api/src/server.ts,2468,,,,,
+ERR-044,ERR,FORBIDDEN: Only recruiters of this organization can save its jobs as templates (B,apps/api/src/server.ts,2546,,,,,
+ERR-045,ERR,RATE_LIMIT_EXCEEDED: Daily salary submission limit reached (5 submissions/day).,apps/api/src/server.ts,2600,,,,,
+ERR-046,ERR,NOT_FOUND: Salary report with ID ${id} not found.,apps/api/src/server.ts,2668,,,,,
+ERR-047,ERR,NOT_FOUND: Profile required before submitting job applications.,apps/api/src/server.ts,2731,,,,,
+ERR-048,ERR,NOT_FOUND: Job with ID ${jobId} not found.,apps/api/src/server.ts,2736,,,,,
+ERR-049,ERR,NOT_FOUND: Evidence item ${evId} not found.,apps/api/src/server.ts,2743,,,,,
+ERR-050,ERR,FORBIDDEN: Evidence item ${evId} does not belong to your profile.,apps/api/src/server.ts,2746,,,,,
+ERR-051,ERR,NOT_FOUND: Application ${id} not found.,apps/api/src/server.ts,2846,,,,,
+ERR-052,ERR,FORBIDDEN: Access to application is restricted.,apps/api/src/server.ts,2857,,,,,
+ERR-053,ERR,FORBIDDEN: Access to candidate applications is restricted to authorized recruiter,apps/api/src/server.ts,2885,,,,,
+ERR-054,ERR,NOT_FOUND: Application with ID ${id} not found.,apps/api/src/server.ts,2932,,,,,
+ERR-055,ERR,NOT_FOUND: Associated job for application ${id} not found.,apps/api/src/server.ts,3027,,,,,
+ERR-056,ERR,FORBIDDEN: Only recruiters of the hiring organization can provide feedback (BR-12,apps/api/src/server.ts,3035,,,,,
+ERR-057,ERR,NOT_FOUND: No feedback recorded for application ${id}.,apps/api/src/server.ts,3111,,,,,
+ERR-058,ERR,FORBIDDEN: Application feedback is private and visible only to the candidate (BR-,apps/api/src/server.ts,3123,,,,,
+ERR-059,ERR,FORBIDDEN: Candidates may only request feedback for their own applications.,apps/api/src/server.ts,3152,,,,,
+ERR-060,ERR,FORBIDDEN: Only organization members can configure feedback templates (BR-224).,apps/api/src/server.ts,3203,,,,,
+ERR-061,ERR,FORBIDDEN: Access to feedback templates is restricted to organization members.,apps/api/src/server.ts,3246,,,,,
+ERR-062,ERR,NOT_FOUND: Candidate profile required to track skill freshness.,apps/api/src/server.ts,3271,,,,,
+ERR-063,ERR,VALIDATION_FAILED: Skill ID ${input.skillId} is not a valid canonical skill (BR-144).,apps/api/src/server.ts,3276,,,,,
+ERR-064,ERR,NOT_FOUND: Candidate profile ${candidateProfileId} not found.,apps/api/src/server.ts,3330,,,,,
+ERR-065,ERR,FORBIDDEN: Skill freshness is private to the candidate and visible to recruiters ,apps/api/src/server.ts,3345,,,,,
+ERR-066,ERR,NOT_FOUND: Candidate profile required for skill re-verification.,apps/api/src/server.ts,3365,,,,,
+ERR-067,ERR,FORBIDDEN: Only a platform admin can recompute every freshness score.,apps/api/src/server.ts,3418,,,,,
+ERR-068,ERR,FORBIDDEN: User is not authorized to create questions for this organization.,apps/api/src/server.ts,3455,,,,,
+ERR-069,ERR,VALIDATION_FAILED: orgId query parameter is required.,apps/api/src/server.ts,3495,,,,,
+ERR-070,ERR,FORBIDDEN: Interview question bank is company-scoped and not accessible to candid,apps/api/src/server.ts,3504,,,,,
+ERR-071,ERR,FORBIDDEN: User is not a member of the requested organization.,apps/api/src/server.ts,3514,,,,,
+ERR-072,ERR,FORBIDDEN: Only the hiring team can do this for this interview.,apps/api/src/server.ts,3547,,,,,
+ERR-073,ERR,FORBIDDEN: Access to this interview assessment is restricted.,apps/api/src/server.ts,3557,,,,,
+ERR-074,ERR,FORBIDDEN: User is not authorized to schedule interviews for this organization.,apps/api/src/server.ts,3570,,,,,
+ERR-075,ERR,NOT_FOUND: Candidate profile ${input.candidateProfileId} not found.,apps/api/src/server.ts,3578,,,,,
+ERR-076,ERR,VALIDATION_FAILED: The interviewer must be a member of the hiring organization.,apps/api/src/server.ts,3590,,,,,
+ERR-077,ERR,VALIDATION_FAILED: applicationId must be an application to one of this organization's job,apps/api/src/server.ts,3607,,,,,
+ERR-078,ERR,VALIDATION_FAILED: questionIds must be questions from this organization's own question ba,apps/api/src/server.ts,3619,,,,,
+ERR-079,ERR,NOT_FOUND: Interview assessment ${id} not found.,apps/api/src/server.ts,3665,,,,,
+ERR-080,ERR,"VALIDATION_FAILED: Invalid resolution '${resolution}'. Must be completed, cancelled, or n",apps/api/src/server.ts,3754,,,,,
+ERR-081,ERR,SERVICE_UNAVAILABLE: Automated code execution is unavailable until a real isolated sandbox ,apps/api/src/server.ts,3789,,,,,
+ERR-082,ERR,NOT_FOUND: That question is not part of this interview.,apps/api/src/server.ts,3800,,,,,
+ERR-083,ERR,FORBIDDEN: Candidates are not authorized to submit interview scorecards.,apps/api/src/server.ts,3838,,,,,
+ERR-084,ERR,FORBIDDEN: Candidates are not authorized to submit scorecard compensations.,apps/api/src/server.ts,3913,,,,,
+ERR-085,ERR,NOT_FOUND: No existing scorecard found to compensate.,apps/api/src/server.ts,3922,,,,,
+ERR-086,ERR,FORBIDDEN: Reputation signals are recorded by moderators and platform admins.,apps/api/src/server.ts,4046,,,,,
+ERR-087,ERR,NOT_FOUND: User ${targetUserId} not found.,apps/api/src/server.ts,4056,,,,,
+ERR-088,ERR,NOT_FOUND: User ${userId} not found.,apps/api/src/server.ts,4117,,,,,
+ERR-089,ERR,FORBIDDEN: Reputation is visible to the candidate and to hiring teams they applie,apps/api/src/server.ts,4144,,,,,
+ERR-090,ERR,NOT_FOUND: Penalty signal ${input.penaltySignalId} not found.,apps/api/src/server.ts,4187,,,,,
+ERR-091,ERR,NOT_FOUND: Recovery plan ${planId} not found.,apps/api/src/server.ts,4222,,,,,
+ERR-092,ERR,FORBIDDEN: A recovery task is confirmed by a moderator or platform admin.,apps/api/src/server.ts,4228,,,,,
+ERR-093,ERR,FORBIDDEN: Only a platform admin can recompute every reputation score.,apps/api/src/server.ts,4283,,,,,
+ERR-094,ERR,FORBIDDEN: Only the instructor or platform administrator can update operational m,apps/api/src/server.ts,4368,,,,,
+ERR-095,ERR,CONFLICT: You have already endorsed this instructor for this skill domain.,apps/api/src/server.ts,4432,,,,,
+ERR-096,ERR,FORBIDDEN: Instructors cannot review themselves.,apps/api/src/server.ts,4470,,,,,
+ERR-097,ERR,"NOT_FOUND: Organization with ID ""${organizationId}"" not found.",apps/api/src/server.ts,4549,,,,,
+ERR-098,ERR,CONFLICT: You have already submitted a review for this employer.,apps/api/src/server.ts,4581,,,,,
+ERR-099,ERR,FORBIDDEN: Access denied to submit operational metrics for this employer.,apps/api/src/server.ts,4664,,,,,
+ERR-100,ERR,NOT_FOUND: Challenge with ID ${id} not found.,apps/api/src/server.ts,4735,,,,,
+ERR-101,ERR,"CONFLICT: Challenge with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,4746,,,,,
+ERR-102,ERR,NOT_FOUND: Candidate profile required before starting assessment.,apps/api/src/server.ts,4781,,,,,
+ERR-103,ERR,NOT_FOUND: Challenge with ID ${challengeId} not found.,apps/api/src/server.ts,4789,,,,,
+ERR-104,ERR,NOT_FOUND: Candidate profile required.,apps/api/src/server.ts,4815,,,,,
+ERR-105,ERR,NOT_FOUND: Assessment session not found.,apps/api/src/server.ts,4832,,,,,
+ERR-106,ERR,"FORBIDDEN: Only instructors, course authors and platform admins can create course",apps/api/src/server.ts,4996,,,,,
+ERR-107,ERR,NOT_FOUND: Profile not found. Please create a profile first.,apps/api/src/server.ts,5003,,,,,
+ERR-108,ERR,"CONFLICT: Course with slug ""${input.slug}"" already exists.",apps/api/src/server.ts,5008,,,,,
+ERR-109,ERR,"NOT_FOUND: Course with ID or slug ""${id}"" not found.",apps/api/src/server.ts,5043,,,,,
+ERR-110,ERR,"NOT_FOUND: Course with ID ""${id}"" not found.",apps/api/src/server.ts,5087,,,,,
+ERR-111,ERR,FORBIDDEN: Only the course instructor or platform admin can add modules.,apps/api/src/server.ts,5092,,,,,
+ERR-112,ERR,CONFLICT: Module with orderIndex ${input.orderIndex} already exists in this cour,apps/api/src/server.ts,5103,,,,,
+ERR-113,ERR,"NOT_FOUND: Module with ID ""${id}"" not found.",apps/api/src/server.ts,5132,,,,,
+ERR-114,ERR,FORBIDDEN: Only the course instructor or platform admin can add lessons.,apps/api/src/server.ts,5141,,,,,
+ERR-115,ERR,"NOT_FOUND: Prerequisite lesson with ID ""${input.prerequisiteLessonId}"" not found.",apps/api/src/server.ts,5149,,,,,
+ERR-116,ERR,CONFLICT: Lesson with orderIndex ${input.orderIndex} already exists in this modu,apps/api/src/server.ts,5159,,,,,
+ERR-117,ERR,FORBIDDEN: Only the course instructor or platform admin can publish this course.,apps/api/src/server.ts,5197,,,,,
+ERR-118,ERR,VALIDATION_FAILED: Course publish requirements not met: ${readiness.errors.join('; ')},apps/api/src/server.ts,5211,,,,,
+ERR-119,ERR,FORBIDDEN: You cannot enrol in a course you teach.,apps/api/src/server.ts,5244,,,,,
+ERR-120,ERR,"NOT_FOUND: Lesson with ID ""${id}"" not found.",apps/api/src/server.ts,5319,,,,,
+ERR-121,ERR,NOT_FOUND: Module for lesson not found.,apps/api/src/server.ts,5324,,,,,
+ERR-122,ERR,NOT_FOUND: Course for lesson not found.,apps/api/src/server.ts,5329,,,,,
+ERR-123,ERR,FORBIDDEN: You must be actively enrolled in the course to complete lessons.,apps/api/src/server.ts,5339,,,,,
+ERR-124,ERR,"NOT_FOUND: Certificate ""${certificateNumber}"" not found.",apps/api/src/server.ts,5475,,,,,
+ERR-125,ERR,"NOT_FOUND: No credential or verification proof found matching hash ""${hash}"".",apps/api/src/server.ts,5532,,,,,
+ERR-126,ERR,"NOT_FOUND: Certificate with verification proof hash ""${hash}"" not found.",apps/api/src/server.ts,5546,,,,,
+ERR-127,ERR,NOT_FOUND: Recipient profile not found.,apps/api/src/server.ts,5765,,,,,
+ERR-128,ERR,VALIDATION_FAILED: Cannot start a direct message thread solely with yourself.,apps/api/src/server.ts,5768,,,,,
+ERR-129,ERR,FORBIDDEN: You can message people you are connected with. A hiring team and a can,apps/api/src/server.ts,5774,,,,,
+ERR-130,ERR,"NOT_FOUND: Thread with ID ""${id}"" not found.",apps/api/src/server.ts,5858,,,,,
+ERR-131,ERR,"NOT_FOUND: Conversation with ID ""${id}"" not found.",apps/api/src/server.ts,6151,,,,,
+ERR-132,ERR,FORBIDDEN: Access denied to conversation.,apps/api/src/server.ts,6155,,,,,
+ERR-133,ERR,"NOT_FOUND: Conversation with ID ""${input.conversationId}"" not found.",apps/api/src/server.ts,6193,,,,,
+ERR-134,ERR,"NOT_FOUND: Resume with ID ""${resumeId}"" not found.",apps/api/src/server.ts,6288,,,,,
+ERR-135,ERR,FORBIDDEN: Access denied to resume.,apps/api/src/server.ts,6291,,,,,
+ERR-136,ERR,"NOT_FOUND: Resume with ID ""${id}"" not found.",apps/api/src/server.ts,6323,,,,,
+ERR-137,ERR,"NOT_FOUND: Resume export with ID ""${exportId}"" not found.",apps/api/src/server.ts,6442,,,,,
+ERR-138,ERR,FORBIDDEN: Access denied to resume export.,apps/api/src/server.ts,6446,,,,,
+ERR-139,ERR,NOT_FOUND: Recipient user not found.,apps/api/src/server.ts,6488,,,,,
+ERR-140,ERR,"NOT_FOUND: Connection request with ID ""${id}"" not found.",apps/api/src/server.ts,6624,,,,,
+ERR-141,ERR,"NOT_FOUND: Connection with ID ""${id}"" not found.",apps/api/src/server.ts,6731,,,,,
+ERR-142,ERR,FORBIDDEN: Access denied to connection.,apps/api/src/server.ts,6735,,,,,
 ERR-143,ERR,VALIDATION_FAILED: targetUserId query parameter is required.,apps/api/src/server.ts,6839,,,,,
 ERR-144,ERR,NOT_FOUND: Warm intro request with ID ${id} not found.,apps/api/src/server.ts,6964,,,,,
 ERR-145,ERR,FORBIDDEN: Access denied to this introduction request.,apps/api/src/server.ts,6975,,,,,
@@ -1171,51 +1171,49 @@ ERR-203,ERR,SERVICE_UNAVAILABLE: CSV exports are not available. Request the supp
 ERR-204,ERR,NOT_FOUND: Account profile is unavailable for export.,apps/api/src/server.ts,10219,,,,,
 ERR-205,ERR,NOT_FOUND: User or profile not found for erasure execution.,apps/api/src/server.ts,10448,,,,,
 ERR-206,ERR,CONFLICT: Account erasure is already in progress.,apps/api/src/server.ts,10464,,,,,
-ERR-207,ERR,SERVICE_UNAVAILABLE: Stripe billing is not enabled on this server.,apps/api/src/server.ts,10825,,,,,
-ERR-208,ERR,POLICY_VIOLATION: Paid plans are bought through Stripe Checkout: POST /api/v1/billing/ch,apps/api/src/server.ts,10938,,,,,
-ERR-209,ERR,SERVICE_UNAVAILABLE: Paid plans are not available yet. TalentSphere is free while payments ,apps/api/src/server.ts,10947,,,,,
-ERR-210,ERR,CONFLICT: Cancel your paid subscription before switching to the free plan.,apps/api/src/server.ts,10964,,,,,
-ERR-211,ERR,CONFLICT: This idempotency key was already used for a different plan or billing ,apps/api/src/server.ts,10983,,,,,
-ERR-212,ERR,INVALID_STATE_TRANSITION: No active paid subscription found to cancel.,apps/api/src/server.ts,11050,,,,,
-ERR-213,ERR,"SERVICE_UNAVAILABLE: This subscription is managed by Stripe, which is not configured on thi",apps/api/src/server.ts,11060,,,,,
-ERR-214,ERR,SERVICE_UNAVAILABLE: Billing webhooks are not configured.,apps/api/src/server.ts,11125,,,,,
-ERR-215,ERR,"UNAUTHENTICATED: Webhook signature is missing, invalid or stale.",apps/api/src/server.ts,11144,,,,,
-ERR-216,ERR,NOT_FOUND: The webhook refers to an unknown user.,apps/api/src/server.ts,11152,,,,,
-ERR-217,ERR,"NOT_FOUND: User with ID ""${id}"" not found.",apps/api/src/server.ts,11242,,,,,
-ERR-218,ERR,POLICY_VIOLATION: Administrators cannot remove their own platform_admin role (governance,apps/api/src/server.ts,11310,,,,,
-ERR-219,ERR,"NOT_FOUND: Moderation report with ID ""${id}"" not found.",apps/api/src/server.ts,12008,,,,,
-ERR-220,ERR,FORBIDDEN: Access denied to this moderation report.,apps/api/src/server.ts,12014,,,,,
-ERR-221,ERR,FORBIDDEN: You cannot resolve a report you filed.,apps/api/src/server.ts,12059,,,,,
-ERR-222,ERR,FORBIDDEN: Only a platform admin can suspend or ban a platform admin.,apps/api/src/server.ts,12069,,,,,
-ERR-223,ERR,"INVALID_STATE_TRANSITION: Report with ID ""${report.id}"" has already reached terminal status ""${r",apps/api/src/server.ts,12084,,,,,
-ERR-224,ERR,FORBIDDEN: Permanent account termination requires Platform Admin authority (BR-06,apps/api/src/server.ts,12107,,,,,
-ERR-225,ERR,FORBIDDEN: Only the person or team this decision was about can appeal it.,apps/api/src/server.ts,12198,,,,,
-ERR-226,ERR,"NOT_FOUND: Appeal with ID ""${id}"" not found.",apps/api/src/server.ts,12237,,,,,
-ERR-227,ERR,"NOT_FOUND: Saved search with ID ""${id}"" not found.",apps/api/src/server.ts,12309,,,,,
-ERR-228,ERR,FORBIDDEN: Access denied to this saved search.,apps/api/src/server.ts,12312,,,,,
-ERR-229,ERR,"NOT_FOUND: Job alert with ID ""${id}"" not found.",apps/api/src/server.ts,12392,,,,,
-ERR-230,ERR,FORBIDDEN: Access denied to this alert.,apps/api/src/server.ts,12395,,,,,
-ERR-231,ERR,"NOT_FOUND: Job with ID ""${jobId}"" not found.",apps/api/src/server.ts,12413,,,,,
-ERR-232,ERR,"CONFLICT: Draft has changed (version ${existingDraft.version}, expected ${input.",apps/api/src/server.ts,12472,,,,,
-ERR-233,ERR,NOT_FOUND: No active application draft found for this job.,apps/api/src/server.ts,12517,,,,,
-ERR-234,ERR,VALIDATION_FAILED: companyId does not match a known organization.,apps/api/src/server.ts,12806,,,,,
-ERR-235,ERR,"NOT_FOUND: Work history record ""${id}"" not found.",apps/api/src/server.ts,12872,,,,,
-ERR-236,ERR,FORBIDDEN: Access denied to verify this work history record.,apps/api/src/server.ts,12876,,,,,
-ERR-237,ERR,SERVICE_UNAVAILABLE: Work-email verification is unavailable until email delivery is configu,apps/api/src/server.ts,12895,,,,,
-ERR-238,ERR,SERVICE_UNAVAILABLE: Verification email could not be queued.,apps/api/src/server.ts,12940,,,,,
-ERR-239,ERR,VALIDATION_FAILED: No verification is pending for this address. Request a new code.,apps/api/src/server.ts,12952,,,,,
-ERR-240,ERR,VALIDATION_FAILED: This code has expired. Request a new code.,apps/api/src/server.ts,12959,,,,,
-ERR-241,ERR,RATE_LIMIT_EXCEEDED: Too many incorrect codes. Request a new code.,apps/api/src/server.ts,12962,,,,,
-ERR-242,ERR,VALIDATION_FAILED: That code is not correct.,apps/api/src/server.ts,12975,,,,,
-ERR-243,ERR,FORBIDDEN: Access denied to request reference for this record.,apps/api/src/server.ts,13035,,,,,
-ERR-244,ERR,SERVICE_UNAVAILABLE: Reference invitations are unavailable until email delivery is configur,apps/api/src/server.ts,13042,,,,,
-ERR-245,ERR,SERVICE_UNAVAILABLE: Reference invitation could not be queued.,apps/api/src/server.ts,13106,,,,,
-ERR-246,ERR,NOT_FOUND: This reference link is invalid or has been used.,apps/api/src/server.ts,13133,,,,,
-ERR-247,ERR,"NOT_FOUND: Employment reference ""${refId}"" not found.",apps/api/src/server.ts,13163,,,,,
-ERR-248,ERR,FORBIDDEN: Candidate cannot submit their own reference.,apps/api/src/server.ts,13167,,,,,
-ERR-249,ERR,UNAUTHORIZED: This reference can only be submitted from the link sent to the referee,apps/api/src/server.ts,13183,,,,,
-ERR-250,ERR,NOT_FOUND: Candidate not found.,apps/api/src/server.ts,13284,,,,,
-ERR-251,ERR,FORBIDDEN: Only the person this role belongs to can remove it.,apps/api/src/server.ts,13418,,,,,
+ERR-207,ERR,SERVICE_UNAVAILABLE: Stripe billing is not enabled on this server.,apps/api/src/server.ts,10824,,,,,
+ERR-208,ERR,POLICY_VIOLATION: Paid plans are bought through Stripe Checkout: POST /api/v1/billing/ch,apps/api/src/server.ts,10937,,,,,
+ERR-209,ERR,SERVICE_UNAVAILABLE: Paid plans are not available yet. TalentSphere is free while payments ,apps/api/src/server.ts,10946,,,,,
+ERR-210,ERR,CONFLICT: Cancel your paid subscription before switching to the free plan.,apps/api/src/server.ts,10963,,,,,
+ERR-211,ERR,CONFLICT: This idempotency key was already used for a different plan or billing ,apps/api/src/server.ts,10982,,,,,
+ERR-212,ERR,INVALID_STATE_TRANSITION: No active paid subscription found to cancel.,apps/api/src/server.ts,11049,,,,,
+ERR-213,ERR,"SERVICE_UNAVAILABLE: This subscription is managed by Stripe, which is not configured on thi",apps/api/src/server.ts,11059,,,,,
+ERR-214,ERR,SERVICE_UNAVAILABLE: Billing webhooks are not configured.,apps/api/src/server.ts,11124,,,,,
+ERR-215,ERR,"UNAUTHENTICATED: Webhook signature is missing, invalid or stale.",apps/api/src/server.ts,11143,,,,,
+ERR-216,ERR,NOT_FOUND: The webhook refers to an unknown user.,apps/api/src/server.ts,11151,,,,,
+ERR-217,ERR,"NOT_FOUND: User with ID ""${id}"" not found.",apps/api/src/server.ts,11241,,,,,
+ERR-218,ERR,POLICY_VIOLATION: Administrators cannot remove their own platform_admin role (governance,apps/api/src/server.ts,11309,,,,,
+ERR-219,ERR,"NOT_FOUND: Moderation report with ID ""${id}"" not found.",apps/api/src/server.ts,12007,,,,,
+ERR-220,ERR,FORBIDDEN: Access denied to this moderation report.,apps/api/src/server.ts,12013,,,,,
+ERR-221,ERR,FORBIDDEN: You cannot resolve a report you filed.,apps/api/src/server.ts,12058,,,,,
+ERR-222,ERR,FORBIDDEN: Only a platform admin can suspend or ban a platform admin.,apps/api/src/server.ts,12068,,,,,
+ERR-223,ERR,"INVALID_STATE_TRANSITION: Report with ID ""${report.id}"" has already reached terminal status ""${r",apps/api/src/server.ts,12083,,,,,
+ERR-224,ERR,FORBIDDEN: Permanent account termination requires Platform Admin authority (BR-06,apps/api/src/server.ts,12106,,,,,
+ERR-225,ERR,FORBIDDEN: Only the person or team this decision was about can appeal it.,apps/api/src/server.ts,12197,,,,,
+ERR-226,ERR,"NOT_FOUND: Appeal with ID ""${id}"" not found.",apps/api/src/server.ts,12236,,,,,
+ERR-227,ERR,"NOT_FOUND: Saved search with ID ""${id}"" not found.",apps/api/src/server.ts,12308,,,,,
+ERR-228,ERR,FORBIDDEN: Access denied to this saved search.,apps/api/src/server.ts,12311,,,,,
+ERR-231,ERR,"NOT_FOUND: Job with ID ""${jobId}"" not found.",apps/api/src/server.ts,12402,,,,,
+ERR-232,ERR,"CONFLICT: Draft has changed (version ${existingDraft.version}, expected ${input.",apps/api/src/server.ts,12461,,,,,
+ERR-233,ERR,NOT_FOUND: No active application draft found for this job.,apps/api/src/server.ts,12506,,,,,
+ERR-234,ERR,VALIDATION_FAILED: companyId does not match a known organization.,apps/api/src/server.ts,12795,,,,,
+ERR-235,ERR,"NOT_FOUND: Work history record ""${id}"" not found.",apps/api/src/server.ts,12861,,,,,
+ERR-236,ERR,FORBIDDEN: Access denied to verify this work history record.,apps/api/src/server.ts,12865,,,,,
+ERR-237,ERR,SERVICE_UNAVAILABLE: Work-email verification is unavailable until email delivery is configu,apps/api/src/server.ts,12884,,,,,
+ERR-238,ERR,SERVICE_UNAVAILABLE: Verification email could not be queued.,apps/api/src/server.ts,12929,,,,,
+ERR-239,ERR,VALIDATION_FAILED: No verification is pending for this address. Request a new code.,apps/api/src/server.ts,12941,,,,,
+ERR-240,ERR,VALIDATION_FAILED: This code has expired. Request a new code.,apps/api/src/server.ts,12948,,,,,
+ERR-241,ERR,RATE_LIMIT_EXCEEDED: Too many incorrect codes. Request a new code.,apps/api/src/server.ts,12951,,,,,
+ERR-242,ERR,VALIDATION_FAILED: That code is not correct.,apps/api/src/server.ts,12964,,,,,
+ERR-243,ERR,FORBIDDEN: Access denied to request reference for this record.,apps/api/src/server.ts,13024,,,,,
+ERR-244,ERR,SERVICE_UNAVAILABLE: Reference invitations are unavailable until email delivery is configur,apps/api/src/server.ts,13031,,,,,
+ERR-245,ERR,SERVICE_UNAVAILABLE: Reference invitation could not be queued.,apps/api/src/server.ts,13095,,,,,
+ERR-246,ERR,NOT_FOUND: This reference link is invalid or has been used.,apps/api/src/server.ts,13122,,,,,
+ERR-247,ERR,"NOT_FOUND: Employment reference ""${refId}"" not found.",apps/api/src/server.ts,13152,,,,,
+ERR-248,ERR,FORBIDDEN: Candidate cannot submit their own reference.,apps/api/src/server.ts,13156,,,,,
+ERR-249,ERR,UNAUTHORIZED: This reference can only be submitted from the link sent to the referee,apps/api/src/server.ts,13172,,,,,
+ERR-250,ERR,NOT_FOUND: Candidate not found.,apps/api/src/server.ts,13273,,,,,
+ERR-251,ERR,FORBIDDEN: Only the person this role belongs to can remove it.,apps/api/src/server.ts,13407,,,,,
 ERR-252,ERR,FORBIDDEN: The ${plan.name} plan is not available for your account type.,apps/api/src/billing-stripe.ts,288,,,,,
 ERR-253,ERR,SERVICE_UNAVAILABLE: That plan is not available for purchase yet.,apps/api/src/billing-stripe.ts,295,,,,,
 ERR-254,ERR,CONFLICT: You already have a paid subscription. Manage or change it from the bil,apps/api/src/billing-stripe.ts,299,,,,,
@@ -1477,16 +1475,16 @@ INT-151,INT,change:inline,apps/web/src/pages/LoginPage.tsx,192,onChange,IMPLEMEN
 INT-152,INT,change:inline,apps/web/src/pages/LoginPage.tsx,235,onChange,IMPLEMENTED,MEDIUM,,
 INT-153,INT,listener:focus:inline,apps/web/src/pages/MessagesPage.tsx,35,addEventListener,IMPLEMENTED,MEDIUM,,
 INT-154,INT,retry:inline,apps/web/src/pages/MessagesPage.tsx,51,onRetry,IMPLEMENTED,MEDIUM,,
-INT-155,INT,retry:inline,apps/web/src/pages/NetworkPage.tsx,180,onRetry,IMPLEMENTED,MEDIUM,,
-INT-156,INT,submit:search,apps/web/src/pages/NetworkPage.tsx,197,onSubmit,IMPLEMENTED,MEDIUM,,
-INT-157,INT,change:inline,apps/web/src/pages/NetworkPage.tsx,203,onChange,IMPLEMENTED,MEDIUM,,
-INT-158,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,252,onClick,IMPLEMENTED,MEDIUM,,
-INT-159,INT,submit:send,apps/web/src/pages/NetworkPage.tsx,265,onSubmit,IMPLEMENTED,MEDIUM,,
-INT-160,INT,change:inline,apps/web/src/pages/NetworkPage.tsx,271,onChange,IMPLEMENTED,MEDIUM,,
-INT-161,INT,change:inline,apps/web/src/pages/NetworkPage.tsx,280,onChange,IMPLEMENTED,MEDIUM,,
-INT-162,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,330,onClick,IMPLEMENTED,MEDIUM,,
-INT-163,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,345,onClick,IMPLEMENTED,MEDIUM,,
-INT-164,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,363,onClick,IMPLEMENTED,MEDIUM,,
+INT-155,INT,retry:inline,apps/web/src/pages/NetworkPage.tsx,175,onRetry,IMPLEMENTED,MEDIUM,,
+INT-156,INT,submit:search,apps/web/src/pages/NetworkPage.tsx,192,onSubmit,IMPLEMENTED,MEDIUM,,
+INT-157,INT,change:inline,apps/web/src/pages/NetworkPage.tsx,198,onChange,IMPLEMENTED,MEDIUM,,
+INT-158,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,247,onClick,IMPLEMENTED,MEDIUM,,
+INT-159,INT,submit:send,apps/web/src/pages/NetworkPage.tsx,260,onSubmit,IMPLEMENTED,MEDIUM,,
+INT-160,INT,change:inline,apps/web/src/pages/NetworkPage.tsx,266,onChange,IMPLEMENTED,MEDIUM,,
+INT-161,INT,change:inline,apps/web/src/pages/NetworkPage.tsx,275,onChange,IMPLEMENTED,MEDIUM,,
+INT-162,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,325,onClick,IMPLEMENTED,MEDIUM,,
+INT-163,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,340,onClick,IMPLEMENTED,MEDIUM,,
+INT-164,INT,click:inline,apps/web/src/pages/NetworkPage.tsx,358,onClick,IMPLEMENTED,MEDIUM,,
 INT-165,INT,click:inline,apps/web/src/pages/NotificationsPage.tsx,87,onClick,IMPLEMENTED,MEDIUM,,
 INT-166,INT,retry:inline,apps/web/src/pages/NotificationsPage.tsx,97,onRetry,IMPLEMENTED,MEDIUM,,
 INT-167,INT,click:inline,apps/web/src/pages/NotificationsPage.tsx,155,onClick,IMPLEMENTED,MEDIUM,,
@@ -1669,7 +1667,7 @@ MOD-105,MOD,migration/00009_resumes_schema,supabase/migrations/00009_resumes_sch
 DB-034,DB,resumes,supabase/migrations/00009_resumes_schema.sql,7,resumes,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
 DB-035,DB,resume_exports,supabase/migrations/00009_resumes_schema.sql,28,resume_exports,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
 MOD-106,MOD,migration/00010_networking_connections_schema,supabase/migrations/00010_networking_connections_schema.sql,,,IMPLEMENTED,MEDIUM,,
-DB-036,DB,connections,supabase/migrations/00010_networking_connections_schema.sql,7,connections,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
+DB-036,DB,connections,supabase/migrations/00010_networking_connections_schema.sql,7,connections,IMPLEMENTED,MEDIUM,,
 MOD-107,MOD,migration/00011_portfolio_showcase_schema,supabase/migrations/00011_portfolio_showcase_schema.sql,,,IMPLEMENTED,MEDIUM,,
 DB-037,DB,portfolio_projects,supabase/migrations/00011_portfolio_showcase_schema.sql,7,portfolio_projects,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
 DB-038,DB,portfolio_project_skills,supabase/migrations/00011_portfolio_showcase_schema.sql,22,portfolio_project_skills,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
@@ -1697,7 +1695,7 @@ DB-053,DB,moderation_reports,supabase/migrations/00017_moderation_trust_safety_s
 DB-054,DB,moderation_appeals,supabase/migrations/00017_moderation_trust_safety_schema.sql,27,moderation_appeals,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
 MOD-114,MOD,migration/00018_saved_searches_job_alerts_schema,supabase/migrations/00018_saved_searches_job_alerts_schema.sql,,,IMPLEMENTED,MEDIUM,,
 DB-055,DB,saved_searches,supabase/migrations/00018_saved_searches_job_alerts_schema.sql,7,saved_searches,IMPLEMENTED,MEDIUM,,
-DB-056,DB,job_alerts,supabase/migrations/00018_saved_searches_job_alerts_schema.sql,24,job_alerts,NOT_IMPLEMENTED,LOW,,schema-only: no SQL consumer found by static scan (dynamic SQL would not be detected)
+DB-056,DB,job_alerts,supabase/migrations/00018_saved_searches_job_alerts_schema.sql,24,job_alerts,IMPLEMENTED,MEDIUM,,
 DB-057,DB,saved_jobs,supabase/migrations/00018_saved_searches_job_alerts_schema.sql,35,saved_jobs,IMPLEMENTED,MEDIUM,,
 MOD-115,MOD,migration/00019_application_drafts_schema,supabase/migrations/00019_application_drafts_schema.sql,,,IMPLEMENTED,MEDIUM,,
 DB-058,DB,application_drafts,supabase/migrations/00019_application_drafts_schema.sql,4,application_drafts,IMPLEMENTED,MEDIUM,,
@@ -1792,14 +1790,17 @@ MOD-149,MOD,migration/00053_billing_role_grants_hardening,supabase/migrations/00
 MOD-150,MOD,migration/00054_repoint_auth_users_foreign_keys,supabase/migrations/00054_repoint_auth_users_foreign_keys.sql,,,IMPLEMENTED,MEDIUM,,
 MOD-151,MOD,migration/00055_certificate_revocations_rls,supabase/migrations/00055_certificate_revocations_rls.sql,,,IMPLEMENTED,MEDIUM,,
 MOD-158,MOD,migration/00056_application_drafts_durable,supabase/migrations/00056_application_drafts_durable.sql,,,IMPLEMENTED,MEDIUM,,
+MOD-159,MOD,migration/00057_connections_durable,supabase/migrations/00057_connections_durable.sql,,,IMPLEMENTED,MEDIUM,,
 SVC-046,SVC,apps/api/src/storage/account-store.ts,apps/api/src/storage/account-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-047,SVC,apps/api/src/storage/admin-audit-store.ts,apps/api/src/storage/admin-audit-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-114,SVC,apps/api/src/storage/application-draft-store.ts,apps/api/src/storage/application-draft-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-048,SVC,apps/api/src/storage/billing-store.ts,apps/api/src/storage/billing-store.ts,,,IMPLEMENTED,MEDIUM,,
+SVC-116,SVC,apps/api/src/storage/connection-store.ts,apps/api/src/storage/connection-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-049,SVC,apps/api/src/storage/core-store.ts,apps/api/src/storage/core-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-050,SVC,apps/api/src/storage/erasure-store.ts,apps/api/src/storage/erasure-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-051,SVC,apps/api/src/storage/feature-flag-store.ts,apps/api/src/storage/feature-flag-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-052,SVC,apps/api/src/storage/index.ts,apps/api/src/storage/index.ts,,,IMPLEMENTED,MEDIUM,,
+SVC-117,SVC,apps/api/src/storage/job-alert-store.ts,apps/api/src/storage/job-alert-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-053,SVC,apps/api/src/storage/saved-job-store.ts,apps/api/src/storage/saved-job-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-054,SVC,apps/api/src/storage/saved-search-store.ts,apps/api/src/storage/saved-search-store.ts,,,IMPLEMENTED,MEDIUM,,
 SVC-055,SVC,apps/worker/src/index.ts,apps/worker/src/index.ts,,,IMPLEMENTED,MEDIUM,,
@@ -2000,9 +2001,11 @@ TEST-148,TEST,tests/pg/analytics-consent.test.ts,tests/pg/analytics-consent.test
 TEST-224,TEST,tests/pg/application-drafts.test.ts,tests/pg/application-drafts.test.ts,1,,,,,
 TEST-149,TEST,tests/pg/billing.test.ts,tests/pg/billing.test.ts,1,,,,,
 TEST-150,TEST,tests/pg/concurrency.test.ts,tests/pg/concurrency.test.ts,1,,,,,
+TEST-225,TEST,tests/pg/connections.test.ts,tests/pg/connections.test.ts,1,,,,,
 TEST-151,TEST,tests/pg/core-persistence.test.ts,tests/pg/core-persistence.test.ts,1,,,,,
 TEST-152,TEST,tests/pg/erasure-concurrency.test.ts,tests/pg/erasure-concurrency.test.ts,1,,,,,
 TEST-153,TEST,tests/pg/feature-flags.test.ts,tests/pg/feature-flags.test.ts,1,,,,,
+TEST-226,TEST,tests/pg/job-alerts.test.ts,tests/pg/job-alerts.test.ts,1,,,,,
 TEST-154,TEST,tests/pg/job-claim-fencing.test.ts,tests/pg/job-claim-fencing.test.ts,1,,,,,
 TEST-155,TEST,tests/pg/messaging.test.ts,tests/pg/messaging.test.ts,1,,,,,
 TEST-156,TEST,tests/pg/notifications.test.ts,tests/pg/notifications.test.ts,1,,,,,

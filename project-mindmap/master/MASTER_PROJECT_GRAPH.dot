@@ -366,7 +366,7 @@ digraph TalentSphere {
     "DB-033" [label="DB-033\nai_usage_meters" fillcolor="#c8ece8" color="#c62828"];
     "DB-034" [label="DB-034\nresumes" fillcolor="#c8ece8" color="#c62828"];
     "DB-035" [label="DB-035\nresume_exports" fillcolor="#c8ece8" color="#c62828"];
-    "DB-036" [label="DB-036\nconnections" fillcolor="#c8ece8" color="#c62828"];
+    "DB-036" [label="DB-036\nconnections" fillcolor="#c8ece8" color="#2e7d32"];
     "DB-037" [label="DB-037\nportfolio_projects" fillcolor="#c8ece8" color="#c62828"];
     "DB-038" [label="DB-038\nportfolio_project_skills" fillcolor="#c8ece8" color="#c62828"];
     "DB-039" [label="DB-039\nportfolio_project_media" fillcolor="#c8ece8" color="#c62828"];
@@ -386,7 +386,7 @@ digraph TalentSphere {
     "DB-053" [label="DB-053\nmoderation_reports" fillcolor="#c8ece8" color="#c62828"];
     "DB-054" [label="DB-054\nmoderation_appeals" fillcolor="#c8ece8" color="#c62828"];
     "DB-055" [label="DB-055\nsaved_searches" fillcolor="#c8ece8" color="#2e7d32"];
-    "DB-056" [label="DB-056\njob_alerts" fillcolor="#c8ece8" color="#c62828"];
+    "DB-056" [label="DB-056\njob_alerts" fillcolor="#c8ece8" color="#2e7d32"];
     "DB-057" [label="DB-057\nsaved_jobs" fillcolor="#c8ece8" color="#2e7d32"];
     "DB-058" [label="DB-058\napplication_drafts" fillcolor="#c8ece8" color="#2e7d32"];
     "DB-059" [label="DB-059\napplication_draft_versions" fillcolor="#c8ece8" color="#2e7d32"];
@@ -1128,8 +1128,6 @@ digraph TalentSphere {
     "ERR-226" [label="ERR-226\nNOT_FOUND: Appeal with ID \"${id}\" not found." fillcolor="#f8d7da" color="#9e9e9e"];
     "ERR-227" [label="ERR-227\nNOT_FOUND: Saved search with ID \"${id}\" not found." fillcolor="#f8d7da" color="#9e9e9e"];
     "ERR-228" [label="ERR-228\nFORBIDDEN: Access denied to this saved search." fillcolor="#f8d7da" color="#9e9e9e"];
-    "ERR-229" [label="ERR-229\nNOT_FOUND: Job alert with ID \"${id}\" not found." fillcolor="#f8d7da" color="#9e9e9e"];
-    "ERR-230" [label="ERR-230\nFORBIDDEN: Access denied to this alert." fillcolor="#f8d7da" color="#9e9e9e"];
     "ERR-231" [label="ERR-231\nNOT_FOUND: Job with ID \"${jobId}\" not found." fillcolor="#f8d7da" color="#9e9e9e"];
     "ERR-232" [label="ERR-232\nCONFLICT: Draft has changed (version ${existingDraft.version}, expected ${input." fillcolor="#f8d7da" color="#9e9e9e"];
     "ERR-233" [label="ERR-233\nNOT_FOUND: No active application draft found for this job." fillcolor="#f8d7da" color="#9e9e9e"];
@@ -1805,6 +1803,7 @@ digraph TalentSphere {
     "MOD-150" [label="MOD-150\nmigration/00054_repoint_auth_users_foreign_keys" fillcolor="#ffffff" color="#2e7d32"];
     "MOD-151" [label="MOD-151\nmigration/00055_certificate_revocations_rls" fillcolor="#ffffff" color="#2e7d32"];
     "MOD-158" [label="MOD-158\nmigration/00056_application_drafts_durable" fillcolor="#ffffff" color="#2e7d32"];
+    "MOD-159" [label="MOD-159\nmigration/00057_connections_durable" fillcolor="#ffffff" color="#2e7d32"];
     "MOD-152" [label="MOD-152\npackages/config" fillcolor="#ffffff" color="#2e7d32"];
     "MOD-153" [label="MOD-153\npackages/contracts" fillcolor="#ffffff" color="#2e7d32"];
     "MOD-154" [label="MOD-154\npackages/domain" fillcolor="#ffffff" color="#2e7d32"];
@@ -2381,10 +2380,12 @@ digraph TalentSphere {
     "SVC-047" [label="SVC-047\napps/api/src/storage/admin-audit-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-114" [label="SVC-114\napps/api/src/storage/application-draft-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-048" [label="SVC-048\napps/api/src/storage/billing-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
+    "SVC-116" [label="SVC-116\napps/api/src/storage/connection-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-049" [label="SVC-049\napps/api/src/storage/core-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-050" [label="SVC-050\napps/api/src/storage/erasure-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-051" [label="SVC-051\napps/api/src/storage/feature-flag-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-052" [label="SVC-052\napps/api/src/storage/index.ts" fillcolor="#e1d5f5" color="#2e7d32"];
+    "SVC-117" [label="SVC-117\napps/api/src/storage/job-alert-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-053" [label="SVC-053\napps/api/src/storage/saved-job-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-054" [label="SVC-054\napps/api/src/storage/saved-search-store.ts" fillcolor="#e1d5f5" color="#2e7d32"];
     "SVC-055" [label="SVC-055\napps/worker/src/index.ts" fillcolor="#e1d5f5" color="#2e7d32"];
@@ -2600,9 +2601,11 @@ digraph TalentSphere {
     "TEST-224" [label="TEST-224\ntests/pg/application-drafts.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-149" [label="TEST-149\ntests/pg/billing.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-150" [label="TEST-150\ntests/pg/concurrency.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
+    "TEST-225" [label="TEST-225\ntests/pg/connections.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-151" [label="TEST-151\ntests/pg/core-persistence.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-152" [label="TEST-152\ntests/pg/erasure-concurrency.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-153" [label="TEST-153\ntests/pg/feature-flags.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
+    "TEST-226" [label="TEST-226\ntests/pg/job-alerts.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-154" [label="TEST-154\ntests/pg/job-claim-fencing.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-155" [label="TEST-155\ntests/pg/messaging.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
     "TEST-156" [label="TEST-156\ntests/pg/notifications.test.ts" fillcolor="#f0f0f0" color="#9e9e9e"];
@@ -2826,6 +2829,8 @@ digraph TalentSphere {
   "API-005" -> "TEST-220" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-005" -> "TEST-221" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-005" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-005" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-005" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-005" -> "SCH-004" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-005" -> "DB-001" [label="WRITES" style=bold color="#00796b"];
   "API-005" -> "DB-002" [label="WRITES" style=bold color="#00796b"];
@@ -2860,6 +2865,8 @@ digraph TalentSphere {
   "API-006" -> "TEST-182" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-006" -> "TEST-210" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-006" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-006" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-006" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-006" -> "SCH-005" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-006" -> "DB-001" [label="WRITES" style=bold color="#00796b"];
   "API-007" -> "RULE-049" [label="CALLS" style=solid color="#e65100"];
@@ -3108,6 +3115,7 @@ digraph TalentSphere {
   "API-026" -> "TEST-216" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-026" -> "TEST-218" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-026" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-026" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-026" -> "SCH-014" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-026" -> "DB-004" [label="WRITES" style=bold color="#00796b"];
   "API-026" -> "DB-005" [label="WRITES" style=bold color="#00796b"];
@@ -3178,6 +3186,7 @@ digraph TalentSphere {
   "API-031" -> "TEST-216" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-031" -> "TEST-218" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-031" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-031" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-031" -> "SCH-016" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-031" -> "DB-006" [label="WRITES" style=bold color="#00796b"];
   "API-031" -> "DB-013" [label="WRITES" style=bold color="#00796b"];
@@ -3207,6 +3216,7 @@ digraph TalentSphere {
   "API-032" -> "TEST-217" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-032" -> "TEST-220" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-032" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-032" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-033" -> "RULE-088" [label="CALLS" style=solid color="#e65100"];
   "API-033" -> "ERR-037" [label="PRODUCES" style=dotted color="#c62828"];
   "API-033" -> "TEST-055" [label="TESTED_BY" style=dotted color="#9e9e9e"];
@@ -3223,6 +3233,7 @@ digraph TalentSphere {
   "API-033" -> "TEST-208" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-033" -> "TEST-217" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-033" -> "TEST-220" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-033" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-034" -> "RULE-088" [label="CALLS" style=solid color="#e65100"];
   "API-034" -> "RULE-129" [label="CALLS" style=solid color="#e65100"];
   "API-034" -> "RULE-202" [label="CALLS" style=solid color="#e65100"];
@@ -3259,6 +3270,7 @@ digraph TalentSphere {
   "API-034" -> "TEST-216" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-034" -> "TEST-218" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-034" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-034" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-034" -> "SCH-017" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-034" -> "DB-006" [label="WRITES" style=bold color="#00796b"];
   "API-034" -> "DB-013" [label="WRITES" style=bold color="#00796b"];
@@ -4271,6 +4283,7 @@ digraph TalentSphere {
   "API-134" -> "TEST-198" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-134" -> "TEST-206" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-134" -> "TEST-219" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-134" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-134" -> "SVC-017" [label="TRIGGERS" style=bold color="#1565c0"];
   "API-134" -> "SCH-039" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-135" -> "F-144" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
@@ -4279,6 +4292,7 @@ digraph TalentSphere {
   "API-135" -> "F-75" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-135" -> "TEST-101" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-135" -> "TEST-115" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-135" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-136" -> "RULE-159" [label="CALLS" style=solid color="#e65100"];
   "API-136" -> "F-144" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-136" -> "F-149" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
@@ -4286,6 +4300,7 @@ digraph TalentSphere {
   "API-136" -> "F-75" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-136" -> "TEST-115" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-136" -> "TEST-206" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-136" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-137" -> "RULE-088" [label="CALLS" style=solid color="#e65100"];
   "API-137" -> "RULE-155" [label="CALLS" style=solid color="#e65100"];
   "API-137" -> "RULE-156" [label="CALLS" style=solid color="#e65100"];
@@ -4306,6 +4321,7 @@ digraph TalentSphere {
   "API-137" -> "TEST-198" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-137" -> "TEST-206" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-137" -> "TEST-219" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-137" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-137" -> "SVC-014" [label="TRIGGERS" style=bold color="#1565c0"];
   "API-137" -> "SVC-016" [label="TRIGGERS" style=bold color="#1565c0"];
   "API-137" -> "SCH-040" [label="VALIDATES" style=dashed color="#6a1b9a"];
@@ -4326,6 +4342,7 @@ digraph TalentSphere {
   "API-139" -> "ERR-141" [label="PRODUCES" style=dotted color="#c62828"];
   "API-139" -> "ERR-142" [label="PRODUCES" style=dotted color="#c62828"];
   "API-139" -> "TEST-115" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-139" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-139" -> "SVC-015" [label="TRIGGERS" style=bold color="#1565c0"];
   "API-140" -> "F-144" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-140" -> "F-149" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
@@ -5100,6 +5117,8 @@ digraph TalentSphere {
   "API-219" -> "TEST-158" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-219" -> "TEST-159" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-219" -> "TEST-224" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-219" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-219" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-219" -> "SVC-025" [label="TRIGGERS" style=bold color="#1565c0"];
   "API-219" -> "SCH-049" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-219" -> "DB-001" [label="WRITES" style=bold color="#00796b"];
@@ -5400,6 +5419,7 @@ digraph TalentSphere {
   "API-252" -> "TEST-128" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-252" -> "TEST-159" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-252" -> "TEST-208" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-252" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-252" -> "SCH-070" [label="VALIDATES" style=dashed color="#6a1b9a"];
   "API-253" -> "SVC-054" [label="CALLS" style=solid color="#e65100"];
   "API-253" -> "F-04" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
@@ -5408,6 +5428,7 @@ digraph TalentSphere {
   "API-253" -> "TEST-128" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-253" -> "TEST-159" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-253" -> "TEST-208" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-253" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-254" -> "RULE-088" [label="CALLS" style=solid color="#e65100"];
   "API-254" -> "SVC-054" [label="CALLS" style=solid color="#e65100"];
   "API-254" -> "F-04" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
@@ -5454,14 +5475,13 @@ digraph TalentSphere {
   "API-258" -> "F-32" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-258" -> "TEST-128" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-258" -> "TEST-208" [label="TESTED_BY" style=dotted color="#9e9e9e"];
-  "API-259" -> "RULE-088" [label="CALLS" style=solid color="#e65100"];
+  "API-258" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-259" -> "F-04" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-259" -> "F-25" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "API-259" -> "F-32" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
-  "API-259" -> "ERR-229" [label="PRODUCES" style=dotted color="#c62828"];
-  "API-259" -> "ERR-230" [label="PRODUCES" style=dotted color="#c62828"];
   "API-259" -> "TEST-128" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-259" -> "TEST-208" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "API-259" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "API-260" -> "RULE-088" [label="CALLS" style=solid color="#e65100"];
   "API-260" -> "SVC-053" [label="CALLS" style=solid color="#e65100"];
   "API-260" -> "F-04" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
@@ -6327,6 +6347,7 @@ digraph TalentSphere {
   "F-09" -> "TEST-166" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-09" -> "TEST-196" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-09" -> "TEST-206" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "F-09" -> "TEST-225" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-10" -> "TEST-035" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-10" -> "TEST-113" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-10" -> "TEST-206" [label="TESTED_BY" style=dotted color="#9e9e9e"];
@@ -6494,6 +6515,7 @@ digraph TalentSphere {
   "F-32" -> "TEST-128" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-32" -> "TEST-129" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-32" -> "TEST-208" [label="TESTED_BY" style=dotted color="#9e9e9e"];
+  "F-32" -> "TEST-226" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-34" -> "TEST-020" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-34" -> "TEST-055" [label="TESTED_BY" style=dotted color="#9e9e9e"];
   "F-34" -> "TEST-129" [label="TESTED_BY" style=dotted color="#9e9e9e"];
@@ -7293,6 +7315,8 @@ digraph TalentSphere {
   "MOD-001" -> "SVC-059" [label="CONTAINS" style=solid color="#9e9e9e"];
   "MOD-001" -> "SVC-060" [label="CONTAINS" style=solid color="#9e9e9e"];
   "MOD-001" -> "SVC-114" [label="CONTAINS" style=solid color="#9e9e9e"];
+  "MOD-001" -> "SVC-116" [label="CONTAINS" style=solid color="#9e9e9e"];
+  "MOD-001" -> "SVC-117" [label="CONTAINS" style=solid color="#9e9e9e"];
   "MOD-001" -> "EXT-001" [label="DEPENDS_ON" style=dashed color="#546e7a"];
   "MOD-001" -> "EXT-002" [label="DEPENDS_ON" style=dashed color="#546e7a"];
   "MOD-001" -> "MOD-004" [label="DEPENDS_ON" style=dashed color="#546e7a"];
@@ -8288,6 +8312,7 @@ digraph TalentSphere {
   "PROJ-001" -> "MOD-156" [label="CONTAINS" style=solid color="#9e9e9e"];
   "PROJ-001" -> "MOD-157" [label="CONTAINS" style=solid color="#9e9e9e"];
   "PROJ-001" -> "MOD-158" [label="CONTAINS" style=solid color="#9e9e9e"];
+  "PROJ-001" -> "MOD-159" [label="CONTAINS" style=solid color="#9e9e9e"];
   "PROJ-001" -> "ROLE-001" [label="CONTAINS" style=solid color="#9e9e9e"];
   "PROJ-001" -> "ROLE-002" [label="CONTAINS" style=solid color="#9e9e9e"];
   "PROJ-001" -> "ROLE-003" [label="CONTAINS" style=solid color="#9e9e9e"];
@@ -9623,8 +9648,10 @@ digraph TalentSphere {
   "SVC-051" -> "DB-009" [label="READS" style=dotted color="#00796b"];
   "SVC-051" -> "DB-009" [label="WRITES" style=bold color="#00796b"];
   "SVC-052" -> "BR-067" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
+  "SVC-052" -> "F-09" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "SVC-052" -> "F-16" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "SVC-052" -> "F-17" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
+  "SVC-052" -> "F-32" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "SVC-052" -> "F-35" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "SVC-052" -> "F-36" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
   "SVC-052" -> "DB-110" [label="READS" style=dotted color="#00796b"];
@@ -9645,4 +9672,13 @@ digraph TalentSphere {
   "SVC-114" -> "DB-058" [label="UPDATES" style=bold color="#00796b"];
   "SVC-114" -> "DB-058" [label="WRITES" style=bold color="#00796b"];
   "SVC-114" -> "DB-059" [label="WRITES" style=bold color="#00796b"];
+  "SVC-116" -> "F-09" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
+  "SVC-116" -> "DB-036" [label="READS" style=dotted color="#00796b"];
+  "SVC-116" -> "DB-036" [label="UPDATES" style=bold color="#00796b"];
+  "SVC-116" -> "DB-036" [label="WRITES" style=bold color="#00796b"];
+  "SVC-117" -> "F-32" [label="IMPLEMENTS" style=dashed color="#8e24aa"];
+  "SVC-117" -> "DB-055" [label="READS" style=dotted color="#00796b"];
+  "SVC-117" -> "DB-056" [label="READS" style=dotted color="#00796b"];
+  "SVC-117" -> "DB-056" [label="UPDATES" style=bold color="#00796b"];
+  "SVC-117" -> "DB-056" [label="WRITES" style=bold color="#00796b"];
 }

@@ -2,30 +2,30 @@
 
 Checks executed by the generator against the graph just written. A PASS means the stated invariant holds; it does not mean the map is complete.
 
-| Check                                                                         | Result | Detail                                                                            |
-| ----------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| Every node ID is unique                                                       | PASS   | 2632 nodes                                                                        |
-| Every edge endpoint exists                                                    | PASS   | 6971 edges, 0 dangling                                                            |
-| Every inventory parent_id exists in the graph                                 | PASS   | 1070 entries, 0 bad                                                               |
-| Every node has evidence                                                       | PASS   | 0 without                                                                         |
-| Every feature-like node has a status                                          | PASS   | 0 without                                                                         |
-| No duplicate logical entities (type+name)                                     | PASS   | 0 duplicates: []                                                                  |
-| Endpoint inventory reconciles with a separate grep of registrations           | PASS   | grep 282 vs inventory 282                                                         |
-| Screens reconcile with <Route> elements that render a *Page                   | PASS   | 29 vs 29                                                                          |
-| Tables reconcile with distinct CREATE TABLE names in migrations               | PASS   | 112 distinct names (113 statements) vs 112 nodes                                  |
-| Web API calls all resolve to a server route                                   | PASS   | 96 call sites, 0 unresolved                                                       |
-| Mind map text is structurally valid (indent tree, sanitised labels)           | PASS   | syntax only; not rendered by mermaid                                              |
-| Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)     | PASS   | 105 diagrams ok, 0 failed; parsed, not rendered                                   |
-| DOT file parses and matches the graph (dotparser)                             | PASS   | 2632 nodes, 6971 edges vs graph 2632/6971; not laid out by Graphviz               |
-| ID ledger: every generated node ID is recorded, no ID is assigned to two keys | PASS   | 2192 ledger keys, 2183 generated nodes; new this run 4, retired (kept reserved) 9 |
-| Documented IDs (F-, J-, BR-) are graph nodes with their registry IDs          | PASS   | 173 F, 28 J, 248 BR                                                               |
-| Every executed test file maps to a TEST node                                  | PASS   | 224 executed files, 0 unmatched []                                                |
-| Every e2e-derived journey matches an executed test                            | PASS   | 100/100 matched                                                                   |
-| Graph JSON contains every node and edge (no truncation)                       | PASS   | 2632 nodes, 6971 edges written                                                    |
+| Check                                                                         | Result | Detail                                                                             |
+| ----------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------- |
+| Every node ID is unique                                                       | PASS   | 2635 nodes                                                                         |
+| Every edge endpoint exists                                                    | PASS   | 7004 edges, 0 dangling                                                             |
+| Every inventory parent_id exists in the graph                                 | PASS   | 1068 entries, 0 bad                                                                |
+| Every node has evidence                                                       | PASS   | 0 without                                                                          |
+| Every feature-like node has a status                                          | PASS   | 0 without                                                                          |
+| No duplicate logical entities (type+name)                                     | PASS   | 0 duplicates: []                                                                   |
+| Endpoint inventory reconciles with a separate grep of registrations           | PASS   | grep 282 vs inventory 282                                                          |
+| Screens reconcile with <Route> elements that render a *Page                   | PASS   | 29 vs 29                                                                           |
+| Tables reconcile with distinct CREATE TABLE names in migrations               | PASS   | 112 distinct names (113 statements) vs 112 nodes                                   |
+| Web API calls all resolve to a server route                                   | PASS   | 96 call sites, 0 unresolved                                                        |
+| Mind map text is structurally valid (indent tree, sanitised labels)           | PASS   | syntax only; not rendered by mermaid                                               |
+| Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)     | PASS   | 539 diagrams ok, 0 failed; parsed, not rendered                                    |
+| DOT file parses and matches the graph (dotparser)                             | PASS   | 2635 nodes, 7004 edges vs graph 2635/7004; not laid out by Graphviz                |
+| ID ledger: every generated node ID is recorded, no ID is assigned to two keys | PASS   | 8524 ledger keys, 2186 generated nodes; new this run 0, retired (kept reserved) 11 |
+| Documented IDs (F-, J-, BR-) are graph nodes with their registry IDs          | PASS   | 173 F, 28 J, 248 BR                                                                |
+| Every executed test file maps to a TEST node                                  | PASS   | 226 executed files, 0 unmatched []                                                 |
+| Every e2e-derived journey matches an executed test                            | PASS   | 100/100 matched                                                                    |
+| Graph JSON contains every node and edge (no truncation)                       | PASS   | 2635 nodes, 7004 edges written                                                     |
 
 ## Repository coverage
 
-Tracked source-like files outside documentation and tool-output folders (`docs/`, `.playwright*`, `.agents`; `BRAIN/`, `Yash_Final_Project_Document/`, `PRODUCT_BLUEPRINT/` and `graphify-out/` moved into `docs/` or were deleted on 2026-11-25): 470. Files represented by at least one node: **470 (100.0%)**. Files whose _content_ was analysed in depth (routes, handlers, components, SQL, rules, tests, workflows): **412 (87.7%)**. Files only **inventoried** as a support/config/seed/test-helper node, contents not decomposed: **58**.
+Tracked source-like files outside documentation and tool-output folders (`docs/`, `.playwright*`, `.agents`; `BRAIN/`, `Yash_Final_Project_Document/`, `PRODUCT_BLUEPRINT/` and `graphify-out/` moved into `docs/` or were deleted on 2026-11-25): 475. Files represented by at least one node: **475 (100.0%)**. Files whose _content_ was analysed in depth (routes, handlers, components, SQL, rules, tests, workflows): **417 (87.8%)**. Files only **inventoried** as a support/config/seed/test-helper node, contents not decomposed: **58**.
 
 Inventoried-only files: `apps/api/src/durability.ts`, `apps/api/src/index.ts`, `apps/api/src/lifecycle.ts`, `apps/api/src/load-env.ts`, `apps/web/src/components/RouteErrorBoundary.tsx`, `apps/web/src/components/ui/index.ts`, `apps/web/src/hooks/usePageMeta.ts`, `apps/web/src/lib/api.ts`, `apps/web/src/lib/career.ts`, `apps/web/src/lib/course.ts`, `apps/web/src/lib/format.ts`, `apps/web/src/lib/idempotency.ts`, `apps/web/src/lib/messages.ts`, `apps/web/src/lib/notifications.ts`, `apps/web/src/lib/session.ts`, `apps/web/src/lib/types.ts`, `apps/web/src/main.tsx`, `apps/web/src/reticle-dev.ts`, `apps/web/src/vite-env.d.ts`, `apps/web/vite.config.ts`, `apps/worker/src/claim.ts`, `apps/worker/src/email/config.ts`, `apps/worker/src/email/send-test.ts`, `apps/worker/src/email/templates.ts`, `apps/worker/src/email/types.ts`, `apps/worker/src/loop.ts`, `apps/worker/src/queue.ts`, `deploy/coolify/compose.yaml`, `deploy/oracle/compose.supabase.yaml`, `deploy/oracle/compose.yaml`, `packages/config/src/env.ts`, `packages/config/src/index.ts`, `packages/domain/src/index.ts`, `packages/observability/src/audit.ts`, `packages/observability/src/index.ts`, `packages/observability/src/logger.ts`, `packages/testing/src/factories.ts`, `packages/testing/src/index.ts`, `packages/ui/src/index.ts`, `packages/ui/src/tokens.ts`, `playwright.config.ts`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `scripts/lib/migration-integrity.mjs`, `scripts/lib/pg.mjs`, `supabase/hosted/01_org_aliases.sql`, `supabase/hosted/02_data_api_lockdown.sql`, `supabase/seed/01_initial_seed.sql`, `test-secrets.mjs`, `tests/e2e/content.ts`, `tests/e2e/fixtures.ts`, `tests/helpers/content.ts`, `tests/helpers/stripe.ts`, `tests/helpers/webhook.ts`, `tests/pg/test-db.ts`, `tests/unit/email/provider-contract.ts`, `vitest.config.ts`, `vitest.pg.config.ts`
 

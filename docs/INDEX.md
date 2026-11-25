@@ -12,6 +12,8 @@ The documentation was consolidated on 2026-11-25: about 580 files in eight folde
 | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | What the product is meant to be (canonical intent) | [`../SSOT.md`](../SSOT.md) |
 | Reverse-engineered map of everything in the code: stable IDs, evidence, test results, docs-vs-code gaps | [`../project-mindmap/README.md`](../project-mindmap/README.md) (start at the [master mind map](../project-mindmap/master/MASTER_PROJECT_MINDMAP.md)) |
+| Every feature from module down to nano-feature (single rule, field constraint, error branch, UI binding), with status, evidence and tests | [`../project-mindmap/catalog/FEATURE_CATALOG.md`](../project-mindmap/catalog/FEATURE_CATALOG.md) (generated; journey, data-flow, API, database, state and test views next to it) |
+| What work is in flight, blocked or waiting on the owner, and where to resume | [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
 | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
 | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
@@ -105,6 +107,24 @@ Rules for keeping it true: change a diagram in the same commit as the code it de
 |---|---|
 | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) | Authority, change classes, no-duplication rule and status vocabulary; then the gap analysis with the open documentation-conflicts register, the phased implementation plan, and the historical 2026-09-24 source reconciliation (its "greenfield" status is superseded). |
 | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) | Proposed releases, sprint goals and explicit decision gates. |
+| [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) | Living tracker: work items with priority, status, evidence and next action, the current test baseline, and how to resume. |
+
+### Decisions
+
+Decisions are kept where they are made; this list is the index, not a copy.
+
+| Kind | Where |
+|---|---|
+| Approved architecture decisions (as built) | Decision register in [`../ARCHITECTURE.md`](../ARCHITECTURE.md); full ADR-015 and ADR-016 text in [`engineering/DECISIONS.md`](engineering/DECISIONS.md) |
+| Intended architecture decisions | ADR-001 to ADR-013 in [`../SSOT.md`](../SSOT.md) |
+| Unresolved documentation conflicts (including C-8 and C-22) | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and the conflict register in [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md) |
+| Open product decisions awaiting the owner | GitHub issues #44 to #50 and the `REQUIRES_APPROVAL` rows in [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) |
+| Proposed (unratified) blueprint decisions | [`blueprint/09_REGISTERS/OPEN_DECISIONS_REGISTER.md`](blueprint/09_REGISTERS/OPEN_DECISIONS_REGISTER.md) |
+| How past decisions were reached | [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md) |
+
+### User journeys
+
+Documented target journeys: [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md) (J-01 to J-28) and navigation in [`experience/APP_FLOW.md`](experience/APP_FLOW.md). Journeys proven by the e2e suite, with the screens and endpoints each one exercises: [`../project-mindmap/catalog/JOURNEY_GRAPHS.md`](../project-mindmap/catalog/JOURNEY_GRAPHS.md) and [`../project-mindmap/journeys/USER_JOURNEYS.md`](../project-mindmap/journeys/USER_JOURNEYS.md).
 
 ## 6. Intended product blueprint
 

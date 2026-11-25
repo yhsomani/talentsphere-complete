@@ -82,7 +82,7 @@ for n in G['nodes']:
     remap[n['id']] = nid
     ledger['ids'][key_of[n['id']]] = nid
     new_keys.append(key_of[n['id']])
-retired = sorted(set(ledger['ids'].values()) - set(remap.values()))
+retired = sorted({v for k, v in ledger['ids'].items() if not k.startswith('catalog:')} - set(remap.values()))  # catalog: keys belong to tools/catalog.py
 
 
 def sub(x):

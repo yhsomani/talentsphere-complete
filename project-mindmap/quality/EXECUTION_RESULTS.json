@@ -1,5 +1,5 @@
 {
-  "commit": "d8cb4c159c3c4265c8197d91fb09d4d0e00717fb",
+  "commit": "9b3032f6342ded1388b004d361ff9416b02ef916",
   "date": "2026-11-25",
   "commands": {
     "vitest": "vitest run (root config: unit, integration, security) after pnpm build, in a throwaway copy of the tracked files",
@@ -21,23 +21,23 @@
     {
       "name": "pnpm lint (prettier --check)",
       "result": "PASS",
-      "detail": "all matched files formatted, including this branch's documentation edits; GitHub Actions CI on main passed for PRs #89 and #90"
+      "detail": "all matched files formatted at the measured commit (before this branch's documentation edits)"
     }
   ],
   "suites": {
     "vitest": {
-      "total": 1571,
-      "passed": 1571,
+      "total": 1572,
+      "passed": 1572,
       "failed": 0,
       "skipped": 0,
       "files": 146
     },
     "vitest-pg": {
-      "total": 67,
-      "passed": 67,
+      "total": 71,
+      "passed": 71,
       "failed": 0,
       "skipped": 0,
-      "files": 16
+      "files": 18
     },
     "node-test": {
       "total": 5,
@@ -937,6 +937,13 @@
       "skipped": 0,
       "failures": []
     },
+    "tests/pg/connections.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
     "tests/pg/core-persistence.test.ts": {
       "runner": "vitest-pg",
       "passed": 11,
@@ -954,6 +961,13 @@
     "tests/pg/feature-flags.test.ts": {
       "runner": "vitest-pg",
       "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/job-alerts.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 2,
       "failed": 0,
       "skipped": 0,
       "failures": []
@@ -1191,7 +1205,7 @@
     },
     "tests/unit/database-migrations.test.ts": {
       "runner": "vitest",
-      "passed": 32,
+      "passed": 33,
       "failed": 0,
       "skipped": 0,
       "failures": []

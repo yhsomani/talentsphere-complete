@@ -11,15 +11,15 @@ Every item names its evidence. Classification uses the requested vocabulary. `ep
 | INT       | 211         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 | COMP      | 42          | 0                     | 0               | 0      | 0      | 0           | 0          | 2       |
 | RULE      | 269         | 0                     | 0               | 0      | 0      | 0           | 0          | 10      |
-| DB        | 36          | 0                     | 76              | 0      | 0      | 0           | 0          | 0       |
+| DB        | 38          | 0                     | 74              | 0      | 0      | 0           | 0          | 0       |
 | EXT       | 2           | 3                     | 0               | 0      | 1      | 0           | 0          | 0       |
 | JOUR      | 100         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
-| SVC       | 72          | 43                    | 0               | 0      | 0      | 0           | 0          | 0       |
+| SVC       | 74          | 43                    | 0               | 0      | 0      | 0           | 0          | 0       |
 | INFRA     | 14          | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 
-Totals: IMPLEMENTED 1048, NOT_IMPLEMENTED 76, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. Confidence: HIGH 658, MEDIUM 436, LOW 98. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
+Totals: IMPLEMENTED 1052, NOT_IMPLEMENTED 74, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. Confidence: HIGH 658, MEDIUM 440, LOW 96. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
 
-## 2. Ephemeral (non-durable) endpoints — 192 of 282
+## 2. Ephemeral (non-durable) endpoints — 184 of 282
 
 State lives in process memory and is lost on restart; responses carry `x-talentsphere-durability: ephemeral`. Evidence: `apps/api/src/durability.ts` (the code's own list of durable routes; everything else is ephemeral).
 
@@ -36,7 +36,6 @@ State lives in process memory and is lost on restart; responses carry `x-talents
 | resumes       | 7                   |
 | job-templates | 6                   |
 | ai            | 6                   |
-| connections   | 6                   |
 | referrals     | 6                   |
 | career        | 6                   |
 | portfolio     | 6                   |
@@ -48,11 +47,11 @@ State lives in process memory and is lost on restart; responses carry `x-talents
 | search        | 5                   |
 | certificates  | 4                   |
 | learning      | 4                   |
-| jobs          | 3                   |
 | applications  | 3                   |
 | analytics     | 3                   |
 | organizations | 2                   |
 | settings      | 2                   |
+| jobs          | 1                   |
 | feedback      | 1                   |
 | candidates    | 1                   |
 | xp            | 1                   |
@@ -61,11 +60,11 @@ State lives in process memory and is lost on restart; responses carry `x-talents
 | verify        | 1                   |
 | internal      | 1                   |
 
-## 3. Schema-only tables — 76 of 112 (NOT_IMPLEMENTED persistence, LOW confidence)
+## 3. Schema-only tables — 74 of 112 (NOT_IMPLEMENTED persistence, LOW confidence)
 
 Tables created by migrations with no SQL consumer found in `apps/` or `packages/`. Dynamic SQL would not be detected.
 
-`audit_logs`, `skill_relationships`, `challenges`, `assessment_sessions`, `challenge_submissions`, `xp_transactions`, `courses`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates`, `course_skills`, `ai_conversations`, `ai_messages`, `ai_usage_meters`, `resumes`, `resume_exports`, `connections`, `portfolio_projects`, `portfolio_project_skills`, `portfolio_project_media`, `portfolio_project_evidence`, `user_gamification_profiles`, `gamification_badges`, `user_badges`, `platform_config`, `search_history`, `moderation_reports`, `moderation_appeals`, `job_alerts`, `analytics_events`, `analytics_daily_kpis`, `certificate_revocations`, `job_templates`, `salary_reports`, `salary_aggregates`, `feedback_templates`, `application_feedback`, `skill_freshness`, `skill_freshness_history`, `interview_questions`, `interview_assessments`, `interview_scorecards`, `interview_ai_feedbacks`, `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_recovery_plans`, `warm_introduction_preferences`, `warm_introduction_requests`, `referral_requests`, `referral_outcomes`, `activity_events`, `contribution_scores`, `instructor_reputation_breakdown`, `instructor_endorsements`, `skill_endorsements`, `endorsement_weights`, `alumni_affiliations`, `alumni_groups`, `alumni_group_members`, `alumni_mentorship`, `employer_reputation_breakdown`, `employer_reviews`, `skill_market_signals`, `skill_forecasts`, `career_transitions`, `progression_benchmarks`, `career_milestone_evaluations`, `learning_outcomes`, `learning_impact_metrics`, `talent_pools`, `talent_pool_members`, `behavioral_talent_profiles`, `candidate_segmentations`
+`audit_logs`, `skill_relationships`, `challenges`, `assessment_sessions`, `challenge_submissions`, `xp_transactions`, `courses`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates`, `course_skills`, `ai_conversations`, `ai_messages`, `ai_usage_meters`, `resumes`, `resume_exports`, `portfolio_projects`, `portfolio_project_skills`, `portfolio_project_media`, `portfolio_project_evidence`, `user_gamification_profiles`, `gamification_badges`, `user_badges`, `platform_config`, `search_history`, `moderation_reports`, `moderation_appeals`, `analytics_events`, `analytics_daily_kpis`, `certificate_revocations`, `job_templates`, `salary_reports`, `salary_aggregates`, `feedback_templates`, `application_feedback`, `skill_freshness`, `skill_freshness_history`, `interview_questions`, `interview_assessments`, `interview_scorecards`, `interview_ai_feedbacks`, `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_recovery_plans`, `warm_introduction_preferences`, `warm_introduction_requests`, `referral_requests`, `referral_outcomes`, `activity_events`, `contribution_scores`, `instructor_reputation_breakdown`, `instructor_endorsements`, `skill_endorsements`, `endorsement_weights`, `alumni_affiliations`, `alumni_groups`, `alumni_group_members`, `alumni_mentorship`, `employer_reputation_breakdown`, `employer_reviews`, `skill_market_signals`, `skill_forecasts`, `career_transitions`, `progression_benchmarks`, `career_milestone_evaluations`, `learning_outcomes`, `learning_impact_metrics`, `talent_pools`, `talent_pool_members`, `behavioral_talent_profiles`, `candidate_segmentations`
 
 ## 4. Endpoints with no first-party web caller — 206 of 282
 
@@ -110,7 +109,7 @@ Full comparison, per documented ID: [DOC_CODE_RECONCILIATION.md](DOC_CODE_RECONC
 - Features documented as **Not implemented** (2026-10-21) whose endpoint handlers cite them today (1): F-130 Freelance Marketplace.
 - Features documented as implemented or partial that **no** source or test file cites (30): F-21, F-29, F-33, F-45, F-55, F-60, F-61, F-66, F-67, F-68, F-74, F-77, F-80, F-81, F-82, F-83, F-87, F-89, F-90, F-93, F-95, F-98, F-99, F-101, F-103, F-106, F-117, F-118, F-169, F-172 (weak evidence: code is not required to cite IDs; needs review).
 - 75 of 282 endpoints cite no documented F-/BR- ID (by module: interviews 12, reputation 8, evidence 7, organizations 7, auth 6, skills 6, jobs 6, job-templates 5). Those are capabilities in code that the registries cannot be traced to.
-- Numeric claims in living documents that differ from today's source: 1 of 10 checked (5 more are in dated snapshots, where differences are expected; table in the reconciliation file).
+- Numeric claims in living documents that differ from today's source: 1 of 11 checked (5 more are in dated snapshots, where differences are expected; table in the reconciliation file).
 
 Code-vs-test: endpoints with no test reference: 3 (see test map).
 
