@@ -191,8 +191,6 @@ import {
   updateSavedSearch,
   matchJobAgainstCriteria,
   evaluateJobAlertsForPublishedJob,
-  ApplicationDraft,
-  ApplicationDraftVersion,
   saveApplicationDraft,
   restoreApplicationDraftVersion,
   markDraftSubmitted,
@@ -854,9 +852,7 @@ export async function buildApp(
   const moderationReportsById = new Map<string, ModerationReport>();
   const moderationAppealsById = new Map<string, ModerationAppeal>();
   const jobAlertsById = new Map<string, JobAlert>();
-  const applicationDraftsById = new Map<string, ApplicationDraft>();
-  const applicationDraftsByCandidateAndJob = new Map<string, string>(); // `${candidateId}:${jobId}` -> draftId
-  const applicationDraftVersionsByDraftId = new Map<string, ApplicationDraftVersion[]>();
+  // Application drafts live in storage.applicationDrafts (F-36, migration 00019).
   const analyticsEvents: AnalyticsEvent[] = [];
 
   // Feature flags live in storage.featureFlags (F-35).
@@ -2795,14 +2791,10 @@ export async function buildApp(
       );
 
       // Mark candidate draft as submitted if exists (F-36)
-      const draftKey = `${profile.id}:${jobId}`;
-      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-      if (draftId) {
-        const existingDraft = applicationDraftsById.get(draftId);
-        if (existingDraft && !existingDraft.isSubmitted) {
-          const submittedDraft = markDraftSubmitted(existingDraft);
-          applicationDraftsById.set(draftId, submittedDraft);
-        }
+      const existingDraft = await storage.applicationDrafts.get(profile.id, jobId);
+      if (existingDraft && !existingDraft.isSubmitted) {
+        const submittedDraft = markDraftSubmitted(existingDraft);
+        await storage.applicationDrafts.markSubmitted(profile.id, jobId, submittedDraft.updatedAt);
       }
 
       await dispatchJob({
@@ -10707,12 +10699,7 @@ export async function buildApp(
       });
       // The person's own records in the remaining in-memory stores (K-12).
       // Application drafts are keyed by PROFILE id and read only by their owner.
-      for (const [draftId, draft] of applicationDraftsById) {
-        if (draft.candidateId !== profile.id) continue;
-        applicationDraftsById.delete(draftId);
-        applicationDraftVersionsByDraftId.delete(draftId);
-        applicationDraftsByCandidateAndJob.delete(`${profile.id}:${draft.jobId}`);
-      }
+      await storage.applicationDrafts.eraseCandidate(profile.id);
       // Course enrolments (keyed `${profileId}:${courseId}`) and their lesson
       // progress. Issued certificates stay: public verification (owner #5).
       for (const [key, enrollment] of enrollmentsByUserAndCourse) {
@@ -12473,11 +12460,7 @@ export async function buildApp(
       const input = SaveApplicationDraftInputSchema.parse(req.body);
       assertOwnedResume(input.resumeId, session.userId);
 
-      const draftKey = `${profile.id}:${jobId}`;
-      const existingDraftId = applicationDraftsByCandidateAndJob.get(draftKey);
-      const existingDraft = existingDraftId
-        ? applicationDraftsById.get(existingDraftId)
-        : undefined;
+      const existingDraft = (await storage.applicationDrafts.get(profile.id, jobId)) ?? undefined;
 
       // Optimistic concurrency (SSOT M-66): if the caller names the version it
       // read, refuse to overwrite a draft another writer has since advanced.
@@ -12507,12 +12490,9 @@ export async function buildApp(
         existingDraft,
       });
 
-      applicationDraftsById.set(draft.id, draft);
-      applicationDraftsByCandidateAndJob.set(draftKey, draft.id);
-
-      const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
-      versions.push(versionSnapshot);
-      applicationDraftVersionsByDraftId.set(draft.id, versions);
+      // The store re-checks the version it was read at, so a concurrent save
+      // that advanced the draft in between is a CONFLICT, not a lost write.
+      await storage.applicationDrafts.save(draft, versionSnapshot, existingDraft?.version ?? null);
 
       return reply.status(200).send({
         message: 'Application draft saved successfully.',
@@ -12532,18 +12512,12 @@ export async function buildApp(
       }
 
       const { jobId } = req.params;
-      const draftKey = `${profile.id}:${jobId}`;
-      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-      if (!draftId) {
-        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-      }
-
-      const draft = applicationDraftsById.get(draftId);
+      const draft = await storage.applicationDrafts.get(profile.id, jobId);
       if (!draft || draft.isSubmitted) {
         throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
       }
 
-      const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+      const versions = await storage.applicationDrafts.listVersions(draft.id);
 
       return reply.status(200).send({
         draft,
@@ -12562,15 +12536,9 @@ export async function buildApp(
       }
 
       const { jobId } = req.params;
-      const draftKey = `${profile.id}:${jobId}`;
-      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-      if (!draftId) {
+      if (!(await storage.applicationDrafts.remove(profile.id, jobId))) {
         throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
       }
-
-      applicationDraftsById.delete(draftId);
-      applicationDraftsByCandidateAndJob.delete(draftKey);
-      applicationDraftVersionsByDraftId.delete(draftId);
 
       return reply.status(200).send({
         message: 'Application draft discarded successfully.',
@@ -12588,28 +12556,20 @@ export async function buildApp(
       }
 
       const { jobId } = req.params;
-      const draftKey = `${profile.id}:${jobId}`;
-      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-      if (!draftId) {
-        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-      }
-
-      const draft = applicationDraftsById.get(draftId);
+      const draft = await storage.applicationDrafts.get(profile.id, jobId);
       if (!draft || draft.isSubmitted) {
         throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
       }
 
       const input = RestoreApplicationDraftVersionInputSchema.parse(req.body);
-      const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+      const versions = await storage.applicationDrafts.listVersions(draft.id);
 
       const restored = restoreApplicationDraftVersion(draft, input.targetVersion, versions, {
         userId: session.userId,
         candidateProfileId: profile.id,
       });
 
-      applicationDraftsById.set(restored.draft.id, restored.draft);
-      versions.push(restored.versionSnapshot);
-      applicationDraftVersionsByDraftId.set(restored.draft.id, versions);
+      await storage.applicationDrafts.save(restored.draft, restored.versionSnapshot, draft.version);
 
       return reply.status(200).send({
         message: `Application draft restored to version ${input.targetVersion}.`,
@@ -12626,9 +12586,8 @@ export async function buildApp(
       throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
     }
 
-    const candidateDrafts = Array.from(applicationDraftsById.values())
-      .filter((d) => d.candidateId === profile.id && !d.isSubmitted)
-      .map((draft) => {
+    const candidateDrafts = (await storage.applicationDrafts.listActive(profile.id)).map(
+      (draft) => {
         const job = jobsById.get(draft.jobId);
         return {
           ...draft,
@@ -12636,7 +12595,8 @@ export async function buildApp(
             ? { id: job.id, title: job.title, orgId: job.orgId, location: job.location }
             : undefined,
         };
-      });
+      }
+    );
 
     return reply.status(200).send({
       drafts: candidateDrafts,

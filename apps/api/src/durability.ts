@@ -84,6 +84,12 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/jobs/:id/save',
   'DELETE /api/v1/jobs/:id/save',
   'GET /api/v1/jobs/saved',
+  // Application drafts and version history (migrations 00019 and 00056).
+  'PUT /api/v1/jobs/:jobId/draft',
+  'GET /api/v1/jobs/:jobId/draft',
+  'DELETE /api/v1/jobs/:jobId/draft',
+  'POST /api/v1/jobs/:jobId/draft/restore',
+  'GET /api/v1/applications/drafts',
   // Account metadata already has typed PostgreSQL tables (migration 00013).
   'GET /api/v1/settings',
   'PATCH /api/v1/settings',
