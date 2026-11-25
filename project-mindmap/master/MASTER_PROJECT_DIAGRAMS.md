@@ -20,7 +20,7 @@ The master mind map as Mermaid only, generated from the graph by `tools/mermaid_
 
 ```mermaid
 flowchart LR
-  HUB(("COMPLETE PROJECT ECOSYSTEM<br/>TalentSphere<br/>2,632 nodes - 6,971 edges")):::hub
+  HUB(("COMPLETE PROJECT ECOSYSTEM<br/>TalentSphere<br/>2,635 nodes - 7,004 edges")):::hub
   ZA["PRODUCT and EXPERIENCE"]:::grpA
   HUB ==> ZA
   B01["01 PROJECT OVERVIEW<br/>architecture/BACKEND_ARCHITECTURE.md"]:::grpA
@@ -83,13 +83,13 @@ flowchart LR
   I["INT (211)"]:::grpA -->|"TRIGGERS 82"| P
   J["JOUR (100)"]:::grpA -->|"NAVIGATES_TO 113"| S
   P -->|"VALIDATES 132"| SC["SCH (141)"]:::grpB
-  P -->|"CALLS 470"| RU["RULE (279)"]:::grpB
-  P -->|"CALLS 83"| SV["SVC (115)"]:::grpB
+  P -->|"CALLS 469"| RU["RULE (279)"]:::grpB
+  P -->|"CALLS 83"| SV["SVC (117)"]:::grpB
   P -->|"TRIGGERS 47"| JB["job kinds"]:::grpB
-  SV -->|"READS/WRITES 80"| D["DB (112)"]:::grpC
+  SV -->|"READS/WRITES 87"| D["DB (112)"]:::grpC
   P -->|"WRITES via persist kind 78"| D
-  P -->|"PRODUCES 370"| E["ERR (256)"]:::bad
-  P -->|"TESTED_BY 1,211"| T["TEST (224)"]:::grpC
+  P -->|"PRODUCES 368"| E["ERR (254)"]:::bad
+  P -->|"TESTED_BY 1,231"| T["TEST (226)"]:::grpC
   classDef grpA fill:#e8f1fd,stroke:#1565c0,color:#1b2733,stroke-width:2px;
   classDef grpB fill:#f3eafa,stroke:#6a1b9a,color:#1b2733,stroke-width:2px;
   classDef grpC fill:#e3f5f2,stroke:#00796b,color:#1b2733,stroke-width:2px;
@@ -205,7 +205,7 @@ mindmap
       ▫️ FEATURE - 243
       ▫️ SUB-FEATURE - 311
       ▫️ MICRO-FEATURE - 211
-      ▫️ NANO-FEATURE - 256
+      ▫️ NANO-FEATURE - 254
     API modules 45 by endpoints
       ⚠️ jobs - 22
       ⚠️ skills - 16
@@ -378,7 +378,7 @@ mindmap
       ▫️ setErrorHandler: canonical envelope
     Persistence boundary
       ▫️ storage mode pg or memory no silent fallback
-      ⚠️ 90 durable - 192 ephemeral endpoints
+      ⚠️ 98 durable - 184 ephemeral endpoints
     Worker
       ⚠️ 45 job kinds - 2 deliver email
       ▫️ claim: FOR UPDATE SKIP LOCKED + lease fence
@@ -392,7 +392,7 @@ Detail file: [`architecture/API_ARCHITECTURE.md`](../architecture/API_ARCHITECTU
 mindmap
   root(("BRANCH 11<br/>API ECOSYSTEM"))
     282 REST endpoints - 0 GraphQL/WS/RPC
-      ⚠️ jobs - 22 endpoints - 19 durable
+      ⚠️ jobs - 22 endpoints - 21 durable
       ⚠️ skills - 16 endpoints - 2 durable
       ⚠️ reputation - 15 endpoints - 0 durable
       ⚠️ interviews - 13 endpoints - 0 durable
@@ -423,7 +423,7 @@ Detail file: [`data/DATABASE_ENTITY_MAP.md`](../data/DATABASE_ENTITY_MAP.md)
 mindmap
   root(("BRANCH 12<br/>DATABASE and DATA ARCHITECTURE"))
     Postgres
-      ▫️ 112 tables - 112 with RLS - 56 migrations
+      ▫️ 112 tables - 112 with RLS - 57 migrations
       ▫️ 6 enums - 1 view - 1 function
     Most-referenced tables FK in
       ✅ users - 47
@@ -435,8 +435,8 @@ mindmap
       ✅ evidence - 4
       ✅ resumes - 3
     Persistence reality
-      ✅ 36 tables have a SQL consumer
-      ❌ 76 schema-only tables
+      ✅ 38 tables have a SQL consumer
+      ❌ 74 schema-only tables
 ```
 
 ### Branch 13: Complete Data Flow
@@ -450,7 +450,7 @@ mindmap
       ▫️ INT to API - 82 triggers
       ▫️ SCR/COMP to API - 94 calls
       ▫️ API to SCH - 132 validations
-      ▫️ API to RULE - 470 calls
+      ▫️ API to RULE - 469 calls
       ▫️ API to store - 83 calls
       ▫️ API to table - 78 persist writes
     Async path
@@ -525,9 +525,9 @@ Detail file: [`architecture/API_ARCHITECTURE.md`](../architecture/API_ARCHITECTU
 ```mermaid
 mindmap
   root(("BRANCH 17<br/>ERROR HANDLING and EDGE CASES"))
-    256 error branches by code
-      ▫️ NOT_FOUND - 98
-      ▫️ FORBIDDEN - 85
+    254 error branches by code
+      ▫️ NOT_FOUND - 97
+      ▫️ FORBIDDEN - 84
       ▫️ CONFLICT - 19
       ▫️ VALIDATION_FAILED - 19
       ▫️ SERVICE_UNAVAILABLE - 12
@@ -550,16 +550,16 @@ Detail file: [`quality/TEST_COVERAGE_MAP.md`](../quality/TEST_COVERAGE_MAP.md)
 ```mermaid
 mindmap
   root(("BRANCH 18<br/>TESTING and QUALITY"))
-    224 files - 1884 static cases
+    226 files - 1889 static cases
       ▫️ scripts/tests - 1 files - 5 cases
       ▫️ tests/e2e - 61 files - 327 cases
       ▫️ tests/integration - 59 files - 518 cases
-      ▫️ tests/pg - 16 files - 67 cases
+      ▫️ tests/pg - 18 files - 71 cases
       ▫️ tests/security - 6 files - 115 cases
-      ▫️ tests/unit - 81 files - 852 cases
+      ▫️ tests/unit - 81 files - 853 cases
     Executed 2026-11-25
-      ✅ vitest - 1571/1571 passed
-      ✅ vitest-pg - 67/67 passed
+      ✅ vitest - 1572/1572 passed
+      ✅ vitest-pg - 71/71 passed
       ✅ e2e - 265/265 passed
       ✅ node-test - 5/5 passed
       ✅ pnpm build all packages and apps - PASS
@@ -587,7 +587,7 @@ mindmap
       ▫️ deploy/oracle - .env.example, .omc, Caddyfile, Dockerfil
     Config
       ▫️ 49 env vars validated zod
-      ▫️ 9 scripts - 56 SQL migrations
+      ▫️ 9 scripts - 57 SQL migrations
       ✅ CI on main green since 2026-11-25 Prettier step fixed
 ```
 
@@ -599,14 +599,14 @@ Detail file: [`quality/IMPLEMENTATION_GAPS.md`](../quality/IMPLEMENTATION_GAPS.m
 mindmap
   root(("BRANCH 20<br/>IMPLEMENTATION GAPS and DEBT"))
     Status distribution capabilities
-      ✅ IMPLEMENTED - 1048
-      ❌ NOT_IMPLEMENTED - 76
+      ✅ IMPLEMENTED - 1052
+      ❌ NOT_IMPLEMENTED - 74
       ⚠️ PARTIALLY_IMPLEMENTED - 46
       ⚪ UNKNOWN - 21
       🟠 MOCKED - 1
     Gaps with evidence
-      ⚠️ 192 ephemeral endpoints
-      ❌ 76 schema-only tables
+      ⚠️ 184 ephemeral endpoints
+      ❌ 74 schema-only tables
       ⚪ 206 endpoints with no web caller
       ⚠️ 43 no-op job kinds
       🟠 interview meeting link: fixed template

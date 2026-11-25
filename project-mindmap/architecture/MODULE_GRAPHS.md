@@ -635,11 +635,11 @@ flowchart LR
 
 ## connections (MOD-079)
 
-6 endpoints, 0 durable, 6 ephemeral. Green border = durable, yellow = ephemeral.
+6 endpoints, 6 durable, 0 ephemeral. Green border = durable, yellow = ephemeral.
 
 ```mermaid
 flowchart LR
-  API_134["API-134<br/>POST /connections/request"]:::eph
+  API_134["API-134<br/>POST /connections/request"]:::dur
   SCR_018["SCR-018<br/>/network"]:::ui
   SCR_018 -->|CALLS| API_134
   RULE_088["RULE-088<br/>DomainError"]:::logic
@@ -648,12 +648,12 @@ flowchart LR
   API_134 -->|CALLS| RULE_154
   SVC_017["SVC-017<br/>job:connection.requested"]:::logic
   API_134 -->|TRIGGERS| SVC_017
-  API_135["API-135<br/>GET /connections"]:::eph
+  API_135["API-135<br/>GET /connections"]:::dur
   SCR_018 -->|CALLS| API_135
-  API_136["API-136<br/>GET /connections/status/:targetUserId"]:::eph
+  API_136["API-136<br/>GET /connections/status/:targetUserId"]:::dur
   RULE_159["RULE-159<br/>getConnectionBetween"]:::logic
   API_136 -->|CALLS| RULE_159
-  API_137["API-137<br/>POST /connections/:id/respond"]:::eph
+  API_137["API-137<br/>POST /connections/:id/respond"]:::dur
   SCR_018 -->|CALLS| API_137
   API_137 -->|CALLS| RULE_088
   RULE_155["RULE-155<br/>acceptConnection"]:::logic
@@ -664,13 +664,13 @@ flowchart LR
   API_137 -->|TRIGGERS| SVC_014
   SVC_016["SVC-016<br/>job:connection.rejected"]:::logic
   API_137 -->|TRIGGERS| SVC_016
-  API_138["API-138<br/>POST /connections/:id/withdraw"]:::eph
+  API_138["API-138<br/>POST /connections/:id/withdraw"]:::dur
   API_138 -->|CALLS| RULE_088
   RULE_157["RULE-157<br/>withdrawConnection"]:::logic
   API_138 -->|CALLS| RULE_157
   SVC_018["SVC-018<br/>job:connection.withdrawn"]:::logic
   API_138 -->|TRIGGERS| SVC_018
-  API_139["API-139<br/>DELETE /connections/:id"]:::eph
+  API_139["API-139<br/>DELETE /connections/:id"]:::dur
   API_139 -->|CALLS| RULE_088
   SVC_015["SVC-015<br/>job:connection.removed"]:::logic
   API_139 -->|TRIGGERS| SVC_015
@@ -1014,7 +1014,7 @@ flowchart LR
 
 ## jobs (MOD-060)
 
-22 endpoints, 19 durable, 3 ephemeral. Green border = durable, yellow = ephemeral.
+22 endpoints, 21 durable, 1 ephemeral. Green border = durable, yellow = ephemeral.
 
 ```mermaid
 flowchart LR
@@ -1105,9 +1105,8 @@ flowchart LR
   RULE_201["RULE-201<br/>matchJobAgainstCriteria"]:::logic
   API_257 -->|CALLS| RULE_201
   API_257 -->|CALLS| SVC_054
-  API_258["API-258<br/>GET /jobs/alerts"]:::eph
-  API_259["API-259<br/>PATCH /jobs/alerts/:id/read"]:::eph
-  API_259 -->|CALLS| RULE_088
+  API_258["API-258<br/>GET /jobs/alerts"]:::dur
+  API_259["API-259<br/>PATCH /jobs/alerts/:id/read"]:::dur
   API_260["API-260<br/>POST /jobs/:id/save"]:::dur
   API_260 -->|CALLS| RULE_088
   SVC_053["SVC-053<br/>saved-job-store.ts"]:::logic

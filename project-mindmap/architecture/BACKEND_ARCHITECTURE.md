@@ -4,10 +4,10 @@ Evidence-based description of what the code does. For the _intended_ architectur
 
 ## 1. Shape
 
-- Fastify 5 modular monolith in one file group: `apps/api/src/server.ts` (13,888 lines) registers every route; domain rules are pure functions in `packages/domain/src` (48 modules, 279 exported functions/classes); request/response schemas in `packages/contracts/src/index.ts` (141 schemas).
+- Fastify 5 modular monolith in one file group: `apps/api/src/server.ts` (13,887 lines) registers every route; domain rules are pure functions in `packages/domain/src` (48 modules, 279 exported functions/classes); request/response schemas in `packages/contracts/src/index.ts` (141 schemas).
 - Controllers/handlers/services are not separate layers: a handler parses with a contract schema, calls domain functions, then persists. There is no `controller/service/repository` directory structure.
 - **Persistence boundary** `apps/api/src/storage/index.ts`: mode `pg` (default) or `memory`; no automatic fallback. Core loop entities persist through `persist(...)` → `core-store.ts`; other stores: account metadata, erasure requests, saved searches, saved jobs, admin audit, feature flags, billing, background jobs.
-- **Durable vs ephemeral**: 90 of 282 endpoints are in `DURABLE_ROUTES`; the other 192 keep state in process memory and are labelled `ephemeral` in a response header (ADR-015).
+- **Durable vs ephemeral**: 98 of 282 endpoints are in `DURABLE_ROUTES`; the other 184 keep state in process memory and are labelled `ephemeral` in a response header (ADR-015).
 - Auth: self-issued HMAC session tokens (`packages/domain/src/auth.ts`); Supabase Auth is not used.
 
 ## 2. Domain modules (business-rule host)
@@ -71,10 +71,12 @@ Evidence-based description of what the code does. For the _intended_ architectur
 | SVC-047 | apps/api/src/storage/admin-audit-store.ts       | admin_audit_logs                                                                                                                                                                                         |
 | SVC-114 | apps/api/src/storage/application-draft-store.ts | application_draft_versions, application_drafts                                                                                                                                                           |
 | SVC-048 | apps/api/src/storage/billing-store.ts           | billing_events, entitlements, invoices, stripe_customers, subscriptions                                                                                                                                  |
+| SVC-116 | apps/api/src/storage/connection-store.ts        | connections                                                                                                                                                                                              |
 | SVC-049 | apps/api/src/storage/core-store.ts              | application_evidence, employment_references, evidence, evidence_skills, job_applications, job_skills, jobs, message_threads, messages, notification_preferences, notifications, org_memberships, organiz |
 | SVC-050 | apps/api/src/storage/erasure-store.ts           | data_erasure_requests, users                                                                                                                                                                             |
 | SVC-051 | apps/api/src/storage/feature-flag-store.ts      | feature_flags                                                                                                                                                                                            |
 | SVC-052 | apps/api/src/storage/index.ts                   | worker_health                                                                                                                                                                                            |
+| SVC-117 | apps/api/src/storage/job-alert-store.ts         | job_alerts, saved_searches                                                                                                                                                                               |
 | SVC-053 | apps/api/src/storage/saved-job-store.ts         | saved_jobs                                                                                                                                                                                               |
 | SVC-054 | apps/api/src/storage/saved-search-store.ts      | saved_searches, users                                                                                                                                                                                    |
 | SVC-055 | apps/worker/src/index.ts                        | worker_health                                                                                                                                                                                            |
