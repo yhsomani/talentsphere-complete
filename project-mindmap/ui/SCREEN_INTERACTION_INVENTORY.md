@@ -8,40 +8,40 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 | ID      | Route            | Gate    | Component file                           | Inbound nav links | Outbound nav | E2E specs | Status             | Notes                                                                                                                                        |
 | ------- | ---------------- | ------- | ---------------------------------------- | ----------------- | ------------ | --------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| SCR-001 | /                | public  | apps/web/src/pages/LandingPage.tsx       | 1                 | 1            | 5         | IMPLEMENTED/MEDIUM | no API call found in this screen file (static or composed)                                                                                   |
-| SCR-002 | /login           | public  | apps/web/src/pages/LoginPage.tsx         | 3                 | 1            | 13        | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-003 | /signup          | public  | apps/web/src/pages/SignUpPage.tsx        | 4                 | 3            | 2         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-004 | /checkout        | public  | apps/web/src/pages/CheckoutPage.tsx      | 3                 | 0            | 4         | IMPLEMENTED/MEDIUM | no API call found in this screen file (static or composed)                                                                                   |
-| SCR-005 | /privacy         | public  | apps/web/src/pages/PrivacyPage.tsx       | 3                 | 0            | 5         | IMPLEMENTED/MEDIUM | no API call found in this screen file (static or composed)                                                                                   |
-| SCR-006 | /terms           | public  | apps/web/src/pages/TermsPage.tsx         | 3                 | 0            | 2         | IMPLEMENTED/MEDIUM | no API call found in this screen file (static or composed)                                                                                   |
-| SCR-007 | /jobs            | public  | apps/web/src/pages/JobsPage.tsx          | 12                | 1            | 6         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-008 | /jobs/:id        | public  | apps/web/src/pages/JobDetailPage.tsx     | 0                 | 2            | 2         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-009 | /reference/:id   | public  | apps/web/src/pages/ReferencePage.tsx     | 0                 | 0            | 1         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-010 | /verify/:hash    | public  | apps/web/src/pages/VerifyPage.tsx        | 0                 | 1            | 1         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-011 | /dashboard       | guarded | apps/web/src/pages/DashboardPage.tsx     | 3                 | 2            | 11        | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-012 | /applications    | guarded | apps/web/src/pages/ApplicationsPage.tsx  | 3                 | 1            | 2         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-013 | /evidence        | guarded | apps/web/src/pages/EvidencePage.tsx      | 1                 | 0            | 6         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-014 | /profile         | guarded | apps/web/src/pages/ProfilePage.tsx       | 4                 | 1            | 5         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-015 | /settings        | guarded | apps/web/src/pages/SettingsPage.tsx      | 2                 | 0            | 1         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-016 | /portfolio       | guarded | apps/web/src/pages/PortfolioPage.tsx     | 0                 | 0            | 1         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-017 | /resumes         | guarded | apps/web/src/pages/ResumesPage.tsx       | 0                 | 0            | 1         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-018 | /network         | guarded | apps/web/src/pages/NetworkPage.tsx       | 0                 | 0            | 1         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-019 | /learning        | guarded | apps/web/src/pages/LearningPage.tsx      | 1                 | 0            | 2         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-020 | /learning/:id    | guarded | apps/web/src/pages/CoursePage.tsx        | 0                 | 1            | 1         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-021 | /career          | guarded | apps/web/src/pages/CareerPage.tsx        | 1                 | 1            | 1         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-022 | /notifications   | guarded | apps/web/src/pages/NotificationsPage.tsx | 2                 | 0            | 1         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-023 | /messages        | guarded | apps/web/src/pages/MessagesPage.tsx      | 5                 | 1            | 1         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
+| SCR-001 | /                | public  | apps/web/src/pages/LandingPage.tsx       | 1                 | 1            | 5         | IMPLEMENTED/HIGH   | no API call found in this screen file (static or composed); 5 linked test file(s) executed and passed (2026-11-25); link is path-level       |
+| SCR-002 | /login           | public  | apps/web/src/pages/LoginPage.tsx         | 3                 | 1            | 13        | IMPLEMENTED/HIGH   | 13 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                  |
+| SCR-003 | /signup          | public  | apps/web/src/pages/SignUpPage.tsx        | 4                 | 3            | 2         | IMPLEMENTED/HIGH   | 2 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-004 | /checkout        | public  | apps/web/src/pages/CheckoutPage.tsx      | 3                 | 0            | 4         | IMPLEMENTED/HIGH   | no API call found in this screen file (static or composed); 4 linked test file(s) executed and passed (2026-11-25); link is path-level       |
+| SCR-005 | /privacy         | public  | apps/web/src/pages/PrivacyPage.tsx       | 3                 | 0            | 5         | IMPLEMENTED/HIGH   | no API call found in this screen file (static or composed); 5 linked test file(s) executed and passed (2026-11-25); link is path-level       |
+| SCR-006 | /terms           | public  | apps/web/src/pages/TermsPage.tsx         | 3                 | 0            | 2         | IMPLEMENTED/HIGH   | no API call found in this screen file (static or composed); 2 linked test file(s) executed and passed (2026-11-25); link is path-level       |
+| SCR-007 | /jobs            | public  | apps/web/src/pages/JobsPage.tsx          | 12                | 1            | 6         | IMPLEMENTED/HIGH   | 6 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-008 | /jobs/:id        | public  | apps/web/src/pages/JobDetailPage.tsx     | 0                 | 2            | 2         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 2 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-009 | /reference/:id   | public  | apps/web/src/pages/ReferencePage.tsx     | 0                 | 0            | 1         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 1 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-010 | /verify/:hash    | public  | apps/web/src/pages/VerifyPage.tsx        | 0                 | 1            | 1         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 1 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-011 | /dashboard       | guarded | apps/web/src/pages/DashboardPage.tsx     | 3                 | 2            | 11        | IMPLEMENTED/HIGH   | 11 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                  |
+| SCR-012 | /applications    | guarded | apps/web/src/pages/ApplicationsPage.tsx  | 3                 | 1            | 2         | IMPLEMENTED/HIGH   | 2 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-013 | /evidence        | guarded | apps/web/src/pages/EvidencePage.tsx      | 1                 | 0            | 6         | IMPLEMENTED/HIGH   | 6 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-014 | /profile         | guarded | apps/web/src/pages/ProfilePage.tsx       | 4                 | 1            | 5         | IMPLEMENTED/HIGH   | 5 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-015 | /settings        | guarded | apps/web/src/pages/SettingsPage.tsx      | 2                 | 0            | 1         | IMPLEMENTED/HIGH   | 1 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-016 | /portfolio       | guarded | apps/web/src/pages/PortfolioPage.tsx     | 0                 | 0            | 1         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 1 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-017 | /resumes         | guarded | apps/web/src/pages/ResumesPage.tsx       | 0                 | 0            | 1         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 1 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-018 | /network         | guarded | apps/web/src/pages/NetworkPage.tsx       | 0                 | 0            | 1         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 1 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-019 | /learning        | guarded | apps/web/src/pages/LearningPage.tsx      | 1                 | 0            | 2         | IMPLEMENTED/HIGH   | 2 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-020 | /learning/:id    | guarded | apps/web/src/pages/CoursePage.tsx        | 0                 | 1            | 1         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 1 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-021 | /career          | guarded | apps/web/src/pages/CareerPage.tsx        | 1                 | 1            | 1         | IMPLEMENTED/HIGH   | 1 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-022 | /notifications   | guarded | apps/web/src/pages/NotificationsPage.tsx | 2                 | 0            | 1         | IMPLEMENTED/HIGH   | 1 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-023 | /messages        | guarded | apps/web/src/pages/MessagesPage.tsx      | 5                 | 1            | 1         | IMPLEMENTED/HIGH   | 1 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
 | SCR-024 | /messages/:id    | guarded | apps/web/src/pages/ConversationPage.tsx  | 0                 | 1            | 0         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source; no e2e page.goto to this route found                                                             |
-| SCR-025 | /hiring          | guarded | apps/web/src/pages/HiringPage.tsx        | 2                 | 1            | 4         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-026 | /hiring/jobs/:id | guarded | apps/web/src/pages/HiringJobPage.tsx     | 0                 | 3            | 2         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-027 | /assessments     | guarded | apps/web/src/pages/AssessmentsPage.tsx   | 0                 | 0            | 3         | IMPLEMENTED/MEDIUM | no inbound navigation link found in source                                                                                                   |
-| SCR-028 | /admin           | guarded | apps/web/src/pages/AdminPage.tsx         | 1                 | 0            | 1         | IMPLEMENTED/MEDIUM |                                                                                                                                              |
-| SCR-029 | /\*              | public  | apps/web/src/pages/NotFoundPage.tsx      | 0                 | 0            | 0         | IMPLEMENTED/LOW    | no API call found in this screen file (static or composed); no inbound navigation link found in source; no e2e page.goto to this route found |
+| SCR-025 | /hiring          | guarded | apps/web/src/pages/HiringPage.tsx        | 2                 | 1            | 4         | IMPLEMENTED/HIGH   | 4 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-026 | /hiring/jobs/:id | guarded | apps/web/src/pages/HiringJobPage.tsx     | 0                 | 3            | 2         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 2 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-027 | /assessments     | guarded | apps/web/src/pages/AssessmentsPage.tsx   | 0                 | 0            | 3         | IMPLEMENTED/HIGH   | no inbound navigation link found in source; 3 linked test file(s) executed and passed (2026-11-25); link is path-level                       |
+| SCR-028 | /admin           | guarded | apps/web/src/pages/AdminPage.tsx         | 1                 | 0            | 1         | IMPLEMENTED/HIGH   | 1 linked test file(s) executed and passed (2026-11-25); link is path-level                                                                   |
+| SCR-029 | /*               | public  | apps/web/src/pages/NotFoundPage.tsx      | 0                 | 0            | 0         | IMPLEMENTED/LOW    | no API call found in this screen file (static or composed); no inbound navigation link found in source; no e2e page.goto to this route found |
 
 ### Navigation analysis
 
-- Screens with **no inbound navigation link** in source (reachable only by URL, redirect or `navigate`): /jobs/:id, /reference/:id, /verify/:hash, /portfolio, /resumes, /network, /learning/:id, /messages/:id, /hiring/jobs/:id, /assessments, /\*.
-- Screens with **no outbound link to another routed screen** from their own file (they rely on the shared Layout nav): /checkout, /privacy, /terms, /reference/:id, /evidence, /settings, /portfolio, /resumes, /network, /learning, /notifications, /assessments, /admin, /\*. Layout supplies header/footer links to every screen, so none are true dead ends for a user with the matching nav set.
+- Screens with **no inbound navigation link** in source (reachable only by URL, redirect or `navigate`): /jobs/:id, /reference/:id, /verify/:hash, /portfolio, /resumes, /network, /learning/:id, /messages/:id, /hiring/jobs/:id, /assessments, /*.
+- Screens with **no outbound link to another routed screen** from their own file (they rely on the shared Layout nav): /checkout, /privacy, /terms, /reference/:id, /evidence, /settings, /portfolio, /resumes, /network, /learning, /notifications, /assessments, /admin, /*. Layout supplies header/footer links to every screen, so none are true dead ends for a user with the matching nav set.
 - Unresolved navigation targets (link to a path that is not a route entry as written): /hiring/jobs/, /verify/ (template-built paths such as `/verify/${hash}` truncate in the static scan and are not defects by themselves).
 - Catch-all `*` renders `NotFoundPage`.
 
@@ -49,7 +49,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-001 `/` — LandingPage
 
-- Gate: public · File: `apps/web/src/pages/LandingPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/LandingPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=False, empty=False, error=False
 - Shared components: HeroRecordArt, StepRoleArt, StepEmailArt, StepReferenceArt, CandidateArt, RecruiterArt, ButtonLink
@@ -60,7 +60,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-002 `/login` — LoginPage
 
-- Gate: public · File: `apps/web/src/pages/LoginPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/LoginPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 2, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Notice
@@ -71,7 +71,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-003 `/signup` — SignUpPage
 
-- Gate: public · File: `apps/web/src/pages/SignUpPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/SignUpPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 4, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Input, Notice
@@ -82,7 +82,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-004 `/checkout` — CheckoutPage
 
-- Gate: public · File: `apps/web/src/pages/CheckoutPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/CheckoutPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=False, empty=False, error=False
 - Shared components: PaidPlans, ButtonLink, CheckIcon, PageHeader
@@ -93,7 +93,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-005 `/privacy` — PrivacyPage
 
-- Gate: public · File: `apps/web/src/pages/PrivacyPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/PrivacyPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=False, empty=False, error=False
 - Shared components: Card, CardHeader, CardTitle, CardContent, LockIcon
@@ -104,7 +104,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-006 `/terms` — TermsPage
 
-- Gate: public · File: `apps/web/src/pages/TermsPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/TermsPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=False, empty=False, error=False
 - Shared components: Badge, Card, CardHeader, CardTitle, CardContent, AlertCircleIcon
@@ -115,7 +115,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-007 `/jobs` — JobsPage
 
-- Gate: public · File: `apps/web/src/pages/JobsPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/JobsPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 1, modals 0
 - States handled in source: loading=True, empty=True, error=True
 - Shared components: ButtonLink, EmptyState, Select, Input, LoadError, PageHeader, StatusPill
@@ -126,7 +126,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-008 `/jobs/:id` — JobDetailPage
 
-- Gate: public · File: `apps/web/src/pages/JobDetailPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/JobDetailPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 1, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, ButtonLink, Card, CardContent, TextArea, LoadError, Notice, StatusPill
@@ -137,7 +137,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-009 `/reference/:id` — ReferencePage
 
-- Gate: public · File: `apps/web/src/pages/ReferencePage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/ReferencePage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 2, forms 1, inputs 2, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Card, CardContent, TextArea, Notice
@@ -148,7 +148,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-010 `/verify/:hash` — VerifyPage
 
-- Gate: public · File: `apps/web/src/pages/VerifyPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: public · File: `apps/web/src/pages/VerifyPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=False, empty=False, error=True
 - Shared components: ButtonLink, Card, CardContent, LoadError, Notice, PageHeader
@@ -159,7 +159,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-011 `/dashboard` — DashboardPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/DashboardPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/DashboardPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: SessionErrorNotice, ButtonLink, LoadError, Notice, PageHeader, StatusPill
@@ -170,7 +170,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-012 `/applications` — ApplicationsPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/ApplicationsPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/ApplicationsPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 3, forms 0, inputs 0, modals 1
 - States handled in source: loading=True, empty=True, error=True
 - Shared components: Button, ButtonLink, EmptyState, LoadError, Modal, Notice, PageHeader, StatusPill
@@ -181,7 +181,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-013 `/evidence` — EvidencePage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/EvidencePage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/EvidencePage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 12, forms 4, inputs 10, modals 3
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: SessionErrorNotice, Badge, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Select, CheckIcon, AlertCircleIcon, Input, Modal, Notice, PageHeader, VerificationSeal
@@ -192,7 +192,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-014 `/profile` — ProfilePage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/ProfilePage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/ProfilePage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 5, forms 1, inputs 5, modals 1
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: ChangePasswordForm, CredentialsSection, SessionErrorNotice, SignOutOtherDevices, SkillsSection, Button, Card, CardContent, TextArea, Select, Input, Modal, Notice, PageHeader
@@ -203,7 +203,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-015 `/settings` — SettingsPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/SettingsPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/SettingsPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 1, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Select, LoadError, Notice, PageHeader
@@ -214,7 +214,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-016 `/portfolio` — PortfolioPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/PortfolioPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/PortfolioPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 4, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Card, CardContent, TextArea, Select, Input, LoadError, Notice, PageHeader
@@ -225,7 +225,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-017 `/resumes` — ResumesPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/ResumesPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/ResumesPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 3, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Card, CardContent, TextArea, Select, Input, LoadError, Notice, PageHeader
@@ -236,7 +236,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-018 `/network` — NetworkPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/NetworkPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/NetworkPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 6, forms 2, inputs 2, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Card, CardContent, TextArea, Input, LoadError, Notice, PageHeader
@@ -247,7 +247,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-019 `/learning` — LearningPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/LearningPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/LearningPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 0, inputs 1, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, ButtonLink, Card, CardContent, Select, Input, LoadError, Notice, PageHeader
@@ -258,7 +258,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-020 `/learning/:id` — CoursePage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/CoursePage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/CoursePage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 3, forms 0, inputs 0, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, ButtonLink, Card, CardContent, LoadError, Notice, PageHeader
@@ -269,7 +269,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-021 `/career` — CareerPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/CareerPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/CareerPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 1, inputs 0, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Card, CardContent, Select, LoadError, Notice, PageHeader
@@ -280,7 +280,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-022 `/notifications` — NotificationsPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/NotificationsPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/NotificationsPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 1, forms 0, inputs 0, modals 0
 - States handled in source: loading=True, empty=True, error=True
 - Shared components: Button, EmptyState, LoadError, PageHeader
@@ -291,7 +291,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-023 `/messages` — MessagesPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/MessagesPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/MessagesPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 0, forms 0, inputs 0, modals 0
 - States handled in source: loading=True, empty=True, error=True
 - Shared components: EmptyState, LoadError, PageHeader
@@ -313,7 +313,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-025 `/hiring` — HiringPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/HiringPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/HiringPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 8, forms 2, inputs 9, modals 2
 - States handled in source: loading=True, empty=True, error=True
 - Shared components: Button, Card, CardContent, EmptyState, TextArea, Select, Input, LoadError, Modal, Notice, PageHeader, StatusPill
@@ -324,7 +324,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-026 `/hiring/jobs/:id` — HiringJobPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/HiringJobPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/HiringJobPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 12, forms 1, inputs 0, modals 3
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Badge, Button, TextArea, LoadError, Modal, Notice, PageHeader, StatusPill
@@ -335,7 +335,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-027 `/assessments` — AssessmentsPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/AssessmentsPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/AssessmentsPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 3, forms 1, inputs 0, modals 0
 - States handled in source: loading=True, empty=False, error=True
 - Shared components: Button, Card, CardContent, TextArea, Select, LoadError, Notice, PageHeader
@@ -346,7 +346,7 @@ Screens come from `apps/web/src/App.tsx` route entries; controls, states and API
 
 ### SCR-028 `/admin` — AdminPage
 
-- Gate: RequireAuth · File: `apps/web/src/pages/AdminPage.tsx` · Status: IMPLEMENTED/MEDIUM
+- Gate: RequireAuth · File: `apps/web/src/pages/AdminPage.tsx` · Status: IMPLEMENTED/HIGH
 - Controls (source counts): buttons 3, forms 0, inputs 3, modals 0
 - States handled in source: loading=True, empty=True, error=True
 - Shared components: Button, Card, CardContent, EmptyState, Select, Input, Notice, PageHeader

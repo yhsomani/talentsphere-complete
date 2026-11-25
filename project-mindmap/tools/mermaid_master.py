@@ -7,18 +7,24 @@ Builds the MASTER mind map as Mermaid only (no images):
 Every label is computed from master/MASTER_PROJECT_GRAPH.json, features/COMPLETE_FEATURE_INVENTORY.json or the extractor's aux.json.
 """
 
-import json, os, sys, re, collections
+import json, os, sys, re, collections, glob
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 WORK = sys.argv[1]
 OUT = os.path.join(ROOT, 'project-mindmap', 'master')
 G = json.load(open(os.path.join(OUT, 'MASTER_PROJECT_GRAPH.json')))
 A = json.load(open(os.path.join(WORK, 'aux.json')))
+N_MIG = len(glob.glob(os.path.join(ROOT, 'supabase', 'migrations', '*.sql')))
 nodes = {n['id']: n for n in G['nodes']}
 edges = G['edges']
 by_type = collections.defaultdict(list)
 for n in G['nodes']:
     by_type[n['type']].append(n)
+EXE = A.get('execution') or {}
+EXE_SUITES = EXE.get('suites', {}) if EXE.get('available') else {}
+def exe_line(k):
+    s = EXE_SUITES.get(k)
+    return f"{k} · {s['passed']}/{s['total']} passed" if s else f'{k} · not run'
 out_e = collections.defaultdict(list); in_e = collections.defaultdict(list)
 for e in edges:
     out_e[e['src']].append(e); in_e[e['dst']].append(e)
@@ -103,6 +109,8 @@ cards.append(Card('02', 'USER PERSONAS & ROLES', 'A', 'journeys/USER_JOURNEYS.md
 jm = collections.Counter(re.sub(r"^.*/", '', j['spec']).replace('.spec.ts', '') for j in jours)
 cards.append(Card('03', 'COMPLETE USER JOURNEYS', 'A', 'journeys/USER_JOURNEYS.md', [
     sub(f'{len(jours)} e2e-derived journeys · {len(jm)} specs', [b(f'{k} · {v}', 'IMPLEMENTED') for k, v in top(jm, 12)], more_text(len(jm), 12, 'journeys/USER_JOURNEYS.md')),
+    sub('Run results (e2e)', [b(f"{k} · {v}", 'IMPLEMENTED' if k == 'passed' else 'BROKEN' if k == 'failed' else 'UNKNOWN') for k, v in collections.Counter((j.get('execution') or {}).get('outcome', 'not run') for j in jours).most_common()]),
+    sub(f"Documented target journeys J-01..J-{len(by_type['DOCJ']):02d}", [b(f"cited by code or tests · {sum(1 for n in by_type['DOCJ'] if n.get('code_links') or n.get('test_links'))}", 'PARTIALLY_IMPLEMENTED'), b(f"named by nothing · {sum(1 for n in by_type['DOCJ'] if not (n.get('code_links') or n.get('test_links')))}", 'UNKNOWN')]),
     sub('Structural flows (from source)', [b('guard redirect → /login?return='), b('401 → clear session → reason → /login'), b('restricted account → profile only'), b('20 s request timeout → ApiError')]),
 ]))
 # BRANCH 04
@@ -114,6 +122,7 @@ cards.append(Card('04', 'COMPLETE FEATURE HIERARCHY', 'A', 'features/COMPLETE_FE
     sub('Levels (inventory)', [b(f'{k} · {lvl_counts[k]}') for k in ('APPLICATION', 'MODULE', 'FEATURE', 'SUB-FEATURE', 'MICRO-FEATURE', 'NANO-FEATURE')]),
     sub(f'API modules ({len(api_mods)}) by endpoints', [b(f"{m} · {c}", 'IMPLEMENTED' if all(x['durability'] == 'durable' for x in api_mods[m]) else 'PARTIALLY_IMPLEMENTED') for m, c in mod_top[:11]], more_text(len(mod_top), 11, 'master/MASTER_PROJECT_MINDMAP.md §6')),
     sub('Business rules', [b(f'{len(rules)} exported domain functions (RULE- nodes)')]),
+    sub(f"Documented features F-01..F-{len(by_type['DOCF'])}", [b(f"cited by source · {sum(1 for n in by_type['DOCF'] if n.get('code_links'))}", 'PARTIALLY_IMPLEMENTED')] + [b(f"documented status {k} · {v}", {'Partially implemented': 'PARTIALLY_IMPLEMENTED', 'Not implemented': 'NOT_IMPLEMENTED', 'Implemented, unverified': 'IMPLEMENTED', 'Broken or regressed': 'BROKEN', 'Deprecated or rejected': 'DEPRECATED'}.get(k)) for k, v in collections.Counter(n.get('doc_status') for n in by_type['DOCF']).most_common()]),
 ]))
 # BRANCH 05
 scr_items = [b(f"{n['id']} {n['name']}" + (' 🔒' if n['guarded'] else ''), n['status']) for n in scrs if n['name'] != '/*']
@@ -156,7 +165,8 @@ cards.append(Card('09', 'FRONTEND ARCHITECTURE', 'B', 'architecture/FRONTEND_ARC
     sub('Runtime', [b('main.tsx → App → SessionProvider → BrowserRouter'), b('one context: SessionContext (status, user, profile)'), b('local useState per page · no query/state library')]),
     sub('API client', [b('apiFetch: Bearer token, single 401 policy'), b('apiJson: 20 s timeout, ApiError with server message'), b(f"{len(A['web_calls'])} call sites → {sum(1 for n in apis if n.get('web_callers'))} endpoints")]),
     sub('Browser storage', [b('localStorage: talentsphere_token, talentsphere_user'), b('sessionStorage: session-ended reason'), b('IndexedDB / SQLite: none found')]),
-    sub('PWA / offline', [b('service-worker + display-mode detection', 'PARTIALLY_IMPLEMENTED'), b('offline data sync: none found', 'NOT_IMPLEMENTED')]),
+    sub('PWA / offline', [b('manifest + display-mode detection', 'PARTIALLY_IMPLEMENTED'), b('service-worker registration: none found', 'NOT_IMPLEMENTED'), b('offline data sync: none found', 'NOT_IMPLEMENTED')]),
+    sub('Rule copies', [b('web lib/types.ts mirrors application and job transition tables', 'PARTIALLY_IMPLEMENTED')]),
 ]))
 # BRANCH 10
 cards.append(Card('10', 'BACKEND ARCHITECTURE', 'B', 'architecture/BACKEND_ARCHITECTURE.md', [
@@ -194,7 +204,7 @@ for e in edges:
     if e['rel'] == 'DEPENDS_ON' and nodes[e['src']]['type'] == 'DB' and nodes[e['dst']]['type'] == 'DB': fk_in[nodes[e['dst']]['name']] += 1
 schema_only = sum(1 for n in dbs if n['status'] == 'NOT_IMPLEMENTED')
 cards.append(Card('12', 'DATABASE & DATA ARCHITECTURE', 'C', 'data/DATABASE_ENTITY_MAP.md', [
-    sub('Postgres', [b(f'{len(dbs)} tables · {sum(1 for n in dbs if n.get("rls"))} with RLS · 55 migrations'), b(f"{len(A['enums'])} enums · {len(A['views'])} view · {len(A['functions'])} function")]),
+    sub('Postgres', [b(f'{len(dbs)} tables · {sum(1 for n in dbs if n.get("rls"))} with RLS · {N_MIG} migrations'), b(f"{len(A['enums'])} enums · {len(A['views'])} view · {len(A['functions'])} function")]),
     sub('Most-referenced tables (FK in)', [b(f'{k} · {v}', 'IMPLEMENTED') for k, v in fk_in.most_common(8)]),
     sub('Persistence reality', [b(f'{len(dbs) - schema_only} tables have a SQL consumer', 'IMPLEMENTED'), b(f'{schema_only} schema-only tables', 'NOT_IMPLEMENTED')]),
 ]))
@@ -215,14 +225,15 @@ cards.append(Card('14', 'STATE MANAGEMENT & LIFECYCLE', 'C', 'data/END_TO_END_DA
 tc = collections.Counter(); cc = collections.Counter()
 for n in tests: tc[n['category']] += 1; cc[n['category']] += n['cases']
 cards.append(Card('18', 'TESTING & QUALITY', 'C', 'quality/TEST_COVERAGE_MAP.md', [
-    sub(f'{len(tests)} files · {sum(cc.values())} cases (not run here)', [b(f'{k} · {tc[k]} files · {cc[k]} cases') for k in sorted(tc)]),
-    sub('Link coverage (textual)', [b(f"endpoints referenced by a test · {sum(1 for n in apis if n.get('tests'))}/{len(apis)}"), b(f"screens with an e2e goto · {sum(1 for n in scrs if outs(n['id'], 'TESTED_BY', 'TEST'))}/{len(scrs)}"), b('no HIGH confidence: nothing executed', 'UNKNOWN')]),
+    sub(f'{len(tests)} files · {sum(cc.values())} static cases', [b(f'{k} · {tc[k]} files · {cc[k]} cases') for k in sorted(tc)]),
+    sub(f"Executed {EXE.get('date', '')}".strip(), [b(exe_line(k), 'IMPLEMENTED' if EXE_SUITES.get(k, {}).get('failed') == 0 else 'UNKNOWN') for k in ('vitest', 'vitest-pg', 'e2e', 'node-test')] + [b(f"{c['name'][:40]} · {c['result']}", 'IMPLEMENTED' if c['result'] == 'PASS' else 'BROKEN') for c in EXE.get('checks', [])]),
+    sub('Link coverage (textual)', [b(f"endpoints referenced by a test · {sum(1 for n in apis if n.get('tests'))}/{len(apis)}"), b(f"screens with an e2e goto · {sum(1 for n in scrs if outs(n['id'], 'TESTED_BY', 'TEST'))}/{len(scrs)}"), b('HIGH confidence = passing linked test (path-level)' if EXE_SUITES else 'no HIGH confidence: nothing executed', 'IMPLEMENTED' if EXE_SUITES else 'UNKNOWN')]),
 ]))
 # BRANCH 19
 cards.append(Card('19', 'INFRASTRUCTURE & DEPLOYMENT', 'C', 'architecture/BACKEND_ARCHITECTURE.md', [
     sub('CI workflows', [b(f"{os.path.basename(n['name'])} · {len(n.get('steps', []))} steps", 'PARTIALLY_IMPLEMENTED' if 'ci.yml' in n['name'] else 'IMPLEMENTED') for n in infra if n.get('kind') == 'ci-workflow']),
     sub('Deploy targets', [b(f"{n['name']} · {', '.join(n.get('files', []))[:40]}") for n in infra if n.get('kind') == 'deployment']),
-    sub('Config', [b(f"{len(A['env_vars'])} env vars validated (zod)"), b(f"{sum(1 for n in infra if n.get('kind') == 'script')} scripts · 55 SQL migrations"), b('CI on main red since 2026-10-26', 'BROKEN')]),
+    sub('Config', [b(f"{len(A['env_vars'])} env vars validated (zod)"), b(f"{sum(1 for n in infra if n.get('kind') == 'script')} scripts · {N_MIG} SQL migrations"), b('CI on main red since 2026-10-26 at the Prettier step', 'BROKEN')]),
 ]))
 # BRANCH 20
 dead_rules = sum(1 for n in rules if n.get('prod_references') == 0) if rules and 'prod_references' in rules[0] else None
@@ -230,7 +241,8 @@ no_ui = sum(1 for n in apis if not n.get('web_callers') and not n['path'].starts
 noop_jobs = job_noop
 cards.append(Card('20', 'IMPLEMENTATION GAPS & DEBT', 'C', 'quality/IMPLEMENTATION_GAPS.md', [
     sub('Status distribution (capabilities)', [b(f'{k} · {v}', k) for k, v in collections.Counter(n.get('status') for t in ('API', 'SCR', 'INT', 'COMP', 'RULE', 'DB', 'EXT', 'JOUR', 'SVC', 'INFRA') for n in by_type[t] if n.get('status')).most_common()]),
-    sub('Gaps with evidence', [b(f'{len(apis) - n_dur} ephemeral endpoints', 'PARTIALLY_IMPLEMENTED'), b(f'{schema_only} schema-only tables', 'NOT_IMPLEMENTED'), b(f'{no_ui} endpoints with no web caller', 'UNKNOWN'), b(f'{noop_jobs} no-op job kinds', 'PARTIALLY_IMPLEMENTED'), b('interview meeting link: fixed template', 'MOCKED')]),
+    sub('Gaps with evidence', [b(f'{len(apis) - n_dur} ephemeral endpoints', 'PARTIALLY_IMPLEMENTED'), b(f'{schema_only} schema-only tables', 'NOT_IMPLEMENTED'), b(f'{no_ui} endpoints with no web caller', 'UNKNOWN'), b(f'{noop_jobs} no-op job kinds', 'PARTIALLY_IMPLEMENTED'), b('interview meeting link: fixed template', 'MOCKED'), b('no service-worker registration', 'NOT_IMPLEMENTED')]),
+    sub('Documentation vs code', [b(f"features documented as built but cited nowhere · {sum(1 for n in by_type['DOCF'] if (n.get('disagreement') or '').startswith('documented as (partially)'))}", 'UNKNOWN'), b(f"features documented as missing but cited by handlers · {sum(1 for n in by_type['DOCF'] if (n.get('disagreement') or '').startswith('documented as not'))}", 'PARTIALLY_IMPLEMENTED'), b(f"endpoints citing no documented ID · {sum(1 for n in apis if not any(e['rel'] == 'IMPLEMENTS' for e in out_e[n['id']]))}", 'UNKNOWN')]),
 ]))
 
 order = {c.bid: c for c in cards}
@@ -308,7 +320,7 @@ chain = '\n'.join(CH)
 
 legend = """| Marker | Meaning |
 | --- | --- |
-| ✅ | IMPLEMENTED: source supports it (no runtime evidence; nothing was executed) |
+| ✅ | IMPLEMENTED: source supports it (HIGH confidence where a linked test passed; see the master map section 4) |
 | ⚠️ | PARTIALLY_IMPLEMENTED: works but ephemeral, no-op, or opt-in |
 | ❌ | NOT_IMPLEMENTED / BROKEN: schema-only, absent, or CI red |
 | 🟠 | MOCKED: a template stands in for an integration |

@@ -8,6 +8,8 @@ established.**
 
 - [Documentation index](docs/INDEX.md): topic ownership and reading order.
 - [Architecture](ARCHITECTURE.md): implementation, boundaries and failure modes.
+- [Project mind map](project-mindmap/README.md): generated map of every route, screen,
+  table, rule and test, with evidence, test results and documentation gaps.
 - [Implementation coverage](docs/system-model/01-inventory-and-coverage.md): source
   inventory, feature status and documentation audit scope.
 - [SSOT](SSOT.md): preserved canonical product intent; requirements are not proof

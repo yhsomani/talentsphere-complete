@@ -2,34 +2,37 @@
 
 **Mermaid only (no images).** The master mind map below is generated from the graph. Detail mind maps for every branch, the hub/zone overview flowchart and the cross-connection chain are in [MASTER_PROJECT_DIAGRAMS.md](MASTER_PROJECT_DIAGRAMS.md).
 
-> Generated from the repository by read-only static analysis. Every node below has a stable ID, evidence (file, line, symbol), an implementation status and a confidence. Nothing here was executed: see [README](../README.md) "Limits".
+> Generated from the repository by read-only static analysis, then cross-checked against a test run on 2026-11-25 (commit `5d67317`; vitest 1571/1571 passed, vitest-pg 66/66 passed, node-test 5/5 passed, e2e 265/265 passed; results in [EXECUTION_RESULTS.json](../quality/EXECUTION_RESULTS.json)). Every node has a stable ID, evidence (file, line, symbol), an implementation status and a confidence.
 
 ## 1. How to read this map
 
 - The **mind map** (section 2) shows the 20 required branches with counts computed from the graph.
-- The **interconnected graph** is `MASTER_PROJECT_GRAPH.json` (all 2,188 nodes and 5,582 typed edges, nothing truncated) and `MASTER_PROJECT_GRAPH.dot` (the same graph for Graphviz). Section 3 summarises it by node type; per-module subgraphs are in [MODULE_GRAPHS](../architecture/MODULE_GRAPHS.md).
+- The **interconnected graph** is `MASTER_PROJECT_GRAPH.json` (all 2,628 nodes and 6,945 typed edges, nothing truncated) and `MASTER_PROJECT_GRAPH.dot` (the same graph for Graphviz). Section 3 summarises it by node type; per-module subgraphs are in [MODULE_GRAPHS](../architecture/MODULE_GRAPHS.md).
 - IDs are stable across every artifact. The prefix says what the node is.
 
-| Prefix | Meaning                                                    | Count |
-| ------ | ---------------------------------------------------------- | ----- |
-| PROJ-  | Project                                                    | 1     |
-| ROLE-  | Role / identity                                            | 12    |
-| JOUR-  | User journey (derived from an e2e test)                    | 109   |
-| MOD-   | Module (application, API module, domain module, migration) | 157   |
-| FEAT-  | Feature group (API resource group)                         | 154   |
-| API-   | API endpoint (sub-feature)                                 | 282   |
-| SCR-   | Screen (routed page)                                       | 29    |
-| COMP-  | Shared UI component                                        | 44    |
-| INT-   | Interaction (UI event binding, micro-feature)              | 211   |
-| ERR-   | Error branch (nano-feature, observable system response)    | 256   |
-| RULE-  | Business rule: exported domain function                    | 279   |
-| SCH-   | Contract schema (Zod)                                      | 141   |
-| SVC-   | Service or data-access file, background job kind           | 113   |
-| DB-    | Database table                                             | 112   |
-| STATE- | State definition or transition table                       | 45    |
-| TEST-  | Test file                                                  | 223   |
-| EXT-   | External integration                                       | 6     |
-| INFRA- | CI workflow, deploy target, script                         | 14    |
+| Prefix | Meaning                                                                        | Count |
+| ------ | ------------------------------------------------------------------------------ | ----- |
+| PROJ-  | Project                                                                        | 1     |
+| ROLE-  | Role / identity                                                                | 12    |
+| JOUR-  | User journey (one Playwright e2e test)                                         | 100   |
+| MOD-   | Module (application, API module, domain module, migration)                     | 157   |
+| FEAT-  | Feature group (API resource group)                                             | 154   |
+| API-   | API endpoint (sub-feature)                                                     | 282   |
+| SCR-   | Screen (routed page)                                                           | 29    |
+| COMP-  | Shared UI component                                                            | 44    |
+| INT-   | Interaction (UI event binding, micro-feature)                                  | 211   |
+| ERR-   | Error branch (nano-feature, observable system response)                        | 256   |
+| RULE-  | Business rule: exported domain function                                        | 279   |
+| SCH-   | Contract schema (Zod)                                                          | 141   |
+| SVC-   | Service or data-access file, background job kind                               | 113   |
+| DB-    | Database table                                                                 | 112   |
+| STATE- | State definition or transition table                                           | 45    |
+| TEST-  | Test file                                                                      | 223   |
+| EXT-   | External integration                                                           | 6     |
+| INFRA- | CI workflow, deploy target, script                                             | 14    |
+| F-     | Documented feature (docs/registries/FEATURE_REGISTRY.md); the project's own ID | 173   |
+| J-     | Documented target journey (docs/experience/JOURNEY_REGISTRY.md)                | 28    |
+| BR-    | Documented business rule (docs/registries/BUSINESS_RULE_REGISTRY.md)           | 248   |
 
 Not used (no evidence found, so no nodes exist): `ACT-`, `DATA-`, `NANO-`, `SUB-`, `MIC-` as separate prefixes. Their levels are carried by `INT-` (micro), `ERR-` (nano) and `API-` (sub-feature); see [feature inventory](../features/COMPLETE_FEATURE_INVENTORY.json) `level`.
 
@@ -52,12 +55,15 @@ mindmap
         Navigation sets
         Endpoint auth levels
       BRANCH 03 COMPLETE USER JOURNEYS
-        109 e2e-derived journeys - 28 specs
+        100 e2e-derived journeys - 28 specs
+        Run results e2e
+        Documented target journeys J-01..J-28
         Structural flows from source
       BRANCH 04 COMPLETE FEATURE HIERARCHY
         Levels inventory
         API modules 45 by endpoints
         Business rules
+        Documented features F-01..F-173
       BRANCH 05 SCREENS and UI COMPONENTS
         29 routed screens locked = guarded
         Shared components 44
@@ -79,6 +85,7 @@ mindmap
         API client
         Browser storage
         PWA / offline
+        Rule copies
       BRANCH 10 BACKEND ARCHITECTURE
         Request chain server.ts
         Persistence boundary
@@ -110,7 +117,8 @@ mindmap
         Transition tables
         Gap
       BRANCH 18 TESTING and QUALITY
-        223 files - 1883 cases not run here
+        223 files - 1883 static cases
+        Executed 2026-11-25
         Link coverage textual
       BRANCH 19 INFRASTRUCTURE and DEPLOYMENT
         CI workflows
@@ -119,6 +127,7 @@ mindmap
       BRANCH 20 IMPLEMENTATION GAPS and DEBT
         Status distribution capabilities
         Gaps with evidence
+        Documentation vs code
 ```
 
 | Branch                               | Detail artifact                                                                         |
@@ -153,10 +162,13 @@ flowchart LR
   API["API<br/>282 nodes"]:::api
   COMP["COMP<br/>44 nodes"]:::journey
   DB["DB<br/>112 nodes"]:::data
+  DOCBR["DOCBR<br/>248 nodes"]:::infra
+  DOCF["DOCF<br/>173 nodes"]:::infra
+  DOCJ["DOCJ<br/>28 nodes"]:::infra
   ERR["ERR<br/>256 nodes"]:::bad
   EXT["EXT<br/>6 nodes"]:::api
   INT["INT<br/>211 nodes"]:::journey
-  JOUR["JOUR<br/>109 nodes"]:::journey
+  JOUR["JOUR<br/>100 nodes"]:::journey
   MOD["MOD<br/>157 nodes"]:::infra
   PROJ["PROJ<br/>1 nodes"]:::infra
   ROLE["ROLE<br/>12 nodes"]:::journey
@@ -167,6 +179,7 @@ flowchart LR
   TEST["TEST<br/>223 nodes"]:::infra
   API -->|"CALLS 470"| RULE
   API -->|"CALLS 83"| SVC
+  API -->|"IMPLEMENTS 628"| DOCF
   API -->|"PRODUCES 372"| ERR
   API -->|"REQUIRES 52"| ROLE
   API -->|"TESTED_BY 1195"| TEST
@@ -174,26 +187,37 @@ flowchart LR
   API -->|"VALIDATES 132"| SCH
   API -->|"WRITES 78"| DB
   COMP -->|"CALLS 18"| API
+  COMP -->|"IMPLEMENTS 1"| DOCBR
+  COMP -->|"IMPLEMENTS 4"| DOCF
   COMP -->|"NAVIGATES_TO 33"| SCR
   DB -->|"DEPENDS_ON 147"| DB
+  DOCBR -->|"TESTED_BY 299"| TEST
+  DOCF -->|"TESTED_BY 284"| TEST
+  DOCJ -->|"TESTED_BY 3"| TEST
   EXT -->|"FALLBACK_TO 2"| PROJ
   INT -->|"CALLS 82"| API
   INT -->|"TRIGGERS 82"| API
-  JOUR -->|"NAVIGATES_TO 122"| SCR
-  JOUR -->|"TESTED_BY 109"| TEST
+  JOUR -->|"NAVIGATES_TO 113"| SCR
+  JOUR -->|"TESTED_BY 100"| TEST
   MOD -->|"CREATES 112"| DB
   MOD -->|"DEPENDS_ON 5"| EXT
   MOD -->|"DEPENDS_ON 54"| MOD
+  MOD -->|"IMPLEMENTS 103"| DOCBR
+  MOD -->|"IMPLEMENTS 52"| DOCF
   PROJ -->|"DEPENDS_ON 6"| EXT
   ROLE -->|"AUTHORIZES 38"| API
   ROLE -->|"AUTHORIZES 209"| SCR
   ROLE -->|"BLOCKED_BY 18"| SCR
-  ROLE -->|"TRIGGERS 48"| JOUR
+  ROLE -->|"TRIGGERS 43"| JOUR
   RULE -->|"TESTED_BY 363"| TEST
   SCR -->|"CALLS 76"| API
   SCR -->|"DEPENDS_ON 201"| COMP
+  SCR -->|"IMPLEMENTS 3"| DOCBR
+  SCR -->|"IMPLEMENTS 4"| DOCF
   SCR -->|"NAVIGATES_TO 21"| SCR
   SCR -->|"TESTED_BY 85"| TEST
+  SVC -->|"IMPLEMENTS 1"| DOCBR
+  SVC -->|"IMPLEMENTS 4"| DOCF
   SVC -->|"READS 35"| DB
   SVC -->|"UPDATES 6"| DB
   SVC -->|"WRITES 34"| DB
@@ -209,14 +233,15 @@ flowchart LR
 
 | Relationship | Edges | Meaning in this repository                                                            |
 | ------------ | ----- | ------------------------------------------------------------------------------------- |
-| TESTED_BY    | 1752  | test source references the item                                                       |
+| TESTED_BY    | 2329  | test source references the item (or cites its F-/J-/BR- ID)                           |
 | CONTAINS     | 1247  | hierarchy                                                                             |
+| IMPLEMENTS   | 800   | source cites a documented F-/J-/BR- ID (route block or file)                          |
 | CALLS        | 729   | screen/interaction calls an API; route calls a rule or store                          |
 | DEPENDS_ON   | 413   | package, FK or component dependency                                                   |
 | PRODUCES     | 372   | endpoint throws a DomainError                                                         |
 | AUTHORIZES   | 247   | identity may reach a screen or endpoint                                               |
-| TRIGGERS     | 177   | interaction fires a request; route dispatches a background job; role starts a journey |
-| NAVIGATES_TO | 176   | link, navigate() or nav set                                                           |
+| TRIGGERS     | 172   | interaction fires a request; route dispatches a background job; role starts a journey |
+| NAVIGATES_TO | 167   | link, navigate() or nav set                                                           |
 | VALIDATES    | 132   | route parses with a contract schema                                                   |
 | WRITES       | 112   | SQL INSERT/DELETE, or route to table through a persist kind                           |
 | CREATES      | 112   | migration creates table                                                               |
@@ -239,13 +264,13 @@ Relationship types requested but with **zero** edges because no evidence exists:
 | RULE      | 269         | 0                     | 0               | 0      | 0      | 0           | 0          | 10      |
 | DB        | 34          | 0                     | 78              | 0      | 0      | 0           | 0          | 0       |
 | EXT       | 2           | 3                     | 0               | 0      | 1      | 0           | 0          | 0       |
-| JOUR      | 109         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
+| JOUR      | 100         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 | SVC       | 70          | 43                    | 0               | 0      | 0      | 0           | 0          | 0       |
 | INFRA     | 14          | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 
-Totals: IMPLEMENTED 1053, NOT_IMPLEMENTED 78, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. MOD and FEAT roll up their children; ERR/TEST/SCH/STATE/ROLE nodes carry no status because "implemented" is not meaningful for them.
+Totals: IMPLEMENTED 1044, NOT_IMPLEMENTED 78, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. MOD and FEAT roll up their children; ERR/TEST/SCH/STATE/ROLE nodes carry no status because "implemented" is not meaningful for them.
 
-`HIGH` confidence is assigned to **nothing**: no test or runtime was executed (dependencies are not installed and installing would write protected files). `MEDIUM` = supported by source. `LOW` = inferred.
+Confidence (same node types): HIGH 658, MEDIUM 432, LOW 100. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
 
 ## 5. Legend
 

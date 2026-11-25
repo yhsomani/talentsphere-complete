@@ -17,9 +17,14 @@
       "expect(page.locator('main#main-content')).toBeFocused();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-002",
@@ -34,9 +39,14 @@
       "expect(reached, 'tab order must reach the Opportunities nav link').toContain('nav-jobs');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-003",
@@ -52,9 +62,14 @@
       "expect(isFocused, `login control #${i} must be focusable`).toBe(true);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-004",
@@ -69,9 +84,14 @@
       "expect(hasOutline, 'focused navigation must show a visible focus ring').toBe(true);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-005",
@@ -83,9 +103,14 @@
     "screens_visited": ["/"],
     "steps": ["goto('/'", "expect("],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-006",
@@ -104,9 +129,14 @@
       "expect(focused, `vacancy #${i} action must be keyboard focusable`).toBe(true);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-007",
@@ -124,9 +154,14 @@
       "expect(await cta.evaluate((el) => el === document.activeElement)).toBe(true);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-008",
@@ -149,9 +184,14 @@
       "expect(confirm).toBeEnabled();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-009",
@@ -189,9 +229,14 @@
       "expect(page.getByTestId('delete-password-input')).toHaveValue('');"
     ],
     "api_paths_referenced": ["/api/v1/auth/login"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-010",
@@ -213,9 +258,14 @@
       "expect(login.status()).toBe(401);"
     ],
     "api_paths_referenced": ["/api/v1/auth/login"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-011",
@@ -252,9 +302,14 @@
       ".click("
     ],
     "api_paths_referenced": ["/api/v1/auth/login"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-012",
@@ -278,9 +333,14 @@
       "expect((await sessionWith(otherToken)).status()).toBe(200);"
     ],
     "api_paths_referenced": ["/api/v1/auth/login", "/api/v1/auth/session"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-013",
@@ -308,34 +368,14 @@
       ".click("
     ],
     "api_paths_referenced": ["/api/v1/auth/login"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-014",
-    "title": "E2E: Career readiness (F-91)",
-    "spec": "tests/e2e/career-readiness.spec.ts",
-    "line": 6,
-    "personas": ["unspecified"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "goto('/login'",
-      ".fill(account.email)",
-      ".fill(account.password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);",
-      "request.post(`${API_BASE}/skills/freshness`, {",
-      "expect(skill.status()).toBe(201);",
-      "request.post(`${API_BASE}/candidates/work-history`, {",
-      "expect(role.status()).toBe(201);"
-    ],
-    "api_paths_referenced": ["/api/v1/candidates/work-history", "/api/v1/skills/freshness"],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-015",
@@ -351,9 +391,14 @@
       "expect(page.getByTestId('career-submit')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-016",
@@ -380,9 +425,14 @@
       "expect(milestones).toContainText('more months of domain experience');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-017",
@@ -400,30 +450,14 @@
       "expect(page.getByTestId('career-breakdown')).toContainText('Education: 100%');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-018",
-    "title": "E2E: Challenges (F-08)",
-    "spec": "tests/e2e/challenges.spec.ts",
-    "line": 8,
-    "personas": ["unspecified"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "goto('/login'",
-      ".fill(account.email)",
-      ".fill(account.password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": [],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-019",
@@ -441,9 +475,14 @@
       "expect(page.getByTestId('challenge-session')).not.toContainText('world hello');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-020",
@@ -471,9 +510,14 @@
       "expect(stored.metadata.executed).toBe(false);"
     ],
     "api_paths_referenced": ["/api/v1/evidence/mine"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-021",
@@ -503,9 +547,14 @@
       "expect(bodies[3].idempotencyKey).not.toBe(bodies[0].idempotencyKey);"
     ],
     "api_paths_referenced": ["/api/v1/billing/checkout", "/api/v1/billing/plans"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-022",
@@ -531,9 +580,14 @@
       "expect(row).toContainText('No active applicants');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-023",
@@ -556,9 +610,14 @@
       "expect(candidate.getByTestId('step-1')).toHaveAttribute('data-done', 'true');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-024",
@@ -589,9 +648,14 @@
       "expect(candidate.locator('[data-testid^=\"reference-\"]')).toContainText("
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-025",
@@ -611,9 +675,14 @@
       "expect(candidate.locator('[data-testid^=\"reference-\"]')).toContainText('Received');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-026",
@@ -636,9 +705,14 @@
       "expect(row).toContainText('Submitted');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-027",
@@ -666,9 +740,14 @@
       "expect(applicant).toContainText('Shortlisted');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-028",
@@ -689,35 +768,14 @@
       "expect("
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-029",
-    "title": "E2E: Credentials on the profile and public verification (F-96, F-52)",
-    "spec": "tests/e2e/credentials.spec.ts",
-    "line": 9,
-    "personas": ["unspecified"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "expect(",
-      "request.post(`${API_BASE}/courses/${courseId}/enroll`, { headers: auth })).status()",
-      "request.get(`${API_BASE}/courses/${courseId}`)).json();",
-      "request.post(`${API_BASE}/lessons/${lesson.id}/complete`, { headers: auth })",
-      "expect(certificate, 'completing every lesson issues a certificate').toBeDefined();",
-      "goto('/login'",
-      ".fill(account.email)",
-      ".fill(account.password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": ["/api/v1/courses/", "/api/v1/lessons/"],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-030",
@@ -729,9 +787,14 @@
     "screens_visited": ["/profile"],
     "steps": ["goto('/profile'", "expect(page.getByTestId('credentials-empty')).toBeVisible();"],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-031",
@@ -756,9 +819,14 @@
       "expect(stranger.getByTestId('verify-page')).not.toContainText(account.profile.fullName);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-032",
@@ -782,9 +850,14 @@
       "expect(page.getByTestId('verify-page')).toContainText('Verified ingestion pipeline');"
     ],
     "api_paths_referenced": ["/api/v1/evidence", "/api/v1/evidence/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-033",
@@ -802,9 +875,14 @@
       "expect(page.getByTestId('verify-status')).toContainText('Integrity review failed');"
     ],
     "api_paths_referenced": ["/api/v1/certificates/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-034",
@@ -820,9 +898,14 @@
       "expect(page.getByTestId('load-error-retry')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-035",
@@ -834,9 +917,14 @@
     "screens_visited": ["/signup"],
     "steps": ["goto('/signup'", "expect(ratio).toBeGreaterThanOrEqual(3);"],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-036",
@@ -859,9 +947,14 @@
       "expect(creates).toBe(1);"
     ],
     "api_paths_referenced": ["/api/v1/jobs", "/api/v1/jobs/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-037",
@@ -884,9 +977,14 @@
       "expect(row).toContainText('Closed');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-038",
@@ -907,9 +1005,14 @@
       "expect(closed).toHaveAttribute('aria-pressed', 'true');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-039",
@@ -926,9 +1029,14 @@
       "expect(logins).toBe(1);"
     ],
     "api_paths_referenced": ["/api/v1/auth/login"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-040",
@@ -947,9 +1055,14 @@
       "expect(page.getByTestId('reference-unavailable')).toHaveCount(0);"
     ],
     "api_paths_referenced": ["/api/v1/references/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-041",
@@ -961,9 +1074,14 @@
     "screens_visited": [],
     "steps": [".click(", "expect("],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-042",
@@ -980,9 +1098,14 @@
       "expect("
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-043",
@@ -998,9 +1121,14 @@
       "expect(page.getByTestId('signup-form')).toBeVisible();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-044",
@@ -1017,9 +1145,14 @@
       "expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-045",
@@ -1036,32 +1169,14 @@
       "expect(page.locator('body')).not.toContainText(victim.email);"
     ],
     "api_paths_referenced": ["/api/v1/admin/users"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-046",
-    "title": "E2E: Learning catalogue (F-07)",
-    "spec": "tests/e2e/learning-page.spec.ts",
-    "line": 6,
-    "personas": ["candidate"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "request.post(`${'http://127.0.0.1:4000/api/v1'}/auth/register`, {",
-      "expect(res.status()).toBe(201);",
-      "goto('/login'",
-      ".fill(email)",
-      ".fill(password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": [],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-047",
@@ -1083,30 +1198,14 @@
       "expect(page.getByTestId('learning-notice')).toContainText('You are enrolled');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-048",
-    "title": "E2E: Lesson player (F-07)",
-    "spec": "tests/e2e/lesson-player.spec.ts",
-    "line": 7,
-    "personas": ["unspecified"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "goto('/login'",
-      ".fill(account.email)",
-      ".fill(account.password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": [],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-049",
@@ -1144,9 +1243,14 @@
       ".click("
     ],
     "api_paths_referenced": ["/api/v1/courses/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-050",
@@ -1162,9 +1266,14 @@
       "expect(page.getByTestId('load-error-retry')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-051",
@@ -1202,9 +1311,14 @@
       "expect(casey.getByTestId('nav-notifications')).toHaveAccessibleName('Notifications');"
     ],
     "api_paths_referenced": ["/api/v1/jobs/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-052",
@@ -1227,9 +1341,14 @@
       "expect(page.getByTestId('apply-error')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-053",
@@ -1260,9 +1379,14 @@
       "expect(JSON.parse(bodies[1]).clientRequestId).toBe(firstKey);"
     ],
     "api_paths_referenced": ["/api/v1/candidates/work-history"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-054",
@@ -1287,9 +1411,14 @@
       "expect(page.getByTestId('apply-error')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-055",
@@ -1307,9 +1436,14 @@
       "expect(page.getByTestId(`apply-status-${job.jobId}`)).toHaveText('In review');"
     ],
     "api_paths_referenced": ["/api/v1/applications/my"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-056",
@@ -1328,9 +1462,14 @@
       "expect(page.getByTestId('apply-done')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-057",
@@ -1347,9 +1486,14 @@
       "expect(page.getByTestId('apply-done')).toBeVisible();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-058",
@@ -1368,9 +1512,14 @@
       "expect(applyBtn(page, otherJob.jobId)).toBeVisible();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-059",
@@ -1393,9 +1542,14 @@
       "expect(page.getByTestId('evidence-notice')).toContainText("
     ],
     "api_paths_referenced": ["/api/v1/candidates/", "/api/v1/candidates/work-history"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-060",
@@ -1418,9 +1572,14 @@
       "expect(submitBtn).toHaveText('Send request');"
     ],
     "api_paths_referenced": ["/api/v1/candidates/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-061",
@@ -1439,9 +1598,14 @@
       "expect(purchaseRequests).toBe(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-062",
@@ -1464,9 +1628,14 @@
       "expect(page.getByTestId('apply-error')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-063",
@@ -1483,9 +1652,14 @@
       "expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-064",
@@ -1506,9 +1680,14 @@
       "expect(page.getByTestId(`apply-status-${job.jobId}`)).toHaveText('Submitted');"
     ],
     "api_paths_referenced": ["/api/v1/jobs/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-065",
@@ -1529,9 +1708,14 @@
       "expect(page.getByTestId(`verify-code-new-wait-${id}`)).toHaveCount(0);"
     ],
     "api_paths_referenced": ["/api/v1/candidates/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-066",
@@ -1554,9 +1738,14 @@
       "expect(page.locator('h1')).toContainText('Work history');"
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-067",
@@ -1579,9 +1768,14 @@
       "expect(fresh).toHaveURL(/\\/login\\?return=%2Fdashboard$/);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-068",
@@ -1601,9 +1795,14 @@
       "expect(page).toHaveURL(/\\/jobs$/);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-069",
@@ -1615,9 +1814,14 @@
     "screens_visited": ["/"],
     "steps": ["goto('/'", ".click(", "expect(page).toHaveURL(/\\/jobs$/);"],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-070",
@@ -1634,9 +1838,14 @@
       "expect(page.getByTestId('nav-checkout')).not.toHaveAttribute('aria-current', 'page');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-071",
@@ -1648,9 +1857,14 @@
     "screens_visited": ["/"],
     "steps": ["goto('/'", ".click(", "expect(page).toHaveURL(/\\/jobs$/);"],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-072",
@@ -1676,9 +1890,14 @@
       "expect(page.getByTestId('mobile-menu')).toBeHidden();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-073",
@@ -1697,9 +1916,14 @@
       "expect(opener).toBeFocused();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-074",
@@ -1731,34 +1955,14 @@
       "expect(recruiter.getByTestId('nav-applications')).toHaveCount(0);"
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-075",
-    "title": "E2E: Network page (F-09)",
-    "spec": "tests/e2e/network-page.spec.ts",
-    "line": 7,
-    "personas": ["candidate"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "request.post(`${API_BASE}/auth/register`, {",
-      "expect(sender.status()).toBe(201);",
-      "request.post(`${API_BASE}/auth/register`, {",
-      "expect(target.status()).toBe(201);",
-      "goto('/login'",
-      ".fill(senderEmail)",
-      ".fill(password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": ["/api/v1/auth/register"],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-076",
@@ -1780,9 +1984,14 @@
       "expect(page.getByTestId('network-withdraw')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-077",
@@ -1802,9 +2011,14 @@
       "expect(page.getByTestId('network-withdraw')).toBeVisible();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-078",
@@ -1822,9 +2036,14 @@
       "expect(page.getByTestId('network-connect')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-079",
@@ -1851,9 +2070,14 @@
       "expect(page.getByTestId('notifications-badge')).toHaveCount(0);"
     ],
     "api_paths_referenced": ["/api/v1/jobs/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-080",
@@ -1881,9 +2105,14 @@
       "expect(page.getByText('You are all caught up.')).toBeVisible();"
     ],
     "api_paths_referenced": ["/api/v1/applications/", "/api/v1/jobs/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-081",
@@ -1899,9 +2128,14 @@
       "expect(page.getByTestId('notifications-badge')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-082",
@@ -1924,9 +2158,14 @@
       "expect("
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-083",
@@ -1938,32 +2177,14 @@
     "screens_visited": ["/privacy"],
     "steps": ["goto('/privacy'", "expect(cls, `${width}px ${path}`).toBeLessThanOrEqual(0.1);"],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-084",
-    "title": "E2E: Portfolio and resumes (F-26, F-13)",
-    "spec": "tests/e2e/portfolio-resumes.spec.ts",
-    "line": 7,
-    "personas": ["candidate"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "request.post(`${API_BASE}/auth/register`, {",
-      "expect(res.status()).toBe(201);",
-      "goto('/login'",
-      ".fill(email)",
-      ".fill(password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": ["/api/v1/auth/register"],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-085",
@@ -1983,9 +2204,14 @@
       "expect(page.getByTestId('portfolio-list')).toContainText(projectTitle);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-086",
@@ -2004,9 +2230,14 @@
       "expect(page.getByTestId('resume-list')).toContainText(resumeTitle);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-087",
@@ -2025,9 +2256,14 @@
       "expect(page.locator('a[href=\"mailto:security@talentsphere.dev\"]')).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-088",
@@ -2058,9 +2294,14 @@
       "expect(menu).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-089",
@@ -2086,9 +2327,14 @@
       "expect(dialog).toBeHidden();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-090",
@@ -2125,9 +2371,14 @@
       "expect(refused).toEqual([]);"
     ],
     "api_paths_referenced": ["/api/v1/admin/users/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-091",
@@ -2147,32 +2398,14 @@
       "expect(notice).toHaveCount(0);"
     ],
     "api_paths_referenced": ["/api/v1/auth/session"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-092",
-    "title": "E2E: Settings page and command search (F-15, F-20)",
-    "spec": "tests/e2e/settings-page.spec.ts",
-    "line": 7,
-    "personas": ["candidate"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "request.post(`${API_BASE}/auth/register`, {",
-      "expect(res.status()).toBe(201);",
-      "goto('/login'",
-      ".fill(email)",
-      ".fill(password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": ["/api/v1/auth/register"],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-093",
@@ -2194,9 +2427,14 @@
       "expect(body.settings.showActivity).toBe(!before);"
     ],
     "api_paths_referenced": ["/api/v1/auth/login", "/api/v1/settings"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-094",
@@ -2212,9 +2450,14 @@
       "expect(page.getByTestId(id)).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-095",
@@ -2232,9 +2475,14 @@
       "expect(page.getByTestId('profile-privacy')).toHaveValue('connections_only');"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-096",
@@ -2255,9 +2503,14 @@
       "expect(palette).toBeHidden();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-097",
@@ -2275,34 +2528,14 @@
       "expect(page).toHaveURL(/\\/dashboard$/);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
-  },
-  {
-    "id": "JOUR-098",
-    "title": "E2E: Skills and related skills on the profile (F-84)",
-    "spec": "tests/e2e/skills-graph.spec.ts",
-    "line": 7,
-    "personas": ["platform_admin"],
-    "entry_point": "/login",
-    "screens_visited": ["/login"],
-    "steps": [
-      "request.post(`${API_BASE}/skills`, {",
-      "expect(res.status(), `create skill ${name}`).toBe(201);",
-      "request.post(`${API_BASE}/skills/relationships`, {",
-      "expect(res.status(), 'define relationship').toBe(201);",
-      "goto('/login'",
-      ".fill(account.email)",
-      ".fill(account.password)",
-      "getByRole('button', { name: 'Sign In' })",
-      ".click(",
-      "expect(page).toHaveURL(/\\/dashboard/);"
-    ],
-    "api_paths_referenced": ["/api/v1/skills", "/api/v1/skills/relationships"],
-    "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-099",
@@ -2325,9 +2558,14 @@
       "expect(page.getByLabel('Add a skill').locator('option', { hasText: main })).toHaveCount("
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-100",
@@ -2346,9 +2584,14 @@
       "expect("
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 3
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-101",
@@ -2377,9 +2620,14 @@
       "expect(page.getByText(claim, { exact: false })).toHaveCount(0);"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-102",
@@ -2414,9 +2662,14 @@
       "expect(browse).toHaveAttribute('href', '/jobs');"
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-103",
@@ -2447,9 +2700,14 @@
       "expect(token?.startsWith('demo_token')).toBe(false);"
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-104",
@@ -2471,9 +2729,14 @@
       "expect((await sub.json()).subscription.planTier).toBe('free');"
     ],
     "api_paths_referenced": ["/api/v1/billing/subscription"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-105",
@@ -2511,9 +2774,14 @@
       "expect(alert).toBeVisible();"
     ],
     "api_paths_referenced": ["/api/v1/auth/register", "/api/v1/internal/worker-jobs"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-106",
@@ -2544,9 +2812,14 @@
       "expect(page.getByText(/\\bpassed\\b|score: \\d+/i)).toHaveCount(0);"
     ],
     "api_paths_referenced": ["/api/v1/auth/register"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-107",
@@ -2577,9 +2850,14 @@
       "expect(page.getByTestId('applications-active')).toContainText("
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-108",
@@ -2604,9 +2882,14 @@
       "expect(page.getByText('Prohibition of AI Proxy Agents')).toBeVisible();"
     ],
     "api_paths_referenced": [],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   },
   {
     "id": "JOUR-109",
@@ -2644,8 +2927,13 @@
       "expect(page.getByTestId(`work-history-${kept}`)).toBeVisible();"
     ],
     "api_paths_referenced": ["/api/v1/candidates/work-history", "/api/v1/candidates/work-history/"],
+    "execution": {
+      "runner": "playwright",
+      "outcome": "passed",
+      "instances": 1
+    },
     "status": "IMPLEMENTED",
-    "confidence": "MEDIUM",
-    "notes": ["derived from an e2e test; test was not executed in this session"]
+    "confidence": "HIGH",
+    "notes": ["e2e test passed (2026-11-25)"]
   }
 ]
