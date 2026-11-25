@@ -1,5 +1,9 @@
 # Master Project Mind Map — COMPLETE PROJECT ECOSYSTEM
 
+![COMPLETE PROJECT ECOSYSTEM poster](MASTER_PROJECT_MINDMAP.svg)
+
+_The poster above is generated from the same graph (`tools/poster.py`): 20 branch cards in three zones, a central hub, status dots and a cross-connection chain. Open `MASTER_PROJECT_MINDMAP.svg` full-size in a browser, or edit `MASTER_PROJECT_MINDMAP.drawio` in diagrams.net. A 4400 px PNG copy is `MASTER_PROJECT_MINDMAP.png`._
+
 > Generated from the repository by read-only static analysis. Every node below has a stable ID, evidence (file, line, symbol), an implementation status and a confidence. Nothing here was executed: see [README](../README.md) "Limits".
 
 ## 1. How to read this map

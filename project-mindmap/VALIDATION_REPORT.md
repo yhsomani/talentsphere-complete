@@ -17,6 +17,8 @@ Checks executed by the generator against the graph just written. A PASS means th
 | Mind map text is structurally valid (indent tree, sanitised labels)       | PASS   | syntax only; not rendered by mermaid                                |
 | Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files) | PASS   | 83 diagrams ok, 0 failed; parsed, not rendered                      |
 | DOT file parses and matches the graph (dotparser)                         | PASS   | 2188 nodes, 5582 edges vs graph 2188/5582; not laid out by Graphviz |
+| SVG poster is well-formed XML                                             | PASS   | 574 text elements                                                   |
+| draw.io file is well-formed XML                                           | PASS   | 865 cells                                                           |
 | Graph JSON contains every node and edge (no truncation)                   | PASS   | 2188 nodes, 5582 edges written                                      |
 
 ## Repository coverage

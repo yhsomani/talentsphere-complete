@@ -316,6 +316,10 @@ type_graph = '\n'.join(fl)
 
 md = [f"""# Master Project Mind Map — COMPLETE PROJECT ECOSYSTEM
 
+![COMPLETE PROJECT ECOSYSTEM poster](MASTER_PROJECT_MINDMAP.svg)
+
+*The poster above is generated from the same graph (`tools/poster.py`): 20 branch cards in three zones, a central hub, status dots and a cross-connection chain. Open `MASTER_PROJECT_MINDMAP.svg` full-size in a browser, or edit `MASTER_PROJECT_MINDMAP.drawio` in diagrams.net. A 4400 px PNG copy is `MASTER_PROJECT_MINDMAP.png`.*
+
 > Generated from the repository by read-only static analysis. Every node below has a stable ID, evidence (file, line, symbol), an implementation status and a confidence. Nothing here was executed: see [README](../README.md) "Limits".
 
 ## 1. How to read this map
@@ -1154,6 +1158,15 @@ if _mm:
     checks.append(('Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)', _mm['bad'] == 0, f"{_mm['ok']} diagrams ok, {_mm['bad']} failed; parsed, not rendered"))
 if _dt:
     checks.append(('DOT file parses and matches the graph (dotparser)', _dt['nodes'] == len(nodes) and _dt['edges'] == len(edges), f"{_dt['nodes']} nodes, {_dt['edges']} edges vs graph {len(nodes)}/{len(edges)}; not laid out by Graphviz"))
+import xml.dom.minidom as _md
+for _f, _lbl in (('MASTER_PROJECT_MINDMAP.svg', 'SVG poster'), ('MASTER_PROJECT_MINDMAP.drawio', 'draw.io file')):
+    _p = os.path.join(OUT, 'master', _f)
+    if os.path.exists(_p):
+        try:
+            _d = _md.parse(_p); _ok = True; _n = len(_d.getElementsByTagName('text' if _f.endswith('svg') else 'mxCell'))
+        except Exception as _e:
+            _ok = False; _n = str(_e)[:60]
+        checks.append((f'{_lbl} is well-formed XML', _ok, f'{_n} text elements' if _f.endswith('svg') else f'{_n} cells'))
 checks.append(('Graph JSON contains every node and edge (no truncation)', True, f'{len(nodes)} nodes, {len(edges)} edges written'))
 # repository coverage
 tracked = [f for f in src_files if not f.startswith(('Yash_Final', 'graphify-out', 'TalentSphere/', 'PRODUCT_BLUEPRINT', 'project-mindmap', 'docs/', 'BRAIN/', '.playwright', '.agents'))]
@@ -1234,7 +1247,7 @@ All numbers are computed from the generated graph (`master/MASTER_PROJECT_GRAPH.
 - Response shapes, request field-level validation, per-column constraints, RLS policy semantics and data retention rules are not extracted (see the evidence in migrations and contracts).
 - `TESTED_BY` is textual and path-level.
 - All Mermaid diagrams pass the Mermaid 11.4.1 parser and the DOT file passes a DOT parser, but nothing was *rendered or laid out* (no browser or Graphviz binary used); very large diagrams may need a layout engine tuned for size. The parser checks ran from a throwaway directory outside the repository.
-- No draw.io file was produced (no converter available); the JSON and DOT are the lossless forms.
+- The SVG poster and the draw.io file come from one layout model (`tools/poster.py`). Both were checked as well-formed XML and the SVG was rendered in Chromium and inspected; the draw.io file was **not opened in diagrams.net** here. The poster shows counts and top items per branch; the lossless forms are the JSON and DOT.
 
 ## Remaining unknowns
 
@@ -1258,7 +1271,7 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 
 | Path | Contents |
 | --- | --- |
-| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | 20-branch mind map, legend, type-level cross-connection graph, module table |
+| `master/MASTER_PROJECT_MINDMAP.svg` / `.png` / `.drawio` | **The poster**: one-page master mind map (20 branch cards, hub, status dots, cross-connection chain). `.drawio` is the same layout, editable |\n| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | 20-branch mind map, legend, type-level cross-connection graph, module table |
 | `master/MASTER_PROJECT_GRAPH.json` | **The master graph**: {len(nodes):,} nodes, {len(edges):,} typed edges, each with evidence |
 | `master/MASTER_PROJECT_GRAPH.dot` | The same graph for Graphviz |
 | `journeys/USER_JOURNEYS.md` / `.json` | Personas, navigation sets, {len(jours)} e2e-derived journeys |
@@ -1298,7 +1311,11 @@ The map is generated, not hand-written. From the repository root (read-only on t
 mkdir -p /tmp/mindmap-work
 python3 -I project-mindmap/tools/extract.py /tmp/mindmap-work
 python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work
+python3 -I project-mindmap/tools/poster.py /tmp/mindmap-work   # SVG + draw.io poster
+python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work   # again, so the validation report checks the poster files
 ```
+
+The PNG copy of the poster is a Chromium screenshot of the SVG at 4400 × 3380 (not produced by the scripts).
 
 Optional parser checks (install `mermaid@11.4.1 jsdom dotparser` in a directory **outside** the repository, put `validate-mermaid.mjs` and `validate-dot.mjs` there, and write their JSON output to `<parent of workdir>/mmtest/mm_out.json` and `dot_out.json`; `generate.py` embeds the results in the validation report). Output is deterministic: two runs on the same commit produce an identical graph.
 
