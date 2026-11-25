@@ -203,7 +203,11 @@ Before enabling public verification, authenticate the sender domain in Brevo
 (SPF, DKIM, DMARC records at the DNS host), install
 `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `EMAIL_FROM`, and `APP_URL` in the
 API and worker secrets, send both code and referee-link emails to real staging
-mailboxes, and record delivery, bounce and failure evidence. Never put sample
+mailboxes, and record delivery, bounce and failure evidence. For a first check
+with the same configuration, build the worker and run
+`node apps/worker/dist/email/send-test.js <your mailbox>`: it sends one message
+of each template with placeholder values and prints only Brevo's acceptance.
+The deploy compose files pass the email variables to both services. Never put sample
 one-time tokens or provider credentials in GitHub evidence. Pending delivery is
 not successful delivery. Without approved provider configuration, deployed
 verification creation refuses requests; do not relabel that as delivered.
