@@ -21,7 +21,7 @@ flowchart TB
     UI["ui tokens"]
   end
   subgraph DATA["Postgres"]
-    TBL[("112 tables / 55 migrations")]
+    TBL[("112 tables / 56 migrations")]
   end
   subgraph EXTS["External"]
     STR["Stripe (BILLING_MODE=stripe)"]

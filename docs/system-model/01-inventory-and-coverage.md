@@ -53,7 +53,7 @@ the old matrix. No new production-ready feature count is asserted.
 | Settings/export/erasure | Partially implemented | SQL settings, encrypted BYO keys, request history and multi-stage immediate erasure; no scheduled deletion and incomplete failure recovery |
 | Billing (F-16) | Partially implemented | Stripe adapter, Checkout/Portal, signed events, SQL state and current-period full-refund handling exist; superseded subscriptions, disputes and live acceptance remain gaps |
 | Entitlement enforcement | Partially implemented | Billing writes entitlements; AI tier remains free and broader feature gates are not established |
-| Worker/email | Partially implemented | Durable claim loop and two Resend handlers; batch lease duplication, non-aborting timeout and post-commit dispatch gaps |
+| Worker/email | Partially implemented | Durable claim loop and two transactional mail handlers (Resend at this snapshot; now the provider-independent service with a Brevo adapter, `apps/worker/src/email`); batch lease duplication, non-aborting timeout and post-commit dispatch gaps |
 | Learning/certificates | Partially implemented | Authoring, enrollment, lesson progress and certificates in memory; durable completion evidence can outlive source records; assessment/revocation linkage incomplete |
 | Challenges/interviews | Partially implemented | Session/submission APIs; code evaluators simulate results. Interview execution fails closed when deployed; challenge evidence stays unverified |
 | AI assistant | Partially implemented | Local heuristic chat with quota/firewall; separate scaffold skips those checks; no remote execution |
@@ -139,7 +139,7 @@ Storage and authorization are determined by API/store wiring, not these filename
   re-verification. `reputation-engine.ts` separately decays weighted signals;
   do not merge their policies merely because both use half-lives.
 - `peer-credibility.ts` combines distance, credibility, track record and context,
-  clamping endorsement weight to 0.05?2.0. Route identity/connection gaps are
+  clamping endorsement weight to 0.05–2.0. Route identity/connection gaps are
   tracked as CF-40; a correct formula does not make its inputs trustworthy.
 - `career-trajectory.ts` calculates transition probabilities with Wilson intervals
   and cohort checks, and projects advisory salary pathways. Fabricated seed

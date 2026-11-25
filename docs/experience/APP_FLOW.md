@@ -180,6 +180,6 @@ Evidence created
 
 ## 11. Detailed Behavioral Corpus
 
-The complete corpus is canonical elsewhere: the 28 journeys (J-01 to J-28) are in [`JOURNEY_REGISTRY.md`](JOURNEY_REGISTRY.md), and the 66 workflows, integrity traces and state machines are in [`../registries/WORKFLOWS_AND_BUSINESS_RULES.md`](../registries/BUSINESS_RULE_REGISTRY.md#talentsphere--workflows_and_business_rulesmd-v60) §10. SSOT Part V holds the rules. This document is the navigation and application-flow view and does not repeat those definitions. A second copy of the workflow register that was here was removed on 2026-10-21.
+The complete corpus is canonical elsewhere: the 28 journeys (J-01 to J-28) are in [`JOURNEY_REGISTRY.md`](JOURNEY_REGISTRY.md), and the 66 workflows, integrity traces and state machines are in [`../registries/BUSINESS_RULE_REGISTRY.md`](../registries/BUSINESS_RULE_REGISTRY.md#talentsphere--workflows_and_business_rulesmd-v60) (former `WORKFLOWS_AND_BUSINESS_RULES.md`) §10. SSOT Part V holds the rules. This document is the navigation and application-flow view and does not repeat those definitions. A second copy of the workflow register that was here was removed on 2026-10-21.
 
 

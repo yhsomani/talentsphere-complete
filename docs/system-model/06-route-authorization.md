@@ -38,7 +38,7 @@ Legend: Auth = anonymous (anon), signed in (any), or a role. Check = the role or
 ## Route tables
 
 ### Jobs, applications, organizations, work history, billing, auth
-See `02-flows.md` (F2 to F5) and `04-conditions.md`.
+See `02-flows.md` (F2 to F5) and the [condition matrix](03-conflicts-conditions-audit.md#system-model-04--condition-and-business-rule-matrix) (formerly `04-conditions.md`).
 
 ### Messaging, notifications, AI, resumes, portfolio, connections, warm intros, saved searches (all signed in unless noted)
 

@@ -202,7 +202,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 282 literal registrations, 279 unique method/path pairs; 78 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 78 and 4).
+Measured: 282 literal registrations, 279 unique method/path pairs; 83 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 83 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25); re-counted from `apps/api/src/durability.ts` on 2026-11-25.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -468,11 +468,11 @@ Measured: 282 literal registrations, 279 unique method/path pairs; 78 of them in
 | `POST /api/v1/jobs/:id/save` | handler | P |
 | `DELETE /api/v1/jobs/:id/save` | handler | P |
 | `GET /api/v1/jobs/saved` | handler | P |
-| `PUT /api/v1/jobs/:jobId/draft` | `SaveApplicationDraftInputSchema` | E |
-| `GET /api/v1/jobs/:jobId/draft` | handler | E |
-| `DELETE /api/v1/jobs/:jobId/draft` | handler | E |
-| `POST /api/v1/jobs/:jobId/draft/restore` | `RestoreApplicationDraftVersionInputSchema` | E |
-| `GET /api/v1/applications/drafts` | handler | E |
+| `PUT /api/v1/jobs/:jobId/draft` | `SaveApplicationDraftInputSchema` | P |
+| `GET /api/v1/jobs/:jobId/draft` | handler | P |
+| `DELETE /api/v1/jobs/:jobId/draft` | handler | P |
+| `POST /api/v1/jobs/:jobId/draft/restore` | `RestoreApplicationDraftVersionInputSchema` | P |
+| `GET /api/v1/applications/drafts` | handler | P |
 | `POST /api/v1/analytics/events` | `RecordAnalyticsEventBatchInputSchema`, `RecordAnalyticsEventInputSchema` | E |
 | `GET /api/v1/analytics/events` | handler | E |
 | `GET /api/v1/analytics/kpis` | handler | E |

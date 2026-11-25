@@ -1,4 +1,4 @@
-# TalentSphere ? architecture as implemented
+# TalentSphere — architecture as implemented
 
 Source cross-check: `431c425a`, 2026-10-23. Source inspection establishes code
 behavior, not deployed behavior or production readiness. [SSOT.md](SSOT.md)
@@ -57,21 +57,21 @@ store/table relationships and migration inventory. Do not duplicate their counts
 
 ## 4. Components
 
-| Location                                                   | Responsibility                                                                       |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `apps/api/src/index.ts`                                    | Load environment, validate deployed configuration, build and listen                  |
-| `apps/api/src/server.ts`                                   | `buildApp`, hooks/errors, route orchestration, authorization, read models, `persist` |
-| `apps/api/src/storage/`                                    | Core and dedicated SQL/memory implementations                                        |
-| `apps/api/src/billing-stripe.ts`, `stripe-gateway.ts`      | Billing orchestration and the only Stripe SDK boundary                               |
-| `apps/worker/src/index.ts`, `claim.ts`, `mail-provider.ts` | Durable claims, event acknowledgements and transactional email                       |
-| `apps/web/src/App.tsx`, `pages/`, `components/`, `lib/`    | Routes, UI, session state and HTTP helpers                                           |
-| `packages/domain/src/`                                     | State machines, scoring, policy and auth primitives; injected-query job store        |
-| `packages/contracts/src/index.ts`                          | Zod request schemas, validation helpers and error envelope                           |
-| `packages/config/src/env.ts`                               | Server environment schema and deployment/Stripe refusal checks                       |
-| `packages/observability/src/`                              | Pino logger/redaction and separate audit interface                                   |
-| `packages/ui/src/`                                         | Design tokens; components remain in the web app                                      |
-| `packages/testing/src/`                                    | Shared mock factories                                                                |
-| `supabase/`, `scripts/`, `tests/`                          | SQL, operational tools and executable checks                                         |
+| Location                                                    | Responsibility                                                                                                                                                   |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api/src/index.ts`                                     | Load environment, validate deployed configuration, build and listen                                                                                              |
+| `apps/api/src/server.ts`                                    | `buildApp`, hooks/errors, route orchestration, authorization, read models, `persist`                                                                             |
+| `apps/api/src/storage/`                                     | Core and dedicated SQL/memory implementations                                                                                                                    |
+| `apps/api/src/billing-stripe.ts`, `stripe-gateway.ts`       | Billing orchestration and the only Stripe SDK boundary                                                                                                           |
+| `apps/worker/src/index.ts`, `loop.ts`, `claim.ts`, `email/` | Durable claims, event acknowledgements and transactional email (provider-independent service, Brevo adapter). `queue.ts` holds the unused `JobQueueEngine` (§18) |
+| `apps/web/src/App.tsx`, `pages/`, `components/`, `lib/`     | Routes, UI, session state and HTTP helpers                                                                                                                       |
+| `packages/domain/src/`                                      | State machines, scoring, policy and auth primitives; injected-query job store                                                                                    |
+| `packages/contracts/src/index.ts`                           | Zod request schemas, validation helpers and error envelope                                                                                                       |
+| `packages/config/src/env.ts`                                | Server environment schema and deployment/Stripe refusal checks                                                                                                   |
+| `packages/observability/src/`                               | Pino logger/redaction and separate audit interface                                                                                                               |
+| `packages/ui/src/`                                          | Design tokens; components remain in the web app                                                                                                                  |
+| `packages/testing/src/`                                     | Shared mock factories                                                                                                                                            |
+| `supabase/`, `scripts/`, `tests/`                           | SQL, operational tools and executable checks                                                                                                                     |
 
 ## 5. Responsibility owners
 
@@ -104,7 +104,7 @@ migration descriptions are superseded, not current constraints.
 
 ## 7. Dependency direction
 
-Browser ? API ? contracts/domain ? storage/provider adapter. The worker uses the
+Browser → API → contracts/domain → storage/provider adapter. The worker uses the
 injected-query job store and its own mail adapter; it cannot see API process Maps.
 Domain business functions do not import Fastify, Zod or provider SDKs. The job
 store's injected SQL function is an existing infrastructure seam, not a database

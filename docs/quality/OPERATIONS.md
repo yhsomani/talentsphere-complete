@@ -89,7 +89,7 @@ repository actually requires today.
 
 - **API** (`apps/api`, `node dist/index.js`) — run **exactly one process per database**.
   The API keeps a read model of the core loop in memory, hydrated from Postgres at boot
-  (ADR-015, `docs/engineering/adr/ADR-015-core-loop-persistence.md`). A second replica
+  (ADR-015, [`docs/engineering/DECISIONS.md`](../engineering/DECISIONS.md#adr-015--persist-the-core-career-loop-keep-the-apis-maps-as-a-read-model)). A second replica
   would serve state that diverges from the first. Scaling out requires the ADR-015 exit
   path (core reads in SQL) first.
 - **Worker** (`apps/worker`) — claims `background_jobs` with `FOR UPDATE SKIP LOCKED`;

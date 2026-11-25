@@ -12,7 +12,6 @@ pnpm-lock.yaml
 *.log
 *.tsbuildinfo
 SSOT.md
-BRAIN/
 docs/
 FINAL_DOCUMENT_INDEX.md
 .reticle/
@@ -24,7 +23,6 @@ AGENTS.md
 CLAUDE.md
 RETICLE.md
 .claude/commands/reticle.md
-graphify-out/
 
 # Generated/transient agent collaboration artifacts are not application source.
 .agents/teamwork/

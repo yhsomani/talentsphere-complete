@@ -24,7 +24,7 @@ established.**
 The API persists accounts, profiles, organizations, jobs, applications, evidence,
 work history, messaging and notifications through a boot-hydrated read model.
 Dedicated SQL stores handle settings, erasure requests, saved searches/bookmarks,
-admin audit, feature flags and billing. Run **one API process per database**;
+application drafts, admin audit, feature flags and billing. Run **one API process per database**;
 an advisory lock refuses a second writer.
 
 Stripe Checkout, Customer Portal, signed webhooks and subscription reconciliation

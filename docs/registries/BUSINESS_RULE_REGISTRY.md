@@ -315,4 +315,4 @@ _Former file: `docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md`._
 | Migration rules MIG-01 to MIG-08 | [`BUSINESS_RULE_REGISTRY.md`](#), "Migration rules" |
 | Feature-to-rule links | Detailed feature contracts in [`../../SSOT.md`](../../SSOT.md); reconcile semantic mismatches against the canonical business-rule registry before relying on them |
 
-The registry's IDs use two digits for BR-01 to BR-35 and three digits after that. See conflict C-9 in [`../governance/GAP_ANALYSIS.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60).
+The registry's IDs use two digits for BR-01 to BR-35 and three digits after that. See conflict C-9 in [`../governance/GOVERNANCE.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) (former `GAP_ANALYSIS.md`).

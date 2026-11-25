@@ -10,15 +10,15 @@ Abbreviations: S = `apps/api/src/server.ts`, A = `packages/domain/src/auth.ts`, 
 
 ## F1 — System architecture (Level 1)
 
-Evidence: Read (storage and worker investigation). `ARCHITECTURE.md` was compared and disagrees in places (see `03-conflict-register.md`).
+Evidence: Read (storage and worker investigation). `ARCHITECTURE.md` was compared and disagrees in places (see the [conflict register](03-conflicts-conditions-audit.md#system-model-03--conflict-register-and-decision-records) (formerly `03-conflict-register.md`)).
 
 ```mermaid
 flowchart LR
   Browser["Browser PWA<br/>apps/web (React 19)"] -->|"fetch /api/v1, Bearer token"| API["Fastify API<br/>apps/api (single writer)"]
-  API -->|"pg Pool, persist() one transaction"| PG[("PostgreSQL<br/>53 migrations")]
+  API -->|"pg Pool, persist() one transaction"| PG[("PostgreSQL<br/>56 migrations")]
   API -->|"enqueue background_jobs"| PG
   Worker["Worker<br/>apps/worker"] -->|"claim FOR UPDATE SKIP LOCKED"| PG
-  Worker -->|"send email (Resend)"| Mail["Email provider"]
+  Worker -->|"send email (Brevo adapter)"| Mail["Email provider"]
   API -->|"Checkout, Portal, cancel"| Stripe["Stripe"]
   Stripe -->|"signed webhook"| API
   Worker -->|"heartbeat every 10s"| PG
@@ -119,7 +119,7 @@ flowchart TD
 
   V0([POST /work-history/:id/verify-email]) --> V1{"Owner or admin?"}
   V1 -- no --> E403[["403"]]
-  V1 -- yes --> V2{"Production or staging without a complete<br/>Resend setup (provider, API key,<br/>from-address, https APP_URL)?"}
+  V1 -- yes --> V2{"Production or staging without a complete<br/>email setup (EMAIL_PROVIDER=brevo, BREVO_API_KEY,<br/>EMAIL_FROM, https APP_URL)?"}
   V2 -- yes --> E503[["503 nothing stored"]]
   V2 -- no --> V3{"Code supplied?"}
   V3 -- no --> V4{"Address eligible?<br/>not webmail or disposable;<br/>domain matches only if the role has a company with a website"}
@@ -149,7 +149,7 @@ flowchart TD
 
 Scoring (`D:262`): email verified +40; best valid reference manager +30, else peer +20, else +15; two or more valid references +15; average rating at least 4.0 +10; two or more independently endorsed skills +5; cap 100. Tier gold from 80, silver from 50, bronze from 25. Status `verified` from 25.
 
-Delivery: in `NODE_ENV=development` (the default when unset) the worker only logs "DEV OUTBOX" and the job succeeds, code and link included in the log. Otherwise it sends through Resend; a missing key or from-address is a permanent failure with no retry.
+Delivery: in `NODE_ENV=development` (the default when unset) the worker only logs "DEV OUTBOX" and the job succeeds, code and link included in the log. Otherwise it sends through the provider-independent email service in `apps/worker/src/email` (Brevo is the only adapter; `EMAIL_PROVIDER=none` outside development makes every send fail). Configuration and authentication errors are permanent failures with no retry; rate-limit, unavailable and timeout errors retry (`email/types.ts`). The earlier Resend adapter was replaced by Brevo.
 
 ## F5 — Stripe billing (Level 6)
 
@@ -217,7 +217,7 @@ flowchart TD
 
 ## F7 — Web app journeys by role (Level 2)
 
-Evidence: Read; per-page loading, empty and error states were only partly checked (see the limitations in `05-audit.md`). Route guard `RequireAuth` checks only that a token string exists; it does not check roles. Role gating happens inside pages.
+Evidence: Read; per-page loading, empty and error states were only partly checked (see the limitations in the [audit and limits section](03-conflicts-conditions-audit.md#system-model-05--audit-traceability-sample-and-limits) (formerly `05-audit.md`)). Route guard `RequireAuth` checks only that a token string exists; it does not check roles. Role gating happens inside pages.
 
 ```mermaid
 flowchart TD

@@ -20,7 +20,7 @@ The master mind map as Mermaid only, generated from the graph by `tools/mermaid_
 
 ```mermaid
 flowchart LR
-  HUB(("COMPLETE PROJECT ECOSYSTEM<br/>TalentSphere<br/>2,628 nodes - 6,945 edges")):::hub
+  HUB(("COMPLETE PROJECT ECOSYSTEM<br/>TalentSphere<br/>2,632 nodes - 6,971 edges")):::hub
   ZA["PRODUCT and EXPERIENCE"]:::grpA
   HUB ==> ZA
   B01["01 PROJECT OVERVIEW<br/>architecture/BACKEND_ARCHITECTURE.md"]:::grpA
@@ -84,12 +84,12 @@ flowchart LR
   J["JOUR (100)"]:::grpA -->|"NAVIGATES_TO 113"| S
   P -->|"VALIDATES 132"| SC["SCH (141)"]:::grpB
   P -->|"CALLS 470"| RU["RULE (279)"]:::grpB
-  P -->|"CALLS 83"| SV["SVC (113)"]:::grpB
+  P -->|"CALLS 83"| SV["SVC (115)"]:::grpB
   P -->|"TRIGGERS 47"| JB["job kinds"]:::grpB
-  SV -->|"READS/WRITES 75"| D["DB (112)"]:::grpC
+  SV -->|"READS/WRITES 80"| D["DB (112)"]:::grpC
   P -->|"WRITES via persist kind 78"| D
-  P -->|"PRODUCES 372"| E["ERR (256)"]:::bad
-  P -->|"TESTED_BY 1,195"| T["TEST (223)"]:::grpC
+  P -->|"PRODUCES 370"| E["ERR (256)"]:::bad
+  P -->|"TESTED_BY 1,211"| T["TEST (224)"]:::grpC
   classDef grpA fill:#e8f1fd,stroke:#1565c0,color:#1b2733,stroke-width:2px;
   classDef grpB fill:#f3eafa,stroke:#6a1b9a,color:#1b2733,stroke-width:2px;
   classDef grpC fill:#e3f5f2,stroke:#00796b,color:#1b2733,stroke-width:2px;
@@ -378,7 +378,7 @@ mindmap
       ▫️ setErrorHandler: canonical envelope
     Persistence boundary
       ▫️ storage mode pg or memory no silent fallback
-      ⚠️ 85 durable - 197 ephemeral endpoints
+      ⚠️ 90 durable - 192 ephemeral endpoints
     Worker
       ⚠️ 45 job kinds - 2 deliver email
       ▫️ claim: FOR UPDATE SKIP LOCKED + lease fence
@@ -392,7 +392,7 @@ Detail file: [`architecture/API_ARCHITECTURE.md`](../architecture/API_ARCHITECTU
 mindmap
   root(("BRANCH 11<br/>API ECOSYSTEM"))
     282 REST endpoints - 0 GraphQL/WS/RPC
-      ⚠️ jobs - 22 endpoints - 15 durable
+      ⚠️ jobs - 22 endpoints - 19 durable
       ⚠️ skills - 16 endpoints - 2 durable
       ⚠️ reputation - 15 endpoints - 0 durable
       ⚠️ interviews - 13 endpoints - 0 durable
@@ -423,7 +423,7 @@ Detail file: [`data/DATABASE_ENTITY_MAP.md`](../data/DATABASE_ENTITY_MAP.md)
 mindmap
   root(("BRANCH 12<br/>DATABASE and DATA ARCHITECTURE"))
     Postgres
-      ▫️ 112 tables - 112 with RLS - 55 migrations
+      ▫️ 112 tables - 112 with RLS - 56 migrations
       ▫️ 6 enums - 1 view - 1 function
     Most-referenced tables FK in
       ✅ users - 47
@@ -435,8 +435,8 @@ mindmap
       ✅ evidence - 4
       ✅ resumes - 3
     Persistence reality
-      ✅ 34 tables have a SQL consumer
-      ❌ 78 schema-only tables
+      ✅ 36 tables have a SQL consumer
+      ❌ 76 schema-only tables
 ```
 
 ### Branch 13: Complete Data Flow
@@ -550,21 +550,21 @@ Detail file: [`quality/TEST_COVERAGE_MAP.md`](../quality/TEST_COVERAGE_MAP.md)
 ```mermaid
 mindmap
   root(("BRANCH 18<br/>TESTING and QUALITY"))
-    223 files - 1883 static cases
+    224 files - 1884 static cases
       ▫️ scripts/tests - 1 files - 5 cases
       ▫️ tests/e2e - 61 files - 327 cases
       ▫️ tests/integration - 59 files - 518 cases
-      ▫️ tests/pg - 15 files - 66 cases
+      ▫️ tests/pg - 16 files - 67 cases
       ▫️ tests/security - 6 files - 115 cases
       ▫️ tests/unit - 81 files - 852 cases
     Executed 2026-11-25
       ✅ vitest - 1571/1571 passed
-      ✅ vitest-pg - 66/66 passed
+      ✅ vitest-pg - 67/67 passed
       ✅ e2e - 265/265 passed
       ✅ node-test - 5/5 passed
       ✅ pnpm build all packages and apps - PASS
       ✅ pnpm typecheck tsc -b and and tsc -p tests - PASS
-      ❌ pnpm lint prettier --check - FAIL
+      ✅ pnpm lint prettier --check - PASS
     Link coverage textual
       ▫️ endpoints referenced by a test - 279/282
       ▫️ screens with an e2e goto - 27/29
@@ -587,8 +587,8 @@ mindmap
       ▫️ deploy/oracle - .env.example, .omc, Caddyfile, Dockerfil
     Config
       ▫️ 49 env vars validated zod
-      ▫️ 9 scripts - 55 SQL migrations
-      ❌ CI on main red since 2026-10-26 at the Prettier step
+      ▫️ 9 scripts - 56 SQL migrations
+      ✅ CI on main green since 2026-11-25 Prettier step fixed
 ```
 
 ### Branch 20: Implementation Gaps & Debt
@@ -599,14 +599,14 @@ Detail file: [`quality/IMPLEMENTATION_GAPS.md`](../quality/IMPLEMENTATION_GAPS.m
 mindmap
   root(("BRANCH 20<br/>IMPLEMENTATION GAPS and DEBT"))
     Status distribution capabilities
-      ✅ IMPLEMENTED - 1044
-      ❌ NOT_IMPLEMENTED - 78
+      ✅ IMPLEMENTED - 1048
+      ❌ NOT_IMPLEMENTED - 76
       ⚠️ PARTIALLY_IMPLEMENTED - 46
       ⚪ UNKNOWN - 21
       🟠 MOCKED - 1
     Gaps with evidence
-      ⚠️ 197 ephemeral endpoints
-      ❌ 78 schema-only tables
+      ⚠️ 192 ephemeral endpoints
+      ❌ 76 schema-only tables
       ⚪ 206 endpoints with no web caller
       ⚠️ 43 no-op job kinds
       🟠 interview meeting link: fixed template
