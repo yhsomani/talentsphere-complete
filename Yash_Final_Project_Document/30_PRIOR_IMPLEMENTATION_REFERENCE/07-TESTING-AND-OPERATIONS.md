@@ -9,11 +9,11 @@ Written 2026-10-26 on branch `docs/consolidation-2026-10-26`. **Execution disclo
 
 ## 0. Evidence labels and ground rules
 
-| Label | Meaning |
-| --- | --- |
+| Label                  | Meaning                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------ |
 | **Verified-by-config** | Exists in `package.json`, `scripts/*`, CI, `deploy/*` or tool config. Read, not run. |
-| **Unverified** | Stated by a repo document or inferred; never run or confirmed by config. |
-| **Proposed** | Target design from `Yash_Final_Project_Document` folders 15-18, 23. Not built. |
+| **Unverified**         | Stated by a repo document or inferred; never run or confirmed by config.             |
+| **Proposed**           | Target design from `Yash_Final_Project_Document` folders 15-18, 23. Not built.       |
 
 - Dated test counts below are evidence about their own revision. They are not a statement about the current checkout.
 - A passing assertion is not acceptance. Known false-green risks are in section 11.
@@ -26,12 +26,12 @@ Principle (`docs/quality/TESTING.md`): tests prove intended behaviour, not accid
 
 Risk-based minimum coverage (Proposed in `16_QA_AND_TESTING/TEST_STRATEGY.md` section 8; adopt as guidance):
 
-| Class | Examples | Minimum layers |
-| --- | --- | --- |
+| Class                                     | Examples                                  | Minimum layers                                                   |
+| ----------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
 | R1 invariant / security / money / privacy | authz, tenancy, billing, consent, erasure | unit + integration + security + e2e journey + a negative control |
-| R2 core loop | profile, evidence, apply, pipeline | unit + integration + contract + e2e + a11y |
-| R3 supporting | notifications, messaging, analytics | unit + integration + smoke e2e |
-| R4 presentational | static pages, copy | component/a11y/visual check |
+| R2 core loop                              | profile, evidence, apply, pipeline        | unit + integration + contract + e2e + a11y                       |
+| R3 supporting                             | notifications, messaging, analytics       | unit + integration + smoke e2e                                   |
+| R4 presentational                         | static pages, copy                        | component/a11y/visual check                                      |
 
 The test layers listed in `docs/quality/TESTING.md` section 2 as a vision (component, failure/recovery, regression, AI, assessment-security) that have no dedicated suite must not be reported as covered. Only the layers in section 2 below have executable suites.
 
@@ -39,23 +39,23 @@ The test layers listed in `docs/quality/TESTING.md` section 2 as a vision (compo
 
 All commands Verified-by-config (root `package.json` scripts unless stated). Run from the repo root. Windows PowerShell: use `pnpm.cmd` if `pnpm.ps1` is blocked.
 
-| Layer | Command | Runner / config | Files on disk (2026-10-26 count) | Needs | Writes protected files? |
-| --- | --- | --- | --- | --- | --- |
-| Everything in Vitest default | `pnpm test` = `vitest run` | `vitest.config.ts`: includes `tests/unit`, `tests/integration`, `tests/security`, `tests/accessibility`, `tests/performance`; env `STORAGE=memory`, pinned `TOKEN_SECRET`, `PASSWORD_PBKDF2_ITERATIONS=10000` | - | Built workspace packages (see 2.1) | Vitest may write its cache |
-| Unit | `pnpm test:unit` = `vitest run tests/unit` | same | 68 `*.test.ts` (domain rules, state machines, config, honesty) | - | cache |
-| Integration / API contract | `pnpm test:integration` = `vitest run tests/integration` | `app.inject` against `buildApp` in memory mode | 54 | - | cache |
-| Security | `pnpm test:security` = `vitest run --dir tests/security` | authz, injection, session, RLS-shaped tests | 5 | - | cache |
-| Durability / real PostgreSQL | `pnpm test:pg` = `vitest run --config vitest.pg.config.ts` | `vitest.pg.config.ts`: `tests/pg/**`, 60 s test and 120 s hook timeouts, no file parallelism | 13 tests + `test-db.ts` | `TEST_DATABASE_URL` with a role that can create and drop databases | cache |
-| Migration-history helper | `node --test scripts/tests/migration-integrity.test.mjs` | Node test runner | 1 | - | no |
-| E2E (Chromium) | `pnpm test:e2e` (alias `pnpm test:playwright`) = `playwright test` | `playwright.config.ts`: `tests/e2e`, 1 worker, `fullyParallel: false`, `retries: 0`, timeout 30 s, base URL `http://127.0.0.1:4173` | 58 `*.spec.ts` (+ `content.ts`, `fixtures.ts` helpers) | Built `apps/api/dist` and `apps/web/dist`; Chromium | `test-results/` (the `trace: 'on-first-retry'` setting never records a trace because `retries` is 0) |
-| Accessibility | `pnpm test:a11y` = `playwright test tests/e2e/accessibility.spec.ts` | real Chromium | 1 spec | as E2E | as E2E |
-| Performance baseline | `pnpm test:performance` = `playwright test tests/e2e/performance.spec.ts` | writes percentiles to `test-results/performance/*.json` | 1 spec | as E2E | `test-results/` |
-| Lint | `pnpm lint` = `prettier --check "**/*.{ts,tsx,js,json,md}"` | `.prettierrc`, `.prettierignore` | - | - | no |
-| Typecheck | `pnpm typecheck` = `tsc -b && tsc -p tests` | project references; `tests/tsconfig.json` is `noEmit` | - | - | **writes** (`dist`, `tsbuildinfo`) |
-| Static hosted-migration audit | `node scripts/audit-hosted-supabase-migrations.mjs` | static SQL scan, no DB | - | - | no (stdout JSON) |
-| Static new-migration check | `node scripts/check-new-hosted-migrations.mjs` | fails if a migration after 00051 references `auth.*`. **It exits 1 on the current tree** ("Unreviewed platform Auth reference in new migration: 00054_repoint_auth_users_foreign_keys.sql"; 00054 legitimately mentions `auth.users` to repoint keys). | - | - | no |
-| Bundle secret scan | `node scripts/check-client-secrets.mjs` | scans `apps/web/dist` for sentinel server secrets | built web | **sentinel env vars** set | no |
-| Schema / migration-ledger preflight | `node scripts/release-preflight.mjs --mode=schema` | read-only transaction | - | `DATABASE_URL` | no |
+| Layer                               | Command                                                                   | Runner / config                                                                                                                                                                                                                                        | Files on disk (2026-10-26 count)                               | Needs                                                              | Writes protected files?                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Everything in Vitest default        | `pnpm test` = `vitest run`                                                | `vitest.config.ts`: includes `tests/unit`, `tests/integration`, `tests/security`, `tests/accessibility`, `tests/performance`; env `STORAGE=memory`, pinned `TOKEN_SECRET`, `PASSWORD_PBKDF2_ITERATIONS=10000`                                          | -                                                              | Built workspace packages (see 2.1)                                 | Vitest may write its cache                                                                           |
+| Unit                                | `pnpm test:unit` = `vitest run tests/unit`                                | same                                                                                                                                                                                                                                                   | 68 `*.test.ts` (domain rules, state machines, config, honesty) | -                                                                  | cache                                                                                                |
+| Integration / API contract          | `pnpm test:integration` = `vitest run tests/integration`                  | `app.inject` against `buildApp` in memory mode                                                                                                                                                                                                         | 54                                                             | -                                                                  | cache                                                                                                |
+| Security                            | `pnpm test:security` = `vitest run --dir tests/security`                  | authz, injection, session, RLS-shaped tests                                                                                                                                                                                                            | 5                                                              | -                                                                  | cache                                                                                                |
+| Durability / real PostgreSQL        | `pnpm test:pg` = `vitest run --config vitest.pg.config.ts`                | `vitest.pg.config.ts`: `tests/pg/**`, 60 s test and 120 s hook timeouts, no file parallelism                                                                                                                                                           | 13 tests + `test-db.ts`                                        | `TEST_DATABASE_URL` with a role that can create and drop databases | cache                                                                                                |
+| Migration-history helper            | `node --test scripts/tests/migration-integrity.test.mjs`                  | Node test runner                                                                                                                                                                                                                                       | 1                                                              | -                                                                  | no                                                                                                   |
+| E2E (Chromium)                      | `pnpm test:e2e` (alias `pnpm test:playwright`) = `playwright test`        | `playwright.config.ts`: `tests/e2e`, 1 worker, `fullyParallel: false`, `retries: 0`, timeout 30 s, base URL `http://127.0.0.1:4173`                                                                                                                    | 58 `*.spec.ts` (+ `content.ts`, `fixtures.ts` helpers)         | Built `apps/api/dist` and `apps/web/dist`; Chromium                | `test-results/` (the `trace: 'on-first-retry'` setting never records a trace because `retries` is 0) |
+| Accessibility                       | `pnpm test:a11y` = `playwright test tests/e2e/accessibility.spec.ts`      | real Chromium                                                                                                                                                                                                                                          | 1 spec                                                         | as E2E                                                             | as E2E                                                                                               |
+| Performance baseline                | `pnpm test:performance` = `playwright test tests/e2e/performance.spec.ts` | writes percentiles to `test-results/performance/*.json`                                                                                                                                                                                                | 1 spec                                                         | as E2E                                                             | `test-results/`                                                                                      |
+| Lint                                | `pnpm lint` = `prettier --check "**/*.{ts,tsx,js,json,md}"`               | `.prettierrc`, `.prettierignore`                                                                                                                                                                                                                       | -                                                              | -                                                                  | no                                                                                                   |
+| Typecheck                           | `pnpm typecheck` = `tsc -b && tsc -p tests`                               | project references; `tests/tsconfig.json` is `noEmit`                                                                                                                                                                                                  | -                                                              | -                                                                  | **writes** (`dist`, `tsbuildinfo`)                                                                   |
+| Static hosted-migration audit       | `node scripts/audit-hosted-supabase-migrations.mjs`                       | static SQL scan, no DB                                                                                                                                                                                                                                 | -                                                              | -                                                                  | no (stdout JSON)                                                                                     |
+| Static new-migration check          | `node scripts/check-new-hosted-migrations.mjs`                            | fails if a migration after 00051 references `auth.*`. **It exits 1 on the current tree** ("Unreviewed platform Auth reference in new migration: 00054_repoint_auth_users_foreign_keys.sql"; 00054 legitimately mentions `auth.users` to repoint keys). | -                                                              | -                                                                  | no                                                                                                   |
+| Bundle secret scan                  | `node scripts/check-client-secrets.mjs`                                   | scans `apps/web/dist` for sentinel server secrets                                                                                                                                                                                                      | built web                                                      | **sentinel env vars** set                                          | no                                                                                                   |
+| Schema / migration-ledger preflight | `node scripts/release-preflight.mjs --mode=schema`                        | read-only transaction                                                                                                                                                                                                                                  | -                                                              | `DATABASE_URL`                                                     | no                                                                                                   |
 
 Notes:
 
@@ -82,11 +82,11 @@ These still import already-built workspace output and cannot certify a fresh bui
 
 ### 2.3 Dated evidence (history, not current)
 
-| Date | Source | Result recorded |
-| --- | --- | --- |
-| 2026-10-21 | `docs/reports/FEATURE_STATUS_2026-10-21.md` (source `a771a87b`) | Vitest 1,172 passing in 115 files; migration helper 5 passing; ten TS projects pass with emission disabled; Prettier failed on seven files. Two probes reproduced defects: arbitrary challenge text scored `passed`/100, and six leased jobs executed nine times with two workers. |
-| 2026-10-21 | `docs/reports/E2E_AUDIT_2026-10-21.md` | Playwright-CLI audit, 227 checks: 191 pass, 36 fail (16 real defects, 20 test or tool errors); after fixes, 13/13 regression checks and full suite green (113 files, 1159 tests). Ran in memory mode only; Postgres path, other browsers, rate limits, real email/payments not tested. |
-| 2026-10-23 | `docs/system-model/05-audit.md` | `pnpm test` 120 files, 1266 tests pass; `pnpm lint` passes; tsc `--noEmit` on API and tests clean; `pnpm build` ok; `pnpm test:e2e` 256 passed in 5.0 minutes. **Not run:** `pnpm test:pg`, anything against live Stripe or hosted Supabase, any deployment. |
+| Date       | Source                                                          | Result recorded                                                                                                                                                                                                                                                                        |
+| ---------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-21 | `docs/reports/FEATURE_STATUS_2026-10-21.md` (source `a771a87b`) | Vitest 1,172 passing in 115 files; migration helper 5 passing; ten TS projects pass with emission disabled; Prettier failed on seven files. Two probes reproduced defects: arbitrary challenge text scored `passed`/100, and six leased jobs executed nine times with two workers.     |
+| 2026-10-21 | `docs/reports/E2E_AUDIT_2026-10-21.md`                          | Playwright-CLI audit, 227 checks: 191 pass, 36 fail (16 real defects, 20 test or tool errors); after fixes, 13/13 regression checks and full suite green (113 files, 1159 tests). Ran in memory mode only; Postgres path, other browsers, rate limits, real email/payments not tested. |
+| 2026-10-23 | `docs/system-model/05-audit.md`                                 | `pnpm test` 120 files, 1266 tests pass; `pnpm lint` passes; tsc `--noEmit` on API and tests clean; `pnpm build` ok; `pnpm test:e2e` 256 passed in 5.0 minutes. **Not run:** `pnpm test:pg`, anything against live Stripe or hosted Supabase, any deployment.                           |
 
 Nothing above establishes PostgreSQL behaviour, deployment readiness, or a fresh pass on this checkout.
 
@@ -98,42 +98,42 @@ From `16_QA_AND_TESTING/TEST_STRATEGY.md` (Draft; tool names are options): contr
 
 Authoritative file: `.github/workflows/ci.yml` (workflow `CI`; triggers: push to `main`, every pull request, manual; one job `verify` on `ubuntu-latest`, 30 min timeout, `concurrency` cancels superseded runs). Postgres 16 service container (password `postgres`, `pg_isready` health check). Steps in order, all blocking:
 
-| # | Step | Command |
-| --- | --- | --- |
-| 1 | Setup | pnpm 11.7.0, Node 24 with pnpm cache |
-| 2 | Install | `pnpm install --frozen-lockfile` |
-| 3 | Browser | `pnpm exec playwright install --with-deps chromium` |
-| 4 | Lint | `pnpm lint` |
-| 5 | Typecheck | `pnpm typecheck` |
-| 6 | Unit, integration, security | `pnpm test` |
-| 7 | Migration history guard | `node --test scripts/tests/migration-integrity.test.mjs` |
-| 8 | Hosted-Supabase incompatibility must remain detected | `node scripts/audit-hosted-supabase-migrations.mjs` must exit 1, report `checkedMigrations >= 51`, and still count `auth_uid_claim` or `platform_auth_fk` hits |
-| 9 | Migrations on a clean DB | `node scripts/migrate.mjs` twice; second output must contain "Already up to date" (`DATABASE_URL=.../talentsphere_ci`) |
-| 10 | Schema and ledger after upgrade | `node scripts/release-preflight.mjs --mode=schema` |
-| 11 | Persistence tests on real PostgreSQL | `pnpm test:pg` (`TEST_DATABASE_URL=.../postgres`) |
-| 12 | Build and scan browser bundle | `pnpm build` then `node scripts/check-client-secrets.mjs`, with synthetic sentinel values for `TOKEN_SECRET`, `DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `API_AUTH_TOKEN`, `BILLING_WEBHOOK_SECRET` (never real secrets) |
-| 13 | E2E, accessibility, performance | `pnpm test:e2e` |
-| 14 | Artifacts | On failure upload `test-results/` and `playwright-report/` (7 days); always upload `test-results/performance/` (30 days) |
+| #   | Step                                                 | Command                                                                                                                                                                                                                    |
+| --- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Setup                                                | pnpm 11.7.0, Node 24 with pnpm cache                                                                                                                                                                                       |
+| 2   | Install                                              | `pnpm install --frozen-lockfile`                                                                                                                                                                                           |
+| 3   | Browser                                              | `pnpm exec playwright install --with-deps chromium`                                                                                                                                                                        |
+| 4   | Lint                                                 | `pnpm lint`                                                                                                                                                                                                                |
+| 5   | Typecheck                                            | `pnpm typecheck`                                                                                                                                                                                                           |
+| 6   | Unit, integration, security                          | `pnpm test`                                                                                                                                                                                                                |
+| 7   | Migration history guard                              | `node --test scripts/tests/migration-integrity.test.mjs`                                                                                                                                                                   |
+| 8   | Hosted-Supabase incompatibility must remain detected | `node scripts/audit-hosted-supabase-migrations.mjs` must exit 1, report `checkedMigrations >= 51`, and still count `auth_uid_claim` or `platform_auth_fk` hits                                                             |
+| 9   | Migrations on a clean DB                             | `node scripts/migrate.mjs` twice; second output must contain "Already up to date" (`DATABASE_URL=.../talentsphere_ci`)                                                                                                     |
+| 10  | Schema and ledger after upgrade                      | `node scripts/release-preflight.mjs --mode=schema`                                                                                                                                                                         |
+| 11  | Persistence tests on real PostgreSQL                 | `pnpm test:pg` (`TEST_DATABASE_URL=.../postgres`)                                                                                                                                                                          |
+| 12  | Build and scan browser bundle                        | `pnpm build` then `node scripts/check-client-secrets.mjs`, with synthetic sentinel values for `TOKEN_SECRET`, `DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `API_AUTH_TOKEN`, `BILLING_WEBHOOK_SECRET` (never real secrets) |
+| 13  | E2E, accessibility, performance                      | `pnpm test:e2e`                                                                                                                                                                                                            |
+| 14  | Artifacts                                            | On failure upload `test-results/` and `playwright-report/` (7 days); always upload `test-results/performance/` (30 days)                                                                                                   |
 
 Other workflows:
 
-| Workflow | Trigger | Gate |
-| --- | --- | --- |
+| Workflow                    | Trigger                                                                   | Gate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hosted-supabase-audit.yml` | PR touching `supabase/migrations/**`, the audit script, or itself; manual | Runs the static audit, uploads its JSON, runs `scripts/check-new-hosted-migrations.mjs` (blocks new `auth.*` dependencies in migrations 00052+). **Known red guard:** the script scans every file numbered above 51, not only the PR's files, and 00054 matches, so this workflow fails for every PR that touches `supabase/migrations/**` until the script or 00054's handling is changed (script is protected; ask first). Do not read a red result here as caused by your new migration without checking which file it names. |
-| `oracle-staging.yml` | PR touching `deploy/oracle/**`, `.dockerignore`, itself; manual | `docker compose config --quiet` with synthetic env; fails if the `db` or `api` service publishes any host port |
+| `oracle-staging.yml`        | PR touching `deploy/oracle/**`, `.dockerignore`, itself; manual           | `docker compose config --quiet` with synthetic env; fails if the `db` or `api` service publishes any host port                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 Notes: `docs/quality/TESTING.md` section 10 lists a shorter, older CI sequence (no migration, pg, bundle-scan or ordering after `build`). `ci.yml` is the truth. No deploy job, no image build, no dependency or container vulnerability scan, no SBOM, no coverage threshold and no secret-scan of git history exist in CI (Verified-by-config by absence in `ci.yml`).
 
 ## 4. Environments
 
-| Environment | What exists | Config source | Data |
-| --- | --- | --- | --- |
-| Local dev | `pnpm dev`, `.env` copied from `.env.example`, local PostgreSQL or `STORAGE=memory` | `.env`, process env | Synthetic |
-| CI | GitHub Actions job above, Postgres 16 service | workflow env | Synthetic |
-| Staging (Oracle) | `deploy/oracle/compose.yaml` (own Postgres container) or `compose.supabase.yaml` (external managed Postgres). `NODE_ENV=staging`. | `deploy/oracle/.env` (gitignored) | "Non-public staging account", restricted testers |
-| Staging (Coolify) | `deploy/coolify/compose.yaml`, TLS by Coolify's Traefik | Coolify env | as above |
-| Production | **None.** Public launch is blocked pending issues #44 to #50 (email, privacy, migrations, operations, persistence, interview integrity, billing) | - | - |
-| Preview per PR | None | - | - |
+| Environment       | What exists                                                                                                                                      | Config source                     | Data                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- | ------------------------------------------------ |
+| Local dev         | `pnpm dev`, `.env` copied from `.env.example`, local PostgreSQL or `STORAGE=memory`                                                              | `.env`, process env               | Synthetic                                        |
+| CI                | GitHub Actions job above, Postgres 16 service                                                                                                    | workflow env                      | Synthetic                                        |
+| Staging (Oracle)  | `deploy/oracle/compose.yaml` (own Postgres container) or `compose.supabase.yaml` (external managed Postgres). `NODE_ENV=staging`.                | `deploy/oracle/.env` (gitignored) | "Non-public staging account", restricted testers |
+| Staging (Coolify) | `deploy/coolify/compose.yaml`, TLS by Coolify's Traefik                                                                                          | Coolify env                       | as above                                         |
+| Production        | **None.** Public launch is blocked pending issues #44 to #50 (email, privacy, migrations, operations, persistence, interview integrity, billing) | -                                 | -                                                |
+| Preview per PR    | None                                                                                                                                             | -                                 | -                                                |
 
 Neither staging variant has been run on a VM in the sources: `deploy/oracle/README.md` states "This config has not been executed on an Oracle VM"; `RECOVERY.md` states the backup scripts "are not yet executed". Treat everything in sections 5-9 as Unverified in practice.
 
@@ -145,12 +145,12 @@ Neither staging variant has been run on a VM in the sources: `deploy/oracle/READ
 
 Images are built from `deploy/oracle/Dockerfile` (context = repo root, Node 24 bookworm-slim, `pnpm install --frozen-lockfile && pnpm build`, runs as user `node`). Targets: `api` (`node apps/api/dist/index.js`), `worker` (`node apps/worker/dist/index.js`), `web` (Caddy 2 serving `apps/web/dist` plus `deploy/oracle/Caddyfile`). The image carries source and build tooling (not slimmed).
 
-| Service | Oracle `compose.yaml` | Coolify `compose.yaml` | Oracle `compose.supabase.yaml` |
-| --- | --- | --- | --- |
-| `db` (postgres:16-bookworm, volume `db_data`, `pg_isready` healthcheck) | yes, `internal` network only | yes | none (managed Postgres via `DATABASE_URL`) |
-| `api` | `TRUST_PROXY=1`, no healthcheck, no published port | `TRUST_PROXY=2`, node-fetch healthcheck on `/health` | `TRUST_PROXY=1`, `SUPABASE_PROJECT_REF` set |
-| `worker` | no healthcheck | no healthcheck | no healthcheck |
-| `web` (Caddy) | publishes 80, 443, 443/udp; automatic HTTPS using `SITE_DOMAIN` and `ACME_EMAIL`; `/api/*` proxied to `api:4000`; SPA fallback; `nosniff`, referrer policy, `X-Frame-Options: DENY` | no host ports, `auto_https off`, listens on `:80` behind Traefik; wget healthcheck | as Oracle |
+| Service                                                                 | Oracle `compose.yaml`                                                                                                                                                               | Coolify `compose.yaml`                                                             | Oracle `compose.supabase.yaml`              |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------- |
+| `db` (postgres:16-bookworm, volume `db_data`, `pg_isready` healthcheck) | yes, `internal` network only                                                                                                                                                        | yes                                                                                | none (managed Postgres via `DATABASE_URL`)  |
+| `api`                                                                   | `TRUST_PROXY=1`, no healthcheck, no published port                                                                                                                                  | `TRUST_PROXY=2`, node-fetch healthcheck on `/health`                               | `TRUST_PROXY=1`, `SUPABASE_PROJECT_REF` set |
+| `worker`                                                                | no healthcheck                                                                                                                                                                      | no healthcheck                                                                     | no healthcheck                              |
+| `web` (Caddy)                                                           | publishes 80, 443, 443/udp; automatic HTTPS using `SITE_DOMAIN` and `ACME_EMAIL`; `/api/*` proxied to `api:4000`; SPA fallback; `nosniff`, referrer policy, `X-Frame-Options: DENY` | no host ports, `auto_https off`, listens on `:80` behind Traefik; wget healthcheck | as Oracle                                   |
 
 All set `STORAGE=pg`, `BILLING_MODE=disabled`, `APP_URL=https://$SITE_DOMAIN`, `CORS_ALLOWED_ORIGINS=https://$SITE_DOMAIN`. The `internal` network has no gateway; `egress` lets api and worker reach providers.
 
@@ -207,17 +207,17 @@ Build once, sign, promote the same artifact; SBOM and image signing; IaC for env
 
 Verified-by-config (`apps/api/src/server.ts`, `packages/domain`, `apps/api/src/storage/index.ts`, `scripts/release-preflight.mjs`):
 
-| Check | What it proves | Not proof of |
-| --- | --- | --- |
-| `GET /health` | API process liveness. Body `status`, `timestamp`, `version`. Exempt from rate limiting. Reachable only directly on port 4000 (container-internal checks); through the Oracle/Coolify Caddy it returns the SPA page, so use `/api/v1/health` externally. | Database, worker, email, billing |
-| `GET /api/v1/health` | Same plus `environment`. Exempt from rate limiting. | same |
-| `GET /api/v1/admin/health-diagnostics` (platform admin) | Storage mode, live database round trip, queue status and active job count, durable-versus-ephemeral route split, worker liveness from the database heartbeat | Delivery receipts |
-| Worker heartbeat | Worker writes `public.worker_health.last_seen_at` between claim cycles when 10 s elapsed. Admin diagnostics mark the queue degraded when the heartbeat is missing or older than 45 s. | Throughput (long batches delay the write) |
-| `node scripts/release-preflight.mjs --mode=schema` | Applied-migration ledger matches repo files (no changed applied SQL), 00043/00049 present, required indexes and foreign keys target `public.users`, RLS enabled on six sensitive tables | Cross-tenant isolation, grants, policies |
-| `node scripts/release-preflight.mjs --mode=operational` | All of schema, plus worker heartbeat <= 45 s, no queued jobs overdue > 5 min, no `dead`/`failed` job in the last hour. Exit code 1 on failure, JSON on stdout, read-only transaction. | An alerting system: the script alerts on nothing by itself; schedule it from an external monitor and wire the exit code |
-| Compose `db` healthcheck | `pg_isready` | Schema |
-| Coolify `api` / `web` healthchecks | `/health` fetch / `wget /` | Dependencies |
-| `node scripts/hosted-supabase-preflight.mjs` | Read-only inventory (tables, RLS flags, policies, ledger existence) of the configured database | Authorization correctness |
+| Check                                                   | What it proves                                                                                                                                                                                                                                          | Not proof of                                                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `GET /health`                                           | API process liveness. Body `status`, `timestamp`, `version`. Exempt from rate limiting. Reachable only directly on port 4000 (container-internal checks); through the Oracle/Coolify Caddy it returns the SPA page, so use `/api/v1/health` externally. | Database, worker, email, billing                                                                                        |
+| `GET /api/v1/health`                                    | Same plus `environment`. Exempt from rate limiting.                                                                                                                                                                                                     | same                                                                                                                    |
+| `GET /api/v1/admin/health-diagnostics` (platform admin) | Storage mode, live database round trip, queue status and active job count, durable-versus-ephemeral route split, worker liveness from the database heartbeat                                                                                            | Delivery receipts                                                                                                       |
+| Worker heartbeat                                        | Worker writes `public.worker_health.last_seen_at` between claim cycles when 10 s elapsed. Admin diagnostics mark the queue degraded when the heartbeat is missing or older than 45 s.                                                                   | Throughput (long batches delay the write)                                                                               |
+| `node scripts/release-preflight.mjs --mode=schema`      | Applied-migration ledger matches repo files (no changed applied SQL), 00043/00049 present, required indexes and foreign keys target `public.users`, RLS enabled on six sensitive tables                                                                 | Cross-tenant isolation, grants, policies                                                                                |
+| `node scripts/release-preflight.mjs --mode=operational` | All of schema, plus worker heartbeat <= 45 s, no queued jobs overdue > 5 min, no `dead`/`failed` job in the last hour. Exit code 1 on failure, JSON on stdout, read-only transaction.                                                                   | An alerting system: the script alerts on nothing by itself; schedule it from an external monitor and wire the exit code |
+| Compose `db` healthcheck                                | `pg_isready`                                                                                                                                                                                                                                            | Schema                                                                                                                  |
+| Coolify `api` / `web` healthchecks                      | `/health` fetch / `wget /`                                                                                                                                                                                                                              | Dependencies                                                                                                            |
+| `node scripts/hosted-supabase-preflight.mjs`            | Read-only inventory (tables, RLS flags, policies, ledger existence) of the configured database                                                                                                                                                          | Authorization correctness                                                                                               |
 
 Post-deploy smoke checklist (`docs/quality/TESTING.md` section 11, Verified as intent only): authentication, authorization, a critical API call, database connectivity, queue health, storage, observability, one critical journey. No automated post-deploy smoke job exists.
 
@@ -261,20 +261,20 @@ Proposed targets (`15_*/SLO_AND_PERFORMANCE_TARGETS.md` section 8, `17_*/DEPLOYM
 
 ### 9.1 Built / documented operations
 
-| Situation | Procedure (source) |
-| --- | --- |
-| API will not start in staging or production | Read the printed list from `productionConfigProblems()`; fix each named variable (doc 03 section 10) |
-| Second API refuses to boot | Intended single-writer lock. Stop the other process. Losing the lock session makes API traffic return 503 until restart |
-| Stale read model after SQL edit | Restart the API |
-| First platform admin | SQL `UPDATE public.users SET roles = array_append(roles, 'platform_admin') ...` then restart (`docs/quality/OPERATIONS.md` section 9) |
-| Worker stalled or queue degraded | Check heartbeat age, long claim batch, DB reachability, `background_jobs` retry/dead rows. Note: leased batches can be reclaimed and a job can execute twice (audit D-02); handlers must be idempotent |
-| Email 503 | Provider not fully configured. Fail-closed by design; configure Brevo (sender authenticated, HTTPS `APP_URL`, key) and test real mailboxes. A provider "accepted" is not "delivered"; no bounce/delivery webhook is consumed |
-| Checkout unavailable | Check `BILLING_MODE`, `STRIPE_*`, user role; "redirect success" is not subscription confirmation, inspect persisted subscription and events and Stripe logs |
-| Stripe webhook failures | Endpoint `POST /api/v1/billing/stripe-webhook`; verify signing secret not rotated; events handled: checkout completion, subscription created/updated/deleted, invoice paid/payment_failed, charge refunded. Disputes and voided invoices are unsupported. The generic `/api/v1/billing/webhook` uses a different HMAC signature |
-| Bad migration | Do not edit applied SQL. Forward-fix with a new migration. Hosted: follow the hosted adapter; never run `db:migrate` against hosted Supabase |
-| Secret exposure | Rotate. `TOKEN_SECRET` rotation signs out all users; `BYO_AI_KEY_ENCRYPTION_KEY` rotation needs a planned re-encryption (no tool exists). There is no incident procedure document (see Proposed) |
-| Privacy request | Settings export (`POST /api/v1/settings/export`, partial JSON snapshot; CSV returns 503) and erasure request (no scheduled executor exists; 30-day grace versus immediate deletion needs owner and legal approval). Do not claim automatic due-date deletion |
-| Background-job retention | Terminal jobs older than 7 days are purged opportunistically; one-time codes and reference tokens are stripped from finished job payloads |
+| Situation                                   | Procedure (source)                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API will not start in staging or production | Read the printed list from `productionConfigProblems()`; fix each named variable (doc 03 section 10)                                                                                                                                                                                                                            |
+| Second API refuses to boot                  | Intended single-writer lock. Stop the other process. Losing the lock session makes API traffic return 503 until restart                                                                                                                                                                                                         |
+| Stale read model after SQL edit             | Restart the API                                                                                                                                                                                                                                                                                                                 |
+| First platform admin                        | SQL `UPDATE public.users SET roles = array_append(roles, 'platform_admin') ...` then restart (`docs/quality/OPERATIONS.md` section 9)                                                                                                                                                                                           |
+| Worker stalled or queue degraded            | Check heartbeat age, long claim batch, DB reachability, `background_jobs` retry/dead rows. Note: leased batches can be reclaimed and a job can execute twice (audit D-02); handlers must be idempotent                                                                                                                          |
+| Email 503                                   | Provider not fully configured. Fail-closed by design; configure Brevo (sender authenticated, HTTPS `APP_URL`, key) and test real mailboxes. A provider "accepted" is not "delivered"; no bounce/delivery webhook is consumed                                                                                                    |
+| Checkout unavailable                        | Check `BILLING_MODE`, `STRIPE_*`, user role; "redirect success" is not subscription confirmation, inspect persisted subscription and events and Stripe logs                                                                                                                                                                     |
+| Stripe webhook failures                     | Endpoint `POST /api/v1/billing/stripe-webhook`; verify signing secret not rotated; events handled: checkout completion, subscription created/updated/deleted, invoice paid/payment_failed, charge refunded. Disputes and voided invoices are unsupported. The generic `/api/v1/billing/webhook` uses a different HMAC signature |
+| Bad migration                               | Do not edit applied SQL. Forward-fix with a new migration. Hosted: follow the hosted adapter; never run `db:migrate` against hosted Supabase                                                                                                                                                                                    |
+| Secret exposure                             | Rotate. `TOKEN_SECRET` rotation signs out all users; `BYO_AI_KEY_ENCRYPTION_KEY` rotation needs a planned re-encryption (no tool exists). There is no incident procedure document (see Proposed)                                                                                                                                |
+| Privacy request                             | Settings export (`POST /api/v1/settings/export`, partial JSON snapshot; CSV returns 503) and erasure request (no scheduled executor exists; 30-day grace versus immediate deletion needs owner and legal approval). Do not claim automatic due-date deletion                                                                    |
+| Background-job retention                    | Terminal jobs older than 7 days are purged opportunistically; one-time codes and reference tokens are stripped from finished job payloads                                                                                                                                                                                       |
 
 ### 9.2 Proposed incident process (not built; `18_OPERATIONS_AND_SUPPORT`, Draft)
 
@@ -282,17 +282,17 @@ Lifecycle: detect, triage and declare severity, assign roles, contain, assess, r
 
 Runbook index `RB-01` to `RB-37` is specified (trigger and first steps) but **none is written**. Those most relevant to the built system:
 
-| ID | Topic | First steps (summary) |
-| --- | --- | --- |
-| RB-01 | Suspected cross-tenant exposure | Declare Sev-1, page security, preserve logs/audit before restart, contain via kill switch or deny rule, revoke sessions in scope |
-| RB-03 | DB failover, pool exhaustion, disk pressure | Check primary health, pool waits, locks; shed load; failover only if standby in sync |
-| RB-04 | API elevated errors | Compare error rate by route and release; roll back if tied to a deploy; check saturation |
-| RB-05 | Bad deploy, config or migration | Stop rollout, freeze deploys, identify change set, roll back or forward-fix; never contract-migrate under pressure |
-| RB-10 to RB-12 | Worker backlog, stuck/duplicate jobs, outbox/poison event | Identify class, pause lower priority, check lease and fencing, quarantine poison event, replay with dedupe |
-| RB-15, RB-17 | Email provider outage, Stripe/webhook failure | Check provider status and queue retention; keep entitlements as last known; replay events idempotently |
-| RB-26 | Secret or signing-key compromise | Declare incident, rotate, invalidate sessions if session keys affected, review access logs |
-| RB-28, RB-29, RB-30, RB-31 | Data-rights failure, backup/restore failure, corruption (PITR), DR failover | Privacy lead engaged; treat failed backup as an incident; stop writer; restore to side instance; reconcile |
-| RB-34 | Billing drift | Provider-versus-local reconciliation, repair by audited action, not manual entitlements |
+| ID                         | Topic                                                                       | First steps (summary)                                                                                                            |
+| -------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| RB-01                      | Suspected cross-tenant exposure                                             | Declare Sev-1, page security, preserve logs/audit before restart, contain via kill switch or deny rule, revoke sessions in scope |
+| RB-03                      | DB failover, pool exhaustion, disk pressure                                 | Check primary health, pool waits, locks; shed load; failover only if standby in sync                                             |
+| RB-04                      | API elevated errors                                                         | Compare error rate by route and release; roll back if tied to a deploy; check saturation                                         |
+| RB-05                      | Bad deploy, config or migration                                             | Stop rollout, freeze deploys, identify change set, roll back or forward-fix; never contract-migrate under pressure               |
+| RB-10 to RB-12             | Worker backlog, stuck/duplicate jobs, outbox/poison event                   | Identify class, pause lower priority, check lease and fencing, quarantine poison event, replay with dedupe                       |
+| RB-15, RB-17               | Email provider outage, Stripe/webhook failure                               | Check provider status and queue retention; keep entitlements as last known; replay events idempotently                           |
+| RB-26                      | Secret or signing-key compromise                                            | Declare incident, rotate, invalidate sessions if session keys affected, review access logs                                       |
+| RB-28, RB-29, RB-30, RB-31 | Data-rights failure, backup/restore failure, corruption (PITR), DR failover | Privacy lead engaged; treat failed backup as an incident; stop writer; restore to side instance; reconcile                       |
+| RB-34                      | Billing drift                                                               | Provider-versus-local reconciliation, repair by audited action, not manual entitlements                                          |
 
 Operations processes PROC-01 to PROC-15 (privileged access, maintenance windows, business continuity/DR, change and release management, billing disputes) are also design-only.
 
@@ -372,6 +372,7 @@ Carried here so the originals can be retired later. Each is a stated requirement
 Coverage ownership per layer (`TESTING.md` section 3): unit = domain rules, pure transformations, scoring, matching explanations, state transitions; component = UI states, forms, validation, accessibility behaviour (no dedicated component suite exists); integration = database, RLS, queues, provider adapters, transactional workflows; API = authorization, schema validation, pagination, errors, idempotency, rate limits; E2E = critical journeys; security = authorization fuzzing, RLS deny tests, tenant isolation, SSRF, upload, webhook replay, secrets; accessibility = keyboard, focus, semantics, screen reader, zoom, contrast, reduced motion; performance = route startup, interaction latency, API p95/p99, DB queries, queue age.
 
 Critical E2E journeys (`TESTING.md` section 5):
+
 - Candidate: sign-up, goal, skills, learning, assessment, evidence, job, apply.
 - Recruiter: organization, job, search, review, message, interview, decision.
 - Institution: tenant, learner, learning, assessment, credential, verification.
@@ -385,6 +386,7 @@ Data-integrity tests to have (section 8): unique and foreign-key constraints, st
 Flaky tests: owner, reason and removal deadline are mandatory before any quarantine of a critical test.
 
 Operating model (`OPERATIONS.md` sections 1-8, target):
+
 - Environments `local, CI, preview, staging, production`, each with separate secrets and configuration (no preview environment exists).
 - Critical trace: request, user, tenant, feature, API, DB or queue, provider, result; structured logs, metrics, traces, audit events, business dashboards (only logs and request ids exist).
 - Alert on: error rate, latency or SLO breach, queue age and backlog, database saturation, auth failures, tenant-isolation signals, payment and webhook failures, AI policy and cost anomalies, assessment-integrity anomalies (none are wired).

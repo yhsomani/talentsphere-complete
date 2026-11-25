@@ -8,17 +8,13 @@
         "name": "JavaScript/TypeScript",
         "version": null,
         "confidence": "high",
-        "markers": [
-          "package.json"
-        ]
+        "markers": ["package.json"]
       },
       {
         "name": "TypeScript",
         "version": null,
         "confidence": "high",
-        "markers": [
-          "tsconfig.json"
-        ]
+        "markers": ["tsconfig.json"]
       }
     ],
     "frameworks": [
@@ -75,11 +71,7 @@
   "structure": {
     "isMonorepo": true,
     "workspaces": [],
-    "mainDirectories": [
-      "docs",
-      "scripts",
-      "tests"
-    ],
+    "mainDirectories": ["docs", "scripts", "tests"],
     "gitBranches": {
       "defaultBranch": "main",
       "branchingStrategy": null
@@ -99,10 +91,7 @@
       "purpose": null,
       "fileCount": 2,
       "lastAccessed": 1792855168880,
-      "keyFiles": [
-        "BRAIN.md",
-        "MEMORY.md"
-      ]
+      "keyFiles": ["BRAIN.md", "MEMORY.md"]
     },
     "deploy": {
       "path": "deploy",
@@ -116,23 +105,14 @@
       "purpose": "Documentation",
       "fileCount": 2,
       "lastAccessed": 1792855168895,
-      "keyFiles": [
-        "INDEX.md",
-        "PRICING.md"
-      ]
+      "keyFiles": ["INDEX.md", "PRICING.md"]
     },
     "graphify-out": {
       "path": "graphify-out",
       "purpose": null,
       "fileCount": 11,
       "lastAccessed": 1792855168896,
-      "keyFiles": [
-        "cost.json",
-        "graph.html",
-        "graph.json",
-        "GRAPH_REPORT.md",
-        "manifest.json"
-      ]
+      "keyFiles": ["cost.json", "graph.html", "graph.json", "GRAPH_REPORT.md", "manifest.json"]
     },
     "packages": {
       "path": "packages",
@@ -166,10 +146,7 @@
       "purpose": null,
       "fileCount": 2,
       "lastAccessed": 1792855168900,
-      "keyFiles": [
-        "create a link.md",
-        "Welcome.md"
-      ]
+      "keyFiles": ["create a link.md", "Welcome.md"]
     },
     "test-results": {
       "path": "test-results",
@@ -196,32 +173,21 @@
       "purpose": "API routes",
       "fileCount": 3,
       "lastAccessed": 1792855168903,
-      "keyFiles": [
-        "package.json",
-        "tsconfig.json",
-        "tsconfig.tsbuildinfo"
-      ]
+      "keyFiles": ["package.json", "tsconfig.json", "tsconfig.tsbuildinfo"]
     },
     "packages\\config": {
       "path": "packages\\config",
       "purpose": "Configuration files",
       "fileCount": 3,
       "lastAccessed": 1792855168907,
-      "keyFiles": [
-        "package.json",
-        "tsconfig.json",
-        "tsconfig.tsbuildinfo"
-      ]
+      "keyFiles": ["package.json", "tsconfig.json", "tsconfig.tsbuildinfo"]
     },
     "scripts\\lib": {
       "path": "scripts\\lib",
       "purpose": "Library code",
       "fileCount": 2,
       "lastAccessed": 1792855168908,
-      "keyFiles": [
-        "migration-integrity.mjs",
-        "pg.mjs"
-      ]
+      "keyFiles": ["migration-integrity.mjs", "pg.mjs"]
     },
     "supabase\\migrations": {
       "path": "supabase\\migrations",
@@ -246,11 +212,7 @@
       "purpose": "Helper functions",
       "fileCount": 3,
       "lastAccessed": 1792855168912,
-      "keyFiles": [
-        "content.ts",
-        "stripe.ts",
-        "webhook.ts"
-      ]
+      "keyFiles": ["content.ts", "stripe.ts", "webhook.ts"]
     }
   },
   "hotPaths": [

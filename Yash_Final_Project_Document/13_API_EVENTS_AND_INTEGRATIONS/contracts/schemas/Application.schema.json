@@ -23,15 +23,7 @@
     },
     "state": {
       "type": "string",
-      "enum": [
-        "submitted",
-        "in_review",
-        "interviewing",
-        "offer",
-        "hired",
-        "rejected",
-        "withdrawn"
-      ]
+      "enum": ["submitted", "in_review", "interviewing", "offer", "hired", "rejected", "withdrawn"]
     },
     "stageKey": {
       "type": "string"

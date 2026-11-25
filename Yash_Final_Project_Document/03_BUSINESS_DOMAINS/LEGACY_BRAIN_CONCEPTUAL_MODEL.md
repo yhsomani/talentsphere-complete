@@ -31,22 +31,22 @@ GOAL
 
 ## 2. Claim vs evidence (legacy definitions)
 
-| Term | Meaning |
-|---|---|
-| Profile claim | What a user says. |
-| Evidence | What supports the claim. |
-| Verification | Who or what validated the evidence. |
-| Reputation | Context around trust and behaviour. |
+| Term          | Meaning                             |
+| ------------- | ----------------------------------- |
+| Profile claim | What a user says.                   |
+| Evidence      | What supports the claim.            |
+| Verification  | Who or what validated the evidence. |
+| Reputation    | Context around trust and behaviour. |
 
-Target alignment: the target evidence ladder (four rungs: claimed, artifact-backed, peer-attested, authority-verified; INV-T04 "a claim is never displayed as verified") refines the first three terms. The legacy fourth term, **reputation as context, not as a score a person can set**, matches legacy rules BR-164..BR-168 (reputation derived, skill-specific, time-decayed, private by default, auditable). Target `DOMAIN_ARCHITECTURE.md` should state explicitly that reputation is *derived context* and not an input to ranking (ADR-T22).
+Target alignment: the target evidence ladder (four rungs: claimed, artifact-backed, peer-attested, authority-verified; INV-T04 "a claim is never displayed as verified") refines the first three terms. The legacy fourth term, **reputation as context, not as a score a person can set**, matches legacy rules BR-164..BR-168 (reputation derived, skill-specific, time-decayed, private by default, auditable). Target `DOMAIN_ARCHITECTURE.md` should state explicitly that reputation is _derived context_ and not an input to ranking (ADR-T22).
 
 ## 3. Graph model (legacy; three graphs)
 
-| Graph | Contents |
-|---|---|
-| Talent Graph | skills; competencies; capabilities; prerequisites; relationships |
+| Graph          | Contents                                                                      |
+| -------------- | ----------------------------------------------------------------------------- |
+| Talent Graph   | skills; competencies; capabilities; prerequisites; relationships              |
 | Evidence Graph | evidence; provenance; verification; credentials; recency; conflicts; outcomes |
-| Career Graph | goals; transitions; experiences; learning; applications; interviews; outcomes |
+| Career Graph   | goals; transitions; experiences; learning; applications; interviews; outcomes |
 
 Target comparison: STR-01 section 2 names the Talent Graph and Evidence Graph as the durable asset. The **Career Graph** (goals, transitions, outcomes over time) appears in the target only through career intelligence features and legacy features F-85 (Career Graph and Progression), F-152, F-156. Legacy rules BR-157..BR-163 govern it (opt-in tracking, k >= 5 aggregates, individual transitions visible only to the user, benchmarks need >= 20 data points, no retroactive alteration of historical benchmarks, disclosure of data sources and confidence intervals). Target action: decide whether the Career Graph is a third first-class graph or a view over the other two (OPEN-LGA-11).
 
@@ -54,12 +54,12 @@ Legacy skill-graph rules that belong to the Talent Graph: BR-141..BR-148 (taxono
 
 ## 4. Decision systems (legacy)
 
-| System | Principle |
-|---|---|
-| Matching | Hard constraints first; then capability, evidence, experience, preferences, recency and uncertainty. |
-| Recommendations | Always explain why. |
-| Career intelligence | Scenario and decision support, **not prophecy**. |
-| Trust | Anomaly is a signal for review, **not automatic guilt**. |
+| System              | Principle                                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| Matching            | Hard constraints first; then capability, evidence, experience, preferences, recency and uncertainty. |
+| Recommendations     | Always explain why.                                                                                  |
+| Career intelligence | Scenario and decision support, **not prophecy**.                                                     |
+| Trust               | Anomaly is a signal for review, **not automatic guilt**.                                             |
 
 Target alignment: ADR-T22 (matching explainable, uncertainty-aware, never pay-to-rank); product constitution (no autonomous adverse decision). The **hard-constraints-first ordering** is an explicit design rule worth keeping in the matching specification (`SPEC_G4_HIRING_LOOP.md`); legacy rules BR-184..BR-188 add recommendation disclosure, no protected attributes, dismissals, sponsored labelling and a replaceable engine.
 
@@ -115,6 +115,6 @@ Related legacy gap resolutions (from `31_LEGACY_ARCHIVE/docs/governance/GAP_ANAL
 
 ## 10. Open items
 
-| ID | Item |
-|---|---|
+| ID          | Item                                                                                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OPEN-LGA-11 | Decide Career Graph status (third graph vs view), and reconcile the AI-evidence wording (legacy: labelled; target: not evidence). Owner: Domain Architect + Product Director. |

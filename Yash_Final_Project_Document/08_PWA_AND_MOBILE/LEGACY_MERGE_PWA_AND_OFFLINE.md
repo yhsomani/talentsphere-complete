@@ -12,7 +12,7 @@ Nothing is built. The items below are what an earlier attempt reported about its
 
 ## 1. Facts reported (prior attempt)
 
-- The manifest and a small capability module only **reported** capabilities; "offline readiness" was detected from an *existing* service-worker controller; nothing registered a service worker. The page footer nevertheless said "PWA Installable" (a claim without backing; recorded as a UI-honesty defect in `../10_FRONTEND_ARCHITECTURE/LEGACY_MERGE_FRONTEND_AND_UI_QUALITY.md` section 3).
+- The manifest and a small capability module only **reported** capabilities; "offline readiness" was detected from an _existing_ service-worker controller; nothing registered a service worker. The page footer nevertheless said "PWA Installable" (a claim without backing; recorded as a UI-honesty defect in `../10_FRONTEND_ARCHITECTURE/LEGACY_MERGE_FRONTEND_AND_UI_QUALITY.md` section 3).
 - No durable offline mutation or sync system was found. Feature-status table classified the browser shell/PWA as "partially implemented: mounted pages, session recovery, error boundaries, manifest/capability reporting; offline sync not implemented".
 - Session token lived in browser `localStorage` (XSS-readable); there was no refresh flow, so any offline design would have had to keep a long-lived bearer in script-reachable storage.
 - Accessibility automation covered reflow at 320 px, 200% zoom and `prefers-reduced-motion`; contrast checking and screen-reader verification were not automated (relevant to installed-PWA display modes).
@@ -23,12 +23,12 @@ Nothing is built. The items below are what an earlier attempt reported about its
 
 Each feature declares six properties: `READ_OFFLINE`, `WRITE_OFFLINE`, `QUEUE`, `SYNC`, `CONFLICT`, `SERVER_REQUIRED`. "No secure assessment or other explicitly server-authoritative decision relies on offline authority."
 
-Mapping to the blueprint: ADR-T10 defines tiers (read-cache of owner data; queued writes only for application drafts, profile edits, message compose, notes; everything consequential online-only) and FEA-01 requires each query to declare `meta.offline = { class, ttl }`. The six-flag template is a *different vocabulary for the same intent*. **Decision needed (L-B08-01, owner Frontend Architect):** keep the six flags as the per-feature spec fields in `05_FEATURE_SPECIFICATIONS` (and derive `meta.offline` from them), or declare them superseded by the tier classes. Until decided, feature specs may list both.
+Mapping to the blueprint: ADR-T10 defines tiers (read-cache of owner data; queued writes only for application drafts, profile edits, message compose, notes; everything consequential online-only) and FEA-01 requires each query to declare `meta.offline = { class, ttl }`. The six-flag template is a _different vocabulary for the same intent_. **Decision needed (L-B08-01, owner Frontend Architect):** keep the six flags as the per-feature spec fields in `05_FEATURE_SPECIFICATIONS` (and derive `meta.offline` from them), or declare them superseded by the tier classes. Until decided, feature specs may list both.
 
 ## 3. Open items
 
-| ID | Question | Owner |
-|---|---|---|
-| L-B08-01 | Six-flag offline declaration vs tier classes (ADR-T10) | Frontend Architect |
-| OPEN-12 | Verified iOS/Android PWA facts and device matrix | QA + Frontend Platform |
-| OPEN-40 | Allow-list for persisted offline drafts | Security Architect + Frontend Architect |
+| ID       | Question                                               | Owner                                   |
+| -------- | ------------------------------------------------------ | --------------------------------------- |
+| L-B08-01 | Six-flag offline declaration vs tier classes (ADR-T10) | Frontend Architect                      |
+| OPEN-12  | Verified iOS/Android PWA facts and device matrix       | QA + Frontend Platform                  |
+| OPEN-40  | Allow-list for persisted offline drafts                | Security Architect + Frontend Architect |

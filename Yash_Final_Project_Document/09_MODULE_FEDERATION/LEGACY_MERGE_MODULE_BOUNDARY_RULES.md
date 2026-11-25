@@ -11,16 +11,16 @@ Merged from legacy: `31_LEGACY_ARCHIVE/docs/engineering/TARGET_ARCHITECTURE.md` 
 - Feature -> own local components first; shared UI only after demonstrated reuse (TRD).
 - Cross-feature imports go through a feature's public `index.ts` only (legacy ARCH-016); cross-context communication through events or application-service interfaces (ARCH-018); zero circular dependencies (ARCH-019).
 - `shared/platform` stays intentionally small: no business domain moves into a generic shared kernel merely to avoid imports (legacy V6 correction).
-- The earlier "Web OS" layer concept became a Career Workspace *feature boundary* (not a runtime layer).
+- The earlier "Web OS" layer concept became a Career Workspace _feature boundary_ (not a runtime layer).
 - Intra-package rule: never import a package's own barrel; leaf `core` module imports nothing.
 
 ## 2. Target mapping and decisions
 
-| Legacy rule | Target counterpart | Note |
-|---|---|---|
-| Public `index.ts` barrel per feature | Host contract (HC-01) in federated mode; typed module contract in bundled mode | Barrel rule is the bundled-mode equivalent of "remotes never import another remote's internals" (INV-T16) |
-| Zero circular dependencies | Add to CI as a dependency-cruiser-style check (affected-only) | Legacy enforced only by review; see proposal in the 11 file section 2.1 |
-| Small shared platform | DEP-01 ownership map "shared singletons" list | Verify the shared-singleton list stays minimal (React, router, query client, design-system, host SDK) |
-| Chrome extension local-first (legacy SSOT ADR-006) | Not in target scope | Out of scope unless re-decided; record as a legacy-only decision |
+| Legacy rule                                        | Target counterpart                                                             | Note                                                                                                      |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Public `index.ts` barrel per feature               | Host contract (HC-01) in federated mode; typed module contract in bundled mode | Barrel rule is the bundled-mode equivalent of "remotes never import another remote's internals" (INV-T16) |
+| Zero circular dependencies                         | Add to CI as a dependency-cruiser-style check (affected-only)                  | Legacy enforced only by review; see proposal in the 11 file section 2.1                                   |
+| Small shared platform                              | DEP-01 ownership map "shared singletons" list                                  | Verify the shared-singleton list stays minimal (React, router, query client, design-system, host SDK)     |
+| Chrome extension local-first (legacy SSOT ADR-006) | Not in target scope                                                            | Out of scope unless re-decided; record as a legacy-only decision                                          |
 
 **L-B09-01 (open, owner Frontend Platform Lead):** confirm the bundled-mode module contract forbids deep imports across modules by lint, using the legacy barrel rule as the acceptance wording.

@@ -33,7 +33,7 @@ Merged from legacy: `31_LEGACY_ARCHIVE/docs/quality/SECURITY.md` v6.0 (17.7 KB) 
 ## 3. Deployment safety boundaries (legacy, dated 2026-10-18)
 
 - Automated interview code execution was a development/test **simulation**, not a sandbox; the API refused it with `SERVICE_UNAVAILABLE` in staging/production until a real isolated executor and abuse controls existed. A second simulated evaluator (challenge submissions) could return success without executing code (mitigated only because the evidence was stored unverified with `executed:false`).
-- Work-history badge scoring counted *independently endorsed* skills only, not skills entered by the candidate; changing this trust policy required owner review.
+- Work-history badge scoring counted _independently endorsed_ skills only, not skills entered by the candidate; changing this trust policy required owner review.
 - Public privacy/security inboxes were configured through build-time variables (`VITE_PRIVACY_EMAIL`, `VITE_SECURITY_EMAIL`, plus `VITE_SUPPORT_EMAIL`) **only after ownership and monitoring were verified**; no unsupported response SLA was advertised. Legal pages remained **unapproved drafts** and did not pass a launch gate merely because addresses were configured.
 - **Target requires:** ADR-T13 (no verified evidence from simulation; sandbox runner or `unverified`), OPEN-27 sandbox decision, SEC-03 launch gate for legal pages and monitored inboxes (OPEN-08, OPEN-34, OPEN-16). Conflict kept visible **L-B14-06**: the verified-skill scoring rule (independent endorsement only) must be confirmed as a target business rule (candidate BR-T) - owner Product Director.
 
@@ -118,25 +118,25 @@ Suspended or banned accounts were confined to viewing their reports, appealing, 
 
 ## 9. Open items raised by this file
 
-| ID | Question | Owner / link |
-|---|---|---|
-| L-B14-01 | PBKDF2-SHA512 (legacy) vs argon2id (target) - confirm migration-only use of PBKDF2 | Security Architect, OPEN-17 |
-| L-B14-02 | Bearer-in-browser-storage (legacy) vs cookie sessions (target) - decided by ADR-T06; record as superseded | ARB secretary |
-| L-B14-03 | DPDP / India jurisdiction absent from SEC-03/SEC-04 | Legal/Privacy Lead, OPEN-08/30/34 |
-| L-B14-04 | Two data-classification vocabularies; where does NEVER-EXTERNAL live | Privacy Engineer |
-| L-B14-05 | Employer-domain verification rule (legacy CF-11) | Product Director + Security Architect, OPEN-48 |
-| L-B14-06 | Independent-endorsement-only scoring rule as target BR-T | Product Director, OPEN-43 |
-| L-B14-07 | Gateway step order vs SEC-02/BE-01 ordering; incident sequence vs SUP-INC | Security Architect, SRE Lead |
-
+| ID       | Question                                                                                                  | Owner / link                                   |
+| -------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| L-B14-01 | PBKDF2-SHA512 (legacy) vs argon2id (target) - confirm migration-only use of PBKDF2                        | Security Architect, OPEN-17                    |
+| L-B14-02 | Bearer-in-browser-storage (legacy) vs cookie sessions (target) - decided by ADR-T06; record as superseded | ARB secretary                                  |
+| L-B14-03 | DPDP / India jurisdiction absent from SEC-03/SEC-04                                                       | Legal/Privacy Lead, OPEN-08/30/34              |
+| L-B14-04 | Two data-classification vocabularies; where does NEVER-EXTERNAL live                                      | Privacy Engineer                               |
+| L-B14-05 | Employer-domain verification rule (legacy CF-11)                                                          | Product Director + Security Architect, OPEN-48 |
+| L-B14-06 | Independent-endorsement-only scoring rule as target BR-T                                                  | Product Director, OPEN-43                      |
+| L-B14-07 | Gateway step order vs SEC-02/BE-01 ordering; incident sequence vs SUP-INC                                 | Security Architect, SRE Lead                   |
 
 <!-- ledger-D D-07 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/quality/SECURITY.md (gap closure D-07)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: 4 external guidance URLs (lines 37, 330, 340), prior test file names `tests/pg/billing.test.ts`, `tests/unit/stripe-billing-domain.test.ts`, the `tests/security/api-security.test.ts` describe block (line 157), and `apps/worker/src/email/brevo.ts` (line 243).
 
-~~~~text
+```text
 L37: RLS is required on exposed tables and should be tested with allow/deny assertions. Supabase's current guidance also distinguishes table grants from RLS policies, so both must be designed together. [Supabase Data API security](https://supabase.com/docs/guides/api/securing-your-api)
 [...]
 L155: - Generate a key with:
@@ -151,29 +151,29 @@ L306: Not covered: `scripts/check-client-secrets.mjs` was not extended with Stri
 L307: (protected file; ask first). Dispute/refund events are acknowledged but not acted on.
 L308: Coverage: `tests/unit/stripe-billing-domain.test.ts`, `tests/integration/stripe-billing.test.ts`,
 L309: `tests/pg/billing.test.ts`, `tests/unit/production-config.test.ts`.
-L310: 
+L310:
 [...]
 L330: Use OWASP ASVS 5.0 and OWASP API Security Top 10 as the verification frameworks. [OWASP ASVS](https://asvs.owasp.org/) and [OWASP security projects](https://devguide.owasp.org/en/02-foundations/05-top-ten/)
 [...]
 L340: Implement privacy controls against applicable legal requirements. For India, map the program to the DPDP Act/Rules and their staged commencement timeline; do not claim legal compliance without implementation evidence. [MeitY rules, corrigendum and enforcement documents](https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa)
-~~~~
-
+```
 
 <!-- ledger-D D-09a -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/ARCHITECTURE_DURABILITY_REPORT.md (gap closure D-09a)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: CWE-328 / CWE-916 (SEC-01, line 142) and CWE-613 (SEC-02, line 189) with the full vulnerability text.
 
-| Prior-attempt finding | Severity | CWE | Prior-attempt remedy (target requirement) |
-|---|---|---|---|
-| SEC-01 Insecure challenge hash: `sha256Hex(`${id}:${code}`)` with public work-history UUID and 10^6 code space, no server pepper | High | CWE-328, CWE-916 (hash weakness; insufficient computational effort / no keyed hash) | Key the hash with a server secret: `crypto.createHmac('sha256', env.TOKEN_SECRET)` |
-| SEC-02 Referee voucher tokens never expire (no `expiresAt`) | Medium | CWE-613 (insufficient session/credential expiration) | Add `expires_at TIMESTAMPTZ` with a 30-day TTL and check on lookup and submission |
+| Prior-attempt finding                                                                                                            | Severity | CWE                                                                                 | Prior-attempt remedy (target requirement)                                          |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| SEC-01 Insecure challenge hash: `sha256Hex(`${id}:${code}`)` with public work-history UUID and 10^6 code space, no server pepper | High     | CWE-328, CWE-916 (hash weakness; insufficient computational effort / no keyed hash) | Key the hash with a server secret: `crypto.createHmac('sha256', env.TOKEN_SECRET)` |
+| SEC-02 Referee voucher tokens never expire (no `expiresAt`)                                                                      | Medium   | CWE-613 (insufficient session/credential expiration)                                | Add `expires_at TIMESTAMPTZ` with a 30-day TTL and check on lookup and submission  |
 
 CWE titles in the CWE column are the standard MITRE names as understood by the merger; the source gives only the ids. Target: both remedies are requirements for this project.
 
-~~~~text
+````text
 L141: #### Vulnerability SEC-01: Insecure Challenge Hash (Missing HMAC Key)
 L142: - **Severity**: **High** (CWE-328 / CWE-916)
 L143: - **Finding**: The challenge hash is computed as:
@@ -188,5 +188,5 @@ L189: - **Severity**: **Medium** (CWE-613)
 L190: - **Finding**: Referee voucher tokens have **no expiration timestamp**.
 L191: - **Mechanism**: `EmploymentReference` stores `requestedAt` and `submittedAt`, but lacks an `expiresAt` column. Neither domain logic nor API checks token age. An invitation sent to an employee remains valid months or years later, even if the referee leaves the company, changes roles, or becomes adversarial.
 L192: - **Remediation**: Add `expires_at TIMESTAMPTZ` (30 days TTL) to `employment_references` and validate `Date.now() < Date.parse(reference.expiresAt)` upon lookup and submission.
-L193: 
-~~~~
+L193:
+````

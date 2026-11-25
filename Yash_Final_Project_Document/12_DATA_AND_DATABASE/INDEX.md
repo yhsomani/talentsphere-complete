@@ -1,5 +1,7 @@
 # 12 Data & Database - Index
+
 Supersedes nothing. Doc ID: IDX-12 · Owner: Data Architecture · Version 1.0 · Status: Under Review · Relates: DB-01..DB-04
+
 - [CONCEPTUAL_AND_LOGICAL_MODEL.md](CONCEPTUAL_AND_LOGICAL_MODEL.md) (DB-01)
 - [PHYSICAL_DESIGN.md](PHYSICAL_DESIGN.md) (DB-02)
 - [DATA_GOVERNANCE_AND_LIFECYCLE.md](DATA_GOVERNANCE_AND_LIFECYCLE.md) (DB-03)

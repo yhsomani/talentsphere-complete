@@ -8,7 +8,7 @@ Merged from legacy: root `ARCHITECTURE.md` section 2, `31_LEGACY_ARCHIVE/docs/en
 
 ## 0. Frame - read before using any diagram
 
-- **None of these diagrams describes this project.** Sections 1, 3 are *intended* designs from the legacy "target architecture v6.0" (superseded in places by this blueprint's ADR-T series). Sections 2 and 4 are *as-built behaviour of an earlier attempt*, read from its code on 2026-10-23 (evidence tags "Read", "Read + spot-checked" in the source; nothing was exercised end to end except where a "Tests" line says so). Line numbers (`path:line`) in the text refer to the earlier attempt's repository and drift.
+- **None of these diagrams describes this project.** Sections 1, 3 are _intended_ designs from the legacy "target architecture v6.0" (superseded in places by this blueprint's ADR-T series). Sections 2 and 4 are _as-built behaviour of an earlier attempt_, read from its code on 2026-10-23 (evidence tags "Read", "Read + spot-checked" in the source; nothing was exercised end to end except where a "Tests" line says so). Line numbers (`path:line`) in the text refer to the earlier attempt's repository and drift.
 - Use: (a) as **reference flows** to compare with the target's own flows (DGM-01 sections 5-6 hold the target's apply-to-job and referee verification sequences); (b) as **test-case seeds** (every decision diamond is a branch to test); (c) as **negative lessons** (annotated around each diagram family).
 - Diagram abbreviations in F1-F7 (S = API server file, A = auth module, C = contracts, D = work-history domain module, W = web source) refer to the earlier attempt's files.
 - Each diagram is copied unchanged so that no information is lost; where a diagram contradicts this blueprint the conflict and decision are named next to it.
@@ -73,26 +73,26 @@ flowchart TB
         F[Faculty]
         A[Admins]
     end
-    
+
     subgraph Frontend
         WEB[React/Vite Web App]
         EXT[Chrome Extension]
         PWA[PWA]
     end
-    
+
     subgraph Edge
         MW[Edge Middleware]
         SA[HTTP application APIs]
         EH[Edge Handlers]
     end
-    
+
     subgraph Core
         DOM[Domain Modules]
         OSL[Web OS Layer]
         AI[AI Router]
         Q[Queue]
     end
-    
+
     subgraph Data
         AUTH[Supabase Auth]
         PG[(PostgreSQL)]
@@ -100,7 +100,7 @@ flowchart TB
         RT[Realtime]
         ST[Storage]
     end
-    
+
     subgraph External
         STRIPE[Stripe]
         EMAIL[Resend]
@@ -108,7 +108,7 @@ flowchart TB
         MEDIA[Mux/CF Stream]
         LI[LinkedIn optional]
     end
-    
+
     C & R & I & F & A --> WEB
     C --> EXT
     C --> PWA
@@ -143,7 +143,7 @@ sequenceDiagram
     participant S as Supabase Auth
     participant MW as Edge Middleware
     participant D as Database
-    
+
     U->>W: Credentials / OAuth
     W->>S: Authenticate
     S-->>W: JWT + refresh token
@@ -438,24 +438,26 @@ Status of claims in the UI (from the investigator, compared with `docs/reports/F
 
 ## 5. Open items raised by this file
 
-| ID | Question | Owner |
-|---|---|---|
+| ID       | Question                                                                                        | Owner                         |
+| -------- | ----------------------------------------------------------------------------------------------- | ----------------------------- |
 | L-B25-01 | AI safety flow thresholds (confidence 0.5 / 0.7) and canary-leak response in the gateway design | AI owner + Security Architect |
-| L-B25-02 | Edge-by-edge comparison of legacy job/application transitions with SM-JOB and SM-APPLICATION | Domain Architect |
-| L-B25-03 | Validate Mermaid syntax of this file (not machine-validated) | Documentation Architect |
-
+| L-B25-02 | Edge-by-edge comparison of legacy job/application transitions with SM-JOB and SM-APPLICATION    | Domain Architect              |
+| L-B25-03 | Validate Mermaid syntax of this file (not machine-validated)                                    | Documentation Architect       |
 
 <a id="record-system-diagrams"></a>
+
 ## Preserved source record: SYSTEM_DIAGRAMS
 
 > Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
 
 <!-- source-record-begin: Yash_Final_Project_Document/25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md -->
+
 # System Diagram Library
 
 Doc ID: DGM-01 · Owner: Architecture · Version 1.0 · Status: Draft (Mermaid syntax not machine-validated — see `28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md` for documented checks)
 
 ## 1. Ecosystem / system context
+
 ```mermaid
 flowchart LR
   Cand[Candidate / Learner] --> TS
@@ -472,6 +474,7 @@ flowchart LR
 ```
 
 ## 2. Container view (C4 level 2)
+
 ```mermaid
 flowchart TB
   subgraph Browser
@@ -511,6 +514,7 @@ flowchart TB
 ```
 
 ## 3. Frontend dependency rules
+
 ```mermaid
 flowchart LR
   Shell --> HostSDK[host-sdk contract]
@@ -522,6 +526,7 @@ flowchart LR
 ```
 
 ## 4. Trust boundaries
+
 ```mermaid
 flowchart LR
   subgraph Untrusted[Untrusted: user device]
@@ -541,6 +546,7 @@ flowchart LR
 ```
 
 ## 5. Sequence — apply to job (idempotent)
+
 ```mermaid
 sequenceDiagram
   participant U as Candidate
@@ -560,6 +566,7 @@ sequenceDiagram
 ```
 
 ## 6. Sequence — referee verification
+
 ```mermaid
 sequenceDiagram
   participant C as Candidate
@@ -577,10 +584,12 @@ sequenceDiagram
 ```
 
 ## 7. Failure domains
+
 ```mermaid
 flowchart TB
   Rx[single remote] -->|error boundary: other remotes keep working| Sh[shell + shared singletons]
   St[Stripe / Email / AI] -.timeout and circuit-breaker.-> Ap[API modules]
   Pg[(Postgres)] ==>|shared dependency: remotes degrade to cached read-only| Ap
 ```
+
 <!-- source-record-end: Yash_Final_Project_Document/25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md -->

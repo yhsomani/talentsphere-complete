@@ -9,7 +9,7 @@ Merged from legacy: `31_LEGACY_ARCHIVE/docs/engineering/DATABASE.md`, `.../HOSTE
 ## 0. Frame
 
 - **No database exists in this project.** "Prior attempt reported ..." means a legacy document claimed it of an earlier attempt (source cross-check `431c425a`, 2026-10-23, source-only; "no database was queried, migrated or tested" by that documentation pass). "Target requires ..." is a requirement for this project.
-- Legacy `DATABASE.md` was itself a *source/storage reference, not a claim about an applied database*. Legacy text uses `?` where an arrow or en dash was lost in export; hand-written text below restores the meaning.
+- Legacy `DATABASE.md` was itself a _source/storage reference, not a claim about an applied database_. Legacy text uses `?` where an arrow or en dash was lost in export; hand-written text below restores the meaning.
 - The prior attempt's duplicated target-table lists ("50 / ~220 tables") were already removed upstream in favour of the SSOT Part VII sections 24.1-24.3; this blueprint's authoritative physical design is DB-02 / DB-02-R2.
 
 ## 1. Store ownership and relationships (prior attempt) - lessons for the target
@@ -18,25 +18,25 @@ Prior attempt reported: the storage factory chose PostgreSQL by default (memory 
 
 Store table as reported (verbatim; `?` = lost arrow):
 
-| Store | Persisted records / relationship | Read/write behavior |
-| --- | --- | --- |
-| core-store.ts | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`; work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model |
-| account-store.ts | `user_settings`, `data_export_requests`, keyed by account | SQL-backed settings/export history; BYO credentials encrypted with separate AES-GCM key |
-| erasure-store.ts | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
-| saved-search-store.ts | `saved_searches` owned by user | Owner-scoped CRUD; alert-generation state remains separate |
-| saved-job-store.ts | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
-| admin-audit-store.ts | `admin_audit_logs` | Append and filtered list; distinct from observability's in-memory sink |
-| feature-flag-store.ts | `feature_flags` | SQL list/get/upsert; maintenance-mode state is separate |
-| billing-store.ts | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers` | Transactional state/event writes and customer ownership mapping |
-| background-jobs.ts | `background_jobs` | Injected query boundary; enqueue, leased claim, completion/failure, cancellation and retention |
+| Store                 | Persisted records / relationship                                                                                                                                                                                                                                              | Read/write behavior                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| core-store.ts         | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`; work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model                       |
+| account-store.ts      | `user_settings`, `data_export_requests`, keyed by account                                                                                                                                                                                                                     | SQL-backed settings/export history; BYO credentials encrypted with separate AES-GCM key        |
+| erasure-store.ts      | `data_erasure_requests`, account relationship                                                                                                                                                                                                                                 | Request/status/cancel/complete; account-row locking serializes requests                        |
+| saved-search-store.ts | `saved_searches` owned by user                                                                                                                                                                                                                                                | Owner-scoped CRUD; alert-generation state remains separate                                     |
+| saved-job-store.ts    | `saved_jobs` joins user/job                                                                                                                                                                                                                                                   | Database uniqueness prevents duplicate bookmarks                                               |
+| admin-audit-store.ts  | `admin_audit_logs`                                                                                                                                                                                                                                                            | Append and filtered list; distinct from observability's in-memory sink                         |
+| feature-flag-store.ts | `feature_flags`                                                                                                                                                                                                                                                               | SQL list/get/upsert; maintenance-mode state is separate                                        |
+| billing-store.ts      | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers`                                                                                                                                                                                             | Transactional state/event writes and customer ownership mapping                                |
+| background-jobs.ts    | `background_jobs`                                                                                                                                                                                                                                                             | Injected query boundary; enqueue, leased claim, completion/failure, cancellation and retention |
 
 Reported cautions kept as design lessons:
 
-| Prior attempt reported | Target requires |
-|---|---|
-| User IDs and profile IDs were different keys: applications/evidence/messaging often used profile IDs while billing/settings used account IDs; joins required checking the actual FK first | One canonical person key (`subject`/`user_id`) and an explicit rule for what profile ids are; no table may use two interchangeable id spaces (DB-01 domain model; add lint "FK targets the canonical id"). |
-| Migration 00043 aligned core persistence; 00047-00048 repaired private-data policies; 00052-00053 added billing persistence and hardened grants; 00054 repointed historical `auth.users` foreign keys to application-owned `public.users` | Design identity ownership once (application-owned `users`, never FK to a provider-managed schema) so no repoint migration is ever needed. See hosted Supabase section 6. |
-| Long-tail modules (courses/enrollments/certificates, challenge sessions, resumes, portfolio, connections, analytics, reputation, intelligence) kept in-memory Maps *even where SQL tables existed*; course/challenge routes could persist evidence while their originating records vanished on restart | A table existing is not durability. Acceptance for any feature: restart-survival test against real PostgreSQL (see `../16_QA_AND_TESTING/LEGACY_MERGE_TESTING_STRATEGY.md`); no feature may be listed as "available" if its source of truth is process memory. |
+| Prior attempt reported                                                                                                                                                                                                                                                                                 | Target requires                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User IDs and profile IDs were different keys: applications/evidence/messaging often used profile IDs while billing/settings used account IDs; joins required checking the actual FK first                                                                                                              | One canonical person key (`subject`/`user_id`) and an explicit rule for what profile ids are; no table may use two interchangeable id spaces (DB-01 domain model; add lint "FK targets the canonical id").                                                     |
+| Migration 00043 aligned core persistence; 00047-00048 repaired private-data policies; 00052-00053 added billing persistence and hardened grants; 00054 repointed historical `auth.users` foreign keys to application-owned `public.users`                                                              | Design identity ownership once (application-owned `users`, never FK to a provider-managed schema) so no repoint migration is ever needed. See hosted Supabase section 6.                                                                                       |
+| Long-tail modules (courses/enrollments/certificates, challenge sessions, resumes, portfolio, connections, analytics, reputation, intelligence) kept in-memory Maps _even where SQL tables existed_; course/challenge routes could persist evidence while their originating records vanished on restart | A table existing is not durability. Acceptance for any feature: restart-survival test against real PostgreSQL (see `../16_QA_AND_TESTING/LEGACY_MERGE_TESTING_STRATEGY.md`); no feature may be listed as "available" if its source of truth is process memory. |
 
 ## 2. Transactions, reads and failure recovery (prior attempt) - lessons
 
@@ -78,12 +78,12 @@ Rules reported: preserve applied SQL checksums; use additive migrations; each mi
 
 **Rule (prior attempt, kept as a target rule):** an ordinary local migration runner must never be pointed at a hosted Supabase project. It prepares local compatibility objects, including `auth.users`, `auth.uid()` and `auth.jwt()`, and explicitly refuses the hosted identity footprint; hosted Auth objects belong to the platform.
 
-Prior attempt reported current repository support and *unknown* live state:
+Prior attempt reported current repository support and _unknown_ live state:
 
 - A manual adapter existed: first migration, organization alias views, migrations 00002-00053, migration 00054 (repoint FKs), then Data API lockdown and exact checksum ledger recording. This superseded an older statement that no hosted path existed. It did not establish the sequence had run or was safe on populated data. The adapter's README recorded a historical partial application through 00038; older reports described an earlier empty project; neither was a current observation; the documentation pass made no live connection.
 - Named historical target: `talentsphere-production`, project ref `qidckctwrkxyiwworchd`, Mumbai (`ap-south-1`). **Target requires:** validate the intended target and current schema/ledger before any action; never infer current state from snapshots; never mark equivalent objects applied without matching checksums. (Project ref is not a secret; no credentials are recorded here.)
 
-Static dependency audit (kept as a reusable gate): a script read all migrations without a database connection and printed JSON listing identity references (`auth.users`, `auth.uid()`, `auth.jwt()`), RLS declarations, privileged functions and public views. Exit code 1 was *expected* while historical SQL referenced the provider identity. It was a dependency signal, not a test of current grants or authorization. Migration 00054 fixed FKs but neither removed old file references nor made application tokens provider identities.
+Static dependency audit (kept as a reusable gate): a script read all migrations without a database connection and printed JSON listing identity references (`auth.users`, `auth.uid()`, `auth.jwt()`), RLS declarations, privileged functions and public views. Exit code 1 was _expected_ while historical SQL referenced the provider identity. It was a dependency signal, not a test of current grants or authorization. Migration 00054 fixed FKs but neither removed old file references nor made application tokens provider identities.
 
 Release prerequisites (prior attempt, six steps, preserved):
 
@@ -102,93 +102,93 @@ Conflict list kept visible: **CF-13** (migrations 00016, 00018, 00022, 00023 ref
 
 55 numbered migrations; 112 distinct table names in CREATE TABLE statements (not a live schema count).
 
-| Migration | Created tables |
-| --- | --- |
-| 00001_core_schema.sql | `users`, `profiles`, `evidence`, `organizations`, `org_memberships`, `jobs`, `job_applications`, `audit_logs`, `feature_flags` |
-| 00002_evidence_skills_schema.sql | `skills`, `skill_relationships`, `evidence_skills` |
-| 00003_jobs_applications_schema.sql | `job_skills`, `application_evidence` |
-| 00004_challenges_assessment_schema.sql | `challenges`, `assessment_sessions`, `challenge_submissions`, `xp_transactions` |
-| 00005_lms_courses_schema.sql | `courses`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates`, `course_skills` |
-| 00006_messaging_schema.sql | `message_threads`, `thread_participants`, `messages` |
-| 00007_notifications_schema.sql | `notifications`, `notification_preferences` |
-| 00008_ai_gateway_schema.sql | `ai_conversations`, `ai_messages`, `ai_usage_meters` |
-| 00009_resumes_schema.sql | `resumes`, `resume_exports` |
-| 00010_networking_connections_schema.sql | `connections` |
-| 00011_portfolio_showcase_schema.sql | `portfolio_projects`, `portfolio_project_skills`, `portfolio_project_media`, `portfolio_project_evidence` |
-| 00012_gamification_xp_ledger_schema.sql | `user_gamification_profiles`, `gamification_badges`, `user_badges` |
-| 00013_account_settings_privacy_schema.sql | `user_settings`, `data_erasure_requests`, `data_export_requests` |
-| 00014_billing_subscriptions_schema.sql | `subscriptions`, `invoices`, `entitlements`, `billing_events` |
-| 00015_admin_governance_schema.sql | `platform_config` |
-| 00016_search_discovery_schema.sql | `search_history` |
-| 00017_moderation_trust_safety_schema.sql | `moderation_reports`, `moderation_appeals` |
-| 00018_saved_searches_job_alerts_schema.sql | `saved_searches`, `job_alerts`, `saved_jobs` |
-| 00019_application_drafts_schema.sql | `application_drafts`, `application_draft_versions` |
-| 00020_product_analytics_schema.sql | `analytics_events`, `analytics_daily_kpis` |
-| 00021_certificate_verification_schema.sql | `certificate_revocations` |
-| 00022_job_templates_schema.sql | `job_templates` |
-| 00023_salary_intelligence_schema.sql | `salary_reports`, `salary_aggregates` |
-| 00024_application_feedback_schema.sql | `feedback_templates`, `application_feedback` |
-| 00025_skill_decay_schema.sql | `skill_freshness`, `skill_freshness_history` |
-| 00026_technical_interview_platform_schema.sql | `interview_questions`, `interview_assessments`, `interview_scorecards`, `interview_ai_feedbacks` |
-| 00027_reputation_engine_schema.sql | `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_recovery_plans` |
-| 00028_warm_introductions_schema.sql | `warm_introduction_preferences`, `warm_introduction_requests` |
-| 00029_referral_requests_schema.sql | `referral_requests`, `referral_outcomes` |
-| 00030_activity_contributions_schema.sql | `activity_events`, `contribution_scores` |
-| 00031_instructor_reputation_schema.sql | `instructor_reputation_breakdown`, `instructor_endorsements` |
-| 00032_peer_credibility_schema.sql | `skill_endorsements`, `endorsement_weights` |
-| 00033_alumni_networks_schema.sql | `alumni_affiliations`, `alumni_groups`, `alumni_group_members`, `alumni_mentorship` |
-| 00034_employer_reputation_schema.sql | `employer_reputation_breakdown`, `employer_reviews` |
-| 00035_skill_forecasting_schema.sql | `skill_market_signals`, `skill_forecasts` |
-| 00036_career_trajectory_schema.sql | `career_transitions`, `progression_benchmarks`, `career_milestone_evaluations` |
-| 00037_learning_impact_schema.sql | `learning_outcomes`, `learning_impact_metrics` |
-| 00038_talent_pool_intelligence_schema.sql | `talent_pools`, `talent_pool_members` |
-| 00039_behavioral_talent_discovery_schema.sql | `behavioral_talent_profiles` |
-| 00040_talent_segmentation_schema.sql | `candidate_segmentations` |
-| 00041_verified_work_history_schema.sql | `verified_work_histories`, `employment_references` |
-| 00042_background_jobs_schema.sql | `background_jobs` |
-| 00043_core_persistence_alignment.sql | `work_history_email_challenges` |
-| 00044_notifications_persistence.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
-| 00045_session_revocation.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
-| 00046_session_sign_out.sql | `revoked_sessions` |
-| 00047_private_data_rls_hardening.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
-| 00048_notification_preferences_rls_scope.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
-| 00049_worker_liveness.sql | `worker_health` |
-| 00050_admin_audit_logs.sql | `admin_audit_logs` |
-| 00051_feature_flags.sql | `feature_flags` |
-| 00052_billing_persistence_and_stripe.sql | `stripe_customers` |
-| 00053_billing_role_grants_hardening.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
-| 00054_repoint_auth_users_foreign_keys.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
-| 00055_certificate_revocations_rls.sql | Alterations, policies, indexes or operational alignment; inspect SQL |
+| Migration                                     | Created tables                                                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 00001_core_schema.sql                         | `users`, `profiles`, `evidence`, `organizations`, `org_memberships`, `jobs`, `job_applications`, `audit_logs`, `feature_flags` |
+| 00002_evidence_skills_schema.sql              | `skills`, `skill_relationships`, `evidence_skills`                                                                             |
+| 00003_jobs_applications_schema.sql            | `job_skills`, `application_evidence`                                                                                           |
+| 00004_challenges_assessment_schema.sql        | `challenges`, `assessment_sessions`, `challenge_submissions`, `xp_transactions`                                                |
+| 00005_lms_courses_schema.sql                  | `courses`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates`, `course_skills`        |
+| 00006_messaging_schema.sql                    | `message_threads`, `thread_participants`, `messages`                                                                           |
+| 00007_notifications_schema.sql                | `notifications`, `notification_preferences`                                                                                    |
+| 00008_ai_gateway_schema.sql                   | `ai_conversations`, `ai_messages`, `ai_usage_meters`                                                                           |
+| 00009_resumes_schema.sql                      | `resumes`, `resume_exports`                                                                                                    |
+| 00010_networking_connections_schema.sql       | `connections`                                                                                                                  |
+| 00011_portfolio_showcase_schema.sql           | `portfolio_projects`, `portfolio_project_skills`, `portfolio_project_media`, `portfolio_project_evidence`                      |
+| 00012_gamification_xp_ledger_schema.sql       | `user_gamification_profiles`, `gamification_badges`, `user_badges`                                                             |
+| 00013_account_settings_privacy_schema.sql     | `user_settings`, `data_erasure_requests`, `data_export_requests`                                                               |
+| 00014_billing_subscriptions_schema.sql        | `subscriptions`, `invoices`, `entitlements`, `billing_events`                                                                  |
+| 00015_admin_governance_schema.sql             | `platform_config`                                                                                                              |
+| 00016_search_discovery_schema.sql             | `search_history`                                                                                                               |
+| 00017_moderation_trust_safety_schema.sql      | `moderation_reports`, `moderation_appeals`                                                                                     |
+| 00018_saved_searches_job_alerts_schema.sql    | `saved_searches`, `job_alerts`, `saved_jobs`                                                                                   |
+| 00019_application_drafts_schema.sql           | `application_drafts`, `application_draft_versions`                                                                             |
+| 00020_product_analytics_schema.sql            | `analytics_events`, `analytics_daily_kpis`                                                                                     |
+| 00021_certificate_verification_schema.sql     | `certificate_revocations`                                                                                                      |
+| 00022_job_templates_schema.sql                | `job_templates`                                                                                                                |
+| 00023_salary_intelligence_schema.sql          | `salary_reports`, `salary_aggregates`                                                                                          |
+| 00024_application_feedback_schema.sql         | `feedback_templates`, `application_feedback`                                                                                   |
+| 00025_skill_decay_schema.sql                  | `skill_freshness`, `skill_freshness_history`                                                                                   |
+| 00026_technical_interview_platform_schema.sql | `interview_questions`, `interview_assessments`, `interview_scorecards`, `interview_ai_feedbacks`                               |
+| 00027_reputation_engine_schema.sql            | `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_recovery_plans`                                   |
+| 00028_warm_introductions_schema.sql           | `warm_introduction_preferences`, `warm_introduction_requests`                                                                  |
+| 00029_referral_requests_schema.sql            | `referral_requests`, `referral_outcomes`                                                                                       |
+| 00030_activity_contributions_schema.sql       | `activity_events`, `contribution_scores`                                                                                       |
+| 00031_instructor_reputation_schema.sql        | `instructor_reputation_breakdown`, `instructor_endorsements`                                                                   |
+| 00032_peer_credibility_schema.sql             | `skill_endorsements`, `endorsement_weights`                                                                                    |
+| 00033_alumni_networks_schema.sql              | `alumni_affiliations`, `alumni_groups`, `alumni_group_members`, `alumni_mentorship`                                            |
+| 00034_employer_reputation_schema.sql          | `employer_reputation_breakdown`, `employer_reviews`                                                                            |
+| 00035_skill_forecasting_schema.sql            | `skill_market_signals`, `skill_forecasts`                                                                                      |
+| 00036_career_trajectory_schema.sql            | `career_transitions`, `progression_benchmarks`, `career_milestone_evaluations`                                                 |
+| 00037_learning_impact_schema.sql              | `learning_outcomes`, `learning_impact_metrics`                                                                                 |
+| 00038_talent_pool_intelligence_schema.sql     | `talent_pools`, `talent_pool_members`                                                                                          |
+| 00039_behavioral_talent_discovery_schema.sql  | `behavioral_talent_profiles`                                                                                                   |
+| 00040_talent_segmentation_schema.sql          | `candidate_segmentations`                                                                                                      |
+| 00041_verified_work_history_schema.sql        | `verified_work_histories`, `employment_references`                                                                             |
+| 00042_background_jobs_schema.sql              | `background_jobs`                                                                                                              |
+| 00043_core_persistence_alignment.sql          | `work_history_email_challenges`                                                                                                |
+| 00044_notifications_persistence.sql           | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
+| 00045_session_revocation.sql                  | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
+| 00046_session_sign_out.sql                    | `revoked_sessions`                                                                                                             |
+| 00047_private_data_rls_hardening.sql          | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
+| 00048_notification_preferences_rls_scope.sql  | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
+| 00049_worker_liveness.sql                     | `worker_health`                                                                                                                |
+| 00050_admin_audit_logs.sql                    | `admin_audit_logs`                                                                                                             |
+| 00051_feature_flags.sql                       | `feature_flags`                                                                                                                |
+| 00052_billing_persistence_and_stripe.sql      | `stripe_customers`                                                                                                             |
+| 00053_billing_role_grants_hardening.sql       | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
+| 00054_repoint_auth_users_foreign_keys.sql     | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
+| 00055_certificate_revocations_rls.sql         | Alterations, policies, indexes or operational alignment; inspect SQL                                                           |
 
 ## 8. Open items raised by this file
 
-| ID | Question | Owner |
-|---|---|---|
-| L-B12-01 | Erasure grace period and emergency-delete policy (legacy UI promised 30 days; legacy API ignored it) | Legal/Privacy Lead - OPEN-08 |
-| L-B12-02 | Gap check: do DB-01/DB-02 cover each capability area of the 112-table legacy list (including worker liveness table, admin audit, revoked sessions, certificate revocations)? | Data Architect |
-| L-B12-03 | Add the six migration-runner behaviours in section 4 to DB-04 on next revision | Database Architecture |
-| OPEN-52 | Hybrid read model vs SQL-only | ARB |
-| OPEN-14 | Hosting platform / managed Postgres | Platform Architect + SRE Lead |
-
+| ID       | Question                                                                                                                                                                     | Owner                         |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| L-B12-01 | Erasure grace period and emergency-delete policy (legacy UI promised 30 days; legacy API ignored it)                                                                         | Legal/Privacy Lead - OPEN-08  |
+| L-B12-02 | Gap check: do DB-01/DB-02 cover each capability area of the 112-table legacy list (including worker liveness table, admin audit, revoked sessions, certificate revocations)? | Data Architect                |
+| L-B12-03 | Add the six migration-runner behaviours in section 4 to DB-04 on next revision                                                                                               | Database Architecture         |
+| OPEN-52  | Hybrid read model vs SQL-only                                                                                                                                                | ARB                           |
+| OPEN-14  | Hosting platform / managed Postgres                                                                                                                                          | Platform Architect + SRE Lead |
 
 <!-- ledger-D D-04 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md (gap closure D-04)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: closing scope sentence (lines 59-60: the dependency-audit document is consolidated; no migration, credential, grant, schema, policy or deployment was changed) and the audit script name `scripts/audit-hosted-supabase-migrations.mjs` (line 30).
 
-~~~~text
-L26: 
+````text
+L26:
 L27: From the repository root:
-L28: 
+L28:
 L29: ```sh
 L30: node scripts/audit-hosted-supabase-migrations.mjs
 L31: ```
-L32: 
+L32:
 L33: This reads checked-in migrations without a database connection and writes JSON
 L34: to stdout. Exit 1 is expected while historical SQL refers to `auth.users`,
 [...]
 L59: The historical dependency-audit document is consolidated here. No migration,
 L60: credential, grant, schema, policy or deployment was changed by this audit.
-~~~~
+````

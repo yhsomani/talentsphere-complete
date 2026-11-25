@@ -19,11 +19,7 @@
       "const": 1
     },
     "environment": {
-      "enum": [
-        "production",
-        "staging",
-        "preview"
-      ]
+      "enum": ["production", "staging", "preview"]
     },
     "generatedAt": {
       "type": "string",
@@ -43,10 +39,7 @@
     "killSwitch": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "global",
-        "modules"
-      ],
+      "required": ["global", "modules"],
       "properties": {
         "global": {
           "type": "boolean",

@@ -8,26 +8,26 @@ The source [SSOT](../../SSOT.md#L5-L10) defines intended behavior; executable ev
 
 Keep these three vocabularies separate:
 
-| Vocabulary | Source location | Rows |
-|---|---|---:|
-| IP founder execution phases 0–10 | [Implementation plan](../../docs/governance/IMPLEMENTATION_PLAN.md#L19-L52) | 11 |
-| SSOT capability phases Ph0–Ph10 | [SSOT §23.1](../../SSOT.md#231-phases-010) | 11 |
-| RDM delivery phases Ph0–Ph4 | [Target roadmap §4](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md#L71-L79) | 5 target phases, referenced as candidates |
+| Vocabulary                       | Source location                                                             |                                      Rows |
+| -------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------: |
+| IP founder execution phases 0–10 | [Implementation plan](../../docs/governance/IMPLEMENTATION_PLAN.md#L19-L52) |                                        11 |
+| SSOT capability phases Ph0–Ph10  | [SSOT §23.1](../../SSOT.md#231-phases-010)                                  |                                        11 |
+| RDM delivery phases Ph0–Ph4      | [Target roadmap §4](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md#L71-L79)        | 5 target phases, referenced as candidates |
 
 Matching phase numbers do not establish equivalence. The implementation plan's [current-baseline note](../../docs/governance/IMPLEMENTATION_PLAN.md#L3-L17) points to the current audit and delivery roadmap and preserves the distinction between a proposed restricted beta and career-loop GA. The target [roadmap](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) and [developer guide](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) are draft planning artifacts.
 
 ## Preserved source rows
 
-| CSV family | Source rows |
-|---|---:|
-| ip_phase | 11 |
-| ssot_phase | 11 |
-| ip_exit_gate | 8 |
-| ip_epic | 20 |
-| approval_class | 7 |
-| ssot_mvp_exit | 7 |
-| ssot_institutional_exit | 5 |
-| **Total** | **69** |
+| CSV family              | Source rows |
+| ----------------------- | ----------: |
+| ip_phase                |          11 |
+| ssot_phase              |          11 |
+| ip_exit_gate            |           8 |
+| ip_epic                 |          20 |
+| approval_class          |           7 |
+| ssot_mvp_exit           |           7 |
+| ssot_institutional_exit |           5 |
+| **Total**               |      **69** |
 
 The eight IP gates apply to every founder phase. IP epic IDs are source ordinals, not new EPIC identifiers. MVP and institutional exits were extracted only within their own source sections. Exact source labels, scopes and exit criteria are preserved in separate CSV fields; source statements retain the inspected Markdown text.
 

@@ -36,38 +36,19 @@
     },
     "source": {
       "type": "string",
-      "enum": [
-        "self",
-        "course",
-        "assessment",
-        "institution",
-        "import"
-      ]
+      "enum": ["self", "course", "assessment", "institution", "import"]
     },
     "rung": {
       "type": "string",
-      "enum": [
-        "claimed",
-        "artifact_backed",
-        "peer_attested",
-        "authority_verified"
-      ]
+      "enum": ["claimed", "artifact_backed", "peer_attested", "authority_verified"]
     },
     "lifecycle": {
       "type": "string",
-      "enum": [
-        "active",
-        "withdrawn",
-        "revoked"
-      ]
+      "enum": ["active", "withdrawn", "revoked"]
     },
     "visibility": {
       "type": "string",
-      "enum": [
-        "private",
-        "share_on_request",
-        "public"
-      ]
+      "enum": ["private", "share_on_request", "public"]
     },
     "occurredFrom": {
       "type": "string",
@@ -144,25 +125,14 @@
         },
         "scanState": {
           "type": "string",
-          "enum": [
-            "pending",
-            "clean",
-            "rejected"
-          ]
+          "enum": ["pending", "clean", "rejected"]
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
         }
       },
-      "required": [
-        "id",
-        "fileId",
-        "contentType",
-        "sizeBytes",
-        "scanState",
-        "createdAt"
-      ]
+      "required": ["id", "fileId", "contentType", "sizeBytes", "scanState", "createdAt"]
     },
     "SkillRef": {
       "type": "object",
@@ -178,32 +148,20 @@
           "type": "string"
         }
       },
-      "required": [
-        "skillId",
-        "slug",
-        "name"
-      ]
+      "required": ["skillId", "slug", "name"]
     },
     "AttestationSummary": {
       "type": "object",
       "properties": {
         "highestValidRung": {
           "type": "string",
-          "enum": [
-            "claimed",
-            "artifact_backed",
-            "peer_attested",
-            "authority_verified"
-          ]
+          "enum": ["claimed", "artifact_backed", "peer_attested", "authority_verified"]
         },
         "validCount": {
           "type": "integer"
         }
       },
-      "required": [
-        "highestValidRung",
-        "validCount"
-      ]
+      "required": ["highestValidRung", "validCount"]
     }
   }
 }

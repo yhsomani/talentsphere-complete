@@ -52,20 +52,11 @@
       "description": "UTC build time + git sha; immutable per artefact set."
     },
     "channel": {
-      "enum": [
-        "stable",
-        "canary",
-        "preview"
-      ],
+      "enum": ["stable", "canary", "preview"],
       "default": "stable"
     },
     "status": {
-      "enum": [
-        "active",
-        "degraded",
-        "disabled",
-        "retired"
-      ],
+      "enum": ["active", "degraded", "disabled", "retired"],
       "description": "disabled = shell must not load it (kill switch, FAULT FI-15); degraded = load but show service-notice; retired = routes removed."
     },
     "sequence": {
@@ -89,10 +80,7 @@
     "entry": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "manifestUrl",
-        "remoteEntryUrl"
-      ],
+      "required": ["manifestUrl", "remoteEntryUrl"],
       "properties": {
         "manifestUrl": {
           "$ref": "#/$defs/mfPath"
@@ -113,15 +101,10 @@
     "apiRange": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "basePath",
-        "openapi"
-      ],
+      "required": ["basePath", "openapi"],
       "properties": {
         "basePath": {
-          "enum": [
-            "/api/v1"
-          ],
+          "enum": ["/api/v1"],
           "description": "Major API surface the remote calls (ADR-T08). Adding /api/v2 requires a schema update."
         },
         "openapi": {
@@ -133,11 +116,7 @@
     "dataSchema": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "localSchemaMin",
-        "localSchemaMax",
-        "opSchemas"
-      ],
+      "required": ["localSchemaMin", "localSchemaMax", "opSchemas"],
       "properties": {
         "localSchemaMin": {
           "type": "integer",
@@ -153,10 +132,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "opType",
-              "version"
-            ],
+            "required": ["opType", "version"],
             "properties": {
               "opType": {
                 "$ref": "#/$defs/opType"
@@ -189,10 +165,7 @@
                 "const": true
               }
             },
-            "required": [
-              "name",
-              "singleton"
-            ]
+            "required": ["name", "singleton"]
           }
         },
         {
@@ -206,10 +179,7 @@
                 "const": true
               }
             },
-            "required": [
-              "name",
-              "singleton"
-            ]
+            "required": ["name", "singleton"]
           }
         },
         {
@@ -223,10 +193,7 @@
                 "const": true
               }
             },
-            "required": [
-              "name",
-              "singleton"
-            ]
+            "required": ["name", "singleton"]
           }
         },
         {
@@ -240,10 +207,7 @@
                 "const": true
               }
             },
-            "required": [
-              "name",
-              "singleton"
-            ]
+            "required": ["name", "singleton"]
           }
         }
       ],
@@ -255,21 +219,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "name",
-          "kind"
-        ],
+        "required": ["name", "kind"],
         "properties": {
           "name": {
             "type": "string",
             "pattern": "^\\./[a-z][a-zA-Z0-9-]*$"
           },
           "kind": {
-            "enum": [
-              "module",
-              "widget",
-              "testkit"
-            ]
+            "enum": ["module", "widget", "testkit"]
           },
           "contract": {
             "type": "string",
@@ -284,9 +241,7 @@
             "const": "./module"
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "description": "Every remote exposes './module' (the RemoteModule default export). Other exposes are allowlisted widgets; exposing internals to other remotes is forbidden (FF-03)."
     },
@@ -306,25 +261,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "path",
-          "type",
-          "integrity",
-          "size"
-        ],
+        "required": ["path", "type", "integrity", "size"],
         "properties": {
           "path": {
             "$ref": "#/$defs/mfPath"
           },
           "type": {
-            "enum": [
-              "js",
-              "css",
-              "font",
-              "image",
-              "json",
-              "wasm"
-            ]
+            "enum": ["js", "css", "font", "image", "json", "wasm"]
           },
           "integrity": {
             "$ref": "#/$defs/sri"
@@ -348,11 +291,7 @@
     "integrity": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "algorithm",
-        "manifest",
-        "assetsDigest"
-      ],
+      "required": ["algorithm", "manifest", "assetsDigest"],
       "properties": {
         "algorithm": {
           "const": "sha384"
@@ -374,12 +313,7 @@
     "signature": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "alg",
-        "keyId",
-        "canonicalization",
-        "value"
-      ],
+      "required": ["alg", "keyId", "canonicalization", "value"],
       "properties": {
         "alg": {
           "const": "Ed25519"
@@ -402,13 +336,7 @@
     "healthcheck": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "url",
-        "expectStatus",
-        "timeoutMs",
-        "intervalSec",
-        "probe"
-      ],
+      "required": ["url", "expectStatus", "timeoutMs", "intervalSec", "probe"],
       "properties": {
         "url": {
           "$ref": "#/$defs/mfPath"
@@ -429,10 +357,7 @@
           "maximum": 3600
         },
         "probe": {
-          "enum": [
-            "asset-reachability",
-            "contract-smoke"
-          ],
+          "enum": ["asset-reachability", "contract-smoke"],
           "description": "asset-reachability: HEAD all critical assets and compare integrity; contract-smoke: load './module' in a headless host and run RemoteModule.selfCheck()."
         },
         "expectBuildId": {
@@ -450,12 +375,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "version",
-            "sequence",
-            "entryUrl",
-            "entryIntegrity"
-          ],
+          "required": ["version", "sequence", "entryUrl", "entryIntegrity"],
           "properties": {
             "version": {
               "$ref": "#/$defs/semver"
@@ -485,20 +405,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "opType",
-          "method",
-          "pathTemplate"
-        ],
+        "required": ["opType", "method", "pathTemplate"],
         "properties": {
           "opType": {
             "$ref": "#/$defs/opType"
           },
           "method": {
-            "enum": [
-              "PUT",
-              "PATCH"
-            ]
+            "enum": ["PUT", "PATCH"]
           },
           "pathTemplate": {
             "type": "string",
@@ -553,9 +466,7 @@
     "telemetry": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "serviceName"
-      ],
+      "required": ["serviceName"],
       "properties": {
         "serviceName": {
           "type": "string",
@@ -575,10 +486,7 @@
     "owner": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "team",
-        "escalation"
-      ],
+      "required": ["team", "escalation"],
       "properties": {
         "team": {
           "type": "string",
@@ -595,16 +503,11 @@
     "access": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "audience"
-      ],
+      "required": ["audience"],
       "description": "Delivery audience of this remote's assets (FD-14). 'privileged' = served only behind an authenticated edge rule that requires a valid session and requiredCapability; otherwise the edge answers 404. Controls who can obtain the code; it is not bundle confidentiality and not an authorisation control (ADR-T19). Absent = 'public'.",
       "properties": {
         "audience": {
-          "enum": [
-            "public",
-            "privileged"
-          ]
+          "enum": ["public", "privileged"]
         },
         "edgeRule": {
           "type": "string",
@@ -622,15 +525,10 @@
             "const": "privileged"
           }
         },
-        "required": [
-          "audience"
-        ]
+        "required": ["audience"]
       },
       "then": {
-        "required": [
-          "edgeRule",
-          "requiredCapability"
-        ]
+        "required": ["edgeRule", "requiredCapability"]
       }
     }
   },
@@ -684,11 +582,7 @@
     "sharedDep": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name",
-        "singleton",
-        "requiredVersion"
-      ],
+      "required": ["name", "singleton", "requiredVersion"],
       "properties": {
         "name": {
           "type": "string",

@@ -6,13 +6,13 @@
 
 The [machine-readable crosswalk](LEGACY_RULE_CROSSWALK.csv) contains one row for each of 248 canonical `BR-001…BR-248` identities and 8 `MIG-*` rules (256 total). Each row records the exact source paths, original registry display ID, source-text comparison, candidate target IDs, disposition, rationale, and remaining gap or conflict. All target IDs resolve in the target registry. The two source tables have the same 256 normalized IDs; 252 rule texts are identical after ID normalization and 4 differ (`BR-065`, `BR-066`, `BR-158`, `BR-178`). The changed texts are reviewed separately in their row rationale. Number similarity is not evidence of semantic equivalence. The 248 BR rows also carry stable EVD/JSON pointers into the 2026-10-21 historical audit, plus reference/test-reference counts and candidate feature IDs; eight MIG rows have no corresponding audit rule record. This overlay joins on identity only: it does not resolve the four source-text discrepancies, verify the historical code/test citations, or approve feature associations. Full excerpts remain in the unchanged JSON source.
 
-| Disposition | Rows | Meaning |
-|---|---:|---|
-| Exact | 9 | Target text covers the material legacy behavior; owner adoption is not implied. |
-| Partial | 67 | Related target behavior exists, with a documented residual gap. |
-| Conflict | 8 | Target and legacy behavior differ materially; resolution requires an owner. |
-| Superseded | 1 | A target rule replaces the legacy behavior in the proposed design; approval remains open. |
-| No match | 171 | No semantically equivalent target rule was found. This does not mean the behavior is retired. |
+| Disposition | Rows | Meaning                                                                                       |
+| ----------- | ---: | --------------------------------------------------------------------------------------------- |
+| Exact       |    9 | Target text covers the material legacy behavior; owner adoption is not implied.               |
+| Partial     |   67 | Related target behavior exists, with a documented residual gap.                               |
+| Conflict    |    8 | Target and legacy behavior differ materially; resolution requires an owner.                   |
+| Superseded  |    1 | A target rule replaces the legacy behavior in the proposed design; approval remains open.     |
+| No match    |  171 | No semantically equivalent target rule was found. This does not mean the behavior is retired. |
 
 ## Owner decisions required
 

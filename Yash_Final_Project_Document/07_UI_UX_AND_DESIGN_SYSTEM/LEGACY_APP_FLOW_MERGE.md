@@ -8,26 +8,26 @@ Supersedes nothing; linked from `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` 
 
 ## 0. Frame
 
-**Nothing is implemented.** The prior attempt's APP_FLOW had two parts: a table of routes it *reported* as mounted in a prior web shell, and a set of numbered flow sections it described as "intended journey model, not acceptance claims". Here, both are **requirement candidates**. The target route model is `NAVIGATION_ARCHITECTURE.md` (route trees per remote, role workspaces); where the legacy route names differ they are listed so that no name is lost, and the difference is for owner review (OPEN-LGA-14). Nothing below states that a route exists.
+**Nothing is implemented.** The prior attempt's APP_FLOW had two parts: a table of routes it _reported_ as mounted in a prior web shell, and a set of numbered flow sections it described as "intended journey model, not acceptance claims". Here, both are **requirement candidates**. The target route model is `NAVIGATION_ARCHITECTURE.md` (route trees per remote, role workspaces); where the legacy route names differ they are listed so that no name is lost, and the difference is for owner review (OPEN-LGA-14). Nothing below states that a route exists.
 
 ## 1. Prior attempt's reported browser routes (reference only)
 
 The prior attempt wrapped authenticated workspaces in a guard that checked **token presence only**, loaded the current user/profile/memberships from the API in a session provider, and left every protected decision to the server. A missing token redirected to `/login?return=...`; the login helper validated that the return path was local.
 
-| Prior routes | UI access / purpose reported |
-|---|---|
-| `/`, `/login`, `/signup` | Public landing and credentials |
-| `/jobs`, `/jobs/:id` | Public browsing; application needs authentication |
-| `/reference/:id` | Public shell; emailed token authorises referee access/submission |
-| `/verify/:hash` | Public proof verification |
-| `/checkout`, `/privacy`, `/terms` | Public shells; purchase/account calls need a session; legal text was draft |
-| `/dashboard`, `/profile`, `/settings` | Guarded account workspaces |
-| `/applications`, `/evidence`, `/assessments` | Guarded application/evidence/challenge workflows |
-| `/portfolio`, `/resumes`, `/network` | Guarded, with ephemeral feature state |
-| `/learning`, `/learning/:id`, `/career` | Guarded course and career views; durable journey incomplete |
-| `/notifications`, `/messages`, `/messages/:id` | Guarded messaging and notifications |
-| `/hiring`, `/hiring/jobs/:id`, `/admin` | Guarded shells; API role/ownership checks remain essential |
-| `*` | NotFoundPage |
+| Prior routes                                   | UI access / purpose reported                                               |
+| ---------------------------------------------- | -------------------------------------------------------------------------- |
+| `/`, `/login`, `/signup`                       | Public landing and credentials                                             |
+| `/jobs`, `/jobs/:id`                           | Public browsing; application needs authentication                          |
+| `/reference/:id`                               | Public shell; emailed token authorises referee access/submission           |
+| `/verify/:hash`                                | Public proof verification                                                  |
+| `/checkout`, `/privacy`, `/terms`              | Public shells; purchase/account calls need a session; legal text was draft |
+| `/dashboard`, `/profile`, `/settings`          | Guarded account workspaces                                                 |
+| `/applications`, `/evidence`, `/assessments`   | Guarded application/evidence/challenge workflows                           |
+| `/portfolio`, `/resumes`, `/network`           | Guarded, with ephemeral feature state                                      |
+| `/learning`, `/learning/:id`, `/career`        | Guarded course and career views; durable journey incomplete                |
+| `/notifications`, `/messages`, `/messages/:id` | Guarded messaging and notifications                                        |
+| `/hiring`, `/hiring/jobs/:id`, `/admin`        | Guarded shells; API role/ownership checks remain essential                 |
+| `*`                                            | NotFoundPage                                                               |
 
 Lessons stated by the prior attempt, kept as target requirements:
 
@@ -38,15 +38,15 @@ Lessons stated by the prior attempt, kept as target requirements:
 
 ## 2. Planned routes named by the prior attempt (not mounted there either)
 
-| Group | Prior route names |
-|---|---|
-| Public | `/`, `/login`, `/register`, `/verify/:hash` |
-| Authenticated core | `/dashboard`, `/profile`, `/jobs`, `/applications`, `/courses`, `/challenges`, `/messages`, `/notifications`, `/settings` |
-| Career intelligence | `/career/readiness`, `/career/transition`, `/career/benchmarks`, `/salaries` |
-| Recruiter | `/recruiter/search`, `/recruiter/pools`, `/recruiter/analytics`, `/hm/dashboard` |
-| Learning | `/paths`, `/teach/*`, `/cart`, `/checkout`, `/orders` |
-| Social | `/feed`, `/posts/:id`, `/articles/:id`, `/communities`, `/events` |
-| Institutional | `/institution/*` |
+| Group               | Prior route names                                                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Public              | `/`, `/login`, `/register`, `/verify/:hash`                                                                               |
+| Authenticated core  | `/dashboard`, `/profile`, `/jobs`, `/applications`, `/courses`, `/challenges`, `/messages`, `/notifications`, `/settings` |
+| Career intelligence | `/career/readiness`, `/career/transition`, `/career/benchmarks`, `/salaries`                                              |
+| Recruiter           | `/recruiter/search`, `/recruiter/pools`, `/recruiter/analytics`, `/hm/dashboard`                                          |
+| Learning            | `/paths`, `/teach/*`, `/cart`, `/checkout`, `/orders`                                                                     |
+| Social              | `/feed`, `/posts/:id`, `/articles/:id`, `/communities`, `/events`                                                         |
+| Institutional       | `/institution/*`                                                                                                          |
 
 Differences to resolve against the target route trees: `/register` vs `/signup`; `/courses` vs `/learning`; `/challenges` vs `/assessments`; `/recruiter/*` and `/hm/dashboard` vs `/hiring`; `/institution/*`. Social routes (`/feed`, `/communities`, `/events`) correspond to legacy features F-53..F-57 (legacy Ph8) which the target treats as late-phase or optional. All names are kept here as aliases until the owner decides the canonical route vocabulary (OPEN-LGA-14).
 
@@ -108,15 +108,15 @@ Failure -> Explain what failed -> Preserve user work -> Retry safely
 
 State preservation: refresh, back/forward and mobile interruption must not cause silent data loss.
 
-| Status | Required behaviour |
-|---|---|
-| 401 | Session expired: reauthenticate **without losing return intent**. |
-| 403 | Explain access scope; do not leak existence-sensitive information. |
-| 404 | Safe not-found experience. |
-| 409 | Concurrency/idempotency conflict: show current state and recovery. |
-| 429 | Rate limit: show retry timing. |
-| 5xx | Generic user message plus request ID plus retry. |
-| Maintenance | Explain scope and retry path. |
+| Status      | Required behaviour                                                 |
+| ----------- | ------------------------------------------------------------------ |
+| 401         | Session expired: reauthenticate **without losing return intent**.  |
+| 403         | Explain access scope; do not leak existence-sensitive information. |
+| 404         | Safe not-found experience.                                         |
+| 409         | Concurrency/idempotency conflict: show current state and recovery. |
+| 429         | Rate limit: show retry timing.                                     |
+| 5xx         | Generic user message plus request ID plus retry.                   |
+| Maintenance | Explain scope and retry path.                                      |
 
 Target comparison: global failure classes already live in `ACTION_REGISTRY.md` section 0 and `PROGRESSIVE_UX_AND_FEEDBACK.md`; the target uses 412 for ETag conflicts (ADR-T08) in addition to 409 for idempotency. Keep both; the legacy statement "request ID on 5xx" should be checked against the error-envelope specification (OPEN-LGA-14).
 
@@ -145,7 +145,7 @@ The prior APP_FLOW pointed the 28 journeys to its journey registry, and the 66 w
 
 ## 9. Open items
 
-| ID | Item |
-|---|---|
+| ID          | Item                                                                                           |
+| ----------- | ---------------------------------------------------------------------------------------------- |
 | OPEN-LGA-14 | Canonical route vocabulary and guard/redirect/error-ID rules (aliases in sections 1, 2 and 5). |
-| OPEN-LGA-15 | Confirm the 66-workflow register is represented in `06_BUSINESS_PROCESSES`. |
+| OPEN-LGA-15 | Confirm the 66-workflow register is represented in `06_BUSINESS_PROCESSES`.                    |

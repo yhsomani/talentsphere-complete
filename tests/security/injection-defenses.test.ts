@@ -17,14 +17,7 @@
  *                         client bundle source.
  */
 import { describe, it, expect } from 'vitest';
-import {
-  readFileSync,
-  readdirSync,
-  existsSync,
-  mkdtempSync,
-  writeFileSync,
-  rmSync,
-} from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { FastifyInstance } from 'fastify';
@@ -270,8 +263,11 @@ describe('BONUS: Leaked secret keys never reach the client bundle', () => {
   it('scanForSecrets detects a seeded match and fails closed on a missing dir', () => {
     const dir = mkdtempSync(path.join(tmpdir(), 'secret-scan-'));
     try {
-      writeFileSync(path.join(dir, 'seed.ts'), `const k = '${'sk_live_' + 'b'.repeat(12)}';
-`);
+      writeFileSync(
+        path.join(dir, 'seed.ts'),
+        `const k = '${'sk_live_' + 'b'.repeat(12)}';
+`
+      );
       const scan = scanForSecrets([dir]);
       expect(scan.filesScanned).toBe(1);
       expect(scan.hits).toHaveLength(1);

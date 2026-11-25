@@ -6,10 +6,10 @@ This crosswalk compares the root SSOT's 54 service contract identities to the pr
 
 ## Coverage summary
 
-| Source SCI contracts | Candidate mapping | Count | Meaning |
-|---|---:|---:|---|
-| SCI-01…SCI-54 | Partial candidate | 33 | Related target endpoint(s) exist, but the row records a material gap in identity, lifecycle, actor, or idempotency behavior. |
-| SCI-01…SCI-54 | No specific match | 21 | No sufficiently specific endpoint was identified in the current target API catalog. This does not prove that the product capability is absent from all other target docs. |
+| Source SCI contracts | Candidate mapping | Count | Meaning                                                                                                                                                                   |
+| -------------------- | ----------------: | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SCI-01…SCI-54        | Partial candidate |    33 | Related target endpoint(s) exist, but the row records a material gap in identity, lifecycle, actor, or idempotency behavior.                                              |
+| SCI-01…SCI-54        | No specific match |    21 | No sufficiently specific endpoint was identified in the current target API catalog. This does not prove that the product capability is absent from all other target docs. |
 
 The row-level evidence is in [SSOT_SERVICE_CONTRACT_CROSSWALK.csv](SSOT_SERVICE_CONTRACT_CROSSWALK.csv). All 33 candidate API IDs resolve against [API_CATALOG.md](API_CATALOG.md). No direct match is marked exact because source and target idempotency, lifecycle, or resource semantics still need owner review.
 

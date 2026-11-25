@@ -100,9 +100,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/me"
-      ],
+      "routes": ["/me"],
       "assets": [
         {
           "path": "/mf/mf-candidate/1.4.2/remoteEntry.js",
@@ -172,23 +170,12 @@
           "maxBodyBytes": 65536
         }
       ],
-      "capabilities": [
-        "candidate.profile",
-        "candidate.evidence"
-      ],
+      "capabilities": ["candidate.profile", "candidate.evidence"],
       "events": {
-        "publishes": [
-          "profile.updated@1",
-          "evidence.changed@1"
-        ],
-        "subscribes": [
-          "session.changed@1",
-          "sync.item-resolved@1"
-        ]
+        "publishes": ["profile.updated@1", "evidence.changed@1"],
+        "subscribes": ["session.changed@1", "sync.item-resolved@1"]
       },
-      "flags": [
-        "cand.evidence_ladder_v2"
-      ],
+      "flags": ["cand.evidence_ladder_v2"],
       "telemetry": {
         "serviceName": "ts-web-candidate",
         "sampleRate": 0.1
@@ -287,9 +274,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/learn"
-      ],
+      "routes": ["/learn"],
       "assets": [
         {
           "path": "/mf/mf-learning/1.3.0/remoteEntry.js",
@@ -345,22 +330,12 @@
         "entryIntegrity": "sha384-GQuExPmlqDsLruGUjp5VRD4OkIVy0c8iI+guwDklM2Dxa6JyIqB4qSidjAEzEWnm",
         "reason": "previous stable release"
       },
-      "capabilities": [
-        "learner.courses",
-        "learner.assessments"
-      ],
+      "capabilities": ["learner.courses", "learner.assessments"],
       "events": {
-        "publishes": [
-          "course.progressed@1",
-          "assessment.attempt-started@1"
-        ],
-        "subscribes": [
-          "session.changed@1"
-        ]
+        "publishes": ["course.progressed@1", "assessment.attempt-started@1"],
+        "subscribes": ["session.changed@1"]
       },
-      "flags": [
-        "lrn.challenges_enabled"
-      ],
+      "flags": ["lrn.challenges_enabled"],
       "telemetry": {
         "serviceName": "ts-web-learning",
         "sampleRate": 0.1
@@ -468,10 +443,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/jobs",
-        "/applications"
-      ],
+      "routes": ["/jobs", "/applications"],
       "assets": [
         {
           "path": "/mf/mf-opportunities/1.5.1/remoteEntry.js",
@@ -541,23 +513,12 @@
           "maxBodyBytes": 65536
         }
       ],
-      "capabilities": [
-        "candidate.jobs",
-        "candidate.applications"
-      ],
+      "capabilities": ["candidate.jobs", "candidate.applications"],
       "events": {
-        "publishes": [
-          "application.submitted@1",
-          "job.saved@1"
-        ],
-        "subscribes": [
-          "session.changed@1",
-          "sync.item-resolved@1"
-        ]
+        "publishes": ["application.submitted@1", "job.saved@1"],
+        "subscribes": ["session.changed@1", "sync.item-resolved@1"]
       },
-      "flags": [
-        "opp.match_explanations"
-      ],
+      "flags": ["opp.match_explanations"],
       "telemetry": {
         "serviceName": "ts-web-opportunities",
         "sampleRate": 0.1
@@ -661,9 +622,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/hiring"
-      ],
+      "routes": ["/hiring"],
       "assets": [
         {
           "path": "/mf/mf-hiring/1.2.4/remoteEntry.js",
@@ -727,22 +686,12 @@
           "maxBodyBytes": 65536
         }
       ],
-      "capabilities": [
-        "org.hiring",
-        "org.jobs-manage"
-      ],
+      "capabilities": ["org.hiring", "org.jobs-manage"],
       "events": {
-        "publishes": [
-          "pipeline.stage-changed@1"
-        ],
-        "subscribes": [
-          "session.changed@1",
-          "org.context-changed@1"
-        ]
+        "publishes": ["pipeline.stage-changed@1"],
+        "subscribes": ["session.changed@1", "org.context-changed@1"]
       },
-      "flags": [
-        "hir.pipeline_bulk_actions"
-      ],
+      "flags": ["hir.pipeline_bulk_actions"],
       "telemetry": {
         "serviceName": "ts-web-hiring",
         "sampleRate": 0.1
@@ -846,11 +795,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/messages",
-        "/network",
-        "/notifications"
-      ],
+      "routes": ["/messages", "/network", "/notifications"],
       "assets": [
         {
           "path": "/mf/mf-messaging/1.1.0/remoteEntry.js",
@@ -914,22 +859,12 @@
           "maxBodyBytes": 65536
         }
       ],
-      "capabilities": [
-        "messaging.use"
-      ],
+      "capabilities": ["messaging.use"],
       "events": {
-        "publishes": [
-          "notification.count-changed@1",
-          "message.sent@1"
-        ],
-        "subscribes": [
-          "session.changed@1",
-          "sync.item-resolved@1"
-        ]
+        "publishes": ["notification.count-changed@1", "message.sent@1"],
+        "subscribes": ["session.changed@1", "sync.item-resolved@1"]
       },
-      "flags": [
-        "msg.realtime_sse"
-      ],
+      "flags": ["msg.realtime_sse"],
       "telemetry": {
         "serviceName": "ts-web-messaging",
         "sampleRate": 0.1
@@ -1028,11 +963,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/settings",
-        "/billing",
-        "/privacy"
-      ],
+      "routes": ["/settings", "/billing", "/privacy"],
       "assets": [
         {
           "path": "/mf/mf-account/1.2.0/remoteEntry.js",
@@ -1088,22 +1019,12 @@
         "entryIntegrity": "sha384-jPEXollZXqp08MHHfQPUlo8pNw1ajx/tixdrXj7mT2c3cxEzgjzWpYQo5XGrMO3Y",
         "reason": "previous stable release"
       },
-      "capabilities": [
-        "account.settings",
-        "account.privacy"
-      ],
+      "capabilities": ["account.settings", "account.privacy"],
       "events": {
-        "publishes": [
-          "consent.changed@1",
-          "entitlement.refresh-requested@1"
-        ],
-        "subscribes": [
-          "session.changed@1"
-        ]
+        "publishes": ["consent.changed@1", "entitlement.refresh-requested@1"],
+        "subscribes": ["session.changed@1"]
       },
-      "flags": [
-        "acc.passkey_management"
-      ],
+      "flags": ["acc.passkey_management"],
       "telemetry": {
         "serviceName": "ts-web-account",
         "sampleRate": 0.1
@@ -1202,10 +1123,7 @@
           "kind": "testkit"
         }
       ],
-      "routes": [
-        "/admin",
-        "/institution"
-      ],
+      "routes": ["/admin", "/institution"],
       "assets": [
         {
           "path": "/mf/mf-admin/1.0.0/remoteEntry.js",
@@ -1255,21 +1173,12 @@
         "expectBuildId": true
       },
       "rollbackTo": null,
-      "capabilities": [
-        "admin.console",
-        "institution.workspace"
-      ],
+      "capabilities": ["admin.console", "institution.workspace"],
       "events": {
-        "publishes": [
-          "admin.context-changed@1"
-        ],
-        "subscribes": [
-          "session.changed@1"
-        ]
+        "publishes": ["admin.context-changed@1"],
+        "subscribes": ["session.changed@1"]
       },
-      "flags": [
-        "adm.support_access_grants"
-      ],
+      "flags": ["adm.support_access_grants"],
       "telemetry": {
         "serviceName": "ts-web-admin",
         "sampleRate": 0.1

@@ -8,7 +8,7 @@ Supersedes nothing; linked from `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` 
 
 ## 0. Frame
 
-**Nothing is implemented.** The prior document's own banner said: sections 1 to 9 and the screen families are *intended* (a design target); its state list and micro-interactions were not verified against any running app. Here every item is a requirement candidate. Where the target `DESIGN_SYSTEM.md` is more detailed or different, **both values are kept** in the tables below and the choice is an open decision (OPEN-LGA-16).
+**Nothing is implemented.** The prior document's own banner said: sections 1 to 9 and the screen families are _intended_ (a design target); its state list and micro-interactions were not verified against any running app. Here every item is a requirement candidate. Where the target `DESIGN_SYSTEM.md` is more detailed or different, **both values are kept** in the tables below and the choice is an open decision (OPEN-LGA-16).
 
 ## 1. Design intent (legacy; carried over)
 
@@ -34,16 +34,16 @@ Target comparison: covered by DP-* and the accessibility spec; "honest loading" 
 
 Legacy rule: use **one generated token source**; feature code never hard-codes raw values. (The prior attempt kept tokens in a shared UI package and told agents not to hard-code colours or spacing.) Target equivalent: `@ts/ui` as the single source (`DESIGN_SYSTEM.md` DP-3 and section 12).
 
-| Token area | Legacy value | Target value (`DESIGN_SYSTEM.md`) | Status |
-|---|---|---|---|
-| Spacing grid | 4 px | 4 px base (`--ts-space-1: 4px` and scale) | Same |
-| Colour | Semantic colour roles | Semantic roles with contrast ratios per token | Same intent |
-| Typography | Scale `xs` to `4xl` | Defined in target section on typography (check scale names) | Verify names |
-| Radii | 6 / 10 / 16 / 50% | 6 / 10 / 16 px, pill 999 px, full 50% | Compatible (target adds pill) |
-| Motion durations | 120 / 200 / 320 ms ("initial tokens") | instant 80 / fast 150 / base 240 / slow 400 ms (max) | **Different.** Target values govern the draft; legacy values kept as a recorded alternative. |
-| Focus tokens | Independent from brand tokens | `--ts-focus` never removed | Same |
-| z-index | Layers owned centrally | not stated as a token family in the sections checked | **Gap.** Add a central z-index scale to the token list. |
-| Theme | Existing "Aura" token family as the starting design language; all raw values from token definitions | No "Aura" family; target palette defined from scratch | **Conflict of origin.** "Aura" is a prior-attempt name; do not assume its values are available. OPEN-LGA-16. |
+| Token area       | Legacy value                                                                                        | Target value (`DESIGN_SYSTEM.md`)                           | Status                                                                                                       |
+| ---------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Spacing grid     | 4 px                                                                                                | 4 px base (`--ts-space-1: 4px` and scale)                   | Same                                                                                                         |
+| Colour           | Semantic colour roles                                                                               | Semantic roles with contrast ratios per token               | Same intent                                                                                                  |
+| Typography       | Scale `xs` to `4xl`                                                                                 | Defined in target section on typography (check scale names) | Verify names                                                                                                 |
+| Radii            | 6 / 10 / 16 / 50%                                                                                   | 6 / 10 / 16 px, pill 999 px, full 50%                       | Compatible (target adds pill)                                                                                |
+| Motion durations | 120 / 200 / 320 ms ("initial tokens")                                                               | instant 80 / fast 150 / base 240 / slow 400 ms (max)        | **Different.** Target values govern the draft; legacy values kept as a recorded alternative.                 |
+| Focus tokens     | Independent from brand tokens                                                                       | `--ts-focus` never removed                                  | Same                                                                                                         |
+| z-index          | Layers owned centrally                                                                              | not stated as a token family in the sections checked        | **Gap.** Add a central z-index scale to the token list.                                                      |
+| Theme            | Existing "Aura" token family as the starting design language; all raw values from token definitions | No "Aura" family; target palette defined from scratch       | **Conflict of origin.** "Aura" is a prior-attempt name; do not assume its values are available. OPEN-LGA-16. |
 
 ## 4. Component architecture (legacy; carried over)
 
@@ -57,16 +57,16 @@ Legacy domain-lifecycle labels (8): PENDING, PROCESSING, VERIFIED, REJECTED, EXP
 
 Target vocabulary (`DESIGN_SYSTEM.md` section 6): default, hover, focus-visible, active/pressed, disabled (with reason), loading, error, success, read-only, selected, offline-pending.
 
-| Legacy state | Target counterpart | Note |
-|---|---|---|
-| IDLE | default | rename |
-| HOVER, FOCUS, PRESSED, LOADING, SUCCESS, ERROR, DISABLED | same | |
-| EMPTY | not a component state in the target list | Add as a **view state** ("actionable empty state"), see section 2 |
-| VALIDATION | not listed | Add (field/form validation state; `ErrorSummary` exists) |
-| PARTIAL | not listed | Add (partial data or partial success) |
-| OFFLINE, SYNCING | offline-pending | Target merges the two; keep a distinct "syncing" state for background sync visibility |
-| PERMISSION_DENIED, RESTRICTED | not listed | Add (distinguish "not allowed" from "hidden by consent/purpose") |
-| Domain lifecycle labels | evidence rungs, SM-* states | The target uses state-machine-specific labels; the legacy labels are a **generic badge vocabulary** and may be kept as the cross-domain status chip set |
+| Legacy state                                             | Target counterpart                       | Note                                                                                                                                                    |
+| -------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IDLE                                                     | default                                  | rename                                                                                                                                                  |
+| HOVER, FOCUS, PRESSED, LOADING, SUCCESS, ERROR, DISABLED | same                                     |                                                                                                                                                         |
+| EMPTY                                                    | not a component state in the target list | Add as a **view state** ("actionable empty state"), see section 2                                                                                       |
+| VALIDATION                                               | not listed                               | Add (field/form validation state; `ErrorSummary` exists)                                                                                                |
+| PARTIAL                                                  | not listed                               | Add (partial data or partial success)                                                                                                                   |
+| OFFLINE, SYNCING                                         | offline-pending                          | Target merges the two; keep a distinct "syncing" state for background sync visibility                                                                   |
+| PERMISSION_DENIED, RESTRICTED                            | not listed                               | Add (distinguish "not allowed" from "hidden by consent/purpose")                                                                                        |
+| Domain lifecycle labels                                  | evidence rungs, SM-* states              | The target uses state-machine-specific labels; the legacy labels are a **generic badge vocabulary** and may be kept as the cross-domain status chip set |
 
 Decision: OPEN-LGA-16.
 
@@ -90,11 +90,11 @@ Every major feature needs: happy path; loading; empty; error; offline/reconnect 
 
 ## 9. Responsive behaviour (legacy; carried over)
 
-| Class | Legacy behaviour |
-|---|---|
-| Mobile | Bottom navigation, bottom sheets, stacked cards, compact action bars |
-| Tablet | Adaptive two-pane layouts where content warrants |
-| Desktop | Sidebar navigation, denser tables, multi-column dashboards |
+| Class   | Legacy behaviour                                                     |
+| ------- | -------------------------------------------------------------------- |
+| Mobile  | Bottom navigation, bottom sheets, stacked cards, compact action bars |
+| Tablet  | Adaptive two-pane layouts where content warrants                     |
+| Desktop | Sidebar navigation, denser tables, multi-column dashboards           |
 
 Rule: **do not simply scale a desktop layout down.** Target: sidebar (>= lg), icon rail (md), bottom nav (< md) from one nav manifest (`NAVIGATION_ARCHITECTURE.md`); consistent. Legacy BR-203 adds: mobile-first application must keep feature parity with desktop.
 
@@ -106,6 +106,6 @@ Target: `SCREEN_REGISTRY.md` holds the detailed SCR-* registry. Families that de
 
 ## 11. Open items
 
-| ID | Item |
-|---|---|
+| ID          | Item                                                                                                                                                                                                                                                |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OPEN-LGA-16 | Choose motion durations, add missing states (EMPTY, VALIDATION, PARTIAL, PERMISSION_DENIED, RESTRICTED, SYNCING), add a z-index scale, decide whether any "Aura" values are reused, add the second-reuse promotion rule. Owner: Design System Lead. |

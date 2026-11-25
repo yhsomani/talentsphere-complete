@@ -34,25 +34,25 @@ Candidate/learner, career switcher, professional, recruiter, hiring manager, emp
 
 ## 4. Core jobs-to-be-done (legacy; carried over)
 
-| Persona | Job |
-|---|---|
-| Candidate | Understand readiness for a goal. |
-| Candidate | Identify gaps. |
-| Candidate | Learn what matters. |
-| Candidate | Produce evidence. |
-| Candidate | Discover relevant opportunities. |
-| Candidate | Apply with stronger proof. |
-| Candidate | Learn from outcomes. |
-| Recruiter | Find candidates using relevant capability/evidence signals. |
-| Recruiter | Understand why a candidate matches. |
-| Recruiter | Communicate, interview and decide efficiently. |
-| Recruiter | Preserve an auditable hiring workflow. |
-| Instructor | Deliver learning. |
-| Instructor | Assess progress. |
-| Instructor | Generate trustworthy achievement evidence. |
-| Institution | Manage cohorts and permissions. |
-| Institution | Connect learning outcomes to employability. |
-| Institution | Preserve learner privacy and lifecycle. |
+| Persona     | Job                                                         |
+| ----------- | ----------------------------------------------------------- |
+| Candidate   | Understand readiness for a goal.                            |
+| Candidate   | Identify gaps.                                              |
+| Candidate   | Learn what matters.                                         |
+| Candidate   | Produce evidence.                                           |
+| Candidate   | Discover relevant opportunities.                            |
+| Candidate   | Apply with stronger proof.                                  |
+| Candidate   | Learn from outcomes.                                        |
+| Recruiter   | Find candidates using relevant capability/evidence signals. |
+| Recruiter   | Understand why a candidate matches.                         |
+| Recruiter   | Communicate, interview and decide efficiently.              |
+| Recruiter   | Preserve an auditable hiring workflow.                      |
+| Instructor  | Deliver learning.                                           |
+| Instructor  | Assess progress.                                            |
+| Instructor  | Generate trustworthy achievement evidence.                  |
+| Institution | Manage cohorts and permissions.                             |
+| Institution | Connect learning outcomes to employability.                 |
+| Institution | Preserve learner privacy and lifecycle.                     |
 
 Target comparison: GOAL-01..GOAL-06 cover candidate evidence, recruiter speed, fairness, learning conversion and institution graduation; the legacy candidate jobs "understand readiness", "identify gaps" and "learn from outcomes" are covered functionally by UJ-07 and legacy J-06 / J-26 but are not stated as measurable goals.
 
@@ -62,14 +62,14 @@ The strongest product promise is not "more features". It is **a coherent evidenc
 
 ## 6. Goals (legacy, 6) and target mapping
 
-| # | Legacy goal | Nearest target goal |
-|---|---|---|
-| 1 | Create a trusted career identity. | GOAL-01 |
-| 2 | Turn activity into attributable evidence. | GOAL-01 |
-| 3 | Connect learning to opportunities. | GOAL-04 |
-| 4 | Improve the quality and explainability of matching. | GOAL-03 |
-| 5 | Close the feedback loop from application outcomes to future action. | none explicit (see legacy J-02, feature F-122 Application Feedback Loop) |
-| 6 | Preserve privacy and human control. | GOAL-06 (security, privacy, accessibility) |
+| #   | Legacy goal                                                         | Nearest target goal                                                      |
+| --- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1   | Create a trusted career identity.                                   | GOAL-01                                                                  |
+| 2   | Turn activity into attributable evidence.                           | GOAL-01                                                                  |
+| 3   | Connect learning to opportunities.                                  | GOAL-04                                                                  |
+| 4   | Improve the quality and explainability of matching.                 | GOAL-03                                                                  |
+| 5   | Close the feedback loop from application outcomes to future action. | none explicit (see legacy J-02, feature F-122 Application Feedback Loop) |
+| 6   | Preserve privacy and human control.                                 | GOAL-06 (security, privacy, accessibility)                               |
 
 Target GOAL-02 (recruiter speed), GOAL-05 (institutions), GOAL-07 (sustainability) and GOAL-08 (graceful degradation) have no legacy counterpart. Legacy goal 5 has no explicit target goal (OPEN-LGA-09).
 
@@ -108,11 +108,11 @@ Target comparison: roadmap Phase 2 is the "complete-loop GA candidate" (`../22_I
 
 ## 9. Product metrics (legacy; carried over)
 
-| Class | Metrics |
-|---|---|
-| Primary | **Verifiable Career Progress** |
+| Class      | Metrics                                                                                                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Primary    | **Verifiable Career Progress**                                                                                                                                                                               |
 | Supporting | activation; goal creation; skill coverage; evidence creation; verified evidence; learning completion; assessment improvement; qualified applications; interviews; offers; hires; outcome feedback; retention |
-| Business | paid conversion; recurring revenue; gross margin; infrastructure cost; AI cost by capability; enterprise expansion; support burden |
+| Business   | paid conversion; recurring revenue; gross margin; infrastructure cost; AI cost by capability; enterprise expansion; support burden                                                                           |
 
 Conflict (already registered as **OPEN-51**): the target north star is Evidence-Backed Hiring Conversations per week (MET-001); the legacy primary metric is Verifiable Career Progress, which has no formula in the legacy PRD. Neither is approved. The supporting and business lists above are mostly present as MET-* entries; legacy items **goal creation, skill coverage, assessment improvement, offers, outcome feedback and enterprise expansion** should be checked against `METRICS_CATALOG.md` (OPEN-LGA-10). Reading `METRICS_CATALOG.md` MET-001..MET-055 at merge time: activation (MET-002), verified evidence (MET-004, MET-005), learning completion (MET-017), qualified applications (MET-009), interviews (MET-011), hires (MET-012), retention (MET-022, MET-023), paid conversion, recurring revenue, gross margin, infra cost, AI cost and support burden (MET-026..MET-030, MET-033) have counterparts; **no dedicated metric was found for goal creation, skill coverage, offers extended/accepted, outcome-feedback delivery, or enterprise expansion** (MET-031 net revenue retention is the nearest).
 
@@ -136,9 +136,9 @@ Target alignment: 1 (evidence ladder), 2 (GOAL-03), 3 and 4 (AI policy; ADR-T13 
 
 ## 12. Open items raised here
 
-| ID | Item |
-|---|---|
-| OPEN-LGA-08 | Reconcile legacy 14 user roles / 19 personas with target segments and roles. |
+| ID          | Item                                                                                                                                                           |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OPEN-LGA-08 | Reconcile legacy 14 user roles / 19 personas with target segments and roles.                                                                                   |
 | OPEN-LGA-09 | Decide whether the legacy 13-stage loop, 6 goals, non-goals and GA path add anything to STR-01 (explicit Goal/Gap stage; feedback-loop goal; extra non-goals). |
-| OPEN-LGA-10 | Check legacy supporting/business metrics against `METRICS_CATALOG.md`; add the missing ones or record why not. |
-| OPEN-51 | Primary north-star metric (existing). |
+| OPEN-LGA-10 | Check legacy supporting/business metrics against `METRICS_CATALOG.md`; add the missing ones or record why not.                                                 |
+| OPEN-51     | Primary north-star metric (existing).                                                                                                                          |

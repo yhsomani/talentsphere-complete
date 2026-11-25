@@ -4,8 +4,7 @@
 
 Revision/addendum records now live as labelled sections of their owning documents, with full source context and updated links. See the [source mapping, recovery revision and preservation checks](00_CONTROL_CENTRE/KNOWLEDGE_PRESERVATION_MANIFEST.md#documentation-consolidation--2026-10-27). The historical status below describes the earlier revision; its “nothing deleted” and separate-file statements do not describe this consolidation. Product approval and implementation status are unchanged.
 
-
-Greenfield redesign documentation. **No application source code was modified.** Existing repo docs are *reference only*.
+Greenfield redesign documentation. **No application source code was modified.** Existing repo docs are _reference only_.
 
 Start here: [Master index](00_CONTROL_CENTRE/MASTER_INDEX.md) → final authority: [PROJECT_MASTER_BLUEPRINT](99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md).
 
@@ -18,6 +17,7 @@ Documentation status ≠ implementation status. Nothing here claims a feature is
 All areas are Draft, Under Review or Revision Required; none is Ready for Implementation ([DOCUMENT_STATUS](00_CONTROL_CENTRE/DOCUMENT_STATUS.md)). The review-fix `*_REV2` content has been folded into the originals and the REV2 files are kept as change records ([precedence rules](00_CONTROL_CENTRE/MASTER_INDEX.md)).
 
 What changed in this revision (documentation only; nothing deleted, moved or committed):
+
 - New ID families registered in the [ID registry](00_CONTROL_CENTRE/ID_REGISTRY.md); open items consolidated in [OPEN_DECISIONS section 6](24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md).
 - [G01..G16 mission-goal ledger](22_IMPLEMENTATION_ROADMAP/ROADMAP.md), [prompt coverage matrix](28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md), [50 acceptance questions](99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md), [preservation metrics, Part 66.3](00_CONTROL_CENTRE/KNOWLEDGE_PRESERVATION_MANIFEST.md), [cold-start rehearsal](29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md), and a [link triage with human action items](00_CONTROL_CENTRE/DOCUMENT_STATUS.md).
 

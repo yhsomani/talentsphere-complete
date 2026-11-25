@@ -8,34 +8,34 @@ Merged from legacy: `31_LEGACY_ARCHIVE/deploy/README.md`, `.../deploy/NEW_SUPABA
 
 ## 0. Frame
 
-- **Nothing is deployed and no infrastructure code exists in this project.** The archive holds only the three deploy *markdown* files; the compose files, proxy config, Dockerfiles and backup scripts they reference (`deploy/oracle/compose.yaml`, `compose.supabase.yaml`, `.env.example`, `backup.sh`, `verify-restore.sh`) are **not in this repository** and were never executed on an Oracle VM by the prior attempt ("This config has not been executed on an Oracle VM"). Treat the documents as an *unverified starting configuration* for the reference option "A. Single VM + Compose (Oracle)" already recorded in `OPS-DEP` section 6 / OPEN-14.
+- **Nothing is deployed and no infrastructure code exists in this project.** The archive holds only the three deploy _markdown_ files; the compose files, proxy config, Dockerfiles and backup scripts they reference (`deploy/oracle/compose.yaml`, `compose.supabase.yaml`, `.env.example`, `backup.sh`, `verify-restore.sh`) are **not in this repository** and were never executed on an Oracle VM by the prior attempt ("This config has not been executed on an Oracle VM"). Treat the documents as an _unverified starting configuration_ for the reference option "A. Single VM + Compose (Oracle)" already recorded in `OPS-DEP` section 6 / OPEN-14.
 - "Prior attempt reported" = statements in those documents about the earlier attempt; "Target requires" = requirement here.
 - The `.env`-style example values in the verbatim records are placeholders only ("REPLACE_ME", "REPLACE_WITH_A_FRESH_RANDOM_SECRET"); no credential exists in this file. The hosted project reference `qidckctwrkxyiwworchd` (Mumbai, `ap-south-1`) is an identifier, not a secret, and is recorded as a historical reference target only.
 
 ## 1. Environment ladder and configuration (prior attempt) - requirements carried over
 
 - Ladder: `local -> CI -> preview -> staging -> production`, each with separate secrets/config. **Target:** matches OPS-REL section 5 environment table.
-- Processes: **API** - exactly one process per database in the prior design (single-writer read model); **Worker** - claims jobs with `FOR UPDATE SKIP LOCKED` (does *not* give exactly-once; multiple workers can reclaim expired batch leases and run a job twice, audit D-02); **Web** - static bundle with build-time contact variables (`VITE_SUPPORT_EMAIL`, `VITE_PRIVACY_EMAIL`, `VITE_SECURITY_EMAIL`) baked in at build time. **Target requires:** API replicas allowed (ADR-T05), fenced leases (ADR-T09); build-time contact variables only for public values.
+- Processes: **API** - exactly one process per database in the prior design (single-writer read model); **Worker** - claims jobs with `FOR UPDATE SKIP LOCKED` (does _not_ give exactly-once; multiple workers can reclaim expired batch leases and run a job twice, audit D-02); **Web** - static bundle with build-time contact variables (`VITE_SUPPORT_EMAIL`, `VITE_PRIVACY_EMAIL`, `VITE_SECURITY_EMAIL`) baked in at build time. **Target requires:** API replicas allowed (ADR-T05), fenced leases (ADR-T09); build-time contact variables only for public values.
 - Configuration rules the prior attempt enforced at startup (listing preserved because each is a good boot-time refusal for the target):
 
-| Variable                       | Production rule                                                               |
-| ------------------------------ | ----------------------------------------------------------------------------- |
-| `TOKEN_SECRET`                 | Required, ≥ 32 random characters. Rotating it signs everyone out.            |
-| `DATABASE_URL`                 | Required; not the local default.                                              |
-| `STORAGE`                      | `pg` (default). `memory` is refused in production and staging.                |
-| `CORS_ALLOWED_ORIGINS`         | The web origin(s); localhost is refused in production.                        |
-| `BILLING_MODE`                 | `disabled` (default), `simulated` (no payment; refused in production), or `stripe` (configured provider). |
-| `BILLING_WEBHOOK_SECRET`       | Unset ⇒ the billing webhook answers 503 to everything.                        |
-| `AUTH_RATE_LIMIT_MAX_REQUESTS` | Login attempts per IP+email and sign-ups per IP per window (default 10).      |
-| `RATE_LIMIT_MAX_REQUESTS` / `RATE_LIMIT_WINDOW_MS` | Global limiter per signed-in account (per address when anonymous); default 300 per minute. |
-| `TRUST_PROXY`                  | **Required behind a load balancer** (e.g. `1`): otherwise every anonymous client shares the proxy's address and one rate-limit bucket. |
+| Variable                                           | Production rule                                                                                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `TOKEN_SECRET`                                     | Required, ≥ 32 random characters. Rotating it signs everyone out.                                                                      |
+| `DATABASE_URL`                                     | Required; not the local default.                                                                                                       |
+| `STORAGE`                                          | `pg` (default). `memory` is refused in production and staging.                                                                         |
+| `CORS_ALLOWED_ORIGINS`                             | The web origin(s); localhost is refused in production.                                                                                 |
+| `BILLING_MODE`                                     | `disabled` (default), `simulated` (no payment; refused in production), or `stripe` (configured provider).                              |
+| `BILLING_WEBHOOK_SECRET`                           | Unset ⇒ the billing webhook answers 503 to everything.                                                                                 |
+| `AUTH_RATE_LIMIT_MAX_REQUESTS`                     | Login attempts per IP+email and sign-ups per IP per window (default 10).                                                               |
+| `RATE_LIMIT_MAX_REQUESTS` / `RATE_LIMIT_WINDOW_MS` | Global limiter per signed-in account (per address when anonymous); default 300 per minute.                                             |
+| `TRUST_PROXY`                                      | **Required behind a load balancer** (e.g. `1`): otherwise every anonymous client shares the proxy's address and one rate-limit bucket. |
 
 `apps/api/src/index.ts` refuses to start in production when any rule above is broken and
 prints which ones (`productionConfigProblems()`). Staging (`NODE_ENV=staging`) gets the
 `TOKEN_SECRET`, `DATABASE_URL` and `STORAGE` rules too, but may simulate billing and allow a
 localhost origin for testing.
 
-  Notes: staging got the secret, database-URL and storage rules but could simulate billing and allow a localhost origin; the API refused to start in production listing every broken rule. **Target requires:** a single typed configuration package validated at boot in API **and** worker; production refuses (a) in-memory/ephemeral storage, (b) secrets shorter than the minimum or equal to published test keys, (c) localhost CORS, (d) any simulated provider mode, (e) provider test-mode keys; `TRUST_PROXY`-style setting documented as mandatory behind a load balancer (otherwise all anonymous clients share one rate-limit bucket). Known prior defect to avoid: AI feature flags parsed with `z.coerce.boolean()` so the string `"false"` enabled them (only strict parsing - e.g. `z.enum(["true","false"])` - is safe); add a config test per boolean flag.
+Notes: staging got the secret, database-URL and storage rules but could simulate billing and allow a localhost origin; the API refused to start in production listing every broken rule. **Target requires:** a single typed configuration package validated at boot in API **and** worker; production refuses (a) in-memory/ephemeral storage, (b) secrets shorter than the minimum or equal to published test keys, (c) localhost CORS, (d) any simulated provider mode, (e) provider test-mode keys; `TRUST_PROXY`-style setting documented as mandatory behind a load balancer (otherwise all anonymous clients share one rate-limit bucket). Known prior defect to avoid: AI feature flags parsed with `z.coerce.boolean()` so the string `"false"` enabled them (only strict parsing - e.g. `z.enum(["true","false"])` - is safe); add a config test per boolean flag.
 
 ## 2. CI and release gates (prior attempt) - facts to reconcile with OPS-REL
 
@@ -68,7 +68,7 @@ node scripts/release-preflight.mjs --mode=operational
 ```
 
 - `pre-00043`: detects case-folded email duplicates, active-application collisions and candidate ids with no corresponding user record; conflicts resolved under an approved backfill plan, **not by deleting rows automatically**.
-- `schema`: detects changed applied SQL (checksum), missing required migrations, required indexes, foreign-key targets and RLS enablement on sensitive tables; it checks RLS is *enabled*, **not** that grants and policies prove tenant isolation.
+- `schema`: detects changed applied SQL (checksum), missing required migrations, required indexes, foreign-key targets and RLS enablement on sensitive tables; it checks RLS is _enabled_, **not** that grants and policies prove tenant isolation.
 - `operational`: also fails on stale worker heartbeat (45 s), queued jobs overdue by five minutes, or terminal job failures within the past hour. The nonzero exit status must be wired to an external monitor - running the script once creates no alerts.
 - "These checks do **not** demonstrate an actual populated-database upgrade, backup/point-in-time restore, load or cold-boot performance, HTTPS reverse proxy, multi-replica admission, rolling deploy or incident response. Capture separate staging evidence and operator approval before closing issues #46 or #47."
 - **Target requires** (new RG sub-gates, owner Release Engineering): (a) a `schema` preflight in CI on every PR (checksum, contiguity, RLS-enabled, FK targets, required indexes); (b) an `operational` preflight run as a synthetic monitor that pages on stale heartbeat / overdue queue / terminal failures (maps to ALT-* alerts); (c) a `pre-import` data-quality preflight for any reference-data import (MIG-DATA-01) with duplicate-email, orphan-reference and active-application-collision checks; (d) the rule "preflight never deletes data".
@@ -112,17 +112,17 @@ docker compose --env-file deploy/oracle/.env -f deploy/oracle/compose.yaml ps
 
 ### 6.1 Target interpretation of the Oracle staging limitations
 
-| Prior attempt limitation | Target requires |
-|---|---|
-| Exactly one API instance per DB (never scale) | Not applicable under ADR-T05; staging may still be one instance but must not rely on it |
-| Database private to the Compose network; no backups implemented in the compose file | Encrypted off-host backups with a passed restore drill before any real user data (OPS-DEP section 7 REC-001/002) |
-| Email provider credentials, domain verification and deliverability testing needed; `EMAIL_PROVIDER=none` fails closed | Same: fail-closed default; SPF/DKIM/DMARC (see operations file) |
-| Billing disabled; do not enable simulated billing; interview scoring and ephemeral modules release-gated | No simulated billing; no simulated scoring; no ephemeral modules |
-| Image contains build tooling and source; hardening to smaller runtime images, pinned image digests, scans, resource ceilings, service health checks and deployment rollback "remain necessary prior to public launch" | Multi-stage minimal runtime images, digest pinning, SBOM + vulnerability scan + signing (RG-04), resource limits, health checks, rollback path |
-| Reserved URL characters in the database password break environment interpolation | Use URL-safe generated secrets or percent-encode; add a config test that parses the connection string |
-| Firewall: only 22/tcp from a trusted management IP, 80/tcp and 443/tcp from intended testers (443/udp only if HTTP/3), ports 4000 and 5432 private, SSH keys, no password SSH, DNS A/AAAA resolving before TLS issuance | Adopt as the minimum host-hardening checklist for any single-VM environment |
-| "This compose file does not include an access-control gateway": provision a non-public staging account and restrict testers | Staging access control (basic auth/VPN/IP allow-list) is a requirement for any internet-reachable staging |
-| Do NOT run migrations automatically as part of a public service restart | Migrations are a separate, gated release step (DB-04 order: expand migrations, then deploy, then backfill, then flags, then contract) |
+| Prior attempt limitation                                                                                                                                                                                                | Target requires                                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exactly one API instance per DB (never scale)                                                                                                                                                                           | Not applicable under ADR-T05; staging may still be one instance but must not rely on it                                                        |
+| Database private to the Compose network; no backups implemented in the compose file                                                                                                                                     | Encrypted off-host backups with a passed restore drill before any real user data (OPS-DEP section 7 REC-001/002)                               |
+| Email provider credentials, domain verification and deliverability testing needed; `EMAIL_PROVIDER=none` fails closed                                                                                                   | Same: fail-closed default; SPF/DKIM/DMARC (see operations file)                                                                                |
+| Billing disabled; do not enable simulated billing; interview scoring and ephemeral modules release-gated                                                                                                                | No simulated billing; no simulated scoring; no ephemeral modules                                                                               |
+| Image contains build tooling and source; hardening to smaller runtime images, pinned image digests, scans, resource ceilings, service health checks and deployment rollback "remain necessary prior to public launch"   | Multi-stage minimal runtime images, digest pinning, SBOM + vulnerability scan + signing (RG-04), resource limits, health checks, rollback path |
+| Reserved URL characters in the database password break environment interpolation                                                                                                                                        | Use URL-safe generated secrets or percent-encode; add a config test that parses the connection string                                          |
+| Firewall: only 22/tcp from a trusted management IP, 80/tcp and 443/tcp from intended testers (443/udp only if HTTP/3), ports 4000 and 5432 private, SSH keys, no password SSH, DNS A/AAAA resolving before TLS issuance | Adopt as the minimum host-hardening checklist for any single-VM environment                                                                    |
+| "This compose file does not include an access-control gateway": provision a non-public staging account and restrict testers                                                                                             | Staging access control (basic auth/VPN/IP allow-list) is a requirement for any internet-reachable staging                                      |
+| Do NOT run migrations automatically as part of a public service restart                                                                                                                                                 | Migrations are a separate, gated release step (DB-04 order: expand migrations, then deploy, then backfill, then flags, then contract)          |
 
 ## 7. Prior-attempt hosted database project note (verbatim record)
 
@@ -277,26 +277,26 @@ copy remains in `.agents/teamwork/orchestrator_1/PROJECT.md`.
 
 ## 10. Open items raised by this file
 
-| ID | Question | Owner |
-|---|---|---|
-| L-B17-01 | First-admin bootstrap procedure (audited, no hand-run SQL) | Security Architect + Platform |
-| L-B17-02 | Whether to adopt Oracle single-VM Compose as dev/staging (OPS-DEP option A) given the unexecuted prior config | OPEN-14 |
-| L-B17-03 | Preflight modes (schema, operational, pre-import) as RG sub-gates | Release Engineering |
-| L-B17-04 | Strict boolean parsing for all feature flags | Backend (config package) |
-
+| ID       | Question                                                                                                      | Owner                         |
+| -------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| L-B17-01 | First-admin bootstrap procedure (audited, no hand-run SQL)                                                    | Security Architect + Platform |
+| L-B17-02 | Whether to adopt Oracle single-VM Compose as dev/staging (OPS-DEP option A) given the unexecuted prior config | OPEN-14                       |
+| L-B17-03 | Preflight modes (schema, operational, pre-import) as RG sub-gates                                             | Release Engineering           |
+| L-B17-04 | Strict boolean parsing for all feature flags                                                                  | Backend (config package)      |
 
 <!-- ledger-D D-17 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/MAINTENANCE_AUDIT_2026-10-21.md (gap closure D-17)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: the 28 missing test-case ids TC-04..TC-37 (all of TC-01..TC-38 with results and timings are quoted in the 16_QA section), ~113 code tokens (flags `--max-depth`, `--approve-cleanup`, ecosystem markers `build.gradle`, `package-lock.json`, `.nuxt`), detected-projects table, per-candidate size tables, menu numbering, per-test timings.
 
-~~~~text
+````text
 L18: ## Detected projects and installation boundary
-L19: 
+L19:
 L20: There are ten `package.json` files: one workspace root and nine members. `pnpm-workspace.yaml` includes `apps/*` and `packages/*`; the root `pnpm-lock.yaml` records those importers. The declared and locally available manager is `pnpm@11.7.0`. Local Node is v24.19.0; CI and Docker use Node 24. No separate nested installation boundary or competing lockfile was found outside installed dependencies.
-L21: 
+L21:
 L22: | Project | Technology / purpose | Shared dependencies | Generated output observed |
 L23: |---|---|---|---|
 L24: | `.` | pnpm workspace; Vitest, Playwright, Prettier, TypeScript | Installation owner for all members | Root `node_modules`, `test-results` |
@@ -309,11 +309,11 @@ L30: | `packages/domain` | TypeScript domain logic | Workspace member | `dist`, 
 L31: | `packages/observability` | TypeScript, Pino | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
 L32: | `packages/testing` | TypeScript test helpers | domain | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
 L33: | `packages/ui` | TypeScript shared UI package | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
-L34: 
+L34:
 L35: Each member's manifest and `tsconfig.json` were found. All member TypeScript configs emit to `./dist`; composite compilation writes incremental metadata. Vite also targets `apps/web/dist`. Root TypeScript references list all nine members. Root build scripts compile shared packages before applications.
-L36: 
+L36:
 L37: Other languages and infrastructure actually present:
-L38: 
+L38:
 L39: - JavaScript/MJS: database migration/seed tooling, release checks, icon generation, and E2E server bootstrap.
 L40: - Bash: `deploy/oracle/backup.sh` and `deploy/oracle/verify-restore.sh`.
 L41: - SQL: PostgreSQL migrations and seed data under `supabase`; not cleanup candidates.
@@ -321,11 +321,11 @@ L42: - Python: `.audit/shoot.py`, a Playwright screenshot helper. No `pyproject.
 L43: - Docker/Compose/Caddy and GitHub Actions: container build, staging deployment configuration, and CI checks.
 L44: - HTML/CSS, webmanifest, fonts, icons, and screenshots are source/static/evidence assets, not automatically regenerable build output.
 L45: - No Java/Kotlin, .NET, PHP, Ruby, Go, Rust, C/C++, Android, or iOS project manifest was found. The future scanner should recognize their manifest names and report unsupported projects instead of guessing cleanup or install commands.
-L46: 
+L46:
 L47: ## Cleanup inventory and classification
-L48: 
+L48:
 L49: Sizes below are approximate `du -sk` readings in KiB at discovery time, not promised reclaimable space. Linked/shared allocations and concurrent development can change them. No candidate was deleted. A regenerable classification is permission to propose a target, not authorization to delete it.
-L50: 
+L50:
 L51: | Candidate | Category | Approx. KiB | Classification and evidence |
 L52: |---|---|---:|---|
 L53: | `apps/api/dist` | Build | 1164 | Regenerable candidate: configured TypeScript outDir |
@@ -349,11 +349,11 @@ L70: | `.reticle` and `apps/web/.reticle` | Verification state | Not measured | 
 L71: | `TalentSphere` | Obsidian vault | Not measured | Protected user data, including `.obsidian-mcp` transactions, locks and trash |
 L72: | `BRAIN` | Project memory | Not measured | Protected documentation and execution history |
 L73: | `private-backups` when present | Database backups | Not measured | Always protected; backup scripts may also use an external BACKUP_DIR |
-L74: 
+L74:
 L75: Git inspection found no tracked `dist` output, `*.tsbuildinfo`, or `test-results` content. The maintenance tool must repeat provenance checks immediately before execution and reject targets containing tracked or staged files, nested repositories, essential data, or symlinks. Ignore rules alone are insufficient evidence of safety.
-L76: 
+L76:
 L77: Source-adjacent generated JavaScript, declarations, or map files must not be removed by extension alone. Familiar names such as `build`, `dist`, `cache`, `target`, or `vendor` are review-only without a demonstrated project-specific output contract.
-L78: 
+L78:
 [...]
 L99: Compose owns persistent `db_data`, `caddy_data`, and `caddy_config` volumes. These are never local cleanup targets. `.env*`, key material, database dumps, package manifests, lockfiles, configuration, source, migrations and static/public assets must survive every routine operation.
 [...]
@@ -380,67 +380,67 @@ L198: A before/after hash/size/mtime comparison sampled 55 protected existing fi
 L200: Reports produced by the script are timestamped private logs in an excluded `maintenance-reports` directory after confirmation. The raw verification stdout files beside this document are separate audit artifacts captured by the host and may be ignored by the repository's existing `*.log` rule. No credentials or raw package-manager output are stored in them.
 [...]
 L215: ## Archived Bash usage reference
-L216: 
+L216:
 L217: The following preserves the unique usage/portability details formerly in the engineering guide. It is historical; the named Bash implementation is absent.
-L218: 
+L218:
 L219: ### Archived Bash guide
-L220: 
+L220:
 L221: > **Current checkout correction (2026-10-21, `a771a87b`):** `project-maintenance.sh` and `scripts/tests/project-maintenance.test.sh` are absent from both the working tree and tracked-file inventory. Commands and implementation results below are historical/proposed material, not runnable instructions or a verified deliverable in this checkout. Restoring a maintenance tool that changes build files requires explicit authorization under AGENTS.md; this documentation audit does not restore it.
-L222: 
-L223: 
+L222:
+L223:
 L224: Run from the repository root in Bash:
-L225: 
+L225:
 L226: ```bash
 L227: ./project-maintenance.sh
 L228: ```
-L229: 
+L229:
 L230: If the executable bit was not preserved by the checkout:
-L231: 
+L231:
 L232: ```bash
 L233: chmod +x project-maintenance.sh
 L234: ./project-maintenance.sh
 L235: ```
-L236: 
+L236:
 L237: The script opens a menu for scanning, build cleanup, dependency removal, cache cleanup, installation, combined maintenance, individual project selection, dry-run previews and report export. Menu option 11 deletes all recursively discovered *verified* build artifacts and caches; menu option 12 installs frozen dependencies and rebuilds all supported projects. Choosing a mutation shows the exact targets and commands, validates prerequisites, then requires the exact confirmation `APPLY`. Empty input or EOF cancels. Report-only export requires `EXPORT`. Cleanup is irreversible; ignored artifacts have no Git rollback. Stop dev servers/builds before maintenance and keep backups of anything that is not disposable.
-L238: 
+L238:
 L239: ## Read-only inspection
-L240: 
+L240:
 L241: ```bash
 L242: ./project-maintenance.sh --scan
 L243: ./project-maintenance.sh --dry-run --operation full
 L244: ./project-maintenance.sh --scan --sizes
 L245: ```
-L246: 
+L246:
 L247: Scanning and dry-run write nothing to the target repository. Disk measurements are opt-in because traversing dependency installations can be slow; readings are not additive in linked workspaces. `--scan`, `--dry-run` and `--execute` are mutually exclusive. No configuration module or arbitrary project command is executed during discovery.
-L248: 
+L248:
 L249: ## Selecting operations
-L250: 
+L250:
 L251: ```bash
 L252: # Review one member's build cleanup, without changing anything.
 L253: ./project-maintenance.sh --dry-run --operation build --project apps/web
-L254: 
+L254:
 L255: # Restore once at the workspace root, with a fresh confirmation prompt.
 L256: ./project-maintenance.sh --execute --operation install --project .
-L257: 
+L257:
 L258: # Choose validation commands; order is preserved.
 L259: ./project-maintenance.sh --dry-run --operation validate --check build --check unit --check integration
-L260: 
+L260:
 L261: # Exclude an exact subtree; exclusions are literal, not shell globs.
 L262: ./project-maintenance.sh --dry-run --operation full --exclude path/to/independent-project
-L263: 
+L263:
 L264: # Explicitly classify a reviewed, regenerable local cache. Hard protections remain.
 L265: ./project-maintenance.sh --dry-run --operation caches --approve-cleanup caches:tools/generated-cache
-L266: 
+L266:
 L267: # Explicit report export after a scan; requires typing EXPORT.
 L268: ./project-maintenance.sh --scan --export-report
 L269: ```
-L270: 
+L270:
 L271: `--root PATH` inspects another explicitly chosen project boundary. Repeat `--project`, `--exclude`, `--approve-cleanup` and `--check` as needed. A selected workspace member cannot remove a shared installation without selecting the workspace owner. A root workspace install installs its members once; a genuinely independent deep project gets its own command. A combined reinstall cleans selected build output and dependency installations before frozen installation; use `--operation rebuild` (menu option 12) to clean verified build/cache output, install frozen dependencies, and rebuild the discovered workspace.
-L272: 
+L272:
 L273: ## Supported projects
-L274: 
+L274:
 L275: The script is Bash, with existing Node used only to parse JSON data. Bash 3.2 or newer and standard `find`, Git, `rm`, `mkdir`, `mktemp`, `mv`, `chmod`, `wc`, `date` and `sleep` are required. `du` is optional for `--sizes`. It adds no package dependency.
-L276: 
+L276:
 L277: - Node projects are discovered recursively outside protected/dependency directories, including independently configured deep subprojects.
 L278: - pnpm workspaces use the repository's simple `packages:` YAML list. npm/Yarn workspace arrays and `{packages: [...]}` are recognized. Literal path components and single-component globs work. Unsupported workspace syntax, negative patterns, recursive `**` patterns and overlapping nested workspace definitions block installation rather than guessing ownership. Commands also refuse workspace scopes containing excluded/protected projects or their pruned ancestors.
 L279: - Manager declarations and lockfiles must agree. Ambiguous managers, missing lockfiles, symlink manifests/locks, unsupported managers and declared-version mismatches block execution before removal. No lockfile is generated or deleted.
@@ -449,39 +449,39 @@ L281: - Lifecycle scripts are deliberately disabled during installation. Review 
 L282: - TypeScript outputs are eligible when a safely parsed `tsconfig.json` explicitly identifies an in-project `outDir`. Composite metadata is paired with that output. Ambiguous JSONC, inherited/dynamic output configuration and Vite-only output conventions remain review-only instead of executing configuration code.
 L283: - Known Playwright `test-results` output is classified when this repository's Playwright config exists. Losing diagnostic output is called out in the plan. Other caches require explicit review/approval.
 L284: - Common Python, JVM, .NET, PHP, Ruby, Go, Rust, C/C++, Swift and Deno manifests are reported as unsupported for execution. The actual repository is a Node monorepo; `.audit/shoot.py` is a preserved auxiliary script without a Python dependency manifest. This tool does not install absent language runtimes or speculate about their cleanup conventions.
-L285: 
+L285:
 L286: Available check selectors are `lint`, `typecheck`, `unit`, `integration`, `security`, `test`, `build`, `smoke` and `e2e`. Missing scripts are reported as skipped. Only inspected command forms run; unknown scripts and pre/post hooks require manual review and are refused. Recursive pnpm builds also inspect member build scripts/hooks. Formatting checks are supported; formatting writes, migrations, seeding, deployment, Docker cleanup, database tests against an inferred target, global cache purges and automatic server termination are excluded.
-L287: 
+L287:
 L288: In this repository the root typecheck emits output, API/worker/tests import built shared packages, and Playwright needs Chromium and free server ports. A cleanup or dependency restore alone does not prove the app works. Choose builds before dependent checks, and read failed/skipped results.
-L289: 
+L289:
 L290: ## Safety and reports
-L291: 
+L291:
 L292: No directory is deletable merely because it is named `dist`, `build`, `cache`, `target` or `vendor`. Candidate rows show the owner, category, evidence, classification and optional size. Only verified/explicitly approved candidates reach the execution plan; every target is checked again immediately before deletion.
-L293: 
+L293:
 L294: Hard protections cover source/configuration, environment files and credentials, databases/dumps/migrations, original public assets, documentation, user data, nested repositories, tracked/staged files, excluded descendants, Reticle/browser evidence and the Obsidian vault. Dependency cleanup allows installed package source/configuration but still refuses embedded secrets and data. Symlink roots/ancestors are rejected; dependency symlinks are unlinked with their installation and never traversed. Generated declarations/maps/assets inside verified output directories are distinguished from original source/static input.
-L295: 
+L295:
 L296: A repository-local `.project-maintenance.lock` serializes approved operations. An existing lock is never overridden automatically; investigate whether a run is active before removing a stale lock manually. This does not synchronize external dev servers or defend against a malicious concurrent filesystem writer. Do not run maintenance across bind mounts or other externally managed storage. Installation and selected validation run trusted repository/tooling code after review; this script is not a sandbox for hostile projects.
-L297: 
+L297:
 L298: Confirmed execution and explicit export create private timestamped logs under `maintenance-reports/`, excluded from scanning and cleanup. Logs record selected operations, paths, classifications, skipped items, commands, exact exit codes, failures, warnings and final status. Raw command stdout/stderr is captured in a mode-600 temporary file, counted and removed; arbitrary output is withheld from logs to avoid publishing credentials. On failure, rerun the displayed command privately for full diagnostics. No environment dump or `.env` contents are logged. A failed restore/build stops dependent commands, and incomplete work is never reported as a pass. Removed space is not asserted from overlapping/shared allocations.
-L299: 
+L299:
 L300: SIGINT/SIGTERM stop the invocation-owned command process group, remove private capture files and the lock, retain the report and return 130/143. Deleted artifacts stay deleted. Other errors use 1 for partial failures, 2 for invalid arguments, and 3 for fatal safety/prerequisite/discovery/reporting errors. Cancellation/no-op uses 0; interactive invalid input redisplays the menu.
-L301: 
+L301:
 L302: ## Tests and portability
-L303: 
+L303:
 L304: ```bash
 L305: bash -n project-maintenance.sh
 L306: bash -n scripts/tests/project-maintenance.test.sh
 L307: bash scripts/tests/project-maintenance.test.sh
 L308: shellcheck project-maintenance.sh scripts/tests/project-maintenance.test.sh # if installed
 L309: ```
-L310: 
+L310:
 L311: The tests create disposable temporary repositories, use stub package managers for command outcomes, and never delete real project output or download packages. They cover recursive discovery, spaces, workspace boundaries, dry-run preservation, confirmations, unknown/protected paths, Git provenance, exclusions, restoration failures, hooks, private reports and descendant cancellation. Native symlink and permission-denial checks explicitly skip when the host cannot enforce them.
-L312: 
+L312:
 L313: The implementation uses portable Bash/Unix forms intended for macOS/Linux; verification in this environment uses Git Bash on Windows. Native macOS/Linux and Bash 3.2 have not been executed here. Git Bash may copy instead of creating native symlinks, and Windows ACLs do not necessarily enforce Unix mode bits. The fixture suite detects these cases instead of presenting a false pass. WSL and ShellCheck are not installed on this host.
-L314: 
+L314:
 L315: See the repository audit and validation record (`../reports/MAINTENANCE_AUDIT_2026-10-21.md`, not present in this tree) for detected projects, approximate candidate sizes, verification results and remaining limitations. Existing build files and agent instructions are unchanged by this implementation; real cleanup/reinstallation is an operator action requiring review of the exact current plan.
-L316: 
-L317: 
+L316:
+L317:
 [...]
 L339: - Remove build outputs, local dependency folders, and temporary caches according to detected technology (e.g., `node_modules`, `.venv`, `__pycache__`, `.pytest_cache`, `.turbo`, `.next`, `.nuxt`, `dist`, `build`, `bin`, `obj`, `target`, `vendor`).
 L340: - Strict Guardrails: Never delete source files, configuration (`.env*`, `.git`, IDE settings), manifests (`package.json`, `pom.xml`, etc.), or lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `Cargo.lock`, `poetry.lock`, etc.).
@@ -489,4 +489,4 @@ L340: - Strict Guardrails: Never delete source files, configuration (`.env*`, `.
 L346: - Respect local wrappers (`mvnw`, `gradlew`) when present; detect installed tools via PATH (`where.exe`) and gracefully warn/skip if a tool/runtime is absent without crashing the entire run.
 [...]
 L352: - Supported CLI flags: `--dry-run`, `--clean-only`, `--install-only`, `--build`, `--deep-clean`, `--root <path>`, `--exclude <patterns>`, `--max-depth <int>`, `--continue-on-error`, `--verbose`, `--help`.
-~~~~
+````

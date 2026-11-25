@@ -13,7 +13,7 @@ The row-level source anchors and dispositions are in [ARCHITECTURE_DURABILITY_RE
 - **Security findings:** OTP hashing, referee expiry, RLS database role, assessment-session persistence, and AI quota claims remain historical until rechecked against current source and required tests. The target contracts specify intended controls, not implementation proof.
 - **Billing:** The report's statement that Stripe was absent or simulated predates the 2026-10-23 UTC repository audit, which records Stripe backend and durable PostgreSQL billing after PR #71. This supersession concerns the code snapshot; webhook delivery, hosted schema, commercial approval, and production behavior remain separate questions.
 - **Deployment:** The Oracle Caddy and image findings refer to the report's dated configuration. They need current configuration and staging evidence before they can be closed or presented as present-day defects.
-- **Identity:** SEC-* and OPS-* are source-local identifiers. Do not reuse them as target RISK-*, OPEN-*, or TEST-* IDs.
+- **Identity:** SEC-* and OPS-* are source-local identifiers. Do not reuse them as target RISK-_, OPEN-_, or TEST-* IDs.
 
 ## Review limits
 
