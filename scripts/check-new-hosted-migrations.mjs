@@ -11,9 +11,12 @@ const forbidden = [
   /\bauth\.(?:uid|jwt)\s*\(/i,
   /\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|FUNCTION|SCHEMA)\s+auth\./i,
 ];
+// Reviewed exceptions, by exact file name. 00054 names auth.users only to
+// repoint foreign keys away from it (owner-approved 2026-11-25).
+const reviewed = new Set(['00054_repoint_auth_users_foreign_keys.sql']);
 let violations = 0;
 for (const file of files) {
-  if (Number(file.slice(0, 5)) <= 51) continue;
+  if (Number(file.slice(0, 5)) <= 51 || reviewed.has(file)) continue;
   const sql = fs.readFileSync(path.join(dir, file), 'utf8');
   if (forbidden.some(pattern => pattern.test(sql))) {
     console.error(`Unreviewed platform Auth reference in new migration: ${file}`);
