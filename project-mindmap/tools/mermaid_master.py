@@ -233,7 +233,7 @@ cards.append(Card('18', 'TESTING & QUALITY', 'C', 'quality/TEST_COVERAGE_MAP.md'
 cards.append(Card('19', 'INFRASTRUCTURE & DEPLOYMENT', 'C', 'architecture/BACKEND_ARCHITECTURE.md', [
     sub('CI workflows', [b(f"{os.path.basename(n['name'])} · {len(n.get('steps', []))} steps", 'PARTIALLY_IMPLEMENTED' if 'ci.yml' in n['name'] else 'IMPLEMENTED') for n in infra if n.get('kind') == 'ci-workflow']),
     sub('Deploy targets', [b(f"{n['name']} · {', '.join(n.get('files', []))[:40]}") for n in infra if n.get('kind') == 'deployment']),
-    sub('Config', [b(f"{len(A['env_vars'])} env vars validated (zod)"), b(f"{sum(1 for n in infra if n.get('kind') == 'script')} scripts · {N_MIG} SQL migrations"), b('CI on main red since 2026-10-26 at the Prettier step', 'BROKEN')]),
+    sub('Config', [b(f"{len(A['env_vars'])} env vars validated (zod)"), b(f"{sum(1 for n in infra if n.get('kind') == 'script')} scripts · {N_MIG} SQL migrations"), b('CI on main green since 2026-11-25 (Prettier step fixed)', 'IMPLEMENTED')]),
 ]))
 # BRANCH 20
 dead_rules = sum(1 for n in rules if n.get('prod_references') == 0) if rules and 'prod_references' in rules[0] else None

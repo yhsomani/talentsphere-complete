@@ -21,6 +21,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 | [erasure-store.ts](../../apps/api/src/storage/erasure-store.ts) | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
 | [saved-search-store.ts](../../apps/api/src/storage/saved-search-store.ts) | `saved_searches` owned by user | Owner-scoped CRUD; alert-generation state remains separate |
 | [saved-job-store.ts](../../apps/api/src/storage/saved-job-store.ts) | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
+| [application-draft-store.ts](../../apps/api/src/storage/application-draft-store.ts) | `application_drafts`, `application_draft_versions` keyed by candidate profile and job | Draft write and version snapshot in one transaction; a stale `previousVersion` is a `CONFLICT`. The `resume_id` foreign key is dropped (00056) because resumes are still in memory; the API checks resume ownership instead |
 | [admin-audit-store.ts](../../apps/api/src/storage/admin-audit-store.ts) | `admin_audit_logs` | Append and filtered list; distinct from observability's in-memory sink |
 | [feature-flag-store.ts](../../apps/api/src/storage/feature-flag-store.ts) | `feature_flags` | SQL list/get/upsert; maintenance-mode state is separate |
 | [billing-store.ts](../../apps/api/src/storage/billing-store.ts) | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers` | Transactional state/event writes and customer ownership mapping |
@@ -29,7 +30,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 User IDs and profile IDs are different: applications/evidence and messaging often
 refer to profile IDs, while billing/settings use account IDs. Check the actual
 foreign key and handler lookup before joining them. Migration 00043 aligns core
-persistence; 00047?00048 repair selected private-data policies; 00052?00053 add
+persistence; 00047–00048 repair selected private-data policies; 00052–00053 add
 billing persistence and harden grants; 00054 repoints historical `auth.users`
 foreign keys to application-owned `public.users`.
 
@@ -79,7 +80,7 @@ and currency, auditable lifecycle, concurrency policy, and corrections preservin
 evidence lineage. The current evidence code mutates state; do not equate these
 requirements with an implemented append-only version/event system. Target table
 clusters and RLS generator design are in [SSOT](../../SSOT.md), Part VII sections
-24.1?24.3. They replace the former duplicated 50/~220-table target lists here.
+24.1–24.3. They replace the former duplicated 50/~220-table target lists here.
 
 ## Local migrations and hosted Supabase
 
@@ -123,7 +124,7 @@ are extracted from `CREATE TABLE` statements; alterations/policies are not table
 creation, and presence does not establish applied state or runtime use. For column
 bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DDL.
 
-55 numbered migrations; 112 distinct table names in CREATE TABLE statements (not a live schema count).
+56 numbered migrations; 112 distinct table names in CREATE TABLE statements (not a live schema count).
 
 | Migration | Created tables |
 | --- | --- |
@@ -182,6 +183,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00053_billing_role_grants_hardening.sql](../../supabase/migrations/00053_billing_role_grants_hardening.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
 | [00054_repoint_auth_users_foreign_keys.sql](../../supabase/migrations/00054_repoint_auth_users_foreign_keys.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
 | [00055_certificate_revocations_rls.sql](../../supabase/migrations/00055_certificate_revocations_rls.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00056_application_drafts_durable.sql](../../supabase/migrations/00056_application_drafts_durable.sql) | Alterations only: drops `application_drafts_resume_id_fkey`, revokes `anon`/`authenticated` on both draft tables (API writes drafts to SQL from PR #87) |
 
 ---
 
@@ -198,7 +200,7 @@ refuses the hosted identity footprint. Hosted Auth objects belong to the platfor
 
 A manual adapter now exists in
 [supabase/hosted/README.md](../../supabase/hosted/README.md): first migration,
-organization alias views, migrations 00002?00053, migration 00054 to repoint
+organization alias views, migrations 00002–00053, migration 00054 to repoint
 foreign keys, then Data API lockdown and exact checksum ledger recording.
 This supersedes the older statement that no hosted path exists. It does not
 establish that the complete sequence has run or is safe on populated data.

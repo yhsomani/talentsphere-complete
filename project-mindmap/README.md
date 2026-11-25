@@ -1,6 +1,6 @@
 # project-mindmap — reverse-engineered map of the actual TalentSphere repository
 
-Evidence-backed, ID-stable, interconnected map generated from the source on the date of the commit. It describes the **real** project (what code exists), not the intended product (see `PRODUCT_BLUEPRINT/` for that). Nothing in the application was changed.
+Evidence-backed, ID-stable, interconnected map generated from the source on the date of the commit. It describes the **real** project (what code exists), not the intended product (see `docs/blueprint/` for that). Nothing in the application was changed.
 
 Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md).
 
@@ -10,7 +10,7 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | **Master mind map (Mermaid)**: 20 branches in three zones, legend, type-level cross-connection graph, module table                                       |
 | `master/MASTER_PROJECT_DIAGRAMS.md`         | Mermaid only: hub/zone overview flowchart, cross-connection chain, and one detail mind map per branch (every item, with status emoji)                    |
-| `master/MASTER_PROJECT_GRAPH.json`          | **The master graph**: 2,628 nodes, 6,945 typed edges, each with evidence                                                                                 |
+| `master/MASTER_PROJECT_GRAPH.json`          | **The master graph**: 2,632 nodes, 6,971 typed edges, each with evidence                                                                                 |
 | `master/MASTER_PROJECT_GRAPH.dot`           | The same graph for Graphviz                                                                                                                              |
 | `master/ID_LEDGER.json`                     | Logical key → stable ID for every generated node; IDs are never renumbered or reused                                                                     |
 | `journeys/USER_JOURNEYS.md` / `.json`       | Personas, navigation sets, 100 e2e-derived journeys with run results, 28 documented target journeys                                                      |
@@ -19,7 +19,7 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 | `architecture/`                             | Frontend, backend/infra, API (all 282 endpoints), dependency graph, per-module subgraphs                                                                 |
 | `data/`                                     | Database entity map, end-to-end data flows, state machines                                                                                               |
 | `quality/`                                  | Implementation gaps, test coverage map with execution results, documentation-vs-code reconciliation, traceability matrix (CSV), `EXECUTION_RESULTS.json` |
-| `DOCUMENTATION_MAP.md`                      | Which document tree owns what (code, SSOT, PRODUCT_BLUEPRINT, Yash_Final_Project_Document, docs/), and where they overlap                                |
+| `DOCUMENTATION_MAP.md`                      | Which document tree owns what (code, SSOT, `docs/` and its blueprint, archive and history), and where they overlap                                       |
 | `evidence/`                                 | Evidence register (CSV + summary)                                                                                                                        |
 | `VALIDATION_REPORT.md`, `FINAL_REPORT.md`   | Phase 9–10 checks and computed totals                                                                                                                    |
 

@@ -2,12 +2,12 @@
 
 **Mermaid only (no images).** The master mind map below is generated from the graph. Detail mind maps for every branch, the hub/zone overview flowchart and the cross-connection chain are in [MASTER_PROJECT_DIAGRAMS.md](MASTER_PROJECT_DIAGRAMS.md).
 
-> Generated from the repository by read-only static analysis, then cross-checked against a test run on 2026-11-25 (commit `5d67317`; vitest 1571/1571 passed, vitest-pg 66/66 passed, node-test 5/5 passed, e2e 265/265 passed; results in [EXECUTION_RESULTS.json](../quality/EXECUTION_RESULTS.json)). Every node has a stable ID, evidence (file, line, symbol), an implementation status and a confidence.
+> Generated from the repository by read-only static analysis, then cross-checked against a test run on 2026-11-25 (commit `d8cb4c1`; vitest 1571/1571 passed, vitest-pg 67/67 passed, node-test 5/5 passed, e2e 265/265 passed; results in [EXECUTION_RESULTS.json](../quality/EXECUTION_RESULTS.json)). Every node has a stable ID, evidence (file, line, symbol), an implementation status and a confidence.
 
 ## 1. How to read this map
 
 - The **mind map** (section 2) shows the 20 required branches with counts computed from the graph.
-- The **interconnected graph** is `MASTER_PROJECT_GRAPH.json` (all 2,628 nodes and 6,945 typed edges, nothing truncated) and `MASTER_PROJECT_GRAPH.dot` (the same graph for Graphviz). Section 3 summarises it by node type; per-module subgraphs are in [MODULE_GRAPHS](../architecture/MODULE_GRAPHS.md).
+- The **interconnected graph** is `MASTER_PROJECT_GRAPH.json` (all 2,632 nodes and 6,971 typed edges, nothing truncated) and `MASTER_PROJECT_GRAPH.dot` (the same graph for Graphviz). Section 3 summarises it by node type; per-module subgraphs are in [MODULE_GRAPHS](../architecture/MODULE_GRAPHS.md).
 - IDs are stable across every artifact. The prefix says what the node is.
 
 | Prefix | Meaning                                                                        | Count |
@@ -15,7 +15,7 @@
 | PROJ-  | Project                                                                        | 1     |
 | ROLE-  | Role / identity                                                                | 12    |
 | JOUR-  | User journey (one Playwright e2e test)                                         | 100   |
-| MOD-   | Module (application, API module, domain module, migration)                     | 157   |
+| MOD-   | Module (application, API module, domain module, migration)                     | 158   |
 | FEAT-  | Feature group (API resource group)                                             | 154   |
 | API-   | API endpoint (sub-feature)                                                     | 282   |
 | SCR-   | Screen (routed page)                                                           | 29    |
@@ -24,10 +24,10 @@
 | ERR-   | Error branch (nano-feature, observable system response)                        | 256   |
 | RULE-  | Business rule: exported domain function                                        | 279   |
 | SCH-   | Contract schema (Zod)                                                          | 141   |
-| SVC-   | Service or data-access file, background job kind                               | 113   |
+| SVC-   | Service or data-access file, background job kind                               | 115   |
 | DB-    | Database table                                                                 | 112   |
 | STATE- | State definition or transition table                                           | 45    |
-| TEST-  | Test file                                                                      | 223   |
+| TEST-  | Test file                                                                      | 224   |
 | EXT-   | External integration                                                           | 6     |
 | INFRA- | CI workflow, deploy target, script                                             | 14    |
 | F-     | Documented feature (docs/registries/FEATURE_REGISTRY.md); the project's own ID | 173   |
@@ -117,7 +117,7 @@ mindmap
         Transition tables
         Gap
       BRANCH 18 TESTING and QUALITY
-        223 files - 1883 static cases
+        224 files - 1884 static cases
         Executed 2026-11-25
         Link coverage textual
       BRANCH 19 INFRASTRUCTURE and DEPLOYMENT
@@ -169,20 +169,20 @@ flowchart LR
   EXT["EXT<br/>6 nodes"]:::api
   INT["INT<br/>211 nodes"]:::journey
   JOUR["JOUR<br/>100 nodes"]:::journey
-  MOD["MOD<br/>157 nodes"]:::infra
+  MOD["MOD<br/>158 nodes"]:::infra
   PROJ["PROJ<br/>1 nodes"]:::infra
   ROLE["ROLE<br/>12 nodes"]:::journey
   RULE["RULE<br/>279 nodes"]:::logic
   SCH["SCH<br/>141 nodes"]:::api
   SCR["SCR<br/>29 nodes"]:::journey
-  SVC["SVC<br/>113 nodes"]:::logic
-  TEST["TEST<br/>223 nodes"]:::infra
+  SVC["SVC<br/>115 nodes"]:::logic
+  TEST["TEST<br/>224 nodes"]:::infra
   API -->|"CALLS 470"| RULE
   API -->|"CALLS 83"| SVC
   API -->|"IMPLEMENTS 628"| DOCF
-  API -->|"PRODUCES 372"| ERR
+  API -->|"PRODUCES 370"| ERR
   API -->|"REQUIRES 52"| ROLE
-  API -->|"TESTED_BY 1195"| TEST
+  API -->|"TESTED_BY 1211"| TEST
   API -->|"TRIGGERS 47"| SVC
   API -->|"VALIDATES 132"| SCH
   API -->|"WRITES 78"| DB
@@ -192,7 +192,7 @@ flowchart LR
   COMP -->|"NAVIGATES_TO 33"| SCR
   DB -->|"DEPENDS_ON 147"| DB
   DOCBR -->|"TESTED_BY 299"| TEST
-  DOCF -->|"TESTED_BY 284"| TEST
+  DOCF -->|"TESTED_BY 285"| TEST
   DOCJ -->|"TESTED_BY 3"| TEST
   EXT -->|"FALLBACK_TO 2"| PROJ
   INT -->|"CALLS 82"| API
@@ -216,11 +216,11 @@ flowchart LR
   SCR -->|"IMPLEMENTS 4"| DOCF
   SCR -->|"NAVIGATES_TO 21"| SCR
   SCR -->|"TESTED_BY 85"| TEST
-  SVC -->|"IMPLEMENTS 1"| DOCBR
-  SVC -->|"IMPLEMENTS 4"| DOCF
-  SVC -->|"READS 35"| DB
-  SVC -->|"UPDATES 6"| DB
-  SVC -->|"WRITES 34"| DB
+  SVC -->|"IMPLEMENTS 2"| DOCBR
+  SVC -->|"IMPLEMENTS 6"| DOCF
+  SVC -->|"READS 37"| DB
+  SVC -->|"UPDATES 7"| DB
+  SVC -->|"WRITES 36"| DB
   classDef journey fill:#cfe2ff,stroke:#1565c0;
   classDef api fill:#ffe0b3,stroke:#e65100;
   classDef logic fill:#e1d5f5,stroke:#6a1b9a;
@@ -233,22 +233,22 @@ flowchart LR
 
 | Relationship | Edges | Meaning in this repository                                                            |
 | ------------ | ----- | ------------------------------------------------------------------------------------- |
-| TESTED_BY    | 2329  | test source references the item (or cites its F-/J-/BR- ID)                           |
-| CONTAINS     | 1247  | hierarchy                                                                             |
-| IMPLEMENTS   | 800   | source cites a documented F-/J-/BR- ID (route block or file)                          |
+| TESTED_BY    | 2346  | test source references the item (or cites its F-/J-/BR- ID)                           |
+| CONTAINS     | 1250  | hierarchy                                                                             |
+| IMPLEMENTS   | 803   | source cites a documented F-/J-/BR- ID (route block or file)                          |
 | CALLS        | 729   | screen/interaction calls an API; route calls a rule or store                          |
 | DEPENDS_ON   | 413   | package, FK or component dependency                                                   |
-| PRODUCES     | 372   | endpoint throws a DomainError                                                         |
+| PRODUCES     | 370   | endpoint throws a DomainError                                                         |
 | AUTHORIZES   | 247   | identity may reach a screen or endpoint                                               |
 | TRIGGERS     | 172   | interaction fires a request; route dispatches a background job; role starts a journey |
 | NAVIGATES_TO | 167   | link, navigate() or nav set                                                           |
 | VALIDATES    | 132   | route parses with a contract schema                                                   |
-| WRITES       | 112   | SQL INSERT/DELETE, or route to table through a persist kind                           |
+| WRITES       | 114   | SQL INSERT/DELETE, or route to table through a persist kind                           |
 | CREATES      | 112   | migration creates table                                                               |
 | REQUIRES     | 52    | endpoint checks a role                                                                |
-| READS        | 35    | SQL SELECT/JOIN                                                                       |
+| READS        | 37    | SQL SELECT/JOIN                                                                       |
 | BLOCKED_BY   | 18    | anonymous visitor redirected by RequireAuth                                           |
-| UPDATES      | 6     | SQL UPDATE                                                                            |
+| UPDATES      | 7     | SQL UPDATE                                                                            |
 | FALLBACK_TO  | 2     | integration degrades when not configured                                              |
 
 Relationship types requested but with **zero** edges because no evidence exists: `CONSUMES`, `TRANSFORMS` (data transformation is inside handler bodies, not separately addressable).
@@ -262,15 +262,15 @@ Relationship types requested but with **zero** edges because no evidence exists:
 | INT       | 211         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 | COMP      | 42          | 0                     | 0               | 0      | 0      | 0           | 0          | 2       |
 | RULE      | 269         | 0                     | 0               | 0      | 0      | 0           | 0          | 10      |
-| DB        | 34          | 0                     | 78              | 0      | 0      | 0           | 0          | 0       |
+| DB        | 36          | 0                     | 76              | 0      | 0      | 0           | 0          | 0       |
 | EXT       | 2           | 3                     | 0               | 0      | 1      | 0           | 0          | 0       |
 | JOUR      | 100         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
-| SVC       | 70          | 43                    | 0               | 0      | 0      | 0           | 0          | 0       |
+| SVC       | 72          | 43                    | 0               | 0      | 0      | 0           | 0          | 0       |
 | INFRA     | 14          | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 
-Totals: IMPLEMENTED 1044, NOT_IMPLEMENTED 78, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. MOD and FEAT roll up their children; ERR/TEST/SCH/STATE/ROLE nodes carry no status because "implemented" is not meaningful for them.
+Totals: IMPLEMENTED 1048, NOT_IMPLEMENTED 76, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. MOD and FEAT roll up their children; ERR/TEST/SCH/STATE/ROLE nodes carry no status because "implemented" is not meaningful for them.
 
-Confidence (same node types): HIGH 658, MEDIUM 432, LOW 100. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
+Confidence (same node types): HIGH 658, MEDIUM 436, LOW 98. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
 
 ## 5. Legend
 
@@ -289,7 +289,7 @@ Confidence (same node types): HIGH 658, MEDIUM 432, LOW 100. `HIGH` = source evi
 
 | API module    | Endpoints | Durable | Ephemeral | Auth: public/optional/required | Tested (path-level) | Web-called | ID      |
 | ------------- | --------- | ------- | --------- | ------------------------------ | ------------------- | ---------- | ------- |
-| jobs          | 22        | 15      | 7         | 1/1/20                         | 22                  | 6          | MOD-060 |
+| jobs          | 22        | 19      | 3         | 1/1/20                         | 22                  | 6          | MOD-060 |
 | skills        | 16        | 2       | 14        | 5/0/11                         | 16                  | 4          | MOD-058 |
 | reputation    | 15        | 0       | 15        | 2/1/12                         | 15                  | 0          | MOD-067 |
 | interviews    | 13        | 0       | 13        | 0/0/13                         | 13                  | 0          | MOD-066 |
@@ -303,7 +303,7 @@ Confidence (same node types): HIGH 658, MEDIUM 432, LOW 100. `HIGH` = source evi
 | settings      | 8         | 6       | 2         | 0/0/8                          | 8                   | 4          | MOD-089 |
 | admin         | 8         | 3       | 5         | 0/0/8                          | 8                   | 5          | MOD-091 |
 | organizations | 7         | 5       | 2         | 1/0/6                          | 6                   | 3          | MOD-059 |
-| applications  | 7         | 3       | 4         | 0/0/7                          | 7                   | 2          | MOD-063 |
+| applications  | 7         | 4       | 3         | 0/0/7                          | 7                   | 2          | MOD-063 |
 | courses       | 7         | 0       | 7         | 1/1/5                          | 7                   | 4          | MOD-071 |
 | resumes       | 7         | 0       | 7         | 0/0/7                          | 7                   | 2          | MOD-078 |
 | auth          | 6         | 6       | 0         | 2/0/4                          | 6                   | 6          | MOD-055 |

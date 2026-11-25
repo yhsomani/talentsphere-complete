@@ -207,7 +207,10 @@ if EXECUTED:
                    "Every node has a stable ID, evidence (file, line, symbol), an implementation status and a confidence.")
     _lint = next((c for c in EXE.get('checks', []) if 'lint' in c['name']), None)
     CI_SENTENCE = (f"Reproduced on {EXE_DATE}: `pnpm lint` fails ({_lint['detail']}) Every later CI step that was re-run here passes." if _lint and _lint['result'] == 'FAIL'
+                   else f"Re-run on {EXE_DATE}: `pnpm lint` and every later CI step re-run here pass." if _lint and _lint['result'] == 'PASS'
                    else 'Cause not re-measured in this run.')
+    CI_HEAD = ('CI on `main` has been red since 2026-10-26 (GitHub Actions).' if not (_lint and _lint['result'] == 'PASS')
+               else 'CI on `main` was red from 2026-10-26 until the Prettier step was fixed on 2026-11-25; the GitHub Actions runs for PRs #89 and #90 passed.')
     CONF_RULE = ("`HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed "
                  "(the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.")
 else:
@@ -216,6 +219,7 @@ else:
                    'No test results were supplied to this run: see [README](../README.md) "Limits".')
     CONF_RULE = '`HIGH` is assigned to nothing: no test results were supplied. `MEDIUM` = supported by source. `LOW` = inferred.'
     CI_SENTENCE = 'Cause not measured in this run.'
+    CI_HEAD = 'CI on `main` has been red since 2026-10-26 (GitHub Actions).'
 
 # ---------------------------------------------------------------- documentation nodes (F-, J-, BR- from enrich.py)
 docf = [n for n in nodes.values() if n['type'] == 'DOCF']
@@ -869,7 +873,7 @@ svc_rows = [[n['id'], n['name'], ', '.join(sorted({nodes[e['dst']]['name'] for e
 infra_rows = [[n['id'], n['name'], n['kind'], ', '.join(n.get('jobs', [])) or ', '.join(n.get('files', []))] for n in nodes.values() if n['type'] == 'INFRA']
 w('architecture/BACKEND_ARCHITECTURE.md', f"""# Backend and Infrastructure Architecture
 
-Evidence-based description of what the code does. For the *intended* architecture see `PRODUCT_BLUEPRINT/04_ARCHITECTURE`; for dated audits see `docs/reports/`.
+Evidence-based description of what the code does. For the *intended* architecture see `docs/blueprint/04_ARCHITECTURE.md`; for dated audits see `docs/reports/`.
 
 ## 1. Shape
 
@@ -1270,7 +1274,7 @@ Code-vs-test: endpoints with no test reference: {len(untested_api)} (see test ma
 
 - Billing routes are registered twice by design: {len(mode_variant)} disabled-mode stubs in `server.ts` and Stripe-mode handlers in `billing-stripe.ts` (selected by `BILLING_MODE`).
 - Interview join links are built from a fixed host string in `packages/domain/src/technical-interview.ts` (no provider integration): MOCKED.
-- CI on `main` has been red since 2026-10-26 (GitHub Actions). {CI_SENTENCE}
+- {CI_HEAD} {CI_SENTENCE}
 - Not detected (no occurrences in source): GraphQL, WebSockets, IndexedDB, SQLite, mobile apps, feature-flag SDKs (flags are a first-party table + endpoint).
 """)
 
@@ -1399,7 +1403,7 @@ The full register is [`EVIDENCE_REGISTER.csv`](EVIDENCE_REGISTER.csv): **{n_ev_r
 | 5 | Only application and job lifecycles have explicit transition tables | `packages/domain/src/core.ts:99`, `jobs.ts:25` | MEDIUM |
 | 6 | Interview meeting links are a fixed-host template | `packages/domain/src/technical-interview.ts` | MEDIUM |
 | 7 | Stripe and Brevo are opt-in; behaviour not verified live | `billing-stripe.ts`, `apps/worker/src/email/brevo.ts` | MEDIUM |
-| 8 | CI on `main` red since 2026-10-26. {CI_SENTENCE} | GitHub Actions run list; [execution results](../quality/EXECUTION_RESULTS.json) | {'HIGH' if EXECUTED else 'MEDIUM'} |
+| 8 | {CI_HEAD} {CI_SENTENCE} | GitHub Actions run list; [execution results](../quality/EXECUTION_RESULTS.json) | {'HIGH' if EXECUTED else 'MEDIUM'} |
 | 9 | Test suites at the mapped commit: {EXEC_LINE} | [EXECUTION_RESULTS.json](../quality/EXECUTION_RESULTS.json) | {'HIGH' if EXECUTED else 'n/a'} |
 | 10 | No service-worker registration in `apps/web`; the PWA has no offline behaviour | `apps/web/src/pwa.ts` (detection only); search of `apps/web` | MEDIUM |
 | 11 | Web app keeps its own copies of the application and job transition tables | `apps/web/src/lib/types.ts` | MEDIUM |
@@ -1482,11 +1486,11 @@ shallow_only = [f for f in src_set if f in ev_files and f not in deep_files]
 unc = collections.Counter(os.path.dirname(f).split('/')[0] + '/' + (os.path.dirname(f).split('/')[1] if '/' in os.path.dirname(f) else '') for f in src_set if f not in ev_files)
 vt = ['# Validation Report (Phase 9/10)', '', 'Checks executed by the generator against the graph just written. A PASS means the stated invariant holds; it does not mean the map is complete.', '',
       table(['Check', 'Result', 'Detail'], [[c, 'PASS' if ok else 'FAIL', d] for c, ok, d in checks]), '',
-      f'## Repository coverage', '', f'Tracked source-like files outside documentation and tool-output folders (`docs/`, `BRAIN/`, `Yash_Final_Project_Document/`, `PRODUCT_BLUEPRINT/`, `.playwright*`, `.agents`, `graphify-out/`): {len(src_set)}. Files represented by at least one node: **{len(cov)} ({100*len(cov)/len(src_set):.1f}%)**. Files whose *content* was analysed in depth (routes, handlers, components, SQL, rules, tests, workflows): **{len(deep)} ({100*len(deep)/len(src_set):.1f}%)**. Files only **inventoried** as a support/config/seed/test-helper node, contents not decomposed: **{len(shallow_only)}**.', '', 'Inventoried-only files: ' + ', '.join('`' + f + '`' for f in sorted(shallow_only)), '',
+      f'## Repository coverage', '', f'Tracked source-like files outside documentation and tool-output folders (`docs/`, `.playwright*`, `.agents`; `BRAIN/`, `Yash_Final_Project_Document/`, `PRODUCT_BLUEPRINT/` and `graphify-out/` moved into `docs/` or were deleted on 2026-11-25): {len(src_set)}. Files represented by at least one node: **{len(cov)} ({100*len(cov)/len(src_set):.1f}%)**. Files whose *content* was analysed in depth (routes, handlers, components, SQL, rules, tests, workflows): **{len(deep)} ({100*len(deep)/len(src_set):.1f}%)**. Files only **inventoried** as a support/config/seed/test-helper node, contents not decomposed: **{len(shallow_only)}**.', '', 'Inventoried-only files: ' + ', '.join('`' + f + '`' for f in sorted(shallow_only)), '',
       
       '## Second-pass completeness audit (Phase 10)', '',
       '| Question | Answer |', '| --- | --- |',
-      f'| Missed directories? | Every directory under apps/, packages/, tests/, supabase/, deploy/, scripts/, .github/ was scanned; folders not scanned: docs/, Yash_Final_Project_Document/, PRODUCT_BLUEPRINT/, BRAIN/, graphify-out/, TalentSphere/ (documentation or tool output). Non-evidence files listed above. |',
+      f'| Missed directories? | Every directory under apps/, packages/, tests/, supabase/, deploy/, scripts/, .github/ was scanned; folders not scanned: docs/ and .agents/ (documentation and agent working files; since 2026-11-25 docs/ also holds the former PRODUCT_BLUEPRINT/, Yash_Final_Project_Document/ and BRAIN/). Non-evidence files listed above. |',
       f'| Missed endpoints? | grep of registrations = inventory ({routes_in_src}). Routes registered by a different construct (`app.route`, plugins) were searched for: none found. |',
       '| Missed screens? | Route elements = screens; page files not routed are listed in gaps. |',
       '| Missed interactions? | JSX `on<Event>=` props counted; interactions via `addEventListener`, refs or library internals are not seen. |',
@@ -1550,7 +1554,7 @@ All under `project-mindmap/` (see [README](README.md)).
 
 w('README.md', f"""# project-mindmap — reverse-engineered map of the actual TalentSphere repository
 
-Evidence-backed, ID-stable, interconnected map generated from the source on the date of the commit. It describes the **real** project (what code exists), not the intended product (see `PRODUCT_BLUEPRINT/` for that). Nothing in the application was changed.
+Evidence-backed, ID-stable, interconnected map generated from the source on the date of the commit. It describes the **real** project (what code exists), not the intended product (see `docs/blueprint/` for that). Nothing in the application was changed.
 
 Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md).
 
@@ -1568,7 +1572,7 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 | `architecture/` | Frontend, backend/infra, API (all {len(apis)} endpoints), dependency graph, per-module subgraphs |
 | `data/` | Database entity map, end-to-end data flows, state machines |
 | `quality/` | Implementation gaps, test coverage map with execution results, documentation-vs-code reconciliation, traceability matrix (CSV), `EXECUTION_RESULTS.json` |
-| `DOCUMENTATION_MAP.md` | Which document tree owns what (code, SSOT, PRODUCT_BLUEPRINT, Yash_Final_Project_Document, docs/), and where they overlap |
+| `DOCUMENTATION_MAP.md` | Which document tree owns what (code, SSOT, `docs/` and its blueprint, archive and history), and where they overlap |
 | `evidence/` | Evidence register (CSV + summary) |
 | `VALIDATION_REPORT.md`, `FINAL_REPORT.md` | Phase 9–10 checks and computed totals |
 

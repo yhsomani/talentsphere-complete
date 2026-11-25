@@ -230,7 +230,7 @@ flowchart LR
 
 ## applications (MOD-063)
 
-7 endpoints, 3 durable, 4 ephemeral. Green border = durable, yellow = ephemeral.
+7 endpoints, 4 durable, 3 ephemeral. Green border = durable, yellow = ephemeral.
 
 ```mermaid
 flowchart LR
@@ -284,7 +284,7 @@ flowchart LR
   RULE_037["RULE-037<br/>requestApplicationFeedback"]:::logic
   API_054 -->|CALLS| RULE_037
   API_054 -->|CALLS| RULE_088
-  API_267["API-267<br/>GET /applications/drafts"]:::eph
+  API_267["API-267<br/>GET /applications/drafts"]:::dur
   API_267 -->|CALLS| RULE_088
   classDef dur fill:#ffe0b3,stroke:#2e7d32,stroke-width:2px;
   classDef eph fill:#ffe0b3,stroke:#f9a825,stroke-width:2px;
@@ -1014,7 +1014,7 @@ flowchart LR
 
 ## jobs (MOD-060)
 
-22 endpoints, 15 durable, 7 ephemeral. Green border = durable, yellow = ephemeral.
+22 endpoints, 19 durable, 3 ephemeral. Green border = durable, yellow = ephemeral.
 
 ```mermaid
 flowchart LR
@@ -1116,15 +1116,15 @@ flowchart LR
   API_261 -->|CALLS| SVC_053
   API_262["API-262<br/>GET /jobs/saved"]:::dur
   API_262 -->|CALLS| SVC_053
-  API_263["API-263<br/>PUT /jobs/:jobId/draft"]:::eph
+  API_263["API-263<br/>PUT /jobs/:jobId/draft"]:::dur
   RULE_033["RULE-033<br/>saveApplicationDraft"]:::logic
   API_263 -->|CALLS| RULE_033
   API_263 -->|CALLS| RULE_088
-  API_264["API-264<br/>GET /jobs/:jobId/draft"]:::eph
+  API_264["API-264<br/>GET /jobs/:jobId/draft"]:::dur
   API_264 -->|CALLS| RULE_088
-  API_265["API-265<br/>DELETE /jobs/:jobId/draft"]:::eph
+  API_265["API-265<br/>DELETE /jobs/:jobId/draft"]:::dur
   API_265 -->|CALLS| RULE_088
-  API_266["API-266<br/>POST /jobs/:jobId/draft/restore"]:::eph
+  API_266["API-266<br/>POST /jobs/:jobId/draft/restore"]:::dur
   RULE_034["RULE-034<br/>restoreApplicationDraftVersion"]:::logic
   API_266 -->|CALLS| RULE_034
   API_266 -->|CALLS| RULE_088

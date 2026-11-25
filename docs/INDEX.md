@@ -74,7 +74,7 @@ Source model and dated verification records, updated 2026-10-23. A source diagra
 | [`system-model/02-flows.md`](system-model/02-flows.md) | Mermaid flowcharts F1 to F7: architecture, auth, jobs and applications, verified work history, Stripe billing, boot and background jobs, web journeys |
 | [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md) | Conflict register (7 resolved, 21 open, with decision records), the condition and business-rule matrix (62 rules) and the completeness audit |
 | [`system-model/06-route-authorization.md`](system-model/06-route-authorization.md) | Who may call each of about 170 more routes, what is durable, 6 fixes and 15 findings (CF-31 to CF-45). Read by a test |
-| [`system-model/MASTER_SYSTEM_MODEL.md`](system-model/MASTER_SYSTEM_MODEL.md) | One consolidated Mermaid system model (2026-11-10) |
+| [`system-model/MASTER_SYSTEM_MODEL.md`](system-model/MASTER_SYSTEM_MODEL.md) | One consolidated Mermaid system model (2026-11-10 snapshot). Its feature and rule tables now link to the registries |
 
 Rules for keeping it true: change a diagram in the same commit as the code it describes; re-check a `path:line` before relying on it (lines drift); add every new contradiction to the conflict register instead of fixing a document silently.
 
@@ -82,7 +82,7 @@ Rules for keeping it true: change a diagram in the same commit as the code it de
 
 | Document | Purpose |
 |---|---|
-| [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 55 migrations, lifecycle and hosted/local boundaries, then (appended) the hosted Supabase migration gate. |
+| [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 56 migrations, lifecycle and hosted/local boundaries, then (appended) the hosted Supabase migration gate. |
 | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 279 unique method/path pairs (282 registrations), request-schema locators, response/error semantics and billing retries. |
 | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
 | [`engineering/PROJECT_MAINTENANCE.md`](engineering/PROJECT_MAINTENANCE.md) | Windows maintenance scripts and their safety limits. |
@@ -122,6 +122,7 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 | [`reports/IMPROVEMENT_PROGRAM_2026-10-10.md`](reports/IMPROVEMENT_PROGRAM_2026-10-10.md) | 2026-10-10 | Improvement program and open risks. |
 | [`reports/AUDITS_2026-10.md`](reports/AUDITS_2026-10.md) | 2026-10-03 to 10-23 | Every October audit, oldest first: production audit (verdict: not ready), final validation, maintenance audit, E2E audit, master repository audit, payment audit, Stripe and Supabase audit. |
 | [`reports/REPOSITORY_STATE_2026-10.md`](reports/REPOSITORY_STATE_2026-10.md) | 2026-10-22 to 10-23 | Architecture and durability review, git and issue reconciliation, release scope and backlog, and the second-pass re-audit with live Stripe/Supabase release gates. |
+| [`reports/DOC_DEDUP_2026-11-25.md`](reports/DOC_DEDUP_2026-11-25.md) | 2026-11-25 | Paragraph- and section-level duplicate scan of every Markdown file, the duplicate-resolution matrix ([groups appendix](reports/DOC_DEDUP_2026-11-25_GROUPS.md)), contradictions, and the doc-to-code sync edits. |
 | [`reports/AUDIT_EVIDENCE_2026-10-21.md`](reports/AUDIT_EVIDENCE_2026-10-21.md) | 2026-10-21 | Evidence ledger (173 features, 248 rules, 28 journeys, routes, migrations and dated tests), converted from JSON to tables; continues in [part 2](reports/AUDIT_EVIDENCE_2026-10-21_PART2.md). |
 
 ## 8. Archive
@@ -155,3 +156,4 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 
 - **2026-10-23:** the [file-by-file inventory](system-model/01-inventory-and-coverage.md#file-by-file-documentation-classification) classified every tracked Markdown document then; four redundant files were consolidated (197 to 193).
 - **2026-11-25:** one documentation home. `PRODUCT_BLUEPRINT/` moved to `docs/blueprint/` (106 files to 49), `Yash_Final_Project_Document/` to `docs/archive/target-blueprint/` (246 files to 40), `BRAIN/` into `docs/history/`, and the rest of `docs/` went from 50 files to 32. The tool output in `graphify-out/` (127 files) and the empty Obsidian vault in `TalentSphere/` were deleted. See [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
+- **2026-11-25 (second pass):** paragraph-level duplicate scan and doc-to-code sync; the copies of the feature and business-rule registries in `system-model/MASTER_SYSTEM_MODEL.md` §4 and §5 were replaced with links. See [`reports/DOC_DEDUP_2026-11-25.md`](reports/DOC_DEDUP_2026-11-25.md).

@@ -1,5 +1,5 @@
 {
-  "commit": "5d67317778b0c9bd4380b7fb4c4e6ed966e073e6",
+  "commit": "d8cb4c159c3c4265c8197d91fb09d4d0e00717fb",
   "date": "2026-11-25",
   "commands": {
     "vitest": "vitest run (root config: unit, integration, security) after pnpm build, in a throwaway copy of the tracked files",
@@ -20,8 +20,8 @@
     },
     {
       "name": "pnpm lint (prettier --check)",
-      "result": "FAIL",
-      "detail": "230 files unformatted: 199 in Yash_Final_Project_Document/, 25 tracked .omc/ agent-state JSON files (root, apps/web, deploy/oracle), 4 in PRODUCT_BLUEPRINT/, plus .claude/launch.json and tests/security/injection-defenses.test.ts. Lint is the first check step in .github/workflows/ci.yml, so CI on main stops there and the later steps never run."
+      "result": "PASS",
+      "detail": "all matched files formatted, including this branch's documentation edits; GitHub Actions CI on main passed for PRs #89 and #90"
     }
   ],
   "suites": {
@@ -33,11 +33,11 @@
       "files": 146
     },
     "vitest-pg": {
-      "total": 66,
-      "passed": 66,
+      "total": 67,
+      "passed": 67,
       "failed": 0,
       "skipped": 0,
-      "files": 15
+      "files": 16
     },
     "node-test": {
       "total": 5,
@@ -912,6 +912,13 @@
     "tests/pg/analytics-consent.test.ts": {
       "runner": "vitest-pg",
       "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/application-drafts.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 1,
       "failed": 0,
       "skipped": 0,
       "failures": []
