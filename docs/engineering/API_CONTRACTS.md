@@ -202,7 +202,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 282 literal registrations, 279 unique method/path pairs; 85 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 85 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), and the two job-alert routes moved to `P` with `job-alert-store.ts` (2026-11-25, no new migration); re-counted from `apps/api/src/durability.ts` on 2026-11-25.
+Measured: 282 literal registrations, 279 unique method/path pairs; 91 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 91 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), and the six connection routes with migration 00057 (2026-11-25); re-counted from `apps/api/src/durability.ts` on 2026-11-25.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -339,12 +339,12 @@ Measured: 282 literal registrations, 279 unique method/path pairs; 85 of them in
 | `POST /api/v1/resumes/:id/export` | `ExportResumeInputSchema` | E |
 | `GET /api/v1/resumes/:id/exports` | handler | E |
 | `DELETE /api/v1/resumes/exports/:exportId` | handler | E |
-| `POST /api/v1/connections/request` | `RequestConnectionInputSchema` | E |
-| `GET /api/v1/connections` | handler | E |
-| `GET /api/v1/connections/status/:targetUserId` | handler | E |
-| `POST /api/v1/connections/:id/respond` | `RespondConnectionInputSchema` | E |
-| `POST /api/v1/connections/:id/withdraw` | handler | E |
-| `DELETE /api/v1/connections/:id` | handler | E |
+| `POST /api/v1/connections/request` | `RequestConnectionInputSchema` | P |
+| `GET /api/v1/connections` | handler | P |
+| `GET /api/v1/connections/status/:targetUserId` | handler | P |
+| `POST /api/v1/connections/:id/respond` | `RespondConnectionInputSchema` | P |
+| `POST /api/v1/connections/:id/withdraw` | handler | P |
+| `DELETE /api/v1/connections/:id` | handler | P |
 | `POST /api/v1/networking/warm-intros/preferences` | `UpdateWarmIntroPreferencesInputSchema` | E |
 | `GET /api/v1/networking/warm-intros/preferences` | handler | E |
 | `GET /api/v1/networking/warm-intros/paths` | handler | E |

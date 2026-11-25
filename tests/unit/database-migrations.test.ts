@@ -448,6 +448,22 @@ describe('Schema content authority (E-04, E-05) — SQL text assertions, does NO
   });
 });
 
+describe('Connections durable (migration 00057, F-09)', () => {
+  it('replaces the directional pair key with an open-pair index and revokes client roles', () => {
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00057_connections_durable.sql'),
+      'utf8'
+    );
+    expect(sql).toContain('DROP CONSTRAINT IF EXISTS uq_connections_pair');
+    expect(sql).toContain('CREATE UNIQUE INDEX IF NOT EXISTS uq_connections_open_pair');
+    expect(sql).toContain('LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id)');
+    expect(sql).toContain("WHERE status IN ('pending', 'accepted')");
+    expect(sql).toContain('REVOKE ALL ON public.connections FROM anon, authenticated;');
+    // Alterations only: no table is dropped and no row is deleted.
+    expect(sql).not.toMatch(/DROP TABLE|DELETE FROM|TRUNCATE/i);
+  });
+});
+
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');

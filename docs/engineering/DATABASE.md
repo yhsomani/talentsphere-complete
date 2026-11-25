@@ -23,6 +23,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 | [job-alert-store.ts](../../apps/api/src/storage/job-alert-store.ts) | `job_alerts` joins user, saved search and job | Alerts from one publish are inserted in one statement; an alert whose saved search was deleted meanwhile is skipped. Owner-scoped list and mark-read; erasure deletes the owner's rows |
 | [saved-job-store.ts](../../apps/api/src/storage/saved-job-store.ts) | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
 | [application-draft-store.ts](../../apps/api/src/storage/application-draft-store.ts) | `application_drafts`, `application_draft_versions` keyed by candidate profile and job | Draft write and version snapshot in one transaction; a stale `previousVersion` is a `CONFLICT`. The `resume_id` foreign key is dropped (00056) because resumes are still in memory; the API checks resume ownership instead |
+| [connection-store.ts](../../apps/api/src/storage/connection-store.ts) | `connections` between two users | Write-through: SQL first, then the in-memory read model, which is rebuilt from the table at boot. Respond and withdraw are optimistic on `updated_at` (stale write is a `CONFLICT`). One open (pending or accepted) row per unordered pair (00057); closed rows stay as history. Erasure deletes rows the person sent or received |
 | [admin-audit-store.ts](../../apps/api/src/storage/admin-audit-store.ts) | `admin_audit_logs` | Append and filtered list; distinct from observability's in-memory sink |
 | [feature-flag-store.ts](../../apps/api/src/storage/feature-flag-store.ts) | `feature_flags` | SQL list/get/upsert; maintenance-mode state is separate |
 | [billing-store.ts](../../apps/api/src/storage/billing-store.ts) | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers` | Transactional state/event writes and customer ownership mapping |
@@ -185,6 +186,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00054_repoint_auth_users_foreign_keys.sql](../../supabase/migrations/00054_repoint_auth_users_foreign_keys.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
 | [00055_certificate_revocations_rls.sql](../../supabase/migrations/00055_certificate_revocations_rls.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
 | [00056_application_drafts_durable.sql](../../supabase/migrations/00056_application_drafts_durable.sql) | Alterations only: drops `application_drafts_resume_id_fkey`, revokes `anon`/`authenticated` on both draft tables (API writes drafts to SQL from PR #87) |
+| [00057_connections_durable.sql](../../supabase/migrations/00057_connections_durable.sql) | Alterations only: replaces `uq_connections_pair` (directional) with `uq_connections_open_pair`, a unique index over the unordered pair for `pending`/`accepted` rows; revokes `anon`/`authenticated` on `connections` |
 
 ---
 

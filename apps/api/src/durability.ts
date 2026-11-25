@@ -87,6 +87,13 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   // Job alerts raised when a published job matches a saved search (migration 00018).
   'GET /api/v1/jobs/alerts',
   'PATCH /api/v1/jobs/alerts/:id/read',
+  // Professional connections (migrations 00010 and 00057).
+  'POST /api/v1/connections/request',
+  'GET /api/v1/connections',
+  'GET /api/v1/connections/status/:targetUserId',
+  'POST /api/v1/connections/:id/respond',
+  'POST /api/v1/connections/:id/withdraw',
+  'DELETE /api/v1/connections/:id',
   // Application drafts and version history (migrations 00019 and 00056).
   'PUT /api/v1/jobs/:jobId/draft',
   'GET /api/v1/jobs/:jobId/draft',
