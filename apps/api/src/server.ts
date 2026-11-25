@@ -186,7 +186,6 @@ import {
   resolveModerationReport,
   createModerationAppeal,
   reviewModerationAppeal,
-  JobAlert,
   createSavedSearch,
   updateSavedSearch,
   matchJobAgainstCriteria,
@@ -851,7 +850,7 @@ export async function buildApp(
   const searchHistoryByUserId = new Map<string, SearchHistoryItem[]>();
   const moderationReportsById = new Map<string, ModerationReport>();
   const moderationAppealsById = new Map<string, ModerationAppeal>();
-  const jobAlertsById = new Map<string, JobAlert>();
+  // Job alerts live in storage.jobAlerts (F-32, migration 00018).
   // Application drafts live in storage.applicationDrafts (F-36, migration 00019).
   const analyticsEvents: AnalyticsEvent[] = [];
 
@@ -2090,10 +2089,7 @@ export async function buildApp(
 
     if (job.status === 'published') {
       const activeSearches = (await storage.savedSearches.listAll()).filter((s) => s.isActive);
-      const alerts = evaluateJobAlertsForPublishedJob(job, activeSearches);
-      for (const alert of alerts) {
-        jobAlertsById.set(alert.id, alert);
-      }
+      await storage.jobAlerts.createMany(evaluateJobAlertsForPublishedJob(job, activeSearches));
     }
 
     auditLogs.push({
@@ -2174,10 +2170,9 @@ export async function buildApp(
 
       if (updated.status === 'published' && job.status !== 'published') {
         const activeSearches = (await storage.savedSearches.listAll()).filter((s) => s.isActive);
-        const alerts = evaluateJobAlertsForPublishedJob(updated, activeSearches);
-        for (const alert of alerts) {
-          jobAlertsById.set(alert.id, alert);
-        }
+        await storage.jobAlerts.createMany(
+          evaluateJobAlertsForPublishedJob(updated, activeSearches)
+        );
       }
 
       return reply.status(200).send({
@@ -10694,9 +10689,7 @@ export async function buildApp(
       }
       skillEndorsementsByRecipientId.delete(session.userId);
       await storage.savedSearches.eraseUser(session.userId);
-      jobAlertsById.forEach((alert, key) => {
-        if (alert.userId === session.userId) jobAlertsById.delete(key);
-      });
+      await storage.jobAlerts.eraseUser(session.userId);
       // The person's own records in the remaining in-memory stores (K-12).
       // Application drafts are keyed by PROFILE id and read only by their owner.
       await storage.applicationDrafts.eraseCandidate(profile.id);
@@ -12375,9 +12368,7 @@ export async function buildApp(
   // 7. List job alerts for candidate
   app.get('/api/v1/jobs/alerts', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const alerts = Array.from(jobAlertsById.values())
-      .filter((a) => a.userId === session.userId)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const alerts = await storage.jobAlerts.listByUser(session.userId);
     return reply.status(200).send({ alerts, total: alerts.length });
   });
 
@@ -12387,15 +12378,7 @@ export async function buildApp(
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
       const { id } = req.params;
-      const alert = jobAlertsById.get(id);
-      if (!alert) {
-        throw new DomainError('NOT_FOUND', `Job alert with ID "${id}" not found.`);
-      }
-      if (alert.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to this alert.');
-      }
-      alert.isRead = true;
-      jobAlertsById.set(id, alert);
+      const alert = await storage.jobAlerts.markRead(id, session.userId);
       return reply.status(200).send({ alert });
     }
   );

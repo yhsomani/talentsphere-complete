@@ -36,6 +36,8 @@ import {
   type ApplicationDraftStore,
 } from './application-draft-store.js';
 
+import { MemoryJobAlertStore, PgJobAlertStore, type JobAlertStore } from './job-alert-store.js';
+
 export type { BillingStore, BillingEventRecord, BillingStateWrite } from './billing-store.js';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
@@ -70,6 +72,8 @@ export interface Storage {
   readonly accountMetadata: AccountMetadataStore;
   readonly savedSearches: SavedSearchStore;
   readonly savedJobs: SavedJobStore;
+  /** Saved-search job alerts (F-32, migration 00018). */
+  readonly jobAlerts: JobAlertStore;
   /** Administrator action trail (F-17, BR-067): durable in pg mode only. */
   readonly adminAudit: AdminAuditStore;
   /** Platform feature flags (F-35): durable in pg mode only. */
@@ -108,6 +112,7 @@ class PgStorage implements Storage {
   readonly accountMetadata: AccountMetadataStore;
   readonly savedSearches: SavedSearchStore;
   readonly savedJobs: SavedJobStore;
+  readonly jobAlerts: JobAlertStore;
   readonly adminAudit: AdminAuditStore;
   /** Platform feature flags (F-35): durable in pg mode only. */
   readonly featureFlags: FeatureFlagStore;
@@ -148,6 +153,7 @@ class PgStorage implements Storage {
     this.erasureRequests = new PgErasureRequestStore(this.pool);
     this.accountMetadata = new PgAccountMetadataStore(this.pool, encryptionKey);
     this.savedSearches = new PgSavedSearchStore(this.pool);
+    this.jobAlerts = new PgJobAlertStore(this.pool);
     this.savedJobs = new PgSavedJobStore(this.pool);
     this.adminAudit = new PgAdminAuditStore(this.pool);
     this.featureFlags = new PgFeatureFlagStore(this.pool);
@@ -268,6 +274,7 @@ class MemoryStorage implements Storage {
   readonly accountMetadata: AccountMetadataStore = new MemoryAccountMetadataStore();
   readonly savedSearches: SavedSearchStore = new MemorySavedSearchStore();
   readonly savedJobs: SavedJobStore = new MemorySavedJobStore();
+  readonly jobAlerts: JobAlertStore = new MemoryJobAlertStore();
   readonly adminAudit: AdminAuditStore = new MemoryAdminAuditStore();
   readonly featureFlags: FeatureFlagStore = new MemoryFeatureFlagStore();
   readonly billing: BillingStore = new MemoryBillingStore();
