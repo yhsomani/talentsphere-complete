@@ -8,7 +8,7 @@
 --      unique index over the unordered pair that covers only open
 --      (pending or accepted) connections. Closed rows stay as history.
 --   2. The API role alone reads and writes connections (there is no Supabase
---      Auth, so the 00010 auth.uid() policies never match). Drop client-role
+--      Auth, so the 00010 Supabase-session policies never match). Drop client-role
 --      access, as 00053, 00055 and 00056 do. RLS stays enabled.
 --              Idempotent; no data change.
 -- ============================================================================
