@@ -7,7 +7,7 @@
 --      the resume belongs to the caller before saving. Restore it once resumes
 --      are durable.
 --   2. The API role alone reads and writes drafts (there is no Supabase Auth,
---      so the auth.uid() policies never match). Drop client-role access, as
+--      so the 00019 Supabase-session policies never match). Drop client-role access, as
 --      00053 and 00055 do. RLS stays enabled.
 --              Idempotent; no data change.
 -- ============================================================================
