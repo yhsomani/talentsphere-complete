@@ -242,4 +242,4 @@ flowchart TD
   Any([Any API call returns 401]) --> Clear["Clear stored token, remember reason,<br/>hard redirect to /login?return="]
 ```
 
-Status of claims in the UI (from the investigator, compared with `docs/reports/FEATURE_STATUS_2026-10-21.md`): the Learning, Network and Resumes pages tell the user their data is not saved permanently; the Assessments page says submitted code is not run or scored; there is no registered service worker, so the footer shows "PWA Installable" and no offline mode exists; Settings offers email and summary-frequency toggles although no digest sending was found.
+Status of claims in the UI (from the investigator, compared with `docs/reports/FEATURE_STATUS_2026-10-21.md`): the Learning and Resumes pages tell the user their data is not saved permanently (the Network page's warning went when connections moved to PostgreSQL in PR #93); the Assessments page says submitted code is not run or scored; there is no registered service worker, so the footer shows "PWA Installable" and no offline mode exists; Settings offers email and summary-frequency toggles although no digest sending was found.

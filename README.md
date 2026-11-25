@@ -24,7 +24,8 @@ established.**
 The API persists accounts, profiles, organizations, jobs, applications, evidence,
 work history, messaging and notifications through a boot-hydrated read model.
 Dedicated SQL stores handle settings, erasure requests, saved searches/bookmarks,
-application drafts, admin audit, feature flags and billing. Run **one API process per database**;
+application drafts, job alerts, professional connections, admin audit, feature flags
+and billing. Run **one API process per database**;
 an advisory lock refuses a second writer.
 
 Stripe Checkout, Customer Portal, signed webhooks and subscription reconciliation
@@ -32,7 +33,7 @@ exist in source. Billing defaults to disabled. Brevo email delivery is opt-in. N
 adapter's presence proves a successful live payment or mailbox delivery. AI uses
 local heuristics; no external model provider is connected.
 
-Learning, assessments, portfolios, resumes, networking and many intelligence
+Learning, assessments, portfolios, resumes and many intelligence
 features retain process-local state. Some write durable evidence while losing
 their originating records on restart. Challenge evaluation is simulated; worker
 batch leases and multi-store erasure have unresolved recovery risks. See the

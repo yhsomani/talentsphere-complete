@@ -352,7 +352,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [docs/governance/GAP_ANALYSIS.md](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/governance/GOVERNANCE.md](../governance/GOVERNANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/governance/IMPLEMENTATION_PLAN.md](../governance/GOVERNANCE.md#talentsphere--implementation_planmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/governance/SOURCE_RECONCILIATION.md](../governance/GOVERNANCE.md#talentsphere--source-reconciliation-v10) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/governance/SOURCE_RECONCILIATION.md](../history/PROJECT_HISTORY.md#talentsphere--source-reconciliation-v10) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/product/PRD.md](../product/PRD.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/quality/OPERATIONS.md](../quality/OPERATIONS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/quality/SECURITY.md](../quality/SECURITY.md) | Living navigation/technical/policy reference; retains distinct topic ownership |

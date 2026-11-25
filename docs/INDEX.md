@@ -60,7 +60,7 @@ docs/
   product/ engineering/ experience/ quality/ registries/ governance/ system-model/
                                as-built references, requirements and registries
   reports/                     dated audits and status snapshots
-  history/                     agent memory and execution history (former BRAIN/ and .agents/teamwork/)
+  history/                     agent memory, execution history and superseded records (former BRAIN/, .agents/teamwork/, MASTER_SYSTEM_MODEL)
   blueprint/                   intended-product blueprint (former PRODUCT_BLUEPRINT/)
   archive/target-blueprint/    earlier redesign blueprint (former Yash_Final_Project_Document/)
   archive/REMOVED_FILES.md     every moved, merged or deleted path
@@ -95,7 +95,7 @@ Source model and dated verification records, updated 2026-10-23. A source diagra
 | [`system-model/02-flows.md`](system-model/02-flows.md) | Mermaid flowcharts F1 to F7: architecture, auth, jobs and applications, verified work history, Stripe billing, boot and background jobs, web journeys |
 | [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md) | Conflict register (7 resolved, 21 open, with decision records), the condition and business-rule matrix (62 rules) and the completeness audit |
 | [`system-model/06-route-authorization.md`](system-model/06-route-authorization.md) | Who may call each of about 170 more routes, what is durable, 6 fixes and 15 findings (CF-31 to CF-45). Read by a test |
-| [`system-model/MASTER_SYSTEM_MODEL.md`](system-model/MASTER_SYSTEM_MODEL.md) | One consolidated Mermaid system model (2026-11-10 snapshot). Its feature and rule tables now link to the registries |
+| [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md#talentsphere--master-system-model) | The former `system-model/MASTER_SYSTEM_MODEL.md`: a hand-built Mermaid system model (2026-11-10 snapshot), superseded by the generated [`project-mindmap/`](../project-mindmap/README.md) |
 
 Rules for keeping it true: change a diagram in the same commit as the code it describes; re-check a `path:line` before relying on it (lines drift); add every new contradiction to the conflict register instead of fixing a document silently.
 
@@ -197,5 +197,6 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 
 - **2026-10-23:** the [file-by-file inventory](system-model/01-inventory-and-coverage.md#file-by-file-documentation-classification) classified every tracked Markdown document then; four redundant files were consolidated (197 to 193).
 - **2026-11-25:** one documentation home. `PRODUCT_BLUEPRINT/` moved to `docs/blueprint/` (106 files to 49), `Yash_Final_Project_Document/` to `docs/archive/target-blueprint/` (246 files to 40), `BRAIN/` into `docs/history/`, and the rest of `docs/` went from 50 files to 32. The tool output in `graphify-out/` (127 files) and the empty Obsidian vault in `TalentSphere/` were deleted. See [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
+- **2026-11-26 (fourth round, by reading):** superseded records moved out of living documents into [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md): `system-model/MASTER_SYSTEM_MODEL.md` (a hand-built 2026-11-10 graph, now replaced by the generated `project-mindmap/`), the greenfield source reconciliation from `governance/GOVERNANCE.md`, and `engineering/TARGET_ARCHITECTURE.md` §11 (an older copy of SSOT §12.6 to §12.12). Stale statements fixed in `README.md`, `quality/TESTING.md`, `system-model/02-flows.md` and the `GOVERNANCE.md` authority list. See [`reports/DOC_DEDUP_2026-11-25.md` §11](reports/DOC_DEDUP_2026-11-25.md#11-fourth-round-by-reading).
 - **2026-11-25 (third round):** the 130 files in `.agents/teamwork/` became two history files, `engineering/PROJECT_MAINTENANCE.md` became §10 of `quality/OPERATIONS.md`, and the canonical set above was mapped. Documentation files went from 429 to 313 with 0 broken relative links. Per-file inventory and classification: [`reports/DOC_DEDUP_2026-11-25.md` §10](reports/DOC_DEDUP_2026-11-25.md#10-third-round-inventory-and-consolidation).
 - **2026-11-25 (second pass):** paragraph-level duplicate scan and doc-to-code sync; the copies of the feature and business-rule registries in `system-model/MASTER_SYSTEM_MODEL.md` §4 and §5 were replaced with links. See [`reports/DOC_DEDUP_2026-11-25.md`](reports/DOC_DEDUP_2026-11-25.md).

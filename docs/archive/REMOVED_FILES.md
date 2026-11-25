@@ -323,7 +323,7 @@
 | `docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md` | [`docs/engineering/DECISIONS.md`](../engineering/DECISIONS.md#adr-016--measure-ui-quality-in-a-real-browser-and-test-it-adversarially) |
 | `docs/governance/GAP_ANALYSIS.md` | [`docs/governance/GOVERNANCE.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) |
 | `docs/governance/IMPLEMENTATION_PLAN.md` | [`docs/governance/GOVERNANCE.md`](../governance/GOVERNANCE.md#talentsphere--implementation_planmd-v60) |
-| `docs/governance/SOURCE_RECONCILIATION.md` | [`docs/governance/GOVERNANCE.md`](../governance/GOVERNANCE.md#talentsphere--source-reconciliation-v10) |
+| `docs/governance/SOURCE_RECONCILIATION.md` | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#talentsphere--source-reconciliation-v10) (in `GOVERNANCE.md` until 2026-11-26, see §5) |
 | `docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md` | [`docs/registries/BUSINESS_RULE_REGISTRY.md`](../registries/BUSINESS_RULE_REGISTRY.md#talentsphere--workflows_and_business_rulesmd-v60) |
 | `docs/reports/ARCHITECTURE_DURABILITY_REPORT.md` | [`docs/reports/REPOSITORY_STATE_2026-10.md`](../reports/REPOSITORY_STATE_2026-10.md#talentsphere--architecture-security-durability--integrations-report) |
 | `docs/reports/AUDIT_EVIDENCE_2026-10-21.json` | [`docs/reports/AUDIT_EVIDENCE_2026-10-21.md`](../reports/AUDIT_EVIDENCE_2026-10-21.md#audit_evidence_2026-10-21json) |
@@ -386,7 +386,7 @@
 | `PRODUCT_BLUEPRINT/09_REGISTERS/OPEN_DECISIONS_REGISTER.md` | [`docs/blueprint/09_REGISTERS/OPEN_DECISIONS_REGISTER.md`](../blueprint/09_REGISTERS/OPEN_DECISIONS_REGISTER.md) |
 | `PRODUCT_BLUEPRINT/09_REGISTERS/RISK_REGISTER.md` | [`docs/blueprint/09_REGISTERS/RISK_REGISTER.md`](../blueprint/09_REGISTERS/RISK_REGISTER.md) |
 | `PRODUCT_BLUEPRINT/09_REGISTERS/SCREEN_REGISTER.md` | [`docs/blueprint/09_REGISTERS/SCREEN_REGISTER.md`](../blueprint/09_REGISTERS/SCREEN_REGISTER.md) |
-| `docs/system-model/TALENTSPHERE_MASTER_SYSTEM_MODEL.md` | [`docs/system-model/MASTER_SYSTEM_MODEL.md`](../system-model/MASTER_SYSTEM_MODEL.md) |
+| `docs/system-model/TALENTSPHERE_MASTER_SYSTEM_MODEL.md` | `docs/system-model/MASTER_SYSTEM_MODEL.md`, merged on 2026-11-26 into [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#talentsphere--master-system-model) (see §5) |
 
 ## 3. Deleted
 
@@ -733,3 +733,13 @@ Each file's full text is kept in the repository at the new location. The `.agent
 | `.agents/teamwork/worker_synthesis_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1dispatchmd) |
 | `.agents/teamwork/worker_synthesis_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1handoffmd) |
 | `.agents/teamwork/worker_synthesis_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1progressmd) |
+
+## 5. Merged on 2026-11-26 (fourth round)
+
+Decided by reading the documents. Commit before the change: `b7d7eb6`. Each moved text sits in its new home under its old title, unchanged except that headings moved down one level; a script compared each block with the original after the move.
+
+| Former file or section | Now in |
+|---|---|
+| `docs/system-model/MASTER_SYSTEM_MODEL.md` (whole file) | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#talentsphere--master-system-model) |
+| `docs/governance/GOVERNANCE.md`, section "TalentSphere — Source Reconciliation v1.0" | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#talentsphere--source-reconciliation-v10) |
+| `docs/engineering/TARGET_ARCHITECTURE.md` §11 "Source-Derived Detailed Architecture Corpus" | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#superseded-target-architecture-corpus-former-target_architecturemd-11) |

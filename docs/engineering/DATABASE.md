@@ -52,7 +52,7 @@ does not automatically include dedicated stores, Stripe calls or queued jobs.
 transactional outbox guaranteeing delivery of every committed event.
 
 Long-tail modules (courses/enrollments/certificates, challenge sessions, resumes,
-portfolio, connections, analytics, reputation and intelligence) retain Maps even
+portfolio, analytics, reputation and intelligence) retain Maps even
 where SQL tables exist. Course/challenge routes may persist evidence while their
 originating records disappear on restart. See the
 [route inventory](API_CONTRACTS.md#complete-static-endpoint-index) and
