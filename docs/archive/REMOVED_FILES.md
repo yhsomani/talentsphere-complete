@@ -1,6 +1,6 @@
 # Removed and moved files
 
-> **Status.** Record of the 2026-11-25 documentation consolidation. Every file below left its old path. Files in sections 1 and 2 were merged or moved, so their text is still in the repository at the new location. Files in section 3 were deleted; restore any of them with `git checkout 08387ec -- <path>`.
+> **Status.** Record of the 2026-11-25 documentation consolidation. Every file below left its old path. Files in sections 1 and 2 were merged or moved, so their text is still in the repository at the new location. Files in section 3 were deleted; restore any of them with `git checkout 08387ec -- <path>`. Section 4 records the second round on the same day, with its own restore commit.
 
 515 paths changed. Commit before the change: `08387ec`.
 
@@ -591,3 +591,145 @@ Content now in: project-mindmap/. 127 files.
 
 </details>
 
+
+## 4. Merged on 2026-11-25 (second round)
+
+131 files. Commit before the change: `2ca2ba8`. Restore any of them with `git checkout 2ca2ba8 -- <path>`.
+
+Each file's full text is kept in the repository at the new location. The `.agents/teamwork/` files are fenced byte for byte under a heading that is their old path; a script compared every block with `git show 2ca2ba8:<path>` and found no differences. `docs/engineering/PROJECT_MAINTENANCE.md` became a section of `OPERATIONS.md` with its headings moved down one level.
+
+`.prettierignore` still lists `.agents/teamwork/`. It is a protected build file, so the stale entry was left; it matches nothing.
+
+| Former file | Now in |
+|---|---|
+| `docs/engineering/PROJECT_MAINTENANCE.md` | [`docs/quality/OPERATIONS.md`](../quality/OPERATIONS.md#10-project-maintenance-tooling) |
+| `.agents/teamwork/ORIGINAL_REQUEST.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkoriginal_requestmd) |
+| `.agents/teamwork/auditor_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1briefingmd) |
+| `.agents/teamwork/auditor_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1contextmd) |
+| `.agents/teamwork/auditor_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1dispatchmd) |
+| `.agents/teamwork/auditor_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1handoffmd) |
+| `.agents/teamwork/auditor_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1progressmd) |
+| `.agents/teamwork/auditor_iter2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_iter2contextmd) |
+| `.agents/teamwork/auditor_iter2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_iter2dispatchmd) |
+| `.agents/teamwork/challenger_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1briefingmd) |
+| `.agents/teamwork/challenger_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1contextmd) |
+| `.agents/teamwork/challenger_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1dispatchmd) |
+| `.agents/teamwork/challenger_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1handoffmd) |
+| `.agents/teamwork/challenger_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1progressmd) |
+| `.agents/teamwork/challenger_2/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2briefingmd) |
+| `.agents/teamwork/challenger_2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2contextmd) |
+| `.agents/teamwork/challenger_2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2dispatchmd) |
+| `.agents/teamwork/challenger_2/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2handoffmd) |
+| `.agents/teamwork/challenger_2/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2progressmd) |
+| `.agents/teamwork/challenger_iter2_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_1contextmd) |
+| `.agents/teamwork/challenger_iter2_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_1dispatchmd) |
+| `.agents/teamwork/challenger_iter2_2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_2contextmd) |
+| `.agents/teamwork/challenger_iter2_2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_2dispatchmd) |
+| `.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1architecture_security_reportmd) |
+| `.agents/teamwork/explorer_arch_sec_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1briefingmd) |
+| `.agents/teamwork/explorer_arch_sec_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1dispatchmd) |
+| `.agents/teamwork/explorer_arch_sec_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1handoffmd) |
+| `.agents/teamwork/explorer_arch_sec_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1progressmd) |
+| `.agents/teamwork/explorer_features_1/all_routes.txt` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1all_routestxt) |
+| `.agents/teamwork/explorer_features_1/analyze_routes.cjs` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1analyze_routescjs) |
+| `.agents/teamwork/explorer_features_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1briefingmd) |
+| `.agents/teamwork/explorer_features_1/build_traceability_matrix.cjs` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1build_traceability_matrixcjs) |
+| `.agents/teamwork/explorer_features_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1dispatchmd) |
+| `.agents/teamwork/explorer_features_1/extract_audit_data.cjs` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1extract_audit_datacjs) |
+| `.agents/teamwork/explorer_features_1/extract_web_calls.cjs` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1extract_web_callscjs) |
+| `.agents/teamwork/explorer_features_1/features_audit_report.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1features_audit_reportmd) |
+| `.agents/teamwork/explorer_features_1/features_raw.json` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1features_rawjson) |
+| `.agents/teamwork/explorer_features_1/generate_report.cjs` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1generate_reportcjs) |
+| `.agents/teamwork/explorer_features_1/group_routes.cjs` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1group_routescjs) |
+| `.agents/teamwork/explorer_features_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1handoffmd) |
+| `.agents/teamwork/explorer_features_1/migration_tables.json` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1migration_tablesjson) |
+| `.agents/teamwork/explorer_features_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1progressmd) |
+| `.agents/teamwork/explorer_features_1/routes_with_lines.json` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1routes_with_linesjson) |
+| `.agents/teamwork/explorer_features_1/traceability_matrix.json` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1traceability_matrixjson) |
+| `.agents/teamwork/explorer_features_1/unique_features.json` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1unique_featuresjson) |
+| `.agents/teamwork/explorer_features_1/web_api_calls.json` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkexplorer_features_1web_api_callsjson) |
+| `.agents/teamwork/explorer_git_issues_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1briefingmd) |
+| `.agents/teamwork/explorer_git_issues_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1dispatchmd) |
+| `.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1git_reconciliation_reportmd) |
+| `.agents/teamwork/explorer_git_issues_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1handoffmd) |
+| `.agents/teamwork/explorer_git_issues_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1progressmd) |
+| `.agents/teamwork/explorer_survey_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1briefingmd) |
+| `.agents/teamwork/explorer_survey_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1contextmd) |
+| `.agents/teamwork/explorer_survey_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1dispatchmd) |
+| `.agents/teamwork/explorer_survey_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1handoffmd) |
+| `.agents/teamwork/explorer_survey_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1progressmd) |
+| `.agents/teamwork/explorer_survey_2/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2briefingmd) |
+| `.agents/teamwork/explorer_survey_2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2contextmd) |
+| `.agents/teamwork/explorer_survey_2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2dispatchmd) |
+| `.agents/teamwork/explorer_survey_2/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2handoffmd) |
+| `.agents/teamwork/explorer_survey_2/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2progressmd) |
+| `.agents/teamwork/explorer_survey_3/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3briefingmd) |
+| `.agents/teamwork/explorer_survey_3/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3contextmd) |
+| `.agents/teamwork/explorer_survey_3/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3dispatchmd) |
+| `.agents/teamwork/explorer_survey_3/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3handoffmd) |
+| `.agents/teamwork/explorer_survey_3/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3progressmd) |
+| `.agents/teamwork/orchestrator_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1briefingmd) |
+| `.agents/teamwork/orchestrator_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1contextmd) |
+| `.agents/teamwork/orchestrator_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1dispatchmd) |
+| `.agents/teamwork/orchestrator_1/GATE_STATUS.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1gate_statusmd) |
+| `.agents/teamwork/orchestrator_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1progressmd) |
+| `.agents/teamwork/orchestrator_1/PROJECT.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1projectmd) |
+| `.agents/teamwork/orchestrator_1/TEST_INFRA.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1test_inframd) |
+| `.agents/teamwork/reviewer_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1briefingmd) |
+| `.agents/teamwork/reviewer_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1contextmd) |
+| `.agents/teamwork/reviewer_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1dispatchmd) |
+| `.agents/teamwork/reviewer_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1handoffmd) |
+| `.agents/teamwork/reviewer_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1progressmd) |
+| `.agents/teamwork/reviewer_2/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2briefingmd) |
+| `.agents/teamwork/reviewer_2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2contextmd) |
+| `.agents/teamwork/reviewer_2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2dispatchmd) |
+| `.agents/teamwork/reviewer_2/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2handoffmd) |
+| `.agents/teamwork/reviewer_2/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2progressmd) |
+| `.agents/teamwork/reviewer_audit_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1briefingmd) |
+| `.agents/teamwork/reviewer_audit_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1dispatchmd) |
+| `.agents/teamwork/reviewer_audit_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1handoffmd) |
+| `.agents/teamwork/reviewer_audit_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1progressmd) |
+| `.agents/teamwork/reviewer_iter2_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_1contextmd) |
+| `.agents/teamwork/reviewer_iter2_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_1dispatchmd) |
+| `.agents/teamwork/reviewer_iter2_2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_2contextmd) |
+| `.agents/teamwork/reviewer_iter2_2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_2dispatchmd) |
+| `.agents/teamwork/sentinel/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworksentinelbriefingmd) |
+| `.agents/teamwork/sentinel/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworksentinelhandoffmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1briefingmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1dispatchmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1gate_statusmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1handoffmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/plan.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1planmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1progressmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1projectmd) |
+| `.agents/teamwork/teamwork_preview_orchestrator_1/README.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1readmemd) |
+| `.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1briefingmd) |
+| `.agents/teamwork/teamwork_preview_victory_auditor_1/count_routes.js` | [`docs/history/AGENT_TEAMWORK_2026-10_DATA.md`](../history/AGENT_TEAMWORK_2026-10_DATA.md#agentsteamworkteamwork_preview_victory_auditor_1count_routesjs) |
+| `.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1dispatchmd) |
+| `.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1handoffmd) |
+| `.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1progressmd) |
+| `.agents/teamwork/teamwork_preview_victory_auditor_1/README.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1readmemd) |
+| `.agents/teamwork/test_writer_e2e_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1briefingmd) |
+| `.agents/teamwork/test_writer_e2e_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1contextmd) |
+| `.agents/teamwork/test_writer_e2e_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1dispatchmd) |
+| `.agents/teamwork/test_writer_e2e_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1handoffmd) |
+| `.agents/teamwork/test_writer_e2e_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1progressmd) |
+| `.agents/teamwork/worker_baseline_diag_1/baseline_report.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1baseline_reportmd) |
+| `.agents/teamwork/worker_baseline_diag_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1briefingmd) |
+| `.agents/teamwork/worker_baseline_diag_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1dispatchmd) |
+| `.agents/teamwork/worker_baseline_diag_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1handoffmd) |
+| `.agents/teamwork/worker_baseline_diag_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1progressmd) |
+| `.agents/teamwork/worker_impl_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1briefingmd) |
+| `.agents/teamwork/worker_impl_1/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1contextmd) |
+| `.agents/teamwork/worker_impl_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1dispatchmd) |
+| `.agents/teamwork/worker_impl_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1handoffmd) |
+| `.agents/teamwork/worker_impl_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1progressmd) |
+| `.agents/teamwork/worker_impl_2/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2briefingmd) |
+| `.agents/teamwork/worker_impl_2/context.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2contextmd) |
+| `.agents/teamwork/worker_impl_2/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2dispatchmd) |
+| `.agents/teamwork/worker_impl_2/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2handoffmd) |
+| `.agents/teamwork/worker_impl_2/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2progressmd) |
+| `.agents/teamwork/worker_synthesis_1/BRIEFING.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1briefingmd) |
+| `.agents/teamwork/worker_synthesis_1/DISPATCH.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1dispatchmd) |
+| `.agents/teamwork/worker_synthesis_1/handoff.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1handoffmd) |
+| `.agents/teamwork/worker_synthesis_1/progress.md` | [`docs/history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1progressmd) |

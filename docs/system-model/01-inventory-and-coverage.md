@@ -1,6 +1,6 @@
 # Implementation inventory and documentation coverage
 
-> **Path note (2026-11-25).** This is a 2026-10-23 snapshot. File names in the classification tables below are the paths at that date. On 2026-11-25 the documentation was consolidated into `docs/`: for the current location of any old path, see [`../archive/REMOVED_FILES.md`](../archive/REMOVED_FILES.md) and [`../INDEX.md`](../INDEX.md).
+> **Path note (2026-11-25).** This is a 2026-10-23 snapshot. File names in the classification tables below are the paths at that date. On 2026-11-25 the documentation was consolidated into `docs/`: for the current location of any old path, see [`../archive/REMOVED_FILES.md`](../archive/REMOVED_FILES.md) and [`../INDEX.md`](../INDEX.md). In a second round the same day, the `.agents/teamwork/` files were merged verbatim into [`../history/AGENT_TEAMWORK_2026-10.md`](../history/AGENT_TEAMWORK_2026-10.md) and its `_DATA` companion; the links in the tables below point to their sections.
 
 Source snapshot: `431c425a33f4bd97da73dd966ed28b9acfe1398c`, 2026-10-23.
 Initial working tree: clean. During this work, another actor committed the first documentation edits as `335e9827`; this auditor did not commit or stage them. Comparisons use the original source snapshot, not only the current working-tree diff. This documentation-only audit preserves `SSOT.md`
@@ -171,7 +171,7 @@ useful content:
 | --- | --- |
 | Root `ORIGINAL_REQUEST.md` | Original Windows maintenance requirements in [maintenance archive](../reports/AUDITS_2026-10.md#original-windows-tool-requirements) |
 | Root `TEST_READY.md` | Full dated test record and defect note in [maintenance archive](../reports/AUDITS_2026-10.md#historical-windows-test-readiness) |
-| Root `PROJECT.md` | Byte-identical existing [.agents plan](../../.agents/teamwork/orchestrator_1/PROJECT.md); linked from maintenance archive |
+| Root `PROJECT.md` | Byte-identical existing [.agents plan](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1projectmd); linked from maintenance archive |
 | `HOSTED_SUPABASE_DEPENDENCY_AUDIT.md` | [Hosted migration gate](../engineering/DATABASE.md#hosted-supabase-migration-gate-and-dependency-audit), including static audit command and prerequisites |
 
 137 substantive API-reference lines and 51 database-reference lines previously
@@ -190,7 +190,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | File | Classification / disposition |
 | --- | --- |
 | `ORIGINAL_REQUEST.md` | Consolidated: original requirements retained in maintenance archive |
-| `PROJECT.md` | Consolidated: byte-identical plan retained in `.agents/teamwork/orchestrator_1/PROJECT.md` |
+| `PROJECT.md` | Consolidated: byte-identical plan retained in `.agents/teamwork/orchestrator_1/PROJECT.md` (since 2026-11-25 a section of [AGENT_TEAMWORK_2026-10.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1projectmd)) |
 | `TEST_READY.md` | Consolidated: historical test evidence retained in maintenance archive |
 | `docs/engineering/HOSTED_SUPABASE_DEPENDENCY_AUDIT.md` | Consolidated: hosted migration gate owns dependency audit |
 | [.agents/skills/autofix/SKILL.md](../../.agents/skills/autofix/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
@@ -198,122 +198,122 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [.agents/skills/code-review/SKILL.md](../../.agents/skills/code-review/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [.agents/skills/code-review/references/auth-recovery.md](../../.agents/skills/code-review/references/auth-recovery.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [.agents/skills/code-review/references/cli-workflows.md](../../.agents/skills/code-review/references/cli-workflows.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-| [.agents/teamwork/ORIGINAL_REQUEST.md](../../.agents/teamwork/ORIGINAL_REQUEST.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_1/BRIEFING.md](../../.agents/teamwork/auditor_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_1/DISPATCH.md](../../.agents/teamwork/auditor_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_1/context.md](../../.agents/teamwork/auditor_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_1/handoff.md](../../.agents/teamwork/auditor_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_1/progress.md](../../.agents/teamwork/auditor_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_iter2/DISPATCH.md](../../.agents/teamwork/auditor_iter2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/auditor_iter2/context.md](../../.agents/teamwork/auditor_iter2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_1/BRIEFING.md](../../.agents/teamwork/challenger_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_1/DISPATCH.md](../../.agents/teamwork/challenger_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_1/context.md](../../.agents/teamwork/challenger_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_1/handoff.md](../../.agents/teamwork/challenger_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_1/progress.md](../../.agents/teamwork/challenger_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_2/BRIEFING.md](../../.agents/teamwork/challenger_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_2/DISPATCH.md](../../.agents/teamwork/challenger_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_2/context.md](../../.agents/teamwork/challenger_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_2/handoff.md](../../.agents/teamwork/challenger_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_2/progress.md](../../.agents/teamwork/challenger_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_iter2_1/DISPATCH.md](../../.agents/teamwork/challenger_iter2_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_iter2_1/context.md](../../.agents/teamwork/challenger_iter2_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_iter2_2/DISPATCH.md](../../.agents/teamwork/challenger_iter2_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/challenger_iter2_2/context.md](../../.agents/teamwork/challenger_iter2_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_arch_sec_1/BRIEFING.md](../../.agents/teamwork/explorer_arch_sec_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_arch_sec_1/DISPATCH.md](../../.agents/teamwork/explorer_arch_sec_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md](../../.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_arch_sec_1/handoff.md](../../.agents/teamwork/explorer_arch_sec_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_arch_sec_1/progress.md](../../.agents/teamwork/explorer_arch_sec_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_features_1/BRIEFING.md](../../.agents/teamwork/explorer_features_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_features_1/DISPATCH.md](../../.agents/teamwork/explorer_features_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_features_1/features_audit_report.md](../../.agents/teamwork/explorer_features_1/features_audit_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_features_1/handoff.md](../../.agents/teamwork/explorer_features_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_features_1/progress.md](../../.agents/teamwork/explorer_features_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_git_issues_1/BRIEFING.md](../../.agents/teamwork/explorer_git_issues_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_git_issues_1/DISPATCH.md](../../.agents/teamwork/explorer_git_issues_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md](../../.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_git_issues_1/handoff.md](../../.agents/teamwork/explorer_git_issues_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_git_issues_1/progress.md](../../.agents/teamwork/explorer_git_issues_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_1/BRIEFING.md](../../.agents/teamwork/explorer_survey_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_1/DISPATCH.md](../../.agents/teamwork/explorer_survey_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_1/context.md](../../.agents/teamwork/explorer_survey_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_1/handoff.md](../../.agents/teamwork/explorer_survey_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_1/progress.md](../../.agents/teamwork/explorer_survey_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_2/BRIEFING.md](../../.agents/teamwork/explorer_survey_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_2/DISPATCH.md](../../.agents/teamwork/explorer_survey_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_2/context.md](../../.agents/teamwork/explorer_survey_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_2/handoff.md](../../.agents/teamwork/explorer_survey_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_2/progress.md](../../.agents/teamwork/explorer_survey_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_3/BRIEFING.md](../../.agents/teamwork/explorer_survey_3/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_3/DISPATCH.md](../../.agents/teamwork/explorer_survey_3/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_3/context.md](../../.agents/teamwork/explorer_survey_3/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_3/handoff.md](../../.agents/teamwork/explorer_survey_3/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/explorer_survey_3/progress.md](../../.agents/teamwork/explorer_survey_3/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/BRIEFING.md](../../.agents/teamwork/orchestrator_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/DISPATCH.md](../../.agents/teamwork/orchestrator_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/GATE_STATUS.md](../../.agents/teamwork/orchestrator_1/GATE_STATUS.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/PROJECT.md](../../.agents/teamwork/orchestrator_1/PROJECT.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/TEST_INFRA.md](../../.agents/teamwork/orchestrator_1/TEST_INFRA.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/context.md](../../.agents/teamwork/orchestrator_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/orchestrator_1/progress.md](../../.agents/teamwork/orchestrator_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_1/BRIEFING.md](../../.agents/teamwork/reviewer_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_1/DISPATCH.md](../../.agents/teamwork/reviewer_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_1/context.md](../../.agents/teamwork/reviewer_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_1/handoff.md](../../.agents/teamwork/reviewer_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_1/progress.md](../../.agents/teamwork/reviewer_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_2/BRIEFING.md](../../.agents/teamwork/reviewer_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_2/DISPATCH.md](../../.agents/teamwork/reviewer_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_2/context.md](../../.agents/teamwork/reviewer_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_2/handoff.md](../../.agents/teamwork/reviewer_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_2/progress.md](../../.agents/teamwork/reviewer_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_audit_1/BRIEFING.md](../../.agents/teamwork/reviewer_audit_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_audit_1/DISPATCH.md](../../.agents/teamwork/reviewer_audit_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_audit_1/handoff.md](../../.agents/teamwork/reviewer_audit_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_audit_1/progress.md](../../.agents/teamwork/reviewer_audit_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_iter2_1/DISPATCH.md](../../.agents/teamwork/reviewer_iter2_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_iter2_1/context.md](../../.agents/teamwork/reviewer_iter2_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_iter2_2/DISPATCH.md](../../.agents/teamwork/reviewer_iter2_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/reviewer_iter2_2/context.md](../../.agents/teamwork/reviewer_iter2_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/sentinel/BRIEFING.md](../../.agents/teamwork/sentinel/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/sentinel/handoff.md](../../.agents/teamwork/sentinel/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/README.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/README.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/plan.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/plan.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_orchestrator_1/progress.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_victory_auditor_1/README.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/README.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/test_writer_e2e_1/BRIEFING.md](../../.agents/teamwork/test_writer_e2e_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/test_writer_e2e_1/DISPATCH.md](../../.agents/teamwork/test_writer_e2e_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/test_writer_e2e_1/context.md](../../.agents/teamwork/test_writer_e2e_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/test_writer_e2e_1/handoff.md](../../.agents/teamwork/test_writer_e2e_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/test_writer_e2e_1/progress.md](../../.agents/teamwork/test_writer_e2e_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_baseline_diag_1/BRIEFING.md](../../.agents/teamwork/worker_baseline_diag_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_baseline_diag_1/DISPATCH.md](../../.agents/teamwork/worker_baseline_diag_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_baseline_diag_1/baseline_report.md](../../.agents/teamwork/worker_baseline_diag_1/baseline_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_baseline_diag_1/handoff.md](../../.agents/teamwork/worker_baseline_diag_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_baseline_diag_1/progress.md](../../.agents/teamwork/worker_baseline_diag_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_1/BRIEFING.md](../../.agents/teamwork/worker_impl_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_1/DISPATCH.md](../../.agents/teamwork/worker_impl_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_1/context.md](../../.agents/teamwork/worker_impl_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_1/handoff.md](../../.agents/teamwork/worker_impl_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_1/progress.md](../../.agents/teamwork/worker_impl_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_2/BRIEFING.md](../../.agents/teamwork/worker_impl_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_2/DISPATCH.md](../../.agents/teamwork/worker_impl_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_2/context.md](../../.agents/teamwork/worker_impl_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_2/handoff.md](../../.agents/teamwork/worker_impl_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_impl_2/progress.md](../../.agents/teamwork/worker_impl_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_synthesis_1/BRIEFING.md](../../.agents/teamwork/worker_synthesis_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_synthesis_1/DISPATCH.md](../../.agents/teamwork/worker_synthesis_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_synthesis_1/handoff.md](../../.agents/teamwork/worker_synthesis_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-| [.agents/teamwork/worker_synthesis_1/progress.md](../../.agents/teamwork/worker_synthesis_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/ORIGINAL_REQUEST.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkoriginal_requestmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_iter2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_iter2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/auditor_iter2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkauditor_iter2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_2/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_2/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_2/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_2progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_iter2_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_iter2_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_iter2_2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/challenger_iter2_2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkchallenger_iter2_2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_arch_sec_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_arch_sec_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1architecture_security_reportmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_arch_sec_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_arch_sec_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_arch_sec_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_features_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_features_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_features_1/features_audit_report.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1features_audit_reportmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_features_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_features_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_features_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_git_issues_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_git_issues_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1git_reconciliation_reportmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_git_issues_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_git_issues_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_git_issues_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_2/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_2/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_2/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_2progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_3/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_3/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_3/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_3/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/explorer_survey_3/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkexplorer_survey_3progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/GATE_STATUS.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1gate_statusmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/PROJECT.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1projectmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/TEST_INFRA.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1test_inframd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/orchestrator_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkorchestrator_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_2/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_2/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_2/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_2progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_audit_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_audit_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_audit_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_audit_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_audit_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_iter2_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_iter2_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_iter2_2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/reviewer_iter2_2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkreviewer_iter2_2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/sentinel/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworksentinelbriefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/sentinel/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworksentinelhandoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1gate_statusmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1projectmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/README.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1readmemd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/plan.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1planmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_orchestrator_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_orchestrator_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_victory_auditor_1/README.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1readmemd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkteamwork_preview_victory_auditor_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/test_writer_e2e_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/test_writer_e2e_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/test_writer_e2e_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/test_writer_e2e_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/test_writer_e2e_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworktest_writer_e2e_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_baseline_diag_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_baseline_diag_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_baseline_diag_1/baseline_report.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1baseline_reportmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_baseline_diag_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_baseline_diag_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_baseline_diag_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_1/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_2/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_2/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_2/context.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2contextmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_2/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_impl_2/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_impl_2progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_synthesis_1/BRIEFING.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1briefingmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_synthesis_1/DISPATCH.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1dispatchmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_synthesis_1/handoff.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1handoffmd) | Historical agent briefing/plan/evidence; retained for provenance |
+| [.agents/teamwork/worker_synthesis_1/progress.md](../history/AGENT_TEAMWORK_2026-10.md#agentsteamworkworker_synthesis_1progressmd) | Historical agent briefing/plan/evidence; retained for provenance |
 | [.claude/commands/reticle.md](../../.claude/commands/reticle.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [.claude/skills/autofix/SKILL.md](../../.claude/skills/autofix/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [.claude/skills/autofix/github.md](../../.claude/skills/autofix/github.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
@@ -341,7 +341,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [docs/engineering/CODE_STYLE.md](../engineering/CODE_STYLE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/DATABASE.md](../engineering/DATABASE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md](../engineering/DATABASE.md#hosted-supabase-migration-gate-and-dependency-audit) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [docs/engineering/PROJECT_MAINTENANCE.md](../engineering/PROJECT_MAINTENANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+| [docs/engineering/PROJECT_MAINTENANCE.md](../quality/OPERATIONS.md#10-project-maintenance-tooling) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/TARGET_ARCHITECTURE.md](../engineering/TARGET_ARCHITECTURE.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/engineering/TRD.md](../engineering/TARGET_ARCHITECTURE.md#talentsphere--trdmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/engineering/adr/ADR-015-core-loop-persistence.md](../engineering/DECISIONS.md#adr-015--persist-the-core-career-loop-keep-the-apis-maps-as-a-read-model) | Living navigation/technical/policy reference; retains distinct topic ownership |

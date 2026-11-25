@@ -2,7 +2,7 @@
 
 The single entry point to the project's documentation. Every project document is a Markdown file under `docs/`, except the rule and entry files at the repository root and the generated [`project-mindmap/`](../project-mindmap/README.md). Links are relative to this file; `../` reaches the repository root.
 
-The documentation was consolidated on 2026-11-25: about 580 files in eight folders became about 150 Markdown files. Every old path, and where its content went, is listed in [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
+The documentation was consolidated on 2026-11-25: about 580 files in eight folders became about 150 Markdown files, and a third round the same day merged the 130 agent working files from `.agents/teamwork/`. Every old path, and where its content went, is listed in [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
 
 ## Start here
 
@@ -19,6 +19,25 @@ The documentation was consolidated on 2026-11-25: about 580 files in eight folde
 | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
 | The full intended product, module by module (not ratified) | [`blueprint/README.md`](blueprint/README.md) |
 | Coding-agent workflow | [`../AGENTS.md`](../AGENTS.md), [`../CLAUDE.md`](../CLAUDE.md) |
+
+## Canonical set
+
+The minimal documentation set, mapped onto the files that already hold each subject. One file owns each subject; the others link to it.
+
+| Subject | Canonical file | Also read |
+|---|---|---|
+| Project single source of truth (purpose, scope, users, modules, intended rules) | [`../SSOT.md`](../SSOT.md) | [`product/PRD.md`](product/PRD.md) (short product summary) |
+| Architecture (as built) | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) (intended, not built) |
+| Feature catalog, module to nano-feature | [`../project-mindmap/catalog/FEATURE_CATALOG.md`](../project-mindmap/catalog/FEATURE_CATALOG.md) (generated) | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) (feature IDs) |
+| User journeys and navigation | [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md), [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | [`../project-mindmap/catalog/JOURNEY_GRAPHS.md`](../project-mindmap/catalog/JOURNEY_GRAPHS.md) (journeys proven by e2e) |
+| Business rules, permissions, state transitions | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | [`system-model/06-route-authorization.md`](system-model/06-route-authorization.md), [`../project-mindmap/catalog/STATE_GRAPHS.md`](../project-mindmap/catalog/STATE_GRAPHS.md) |
+| Data and API | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md), [`engineering/DATABASE.md`](engineering/DATABASE.md) | [`../project-mindmap/catalog/API_DEPENDENCY_GRAPH.md`](../project-mindmap/catalog/API_DEPENDENCY_GRAPH.md), [`../project-mindmap/catalog/DATABASE_GRAPH.md`](../project-mindmap/catalog/DATABASE_GRAPH.md), [`../project-mindmap/catalog/DATA_FLOW_GRAPHS.md`](../project-mindmap/catalog/DATA_FLOW_GRAPHS.md) |
+| Engineering quality (security, testing, operations, reliability) | [`quality/SECURITY.md`](quality/SECURITY.md), [`quality/TESTING.md`](quality/TESTING.md), [`quality/OPERATIONS.md`](quality/OPERATIONS.md) | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md), [`../project-mindmap/catalog/TEST_TRACEABILITY.md`](../project-mindmap/catalog/TEST_TRACEABILITY.md) |
+| Implementation tracker | [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) | GitHub issues and pull requests |
+| Decisions | [Decisions](#decisions) below (an index: ADRs in [`engineering/DECISIONS.md`](engineering/DECISIONS.md), open conflicts in [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21)) | |
+| Project graph and mind map views | [`../project-mindmap/README.md`](../project-mindmap/README.md) (one machine-readable dataset, `master/MASTER_PROJECT_GRAPH.json`, and the views generated from it) | [`catalog/GRAPH_VALIDATION.md`](../project-mindmap/catalog/GRAPH_VALIDATION.md) |
+
+Two open product contradictions stay as owner decisions, not edits: **C-8** (privacy threshold, k ≥ 10 in SSOT versus k ≥ 5 in BR-158 and BR-178) and **C-22** (rule text drift for BR-065, BR-066, BR-35 and BR-208). See [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and tracker row T-015.
 
 ## Authority order
 
@@ -41,7 +60,7 @@ docs/
   product/ engineering/ experience/ quality/ registries/ governance/ system-model/
                                as-built references, requirements and registries
   reports/                     dated audits and status snapshots
-  history/                     agent memory and execution history (former BRAIN/)
+  history/                     agent memory and execution history (former BRAIN/ and .agents/teamwork/)
   blueprint/                   intended-product blueprint (former PRODUCT_BLUEPRINT/)
   archive/target-blueprint/    earlier redesign blueprint (former Yash_Final_Project_Document/)
   archive/REMOVED_FILES.md     every moved, merged or deleted path
@@ -87,7 +106,7 @@ Rules for keeping it true: change a diagram in the same commit as the code it de
 | [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 57 migrations, lifecycle and hosted/local boundaries, then (appended) the hosted Supabase migration gate. |
 | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 279 unique method/path pairs (282 registrations), request-schema locators, response/error semantics and billing retries. |
 | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
-| [`engineering/PROJECT_MAINTENANCE.md`](engineering/PROJECT_MAINTENANCE.md) | Windows maintenance scripts and their safety limits. |
+| [`quality/OPERATIONS.md` §10](quality/OPERATIONS.md#10-project-maintenance-tooling) | Windows maintenance scripts and their safety limits. |
 | [`experience/UI_UX_DESIGN_SYSTEM.md`](experience/UI_UX_DESIGN_SYSTEM.md) | Design tokens, components, accessibility (WCAG 2.2 AA). |
 | [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | Routes, navigation guards, state transitions. |
 
@@ -151,6 +170,7 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 |---|---|
 | [`archive/target-blueprint/README.md`](archive/target-blueprint/README.md) | The earlier greenfield redesign blueprint (former `Yash_Final_Project_Document/`), one file per numbered section (`00` to `30` and `99`; large sections in parts). CSV, JSON and YAML became Markdown. Its content was mined into `blueprint/`. |
 | [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md) | Agent conceptual model, execution memory and audit log (former `BRAIN/`), and the 2026-10-21 maintenance plan. |
+| [`history/AGENT_TEAMWORK_2026-10.md`](history/AGENT_TEAMWORK_2026-10.md) | The 116 Markdown working files of the October 2026 multi-agent audit (former `.agents/teamwork/`), byte for byte; its scripts and JSON output are in [`AGENT_TEAMWORK_2026-10_DATA.md`](history/AGENT_TEAMWORK_2026-10_DATA.md). |
 | [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md) | Every path removed on 2026-11-25 and where its content is now, with the commit to restore from. |
 
 ## 9. Agent and tooling instructions
@@ -162,6 +182,7 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 | [`../GEMINI.md`](../GEMINI.md) | Pointer to `AGENTS.md` for Gemini. |
 | [`../RETICLE.md`](../RETICLE.md) | Full Reticle verification rules. |
 | [`../.claude/commands/reticle.md`](../.claude/commands/reticle.md) | `/reticle` skill: detect, connect, drive one flow, report. |
+| `../.claude/skills/` and `../.agents/skills/` | CodeRabbit review skills. The two folders are byte-identical on purpose: each agent tool reads its own folder. |
 
 ## Conventions
 
@@ -176,4 +197,5 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 
 - **2026-10-23:** the [file-by-file inventory](system-model/01-inventory-and-coverage.md#file-by-file-documentation-classification) classified every tracked Markdown document then; four redundant files were consolidated (197 to 193).
 - **2026-11-25:** one documentation home. `PRODUCT_BLUEPRINT/` moved to `docs/blueprint/` (106 files to 49), `Yash_Final_Project_Document/` to `docs/archive/target-blueprint/` (246 files to 40), `BRAIN/` into `docs/history/`, and the rest of `docs/` went from 50 files to 32. The tool output in `graphify-out/` (127 files) and the empty Obsidian vault in `TalentSphere/` were deleted. See [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
+- **2026-11-25 (third round):** the 130 files in `.agents/teamwork/` became two history files, `engineering/PROJECT_MAINTENANCE.md` became §10 of `quality/OPERATIONS.md`, and the canonical set above was mapped. Documentation files went from 429 to 313 with 0 broken relative links. Per-file inventory and classification: [`reports/DOC_DEDUP_2026-11-25.md` §10](reports/DOC_DEDUP_2026-11-25.md#10-third-round-inventory-and-consolidation).
 - **2026-11-25 (second pass):** paragraph-level duplicate scan and doc-to-code sync; the copies of the feature and business-rule registries in `system-model/MASTER_SYSTEM_MODEL.md` §4 and §5 were replaced with links. See [`reports/DOC_DEDUP_2026-11-25.md`](reports/DOC_DEDUP_2026-11-25.md).
