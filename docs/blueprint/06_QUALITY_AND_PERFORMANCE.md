@@ -1093,7 +1093,7 @@ Informed by: [TESTING.md](../quality/TESTING.md) (layer list, honesty baseline),
 
 _Former file: `PRODUCT_BLUEPRINT/06_QUALITY_AND_PERFORMANCE/03_ENGINEERING_STANDARDS.md`._
 
-Status: intended standards for building the complete TalentSphere product. Input: [CODE_STYLE.md](../engineering/CODE_STYLE.md) (v6.0), which remains authoritative for the rules it states; this document extends it and cites it as `[SRC: CODE_STYLE §n]`. Other inputs: [API_CONTRACTS.md](../engineering/API_CONTRACTS.md), [DATABASE.md](../engineering/DATABASE.md), [PROJECT_MAINTENANCE.md](../engineering/PROJECT_MAINTENANCE.md), CLAUDE.md rules. Evidence tags per [CONVENTIONS](README.md#blueprint-conventions). Numeric thresholds are `[PROP]` with an `OD-ENG-` id in section 20.
+Status: intended standards for building the complete TalentSphere product. Input: [CODE_STYLE.md](../engineering/CODE_STYLE.md) (v6.0), which remains authoritative for the rules it states; this document extends it and cites it as `[SRC: CODE_STYLE §n]`. Other inputs: [API_CONTRACTS.md](../engineering/API_CONTRACTS.md), [DATABASE.md](../engineering/DATABASE.md), [PROJECT_MAINTENANCE.md](../quality/OPERATIONS.md#10-project-maintenance-tooling), CLAUDE.md rules. Evidence tags per [CONVENTIONS](README.md#blueprint-conventions). Numeric thresholds are `[PROP]` with an `OD-ENG-` id in section 20.
 
 Rule wording: MUST and MUST NOT are enforced by CI or review; SHOULD requires a written reason to deviate.
 
