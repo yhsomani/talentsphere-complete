@@ -130,7 +130,7 @@ localhost origin for testing.
   response alone does not establish worker processing.
 - For ordinary local PostgreSQL, apply migrations with `pnpm db:migrate` (`scripts/migrate.mjs`: one transaction per
   file, `schema_migrations` ledger, re-running is a no-op). CI applies all migrations to
-  an empty database and re-runs the runner on every push. Hosted Supabase must use the separate [migration gate](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md); the local runner refuses it.
+  an empty database and re-runs the runner on every push. Hosted Supabase must use the separate [migration gate](../engineering/DATABASE.md#hosted-supabase-migration-gate-and-dependency-audit); the local runner refuses it.
 - Migration `00043` builds a case-insensitive unique index on `users.email`; on a database
   that already holds two emails differing only by case it fails — de-duplicate first.
 - **Rows changed directly in SQL are seen by the API only after a restart** (the read

@@ -8,7 +8,7 @@ passed with emission and incremental output disabled. Lint failed on seven files
 These tests reused existing built workspace dependencies; they do not establish a
 fresh source build, PostgreSQL behavior, browser acceptance or deployment readiness.
 See the [audit](../reports/FEATURE_STATUS_2026-10-21.md) and
-[evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json) for commands and scope.
+[evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.md#audit_evidence_2026-10-21json) for commands and scope.
 
 The assessment suite currently accepts simulated scoring, and the injection scan
 can pass when its external grep command is unavailable. Passing assertions must
@@ -23,7 +23,7 @@ remain outstanding; documentation edits do not require Reticle.
 
 For the 2026-10-23 documentation pass, current checks and limitations are recorded
 in [the coverage inventory](../system-model/01-inventory-and-coverage.md).
-The historical counts above and the [system-model test record](../system-model/05-audit.md)
+The historical counts above and the [system-model test record](../system-model/03-conflicts-conditions-audit.md#system-model-05--audit-traceability-sample-and-limits)
 were not rerun as application acceptance.
 
 The root `typecheck` runs `tsc -b`, which emits protected files. A per-project

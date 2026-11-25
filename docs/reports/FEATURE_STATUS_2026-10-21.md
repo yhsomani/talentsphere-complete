@@ -14,7 +14,7 @@ The previous assessment of 16 implemented / 78 partial / 75 absent is preserved 
 
 Recommend a restricted, owner-approved beta around identity, profile, evidence verification, job discovery/application, recruiter review, messaging and account controls. The PRD's GA loop also requires learning, assessment/practice, portfolio, outcomes and career progression. A narrower beta must not silently redefine GA. Keep payment, predictive hiring, proctoring and other gated capabilities behind their existing decisions. The [delivery plan](FEATURE_PLAN_2026-10-21.md) separates release urgency from the unchanged registry scores.
 
-**Audit completeness:** all 173 features, 248 business rules, 28 journeys, 274 direct route registrations, 51 migration files and 684 tracked files are inventoried. High-risk paths received targeted inspection; all remaining semantic, subfeature and end-to-end coverage gaps are explicit in the [machine-readable evidence ledger](AUDIT_EVIDENCE_2026-10-21.json). Exhaustive feature acceptance and production verification remain incomplete. No revenue, conversion, cost, usage or capacity metrics were supplied; this is not a business-performance measurement.
+**Audit completeness:** all 173 features, 248 business rules, 28 journeys, 274 direct route registrations, 51 migration files and 684 tracked files are inventoried. High-risk paths received targeted inspection; all remaining semantic, subfeature and end-to-end coverage gaps are explicit in the [machine-readable evidence ledger](AUDIT_EVIDENCE_2026-10-21.md#audit_evidence_2026-10-21json). Exhaustive feature acceptance and production verification remain incomplete. No revenue, conversion, cost, usage or capacity metrics were supplied; this is not a business-performance measurement.
 
 ## B. Reproducible baseline and inspection inventory
 
@@ -63,7 +63,7 @@ The Vitest reporter counts 458 suites including nested `describe` blocks; **115*
 
 ## Complete feature matrix
 
-The 173 rows preserve canonical IDs. Expected behavior and historical assessments are inputs to reconciliation, not freshly approved scope. Reference associations and full maturity dimensions are in [the evidence ledger](AUDIT_EVIDENCE_2026-10-21.json). Untraced fields are explicit audit limitations. No whole feature is certified verified by this table.
+The 173 rows preserve canonical IDs. Expected behavior and historical assessments are inputs to reconciliation, not freshly approved scope. Reference associations and full maturity dimensions are in [the evidence ledger](AUDIT_EVIDENCE_2026-10-21.md#audit_evidence_2026-10-21json). Untraced fields are explicit audit limitations. No whole feature is certified verified by this table.
 
 | ID | Feature | Expected behavior | Actual behavior | Overall status | UI | Backend | Persistence | Verification | Priority | Next action |
 |---|---|---|---|---|---|---|---|---|---|---|---|

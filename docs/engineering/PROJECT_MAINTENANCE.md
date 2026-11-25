@@ -5,7 +5,7 @@ Source cross-check: `431c425a`, 2026-10-23. The current tool is
 [clean-reinstall.ps1](../../clean-reinstall.ps1). The older Bash
 `project-maintenance.sh` and its test script are absent. Their unique usage,
 requirements and test history are preserved in the
-[maintenance archive](../reports/MAINTENANCE_AUDIT_2026-10-21.md).
+[maintenance archive](../reports/AUDITS_2026-10.md#repository-maintenance-audit-and-proposed-design).
 
 ## Current execution path
 

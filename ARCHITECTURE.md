@@ -326,7 +326,7 @@ manual adapter. Do not substitute `supabase db push` for the repository workflow
   restore and runtime acceptance remain unverified.
 - U-3: tenant/membership permissions need an explicit policy reconciliation.
 
-The [conflict register](docs/system-model/03-conflict-register.md) and
+The [conflict register](docs/system-model/03-conflicts-conditions-audit.md#system-model-03--conflict-register-and-decision-records) and
 [route review](docs/system-model/06-route-authorization.md) preserve finding IDs,
 evidence and decisions. Dated reports remain historical, not live release verdicts.
 
@@ -357,21 +357,21 @@ above are fixed. Invariant 007 has a known assistant-scaffold exception. Invaria
 These IDs belong to the implemented-architecture register; SSOT has a distinct
 numbering namespace. This reconciliation does not approve new architecture.
 
-| ID      | Decision / status                                                                                                | Reason and trade-off / revisit                                                               |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| ADR-001 | Fastify modular monolith                                                                                         | Shared domain boundaries; split only for measured ownership/scale needs                      |
-| ADR-002 | Pure domain business functions                                                                                   | Testability and reuse; preserve framework independence                                       |
-| ADR-003 | Memory persistence, superseded for core by ADR-015                                                               | Long tail still loses state; migrate deliberately                                            |
-| ADR-004 | Self-issued HMAC sessions                                                                                        | No external IdP; stable secret/revocation required; provider adoption is a security decision |
-| ADR-005 | Shared Zod contracts                                                                                             | One request-shape owner; large file can be split without duplicate schemas                   |
-| ADR-006 | Central error envelope                                                                                           | Consistent clients/logs; extend mappings deliberately                                        |
-| ADR-007 | Local heuristic AI                                                                                               | No external inference cost; remote provider needs explicit approval                          |
-| ADR-008 | Early memory queue engine, superseded at runtime                                                                 | Durable claim loop now runs; unused engine retained pending removal decision                 |
-| ADR-009 | Early SQL-as-text migration guard, superseded                                                                    | Runner now executes SQL; checksum/honesty controls remain                                    |
-| ADR-010 | pnpm, packages before apps                                                                                       | Built workspace dependencies are required; toolchain changes respect build-file protection   |
-| ADR-011 | Reticle for visible changes                                                                                      | Real flow verdict required; setup alone is not verification                                  |
-| ADR-015 | [Core persistence/read model](docs/engineering/adr/ADR-015-core-loop-persistence.md), pending owner ratification | One writer and boot hydration; move reads to SQL before scaling                              |
-| ADR-016 | [Browser UI quality gates](docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md)                    | Browser evidence, with its documented coverage limits                                        |
+| ID      | Decision / status                                                                                                                                                 | Reason and trade-off / revisit                                                               |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ADR-001 | Fastify modular monolith                                                                                                                                          | Shared domain boundaries; split only for measured ownership/scale needs                      |
+| ADR-002 | Pure domain business functions                                                                                                                                    | Testability and reuse; preserve framework independence                                       |
+| ADR-003 | Memory persistence, superseded for core by ADR-015                                                                                                                | Long tail still loses state; migrate deliberately                                            |
+| ADR-004 | Self-issued HMAC sessions                                                                                                                                         | No external IdP; stable secret/revocation required; provider adoption is a security decision |
+| ADR-005 | Shared Zod contracts                                                                                                                                              | One request-shape owner; large file can be split without duplicate schemas                   |
+| ADR-006 | Central error envelope                                                                                                                                            | Consistent clients/logs; extend mappings deliberately                                        |
+| ADR-007 | Local heuristic AI                                                                                                                                                | No external inference cost; remote provider needs explicit approval                          |
+| ADR-008 | Early memory queue engine, superseded at runtime                                                                                                                  | Durable claim loop now runs; unused engine retained pending removal decision                 |
+| ADR-009 | Early SQL-as-text migration guard, superseded                                                                                                                     | Runner now executes SQL; checksum/honesty controls remain                                    |
+| ADR-010 | pnpm, packages before apps                                                                                                                                        | Built workspace dependencies are required; toolchain changes respect build-file protection   |
+| ADR-011 | Reticle for visible changes                                                                                                                                       | Real flow verdict required; setup alone is not verification                                  |
+| ADR-015 | [Core persistence/read model](docs/engineering/DECISIONS.md#adr-015--persist-the-core-career-loop-keep-the-apis-maps-as-a-read-model), pending owner ratification | One writer and boot hydration; move reads to SQL before scaling                              |
+| ADR-016 | [Browser UI quality gates](docs/engineering/DECISIONS.md#adr-016--measure-ui-quality-in-a-real-browser-and-test-it-adversarially)                                 | Browser evidence, with its documented coverage limits                                        |
 
 ## 27. Agent quick reference
 

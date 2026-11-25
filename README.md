@@ -36,7 +36,7 @@ Learning, assessments, portfolios, resumes, networking and many intelligence
 features retain process-local state. Some write durable evidence while losing
 their originating records on restart. Challenge evaluation is simulated; worker
 batch leases and multi-store erasure have unresolved recovery risks. See the
-[conflict register](docs/system-model/03-conflict-register.md) and
+[conflict register](docs/system-model/03-conflicts-conditions-audit.md#system-model-03--conflict-register-and-decision-records) and
 [route review](docs/system-model/06-route-authorization.md).
 
 ## Local development
@@ -52,7 +52,7 @@ writes require explicit authorization because build files are read-only.**
    above their working directory. Existing environment values take precedence.
 3. For **local PostgreSQL**, run `pnpm db:migrate`. This changes the database and
    may create it. Do not use this runner on hosted Supabase; follow the
-   [hosted migration gate](docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md).
+   [hosted migration gate](docs/engineering/DATABASE.md#hosted-supabase-migration-gate-and-dependency-audit).
 4. Run `pnpm build` before `pnpm dev`. API and worker `dev` scripts execute
    `dist/index.js`; they do not compile or watch TypeScript. Rebuild and restart
    those processes after source changes. The web `dev` script runs Vite.
