@@ -30,6 +30,11 @@ import {
   type FeatureFlagStore,
 } from './feature-flag-store.js';
 import { MemoryBillingStore, PgBillingStore, type BillingStore } from './billing-store.js';
+import {
+  MemoryApplicationDraftStore,
+  PgApplicationDraftStore,
+  type ApplicationDraftStore,
+} from './application-draft-store.js';
 
 export type { BillingStore, BillingEventRecord, BillingStateWrite } from './billing-store.js';
 
@@ -71,6 +76,8 @@ export interface Storage {
   readonly featureFlags: FeatureFlagStore;
   /** Subscriptions, invoices, entitlements, Stripe mapping and billing events (F-16). */
   readonly billing: BillingStore;
+  /** Application drafts and version history (F-36, migration 00019). */
+  readonly applicationDrafts: ApplicationDraftStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -105,6 +112,7 @@ class PgStorage implements Storage {
   /** Platform feature flags (F-35): durable in pg mode only. */
   readonly featureFlags: FeatureFlagStore;
   readonly billing: BillingStore;
+  readonly applicationDrafts: ApplicationDraftStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -144,6 +152,7 @@ class PgStorage implements Storage {
     this.adminAudit = new PgAdminAuditStore(this.pool);
     this.featureFlags = new PgFeatureFlagStore(this.pool);
     this.billing = new PgBillingStore(this.pool);
+    this.applicationDrafts = new PgApplicationDraftStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -262,6 +271,7 @@ class MemoryStorage implements Storage {
   readonly adminAudit: AdminAuditStore = new MemoryAdminAuditStore();
   readonly featureFlags: FeatureFlagStore = new MemoryFeatureFlagStore();
   readonly billing: BillingStore = new MemoryBillingStore();
+  readonly applicationDrafts: ApplicationDraftStore = new MemoryApplicationDraftStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({
