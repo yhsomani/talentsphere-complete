@@ -202,7 +202,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 282 literal registrations, 279 unique method/path pairs; 83 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 83 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25); re-counted from `apps/api/src/durability.ts` on 2026-11-25.
+Measured: 282 literal registrations, 279 unique method/path pairs; 85 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 85 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), and the two job-alert routes moved to `P` with `job-alert-store.ts` (2026-11-25, no new migration); re-counted from `apps/api/src/durability.ts` on 2026-11-25.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -463,8 +463,8 @@ Measured: 282 literal registrations, 279 unique method/path pairs; 83 of them in
 | `PATCH /api/v1/jobs/saved-searches/:id` | `UpdateSavedSearchInputSchema` | P |
 | `DELETE /api/v1/jobs/saved-searches/:id` | handler | P |
 | `POST /api/v1/jobs/saved-searches/:id/run` | handler | P |
-| `GET /api/v1/jobs/alerts` | handler | E |
-| `PATCH /api/v1/jobs/alerts/:id/read` | handler | E |
+| `GET /api/v1/jobs/alerts` | handler | P |
+| `PATCH /api/v1/jobs/alerts/:id/read` | handler | P |
 | `POST /api/v1/jobs/:id/save` | handler | P |
 | `DELETE /api/v1/jobs/:id/save` | handler | P |
 | `GET /api/v1/jobs/saved` | handler | P |

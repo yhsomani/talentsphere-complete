@@ -84,6 +84,9 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/jobs/:id/save',
   'DELETE /api/v1/jobs/:id/save',
   'GET /api/v1/jobs/saved',
+  // Job alerts raised when a published job matches a saved search (migration 00018).
+  'GET /api/v1/jobs/alerts',
+  'PATCH /api/v1/jobs/alerts/:id/read',
   // Application drafts and version history (migrations 00019 and 00056).
   'PUT /api/v1/jobs/:jobId/draft',
   'GET /api/v1/jobs/:jobId/draft',
