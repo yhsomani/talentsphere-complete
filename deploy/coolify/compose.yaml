@@ -39,8 +39,13 @@ services:
       APP_URL: https://${SITE_DOMAIN:?Required}
       CORS_ALLOWED_ORIGINS: https://${SITE_DOMAIN:?Required}
       BILLING_MODE: disabled
-      # Email is off (EMAIL_PROVIDER defaults to none). Brevo needs BREVO_API_KEY and
-      # EMAIL_FROM set to real values; empty strings fail env validation at boot.
+      # Email is off unless EMAIL_PROVIDER=brevo with BREVO_API_KEY and an EMAIL_FROM
+      # sender on a domain authenticated in Brevo. Unset optional values are ignored.
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-none}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
@@ -64,6 +69,11 @@ services:
       STORAGE: pg
       DATABASE_URL: postgresql://talentsphere:${POSTGRES_PASSWORD:?Required}@db:5432/talentsphere
       APP_URL: https://${SITE_DOMAIN:?Required}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-none}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
     depends_on:
       db:
         condition: service_healthy
