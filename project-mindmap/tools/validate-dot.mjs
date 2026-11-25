@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const parse = require('dotparser');
+const t = fs.readFileSync(process.argv[2], 'utf8');
+const g = parse(t);
+const root = g[0];
+let nodes = 0, edges = 0, subs = 0;
+(function walk(ch){ for (const c of ch) { if (c.type==='node_stmt') nodes++; else if (c.type==='edge_stmt') edges++; else if (c.type==='subgraph') { subs++; walk(c.children); } } })(root.children);
+console.log(JSON.stringify({ graphs: g.length, nodes, edges, subgraphs: subs }));

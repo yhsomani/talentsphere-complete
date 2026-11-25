@@ -1,0 +1,74 @@
+mindmap
+  root((COMPLETE PROJECT ECOSYSTEM))
+    BRANCH 01 PROJECT OVERVIEW
+      3 applications: api web worker
+      6 workspace packages
+      Fastify 5 + React 19 + Postgres
+      6 external dependencies
+    BRANCH 02 USER PERSONAS AND ROLES
+      12 role nodes incl. anonymous
+      role-specific navigation sets
+      48 routes with explicit role checks
+    BRANCH 03 COMPLETE USER JOURNEYS
+      109 e2e-derived journeys
+      structural flows: guard redirect and session end
+    BRANCH 04 FEATURE HIERARCHY
+      45 API modules
+      154 feature groups
+      282 sub-features endpoints
+      211 micro-features interactions
+      256 nano-features error branches
+    BRANCH 05 SCREENS AND UI COMPONENTS
+      29 routed screens
+      44 shared components
+      211 event bindings
+    BRANCH 06 ACTIONS AND INTERACTIONS
+      change is the most common event
+      61 api-backed
+    BRANCH 07 APPLICATION FLOW AND NAVIGATION
+      29 route entries
+      18 guarded
+      5 navigation sets
+    BRANCH 08 BUSINESS LOGIC AND DECISION TREES
+      279 exported domain functions
+      45 state definitions
+    BRANCH 09 FRONTEND ARCHITECTURE
+      SessionProvider + local state
+      localStorage token
+      service worker PWA
+    BRANCH 10 BACKEND ARCHITECTURE
+      Fastify modular monolith
+      storage boundary pg or memory
+      worker with SKIP LOCKED
+    BRANCH 11 API ECOSYSTEM
+      282 endpoints
+      85 durable
+      197 ephemeral
+    BRANCH 12 DATABASE AND DATA
+      112 tables
+      112 with RLS enabled
+      6 enums
+    BRANCH 13 COMPLETE DATA FLOW
+      route to store to table chains
+      worker email flow
+    BRANCH 14 STATE MANAGEMENT AND LIFECYCLE
+      45 state nodes
+      application and job transition tables
+    BRANCH 15 EXTERNAL INTEGRATIONS
+      6 integrations
+    BRANCH 16 SECURITY AND PERMISSIONS
+      session token guard
+      rate limits
+      112 tables with RLS
+    BRANCH 17 ERROR HANDLING AND EDGE CASES
+      256 distinct error branches
+      canonical error envelope
+    BRANCH 18 TESTING AND QUALITY
+      223 test files
+      1883 cases
+    BRANCH 19 INFRASTRUCTURE AND DEPLOYMENT
+      3 CI workflows
+      deploy coolify and oracle
+    BRANCH 20 IMPLEMENTATION GAPS AND DEBT
+      197 ephemeral endpoints
+      78 schema-only tables
