@@ -9,19 +9,22 @@ Next concrete actions: obtain product-owner review of the candidate SSOT F-ID to
 Model record: the runtime identifies the primary model family as GPT-6. Exact model/effort metadata and the specialist agents' model configuration are not exposed here; no stronger model claim is made.
 
 ## Fix pass 2026-10-25 (REVW-01..05)
+
 - REVW-01: USR-01 §4 rows rewritten from DT-01/BR-T100/BR-T105; matrix marked non-normative; TEST-SEC-NEG-01 added.
 - REVW-02: 14-scope CONSENT_SCOPE_CATALOGUE.md; DB/OpenAPI/DT-01/privacy aligned; FF-12. Revocation timing beyond read-time is [OPEN-CS-02].
 - REVW-03: SM-00 is single state vocabulary; DB CHECK/OpenAPI/AsyncAPI aligned (ad-hoc lint 0 mismatches; FF-11 defined, no CI exists). Left: SM-FILE, endpoints for new transitions, job retry limits, 409 problem-type name.
 - REVW-04: opaque subject_ref + erasable subject_identity_map; batch anchoring replaces inline chain; write-budget skeleton. REVW-06 fan-out/idempotency/rate-limit parts still open.
 - REVW-05: single cookie contract (`__Host-ts_at`, `__Secure-ts_rt` Path=/api/v1/auth/refresh, `X-CSRF-Token`); /bff namespace removed.
-At the time of this fix-pass note, the review report had not yet been updated. Its later post-review disposition is in `27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md`.
+  At the time of this fix-pass note, the review report had not yet been updated. Its later post-review disposition is in `27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md`.
 
 ## Checkpoint update 2026-10-25
+
 - At that earlier checkpoint, the review listed findings 01–05 and 46 as closed, REVW-06/07/10/11 as partial, and 36 open. The current disposition is updated below; two specialist passes spot-checked contracts and security/offline controls but did not replace full validation.
 - `00_CONTROL_CENTRE/DOCUMENT_STATUS.md` is the canonical folder-level status register. Statuses describe documentation maturity only, never implementation readiness.
 - Verification performed in this checkpoint: read-only Markdown relative-link scan (159, 0 missing), JSON parse (12 files, 0 invalid), YAML parse (2 files, 0 invalid), JSON Schema 2020-12 meta-validation (2 schemas), and example registry validation (0 errors using the local manifest schema reference). Redocly/AsyncAPI semantic lint, Mermaid rendering, Markdown lint, Ed25519 signature verification, browser/device validation, production checks, and legal review were not run.
 
 ## Checkpoint update 2026-10-25 15:50 UTC
+
 - Reconciled the architecture summary and master blueprint with the ADR-T23 proposal: bundled lazy modules are the proposed initial baseline; federated registry/signing and per-remote deployment remain gated, not approved or verified.
 - Corrected the bundled/federated comparison table, whose resolution, build, deploy, compatibility, rollback, and use-case cells had been reversed under the column labels.
 - Recounted TEST IDs in the catalog's first column: 214 unique specified cases, including `TEST-SEC-NEG-01`; corrected the SEC and total counts and the master-blueprint headline. Updated the master roadmap count to 60 work packages (57 phase packages plus 3 conditional migrations).
@@ -29,6 +32,7 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Still open: owner approval of the candidate canonical SSOT `F-*` to local `FEAT-*` mapping (OPEN-41), phase-to-work-package reconciliation (OPEN-42), semantic acceptance/test coverage, ARB ratification of ADR-T23, and external product/security/legal decisions. Next: continue the cross-document audit against the 44 named deliverables and close documentation-only inconsistencies that do not require owner decisions.
 
 ## Checkpoint update 2026-10-25 15:55 UTC
+
 - Corrected the capability headline to 108 unique `CAP-*` rows and corrected the QA catalog to 214 unique specified test IDs. REVW-36 is now Partial: current headline discrepancies are corrected, but no automated count generator was added.
 - Updated the current review totals to 6 closed, 6 partial and 34 open; the original review's 209-test/97-capability statement remains in its historical snapshot section.
 - Reconciled bundled/federated mode across the architecture summary, master blueprint, federation comparison, deployment, QA, DevOps, failure, risk, and developer-guide documents. Federation remains an unratified option under ADR-T23.
@@ -38,12 +42,14 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Remaining blockers include OPEN-41 owner approval, OPEN-42 phase/WP reconciliation, semantic AC/test coverage, other owner decisions, and device/browser validation. Continue the audit against the full named deliverable set; do not claim implementation readiness.
 
 ## Checkpoint update 2026-10-25 — SSOT crosswalk draft
+
 - Added `28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md` with one candidate row for each canonical F-01…F-173, direct/partial/no-match labels, and owner-review limits. Two read-only range audits informed F-01…F-120; F-121…F-173 were compared against the same local capability rows. Generic infrastructure matches were excluded when they did not evidence canonical behavior.
 - OPEN-41 remains open for Product Director and Documentation Architect review. Phase labels were not translated: SSOT and local phases differ, and feature-to-WP reconciliation is a separate open workstream.
 - Linked the draft from the master index, capability map, and traceability report; updated OPEN-41's next action and the current status notes. Added a supplemental read-only phase audit to the review report: roadmap pre-GA/GA gating is coherent, with specific FEAT-to-WP phase mismatches still awaiting owner reconciliation.
 - Validation: 173 crosswalk rows exactly match SSOT F-ID/name pairs; all candidate FEAT references resolve among 253 local rows; 0 broken relative Markdown links; `git diff --check` passed (CRLF-to-LF warnings only). No application tests or runtime/device checks were run for this documentation-only change.
 
 ## Checkpoint update 2026-10-25 — AC/test traceability audit
+
 - Generated `28_TRACEABILITY_AND_COVERAGE/AC_TEST_TRACEABILITY_MATRIX.md` from current AC definition rows and exact AC IDs in `TEST_CATALOG.md`. The scan found 389 defined criteria, 214 unique specified test IDs, 125 criteria directly cited by tests, and 264 criteria without a direct AC-ID link (96/359 feature criteria linked; 29/30 shared platform criteria linked).
 - Corrected `SPEC-13`'s README AC count from 23 to 24 based on its 24 definition rows; the complete feature-spec total is 359, not 358. Added the matrix to the master index and updated the test catalog, traceability report, master blueprint, and review disposition.
 - REVW-17 is now Partial: the direct-reference matrix exists, but BR-to-AC-to-TEST traceability, semantic relevance, feature-level coverage and missing specs remain open. Review totals are 6 closed, 6 partial and 34 open.
@@ -100,6 +106,7 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Validation: exact source operation/actor/idempotency preservation 54/54; all 58 candidate API-ID references resolve in the target catalog; residuals present 54/54; 101 Markdown files, 209 relative links and 0 broken; protected baseline 113/113; root SSOT hash unchanged; `git diff --check` passed with CRLF/LF normalization warnings. No changes outside the documentation root. No application tests, build, typecheck, runtime, deployment, or Reticle verification was run.
 
 ## Checkpoint update 2026-10-25 - Interface, metadata, and high-risk evidence preservation
+
 - Added the 16-row CON interface-contract crosswalk (8 aligned candidates, 6 partial candidates, 2 conflicts), preserving pagination and stale-write conflicts under OPEN-46. Added the 173-row feature-registry metadata crosswalk for category, source priority, phase, and dependencies; OPEN-41 remains open and no phases or priorities were translated. Recorded the PRD-versus-target primary metric conflict in OPEN-51 and the metrics catalog.
 - Added a 15-row CF-31 through CF-45 route-authorization finding map with source anchors and candidate destinations. The dated source labels them open; current behavior was not revalidated. Extended the reconciliation audit with the 30-day / 14-day / no-expiry referee TTL conflict, D-09/D-10 assessment-trust evidence, incompatible dated feature-maturity totals, and the observed 278-route inventory gap. OPEN-50 now records CF mapping as candidate traceability, not approval.
 - Corrected reference-data migration notes on persisted threads/messages, email-verification provenance, and the post-00043 hash-only referee-token schema. Added a dated pricing implementation snapshot to commercial operations; it is reference evidence only and does not approve target prices or entitlements.
@@ -111,7 +118,6 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 
 - Revalidated after the observed-route inventory addition: 105 Markdown files with 0 broken relative links; 9 CSV files parse; the route inventory has 278/278 unique entries and the CF map has 15/15 ordered IDs; protected-tree baseline 113/113 paths present; root SSOT remains 5675 lines with unchanged SHA-256 `891CB4A472B7BAA7C9259778922AE26AC46D8BDD97508B2B05C9FD0A2792F68D`; all 66 worktree changes remain under `Yash_Final_Project_Document/`. `git diff --check` run immediately after this ledger update.
 
-
 ## Checkpoint update 2026-10-25 17:14 UTC ? UX and phase/governance candidate crosswalks
 
 - Status: **In Progress**. Added and verified a 69-row phase/gate/governance candidate map, plus the 100-row UX pattern map produced in the prior checkpoint. Linked the phase map from the master index, traceability report, reconciliation audit, and source manifest; updated OPEN-50 and folder status to reflect that the maps exist but remain unapproved.
@@ -122,8 +128,8 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Remaining blockers/open issues: source-by-source disposition is incomplete; owner review is required for candidate mappings and decisions OPEN-41 through OPEN-51. Research citations, route mappings, and nested evidence need further reconciliation. No assumptions were promoted to decisions.
 - Next concrete actions: continue remaining source-register and report evidence mapping; update destination documents only where verified evidence is missing; rerun link, CSV, protected-tree, SSOT hash, scope, and diff checks after each checkpoint. Keep cleanup deferred until each individual source satisfies the migration and verification criteria.
 
-
 ## Checkpoint update 2026-10-25 17:24 UTC - observed implementation control crosswalk validation
+
 - Added the 38-row candidate preservation map for `docs/engineering/DATABASE.md` and `docs/quality/OPERATIONS.md`, `SECURITY.md`, and `TESTING.md`; assigned EVD-000205 through EVD-000242 and linked it from the control index, manifest, status register, and traceability reports.
 - Rechecked four source SHA-256 values and all source line-anchor bounds; all match the crosswalk. Corrected EVD-000207 target path to the existing observed API inventory, removed one repeated ID-allocation sentence, and corrected the comparison-label description.
 - Review evidence: coherence, feasibility, and security reviews returned no findings; adversarial review found and led to correction of the SSOT section citations in the reconciliation audit. The crosswalk remains candidate evidence only; current code/runtime, database state, delivery, tests, and controls were not revalidated.
@@ -131,39 +137,38 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - No application source, tests, migrations, build/config files, or legacy source documents were modified. No files were deleted, moved, or renamed. No legacy source is cleanup-eligible.
 - Status: **In Progress**. Next: continue remaining source-register and nested evidence reconciliation; keep OPEN-50 and source-level dispositions pending owner review.
 
-
 ## Checkpoint update 2026-10-25 17:27 UTC - traceability display cleanup
+
 - Replaced the 264 `?` placeholders in the AC-to-test matrix with `None`; each affected row explicitly says "No direct test-ID link" and the summary remains 264/389 criteria without a direct ID citation. This is a presentation correction only; it does not imply missing behavioral coverage or test execution.
 - Repaired visibly corrupted separators in the historical audit index, observed API inventory, UX and route-authorization crosswalk headers; clarified the literal `No target` label and repaired one corrupted historical ledger heading.
 - No source documents, application code, tests, migrations, configurations, or protected build files were changed. No files were deleted, moved, or renamed.
 - Validation: 389 AC rows, 125 explicit test-ID links, 264 `None` no-direct-link rows; all 389 definition anchors resolve. 109 Markdown files, 266 relative links, 0 broken; all 13 CSVs parse; protected baseline 113/113; root SSOT SHA-256 unchanged; 74 worktree paths all within the documentation root; `git diff --check` passes with existing CRLF/LF warnings only.
 - Status: **In Progress**. This does not close historical JSON migration or owner-disposition work.
 
-
 ## Checkpoint update 2026-10-25 17:29 UTC - historical business-rule evidence linkage
+
 - Linked all 248 `/businessRules` records in the unchanged 2026-10-21 audit JSON to the matching source-rule rows in `06_BUSINESS_PROCESSES/LEGACY_RULE_CROSSWALK.csv`, assigning EVD-000243 through EVD-000490. Added JSON pointers, historical reference/test-reference counts, feature candidates, and the source association warning; detailed excerpts stay in the JSON. Eight MIG rows correctly have no linked audit rule record.
 - The snapshot records 1,003 code/test reference objects across 106 referenced rules (142 have none), including 576 references whose paths are under `tests/`; it has 33 candidate feature associations across 24 rules. Each record states semantic acceptance and exhaustive feature mapping are not verified. ID joins do not resolve four source-text discrepancies.
 - Updated the audit index, legacy-rule crosswalk guide, manifest DOC-000191, and ID Registry. The manifest remains **Read but partially processed**; no source cleanup is authorized.
 - Validation: all 248 EVD/JSON pointers, ID joins, per-row counts, feature candidates, and warnings match the source; source JSON SHA-256 unchanged at `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`. All 13 CSVs parse; 109 Markdown files have 267 relative links and 0 broken; protected baseline 113/113; root SSOT hash unchanged; 74 worktree paths remain under YFD; `git diff --check` passes with existing CRLF/LF warnings only.
 - No application code, tests, migrations, configuration, build files, or source documents were modified; no files were deleted, moved, or renamed. Status: **In Progress**.
 
-
 ## Checkpoint update 2026-10-25 17:29 UTC - historical journey evidence crosswalk
+
 - Added a 28-row candidate mapping from the 2026-10-21 audit journeys J-01 through J-28 to the current 20-row target journey catalog: 22 partial candidates, 6 with no direct target UJ. Assigned EVD-000491 through EVD-000518 and TRC-08. Each row retains source and audit JSON pointers, current registry line/hash, persona, terminal outcome, historical verification statement, and mapping residual.
 - All 28 source line numbers are current J-ID/title matches. Candidate links are to target design documents only; the source audit did not verify complete end-to-end journeys. "No direct match" is scoped to USER_JOURNEYS.md, not a whole-repository absence claim. Two independent reviews prompted corrections for J-07, J-13, J-14, J-18, J-19 and J-20, and reconciliation of the former duplicate mapping table into the CSV source of truth.
 - Linked the crosswalk from the master index, target journey document, audit evidence index, traceability report, manifest, and OPEN-50. DOC-000143 and DOC-000191 remain partially processed; no cleanup is authorized. Removed the confirmed empty duplicate evidence heading in ID_REGISTRY.md.
 - Validation complete: 28 rows and unique EVD IDs; 22 partial and 6 no-match candidates; source JSON pointers, registry lines/titles, hashes, and target UJ IDs all resolve. Root `SSOT.md` hash remains `891cb4a472b7baa7c9259778922ae26ac46d8bdd97508b2b05c9fd0a2792f68d`. All 113 protected-baseline paths exist; 109 Markdown files have 274 relative links and 0 broken; all 14 CSVs parse; 75 worktree paths remain inside Yash_Final_Project_Document; `git diff --check` reports no whitespace errors (existing CRLF/LF warnings only).
 - No application source, tests, migrations, configuration, build files, or legacy source documents were modified. No files were deleted, moved, or renamed. Status: **In Progress**.
 
-
 ## Checkpoint update 2026-10-25 17:55 UTC - observed route path crosswalk verified
+
 - Added a 278-row candidate comparison from the static route index in `docs/engineering/API_CONTRACTS.md` (DOC-000135) to the 230-entry target API catalog. It records 9 name-preserving method/path overlaps, 4 same-name-path method mismatches, 6 additional parameter-agnostic path-shape candidates (5 same method, 1 method mismatch), and 259 routes with no path-shape match. Evidence IDs EVD-000519 through EVD-000796; TRC-09.
 - Each row retains the source route, request-schema label, P/S/E registry label, source snapshot anchor, source document line, source file hash, candidate target API IDs when path overlap exists, and an explicit semantic/verification limitation. Exact path matches do not imply contract equivalence. No path match does not imply feature absence.
 - Linked the crosswalk from the API inventory guide, target API catalog, master index, traceability report, ID registry, OPEN-50, document status, and DOC-000135 in the preservation manifest. OPEN-46/50 remain unresolved for semantic mapping and owner disposition.
 - Validation complete: two independent read-only reviews confirmed all 278 source rows, anchors, classifications, candidate IDs and summary counts. Local checks confirm 278 unique EVD IDs (EVD-000519-EVD-000796), 230 target endpoints, 9 named method/path overlaps, 4 named-path method mismatches, 6 parameter-agnostic shape candidates (5 same method, 1 method mismatch), and 259 without a shape match. Source API_CONTRACTS.md SHA-256 is 0d13fbb3e0f06582a007a90bb047c2e5dd5e952e2ed88555fb3f69111a2265fe; root SSOT SHA-256 remains 891cb4a472b7baa7c9259778922ae26ac46d8bdd97508b2b05c9fd0a2792f68d. All 113 baseline paths exist; 109 Markdown files have 280 relative links and 0 broken; all 15 CSVs parse; all worktree changes remain inside Yash_Final_Project_Document; git diff --check reports no whitespace errors (CRLF/LF warnings only).
 - Next: continue row-level reconciliation of remaining nested historical JSON records (migration, test, probe and external issue evidence) and unresolved source registers; preserve OPEN-46/50 and partial-processing status until semantic owner dispositions exist.
 - No source documents, application code, tests, migrations, build/configuration files, or existing files inside the protected documentation root were removed, moved, or renamed. Status: **In Progress**.
-
 
 ## Checkpoint update 2026-10-25 17:58 UTC - historical migration evidence pointers
 
@@ -173,7 +178,6 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - No source migration or audit JSON, application code, tests, build/configuration files, or non-documentation artifacts were edited; no files were deleted, moved, or renamed. No application tests, builds, typechecks, or runtime verification were run; changes are documentation-only.
 - Status: **In Progress**. Next: continue row-level test, probe, external issue, and remaining source-register evidence mapping; preserve historical status and OPEN-50 until semantic owner dispositions and all source checks are complete.
 
-
 ## Checkpoint update 2026-10-25 17:59 UTC - historical test assertion pointers
 
 - Added a 1,172-row crosswalk of the `/tests` assertions in the 2026-10-21 audit JSON, with EVD-000848 through EVD-002019 and TRC-11. Each row retains the full recorded assertion name/status, file path/status, JSON pointer, audit hash, and feature IDs parsed from names as candidates only.
@@ -181,7 +185,6 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Updated the audit index, master index, ID registry, OPEN-50, QA document status, and manifest. Validation: all 1,172 JSON pointers/statuses and IDs align; source JSON SHA-256 remains `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`; the migration crosswalk remains 51/51 hashes matched with applied states unknown; all 17 CSVs parse; 111 Markdown files have 0 broken relative links; protected baseline 113/113 present; `git diff --check` reports no whitespace errors (CRLF/LF warnings only).
 - No application tests were run; the recorded test results are historical source claims. No source code, test file, migration, configuration, or build artifact was changed. No files were deleted, moved, or renamed.
 - Status: **In Progress**. Next: map nested probe and external issue evidence, then reconcile remaining source-register records and preserve the unresolved owner decisions.
-
 
 ## Checkpoint update 2026-10-25 18:02 UTC - nested probe, external issue, and route evidence
 
@@ -193,14 +196,12 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - No current external status fetch, application tests, builds, database queries, or runtime checks were performed. No source code, migrations, tests, or external records were modified; no files were deleted, moved, or renamed.
 - Status: **In Progress**. Next: reconcile the remaining audit JSON sections (`/inventory`, `/contractInventory`, `/inspectionLimitations`, `/artifactValidation`, `/documentationCrossCheck`, `/summaryCounts`) and remaining standalone source/register dispositions; maintain the historical-only labels.
 
-
 ## Checkpoint update 2026-10-25 18:03 UTC - historical audit inventory hash crosswalk
 
 - Added TRC-15 for all 684 `/inventory` entries (EVD-002329-EVD-003012), retaining each historical path/hash/coverage label and current checkout hash/status. Every source coverage label is ?Inventoried; not necessarily inspected?; this crosswalk does not imply content-level migration or cleanup eligibility.
 - Read-only comparison: 573 hashes match, 108 differ, and 3 paths are missing (`apps/worker/src/mail-provider.ts`, a Graphify hook-session cache path, and `tests/unit/transactional-mail.test.ts`). Differences or missing paths do not establish deletion, data loss, or a source disposition.
 - Updated the audit index, master index, manifest, ID registry, OPEN-50, and document status. DOC-000191 remains partially processed. Validation: 684/684 JSON pointers and hashes match the generated crosswalk/current comparison; all 21 CSVs parse; 115 Markdown files have 0 broken relative links; protected baseline 113/113 present; root SSOT unchanged; all worktree changes remain inside YFD; `git diff --check` reports no whitespace errors (CRLF/LF warnings only).
 - No source files were edited, no tests or builds were run, and no legacy file was deleted. Status: **In Progress**. Next: inspect the remaining audit contract inventory and aggregate evidence fields, then continue source-by-source content review and dispositions.
-
 
 ## Checkpoint update 2026-10-25 18:05 UTC - documentation inventory cross-check and audit limits
 
@@ -210,7 +211,6 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Updated the audit evidence index, master index, manifest, ID registry, OPEN-50, and document status. DOC-000191 remains partially processed. No files outside YFD were changed; no legacy files were deleted.
 - Validation completed after ledger write: 684/684 inventory rows match JSON pointers and current comparison (573 match, 108 different, 3 missing); 46/46 documentation records join to manifest DOC IDs and both missing historical paths are absent; 46 contract candidates match the feature crosswalk. Across the structured registers, primary evidence IDs EVD-000001 through EVD-003060 are unique and continuous. All 22 CSVs parse; 116 Markdown files have 0 broken relative links; protected baseline 113/113 is present; root SSOT hash remains unchanged; `git diff --check` has no whitespace errors (CRLF/LF warnings only).
 - Status: **In Progress**. Next: verify all cumulative evidence ID ranges and links, then map remaining compact audit aggregate records and continue source-by-source content dispositions.
-
 
 ## Checkpoint update 2026-10-25 18:07 UTC - audit reconciliation and source-processing status
 
@@ -239,26 +239,32 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Independent architecture review found and resolved the missed lock-loss unhealthy behavior and an unaddressable later-audit citation. Corrected the repository audit date to its documented as-of 2026-10-23 UTC and added DOC-000171 with exact section/line anchors; target issue/provider state remains historical.
 - Corrected the crosswalk to say ADR-015 approval is a prerequisite, not an accomplished approval; captured the later audit reviewed-upstream SHA to keep its dated evidence reproducible.
 
-
 ---
 
 <a id="record-execution-ledger-v9-addendum"></a>
+
 ## Preserved source record: EXECUTION_LEDGER_V9_ADDENDUM
 
 > Consolidated on 2026-10-27. The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. Approval conditions and authority remain unchanged: this move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
 
 <!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/EXECUTION_LEDGER_V9_ADDENDUM.md -->
+
 <a id="record-execution-ledger-v9-addendum--execution-ledger--v9-addendum-2026-10-25"></a>
+
 # Execution Ledger — V9 Addendum (2026-10-25)
 
 Doc ID: CC-LED2 · Additive; the original [EXECUTION_LEDGER](EXECUTION_LEDGER.md) is left as is (V9 forbids overwriting existing files in this root).
 
 <a id="record-execution-ledger-v9-addendum--honest-disclosure-about-preservation"></a>
+
 ## Honest disclosure about preservation
+
 The V8 phase of this work edited files **in place** inside this folder: the orchestrator's own earlier files and, through delegated Sonnet agents, many agent-written files (consent catalogue, state-machine vocabulary, cookie contract, audit/erasure design, permission-matrix rows, ledger append, status lines in the blueprint and readiness docs). These edits were made before the V9 rule ("existing files inside the root must not be destructively changed") was given. Git history holds the prior versions where those files were committed (the folder was committed by another session; check `git log -- Yash_Final_Project_Document`). From this point the work is **additive only** in this root: new revision/addendum files, no in-place edits.
 
 <a id="record-execution-ledger-v9-addendum--state-at-this-checkpoint"></a>
+
 ## State at this checkpoint
+
 - Preservation checks run now: one `SSOT.md`, unchanged per git; no uncommitted change outside the doc root; 158 files in the root.
 - V9 control documents added: [SOURCE_DOCUMENT_INVENTORY](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-source-document-inventory), [INFORMATION_RECONCILIATION_MATRIX](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-information-reconciliation-matrix), [CLEANUP_CANDIDATES](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-cleanup-candidates) (0 eligible). The manifest and baseline were produced by a parallel effort and are reused, not duplicated.
 - Review findings: REVW-01..05 resolved in docs. REVW-06..45: four fix agents (frontend/PWA/federation, product/rules/roadmap, backend/data/API/security, ops/QA/cost) were interrupted twice by usage limits (reset 6pm America/Los_Angeles); partial edits exist, completion unverified. Binding decisions are in `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md`.
@@ -267,20 +273,23 @@ The V8 phase of this work edited files **in place** inside this folder: the orch
 - Validation not performed in this checkpoint: Redocly/AsyncAPI re-run after the interrupted edits, Mermaid rendering, link re-check after the latest parallel edits.
 
 <a id="record-execution-ledger-v9-addendum--next-actions-when-limits-reset"></a>
+
 ## Next actions (when limits reset)
+
 1. Resume the four fix agents (SendMessage by id) in additive mode: write revisions as new files or addenda and link them from the index, per V9.
 2. Re-run YAML/JSON/link/ID scans; update validation notes in a new addendum.
 3. Governance pass: register ADR-T23+ and consolidate OPEN-FE/UX/B/CS ids in a new register file.
 
 <!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/EXECUTION_LEDGER_V9_ADDENDUM.md -->
 
-
 <a id="record-project-scope"></a>
+
 ## Preserved source record: PROJECT_SCOPE
 
 > Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
 
 <!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/PROJECT_SCOPE.md -->
+
 # Project Scope & Execution Boundary
 
 Doc ID: CC-SCOPE · Version 1.0 · Status: Final for this initiative

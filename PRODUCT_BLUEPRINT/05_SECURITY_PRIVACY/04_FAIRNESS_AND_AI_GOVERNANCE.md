@@ -103,14 +103,14 @@ Job recommendations and targeted distribution must not use protected characteris
 
 ### 4.3 Thresholds and actions [PROP, OD-AIG-05]
 
-| Condition                                                                                                                                                    | Action                                                                                                                                             |
+| Condition | Action |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------- |
 | `IR_g < 0.8` for any group with sufficient data, and the difference is statistically significant (two-sided Fisher exact or two-proportion z-test, p < 0.05) | Open an AI governance incident; module owner investigates within 10 business days; feature flag can disable the system for the affected job family |
-| `IR_g < 0.8` without significance, or `0.8 ≤ IR_g < 0.9`                                                                                                     | Watchlist; re-test next cycle with more data                                                                                                       |
-| Exposure ratio < 0.8                                                                                                                                         | Same as first row for AIS-02, AIS-08                                                                                                               |
+| `IR_g < 0.8` without significance, or `0.8 ≤ IR_g < 0.9` | Watchlist; re-test next cycle with more data |
+| Exposure ratio < 0.8 | Same as first row for AIS-02, AIS-08 |
 | `                                                                                                                                                            | SMD                                                                                                                                                | > 0.2` | Investigation; check for proxy features |
-| FPR ratio between groups > 1.25                                                                                                                              | Integrity or fraud signal suspended for the affected signal type until reviewed                                                                    |
-| Extraction F1 gap > 5 percentage points                                                                                                                      | Parser fix before next release                                                                                                                     |
+| FPR ratio between groups > 1.25 | Integrity or fraud signal suspended for the affected signal type until reviewed |
+| Extraction F1 gap > 5 percentage points | Parser fix before next release |
 
 ### 4.4 Cadence
 

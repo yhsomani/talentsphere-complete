@@ -6,8 +6,8 @@ Preservation instruction (project owner, verbatim): "i dont want to loos informa
 
 ## 0. Frame
 
-- **Nothing is implemented in this project.** This file records what the repository-root `ARCHITECTURE.md` (source cross-check `431c425a`, 2026-10-23, 393 lines, 28 sections) reported about an *earlier attempt*. It is a catalogue of lessons, constraints and gaps to design against - never a status report. Root `ARCHITECTURE.md` is not edited by this work.
-- Evidence vocabulary the prior attempt used (kept because it prevents over-claiming): **implemented** = source presence; **partial** = incomplete contract coverage; **planned** = explicit future scope; **not implemented** = absent from inspected sources; **unverified** = missing proof. Runtime or production claims need separately recorded execution evidence. For this project the only state is *specified / designed / not built*.
+- **Nothing is implemented in this project.** This file records what the repository-root `ARCHITECTURE.md` (source cross-check `431c425a`, 2026-10-23, 393 lines, 28 sections) reported about an _earlier attempt_. It is a catalogue of lessons, constraints and gaps to design against - never a status report. Root `ARCHITECTURE.md` is not edited by this work.
+- Evidence vocabulary the prior attempt used (kept because it prevents over-claiming): **implemented** = source presence; **partial** = incomplete contract coverage; **planned** = explicit future scope; **not implemented** = absent from inspected sources; **unverified** = missing proof. Runtime or production claims need separately recorded execution evidence. For this project the only state is _specified / designed / not built_.
 - Companion: `LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md` (target architecture v6.0, TRD, code style, ADR-015). Diagrams: `../25_DIAGRAM_LIBRARY/LEGACY_MERGE_DIAGRAMS.md`.
 
 ## 1. Purpose, authority and precedence (prior attempt)
@@ -140,20 +140,20 @@ PBKDF2-SHA512 (default 210,000 iterations), HMAC sessions with revocation, refus
 ## 11. Observability, testing, deployment facts reported
 
 - Pino logs and request IDs; SQL admin audit; admin health diagnostics. Liveness alone did not prove database reachability or job completion. Worker heartbeat written between claim cycles when 10 s elapsed (long batches could delay it); API treated a heartbeat older than 45 s as unhealthy. Maintenance mode only changed diagnostics, not request admission. No deployed metrics/tracing/alert backend established.
-- Testing architecture: unit tests often imported source while the API imported *built* workspace packages, so stale `dist` produced misleading passes or failures; shared test signing keys kept copies compatible but did not prove matching source; PostgreSQL tests exercised durability/RLS; Playwright used built API/web. **Target requires:** tests run against source or against a freshly built artifact in the same job (never stale build output); see QA file.
+- Testing architecture: unit tests often imported source while the API imported _built_ workspace packages, so stale `dist` produced misleading passes or failures; shared test signing keys kept copies compatible but did not prove matching source; PostgreSQL tests exercised durability/RLS; Playwright used built API/web. **Target requires:** tests run against source or against a freshly built artifact in the same job (never stale build output); see QA file.
 - Deployment: root build built packages before apps; CI on Node 24; package manager pinned in the manifest; Oracle container/Compose/proxy/recovery assets existed; local migrations used a custom runner while hosted Supabase used a separate gated manual adapter; `supabase db push` was not a substitute for the repository workflow. See `../17_DEVOPS_AND_INFRASTRUCTURE/LEGACY_MERGE_DEVOPS_AND_DEPLOY.md`.
 
 ## 12. Prior-attempt risks and unresolved decisions (R-/U- ids preserved)
 
-| ID | Statement (prior attempt) | Target handling |
-|---|---|---|
-| R-2 | Inline/duplicated authorization and organization-role inconsistencies | ADR-T07 central policy; OPEN-44 role model |
-| R-3 | UI tokens and web primitives are distinct owners; no second UI kit | `../07_UI_UX_AND_DESIGN_SYSTEM` single design system |
-| R-4 | AI tier hardcoded free despite billing entitlements; consent/quotas differ between assistant paths; entitlement changes need owner decision | ADR-T12, OPEN-19, OPEN-24 |
-| R-6 | SQL admin audit and the observability audit interface differ; cross-system coverage/retention not established | one audit sink (OPS-OBS) |
-| (unnumbered) | Long-tail persistence, worker leases/timeouts, erasure recovery, certificate assessment/revocation and billing concurrency are material release risks | `../24_RISKS_AND_DECISIONS/RISK_REGISTER.md` |
-| U-1/U-2 | Deployment assets and local proxies exist; deployed topology, gateway, restore and runtime acceptance unverified | OPEN-14, RG-14 restore drill |
-| U-3 | Tenant/membership permissions need explicit policy reconciliation | OPEN-44 |
+| ID           | Statement (prior attempt)                                                                                                                             | Target handling                                      |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| R-2          | Inline/duplicated authorization and organization-role inconsistencies                                                                                 | ADR-T07 central policy; OPEN-44 role model           |
+| R-3          | UI tokens and web primitives are distinct owners; no second UI kit                                                                                    | `../07_UI_UX_AND_DESIGN_SYSTEM` single design system |
+| R-4          | AI tier hardcoded free despite billing entitlements; consent/quotas differ between assistant paths; entitlement changes need owner decision           | ADR-T12, OPEN-19, OPEN-24                            |
+| R-6          | SQL admin audit and the observability audit interface differ; cross-system coverage/retention not established                                         | one audit sink (OPS-OBS)                             |
+| (unnumbered) | Long-tail persistence, worker leases/timeouts, erasure recovery, certificate assessment/revocation and billing concurrency are material release risks | `../24_RISKS_AND_DECISIONS/RISK_REGISTER.md`         |
+| U-1/U-2      | Deployment assets and local proxies exist; deployed topology, gateway, restore and runtime acceptance unverified                                      | OPEN-14, RG-14 restore drill                         |
+| U-3          | Tenant/membership permissions need explicit policy reconciliation                                                                                     | OPEN-44                                              |
 
 Finding ids (CF-01..CF-45) are kept in `../23_MIGRATION_AND_EVOLUTION/LEGACY_MERGE_CONFLICT_REGISTER.md` and `../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md`.
 
@@ -179,23 +179,23 @@ These were "constraints to preserve and complete"; they did not assert that gaps
 
 **Target mapping (suggested, needs owner confirmation - see L-B11-04):**
 
-| Legacy | Closest target invariant / decision (from `CANONICAL_INVARIANTS.md`) |
-|---|---|
-| INVARIANT-001 server-side authz on every protected route | INV-T01 |
-| INVARIANT-002 one definition per business rule in the domain package | no direct INV-T; BE-01 module rules and INV-T11 (declared state machines) are adjacent |
-| INVARIANT-003 domain imports nothing from frameworks/providers; `core.ts` imports nothing; no module imports its own barrel | no INV-T equivalent; see rule 2.1 in `LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md` |
-| INVARIANT-004 one global error envelope with request id | ADR-T08 (problem+json); no INV-T |
-| INVARIANT-005 only the API storage layer and worker may hold a database client | no equivalent found (candidate new invariant) |
-| INVARIANT-006 session tokens signed with a configured secret or per-process random key, never a committed constant | INV-T14 (secrets), ADR-T06, OPEN-22 |
-| INVARIANT-007 free-tier AI usage always passes the quota check | INV-T07 |
-| INVARIANT-008 AI prohibited sessions reject every AI entry point server-side | INV-T06 |
-| INVARIANT-009 contiguous migration sequence; honesty tests | DB-04 migration policy; no INV-T |
-| INVARIANT-010 application records move only along the allowed-transition table; terminal states immutable | INV-T11 |
-| INVARIANT-011 new infrastructure technology only through a recorded human decision (ADR) | ADR_REGISTER process; no INV-T |
-| INVARIANT-012 durable claim loop is the only execution path; no second scheduler | ADR-T09, INV-T12 |
-| INVARIANT-013 core entity changes only through `persist()` with `base`; read model never mutated before commit | INV-T12 (outbox in same transaction) and ADR-T05; the read-model half is not applicable to a SQL-only design |
-| INVARIANT-014 every route that loads a record by id authorizes the caller against it | INV-T02 |
-| INVARIANT-015 verification credentials never returned to the person verified and stored only as a hash | INV-T05 |
+| Legacy                                                                                                                      | Closest target invariant / decision (from `CANONICAL_INVARIANTS.md`)                                         |
+| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| INVARIANT-001 server-side authz on every protected route                                                                    | INV-T01                                                                                                      |
+| INVARIANT-002 one definition per business rule in the domain package                                                        | no direct INV-T; BE-01 module rules and INV-T11 (declared state machines) are adjacent                       |
+| INVARIANT-003 domain imports nothing from frameworks/providers; `core.ts` imports nothing; no module imports its own barrel | no INV-T equivalent; see rule 2.1 in `LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md`                           |
+| INVARIANT-004 one global error envelope with request id                                                                     | ADR-T08 (problem+json); no INV-T                                                                             |
+| INVARIANT-005 only the API storage layer and worker may hold a database client                                              | no equivalent found (candidate new invariant)                                                                |
+| INVARIANT-006 session tokens signed with a configured secret or per-process random key, never a committed constant          | INV-T14 (secrets), ADR-T06, OPEN-22                                                                          |
+| INVARIANT-007 free-tier AI usage always passes the quota check                                                              | INV-T07                                                                                                      |
+| INVARIANT-008 AI prohibited sessions reject every AI entry point server-side                                                | INV-T06                                                                                                      |
+| INVARIANT-009 contiguous migration sequence; honesty tests                                                                  | DB-04 migration policy; no INV-T                                                                             |
+| INVARIANT-010 application records move only along the allowed-transition table; terminal states immutable                   | INV-T11                                                                                                      |
+| INVARIANT-011 new infrastructure technology only through a recorded human decision (ADR)                                    | ADR_REGISTER process; no INV-T                                                                               |
+| INVARIANT-012 durable claim loop is the only execution path; no second scheduler                                            | ADR-T09, INV-T12                                                                                             |
+| INVARIANT-013 core entity changes only through `persist()` with `base`; read model never mutated before commit              | INV-T12 (outbox in same transaction) and ADR-T05; the read-model half is not applicable to a SQL-only design |
+| INVARIANT-014 every route that loads a record by id authorizes the caller against it                                        | INV-T02                                                                                                      |
+| INVARIANT-015 verification credentials never returned to the person verified and stored only as a hash                      | INV-T05                                                                                                      |
 
 **L-B11-04 (open, owner: Architecture Review Board):** `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` is the canonical list and is not edited by this work. Legacy INVARIANT-002, -003, -004, -005, -009 and -011 have no INV-T counterpart; decide whether each becomes a new INV-T, a BE-01 rule, or is retired. INVARIANT-013's read-model clause is retired by ADR-T05.
 
@@ -203,21 +203,21 @@ These were "constraints to preserve and complete"; they did not assert that gaps
 
 "These IDs belong to the implemented-architecture register; SSOT has a distinct numbering namespace." Preserved:
 
-| ID      | Decision / status                                                                                                | Reason and trade-off / revisit                                                               |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| ADR-001 | Fastify modular monolith                                                                                         | Shared domain boundaries; split only for measured ownership/scale needs                      |
-| ADR-002 | Pure domain business functions                                                                                   | Testability and reuse; preserve framework independence                                       |
-| ADR-003 | Memory persistence, superseded for core by ADR-015                                                               | Long tail still loses state; migrate deliberately                                            |
-| ADR-004 | Self-issued HMAC sessions                                                                                        | No external IdP; stable secret/revocation required; provider adoption is a security decision |
-| ADR-005 | Shared Zod contracts                                                                                             | One request-shape owner; large file can be split without duplicate schemas                   |
-| ADR-006 | Central error envelope                                                                                           | Consistent clients/logs; extend mappings deliberately                                        |
-| ADR-007 | Local heuristic AI                                                                                               | No external inference cost; remote provider needs explicit approval                          |
-| ADR-008 | Early memory queue engine, superseded at runtime                                                                 | Durable claim loop now runs; unused engine retained pending removal decision                 |
-| ADR-009 | Early SQL-as-text migration guard, superseded                                                                    | Runner now executes SQL; checksum/honesty controls remain                                    |
-| ADR-010 | pnpm, packages before apps                                                                                       | Built workspace dependencies are required; toolchain changes respect build-file protection   |
-| ADR-011 | Reticle for visible changes                                                                                      | Real flow verdict required; setup alone is not verification                                  |
+| ID      | Decision / status                                       | Reason and trade-off / revisit                                                               |
+| ------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ADR-001 | Fastify modular monolith                                | Shared domain boundaries; split only for measured ownership/scale needs                      |
+| ADR-002 | Pure domain business functions                          | Testability and reuse; preserve framework independence                                       |
+| ADR-003 | Memory persistence, superseded for core by ADR-015      | Long tail still loses state; migrate deliberately                                            |
+| ADR-004 | Self-issued HMAC sessions                               | No external IdP; stable secret/revocation required; provider adoption is a security decision |
+| ADR-005 | Shared Zod contracts                                    | One request-shape owner; large file can be split without duplicate schemas                   |
+| ADR-006 | Central error envelope                                  | Consistent clients/logs; extend mappings deliberately                                        |
+| ADR-007 | Local heuristic AI                                      | No external inference cost; remote provider needs explicit approval                          |
+| ADR-008 | Early memory queue engine, superseded at runtime        | Durable claim loop now runs; unused engine retained pending removal decision                 |
+| ADR-009 | Early SQL-as-text migration guard, superseded           | Runner now executes SQL; checksum/honesty controls remain                                    |
+| ADR-010 | pnpm, packages before apps                              | Built workspace dependencies are required; toolchain changes respect build-file protection   |
+| ADR-011 | Reticle for visible changes                             | Real flow verdict required; setup alone is not verification                                  |
 | ADR-015 | Core persistence/read model, pending owner ratification | One writer and boot hydration; move reads to SQL before scaling                              |
-| ADR-016 | Browser UI quality gates                    | Browser evidence, with its documented coverage limits                                        |
+| ADR-016 | Browser UI quality gates                                | Browser evidence, with its documented coverage limits                                        |
 
 Namespace collision with the SSOT-aligned list is recorded as L-B11-03 in `LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md`.
 

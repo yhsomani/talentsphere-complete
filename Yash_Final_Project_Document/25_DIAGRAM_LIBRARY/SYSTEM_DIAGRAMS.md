@@ -3,6 +3,7 @@
 Doc ID: DGM-01 · Owner: Architecture · Version 1.0 · Status: Draft (Mermaid syntax not machine-validated — see `28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md` for documented checks)
 
 ## 1. Ecosystem / system context
+
 ```mermaid
 flowchart LR
   Cand[Candidate / Learner] --> TS
@@ -19,6 +20,7 @@ flowchart LR
 ```
 
 ## 2. Container view (C4 level 2)
+
 ```mermaid
 flowchart TB
   subgraph Browser
@@ -58,6 +60,7 @@ flowchart TB
 ```
 
 ## 3. Frontend dependency rules
+
 ```mermaid
 flowchart LR
   Shell --> HostSDK[host-sdk contract]
@@ -69,6 +72,7 @@ flowchart LR
 ```
 
 ## 4. Trust boundaries
+
 ```mermaid
 flowchart LR
   subgraph Untrusted[Untrusted: user device]
@@ -88,6 +92,7 @@ flowchart LR
 ```
 
 ## 5. Sequence — apply to job (idempotent)
+
 ```mermaid
 sequenceDiagram
   participant U as Candidate
@@ -107,6 +112,7 @@ sequenceDiagram
 ```
 
 ## 6. Sequence — referee verification
+
 ```mermaid
 sequenceDiagram
   participant C as Candidate
@@ -124,6 +130,7 @@ sequenceDiagram
 ```
 
 ## 7. Failure domains
+
 ```mermaid
 flowchart TB
   Rx[single remote] -->|error boundary: other remotes keep working| Sh[shell + shared singletons]

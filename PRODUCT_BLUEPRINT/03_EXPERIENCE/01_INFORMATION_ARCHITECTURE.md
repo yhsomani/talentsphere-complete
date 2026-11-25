@@ -828,26 +828,26 @@ Each route segment is wrapped by an error boundary that keeps the shell and nav 
 
 Full flows are in `03_INTERACTION_PATTERNS.md` section 2. This table fixes where each flow starts and where it ends so IA is consistent.
 
-| Entry                                           | URL                                                                                         | Who                          | Ends at                                                           |
+| Entry | URL | Who | Ends at |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------- | ---------------------------------------------- |
-| Candidate self sign-up                          | `/signup/candidate`                                                                         | New individual               | `/dashboard` with the first-run checklist                         |
-| Student sign-up via institution                 | Institution invite `/invite/{token}` or `/signup/student?inst={slug}`                       | New or existing user         | `/campus`                                                         |
-| Employer sign-up                                | `/signup/employer`                                                                          | New recruiter or hiring lead | `/employer/{org}/dashboard` with the organization setup checklist |
-| Teammate invitation                             | `/invite/{token}` (type org)                                                                | Invited REC, HMG, EAD        | `/employer/{org}/dashboard`                                       |
-| Institution onboarding                          | `/signup/institution` (request) then admin-provisioned `/invite/{token}`                    | IAD                          | `/institution/{inst}/dashboard`                                   |
-| Enterprise onboarding                           | Sales-assisted; provisioned invitation                                                      | EXA                          | `/enterprise/{org}/dashboard`                                     |
-| Mentor application                              | `/signup/mentor` or "Become a mentor" in Personal                                           | CAN                          | `/mentoring/mentor` in pending-approval state                     |
-| Instructor application                          | `/signup/instructor` or "Teach" in Personal                                                 | CAN                          | `/studio`                                                         |
-| Freelancer mode                                 | Settings toggle or "Start freelancing" on `/gigs`                                           | CAN                          | `/gigs/my/profile`                                                |
-| Apply from a shared job link                    | `/jobs/{slug}-{id}` then Apply while signed out                                             | Guest                        | Sign up or sign in with `returnTo`, then the apply wizard resumes |
-| Referral link                                   | `/r/{code}` (resolves, records attribution, redirects to the target or `/signup/candidate`) | Guest                        | Target page or onboarding                                         |
-| Course purchase from a public page              | `/courses/{slug}-{id}` then Enroll                                                          | Guest                        | Sign up, checkout, `/learn/courses/{id}`                          |
-| Assessment invitation (employer or institution) | `/invite/{token}` (type assessment)                                                         | Guest or user                | `/assess/{attemptId}/start`                                       |
-| Interview invitation                            | `/invite/{token}` (type interview)                                                          | Guest or user                | `/interviews/{id}` (guest may join with a limited session)        |
-| Browser extension install                       | `/extension` (marketing) then extension onboarding tab                                      | CAN                          | `/profile` import review                                          |
-| Profile import (LinkedIn or resume)             | `/signup/candidate?import=resume                                                            | linkedin`                    | New candidate                                                     | Profile import review screen then `/dashboard` |
-| PWA install prompt                              | In-app, after second visit and one completed action                                         | Any                          | Stays in place                                                    |
-| Staff account creation                          | Admin-provisioned invitation with mandatory MFA enrollment                                  | Staff                        | `/console/dashboard`                                              |
+| Candidate self sign-up | `/signup/candidate` | New individual | `/dashboard` with the first-run checklist |
+| Student sign-up via institution | Institution invite `/invite/{token}` or `/signup/student?inst={slug}` | New or existing user | `/campus` |
+| Employer sign-up | `/signup/employer` | New recruiter or hiring lead | `/employer/{org}/dashboard` with the organization setup checklist |
+| Teammate invitation | `/invite/{token}` (type org) | Invited REC, HMG, EAD | `/employer/{org}/dashboard` |
+| Institution onboarding | `/signup/institution` (request) then admin-provisioned `/invite/{token}` | IAD | `/institution/{inst}/dashboard` |
+| Enterprise onboarding | Sales-assisted; provisioned invitation | EXA | `/enterprise/{org}/dashboard` |
+| Mentor application | `/signup/mentor` or "Become a mentor" in Personal | CAN | `/mentoring/mentor` in pending-approval state |
+| Instructor application | `/signup/instructor` or "Teach" in Personal | CAN | `/studio` |
+| Freelancer mode | Settings toggle or "Start freelancing" on `/gigs` | CAN | `/gigs/my/profile` |
+| Apply from a shared job link | `/jobs/{slug}-{id}` then Apply while signed out | Guest | Sign up or sign in with `returnTo`, then the apply wizard resumes |
+| Referral link | `/r/{code}` (resolves, records attribution, redirects to the target or `/signup/candidate`) | Guest | Target page or onboarding |
+| Course purchase from a public page | `/courses/{slug}-{id}` then Enroll | Guest | Sign up, checkout, `/learn/courses/{id}` |
+| Assessment invitation (employer or institution) | `/invite/{token}` (type assessment) | Guest or user | `/assess/{attemptId}/start` |
+| Interview invitation | `/invite/{token}` (type interview) | Guest or user | `/interviews/{id}` (guest may join with a limited session) |
+| Browser extension install | `/extension` (marketing) then extension onboarding tab | CAN | `/profile` import review |
+| Profile import (LinkedIn or resume) | `/signup/candidate?import=resume                                                            | linkedin` | New candidate | Profile import review screen then `/dashboard` |
+| PWA install prompt | In-app, after second visit and one completed action | Any | Stays in place |
+| Staff account creation | Admin-provisioned invitation with mandatory MFA enrollment | Staff | `/console/dashboard` |
 
 Rules:
 

@@ -2,7 +2,7 @@
 
 Doc ID: RDM-GATES-C · Owner: Program Director (proposed) · Version 1.0 · Status: Proposed (Under Review) · Date: 2026-10-26 · Merge track: C (source group `31_LEGACY_ARCHIVE/docs/reports/**`)
 
-**Relationship (no original file was edited).** This file **supersedes nothing**. It does not change `ROADMAP.md` or `ROADMAP.md#record-roadmap-rev2`; it is a register of **gates and sequencing evidence from the earlier attempt** that the target roadmap can adopt, adapt or reject by ID. It is linked from `00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_C.md`; the documentation owner must also link it from `00_CONTROL_CENTRE/MASTER_INDEX.md`. Owner instruction behind this merge: *"i dont want to loos information keep everything in use untile it get improved"*. Contains no dates for the target, no durations and no staffing numbers.
+**Relationship (no original file was edited).** This file **supersedes nothing**. It does not change `ROADMAP.md` or `ROADMAP.md#record-roadmap-rev2`; it is a register of **gates and sequencing evidence from the earlier attempt** that the target roadmap can adopt, adapt or reject by ID. It is linked from `00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_C.md`; the documentation owner must also link it from `00_CONTROL_CENTRE/MASTER_INDEX.md`. Owner instruction behind this merge: _"i dont want to loos information keep everything in use untile it get improved"_. Contains no dates for the target, no durations and no staffing numbers.
 
 **Greenfield frame.** No source code exists in this repository and nothing is implemented. Every row records "the earlier attempt required X before release" or "the earlier attempt reported state Y at commit Z". Hosted-service facts (Stripe, Supabase, GitHub) describe the **earlier attempt's accounts and repositories** at the dates given, observed read-only; they are not facts about any target environment. No live-verification gate below is satisfied for the target.
 
@@ -12,25 +12,25 @@ Companion files: `24_RISKS_AND_DECISIONS/RISK_AND_LESSONS_FROM_PRIOR_ATTEMPT.md`
 
 Each gate is a condition the earlier attempt judged necessary before a user-facing release. "State then" is the last recorded state in the reports (2026-10-23) and is historical.
 
-| ID | Gate | Required evidence (as the reports phrased it) | Source | State then |
-|---|---|---|---|---|
-| LRG-01 | **Exact-commit green CI** | Lint, type-check including the test projects, unit, integration and security tests, local migrations applied to an empty database twice (idempotency), real-database tests, production build, client-bundle secret scan, browser tests all green on the exact release commit; no assertion weakened to get there. | PRODUCTION_AUDIT P0-08; REPOSITORY_AUDIT R2-01, I, L | Red twice: 2026-10-03 at type-check; 2026-10-23 one of 236 browser cases failed (account-security, aborted navigation) |
-| LRG-02 | **Transactional email proven** | Verified sender and domain (SPF, DKIM, DMARC), a real mailbox receives the verification code and the referee link, the token is absent from the requester's response and from logs, expiry and replay negatives, retries preserve idempotency, bounce and retry alerting, queue alert; worker fails closed (503) when unconfigured in staging and production. | issue "email" (#44 in 10-21/10-23 numbering); BL-003; X-02 | Blocked: adapter code existed, no live proof |
-| LRG-03 | **Privacy and erasure lifecycle approved and proven** | Ratified policy (immediate versus 30-day grace), retention and backup treatment, scheduler for due erasures, resumable cleanup after partial failure with the account kept closed, deletion proven across every store and the payment provider, user notification, counsel sign-off. | issue "privacy/erasure" (#45); BL-006; X-07; D-03; R2-05 | Blocked: owner and legal decision; no scheduler |
-| LRG-04 | **Legal text and contacts** | Counsel review of Terms and Privacy Policy against GDPR, CCPA/CPRA and India DPDP recorded in a governance record; monitored privacy and security mailboxes on a domain the company owns; no unsupported compliance claim. | BL-004; finding 20 | Open (code honest; law open) |
-| LRG-05 | **Persistence design ratified; populated migration rehearsed** | Owner ratifies the persistence design and its schema change (the earlier migration 00043: replaced `UNIQUE(job_id, candidate_id)` with a partial index, dropped the plaintext reference token after hashing, re-pointed work-history and reference foreign keys to `users(id)`); duplicate case-folded emails and active applications resolved by approved policy; upgrade of a populated snapshot, rollback and restore exercised; target grants and RLS deny cross-account reads. | issue "ADR-015 / hosted migration" (#46); X-08; O-01 | Blocked: no ratification; hosted project empty |
-| LRG-06 | **Hosted database target gate** | Do not run the migration command against a hosted managed database until a compatible identity model exists: the earlier SQL referenced `auth.users`, `auth.uid()`, `auth.jwt()` (four migrations held foreign keys to `auth.users(id)`) while the app issued its own sessions; do not insert fake `auth.users` rows, replace `auth.uid` globally or grant blanket access; rehearse on a disposable target (drift, abort and rollback, grants, RLS, concurrent writes) first. A CI scanner that expects exit code 1 on known incompatibility is a blocker detector, not a compatibility proof. | HOSTED_SUPABASE_MIGRATION_GATE (cited); STRIPE_SUPABASE; REPOSITORY_AUDIT E | Blocked |
-| LRG-07 | **Deployment topology correct** | HTTPS; the proxy forwards the root health route to the API (not static HTML); database and API publish no host ports, only the edge proxy binds 80 and 443; secrets excluded from images (`.dockerignore`); production image pruned (below 250 MB target); single API writer enforced where the design needs it. | BL-005, BL-018; PR #55; OPS-02; issue "deployment" (#47) | Code existed; not operationally verified |
-| LRG-08 | **Worker and queue reliability** | Claims bounded by execution capacity and fenced by claim token, expired owners cannot acknowledge, crashed claims recover, cancellation wins, mail idempotency kept; worker heartbeat and queue-age alerts observed in a kill drill. | D-02; X-06; R2-07 | Reproduced defect (6 jobs, 9 executions); fix not proven |
-| LRG-09 | **Operations drills passed** | Backup restored independently into an isolated database and verified (schema, table row counts, background-job queue); the restored app passes a smoke test; rollback of the image with schema compatibility; load and cold-boot/memory measured; external monitoring of error-level logs; approved RPO and RTO; signed go/no-go. | X-09; issue "deployment"; PRs #55, #56 | Not performed (no deployment target) |
-| LRG-10 | **Assessment integrity and trust policy** | No scored result without approved isolated execution (submission-only until then); credential issuance after the final-assessment gate; linked certificate and evidence proofs agree on revocation; trust policy for badges and scoring ratified; interview code execution refused (503) in deployed environments until a sandbox is approved. | D-01, D-09, D-10; X-05, X-11; issue "interview/trust" (#49) | Open decisions |
-| LRG-11 | **Session architecture decision** | Decide bearer token in storage versus httpOnly cookie, with CSRF defence, credentialed CORS and the client contract. | TS-007; issue "trust/token storage" | Open |
-| LRG-12 | **Commercial gate** | Explicit free-only launch, or: approved provider and price policy, test-environment webhook endpoint configured and signed delivery verified, refund and dispute behavior decided and implemented, entitlement read-model audit (all gates read entitlements, never plan tier alone), truthful UI, then live-mode readiness. Do not enable the paid billing mode for public users before these gates. | issue "commercial" (#50); X-03; REPOSITORY_AUDIT F, L | Partial: Stripe code merged; 0 webhook endpoints in the test account; UI free-only |
-| LRG-13 | **Durable beta scope** | Decide which long-tail modules must persist before exposure; each slice: API, database, authorization, UI, restart, tenant and browser tests; the UI states remaining preview limits. | issue "durable beta modules" (#48); X-01 | Partial |
-| LRG-14 | **Security hardening backlog closed** | Keyed hash for email codes (BL-001); referee token expiry (BL-002); durable assessment sessions (BL-009); AI tier from entitlements (BL-010); password policy; CSP on the web host; patched web-framework advisory (fastify 5.12.2 to 5.12.5 affected by GHSA-389g-gv7q-r4x8, fixed in 5.12.6); secret scanner fails on scanner error. | SEC-01, SEC-02, SEC-05, SEC-06, O-4, D-07 | Open at last report |
-| LRG-15 | **Accessibility and performance acceptance** | Manual contrast and screen-reader checks; measured service-level objectives (no fictitious SLOs); layout-shift budget; load, soak, backup/restore and deployment tests (never produced). | FINAL_VALIDATION "Not produced"; FEATURE_STATUS; PRODUCTION_AUDIT section 8 | Not produced |
-| LRG-16 | **Documentation and claims gate** | Status documents match evidence, dated and tied to a commit; no feature called implemented from documentation; the docs index points to the current audit; historical reports labelled. | REPOSITORY_AUDIT R2-08; FEATURE_PLAN K | Drift recorded |
-| LRG-17 | **Verification-environment gate** | A clean, permitted environment (fresh build, install, isolated test database, browser) exists before acceptance is claimed; "not run" is never reported as pass. | D-06; X-00 | Blocked |
+| ID     | Gate                                                           | Required evidence (as the reports phrased it)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Source                                                                      | State then                                                                                                             |
+| ------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| LRG-01 | **Exact-commit green CI**                                      | Lint, type-check including the test projects, unit, integration and security tests, local migrations applied to an empty database twice (idempotency), real-database tests, production build, client-bundle secret scan, browser tests all green on the exact release commit; no assertion weakened to get there.                                                                                                                                                                                                                                                                              | PRODUCTION_AUDIT P0-08; REPOSITORY_AUDIT R2-01, I, L                        | Red twice: 2026-10-03 at type-check; 2026-10-23 one of 236 browser cases failed (account-security, aborted navigation) |
+| LRG-02 | **Transactional email proven**                                 | Verified sender and domain (SPF, DKIM, DMARC), a real mailbox receives the verification code and the referee link, the token is absent from the requester's response and from logs, expiry and replay negatives, retries preserve idempotency, bounce and retry alerting, queue alert; worker fails closed (503) when unconfigured in staging and production.                                                                                                                                                                                                                                  | issue "email" (#44 in 10-21/10-23 numbering); BL-003; X-02                  | Blocked: adapter code existed, no live proof                                                                           |
+| LRG-03 | **Privacy and erasure lifecycle approved and proven**          | Ratified policy (immediate versus 30-day grace), retention and backup treatment, scheduler for due erasures, resumable cleanup after partial failure with the account kept closed, deletion proven across every store and the payment provider, user notification, counsel sign-off.                                                                                                                                                                                                                                                                                                           | issue "privacy/erasure" (#45); BL-006; X-07; D-03; R2-05                    | Blocked: owner and legal decision; no scheduler                                                                        |
+| LRG-04 | **Legal text and contacts**                                    | Counsel review of Terms and Privacy Policy against GDPR, CCPA/CPRA and India DPDP recorded in a governance record; monitored privacy and security mailboxes on a domain the company owns; no unsupported compliance claim.                                                                                                                                                                                                                                                                                                                                                                     | BL-004; finding 20                                                          | Open (code honest; law open)                                                                                           |
+| LRG-05 | **Persistence design ratified; populated migration rehearsed** | Owner ratifies the persistence design and its schema change (the earlier migration 00043: replaced `UNIQUE(job_id, candidate_id)` with a partial index, dropped the plaintext reference token after hashing, re-pointed work-history and reference foreign keys to `users(id)`); duplicate case-folded emails and active applications resolved by approved policy; upgrade of a populated snapshot, rollback and restore exercised; target grants and RLS deny cross-account reads.                                                                                                            | issue "ADR-015 / hosted migration" (#46); X-08; O-01                        | Blocked: no ratification; hosted project empty                                                                         |
+| LRG-06 | **Hosted database target gate**                                | Do not run the migration command against a hosted managed database until a compatible identity model exists: the earlier SQL referenced `auth.users`, `auth.uid()`, `auth.jwt()` (four migrations held foreign keys to `auth.users(id)`) while the app issued its own sessions; do not insert fake `auth.users` rows, replace `auth.uid` globally or grant blanket access; rehearse on a disposable target (drift, abort and rollback, grants, RLS, concurrent writes) first. A CI scanner that expects exit code 1 on known incompatibility is a blocker detector, not a compatibility proof. | HOSTED_SUPABASE_MIGRATION_GATE (cited); STRIPE_SUPABASE; REPOSITORY_AUDIT E | Blocked                                                                                                                |
+| LRG-07 | **Deployment topology correct**                                | HTTPS; the proxy forwards the root health route to the API (not static HTML); database and API publish no host ports, only the edge proxy binds 80 and 443; secrets excluded from images (`.dockerignore`); production image pruned (below 250 MB target); single API writer enforced where the design needs it.                                                                                                                                                                                                                                                                               | BL-005, BL-018; PR #55; OPS-02; issue "deployment" (#47)                    | Code existed; not operationally verified                                                                               |
+| LRG-08 | **Worker and queue reliability**                               | Claims bounded by execution capacity and fenced by claim token, expired owners cannot acknowledge, crashed claims recover, cancellation wins, mail idempotency kept; worker heartbeat and queue-age alerts observed in a kill drill.                                                                                                                                                                                                                                                                                                                                                           | D-02; X-06; R2-07                                                           | Reproduced defect (6 jobs, 9 executions); fix not proven                                                               |
+| LRG-09 | **Operations drills passed**                                   | Backup restored independently into an isolated database and verified (schema, table row counts, background-job queue); the restored app passes a smoke test; rollback of the image with schema compatibility; load and cold-boot/memory measured; external monitoring of error-level logs; approved RPO and RTO; signed go/no-go.                                                                                                                                                                                                                                                              | X-09; issue "deployment"; PRs #55, #56                                      | Not performed (no deployment target)                                                                                   |
+| LRG-10 | **Assessment integrity and trust policy**                      | No scored result without approved isolated execution (submission-only until then); credential issuance after the final-assessment gate; linked certificate and evidence proofs agree on revocation; trust policy for badges and scoring ratified; interview code execution refused (503) in deployed environments until a sandbox is approved.                                                                                                                                                                                                                                                 | D-01, D-09, D-10; X-05, X-11; issue "interview/trust" (#49)                 | Open decisions                                                                                                         |
+| LRG-11 | **Session architecture decision**                              | Decide bearer token in storage versus httpOnly cookie, with CSRF defence, credentialed CORS and the client contract.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | TS-007; issue "trust/token storage"                                         | Open                                                                                                                   |
+| LRG-12 | **Commercial gate**                                            | Explicit free-only launch, or: approved provider and price policy, test-environment webhook endpoint configured and signed delivery verified, refund and dispute behavior decided and implemented, entitlement read-model audit (all gates read entitlements, never plan tier alone), truthful UI, then live-mode readiness. Do not enable the paid billing mode for public users before these gates.                                                                                                                                                                                          | issue "commercial" (#50); X-03; REPOSITORY_AUDIT F, L                       | Partial: Stripe code merged; 0 webhook endpoints in the test account; UI free-only                                     |
+| LRG-13 | **Durable beta scope**                                         | Decide which long-tail modules must persist before exposure; each slice: API, database, authorization, UI, restart, tenant and browser tests; the UI states remaining preview limits.                                                                                                                                                                                                                                                                                                                                                                                                          | issue "durable beta modules" (#48); X-01                                    | Partial                                                                                                                |
+| LRG-14 | **Security hardening backlog closed**                          | Keyed hash for email codes (BL-001); referee token expiry (BL-002); durable assessment sessions (BL-009); AI tier from entitlements (BL-010); password policy; CSP on the web host; patched web-framework advisory (fastify 5.12.2 to 5.12.5 affected by GHSA-389g-gv7q-r4x8, fixed in 5.12.6); secret scanner fails on scanner error.                                                                                                                                                                                                                                                         | SEC-01, SEC-02, SEC-05, SEC-06, O-4, D-07                                   | Open at last report                                                                                                    |
+| LRG-15 | **Accessibility and performance acceptance**                   | Manual contrast and screen-reader checks; measured service-level objectives (no fictitious SLOs); layout-shift budget; load, soak, backup/restore and deployment tests (never produced).                                                                                                                                                                                                                                                                                                                                                                                                       | FINAL_VALIDATION "Not produced"; FEATURE_STATUS; PRODUCTION_AUDIT section 8 | Not produced                                                                                                           |
+| LRG-16 | **Documentation and claims gate**                              | Status documents match evidence, dated and tied to a commit; no feature called implemented from documentation; the docs index points to the current audit; historical reports labelled.                                                                                                                                                                                                                                                                                                                                                                                                        | REPOSITORY_AUDIT R2-08; FEATURE_PLAN K                                      | Drift recorded                                                                                                         |
+| LRG-17 | **Verification-environment gate**                              | A clean, permitted environment (fresh build, install, isolated test database, browser) exists before acceptance is claimed; "not run" is never reported as pass.                                                                                                                                                                                                                                                                                                                                                                                                                               | D-06; X-00                                                                  | Blocked                                                                                                                |
 
 ## 2. Issue-by-issue gates (GitHub #44 to #50)
 
@@ -38,71 +38,70 @@ All seven issues were **open** at every report. No issue closure was justified (
 
 ### 2.1 Mapping used by FEATURE_STATUS (2026-10-21) and REPOSITORY_AUDIT (2026-10-23), which read the issue bodies
 
-| Issue | Title / scope | Priority | Already in code or merged work | Remaining acceptance | Whole-issue status on 2026-10-23 |
-|---|---|---|---|---|---|
-| #44 | Transactional email delivery | P0 | PR #51 Resend adapter, fail-closed configuration, durable enqueue | Sender and provider ownership, real inbox, monitoring, D-02 | BLOCKED (provider and live proof) |
-| #45 | Privacy, legal, erasure | P0 | PR #43 request and cancel SQL; PR #51 encrypted metadata and cleanup; PR #58 privacy checks | Legal, contact and retention approval, scheduler policy, complete recoverable deletion including shared data and backups | BLOCKED (owner, legal, live proof) |
-| #46 | Persistence design ratification and hosted migration | P0 | PR #52 migration ledger guard and read-only preflight; ADR describing the writer lock | Ratification, populated migration and rollback, hosted grants and RLS | BLOCKED (schema, approval) |
-| #47 | Deployment, restore, single writer | P0 | Writer lock, heartbeat, PR #55 topology, PR #56 recovery scripts, PR #58 config hardening | Deployed drills, load and boot measurements, independent restore and rollback, release acceptance | BLOCKED (infrastructure proof) |
-| #48 | Durable beta modules | P1 | PR #51 metadata, PR #53 searches, PR #54 bookmarks; audit and flag stores; billing in database mode | Selected remaining modules, drafts, connections, alerts; avoid blanket rewrite | PARTIAL |
-| #49 | Interview, trust, token storage | P1 | PR #43 deployed interview refusal and trust changes; PRs #57, #58 regression and access control | Challenge semantics, approved sandbox, trust, badge and session policy; no cookie migration assumed | PARTIAL / decisions blocked |
-| #50 | Commercial policy and payment | P1 | Paid activation disabled; simulated mode refused in deployment; PR #71 Stripe backend and migration 00052 | Explicit free-only decision or approved provider plus durable payment and entitlement reconciliation; price approval | PARTIAL |
+| Issue | Title / scope                                        | Priority | Already in code or merged work                                                                            | Remaining acceptance                                                                                                     | Whole-issue status on 2026-10-23   |
+| ----- | ---------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| #44   | Transactional email delivery                         | P0       | PR #51 Resend adapter, fail-closed configuration, durable enqueue                                         | Sender and provider ownership, real inbox, monitoring, D-02                                                              | BLOCKED (provider and live proof)  |
+| #45   | Privacy, legal, erasure                              | P0       | PR #43 request and cancel SQL; PR #51 encrypted metadata and cleanup; PR #58 privacy checks               | Legal, contact and retention approval, scheduler policy, complete recoverable deletion including shared data and backups | BLOCKED (owner, legal, live proof) |
+| #46   | Persistence design ratification and hosted migration | P0       | PR #52 migration ledger guard and read-only preflight; ADR describing the writer lock                     | Ratification, populated migration and rollback, hosted grants and RLS                                                    | BLOCKED (schema, approval)         |
+| #47   | Deployment, restore, single writer                   | P0       | Writer lock, heartbeat, PR #55 topology, PR #56 recovery scripts, PR #58 config hardening                 | Deployed drills, load and boot measurements, independent restore and rollback, release acceptance                        | BLOCKED (infrastructure proof)     |
+| #48   | Durable beta modules                                 | P1       | PR #51 metadata, PR #53 searches, PR #54 bookmarks; audit and flag stores; billing in database mode       | Selected remaining modules, drafts, connections, alerts; avoid blanket rewrite                                           | PARTIAL                            |
+| #49   | Interview, trust, token storage                      | P1       | PR #43 deployed interview refusal and trust changes; PRs #57, #58 regression and access control           | Challenge semantics, approved sandbox, trust, badge and session policy; no cookie migration assumed                      | PARTIAL / decisions blocked        |
+| #50   | Commercial policy and payment                        | P1       | Paid activation disabled; simulated mode refused in deployment; PR #71 Stripe backend and migration 00052 | Explicit free-only decision or approved provider plus durable payment and entitlement reconciliation; price approval     | PARTIAL                            |
 
 Status accounting (REPOSITORY_AUDIT A): fixed and verified 0; implemented, not fully verified 0; partially fixed or open 3 (#48, #49, #50); regressed 0; blocked 4 (#44 to #47); not reproducible 0. Comments counted in the 2026-10-21 snapshot: #44 2, #45 3, #46 2, #47 3, #48 5, #49 1, #50 1 (17 total). On 2026-10-23 the review posted five comments (to #45, #46, #47, #48, #50: ids 6374109469, 6374110168, 6374110786, 6374111482, 6374112336) and changed no state, label or assignee.
 
 ### 2.2 Mapping used by GIT_RECONCILIATION_REPORT (2026-10-22), inferred from commits
 
-| Issue | Title in that report | Codebase status | Release status | Commits and PRs cited |
-|---|---|---|---|---|
-| #44 | Transactional email, provider integration and fail-closed guard | Partially addressed | Gated (staging proof) | `22fb8190`, `ad613fc3` (PR #43 fail-closed 503); `43ef011e`, `73f27b29`, `f75fd3b4` (PR #51 Resend adapter, exponential backoff, idempotency headers); `8aea7fee` (PR #51 worker configuration validator); `7c723a0e` (PR #55 outbound mail allowed, database private); `43bb9258` (PR #57 FE-05) |
-| #45 | Reputation visibility, recruiter scoping, candidate consent (BR-167) | Partially addressed | Gated (consent setting) | `a30fcaab` (PR #57); `8f5ff69a` (PR #58 R2-2); `d3607f0f` (PR #58 BR-167 gate; message "No reputation consent setting exists yet ... #45 #49 remain open") |
-| #46 | Technical-interview code execution sandbox and cross-tenant IDOR | Partially addressed, architectural limitation | Documented limitation | `93dfe125` (PR #40); `48b5fd55`, `f9c2d0bb` (PR #43 simulated sandbox claims removed, 503); `a30fcaab` (PR #57) |
-| #47 | Privacy policy, terms, contact verification, false compliance claims | Resolved in code, open in law | Gated (legal counsel) | `ae99e31c` (PR #40); `731c2ef3`, `d0f21535`, `f9c2d0bb` (PR #43); `8a81a953`, `ab410a92` (PR #43); `43bb9258` (PR #57 FE-02) |
-| #48 | User data erasure semantics and scheduled deletion | Partially addressed | Gated (30-day executor) | `1bb0f625` (PR #40); `15b44921`, `7bc608b8`, `de352710` (PR #43); `34e54020`, `6f88ef74` (PR #51); `a30fcaab` (PR #57) |
-| #49 | PostgreSQL durability versus about 220 ephemeral routes and the single-writer constraint | Partially addressed | Progressive migration | `1bb0f625`; `1515beae`, `e49c43b1` (PR #43); `000013c3`, `f6612e46`, `34e54020` (PR #51); `735b30ea` (PR #53); `47a3f130`, `b30e7e42` (PR #54); `8864d2c8` (PR #55) |
-| #50 | Payment gateway and billing integrity | Resolved in code, open in plan | Gated (provider) | `ae99e31c`, `1bb0f625` (PR #40); `48b5fd55` (PR #43); `8864d2c8` (PR #55) |
+| Issue | Title in that report                                                                     | Codebase status                               | Release status          | Commits and PRs cited                                                                                                                                                                                                                                                                             |
+| ----- | ---------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #44   | Transactional email, provider integration and fail-closed guard                          | Partially addressed                           | Gated (staging proof)   | `22fb8190`, `ad613fc3` (PR #43 fail-closed 503); `43ef011e`, `73f27b29`, `f75fd3b4` (PR #51 Resend adapter, exponential backoff, idempotency headers); `8aea7fee` (PR #51 worker configuration validator); `7c723a0e` (PR #55 outbound mail allowed, database private); `43bb9258` (PR #57 FE-05) |
+| #45   | Reputation visibility, recruiter scoping, candidate consent (BR-167)                     | Partially addressed                           | Gated (consent setting) | `a30fcaab` (PR #57); `8f5ff69a` (PR #58 R2-2); `d3607f0f` (PR #58 BR-167 gate; message "No reputation consent setting exists yet ... #45 #49 remain open")                                                                                                                                        |
+| #46   | Technical-interview code execution sandbox and cross-tenant IDOR                         | Partially addressed, architectural limitation | Documented limitation   | `93dfe125` (PR #40); `48b5fd55`, `f9c2d0bb` (PR #43 simulated sandbox claims removed, 503); `a30fcaab` (PR #57)                                                                                                                                                                                   |
+| #47   | Privacy policy, terms, contact verification, false compliance claims                     | Resolved in code, open in law                 | Gated (legal counsel)   | `ae99e31c` (PR #40); `731c2ef3`, `d0f21535`, `f9c2d0bb` (PR #43); `8a81a953`, `ab410a92` (PR #43); `43bb9258` (PR #57 FE-02)                                                                                                                                                                      |
+| #48   | User data erasure semantics and scheduled deletion                                       | Partially addressed                           | Gated (30-day executor) | `1bb0f625` (PR #40); `15b44921`, `7bc608b8`, `de352710` (PR #43); `34e54020`, `6f88ef74` (PR #51); `a30fcaab` (PR #57)                                                                                                                                                                            |
+| #49   | PostgreSQL durability versus about 220 ephemeral routes and the single-writer constraint | Partially addressed                           | Progressive migration   | `1bb0f625`; `1515beae`, `e49c43b1` (PR #43); `000013c3`, `f6612e46`, `34e54020` (PR #51); `735b30ea` (PR #53); `47a3f130`, `b30e7e42` (PR #54); `8864d2c8` (PR #55)                                                                                                                               |
+| #50   | Payment gateway and billing integrity                                                    | Resolved in code, open in plan                | Gated (provider)        | `ae99e31c`, `1bb0f625` (PR #40); `48b5fd55` (PR #43); `8864d2c8` (PR #55)                                                                                                                                                                                                                         |
 
 Numbering fact recorded there: pull requests and issues share one counter. PR #40 to #43 were merged in succession; numbers #44 to #50 were then allocated to the seven issues; later pull requests are #51 to #58. No pull request numbered #44 to #50 ever existed.
 
 ### 2.3 Reported defect and verifying tests per issue (GIT_RECONCILIATION_REPORT numbering)
 
-| Issue (that report's title) | Reported defect | Verifying tests named |
-|---|---|---|
-| #44 transactional email | Development logged verification codes to the console; in staging or production without a provider the platform accepted verification requests without sending mail, so candidates could not verify corporate domains or obtain reference upgrades | `production-config` unit; `work-history-graph` integration; e2e `core-loop`, `frontend-fixes` (FE-05) |
-| #45 reputation visibility | Any authenticated caller could inspect any candidate's multi-dimensional reputation score and breakdown without consent (BR-167); recalculation open to non-admins; stealth candidates exposed in discovery | `reputation-visibility`, `review-r2-regressions` (R2-2), `reputation-engine` integration; e2e `reputation-engine` |
-| #46 interview sandbox | Evaluation simulated in-process, claiming to run submitted code; cross-tenant IDOR let rival organizations link, score and move another company's application and expose private questions and hidden test cases | `technical-interview` integration; `core-authz` ("interview assessments are scoped...") |
-| #47 privacy and legal | Fabricated claims ("SOC2 Type II Ready", "GDPR & CCPA Compliant", "DKIM Verified"), fictitious hashes, a fake phone number, a support address at an unowned domain; unreviewed boilerplate Terms and Privacy Policy | e2e `frontend-fixes` (FE-02), `core-loop`; `core-authz` |
-| #48 erasure | Erasure left work history, references and applications in tables; requests and cancellations lived in volatile maps; no executor for the 30-day grace period; recruiter-versus-candidate retention semantics undefined | `tests/pg/core-persistence`, `notifications`, `messaging`, `work-history-removal`, `saved-jobs` |
-| #49 durability | Only the core loop persisted; about 220 routes kept state in maps; horizontal scaling unsafe without a single-writer lock | `tests/pg/core-persistence`, `concurrency`, `saved-searches`, `saved-jobs` |
-| #50 payments | Checkout collected card numbers without submitting them anywhere and activated paid plans without payment; the webhook was unsigned and open to spoofed confirmations | `billing` integration; `api-security`; `production-config` |
-
+| Issue (that report's title) | Reported defect                                                                                                                                                                                                                                   | Verifying tests named                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| #44 transactional email     | Development logged verification codes to the console; in staging or production without a provider the platform accepted verification requests without sending mail, so candidates could not verify corporate domains or obtain reference upgrades | `production-config` unit; `work-history-graph` integration; e2e `core-loop`, `frontend-fixes` (FE-05)             |
+| #45 reputation visibility   | Any authenticated caller could inspect any candidate's multi-dimensional reputation score and breakdown without consent (BR-167); recalculation open to non-admins; stealth candidates exposed in discovery                                       | `reputation-visibility`, `review-r2-regressions` (R2-2), `reputation-engine` integration; e2e `reputation-engine` |
+| #46 interview sandbox       | Evaluation simulated in-process, claiming to run submitted code; cross-tenant IDOR let rival organizations link, score and move another company's application and expose private questions and hidden test cases                                  | `technical-interview` integration; `core-authz` ("interview assessments are scoped...")                           |
+| #47 privacy and legal       | Fabricated claims ("SOC2 Type II Ready", "GDPR & CCPA Compliant", "DKIM Verified"), fictitious hashes, a fake phone number, a support address at an unowned domain; unreviewed boilerplate Terms and Privacy Policy                               | e2e `frontend-fixes` (FE-02), `core-loop`; `core-authz`                                                           |
+| #48 erasure                 | Erasure left work history, references and applications in tables; requests and cancellations lived in volatile maps; no executor for the 30-day grace period; recruiter-versus-candidate retention semantics undefined                            | `tests/pg/core-persistence`, `notifications`, `messaging`, `work-history-removal`, `saved-jobs`                   |
+| #49 durability              | Only the core loop persisted; about 220 routes kept state in maps; horizontal scaling unsafe without a single-writer lock                                                                                                                         | `tests/pg/core-persistence`, `concurrency`, `saved-searches`, `saved-jobs`                                        |
+| #50 payments                | Checkout collected card numbers without submitting them anywhere and activated paid plans without payment; the webhook was unsigned and open to spoofed confirmations                                                                             | `billing` integration; `api-security`; `production-config`                                                        |
 
 ## 3. Release stages and sprints
 
 ### 3.1 Stages A to F (RELEASE_SCOPE_AND_BACKLOG, 2026-10-22)
 
-| Stage | Focus | Backlog delivered | Exit criteria |
-|---|---|---|---|
-| A | Production hardening and operational gates | BL-001, 002, 003, 004, 005, 007, 008 | All tests green, `test:security` exits 0, lint exits 0, a live email received from staging |
-| B | Core career loop GA launch (free early-access tier) | BL-006, 009, 010; deployment on the single-writer design with automated backup verification | End-to-end in production: candidate sign-up, corporate email attestation, referee voucher completion, job apply, recruiter pipeline move |
-| C | Progressive durability (long tail) | BL-011, 012, 013, 015; portfolio showcase (F-26) and admin console (F-17) durable | Ephemeral route count reduced from 217 to below 100; restart preserves challenge submissions, course progress, drafts |
-| D | Commercial monetization and enterprise tier | BL-016; enterprise seat licensing and invoice generation; webhook deduplication keys persisted | A live-style card test succeeds in the provider's test mode, the webhook activates the Pro subscription, canceling updates entitlements |
-| E | Sandboxed code execution and remote assessment | BL-017; multi-language runner (Node.js, Python, TypeScript); technical-interview real-time room | Unprivileged execution of untrusted code passes an isolation audit; fork bombs and unauthorized network calls blocked |
-| F | Ecosystem, reputation and career graph | BL-014; career trajectory visualizations; alumni networks, warm-introduction pathfinding, peer credibility views | Full 173-feature matrix with persistence and accessible UI views |
+| Stage | Focus                                               | Backlog delivered                                                                                                | Exit criteria                                                                                                                            |
+| ----- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | Production hardening and operational gates          | BL-001, 002, 003, 004, 005, 007, 008                                                                             | All tests green, `test:security` exits 0, lint exits 0, a live email received from staging                                               |
+| B     | Core career loop GA launch (free early-access tier) | BL-006, 009, 010; deployment on the single-writer design with automated backup verification                      | End-to-end in production: candidate sign-up, corporate email attestation, referee voucher completion, job apply, recruiter pipeline move |
+| C     | Progressive durability (long tail)                  | BL-011, 012, 013, 015; portfolio showcase (F-26) and admin console (F-17) durable                                | Ephemeral route count reduced from 217 to below 100; restart preserves challenge submissions, course progress, drafts                    |
+| D     | Commercial monetization and enterprise tier         | BL-016; enterprise seat licensing and invoice generation; webhook deduplication keys persisted                   | A live-style card test succeeds in the provider's test mode, the webhook activates the Pro subscription, canceling updates entitlements  |
+| E     | Sandboxed code execution and remote assessment      | BL-017; multi-language runner (Node.js, Python, TypeScript); technical-interview real-time room                  | Unprivileged execution of untrusted code passes an isolation audit; fork bombs and unauthorized network calls blocked                    |
+| F     | Ecosystem, reputation and career graph              | BL-014; career trajectory visualizations; alumni networks, warm-introduction pathfinding, peer credibility views | Full 173-feature matrix with persistence and accessible UI views                                                                         |
 
 Timeline column in that report (relative only): Stage A sprints 1-2, B 3-4, C 5-6, D 7-8, E 9-10, F 11 and later.
 
 ### 3.2 Sprints S0 to S6 (FEATURE_PLAN_2026-10-21, no dates or velocity)
 
-| Stage | Sprint | Goal | Backlog and urgency | Demonstrable increment | Exit criteria |
-|---|---|---|---|---|---|
-| A delivery safety | S0 | Select beta or GA contract from an audited baseline | X-00 P0; prepare X-08, X-09; X-03 decision | Reproducible baseline and release-specific acceptance catalogue | Exact SHA and build provenance; admitted stories Ready; unexecuted gates named; no readiness claim |
-| B trust integrity | S1 | Remove false results and unsafe claims while keeping flows | X-05, X-06 P0; X-10 P1/P2 (split if capacity requires) | Honest challenge submission; recoverable worker queue with bounded claims; reliable verification checks | D-01 and D-02 regressions fail before the fix and pass after; PG fencing proof; affected browser verdict; no trust downgrade |
-| B verification and privacy | S2 | Real proof and recovery slice | X-08 then X-02; X-07 separate P0 | Candidate receives proof email, referee responds, persisted result survives restart; approved erasure demonstrably recovers | Live inbox, replay, expiry; PG restart and race; erasure failure drill; monitored failure; owner accepts trust semantics |
-| C restricted beta | S3 | Close admitted application and recruiter gaps on the durable core | BL-F-04, 05, 06, 10, 14, 17, 24, 32, 94, 96, 162; X-01 per needed slice | Candidate applies with evidence; recruiter reviews and transitions; candidate sees outcome; account controls work | Fresh-browser and restart journey; duplicate, retry, expired-session, tenant cases; moderation recovery; all beta inclusions accepted |
-| D full career loop | S4.n | One learning, proof or career increment per sprint | BL-F-07a then approved BL-F-08, 26, 84, 85, 91, 95, 106, 122, 145; P1 | First durable lesson progress, later portfolio and goal, gap, outcome progression | Each slice survives restart, meets its story, has PG, browser and security evidence; no simulated proficiency |
-| E operational release | S5 | Prove operation under failure | X-09 P0; unresolved X-07 and X-08 block entry | Restore and roll back a working candidate and recruiter product; detect worker failure | Exact-SHA CI/build/browser; hosted RLS; backup, restore, rollback; HTTPS; accessibility and manual gaps closed; load and boot data accepted; signed release |
-| F expansion | S6.n | One standalone extension per sprint | Deferred BL-F packets (P2/P3) | Individually admitted | Same Definition of Done; pricing, AI and predictive decisions never inferred |
+| Stage                      | Sprint | Goal                                                              | Backlog and urgency                                                     | Demonstrable increment                                                                                                      | Exit criteria                                                                                                                                               |
+| -------------------------- | ------ | ----------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A delivery safety          | S0     | Select beta or GA contract from an audited baseline               | X-00 P0; prepare X-08, X-09; X-03 decision                              | Reproducible baseline and release-specific acceptance catalogue                                                             | Exact SHA and build provenance; admitted stories Ready; unexecuted gates named; no readiness claim                                                          |
+| B trust integrity          | S1     | Remove false results and unsafe claims while keeping flows        | X-05, X-06 P0; X-10 P1/P2 (split if capacity requires)                  | Honest challenge submission; recoverable worker queue with bounded claims; reliable verification checks                     | D-01 and D-02 regressions fail before the fix and pass after; PG fencing proof; affected browser verdict; no trust downgrade                                |
+| B verification and privacy | S2     | Real proof and recovery slice                                     | X-08 then X-02; X-07 separate P0                                        | Candidate receives proof email, referee responds, persisted result survives restart; approved erasure demonstrably recovers | Live inbox, replay, expiry; PG restart and race; erasure failure drill; monitored failure; owner accepts trust semantics                                    |
+| C restricted beta          | S3     | Close admitted application and recruiter gaps on the durable core | BL-F-04, 05, 06, 10, 14, 17, 24, 32, 94, 96, 162; X-01 per needed slice | Candidate applies with evidence; recruiter reviews and transitions; candidate sees outcome; account controls work           | Fresh-browser and restart journey; duplicate, retry, expired-session, tenant cases; moderation recovery; all beta inclusions accepted                       |
+| D full career loop         | S4.n   | One learning, proof or career increment per sprint                | BL-F-07a then approved BL-F-08, 26, 84, 85, 91, 95, 106, 122, 145; P1   | First durable lesson progress, later portfolio and goal, gap, outcome progression                                           | Each slice survives restart, meets its story, has PG, browser and security evidence; no simulated proficiency                                               |
+| E operational release      | S5     | Prove operation under failure                                     | X-09 P0; unresolved X-07 and X-08 block entry                           | Restore and roll back a working candidate and recruiter product; detect worker failure                                      | Exact-SHA CI/build/browser; hosted RLS; backup, restore, rollback; HTTPS; accessibility and manual gaps closed; load and boot data accepted; signed release |
+| F expansion                | S6.n   | One standalone extension per sprint                               | Deferred BL-F packets (P2/P3)                                           | Individually admitted                                                                                                       | Same Definition of Done; pricing, AI and predictive decisions never inferred                                                                                |
 
 Sprint risk, isolation and rollback contract (kept verbatim in substance): S0 documentation-only diff; S1 keep the old API contract until a coordinated consumer migration, stop a scored path if unsafe, rollback must not restore fake trust or unsafe worker scale, deferrals real sandbox and provider choices; S2 fail closed on mail outage, reversible migration rehearsal, erased data is not restored to users as an application rollback; S3 restrict incomplete preview modules by approved scope, additive migration with a tested rollback and restore; S4.n one module at a time preserving old data and contract until the replacement is verified; S5 tested image rollback with schema compatibility, restore procedure owned and timed, no claim beyond measured load; S6.n feature-specific rollback and retention plan.
 
@@ -135,17 +134,17 @@ The graph shows delivery dependencies, not new canonical feature dependencies. L
 
 ### 3.4 Dependency-ordered action plan (REPOSITORY_AUDIT M, 2026-10-23)
 
-| Order | Priority | Workstream | Observable acceptance |
-|---|---|---|---|
-| 0 | P0 | CI (R2-01) | Pull-request CI completes with 236 of 236 browser cases; a revoked external session is still redirected with the exact banner and the active session retained |
-| 1 | P0 | Schema (#46) | Approved identity model, migration adaptation, clean and populated disposable rehearsal, two-user and two-tenant RLS and grant checks; no direct hosted migration before signed approval |
-| 2 | P0 | Operations (#47) | After #46: app boot, single-writer lock, worker liveness and queue-backlog alarm, fresh encrypted off-host restore, rollback and smoke |
-| 3 | P0 | Communication (#44) | Verified sender, real-mailbox code and reference sends, expiry and replay negatives, bounces and retry alerts, secrets absent from logs |
-| 4 | P0 | Privacy (#45, R2-05) | Legal, retention and contact approval, due-erasure scheduler, restart recovery, payment-provider disabled and enabled erasure consistency and staging tests |
-| 5 | P1 | Monetization (#50; R2-03, 04, 06, 09) | Decide launch mode; test-mode provider endpoint and signed delivery; complete refund and ordering policy; entitlement read model; honest UI; then any live-mode readiness |
-| 6 | P1 | Core product (#48) | Prioritize drafts, network, alerts by accepted beta scope; each vertical slice API, database, authorization, UI, restart, tenant and browser tests |
-| 7 | P1 | Trust (#49) and worker (R2-07) | Code executor sandbox or fail closed, policy provenance, safe worker lease fencing and replay proof |
-| 8 | P2 | Documentation (R2-08) | Mark stale snapshots clearly; link the current report in the docs index; refresh the feature ledger after acceptance, not before |
+| Order | Priority | Workstream                            | Observable acceptance                                                                                                                                                                    |
+| ----- | -------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | P0       | CI (R2-01)                            | Pull-request CI completes with 236 of 236 browser cases; a revoked external session is still redirected with the exact banner and the active session retained                            |
+| 1     | P0       | Schema (#46)                          | Approved identity model, migration adaptation, clean and populated disposable rehearsal, two-user and two-tenant RLS and grant checks; no direct hosted migration before signed approval |
+| 2     | P0       | Operations (#47)                      | After #46: app boot, single-writer lock, worker liveness and queue-backlog alarm, fresh encrypted off-host restore, rollback and smoke                                                   |
+| 3     | P0       | Communication (#44)                   | Verified sender, real-mailbox code and reference sends, expiry and replay negatives, bounces and retry alerts, secrets absent from logs                                                  |
+| 4     | P0       | Privacy (#45, R2-05)                  | Legal, retention and contact approval, due-erasure scheduler, restart recovery, payment-provider disabled and enabled erasure consistency and staging tests                              |
+| 5     | P1       | Monetization (#50; R2-03, 04, 06, 09) | Decide launch mode; test-mode provider endpoint and signed delivery; complete refund and ordering policy; entitlement read model; honest UI; then any live-mode readiness                |
+| 6     | P1       | Core product (#48)                    | Prioritize drafts, network, alerts by accepted beta scope; each vertical slice API, database, authorization, UI, restart, tenant and browser tests                                       |
+| 7     | P1       | Trust (#49) and worker (R2-07)        | Code executor sandbox or fail closed, policy provenance, safe worker lease fencing and replay proof                                                                                      |
+| 8     | P2       | Documentation (R2-08)                 | Mark stale snapshots clearly; link the current report in the docs index; refresh the feature ledger after acceptance, not before                                                         |
 
 Sprint increments suggested there (capacity unknown; sequencing only): A CI plus observability baseline (no new feature); B hosted schema proof on a disposable target; C one staging candidate, reference and job-application journey; D privacy plus mail and erasure proof; E optional paid vertical slice only after commercial approval; F durable beta micro-features and technical-interview security. A sprint with red CI does not complete or unlock the next.
 
@@ -155,17 +154,17 @@ Not ready for public release because: the stored-XSS link fix was uncommitted an
 
 ## 4. Deployment readiness table (REPOSITORY_AUDIT L, 2026-10-23)
 
-| Gate | Observed state | Verdict |
-|---|---|---|
-| Latest upstream full CI | Failed 1 of 236 browser tests; the two preceding runs green | RED |
-| 52 local database migrations and 50 database tests | Successful in CI | GREEN (local CI only) |
-| Managed Supabase target schema | No application tables | BLOCKED |
-| Hosted RLS authorization and grants | Cannot test real application objects | BLOCKED |
-| Stripe SDK, signed webhook, durable storage | Code present; mocked network tests and local PG green | PARTIAL |
-| Stripe test-account webhook delivery | 0 webhook endpoints configured | BLOCKED |
-| Live-mode payments | Not accessed; no mutation performed | NOT VERIFIED |
-| Legal, email, privacy, backups, worker, load, TLS | Acceptance evidence missing | BLOCKED |
-| App-wide 173-feature production verification | Only a historical provisional inventory | NOT VERIFIED |
+| Gate                                               | Observed state                                              | Verdict               |
+| -------------------------------------------------- | ----------------------------------------------------------- | --------------------- |
+| Latest upstream full CI                            | Failed 1 of 236 browser tests; the two preceding runs green | RED                   |
+| 52 local database migrations and 50 database tests | Successful in CI                                            | GREEN (local CI only) |
+| Managed Supabase target schema                     | No application tables                                       | BLOCKED               |
+| Hosted RLS authorization and grants                | Cannot test real application objects                        | BLOCKED               |
+| Stripe SDK, signed webhook, durable storage        | Code present; mocked network tests and local PG green       | PARTIAL               |
+| Stripe test-account webhook delivery               | 0 webhook endpoints configured                              | BLOCKED               |
+| Live-mode payments                                 | Not accessed; no mutation performed                         | NOT VERIFIED          |
+| Legal, email, privacy, backups, worker, load, TLS  | Acceptance evidence missing                                 | BLOCKED               |
+| App-wide 173-feature production verification       | Only a historical provisional inventory                     | NOT VERIFIED          |
 
 Rule recorded there: do not enable `BILLING_MODE=stripe` for public users, deploy application migrations to the current Supabase project, or describe the product as production-ready before the relevant owner-approved gates and environment checks pass.
 
@@ -173,18 +172,18 @@ Rule recorded there: do not enable `BILLING_MODE=stripe` for public users, deplo
 
 ### 5.1 Capability matrix (REPOSITORY_AUDIT F)
 
-| Capability | Evidence in the earlier attempt | Remaining gate |
-|---|---|---|
-| Server-side catalog and access | Price catalogue, Checkout input schema and route registration enforce server-side prices and plan role; routes require a session | Commercial price and entitlement policy approved |
-| Checkout | Route `/api/v1/billing/checkout` creating a Checkout Session with idempotency including user, plan, cycle and a client reference | Network was mocked in tests; the page still said no processor existed and showed no purchase UI |
-| Source of truth | Paid access only from a signed, known-price, eligible subscription; unknown prices grant free entitlements | Verify every user-facing gate reads entitlements, never plan tier alone |
-| Webhooks | Raw-body signature verification with the endpoint secret; normalized checkout, subscription, invoice events | Synthetic payloads only; 0 configured endpoints, remote delivery unproven |
-| Idempotency and ordering | `billing_events(provider, provider_event_id)` unique, transactional write, freshness guard, concurrency tests | Event time is in seconds: test equal-second conflicting order; asynchronous side effects; no remote retry drill |
-| Subscriptions and cancel | Gateway call plus domain reconcile; scheduled and immediate cancel; persisted | Live cancel, portal behavior, downgrade at renewal, subscription replace and retries unverified |
-| Invoices | `invoice.paid` and `invoice.payment_failed`; provider invoice id uniqueness | Live invoice mapping, credit notes, refunds unverified |
-| Refunds and disputes | `charge.refunded` later handled (see 5.3); dispute and void not handled | Decide dispute and void behavior |
-| Erase | Customer deletion before local purge in enabled mode | Provider disabled with an existing customer logs a warning and purges the local mapping only (R2-05) |
-| Connected test account (read-only) | account `talentsphere-production` in **test mode only**; 1 active USD 2.99 per month recurring price; 2 active test subscriptions; 0 webhook endpoints | Not a production payment test; nothing was charged, refunded, canceled, created or edited |
+| Capability                         | Evidence in the earlier attempt                                                                                                                        | Remaining gate                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Server-side catalog and access     | Price catalogue, Checkout input schema and route registration enforce server-side prices and plan role; routes require a session                       | Commercial price and entitlement policy approved                                                                |
+| Checkout                           | Route `/api/v1/billing/checkout` creating a Checkout Session with idempotency including user, plan, cycle and a client reference                       | Network was mocked in tests; the page still said no processor existed and showed no purchase UI                 |
+| Source of truth                    | Paid access only from a signed, known-price, eligible subscription; unknown prices grant free entitlements                                             | Verify every user-facing gate reads entitlements, never plan tier alone                                         |
+| Webhooks                           | Raw-body signature verification with the endpoint secret; normalized checkout, subscription, invoice events                                            | Synthetic payloads only; 0 configured endpoints, remote delivery unproven                                       |
+| Idempotency and ordering           | `billing_events(provider, provider_event_id)` unique, transactional write, freshness guard, concurrency tests                                          | Event time is in seconds: test equal-second conflicting order; asynchronous side effects; no remote retry drill |
+| Subscriptions and cancel           | Gateway call plus domain reconcile; scheduled and immediate cancel; persisted                                                                          | Live cancel, portal behavior, downgrade at renewal, subscription replace and retries unverified                 |
+| Invoices                           | `invoice.paid` and `invoice.payment_failed`; provider invoice id uniqueness                                                                            | Live invoice mapping, credit notes, refunds unverified                                                          |
+| Refunds and disputes               | `charge.refunded` later handled (see 5.3); dispute and void not handled                                                                                | Decide dispute and void behavior                                                                                |
+| Erase                              | Customer deletion before local purge in enabled mode                                                                                                   | Provider disabled with an existing customer logs a warning and purges the local mapping only (R2-05)            |
+| Connected test account (read-only) | account `talentsphere-production` in **test mode only**; 1 active USD 2.99 per month recurring price; 2 active test subscriptions; 0 webhook endpoints | Not a production payment test; nothing was charged, refunded, canceled, created or edited                       |
 
 ### 5.2 Manual provider configuration (not code), from STRIPE_SUPABASE_AUDIT
 
@@ -208,43 +207,43 @@ Create the six `STRIPE_PRICE_*` prices; create a webhook endpoint at `/api/v1/bi
 
 Repository history to that head: 302 commits from the initial commit `e93d2514` (2026-09-19); head subject "update" (2026-10-20, Graphify artifacts). Local branches `main`, `repository_audit_roadmap`, `universal_project_clean_reinstall` and remote `origin/main`, `origin/HEAD` all pointed at the head; zero unmerged, dangling or orphaned branches. Other branches merged earlier: `improvement/core-loop-durability` (tip `b5d40da1`, merged by PR #40); `install_ralph_loop_extension` (tip `dc0d8ef0`, merged PR #37); `implementation-completion-tracker-57547` (PR #16, `73632855`); `next-priority-implementation-ff90f` (PR #28, `49beef19`, user blocking NET-005); `security/five-lock-smoke-hardening-20261018` (PR #41); `security/rls-runtime-validation-ci-fix-20261018` (PR #42).
 
-| PR | Merge commit | Date | Branch | Delivered |
-|---|---|---|---|---|
-| #40 | `4004457d` | 2026-10-14 | `improvement/core-loop-durability` | Durable core loop (ADR-015); proof-of-control verification (6-digit email challenge, single-use referee token as SHA-256); dynamic React candidate, recruiter and referee flows replacing the hard-coded mock; global rate-limit lockout fix (300 per minute per account, health exempt); password change with multi-device revocation, explicit sign-out, role removal; strict type-check of the test suites |
-| #41 | `8bdad381` | 2026-10-18 | `security/five-lock-smoke-hardening-20261018` | RLS policies for messaging threads, messages, notification preferences; static regression checks |
-| #42 | `5c130a7e` | 2026-10-18 | `security/rls-runtime-validation-ci-fix-20261018` | Correlated RLS column-shadowing fix; runtime two-account RLS validation on real PostgreSQL; SQL apostrophe-escape test; CI sentinel scanning the production web bundle for server secrets |
-| #43 | `d8dd0567` | 2026-10-18 | `chatgpt/production-safety-gates-20261018` | Single-writer advisory lock lease `pg_try_advisory_lock(718201, 1)`; worker heartbeat; fail-closed transactional email (503); durable erasure request store with restart test; inline JSON export; rejection of unverified legal mailboxes; removal of simulated execution claims |
-| #51 | `4890ef21` | 2026-10-18 | `chatgpt/privacy-mail-hardening-20261018` | AES-256-GCM encryption of BYO AI keys with a separate 64-hex key (plaintext downgrade refused); opt-in Resend adapter with idempotent retries; durable settings and export metadata |
-| #52 | `616f942d` | 2026-10-18 | `chatgpt/release-preflight-20261018` | Read-only release preflight for migration drift; strict sequential numbering |
-| #53 | `eb69a2f8` | 2026-10-18 | `chatgpt/durable-saved-searches-20261018` | Owner-scoped SQL saved searches with restart and isolation tests |
-| #54 | `1776f948` | 2026-10-18 | `chatgpt/durable-job-bookmarks-20261018` | SQL saved jobs; unpublished or draft jobs refused; erasure purge; race, ownership, restart tests |
-| #55 | `8864d2c8` | 2026-10-18 | `chatgpt/oracle-staging-readiness` | ARM64 staging compose, private network topology (db and api no host ports; edge proxy only on 80 and 443), outbound mail permitted, hardened `.dockerignore`, CI compose validation workflow |
-| #56 | `252b03f9` | 2026-10-18 | `chatgpt/oracle-staging-recovery` | Backup and isolated restore verification script; dump files ignored by version control |
-| #57 | `9156b1a8` | 2026-10-20 | `claude/issues-44-50-fixes` | Stage 1 `a30fcaab` (evidence relationships and dispute handling, work-history visibility and referee contact redaction, admin-only recomputation, k floors, recruiter profiling limited to active applicants or visible public profiles, stealth hidden, institution-scoped admin seats, certificate revocation limited to instructor or admin, two-step bans with lapsing proposals, moderation appeals with reporter anonymity, challenge evidence stored once, self-verification blocked, self-reported skills 0 trust points, interview questions scoped to organization); Stage 2 `43bb9258` (FE-02, FE-03, FE-04, FE-05, FE-06, FE-07, FE-11, sign-in double-click guard, ten ported security and frontend e2e specs) |
-| #58 | `61eae132` | 2026-10-20 | `claude/audit-f01-f04-r2` | BR-167 reputation visibility; deployed PBKDF2 iteration floor of 210,000; regressions R2-2 (stealth hidden from segmentation), R2-3 (`/reports/my` reveals only resolved decisions, reporter id and moderator notes redacted), R2-7 (expired ban proposal cannot be confirmed after 24 hours), R2-8 (resubmitting a passed challenge returns existing evidence) |
+| PR  | Merge commit | Date       | Branch                                            | Delivered                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --- | ------------ | ---------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #40 | `4004457d`   | 2026-10-14 | `improvement/core-loop-durability`                | Durable core loop (ADR-015); proof-of-control verification (6-digit email challenge, single-use referee token as SHA-256); dynamic React candidate, recruiter and referee flows replacing the hard-coded mock; global rate-limit lockout fix (300 per minute per account, health exempt); password change with multi-device revocation, explicit sign-out, role removal; strict type-check of the test suites                                                                                                                                                                                                                                                                                                               |
+| #41 | `8bdad381`   | 2026-10-18 | `security/five-lock-smoke-hardening-20261018`     | RLS policies for messaging threads, messages, notification preferences; static regression checks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| #42 | `5c130a7e`   | 2026-10-18 | `security/rls-runtime-validation-ci-fix-20261018` | Correlated RLS column-shadowing fix; runtime two-account RLS validation on real PostgreSQL; SQL apostrophe-escape test; CI sentinel scanning the production web bundle for server secrets                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| #43 | `d8dd0567`   | 2026-10-18 | `chatgpt/production-safety-gates-20261018`        | Single-writer advisory lock lease `pg_try_advisory_lock(718201, 1)`; worker heartbeat; fail-closed transactional email (503); durable erasure request store with restart test; inline JSON export; rejection of unverified legal mailboxes; removal of simulated execution claims                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| #51 | `4890ef21`   | 2026-10-18 | `chatgpt/privacy-mail-hardening-20261018`         | AES-256-GCM encryption of BYO AI keys with a separate 64-hex key (plaintext downgrade refused); opt-in Resend adapter with idempotent retries; durable settings and export metadata                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| #52 | `616f942d`   | 2026-10-18 | `chatgpt/release-preflight-20261018`              | Read-only release preflight for migration drift; strict sequential numbering                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| #53 | `eb69a2f8`   | 2026-10-18 | `chatgpt/durable-saved-searches-20261018`         | Owner-scoped SQL saved searches with restart and isolation tests                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| #54 | `1776f948`   | 2026-10-18 | `chatgpt/durable-job-bookmarks-20261018`          | SQL saved jobs; unpublished or draft jobs refused; erasure purge; race, ownership, restart tests                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| #55 | `8864d2c8`   | 2026-10-18 | `chatgpt/oracle-staging-readiness`                | ARM64 staging compose, private network topology (db and api no host ports; edge proxy only on 80 and 443), outbound mail permitted, hardened `.dockerignore`, CI compose validation workflow                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| #56 | `252b03f9`   | 2026-10-18 | `chatgpt/oracle-staging-recovery`                 | Backup and isolated restore verification script; dump files ignored by version control                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| #57 | `9156b1a8`   | 2026-10-20 | `claude/issues-44-50-fixes`                       | Stage 1 `a30fcaab` (evidence relationships and dispute handling, work-history visibility and referee contact redaction, admin-only recomputation, k floors, recruiter profiling limited to active applicants or visible public profiles, stealth hidden, institution-scoped admin seats, certificate revocation limited to instructor or admin, two-step bans with lapsing proposals, moderation appeals with reporter anonymity, challenge evidence stored once, self-verification blocked, self-reported skills 0 trust points, interview questions scoped to organization); Stage 2 `43bb9258` (FE-02, FE-03, FE-04, FE-05, FE-06, FE-07, FE-11, sign-in double-click guard, ten ported security and frontend e2e specs) |
+| #58 | `61eae132`   | 2026-10-20 | `claude/audit-f01-f04-r2`                         | BR-167 reputation visibility; deployed PBKDF2 iteration floor of 210,000; regressions R2-2 (stealth hidden from segmentation), R2-3 (`/reports/my` reveals only resolved decisions, reporter id and moderator notes redacted), R2-7 (expired ban proposal cannot be confirmed after 24 hours), R2-8 (resubmitting a passed challenge returns existing evidence)                                                                                                                                                                                                                                                                                                                                                             |
 
 Chronological order recorded: `32a3abc7` (validation report corrected to measured reality), then PR #40, an "update" commit refreshing intents, #41, #42, #43, [issue numbers #44-#50 allocated], #51, #52, #53, #54, #55, #56, #57, #58, head `83dc7d24`. Commits named in the improvement program: `1bb0f625` (API: durable core loop, proof-based verification, authorization), `ae99e31c` (web: real journeys, honest pricing and copy), `93dfe125` (adversarial review fixes), `346e1f8a` (messaging API), `81ea894a` (dead-code removal), baseline `32a3abc7` and earlier measured head `aad8b54d` (2026-10-08: Vitest 976, Playwright 183), `8db0930` (2026-10-03 production audit), `a30b35bf` and `a771a87b` (2026-10-21 audit initial and final heads), `0f40b6c9` (2026-10-23 upstream main), `fca16f51` (fix for two Playwright 5xx assertion failures), `deaea7665` and `4d3cf5d4` (earlier green runs).
 
 ### 7.2 PRs #61 to #71 (REPOSITORY_AUDIT C, 2026-10-23)
 
-| PRs | Delivered | Evidence level recorded |
-|---|---|---|
-| #61 to #66 | Hosted-target guard, preflight, migration-incompatibility scanners, CI gate that expects exit code 1 for the known auth dependency | Fail-closed warning works in CI; not a hosted-compatible schema |
-| #67 to #69 | Refuse unpaid entitlements; lint remediation | CI-verified guard and formatting; monetization still blocked |
-| #70 | Simulated billing lifecycle, idempotency and erasure | Tested code; simulated billing stays disabled outside development and test |
-| #71 | Stripe SDK gateway, signed webhook, durable Postgres records, idempotent provider-event storage, cancellation, domain tests, migration 00052 | Integration and local PG verified; 50 PG cases pass in CI; zero webhook endpoints; paid production launch not verified |
+| PRs        | Delivered                                                                                                                                    | Evidence level recorded                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| #61 to #66 | Hosted-target guard, preflight, migration-incompatibility scanners, CI gate that expects exit code 1 for the known auth dependency           | Fail-closed warning works in CI; not a hosted-compatible schema                                                        |
+| #67 to #69 | Refuse unpaid entitlements; lint remediation                                                                                                 | CI-verified guard and formatting; monetization still blocked                                                           |
+| #70        | Simulated billing lifecycle, idempotency and erasure                                                                                         | Tested code; simulated billing stays disabled outside development and test                                             |
+| #71        | Stripe SDK gateway, signed webhook, durable Postgres records, idempotent provider-event storage, cancellation, domain tests, migration 00052 | Integration and local PG verified; 50 PG cases pass in CI; zero webhook endpoints; paid production launch not verified |
 
 Earlier merged pull requests PR #41, #42 (RLS and ownership), #43 and #58 (fail-closed assessment, reputation visibility, PBKDF2 floor), #51, #53, #54 (durable privacy metadata, saved searches, bookmarks), #55, #56 (deployment and recovery artifacts) were cross-checked in that report: locally verified only; hosted target had no tables; deployment artifacts implemented, not operationally verified. PR objects fetched on 2026-10-21 showed #43 and #51 to #58 merged even where their old body text said draft or unmerged: do not use stale PR prose as merge state. No open pull request existed in either baseline query.
 
 ## 8. Verdict and score timeline (for calibration)
 
-| Date | Source | Verdict | Key evidence |
-|---|---|---|---|
-| 2026-10-03 | PRODUCTION_AUDIT revisions A to D at `8db0930` | NOT READY, 4.6 of 10 | Demo login, fake checkout, in-memory state, unsigned webhook, log-only worker, red CI at type-check |
-| 2026-10-10/14 | IMPROVEMENT_PROGRAM | Not production-ready; ready for a closed, developer-run demonstration of the core loop; real-user beta gated on the P0 list (email, ratification, architecture decision, legal); public launch gated on P1 | Vitest 1072, PG 23, Playwright 205, 46 migrations |
-| 2026-10-21 | FEATURE_STATUS, E2E_AUDIT | Not ready for public beta or GA; restricted trusted-career beta recommended after P0 fixes | Vitest 1172 in 115 files; 6 impl-unverified, 87 partial, 1 broken, 75 not implemented, 4 excluded |
-| 2026-10-22 | AUDIT_MASTER_REPORT | Gated; recommended GA scope the core career loop; four external gates (transactional email, commercial billing, legal review, scheduled erasure policy) | 1143 tests in 112 files at `83dc7d24` |
-| 2026-10-23 | PAYMENT_AUDIT, STRIPE_SUPABASE_AUDIT, REPOSITORY_AUDIT | NOT READY for production or a paid public launch | CI 1231 Vitest, 50 PG, 235 of 236 browser; 0 issue closures |
+| Date          | Source                                                 | Verdict                                                                                                                                                                                                    | Key evidence                                                                                        |
+| ------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 2026-10-03    | PRODUCTION_AUDIT revisions A to D at `8db0930`         | NOT READY, 4.6 of 10                                                                                                                                                                                       | Demo login, fake checkout, in-memory state, unsigned webhook, log-only worker, red CI at type-check |
+| 2026-10-10/14 | IMPROVEMENT_PROGRAM                                    | Not production-ready; ready for a closed, developer-run demonstration of the core loop; real-user beta gated on the P0 list (email, ratification, architecture decision, legal); public launch gated on P1 | Vitest 1072, PG 23, Playwright 205, 46 migrations                                                   |
+| 2026-10-21    | FEATURE_STATUS, E2E_AUDIT                              | Not ready for public beta or GA; restricted trusted-career beta recommended after P0 fixes                                                                                                                 | Vitest 1172 in 115 files; 6 impl-unverified, 87 partial, 1 broken, 75 not implemented, 4 excluded   |
+| 2026-10-22    | AUDIT_MASTER_REPORT                                    | Gated; recommended GA scope the core career loop; four external gates (transactional email, commercial billing, legal review, scheduled erasure policy)                                                    | 1143 tests in 112 files at `83dc7d24`                                                               |
+| 2026-10-23    | PAYMENT_AUDIT, STRIPE_SUPABASE_AUDIT, REPOSITORY_AUDIT | NOT READY for production or a paid public launch                                                                                                                                                           | CI 1231 Vitest, 50 PG, 235 of 236 browser; 0 issue closures                                         |
 
 ## 9. Immediate execution list and documentation-authority rules recorded on 2026-10-21 (FEATURE_PLAN L and K)
 
@@ -254,27 +253,27 @@ Documentation-authority rules from the same report: the status record is the cur
 
 ## 10. Improvement-program decisions and their reversibility (2026-10-14, section D)
 
-| Decision | Reversible | Where recorded | Needed owner ratification |
-|---|---|---|---|
-| Persist the core loop to the database; maps become a boot-hydrated read model; single API writer | Yes (exit path documented) | persistence ADR | Yes, includes the schema change |
-| Optimistic concurrency on core records (`CoreOp.base`, in-flight set, database re-check) | Yes | ADR decision 5 | No |
-| Verification requires proof of control (email code, referee token); secrets stored only as SHA-256 (later: keyed hash for codes) | Yes | security notes | No |
-| No payment processor means paid plans cannot be bought (`BILLING_MODE=disabled` default); `simulated` for demos and tests only | Yes | environment example, operations notes | Yes (pricing and entitlement) |
-| Webhook signing scheme was the product's own Stripe-style `t=...,v1=...` until a provider is chosen | Yes | security notes | Replace with the provider's scheme when chosen |
-| State what is not durable instead of hiding it (response header) | Yes | durability module | No |
-| Log refused requests (4xx) at info, faults (5xx) at error | Yes | error handler | No |
-
+| Decision                                                                                                                         | Reversible                 | Where recorded                        | Needed owner ratification                      |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------- | ---------------------------------------------- |
+| Persist the core loop to the database; maps become a boot-hydrated read model; single API writer                                 | Yes (exit path documented) | persistence ADR                       | Yes, includes the schema change                |
+| Optimistic concurrency on core records (`CoreOp.base`, in-flight set, database re-check)                                         | Yes                        | ADR decision 5                        | No                                             |
+| Verification requires proof of control (email code, referee token); secrets stored only as SHA-256 (later: keyed hash for codes) | Yes                        | security notes                        | No                                             |
+| No payment processor means paid plans cannot be bought (`BILLING_MODE=disabled` default); `simulated` for demos and tests only   | Yes                        | environment example, operations notes | Yes (pricing and entitlement)                  |
+| Webhook signing scheme was the product's own Stripe-style `t=...,v1=...` until a provider is chosen                              | Yes                        | security notes                        | Replace with the provider's scheme when chosen |
+| State what is not durable instead of hiding it (response header)                                                                 | Yes                        | durability module                     | No                                             |
+| Log refused requests (4xx) at info, faults (5xx) at error                                                                        | Yes                        | error handler                         | No                                             |
 
 <!-- ledger-D D-12 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/FEATURE_PLAN_2026-10-21.md (gap closure D-12)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: row-level corrections to retired documents (section K, lines 137-162 including line 154) and the blocked template-export note (line 150); per-packet candidate-test-file counts below.
 
-~~~~text
+```text
 L137: ## K. Documentation reconciliation and authority
-L138: 
+L138:
 L139: | Artifact | Correction made or required | Authority / history handling |
 L140: |---|---|---|
 L141: | FEATURE_STATUS_2026-10-21.md | Current baseline, corrected maturity, 173-row matrix, traces, discrepancies, defect/decision register | Earlier static assessment retained verbatim as history |
@@ -285,11 +284,11 @@ L145: | BRAIN/MEMORY.md | Append current measured results and moving-HEAD caveat
 L146: | Root ARCHITECTURE.md | Add current factual erratum for Resend, SQL stores, writer lease/heartbeat | Historical sections remain; no architectural decision changed |
 L147: | SSOT / feature registry / ADR-015 | Remove stale implementation counts from SSOT header; do not rewrite policy or approval status | Owner must approve scope/architecture/semantics; portfolio IDs preserved |
 L148: | APP_FLOW / testing / operations / security | Correct routes, current test scope, mail/worker/privacy claims and target-versus-runtime boundaries | Policies unchanged; historical results distinguished from current evidence |
-L149: 
+L149:
 L150: System Design and Business Review template exports are **blocked**: the requested skills require compatible reference-preserving document/presentation creation and rendering. No connected document session or compatible slide-rendering capability was available. Their reference DOCX/PPTX files were not modified or approximated with generic exports. Markdown audit content is complete to the stated inspection boundary; template artifacts are not delivered.
-L151: 
+L151:
 L152: ### Subsequent document reconciliation
-L153: 
+L153:
 L154: Current README, architecture, operations, security, testing, API/database contracts,
 L155: journey/rule pointers and conflict register now use the current evidence boundary.
 L156: Earlier reports retain their recorded results with historical labels. The maintenance
@@ -298,18 +297,18 @@ L158: restored. All tracked Markdown files have an explicit disposition in the e
 L159: ledger. Protected `deploy/**` documentation remains read-only under AGENTS.md.
 L160: Local file links were checked; this does not prove semantic completeness or runtime
 L161: acceptance. X-00 retains feature/rule reconciliation, and X-09 retains live gates.
-L162: 
-~~~~
-
+L162:
+```
 
 <!-- ledger-D D-12-packets -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/FEATURE_PLAN_2026-10-21.md (per-packet candidate tests and release text, gap closure D-12)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: per-packet candidate-test-file counts and the per-row sprint/release text for the 169 BL-F work packets. Format of each line: `packet | feature ids | tests cell | release cell`.
 
-~~~~text
+```text
 L180: BL-F-01 | F-01 | tests: 4 candidate test files; add full acceptance, authorization, PG restart and browser checks as applicable | release: Proposed beta; not a sprint commitment
 L181: BL-F-02 | F-02 | tests: 1 candidate test files; add full acceptance, authorization, PG restart and browser checks as applicable | release: Proposed beta; not a sprint commitment
 L182: BL-F-03 | F-03 | tests: 1 candidate test files; add full acceptance, authorization, PG restart and browser checks as applicable | release: Proposed beta; not a sprint commitment
@@ -479,24 +478,24 @@ L345: BL-F-170 | F-170 | tests: 0 candidate test files; add full acceptance, aut
 L346: BL-F-171 | F-171 | tests: 0 candidate test files; add full acceptance, authorization, PG restart and browser checks as applicable | release: Expansion; unscheduled; not a sprint commitment
 L347: BL-F-172 | F-172 | tests: 3 candidate test files; add full acceptance, authorization, PG restart and browser checks as applicable | release: Expansion; unscheduled; not a sprint commitment
 L348: BL-F-173 | F-173 | tests: 0 candidate test files; add full acceptance, authorization, PG restart and browser checks as applicable | release: Expansion; unscheduled; not a sprint commitment
-~~~~
-
+```
 
 <!-- ledger-D D-15 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/GIT_RECONCILIATION_REPORT.md (gap closure D-15)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: 5 commit hashes (2f88ff86, 9f8ad4df, b0036b84, e8290345, e0882707), the ~35-row branch table with tip hash, subject and merged-by cells (lines 22-41), `Merge pull request #37 from yhsomani/vibe-coding`, key-file cells per PR (reconciliation matrix, lines 394-end) and `MIN_DEPLOYED_PBKDF2_ITERATIONS` (line 241).
 
-~~~~text
-L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`  
+````text
+L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`
 [...]
 L20: - **Working Tree Cleanliness:** Clean working tree with no uncommitted staged or unstaged modifications; only teamwork metadata directory `.agents/` is present.
-L21: 
+L21:
 L22: ### 1.2 Comprehensive Branch Topology & Ancestry Analysis
 L23: A complete graph analysis of all local and remote branches in the repository was conducted using `git merge-base --is-ancestor`:
-L24: 
+L24:
 L25: | Branch Reference | Tip Commit | Tip Subject | Direct Ancestor of HEAD `83dc7d24`? | Status & Merge Details |
 L26: | :--- | :---: | :--- | :---: | :--- |
 L27: | `refs/heads/main` | `83dc7d24` | `update` | **YES** (Identical) | Primary repository line |
@@ -511,11 +510,11 @@ L35: | `refs/remotes/origin/implementation-completion-tracker-57547` | `e8290345
 L36: | `refs/remotes/origin/next-priority-implementation-ff90f` | `9f8ad4df` | `**Implement User Blocking Mechanism (NET-005)**` | **YES** | Fully merged into HEAD via PR #28 (`49beef19`) |
 L37: | `refs/remotes/origin/security/five-lock-smoke-hardening-20261018` | `2f88ff86` | `test(security): add static regression checks for private data RLS` | **YES** | Fully merged into HEAD via PR #41 (`8bdad381`) |
 L38: | `refs/remotes/origin/security/rls-runtime-validation-ci-fix-20261018` | `b0036b84` | `test(security): prevent correlated RLS column shadowing regression` | **YES** | Fully merged into HEAD via PR #42 (`5c130a7e`) |
-L39: 
+L39:
 L40: **Core Finding:** There are **zero unmerged, dangling, or orphaned branches** in the entire Git repository. Every branch ever published to `origin` is a direct mathematical ancestor of HEAD `83dc7d24`.
-L41: 
+L41:
 L42: ### 1.3 Chronological Merge Lineage from PR #40 to HEAD `83dc7d24`
-L43: 
+L43:
 L44: ```text
 L45: (32a3abc7 docs: correct FINAL_VALIDATION_REPORT to measured reality)
 L46:   │
@@ -557,7 +556,7 @@ L238: - **Source Branch:** `yhsomani/claude/audit-f01-f04-r2`
 L241:   2. Enforce `PASSWORD_PBKDF2_ITERATIONS >= 210000` floor in deployed staging and production configurations (`MIN_DEPLOYED_PBKDF2_ITERATIONS`).
 [...]
 L394: ## 4. Git & GitHub Tracking Reconciliation Matrix
-L395: 
+L395:
 L396: | Entity ID | Entity Type | Title / Focus Area | Source Branch / Author | Merge Commit | Incorporated in `83dc7d24`? | Codebase Status | Key Code Files | Key Verifying Tests |
 L397: | :--- | :---: | :--- | :--- | :---: | :---: | :--- | :--- | :--- |
 L398: | **PR #40** | PR | Core Loop Durability & Honest Journeys | `improvement/core-loop-durability` | `4004457d` | **YES** | Resolved | `apps/api/src/server.ts`, `apps/web/src/*` | `tests/e2e/core-loop.spec.ts`, `tests/pg/core-persistence.test.ts` |
@@ -580,29 +579,29 @@ L414: | **PR #56** | PR | Staging Backup & Isolated Restore Drill | `chatgpt/ora
 L415: | **PR #57** | PR | Audit Findings Port & Frontend Fixes | `claude/issues-44-50-fixes` | `9156b1a8` | **YES** | Resolved | `apps/api/src/server.ts`, `apps/web/src/pages/*` | `tests/e2e/frontend-fixes.spec.ts`, integration suites |
 L416: | **PR #58** | PR | Review Round 2 Regressions & BR-167 | `claude/audit-f01-f04-r2` | `61eae132` | **YES** | Resolved | `apps/api/src/server.ts`, `packages/config/src/env.ts` | `tests/integration/reputation-visibility.test.ts`, `tests/integration/review-r2-regressions.test.ts` |
 L417: | **Commit `83dc7d24`** | Commit | Knowledge Graph & Architecture Index | `main` / `repository_audit_roadmap` | `83dc7d24` | **HEAD** | Resolved | `graphify-out/*` | Graphify AST and HTML reports |
-L418: 
+L418:
 L419: ---
-L420: 
+L420:
 L421: *Report ratified and published by the Teamwork Master Synthesis Engineering Group at commit `83dc7d24`.*
-~~~~
-
+````
 
 <!-- ledger-D D-20 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/RELEASE_SCOPE_AND_BACKLOG.md (gap closure D-20)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: about 36 verifying-test command strings per backlog item (for example `pnpm test:pg tests/pg/core-persistence.test.ts -t "..."`, `pnpm exec playwright test tests/e2e/core-loop.spec.ts`, `curl -k https://127.0.0.1/health`, `node scripts/test-staging-mail.mjs`), SQL/API snippets in the Given/When/Then text, URL https://SITE_DOMAIN/health.
 
-~~~~text
-L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`  
+```text
+L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`
 [...]
 L63: ## 3. Actionable, Deduplicated Backlog with Stable IDs
-L64: 
+L64:
 L65: Every backlog item carries a stable identifier (`BL-xxx`), urgency rating (`P0` Blocker to `P3` Medium), structured Given/When/Then acceptance criteria, and explicit verifying tests.
-L66: 
+L66:
 L67: ### 3.1 P0: Launch Blockers (Mandatory Pre-Launch Operational Gates)
-L68: 
+L68:
 L69: #### BL-001: Corporate Email Challenge HMAC Key Hardening (SEC-01)
 L70: - **Urgency:** **P0 Blocker**
 L71: - **Domain:** Cryptography / Work History
@@ -616,7 +615,7 @@ L78:   - **And** raw `sha256Hex(`${id}:${code}`)` without server secret MUST NOT
 L79: - **Verifying Test:**
 L80:   - `pnpm exec vitest run tests/integration/work-history-graph.test.ts`
 L81:   - `pnpm exec vitest run tests/security/injection-defenses.test.ts`
-L82: 
+L82:
 L83: #### BL-002: Referee Voucher Token TTL Expiration Enforcement (SEC-02)
 L84: - **Urgency:** **P0 Blocker**
 L85: - **Domain:** Cryptography / Work History
@@ -630,7 +629,7 @@ L92:   - **And** when `GET /api/v1/references/:refId` or `POST /api/v1/candidate
 L93: - **Verifying Test:**
 L94:   - `pnpm exec vitest run tests/integration/work-history-graph.test.ts -t "voucher expiration"`
 L95:   - `pnpm test:pg tests/pg/work-history-removal.test.ts`
-L96: 
+L96:
 L97: #### BL-003: Transactional Email Staging DNS & Resend Configuration (Issue #44)
 L98: - **Urgency:** **P0 Blocker**
 L99: - **Domain:** Infrastructure / Operations
@@ -644,7 +643,7 @@ L106:   - **And** worker process MUST successfully dispatch a live test email th
 L107: - **Verifying Test:**
 L108:   - `pnpm exec vitest run tests/unit/production-config.test.ts`
 L109:   - Staging live verification: `node scripts/test-staging-mail.mjs`
-L110: 
+L110:
 L111: #### BL-004: Legal Terms & Privacy Policy Founder Review (Issue #47)
 L112: - **Urgency:** **P0 Blocker**
 L113: - **Domain:** Legal / Compliance
@@ -657,7 +656,7 @@ L119:   - **Then** formal legal approval MUST be recorded in `docs/governance/LE
 L120:   - **And** contact mailboxes (`VITE_PRIVACY_EMAIL`, `VITE_SECURITY_EMAIL`) MUST be active mailboxes.
 L121: - **Verifying Test:**
 L122:   - `pnpm exec playwright test tests/e2e/frontend-fixes.spec.ts -t "FE-02"`
-L123: 
+L123:
 L124: #### BL-005: Caddy Reverse Proxy Root Health Route Proxying (OPS-02)
 L125: - **Urgency:** **P0 Blocker**
 L126: - **Domain:** Infrastructure / DevOps
@@ -670,11 +669,11 @@ L132:   - **Then** Caddy MUST proxy the request to `api:4000` rather than servin
 L133:   - **And** the HTTP response MUST return JSON `{"status":"ok"}` with status code 200.
 L134: - **Verifying Test:**
 L135:   - `curl -k https://127.0.0.1/health` on deployed staging instance.
-L136: 
+L136:
 L137: ---
-L138: 
+L138:
 L139: ### 3.2 P1: Critical Quality & Release Readiness
-L140: 
+L140:
 L141: #### BL-006: User Data Erasure 30-Day Scheduled Worker Automation (Issue #48)
 L142: - **Urgency:** **P1 Critical**
 L143: - **Domain:** Compliance / Background Worker
@@ -688,7 +687,7 @@ L150:   - **And** update `data_erasure_requests.status = 'executed'`.
 L151: - **Verifying Test:**
 L152:   - `pnpm test:pg tests/pg/core-persistence.test.ts -t "erasure"`
 L153:   - `pnpm exec vitest run tests/unit/worker-queue.test.ts`
-L154: 
+L154:
 L155: #### BL-007: Fix Vitest Security Script Argument in `package.json`
 L156: - **Urgency:** **P1 Critical**
 L157: - **Domain:** Toolchain / CI
@@ -701,7 +700,7 @@ L163:   - **Then** the command MUST invoke `vitest run tests/security` (removing
 L164:   - **And** exit with code 0 across all 5 security test files.
 L165: - **Verifying Test:**
 L166:   - `pnpm test:security`
-L167: 
+L167:
 L168: #### BL-008: Add Committed Cache & Agent Folders to `.prettierignore`
 L169: - **Urgency:** **P1 Critical**
 L170: - **Domain:** Toolchain / Code Quality
@@ -713,7 +712,7 @@ L175:   - **When** `graphify-out/` and `.agents/` are appended
 L176:   - **Then** `pnpm lint` MUST exit 0 with all matched files compliant.
 L177: - **Verifying Test:**
 L178:   - `pnpm lint`
-L179: 
+L179:
 L180: #### BL-009: Persist Active Assessment Sessions to PostgreSQL (SEC-05)
 L181: - **Urgency:** **P1 Critical**
 L182: - **Domain:** Security / AI Governance
@@ -727,7 +726,7 @@ L189:   - **And** when `assertAIAssistanceAllowed()` is invoked after an API pro
 L190: - **Verifying Test:**
 L191:   - `pnpm exec vitest run tests/security/injection-defenses.test.ts -t "AI_PROHIBITED"`
 L192:   - `pnpm test:pg tests/pg/core-persistence.test.ts -t "assessment session restart"`
-L193: 
+L193:
 L194: #### BL-010: Fix AI Gateway Hardcoded 'free' Tier & Usage Metering (SEC-06)
 L195: - **Urgency:** **P1 Critical**
 L196: - **Domain:** AI Gateway / Monetization
@@ -741,11 +740,11 @@ L203:   - **And** daily usage meters MUST be persisted in PostgreSQL `ai_usage_m
 L204: - **Verifying Test:**
 L205:   - `pnpm exec vitest run tests/unit/ai-gateway-domain.test.ts`
 L206:   - `pnpm exec vitest run tests/integration/ai-gateway.test.ts`
-L207: 
+L207:
 L208: ---
-L209: 
+L209:
 L210: ### 3.3 P2: Staged Capability Migrations & Enhancements
-L211: 
+L211:
 L212: #### BL-011: Migrate Challenges & Arena to Durable Storage (F-08)
 L213: - **Urgency:** **P2 High**
 L214: - **Domain:** Assessment / Durability
@@ -758,7 +757,7 @@ L220:   - **Then** writes MUST pass through `storage.persist()` into `challenge_
 L221:   - **And** response header `x-talentsphere-durability` MUST NOT return `ephemeral`.
 L222: - **Verifying Test:**
 L223:   - `pnpm test:pg tests/pg/core-persistence.test.ts -t "challenges durability"`
-L224: 
+L224:
 L225: #### BL-012: Wire Assessments Page UI to Backend API (F-08)
 L226: - **Urgency:** **P2 High**
 L227: - **Domain:** Frontend / Assessment
@@ -771,7 +770,7 @@ L233:   - **Then** it MUST fetch active challenges from `GET /api/v1/challenges`
 L234:   - **And** submitting code MUST dispatch `POST /api/v1/challenges/:id/submit` and display verified test results.
 L235: - **Verifying Test:**
 L236:   - `pnpm exec playwright test tests/e2e/core-loop.spec.ts`
-L237: 
+L237:
 L238: #### BL-013: Migrate LMS Courses & Module Progression to PostgreSQL (F-07)
 L239: - **Urgency:** **P2 High**
 L240: - **Domain:** Learning / Durability
@@ -784,7 +783,7 @@ L246:   - **Then** record MUST be committed to `lesson_progress` table (migratio
 L247:   - **And** issued certificates MUST be written to `course_certificates`.
 L248: - **Verifying Test:**
 L249:   - `pnpm test:pg tests/pg/core-persistence.test.ts -t "lms durability"`
-L250: 
+L250:
 L251: #### BL-014: Candidate Explicit Reputation Visibility Consent Setting (Issue #45)
 L252: - **Urgency:** **P2 High**
 L253: - **Domain:** Privacy / Reputation
@@ -797,7 +796,7 @@ L259:   - **Then** `user_settings.reputation_visibility` MUST update in PostgreS
 L260:   - **And** `GET /api/v1/reputation/users/:userId` MUST allow authorized recruiters when consent is granted.
 L261: - **Verifying Test:**
 L262:   - `pnpm exec vitest run tests/integration/reputation-visibility.test.ts`
-L263: 
+L263:
 L264: #### BL-015: Connect Application Draft Autosave to Database (F-36)
 L265: - **Urgency:** **P2 High**
 L266: - **Domain:** Candidate / Durability
@@ -810,11 +809,11 @@ L272:   - **Then** draft MUST be written to `application_drafts` table (migratio
 L273:   - **And** reopening the job detail page MUST restore the saved draft.
 L274: - **Verifying Test:**
 L275:   - `pnpm test:pg tests/pg/core-persistence.test.ts -t "application drafts"`
-L276: 
+L276:
 L277: ---
-L278: 
+L278:
 L279: ### 3.4 P3: Monetization, Sandboxing & Ecosystem Expansion
-L280: 
+L280:
 L281: #### BL-016: Stripe Checkout & Subscription Lifecycle Integration (Issue #50, F-16)
 L282: - **Urgency:** **P3 Medium**
 L283: - **Domain:** Monetization / Billing
@@ -827,7 +826,7 @@ L289:   - **Then** server MUST create a Stripe Checkout Session
 L290:   - **And** upon `checkout.session.completed` webhook, activate subscription in `subscriptions` table.
 L291: - **Verifying Test:**
 L292:   - `pnpm exec vitest run tests/integration/billing.test.ts`
-L293: 
+L293:
 L294: #### BL-017: Secure Containerized Code Execution Sandbox (Issue #46, F-88)
 L295: - **Urgency:** **P3 Medium**
 L296: - **Domain:** Sandboxing / Technical Interview
@@ -840,7 +839,7 @@ L302:   - **Then** runner MUST execute inside a container with seccomp profile, 
 L303:   - **And** stdout/stderr and exit code returned cleanly to Fastify.
 L304: - **Verifying Test:**
 L305:   - `pnpm exec vitest run tests/integration/technical-interview.test.ts`
-L306: 
+L306:
 L307: #### BL-018: Dockerfile Multi-Stage Image Pruning (OPS-01)
 L308: - **Urgency:** **P3 Medium**
 L309: - **Domain:** DevOps / Deployment
@@ -853,21 +852,21 @@ L315:   - **Then** runtime stage MUST copy only compiled `dist/` and `node_modul
 L316:   - **And** Vitest, Playwright, and TypeScript compiler MUST NOT exist in the final container image.
 L317: - **Verifying Test:**
 L318:   - `docker images talentsphere-api` verified $<250$MB.
-L319: 
+L319:
 L320: ---
 [...]
 L368:   - Production deployment on single-writer PostgreSQL architecture with automated backup verification (`deploy/oracle/verify-backup-restore.sh`).
-~~~~
-
+```
 
 <!-- ledger-D D-21 -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md (gap closure D-21)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: 15 of 31 URLs (issue-comment links #46/#48, CI run URLs), commit hash fca16f5117c8, ~21 code tokens (`stripe.webhooks.constructEvent(rawBody, signature, whsec)`, `processStripeEvent`, Playwright assertions).
 
-~~~~text
+```text
 L5: **As-of:** 2026-10-23 UTC • **Repository:** [yhsomani/talentsphere-complete](https://github.com/yhsomani/talentsphere-complete) • **Reviewed upstream `main`:** [`0f40b6c951bc305f0bf8faf13d4a0897dd80c0e2`](https://github.com/yhsomani/talentsphere-complete/commit/0f40b6c951bc305f0bf8faf13d4a0897dd80c0e2) • **Report branch:** `chatgpt/second-pass-audit-20261023`.
 [...]
 L11: **Verdict: NOT READY for production or a paid public launch.** The most recent GitHub Actions run for this precise `main` commit [#40017740619](https://github.com/yhsomani/talentsphere-complete/actions/runs/40017740619) **failed 1 of 236 Playwright cases** (`tests/e2e/account-security.spec.ts:127`); 235 passed. Preceding commits [`deaea7665`](https://github.com/yhsomani/talentsphere-complete/actions/runs/40016584724) and [`4d3cf5d4`](https://github.com/yhsomani/talentsphere-complete/actions/runs/40014603225) had successful CI. Latest job passed all prior lint, typecheck, memory-mode unit/integration/security tests, local migration checks, real-Postgres tests, build and browser secret scan.
@@ -916,4 +915,4 @@ L159: | #50 | OPEN | Stripe added in PR71; connected test account zero webhook e
 L389: - [Latest red main CI, run 40017740619](https://github.com/yhsomani/talentsphere-complete/actions/runs/40017740619) — exact commit 0f40b6c, one E2E failure
 L390: - [Earlier green run 40016584724](https://github.com/yhsomani/talentsphere-complete/actions/runs/40016584724), [green run 40014603225](https://github.com/yhsomani/talentsphere-complete/actions/runs/40014603225)
 L391: - [PR #71: durable Stripe billing](https://github.com/yhsomani/talentsphere-complete/pull/71), [PR #70: billing fixes](https://github.com/yhsomani/talentsphere-complete/pull/70), [PRs #61–#66: hosted migration guards](https://github.com/yhsomani/talentsphere-complete/pulls?q=is%3Apr+is%3Amerged)
-~~~~
+```

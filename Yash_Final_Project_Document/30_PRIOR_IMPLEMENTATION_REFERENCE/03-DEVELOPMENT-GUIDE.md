@@ -9,51 +9,51 @@ Written 2026-10-26 on branch `docs/consolidation-2026-10-26`. **Execution disclo
 
 ## 0. Evidence labels
 
-| Label | Meaning |
-| --- | --- |
+| Label                  | Meaning                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Verified-by-config** | The command, file or value exists in `package.json`, `scripts/*`, `.github/workflows/*`, `deploy/*` or a tool config. It was read, not run. |
-| **Unverified** | Documented by a repo document, or inferred; no config or source read confirms it, or it was never run. |
-| **Proposed** | Target design from `Yash_Final_Project_Document` folders 15-18, 23, 29. Nothing described as Proposed is built. |
+| **Unverified**         | Documented by a repo document, or inferred; no config or source read confirms it, or it was never run.                                      |
+| **Proposed**           | Target design from `Yash_Final_Project_Document` folders 15-18, 23, 29. Nothing described as Proposed is built.                             |
 
 Rule when sources disagree: `package.json` scripts, CI and config win; then source code; then `ARCHITECTURE.md`; then dated reports (history only). A feature is not "implemented" because a document says so; check `docs/reports/FEATURE_STATUS_2026-10-21.md` (a dated snapshot) and the code.
 
 ### 0.1 ID glossary (pointers, not definitions)
 
-| Prefix | Meaning | Where defined |
-| --- | --- | --- |
-| `F-nn` | Feature (F-01 to F-173) | `docs/registries/FEATURE_REGISTRY.md`; status snapshot `docs/reports/FEATURE_STATUS_2026-10-21.md`; doc 01 and 04 |
-| `BR-nnn` | Business rule (BR-001 to BR-248) | `docs/registries/BUSINESS_RULE_REGISTRY.md` |
-| `J-nn` | User journey (J-01 to J-28) | `docs/experience/JOURNEY_REGISTRY.md` |
-| `CF-nn` | Documentation/code conflict | `docs/system-model/03-conflict-register.md` |
-| `ADR-nnn` | Decision record built into this repo (ADR-015, ADR-016) | `docs/engineering/adr/` and `ARCHITECTURE.md` decision register |
-| `D-nn`, `G-nn`, `BL-nnn`, `X-nn`, `OD-nn`, `K-nn` | Audit defect, gap, backlog, cross-cutting and open-decision identifiers used by the dated reports and by doc 08 | `docs/reports/*` and `docs/governance/GAP_ANALYSIS.md`; doc 08 for their current status |
-| `ADR-Tnn`, `INV-Tnn`, `FF-nn`, `RB-nn`, `SLO-nn`, `ALT-nn`, `TEST-*`, `SM-*`, `RG-nn`, `PROC-nn`, `OPEN-nn` | **Target design only** (Proposed, nothing built) | `Yash_Final_Project_Document/` |
+| Prefix                                                                                                      | Meaning                                                                                                         | Where defined                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `F-nn`                                                                                                      | Feature (F-01 to F-173)                                                                                         | `docs/registries/FEATURE_REGISTRY.md`; status snapshot `docs/reports/FEATURE_STATUS_2026-10-21.md`; doc 01 and 04 |
+| `BR-nnn`                                                                                                    | Business rule (BR-001 to BR-248)                                                                                | `docs/registries/BUSINESS_RULE_REGISTRY.md`                                                                       |
+| `J-nn`                                                                                                      | User journey (J-01 to J-28)                                                                                     | `docs/experience/JOURNEY_REGISTRY.md`                                                                             |
+| `CF-nn`                                                                                                     | Documentation/code conflict                                                                                     | `docs/system-model/03-conflict-register.md`                                                                       |
+| `ADR-nnn`                                                                                                   | Decision record built into this repo (ADR-015, ADR-016)                                                         | `docs/engineering/adr/` and `ARCHITECTURE.md` decision register                                                   |
+| `D-nn`, `G-nn`, `BL-nnn`, `X-nn`, `OD-nn`, `K-nn`                                                           | Audit defect, gap, backlog, cross-cutting and open-decision identifiers used by the dated reports and by doc 08 | `docs/reports/*` and `docs/governance/GAP_ANALYSIS.md`; doc 08 for their current status                           |
+| `ADR-Tnn`, `INV-Tnn`, `FF-nn`, `RB-nn`, `SLO-nn`, `ALT-nn`, `TEST-*`, `SM-*`, `RG-nn`, `PROC-nn`, `OPEN-nn` | **Target design only** (Proposed, nothing built)                                                                | `Yash_Final_Project_Document/`                                                                                    |
 
 ## 1. Prerequisites
 
-| Requirement | Version / value | Source | Label |
-| --- | --- | --- | --- |
-| Node.js | 24 (CI `node-version: 24`, Docker `node:24-bookworm-slim`). Root `package.json` has no `engines` field and there is no `.nvmrc`. A 2026-10-21 report records local Node v24.19.0. | `ci.yml`, `deploy/oracle/Dockerfile` | Verified-by-config |
-| pnpm | 11.7.0, pinned by `packageManager` in root `package.json`; CI uses `pnpm/action-setup` version 11.7.0. | `package.json`, `ci.yml` | Verified-by-config |
-| PostgreSQL | 16 (CI service `postgres:16`; Compose `postgres:16-bookworm`). Needed for `db:migrate`, `test:pg` and any `STORAGE=pg` run. | `ci.yml`, `deploy/*/compose.yaml` | Verified-by-config |
-| Playwright Chromium | Installed with `pnpm exec playwright install --with-deps chromium` (CI). Only Chromium is configured. | `ci.yml`, `playwright.config.ts` | Verified-by-config |
-| Docker Engine + Compose plugin | Only for the deploy descriptors in `deploy/`. | `deploy/oracle/README.md` | Verified-by-config |
-| Git | Any recent version. | - | Unverified |
-| PowerShell / Git Bash on Windows | See section 8. | `CLAUDE.md`, `README.md` | Verified-by-config |
+| Requirement                      | Version / value                                                                                                                                                                   | Source                               | Label              |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------ |
+| Node.js                          | 24 (CI `node-version: 24`, Docker `node:24-bookworm-slim`). Root `package.json` has no `engines` field and there is no `.nvmrc`. A 2026-10-21 report records local Node v24.19.0. | `ci.yml`, `deploy/oracle/Dockerfile` | Verified-by-config |
+| pnpm                             | 11.7.0, pinned by `packageManager` in root `package.json`; CI uses `pnpm/action-setup` version 11.7.0.                                                                            | `package.json`, `ci.yml`             | Verified-by-config |
+| PostgreSQL                       | 16 (CI service `postgres:16`; Compose `postgres:16-bookworm`). Needed for `db:migrate`, `test:pg` and any `STORAGE=pg` run.                                                       | `ci.yml`, `deploy/*/compose.yaml`    | Verified-by-config |
+| Playwright Chromium              | Installed with `pnpm exec playwright install --with-deps chromium` (CI). Only Chromium is configured.                                                                             | `ci.yml`, `playwright.config.ts`     | Verified-by-config |
+| Docker Engine + Compose plugin   | Only for the deploy descriptors in `deploy/`.                                                                                                                                     | `deploy/oracle/README.md`            | Verified-by-config |
+| Git                              | Any recent version.                                                                                                                                                               | -                                    | Unverified         |
+| PowerShell / Git Bash on Windows | See section 8.                                                                                                                                                                    | `CLAUDE.md`, `README.md`             | Verified-by-config |
 
 Workspace shape (`pnpm-workspace.yaml`): `apps/*` and `packages/*`. `allowBuilds: esbuild` and `onlyBuiltDependencies: [esbuild]` are set.
 
-| Workspace | Package | Role |
-| --- | --- | --- |
-| `apps/api` | `@talentsphere/api` | Fastify 5 API (`src/server.ts` holds `buildApp` and nearly all routes) |
-| `apps/web` | `@talentsphere/web` | React 19 + Vite 5173 app |
-| `apps/worker` | `@talentsphere/worker` | Postgres job-claim worker plus email adapter |
-| `packages/config` | `@talentsphere/config` | Zod server env schema and deployment refusals |
-| `packages/contracts` | `@talentsphere/contracts` | Zod request schemas, error envelope |
-| `packages/domain` | `@talentsphere/domain` | Pure business rules, auth primitives, job store |
-| `packages/observability` | `@talentsphere/observability` | Pino logger with redaction, audit interface |
-| `packages/testing` | `@talentsphere/testing` | Shared test factories |
-| `packages/ui` | `@talentsphere/ui` | Design tokens (`src/tokens.ts`) |
+| Workspace                | Package                       | Role                                                                   |
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------------- |
+| `apps/api`               | `@talentsphere/api`           | Fastify 5 API (`src/server.ts` holds `buildApp` and nearly all routes) |
+| `apps/web`               | `@talentsphere/web`           | React 19 + Vite 5173 app                                               |
+| `apps/worker`            | `@talentsphere/worker`        | Postgres job-claim worker plus email adapter                           |
+| `packages/config`        | `@talentsphere/config`        | Zod server env schema and deployment refusals                          |
+| `packages/contracts`     | `@talentsphere/contracts`     | Zod request schemas, error envelope                                    |
+| `packages/domain`        | `@talentsphere/domain`        | Pure business rules, auth primitives, job store                        |
+| `packages/observability` | `@talentsphere/observability` | Pino logger with redaction, audit interface                            |
+| `packages/testing`       | `@talentsphere/testing`       | Shared test factories                                                  |
+| `packages/ui`            | `@talentsphere/ui`            | Design tokens (`src/tokens.ts`)                                        |
 
 Details of what each module does: doc 02.
 
@@ -76,7 +76,7 @@ These come from `AGENTS.md` and `CLAUDE.md` (Verified-by-config; they are instru
 Operator setup. An AI agent must not run steps 1 and 4 (install, build) without explicit authorization (rule 2).
 
 0. **Install the toolchain (new machine).** Install Node 24 from nodejs.org or a version manager. For pnpm, the repo pins `packageManager: pnpm@11.7.0`; `corepack enable` (bundled with Node, used by `deploy/oracle/Dockerfile`) should select that version automatically, or install pnpm 11.7.0 explicitly (Unverified on this machine). Check with `node --version` and `pnpm --version` (`pnpm.cmd --version` in PowerShell).
-0b. **Get a local PostgreSQL 16 (Proposed convenience; any Postgres 16 works).** Example with Docker: `docker run --name talentsphere-pg -e POSTGRES_PASSWORD=<choose-a-local-password> -p 5432:5432 -d postgres:16`. Then `DATABASE_URL=postgresql://postgres:<that-password>@localhost:5432/talentsphere` (the migration runner creates the `talentsphere` database if it is missing). URL-encode special characters in the password. For `pnpm test:pg` use the same server with a role that can create databases (the `postgres` user can).
+   0b. **Get a local PostgreSQL 16 (Proposed convenience; any Postgres 16 works).** Example with Docker: `docker run --name talentsphere-pg -e POSTGRES_PASSWORD=<choose-a-local-password> -p 5432:5432 -d postgres:16`. Then `DATABASE_URL=postgresql://postgres:<that-password>@localhost:5432/talentsphere` (the migration runner creates the `talentsphere` database if it is missing). URL-encode special characters in the password. For `pnpm test:pg` use the same server with a role that can create databases (the `postgres` user can).
 1. **Install dependencies.** `pnpm install --frozen-lockfile` (Verified-by-config: CI and Dockerfile use the same command). On Windows PowerShell use `pnpm.cmd` if `pnpm.ps1` is blocked (section 8).
 2. **Create `.env`.** Copy `.env.example` to `.env` at the repo root (`.env` is gitignored). Set at least `DATABASE_URL` and a private, stable `TOKEN_SECRET` (>= 32 characters). Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` (command given in `.env.example`). API and worker load `.env` from the current directory or `../../.env` via `process.loadEnvFile`; variables already in the process environment are never overridden by the file. Never commit real values and never reuse the secrets published in `test-secrets.mjs`: the API refuses them in staging and production.
 3. **Create the database and apply migrations (local PostgreSQL only).** `pnpm db:migrate`. It may create the database. Do **not** run it against hosted Supabase; it refuses `*.supabase.co` and `*.pooler.supabase.com`. See section 7.
@@ -95,76 +95,76 @@ Names and purposes only; no values. Source of truth: `packages/config/src/env.ts
 
 ### 4.1 Core
 
-| Variable | Purpose | Required? | Where read |
-| --- | --- | --- | --- |
-| `NODE_ENV` | `development` (default), `test`, `staging`, `production`. `staging` and `production` are "deployed": extra refusals apply. | Optional locally; set by deploy files | API, Worker |
-| `DATABASE_URL` | PostgreSQL connection string. Default is a local dev DSN that deployed startup refuses. | Required for `STORAGE=pg`, migrations, worker | API, Worker, Script |
-| `STORAGE` | `pg` (default outside tests) or `memory`. `memory` is refused in staging/production. | Optional | API, Worker |
-| `TOKEN_SECRET` | Signs session tokens (>= 32 chars). Unset locally: random per process, sessions die on restart. Required when deployed. Rotating it signs everyone out. | Required when deployed | API (domain `auth.ts` also reads `process.env`) |
-| `PASSWORD_PBKDF2_ITERATIONS` | Password hash work factor. Deployed minimum 210000. Tests set 10000. | Optional | API |
-| `PORT`, `HOST` | API listen address. Defaults 4000, `0.0.0.0`. | Optional | API |
-| `APP_URL` | Public web origin; used in links. HTTPS required in deployed environments for email and Stripe. Default `http://localhost:5173`. | Required (HTTPS) when email or Stripe is on | API, Worker |
-| `API_URL`, `APP_NAME`, `APP_VERSION` | Declared in schema; `APP_VERSION` is returned by `/health`. `API_URL` and `APP_NAME`: no consumer found in `apps/*/src`. | Optional | API |
-| `LOG_LEVEL` | Pino level (`fatal` ... `trace`), default `info`. | Optional | API, Worker (`packages/observability`) |
-| `LOG_FORMAT` | `json` or `pretty`. Declared in schema; no consumer found. | Optional | schema only |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated web origins. Production refuses `localhost`. Default `http://localhost:5173`. | Required when deployed | API |
-| `TRUST_PROXY` | `1` (one trusted hop), `true`, or proxy IP/CIDR list. Required behind a proxy or all clients share one rate-limit bucket. Oracle uses `1`, Coolify `2`. | Required behind a proxy | API |
-| `RATE_LIMIT_MAX_REQUESTS`, `RATE_LIMIT_WINDOW_MS` | Global limiter, default 300 per 60000 ms, per account (per address if anonymous). Health routes are exempt. | Optional | API |
-| `AUTH_RATE_LIMIT_MAX_REQUESTS` | Login attempts per IP+email and sign-ups per IP per 15 minutes. Default 10. | Optional | API |
+| Variable                                          | Purpose                                                                                                                                                 | Required?                                     | Where read                                      |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| `NODE_ENV`                                        | `development` (default), `test`, `staging`, `production`. `staging` and `production` are "deployed": extra refusals apply.                              | Optional locally; set by deploy files         | API, Worker                                     |
+| `DATABASE_URL`                                    | PostgreSQL connection string. Default is a local dev DSN that deployed startup refuses.                                                                 | Required for `STORAGE=pg`, migrations, worker | API, Worker, Script                             |
+| `STORAGE`                                         | `pg` (default outside tests) or `memory`. `memory` is refused in staging/production.                                                                    | Optional                                      | API, Worker                                     |
+| `TOKEN_SECRET`                                    | Signs session tokens (>= 32 chars). Unset locally: random per process, sessions die on restart. Required when deployed. Rotating it signs everyone out. | Required when deployed                        | API (domain `auth.ts` also reads `process.env`) |
+| `PASSWORD_PBKDF2_ITERATIONS`                      | Password hash work factor. Deployed minimum 210000. Tests set 10000.                                                                                    | Optional                                      | API                                             |
+| `PORT`, `HOST`                                    | API listen address. Defaults 4000, `0.0.0.0`.                                                                                                           | Optional                                      | API                                             |
+| `APP_URL`                                         | Public web origin; used in links. HTTPS required in deployed environments for email and Stripe. Default `http://localhost:5173`.                        | Required (HTTPS) when email or Stripe is on   | API, Worker                                     |
+| `API_URL`, `APP_NAME`, `APP_VERSION`              | Declared in schema; `APP_VERSION` is returned by `/health`. `API_URL` and `APP_NAME`: no consumer found in `apps/*/src`.                                | Optional                                      | API                                             |
+| `LOG_LEVEL`                                       | Pino level (`fatal` ... `trace`), default `info`.                                                                                                       | Optional                                      | API, Worker (`packages/observability`)          |
+| `LOG_FORMAT`                                      | `json` or `pretty`. Declared in schema; no consumer found.                                                                                              | Optional                                      | schema only                                     |
+| `CORS_ALLOWED_ORIGINS`                            | Comma-separated web origins. Production refuses `localhost`. Default `http://localhost:5173`.                                                           | Required when deployed                        | API                                             |
+| `TRUST_PROXY`                                     | `1` (one trusted hop), `true`, or proxy IP/CIDR list. Required behind a proxy or all clients share one rate-limit bucket. Oracle uses `1`, Coolify `2`. | Required behind a proxy                       | API                                             |
+| `RATE_LIMIT_MAX_REQUESTS`, `RATE_LIMIT_WINDOW_MS` | Global limiter, default 300 per 60000 ms, per account (per address if anonymous). Health routes are exempt.                                             | Optional                                      | API                                             |
+| `AUTH_RATE_LIMIT_MAX_REQUESTS`                    | Login attempts per IP+email and sign-ups per IP per 15 minutes. Default 10.                                                                             | Optional                                      | API                                             |
 
 ### 4.2 Hosted Supabase
 
-| Variable | Purpose | Required? | Where read |
-| --- | --- | --- | --- |
-| `SUPABASE_PROJECT_REF` | 20-character project id. When set in a deployed environment the API requires `DATABASE_URL` to match it and to carry `sslmode=verify-full`. | Optional (hosted DB only) | API |
-| `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWKS_URL`, `SUPABASE_BUCKET_AVATARS`, `SUPABASE_BUCKET_RESUMES`, `SUPABASE_BUCKET_COURSE_CONTENT`, `SUPABASE_BUCKET_PORTFOLIO` | Declared in the schema with dev placeholders. Supabase Auth and Storage are not used; no consumer found in `apps/*/src`. Never put a service-role key in a Vite variable. | Optional | schema only |
+| Variable                                                                                                                                                                                                                 | Purpose                                                                                                                                                                   | Required?                 | Where read  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------- |
+| `SUPABASE_PROJECT_REF`                                                                                                                                                                                                   | 20-character project id. When set in a deployed environment the API requires `DATABASE_URL` to match it and to carry `sslmode=verify-full`.                               | Optional (hosted DB only) | API         |
+| `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWKS_URL`, `SUPABASE_BUCKET_AVATARS`, `SUPABASE_BUCKET_RESUMES`, `SUPABASE_BUCKET_COURSE_CONTENT`, `SUPABASE_BUCKET_PORTFOLIO` | Declared in the schema with dev placeholders. Supabase Auth and Storage are not used; no consumer found in `apps/*/src`. Never put a service-role key in a Vite variable. | Optional                  | schema only |
 
 ### 4.3 Billing
 
-| Variable | Purpose | Required? | Where read |
-| --- | --- | --- | --- |
-| `BILLING_MODE` | `disabled` (default), `simulated` (activates paid plans without payment; refused in production), `stripe`. | Optional | API |
-| `BILLING_WEBHOOK_SECRET` | HMAC key (>= 16 chars) for the generic `/api/v1/billing/webhook`. Unset: webhook answers 503. | Optional | API |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Needed with `BILLING_MODE=stripe`. Production refuses test-mode keys. | Required for stripe mode | API |
-| `STRIPE_PRICE_CANDIDATE_PRO_MONTHLY`, `STRIPE_PRICE_CANDIDATE_PRO_YEARLY`, `STRIPE_PRICE_RECRUITER_STARTER_MONTHLY`, `STRIPE_PRICE_RECRUITER_STARTER_YEARLY`, `STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY`, `STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY` | One Stripe price id per plan and cycle; ids must be distinct; at least one required in stripe mode. | Required (>= 1) for stripe mode | API |
+| Variable                                                                                                                                                                                                                                              | Purpose                                                                                                    | Required?                       | Where read |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------- | ---------- |
+| `BILLING_MODE`                                                                                                                                                                                                                                        | `disabled` (default), `simulated` (activates paid plans without payment; refused in production), `stripe`. | Optional                        | API        |
+| `BILLING_WEBHOOK_SECRET`                                                                                                                                                                                                                              | HMAC key (>= 16 chars) for the generic `/api/v1/billing/webhook`. Unset: webhook answers 503.              | Optional                        | API        |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                                                                                                                                                                                                          | Needed with `BILLING_MODE=stripe`. Production refuses test-mode keys.                                      | Required for stripe mode        | API        |
+| `STRIPE_PRICE_CANDIDATE_PRO_MONTHLY`, `STRIPE_PRICE_CANDIDATE_PRO_YEARLY`, `STRIPE_PRICE_RECRUITER_STARTER_MONTHLY`, `STRIPE_PRICE_RECRUITER_STARTER_YEARLY`, `STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY`, `STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY` | One Stripe price id per plan and cycle; ids must be distinct; at least one required in stripe mode.        | Required (>= 1) for stripe mode | API        |
 
 Billing details and prices: doc 04/08 and `docs/PRICING.md`.
 
 ### 4.4 Email
 
-| Variable | Purpose | Required? | Where read |
-| --- | --- | --- | --- |
-| `EMAIL_PROVIDER` | `none` (default) or `brevo`. Anything else is a startup error. | Optional | API, Worker |
-| `BREVO_API_KEY` | Brevo secret (>= 12 chars). | Required if `brevo` | API, Worker |
-| `EMAIL_FROM` | Sender authenticated in Brevo. | Required if `brevo` | API, Worker |
-| `EMAIL_FROM_NAME`, `EMAIL_REPLY_TO` | Display name (default `TalentSphere`), reply address. | Optional | API, Worker |
+| Variable                            | Purpose                                                        | Required?           | Where read  |
+| ----------------------------------- | -------------------------------------------------------------- | ------------------- | ----------- |
+| `EMAIL_PROVIDER`                    | `none` (default) or `brevo`. Anything else is a startup error. | Optional            | API, Worker |
+| `BREVO_API_KEY`                     | Brevo secret (>= 12 chars).                                    | Required if `brevo` | API, Worker |
+| `EMAIL_FROM`                        | Sender authenticated in Brevo.                                 | Required if `brevo` | API, Worker |
+| `EMAIL_FROM_NAME`, `EMAIL_REPLY_TO` | Display name (default `TalentSphere`), reply address.          | Optional            | API, Worker |
 
 ### 4.5 AI and secrets at rest
 
-| Variable | Purpose | Required? | Where read |
-| --- | --- | --- | --- |
-| `BYO_AI_KEY_ENCRYPTION_KEY` | 64 hex characters (AES-256-GCM key) for stored user-supplied AI keys. Without it, storing such a key is refused. Separate from `TOKEN_SECRET`. | Optional | API (`account-store.ts`, `server.ts`) |
-| `AI_ENABLED`, `AI_FREE_USER_PAID_INFERENCE`, `AI_CLOUD_FALLBACK_ENABLED`, `AI_REQUEST_TIMEOUT_MS` | Declared in schema; no consumer found in `apps/*/src`. `z.coerce.boolean()` treats the text `false` as true, so do not rely on them to disable anything. No external model provider is connected. | Optional | schema only |
+| Variable                                                                                          | Purpose                                                                                                                                                                                           | Required? | Where read                            |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------- |
+| `BYO_AI_KEY_ENCRYPTION_KEY`                                                                       | 64 hex characters (AES-256-GCM key) for stored user-supplied AI keys. Without it, storing such a key is refused. Separate from `TOKEN_SECRET`.                                                    | Optional  | API (`account-store.ts`, `server.ts`) |
+| `AI_ENABLED`, `AI_FREE_USER_PAID_INFERENCE`, `AI_CLOUD_FALLBACK_ENABLED`, `AI_REQUEST_TIMEOUT_MS` | Declared in schema; no consumer found in `apps/*/src`. `z.coerce.boolean()` treats the text `false` as true, so do not rely on them to disable anything. No external model provider is connected. | Optional  | schema only                           |
 
 ### 4.6 Web build (public by design)
 
-| Variable | Purpose | Required? | Where read |
-| --- | --- | --- | --- |
-| `VITE_SUPPORT_EMAIL` | Support address shown in UI; unset hides the line. | Optional | Web (`import.meta.env`) |
-| `VITE_PRIVACY_EMAIL`, `VITE_SECURITY_EMAIL` | Contact addresses. Set only after ownership and monitoring are proven; unset keeps the privacy page reporting that public release is blocked. | Optional | Web |
+| Variable                                    | Purpose                                                                                                                                       | Required? | Where read              |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------- |
+| `VITE_SUPPORT_EMAIL`                        | Support address shown in UI; unset hides the line.                                                                                            | Optional  | Web (`import.meta.env`) |
+| `VITE_PRIVACY_EMAIL`, `VITE_SECURITY_EMAIL` | Contact addresses. Set only after ownership and monitoring are proven; unset keeps the privacy page reporting that public release is blocked. | Optional  | Web                     |
 
 Everything with a `VITE_` prefix is embedded in the browser bundle. Server secrets must never get one (CI guards this, see doc 07).
 
 ### 4.7 Test, CI, deploy and tooling variables
 
-| Variable | Purpose | Where |
-| --- | --- | --- |
-| `TEST_DATABASE_URL` | Postgres URL for `pnpm test:pg`. The role must be able to create and drop databases: the pg suites make a per-file test database and drop it afterwards (`tests/pg/test-db.ts`). CI uses the `postgres` superuser on the service container. | `tests/pg`, CI |
-| `CI` | Enables `forbidOnly` in Playwright and disables server reuse. | Playwright |
-| `API_AUTH_TOKEN` | Only a CI sentinel name for the bundle secret scan; the application does not read it. | `scripts/check-client-secrets.mjs` |
-| `SITE_DOMAIN`, `ACME_EMAIL`, `POSTGRES_PASSWORD` | Oracle/Coolify Compose interpolation. `POSTGRES_PASSWORD` must be URL-safe because it is inlined into `DATABASE_URL`. | `deploy/*` |
-| `RESEND_API_KEY` | Present in Oracle Compose and `deploy/oracle/.env.example`, but **no code reads it**; the shipped adapter is Brevo only (see section 10 and doc 07 known gaps). | `deploy/oracle` |
-| `BACKUP_DIR` | Output directory for `deploy/oracle/backup.sh`. | Script |
+| Variable                                         | Purpose                                                                                                                                                                                                                                     | Where                              |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `TEST_DATABASE_URL`                              | Postgres URL for `pnpm test:pg`. The role must be able to create and drop databases: the pg suites make a per-file test database and drop it afterwards (`tests/pg/test-db.ts`). CI uses the `postgres` superuser on the service container. | `tests/pg`, CI                     |
+| `CI`                                             | Enables `forbidOnly` in Playwright and disables server reuse.                                                                                                                                                                               | Playwright                         |
+| `API_AUTH_TOKEN`                                 | Only a CI sentinel name for the bundle secret scan; the application does not read it.                                                                                                                                                       | `scripts/check-client-secrets.mjs` |
+| `SITE_DOMAIN`, `ACME_EMAIL`, `POSTGRES_PASSWORD` | Oracle/Coolify Compose interpolation. `POSTGRES_PASSWORD` must be URL-safe because it is inlined into `DATABASE_URL`.                                                                                                                       | `deploy/*`                         |
+| `RESEND_API_KEY`                                 | Present in Oracle Compose and `deploy/oracle/.env.example`, but **no code reads it**; the shipped adapter is Brevo only (see section 10 and doc 07 known gaps).                                                                             | `deploy/oracle`                    |
+| `BACKUP_DIR`                                     | Output directory for `deploy/oracle/backup.sh`.                                                                                                                                                                                             | Script                             |
 
 Test-only signing secrets live in `test-secrets.mjs` (`TEST_TOKEN_SECRET`, `TEST_WEBHOOK_SECRET`). They are public, hashed in `packages/config/src/env.ts`, and refused in deployed environments.
 
@@ -172,14 +172,14 @@ Test-only signing secrets live in `test-secrets.mjs` (`TEST_TOKEN_SECRET`, `TEST
 
 All commands Verified-by-config unless noted.
 
-| Goal | Command | Notes |
-| --- | --- | --- |
-| Run web + API + worker | `pnpm dev` | Root script: `pnpm --parallel --filter "./apps/*" dev`. API and worker run `node dist/index.js` (no compile, no watch). Web runs `vite` on 5173. |
-| Run one app | `pnpm --filter @talentsphere/web dev` (or `@talentsphere/api`, `@talentsphere/worker`) | |
-| After editing API/worker/package source | `pnpm build`, then restart the process | Stale `dist` is the most common "my change does nothing" cause. |
-| Web only edits | Vite hot reload | |
-| Seed feature flags | `pnpm db:seed` | Runs `scripts/seed.mjs`: applies `supabase/seed/01_initial_seed.sql`; creates that file if missing (a write; run only with authorization). |
-| Create first platform admin | No API route does this. In SQL: `UPDATE public.users SET roles = array_append(roles, 'platform_admin') WHERE lower(email) = lower($1);` then restart the API | From `docs/quality/OPERATIONS.md`. The API read model is hydrated at boot, so SQL edits need a restart. |
+| Goal                                    | Command                                                                                                                                                      | Notes                                                                                                                                            |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Run web + API + worker                  | `pnpm dev`                                                                                                                                                   | Root script: `pnpm --parallel --filter "./apps/*" dev`. API and worker run `node dist/index.js` (no compile, no watch). Web runs `vite` on 5173. |
+| Run one app                             | `pnpm --filter @talentsphere/web dev` (or `@talentsphere/api`, `@talentsphere/worker`)                                                                       |                                                                                                                                                  |
+| After editing API/worker/package source | `pnpm build`, then restart the process                                                                                                                       | Stale `dist` is the most common "my change does nothing" cause.                                                                                  |
+| Web only edits                          | Vite hot reload                                                                                                                                              |                                                                                                                                                  |
+| Seed feature flags                      | `pnpm db:seed`                                                                                                                                               | Runs `scripts/seed.mjs`: applies `supabase/seed/01_initial_seed.sql`; creates that file if missing (a write; run only with authorization).       |
+| Create first platform admin             | No API route does this. In SQL: `UPDATE public.users SET roles = array_append(roles, 'platform_admin') WHERE lower(email) = lower($1);` then restart the API | From `docs/quality/OPERATIONS.md`. The API read model is hydrated at boot, so SQL edits need a restart.                                          |
 
 Facts that shape dev work:
 
@@ -191,15 +191,15 @@ Facts that shape dev work:
 
 ## 6. Build
 
-| Task | Command | Writes build output? |
-| --- | --- | --- |
-| Build everything | `pnpm build` | Yes. Runs `pnpm --recursive --filter "./packages/*" build`, then `./apps/*`. Package/API/worker `build` is `tsc`; web is `tsc && vite build`. |
-| Typecheck (project references + tests) | `pnpm typecheck` = `tsc -b && tsc -p tests` | **Yes** (`tsc -b` emits `dist` and `tsbuildinfo`). Treated as an emitting command under `AGENTS.md`. |
-| Read-only typecheck of one project | `node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit --incremental false --composite false --declaration false --declarationMap false` | No. From `docs/quality/TESTING.md`; needs existing declaration output from dependencies. Unverified in this guide. |
-| Lint (Prettier check) | `pnpm lint` | No |
-| Format (write) | `pnpm format` | Writes source. Not for agents repo-wide. |
-| Clean a package | `pnpm --filter <name> clean` | Deletes its `dist` |
-| Validate | `pnpm validate` = `pnpm typecheck && pnpm test:unit` | Emits (via typecheck) |
+| Task                                   | Command                                                                                                                                                    | Writes build output?                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Build everything                       | `pnpm build`                                                                                                                                               | Yes. Runs `pnpm --recursive --filter "./packages/*" build`, then `./apps/*`. Package/API/worker `build` is `tsc`; web is `tsc && vite build`. |
+| Typecheck (project references + tests) | `pnpm typecheck` = `tsc -b && tsc -p tests`                                                                                                                | **Yes** (`tsc -b` emits `dist` and `tsbuildinfo`). Treated as an emitting command under `AGENTS.md`.                                          |
+| Read-only typecheck of one project     | `node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit --incremental false --composite false --declaration false --declarationMap false` | No. From `docs/quality/TESTING.md`; needs existing declaration output from dependencies. Unverified in this guide.                            |
+| Lint (Prettier check)                  | `pnpm lint`                                                                                                                                                | No                                                                                                                                            |
+| Format (write)                         | `pnpm format`                                                                                                                                              | Writes source. Not for agents repo-wide.                                                                                                      |
+| Clean a package                        | `pnpm --filter <name> clean`                                                                                                                               | Deletes its `dist`                                                                                                                            |
+| Validate                               | `pnpm validate` = `pnpm typecheck && pnpm test:unit`                                                                                                       | Emits (via typecheck)                                                                                                                         |
 
 TypeScript settings (root `tsconfig.json`): target ES2022, module NodeNext, `strict`, `noUnusedLocals`, `noUnusedParameters`, `composite`, project references to all nine workspaces. `tests/tsconfig.json` extends it with `noEmit` and relaxes unused checks. Prettier (`.prettierrc`): semicolons, single quotes, 2 spaces, trailing commas `es5`, width 100.
 
@@ -267,26 +267,26 @@ UNDERSTAND, SEARCH, PLAN, MODIFY, TEST, VERIFY, REVIEW, DOCUMENT, REPORT. Read f
 
 ## 10. Troubleshooting
 
-| Symptom | Likely cause and check |
-| --- | --- |
-| `pnpm` blocked in PowerShell ("running scripts is disabled") | Use `pnpm.cmd`. Do not change the execution policy. |
-| API/worker exit immediately or "Missing workspace export" | `dist` missing or stale. Operator runs `pnpm build`, then restart. |
-| "Refusing to start with an unsafe production configuration" | Output lists each failed rule (`productionConfigProblems`): missing/published `TOKEN_SECRET`, `STORAGE=memory`, localhost `DATABASE_URL` or CORS, low PBKDF2 iterations, bad `SUPABASE_PROJECT_REF`/`sslmode`, half-configured email or Stripe. Fix the variable named. |
-| Second API process refuses to boot | Advisory-lock single-writer. Stop the first process. Never run two writers. |
-| Sessions expire at every restart | `TOKEN_SECRET` unset or changing. Set a stable private secret. |
-| Rows changed in SQL are not visible | Core read model is loaded at boot. Restart the API. |
-| `Invalid server environment configuration: ...` at boot | A variable failed Zod validation (for example `TOKEN_SECRET` shorter than 32, `BYO_AI_KEY_ENCRYPTION_KEY` not 64 hex, Stripe key not matching `sk_/rk_` pattern, `EMAIL_FROM` not an email). Empty-string values also fail; leave unset instead (Coolify compose comment). |
-| Email routes return 503 | `EMAIL_PROVIDER` not `brevo` or key/sender/HTTPS `APP_URL` missing. Fail-closed by design. |
-| Checkout unavailable | `BILLING_MODE`, `STRIPE_*` ids, or user role. The client never supplies a price. |
-| Worker idle, no jobs processed | `STORAGE=memory`, or `DATABASE_URL` missing. Check `worker_health.last_seen_at` heartbeat. |
-| `db:migrate` fails with "Refusing provider-hosted endpoint" | Intentional. Use the hosted track (section 7). |
-| `db:migrate` fails on checksum/history | An applied file was edited or the sequence has a gap. Restore the file; add a new migration instead. |
-| Migration 00043 fails | Case-insensitive duplicate emails exist. Run the `pre-00043` preflight; de-duplicate under an approved plan. |
+| Symptom                                                                              | Likely cause and check                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm` blocked in PowerShell ("running scripts is disabled")                         | Use `pnpm.cmd`. Do not change the execution policy.                                                                                                                                                                                                                                                                                                                                                                   |
+| API/worker exit immediately or "Missing workspace export"                            | `dist` missing or stale. Operator runs `pnpm build`, then restart.                                                                                                                                                                                                                                                                                                                                                    |
+| "Refusing to start with an unsafe production configuration"                          | Output lists each failed rule (`productionConfigProblems`): missing/published `TOKEN_SECRET`, `STORAGE=memory`, localhost `DATABASE_URL` or CORS, low PBKDF2 iterations, bad `SUPABASE_PROJECT_REF`/`sslmode`, half-configured email or Stripe. Fix the variable named.                                                                                                                                               |
+| Second API process refuses to boot                                                   | Advisory-lock single-writer. Stop the first process. Never run two writers.                                                                                                                                                                                                                                                                                                                                           |
+| Sessions expire at every restart                                                     | `TOKEN_SECRET` unset or changing. Set a stable private secret.                                                                                                                                                                                                                                                                                                                                                        |
+| Rows changed in SQL are not visible                                                  | Core read model is loaded at boot. Restart the API.                                                                                                                                                                                                                                                                                                                                                                   |
+| `Invalid server environment configuration: ...` at boot                              | A variable failed Zod validation (for example `TOKEN_SECRET` shorter than 32, `BYO_AI_KEY_ENCRYPTION_KEY` not 64 hex, Stripe key not matching `sk_/rk_` pattern, `EMAIL_FROM` not an email). Empty-string values also fail; leave unset instead (Coolify compose comment).                                                                                                                                            |
+| Email routes return 503                                                              | `EMAIL_PROVIDER` not `brevo` or key/sender/HTTPS `APP_URL` missing. Fail-closed by design.                                                                                                                                                                                                                                                                                                                            |
+| Checkout unavailable                                                                 | `BILLING_MODE`, `STRIPE_*` ids, or user role. The client never supplies a price.                                                                                                                                                                                                                                                                                                                                      |
+| Worker idle, no jobs processed                                                       | `STORAGE=memory`, or `DATABASE_URL` missing. Check `worker_health.last_seen_at` heartbeat.                                                                                                                                                                                                                                                                                                                            |
+| `db:migrate` fails with "Refusing provider-hosted endpoint"                          | Intentional. Use the hosted track (section 7).                                                                                                                                                                                                                                                                                                                                                                        |
+| `db:migrate` fails on checksum/history                                               | An applied file was edited or the sequence has a gap. Restore the file; add a new migration instead.                                                                                                                                                                                                                                                                                                                  |
+| Migration 00043 fails                                                                | Case-insensitive duplicate emails exist. Run the `pre-00043` preflight; de-duplicate under an approved plan.                                                                                                                                                                                                                                                                                                          |
 | Oracle API exits at boot with `Invalid server environment configuration: EMAIL_FROM` | Known defect (derived by reading, not run): `deploy/oracle/.env.example` has `EMAIL_FROM=` empty, the Oracle compose files pass `EMAIL_FROM: ${EMAIL_FROM:-}`, and `EMAIL_FROM` is `z.string().email().optional()`, which rejects an empty string. Set `EMAIL_FROM` to a valid address in your private `deploy/oracle/.env`. Do not edit the example or compose files (protected); report it. See doc 07 section 5.5. |
-| Oracle/Coolify email never enabled | The Oracle files pass `RESEND_API_KEY`, which nothing reads, and do not pass `BREVO_API_KEY`. The Coolify worker passes no email variables. Needs a deploy-file change (protected; ask first). |
-| Playwright cannot start servers | The E2E API starts from built output (`apps/api/dist/server.js` via `scripts/start-e2e-api.mjs`); build first. Port 4000 or 4173 already used. |
-| `vitest` passes but behaviour is wrong | Tests run in `STORAGE=memory` with a fast PBKDF2 setting; durability needs `pnpm test:pg`. |
-| `pnpm test` hits missing built packages | Tests import some workspace packages from built `dist`; build first or follow doc 07. |
+| Oracle/Coolify email never enabled                                                   | The Oracle files pass `RESEND_API_KEY`, which nothing reads, and do not pass `BREVO_API_KEY`. The Coolify worker passes no email variables. Needs a deploy-file change (protected; ask first).                                                                                                                                                                                                                        |
+| Playwright cannot start servers                                                      | The E2E API starts from built output (`apps/api/dist/server.js` via `scripts/start-e2e-api.mjs`); build first. Port 4000 or 4173 already used.                                                                                                                                                                                                                                                                        |
+| `vitest` passes but behaviour is wrong                                               | Tests run in `STORAGE=memory` with a fast PBKDF2 setting; durability needs `pnpm test:pg`.                                                                                                                                                                                                                                                                                                                            |
+| `pnpm test` hits missing built packages                                              | Tests import some workspace packages from built `dist`; build first or follow doc 07.                                                                                                                                                                                                                                                                                                                                 |
 
 ## 11. How to add a feature (follow the architecture)
 

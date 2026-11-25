@@ -45,17 +45,11 @@
       "additionalProperties": false,
       "properties": {
         "org_id": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uuid"
         },
         "institution_id": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uuid"
         }
       },
@@ -64,11 +58,7 @@
     "aggregate": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "type",
-        "id",
-        "seq"
-      ],
+      "required": ["type", "id", "seq"],
       "properties": {
         "type": {
           "type": "string"
@@ -87,30 +77,18 @@
     "actor": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "kind",
-        "human"
-      ],
+      "required": ["kind", "human"],
       "properties": {
         "kind": {
           "type": "string",
-          "enum": [
-            "user",
-            "service",
-            "system",
-            "support",
-            "referee"
-          ]
+          "enum": ["user", "service", "system", "support", "referee"]
         },
         "human": {
           "type": "boolean",
           "description": "Derived by the producer, never supplied by a client: true when a person caused the event (kind user, support or referee), false for service and system. SM-00 U6 / INV-T09 'human actor' means human=true and kind in (user, support); a referee is human but is never an authorised decider (REVW-44)"
         },
         "account_id": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "format": "uuid"
         }
       },
@@ -119,10 +97,7 @@
           "if": {
             "properties": {
               "kind": {
-                "enum": [
-                  "service",
-                  "system"
-                ]
+                "enum": ["service", "system"]
               }
             }
           },
@@ -144,17 +119,11 @@
       ]
     },
     "correlation_id": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "description": "Request id that started the causal chain"
     },
     "causation_id": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "format": "uuid",
       "description": "event_id of the event that caused this one, if any"
     },

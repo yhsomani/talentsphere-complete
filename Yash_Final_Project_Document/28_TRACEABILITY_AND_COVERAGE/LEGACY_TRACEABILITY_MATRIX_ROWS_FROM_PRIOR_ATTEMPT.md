@@ -6,29 +6,29 @@ Frame: nothing is implemented in this project. The prior attempt reported or req
 
 Source: `31_LEGACY_ARCHIVE/docs/reports/FEATURE_TRACEABILITY_MATRIX.md` (266 lines, quoted in full). It is the prior attempt's mapping of its 173 features to domain modules, API routes, migrations and UI components. Status and durability words in it describe the prior repository at its head `83dc7d24`; they are not facts about this project, where nothing is implemented. The condensed form (status, durability, module, endpoint count, tables) lives in [`LEGACY_REPORTS_EVIDENCE_INDEX.md`](LEGACY_REPORTS_EVIDENCE_INDEX.md).
 
-~~~~text
+````text
 L1: # TalentSphere — 173 Canonical Features Master Traceability Matrix
-L2: 
+L2:
 L3: > Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in the implementation inventory (`../system-model/01-inventory-and-coverage.md`, not present in this tree). No historical pass is a fresh release certification.
-L4: 
-L5: **Date:** 2026-10-22  
-L6: **Author:** Teamwork Master Synthesis Engineering Group  
-L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`  
-L8: **Git HEAD:** `83dc7d247efbd3b3c3312bef74ac49978d33e924`  
-L9: **Active Branch:** `repository_audit_roadmap`  
+L4:
+L5: **Date:** 2026-10-22
+L6: **Author:** Teamwork Master Synthesis Engineering Group
+L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`
+L8: **Git HEAD:** `83dc7d247efbd3b3c3312bef74ac49978d33e924`
+L9: **Active Branch:** `repository_audit_roadmap`
 L10: **Authoritative Baselines:** `SSOT.md` v6.0, `FEATURE_REGISTRY.md` v6.0, `ADR-015`, `PRD.md`, `TRD.md`
-L11: 
+L11:
 L12: ---
-L13: 
+L13:
 L14: ## 1. Executive Summary & Methodological Rubric
-L15: 
+L15:
 L16: An exhaustive, code-level audit was conducted across all **173 canonical features** (F-01 through F-173) defined in the TalentSphere capability registry (`docs/registries/FEATURE_REGISTRY.md`). Every feature was cross-referenced against:
 L17: 1. **Fastify API Routes** in `apps/api/src/server.ts` (274 HTTP route registrations).
 L18: 2. **Domain Models & Services** in `packages/domain/src/` (48 TypeScript modules).
 L19: 3. **Frontend UI Routes & Components** in `apps/web/src/` (20 pages, 16 components).
 L20: 4. **Database Migrations** in `supabase/migrations/` (49 PostgreSQL migrations).
 L21: 5. **Durability Classifications** pursuant to ADR-015 and runtime header enforcement (`x-talentsphere-durability`).
-L22: 
+L22:
 L23: ### Classification Rubric (Reality Separation)
 L24: In accordance with SSOT §Reality Separation:
 L25: ```text
@@ -36,16 +36,16 @@ L26: DOCUMENTED ≠ IMPLEMENTED
 L27: IMPLEMENTED ≠ VERIFIED
 L28: VERIFIED ≠ PRODUCTION-READY
 L29: ```
-L30: 
+L30:
 L31: - **Full (26 features / 15.0%)**: End-to-end implementation. Relational schema in PostgreSQL migrations, pure business logic in domain packages, Fastify route in `apps/api/src/server.ts` running in durable storage mode (`DURABLE_ROUTES`), dedicated interactive React UI component/page in `apps/web/src/`, and automated test coverage (including Playwright E2E).
 L32: - **Partial (91 features / 52.6%)**: Substantial code implementation. Domain models, database migrations, and Fastify endpoints exist and pass unit/integration tests, but state is currently in-memory (`ephemeral`) and/or frontend UI is missing or preview-only.
 L33: - **Stub / Mock (6 features / 3.5%)**: Deprecated legacy endpoints (F-38, F-39) or explicitly vendor-gated/prohibited concepts (F-45, F-61, F-62, F-63).
 L34: - **Missing (50 features / 28.9%)**: Deferred to future roadmap phases (Phases 5–10), Chrome Extension companion, or unbuilt enterprise modules.
-L35: 
+L35:
 L36: ---
-L37: 
+L37:
 L38: ## 2. Capability Portfolio Distribution
-L39: 
+L39:
 L40: ```text
 L41: ┌────────────────────────────────────────────────────────────────────────────────────────┐
 L42: │                        CANONICAL 173 FEATURES AUDIT BREAKDOWN                          │
@@ -60,17 +60,17 @@ L50: ├───────────────────────┼
 L51: │ Total Inventory       │ 173       │ 100.0%       │ Canonical Capability Registry       │
 L52: └───────────────────────┴───────────┴──────────────┴─────────────────────────────────────┘
 L53: ```
-L54: 
+L54:
 L55: ### Durability Breakdown Across Routes
 L56: - **Durable (54 registered routes, 28 features)**: Writes persist to PostgreSQL via `DURABLE_ROUTES`. Single-writer advisory lock lease (`pg_try_advisory_lock(718201, 1)`). Verified by Playwright E2E and real-DB integration tests.
 L57: - **Ephemeral (217 registered routes, 87 features)**: State maintained in ~150 in-process `Map` collections. Responses return `x-talentsphere-durability: ephemeral`. Wiped on server restart.
 L58: - **Stateless (3 registered routes, 3 features)**: Diagnostics and static plan catalogs (`/health`, `/api/v1/health`, `/api/v1/billing/plans`).
 L59: - **Non-API / Future Scope (55 features)**: Features without direct HTTP route handlers in `server.ts`.
-L60: 
+L60:
 L61: ---
-L62: 
+L62:
 L63: ## 3. Comprehensive 173 Features Traceability Matrix
-L64: 
+L64:
 L65: | ID | Feature Name | Category | Domain Module | Fastify API Endpoint(s) | Durability | UI Route / Component | DB Table & Migration | Status | Engineering Notes |
 L66: |---|---|---|---|---|---|---|---|---|---|
 L67: | F-01 | Authentication & Session | Identity | auth.ts, core.ts | POST /api/v1/auth/register, POST /api/v1/auth/login, GET /api/v1/auth/session, POST /api/v1/auth/password, POST /api/v1/auth/sign-out, POST /api/v1/auth/sign-out-others | Durable | LoginPage.tsx, SignUpPage.tsx, ChangePasswordForm.tsx, SignOutOtherDevices.tsx, SessionContext.tsx | 00001_core_schema.sql (users, profiles, audit_logs); 00045_session_revocation.sql; 00046_session_sign_out.sql (revoked_sessions) | **Full** | Complete end-to-end auth with PBKDF2 hashing, JWT/session cookies, session revocation in DB, and E2E coverage. |
@@ -246,11 +246,11 @@ L236: | F-170 | Expert Network (Enhanced) | Community | None | None | N/A | None
 L237: | F-171 | Employer Brand Management System | Company | employer-reputation.ts | GET /api/v1/reputation/employers/:orgId, POST /api/v1/reputation/employers/:orgId/metrics | Ephemeral | None | 00034_employer_reputation_schema.sql | **Partial** | Employer brand management and operational transparency metrics in API; ephemeral. |
 L238: | F-172 | Advanced Compensation Intelligence | Analytics | salary-intelligence.ts | GET /api/v1/salaries/benchmarks | Ephemeral | None | 00023_salary_intelligence_schema.sql | **Partial** | Advanced compensation benchmarks with percentiles (p10, p25, p50, p75, p90) in API; ephemeral. |
 L239: | F-173 | Company-to-Skills Mapping | Intelligence | skills.ts, jobs.ts | GET /api/v1/skills, GET /api/v1/jobs/:id | Durable | JobsPage.tsx | 00002_evidence_skills_schema.sql; 00003_jobs_applications_schema.sql (job_skills) | **Full** | Mapping of employer job postings to canonical skills taxonomy with database enforcement. |
-L240: 
+L240:
 L241: ---
-L242: 
+L242:
 L243: ## 4. Architectural Analysis & Durability Recommendations
-L244: 
+L244:
 L245: ### 4.1 The Core Career Loop Foundation (26 Full Features)
 L246: The 26 **Full** features form a cohesive, production-grade closed loop:
 L247: 1. **Identity & Authentication**: F-01, F-03, F-12, F-15, F-60, F-65, F-80.
@@ -259,9 +259,9 @@ L249: 3. **Verifiable Proof of Control**: F-58, F-94, F-162.
 L250: 4. **Marketplace & Hiring Pipeline**: F-04, F-05, F-06, F-25, F-32, F-56, F-102, F-117.
 L251: 5. **Direct Communication**: F-10, F-14, F-29.
 L252: 6. **Platform Resilience**: F-02, F-21.
-L253: 
+L253:
 L254: This core loop is backed by **PostgreSQL 16**, fully typechecked, and verified by Playwright browser tests.
-L255: 
+L255:
 L256: ### 4.2 Progressive Ephemeral Migration Priorities (Stage C)
 L257: The 91 **Partial** features already possess well-defined domain logic and database migrations in `supabase/migrations/`. To eliminate ephemeral runtime data loss, they should be migrated to PostgreSQL storage in order of business value:
 L258: 1. **F-08 Challenges & Assessment**: Connect `00004_challenges_assessment_schema.sql` to `storage.core.persist()` and wire `AssessmentsPage.tsx` to active endpoints.
@@ -269,8 +269,8 @@ L259: 2. **F-07 LMS & Courses**: Route enrollment, course completion, and certif
 L260: 3. **F-36 Application Draft Autosave**: Persist drafts to `application_drafts` table to prevent candidate data loss.
 L261: 4. **F-26 Portfolio Showcase**: Wire project records to `portfolio_projects` table.
 L262: 5. **F-17 Admin Console**: Build a React admin dashboard and persist platform configuration and feature flag overrides.
-L263: 
+L263:
 L264: ---
-L265: 
+L265:
 L266: *Report ratified and published by the Teamwork Master Synthesis Engineering Group at commit `83dc7d24`.*
-~~~~
+````

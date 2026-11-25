@@ -12,39 +12,39 @@ Frame: **nothing is implemented.** The items below were the prior attempt's rule
 
 The prior attempt required every feature to carry the following fields. The target spec contract (`README.md` section 1, sections 0 to 13) covers almost all of them; the right-hand column records where, and which fields have **no explicit home** so that nothing is lost.
 
-| # | Legacy field | Target home (SPEC-00 section) | Gap? |
-|---|---|---|---|
-| 1 | Feature ID | 0 Metadata | |
-| 2 | Name | 0 Metadata | |
-| 3 | Purpose | 1 Business purpose | |
-| 4 | User value | 1 Business purpose | |
-| 5 | Business value | 1 Business purpose | |
-| 6 | Target roles | 2 Actors and access | |
-| 7 | Dependencies | 0 Metadata (Relates) and the FEAT hierarchy | |
-| 8 | Entry points | 4 User interaction | |
-| 9 | Journey | 4 User interaction (link UJ-*) | |
-| 10 | Behavior | 3 Functional behavior | |
-| 11 | Rules | 3 Functional behavior (BR-T references; legacy BR-* only through the crosswalk) | |
-| 12 | Inputs/outputs | 3 Functional behavior | |
-| 13 | States | 7 States and transitions | |
-| 14 | Permissions | 2 Actors and access | |
-| 15 | Data | 6 Data | |
-| 16 | API/events | 5 Backend behavior | |
-| 17 | Frontend | 4 User interaction | |
-| 18 | Backend | 5 Backend behavior | |
-| 19 | Integrations | 5 Backend behavior (ports) | |
-| 20 | Analytics | none explicit | **Yes.** Add an "events and metrics emitted (MET-*)" line to section 3 side effects or section 8. |
-| 21 | Security/privacy | 8 NFRs | |
-| 22 | Performance | 8 NFRs | |
-| 23 | Observability | 8 NFRs (no dedicated line) | Partial. Name logs, metrics and traces required. |
-| 24 | Errors | 9 Failure scenarios | |
-| 25 | Edge cases | 9 Failure scenarios and 10 acceptance (Boundary tags) | |
-| 26 | Recovery | 9 Failure scenarios | |
-| 27 | Tests | 11 Testing | |
-| 28 | Acceptance | 10 Acceptance criteria | |
-| 29 | Evidence/status | none, by design | **Yes (intentional).** Target specs never claim status; readiness lives in `99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md` and release gates. Keep evidence and status out of the spec body. |
-| 30 | Decision | 12 Developer guidance (pending decisions) | |
-| 31 | Future extension | none explicit | **Yes.** Add a "deferred / future extension" line to section 12. |
+| #   | Legacy field     | Target home (SPEC-00 section)                                                   | Gap?                                                                                                                                                                                                 |
+| --- | ---------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Feature ID       | 0 Metadata                                                                      |                                                                                                                                                                                                      |
+| 2   | Name             | 0 Metadata                                                                      |                                                                                                                                                                                                      |
+| 3   | Purpose          | 1 Business purpose                                                              |                                                                                                                                                                                                      |
+| 4   | User value       | 1 Business purpose                                                              |                                                                                                                                                                                                      |
+| 5   | Business value   | 1 Business purpose                                                              |                                                                                                                                                                                                      |
+| 6   | Target roles     | 2 Actors and access                                                             |                                                                                                                                                                                                      |
+| 7   | Dependencies     | 0 Metadata (Relates) and the FEAT hierarchy                                     |                                                                                                                                                                                                      |
+| 8   | Entry points     | 4 User interaction                                                              |                                                                                                                                                                                                      |
+| 9   | Journey          | 4 User interaction (link UJ-*)                                                  |                                                                                                                                                                                                      |
+| 10  | Behavior         | 3 Functional behavior                                                           |                                                                                                                                                                                                      |
+| 11  | Rules            | 3 Functional behavior (BR-T references; legacy BR-* only through the crosswalk) |                                                                                                                                                                                                      |
+| 12  | Inputs/outputs   | 3 Functional behavior                                                           |                                                                                                                                                                                                      |
+| 13  | States           | 7 States and transitions                                                        |                                                                                                                                                                                                      |
+| 14  | Permissions      | 2 Actors and access                                                             |                                                                                                                                                                                                      |
+| 15  | Data             | 6 Data                                                                          |                                                                                                                                                                                                      |
+| 16  | API/events       | 5 Backend behavior                                                              |                                                                                                                                                                                                      |
+| 17  | Frontend         | 4 User interaction                                                              |                                                                                                                                                                                                      |
+| 18  | Backend          | 5 Backend behavior                                                              |                                                                                                                                                                                                      |
+| 19  | Integrations     | 5 Backend behavior (ports)                                                      |                                                                                                                                                                                                      |
+| 20  | Analytics        | none explicit                                                                   | **Yes.** Add an "events and metrics emitted (MET-*)" line to section 3 side effects or section 8.                                                                                                    |
+| 21  | Security/privacy | 8 NFRs                                                                          |                                                                                                                                                                                                      |
+| 22  | Performance      | 8 NFRs                                                                          |                                                                                                                                                                                                      |
+| 23  | Observability    | 8 NFRs (no dedicated line)                                                      | Partial. Name logs, metrics and traces required.                                                                                                                                                     |
+| 24  | Errors           | 9 Failure scenarios                                                             |                                                                                                                                                                                                      |
+| 25  | Edge cases       | 9 Failure scenarios and 10 acceptance (Boundary tags)                           |                                                                                                                                                                                                      |
+| 26  | Recovery         | 9 Failure scenarios                                                             |                                                                                                                                                                                                      |
+| 27  | Tests            | 11 Testing                                                                      |                                                                                                                                                                                                      |
+| 28  | Acceptance       | 10 Acceptance criteria                                                          |                                                                                                                                                                                                      |
+| 29  | Evidence/status  | none, by design                                                                 | **Yes (intentional).** Target specs never claim status; readiness lives in `99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md` and release gates. Keep evidence and status out of the spec body. |
+| 30  | Decision         | 12 Developer guidance (pending decisions)                                       |                                                                                                                                                                                                      |
+| 31  | Future extension | none explicit                                                                   | **Yes.** Add a "deferred / future extension" line to section 12.                                                                                                                                     |
 
 The legacy block listed exactly 31 field names in the order shown (Feature ID first, Future extension last).
 
@@ -81,6 +81,6 @@ Related prior statements: GA requires the platform foundations plus a **complete
 
 ## 4. Open items
 
-| ID | Item |
-|---|---|
+| ID          | Item                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------ |
 | OPEN-LGA-12 | Add Analytics, Observability and Future-extension lines to SPEC-00 (see section 1). Owner: Product Director. |

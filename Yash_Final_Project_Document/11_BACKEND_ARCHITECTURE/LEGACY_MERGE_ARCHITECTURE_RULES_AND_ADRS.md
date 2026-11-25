@@ -6,14 +6,14 @@ Preservation instruction (project owner, verbatim): "i dont want to loos informa
 
 ## 0. Frame and how to read this file
 
-- **Nothing is implemented in this project.** The project is just starting. Every statement below tagged **prior attempt reported** is a claim made by a legacy document about an *earlier attempt* (snapshot `431c425a`, 2026-10-23). It is reference material, not a fact about this project, and has not been re-verified.
+- **Nothing is implemented in this project.** The project is just starting. Every statement below tagged **prior attempt reported** is a claim made by a legacy document about an _earlier attempt_ (snapshot `431c425a`, 2026-10-23). It is reference material, not a fact about this project, and has not been re-verified.
 - Every statement tagged **target requires** is a requirement or proposal for this project. It never claims existence.
 - Merged from legacy: `31_LEGACY_ARCHIVE/docs/engineering/TARGET_ARCHITECTURE.md`, `.../TRD.md`, `.../CODE_STYLE.md`, `.../adr/ADR-015-core-loop-persistence.md`. Companion files: `LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md` (root `ARCHITECTURE.md`), `../25_DIAGRAM_LIBRARY/LEGACY_MERGE_DIAGRAMS.md` (the Mermaid diagrams of these sources).
 - Source files contain `?` where a non-ASCII character (arrow or dash) was lost in an earlier export; this file restores the obvious meaning in hand-written text and keeps `?` in verbatim blocks.
 
 ## 1. Legacy "target architecture v6.0" decision, restated for this project
 
-**Prior attempt's intended decision:** build a *modular monolith first*; it must remain domain-oriented, contract-first, auditable, replaceable at provider boundaries, and capable of later extraction. (Legacy `TARGET_ARCHITECTURE.md` §1.)
+**Prior attempt's intended decision:** build a _modular monolith first_; it must remain domain-oriented, contract-first, auditable, replaceable at provider boundaries, and capable of later extraction. (Legacy `TARGET_ARCHITECTURE.md` §1.)
 
 **Target requires:** same stance (ADR-T04, modular monolith plus separate worker). No microservices by default. Extraction requires all five of: measurable load/latency evidence, domain ownership, failure-isolation need, operational readiness, and a migration plan (legacy §10). Scale evolution path (legacy TRD §4): `modular monolith -> worker scaling -> cache -> search extraction -> replicas -> selective service extraction`.
 
@@ -77,7 +77,7 @@ Rule: intra-package imports target the module that **declares** the symbol.
 - Browser calls application APIs. Direct table access is not the primary application contract.
 - Use a queue for: file processing, media processing, notification fan-out, recommendation refresh, analytics aggregation, plagiarism/similarity, credential propagation, scheduled maintenance.
 - Use realtime for: messaging, presence, non-critical live progress, selected dashboards.
-- Never use realtime as the *only* path for: payment state, authorization, assessment scoring, credential issuance, audit persistence.
+- Never use realtime as the _only_ path for: payment state, authorization, assessment scoring, credential issuance, audit persistence.
 
 **Target requires:** these four constraints are retained verbatim as design rules (they align with ADR-T05/T09/T12/T15). The queue-use list is a candidate input to `../13_API_EVENTS_AND_INTEGRATIONS/EVENT_CATALOG.md`; the realtime exclusions are inputs to OPEN-49.
 
@@ -85,27 +85,27 @@ Rule: intra-package imports target the module that **declares** the symbol.
 
 ### 4.1 Logical architecture layers
 
-| Layer | Contents | Technology (legacy) |
-|---|---|---|
-| Presentation | Web app, extension, PWA, admin | React + TypeScript + Vite PWA, React 18+, Tailwind, Radix |
-| Application | HTTP application APIs, route handlers, use cases | TypeScript strict |
-| Domain | Aggregates, entities, VOs, domain events, business rules | Pure TS |
-| Infrastructure | Repositories, adapters, integrations | Supabase, Stripe, providers |
-| Data | PostgreSQL with RLS, storage buckets, realtime channels | Supabase |
-| External | AI providers, payment, media, email, IDV | Integration layer |
+| Layer          | Contents                                                 | Technology (legacy)                                       |
+| -------------- | -------------------------------------------------------- | --------------------------------------------------------- |
+| Presentation   | Web app, extension, PWA, admin                           | React + TypeScript + Vite PWA, React 18+, Tailwind, Radix |
+| Application    | HTTP application APIs, route handlers, use cases         | TypeScript strict                                         |
+| Domain         | Aggregates, entities, VOs, domain events, business rules | Pure TS                                                   |
+| Infrastructure | Repositories, adapters, integrations                     | Supabase, Stripe, providers                               |
+| Data           | PostgreSQL with RLS, storage buckets, realtime channels  | Supabase                                                  |
+| External       | AI providers, payment, media, email, IDV                 | Integration layer                                         |
 
 ### 4.2 Bounded contexts (7 + shared kernel) and domain boundary rules
 
-| Context | Contents | Aggregates |
-|---|---|---|
-| identity | Auth, profiles, orgs, tenancy, managed learners, instructor approval | User, Profile, Organization, Membership |
-| marketplace | Jobs, requisitions, applications, offers, interviews, employer insights | Job, Application, Offer, CompanyReview |
-| learning | Courses, lessons/content items, media, enrolments, progress, quizzes, assignments, paths, certificates, XP/gamification, contests, certifications | Course, Enrolment, Assessment, XPLedger, Contest |
-| community | Connections, follows, posts/articles/newsletters, comments/reactions/reposts, groups, events, messaging, notifications | Thread, Post, Community |
-| billing | Subscriptions, entitlements, course commerce, coupons, orders, refunds, licence pools, procurement, payouts | Subscription, Order, LicencePool, Payout |
-| governance | Admin, moderation, trust, audit, flags, verification | Report, ModerationAction, FeatureFlag |
-| analytics | Event tracking, KPIs, dashboards, experimentation | AnalyticsEvent, KPISnapshot |
-| Shared kernel | Event backbone, UOM, TIG, automation, agents, healing, liquidity, DQ, health, media engine, integrations, AI service, UI kit, types, utilities | DomainEvent, MediaSource, ProviderAdapter |
+| Context       | Contents                                                                                                                                          | Aggregates                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| identity      | Auth, profiles, orgs, tenancy, managed learners, instructor approval                                                                              | User, Profile, Organization, Membership          |
+| marketplace   | Jobs, requisitions, applications, offers, interviews, employer insights                                                                           | Job, Application, Offer, CompanyReview           |
+| learning      | Courses, lessons/content items, media, enrolments, progress, quizzes, assignments, paths, certificates, XP/gamification, contests, certifications | Course, Enrolment, Assessment, XPLedger, Contest |
+| community     | Connections, follows, posts/articles/newsletters, comments/reactions/reposts, groups, events, messaging, notifications                            | Thread, Post, Community                          |
+| billing       | Subscriptions, entitlements, course commerce, coupons, orders, refunds, licence pools, procurement, payouts                                       | Subscription, Order, LicencePool, Payout         |
+| governance    | Admin, moderation, trust, audit, flags, verification                                                                                              | Report, ModerationAction, FeatureFlag            |
+| analytics     | Event tracking, KPIs, dashboards, experimentation                                                                                                 | AnalyticsEvent, KPISnapshot                      |
+| Shared kernel | Event backbone, UOM, TIG, automation, agents, healing, liquidity, DQ, health, media engine, integrations, AI service, UI kit, types, utilities    | DomainEvent, MediaSource, ProviderAdapter        |
 
 Domain boundary rules (legacy IDs preserved):
 
@@ -118,27 +118,27 @@ Domain boundary rules (legacy IDs preserved):
 - ARCH-019 Zero circular dependencies.
 - ARCH-020 Routes are thin composition.
 
-**Legacy-internal conflict L-B11-02:** ARCH-016 ("cross-feature imports via `index.ts` barrels only") and the intra-package rule in section 2.1 ("never import your own package barrel") are compatible only if read as *cross-feature* vs *intra-package*. A future implementer must keep both readings explicit. **Decision needed:** adopt ARCH-013..ARCH-020 as target IDs or map them to `INV-T01..T20`; owner Backend Architecture Team; track with OPEN-47.
+**Legacy-internal conflict L-B11-02:** ARCH-016 ("cross-feature imports via `index.ts` barrels only") and the intra-package rule in section 2.1 ("never import your own package barrel") are compatible only if read as _cross-feature_ vs _intra-package_. A future implementer must keep both readings explicit. **Decision needed:** adopt ARCH-013..ARCH-020 as target IDs or map them to `INV-T01..T20`; owner Backend Architecture Team; track with OPEN-47.
 
 **Note on "atomic promotion rule" (ARCH-017):** the legacy text states only the name. Its meaning is not defined in the inspected sources. Treat as **unknown**; do not invent semantics.
 
 ### 4.3 Legacy ADR set ("locked at 13") - SSOT-aligned numbering
 
-| ID | Decision (legacy) |
-|---|---|
-| ADR-001 | Supabase Auth sole session authority |
+| ID      | Decision (legacy)                                                   |
+| ------- | ------------------------------------------------------------------- |
+| ADR-001 | Supabase Auth sole session authority                                |
 | ADR-002 | Modular monolith (React/Vite + Supabase + managed hosting provider) |
-| ADR-003 | 50 canonical tables + RLS deny-by-default |
-| ADR-004 | Supabase Realtime messaging authority |
-| ADR-005 | Stripe webhook idempotency + demo stubs |
-| ADR-006 | Chrome extension local-first |
-| ADR-007 | Provider-agnostic media |
-| ADR-008 | Institutional tenancy |
-| ADR-009 | Dual-queue boundary |
-| ADR-010 | RLS policy template generator |
-| ADR-011 | Media model is authority for lesson content |
-| ADR-012 | DDD + Feature-Based + Atomic Design combination |
-| ADR-013 | Cross-domain via events or application-service interfaces only |
+| ADR-003 | 50 canonical tables + RLS deny-by-default                           |
+| ADR-004 | Supabase Realtime messaging authority                               |
+| ADR-005 | Stripe webhook idempotency + demo stubs                             |
+| ADR-006 | Chrome extension local-first                                        |
+| ADR-007 | Provider-agnostic media                                             |
+| ADR-008 | Institutional tenancy                                               |
+| ADR-009 | Dual-queue boundary                                                 |
+| ADR-010 | RLS policy template generator                                       |
+| ADR-011 | Media model is authority for lesson content                         |
+| ADR-012 | DDD + Feature-Based + Atomic Design combination                     |
+| ADR-013 | Cross-domain via events or application-service interfaces only      |
 
 **Numbering conflict L-B11-03 (kept visible):** three ADR numbering namespaces exist across the legacy corpus: (a) the list above (SSOT-aligned; ADR-001..013); (b) root `ARCHITECTURE.md` section 26 (implemented architecture; ADR-001..011, 015, 016) - see `LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md` section 9; (c) this blueprint's `ADR-T01..T23`. Collisions: legacy (a) ADR-001 = "Supabase Auth sole session authority" while (b) ADR-001 = "Fastify modular monolith" and (c) ADR-T06 = cookie sessions through the API. Legacy ADR-014 is unassigned. **Decision needed:** ARB secretary to retire (a) and (b) as historical, keep only ADR-T## going forward. Until then every citation of a legacy ADR must carry its namespace (for example "legacy-SSOT ADR-001").
 
@@ -157,27 +157,27 @@ Legacy overlap warning (2026-10-21, preserved): 118 of 144 unique lines of that 
 
 ### 5.1 Technical baseline table (legacy "standard") vs this blueprint
 
-| Area | Legacy TRD standard | Prior attempt reported (as built) | This blueprint |
-|---|---|---|---|
-| Frontend | React + TypeScript + Vite | same | same (FEA-01) |
-| PWA | Service Worker + offline capability layer | no service worker registered | PWA-01 / ADR-T10 |
-| Routing | React Router | react-router-dom | open (FEA-01) |
-| Server state | TanStack Query | plain React state + `fetch` helper | FD-F2: TanStack Query v5 |
-| Backend | Node.js + Fastify + TypeScript | same | ADR-T04 |
-| Validation | Zod | same | ADR-T08 |
-| API | REST/JSON + OpenAPI 3.1 | no generated OpenAPI | ADR-T08 (generate from Zod) |
-| Database | PostgreSQL | same | ADR-T05 |
-| Platform | Supabase | Supabase assets only for SQL history | OPEN-14 |
-| Auth | Supabase Auth behind an application identity boundary | self-issued HMAC tokens | ADR-T06 (cookie sessions) |
-| Storage | Supabase Storage | none | object storage port |
-| Queue | Supabase Queues | Postgres `background_jobs` | ADR-T09 outbox + worker |
-| Workers | Dedicated worker process | yes | ADR-T04 |
-| Search | PostgreSQL FTS + trigram initially | in-process matching | ADR-T11 |
-| Realtime | Selective | none | OPEN-49 |
-| Telemetry | OpenTelemetry-compatible | Pino logs only | ADR-T16 |
-| Product analytics | Event pipeline with privacy controls | in-memory | 20_ANALYTICS |
-| AI | Central AI Gateway / Orchestrator | local heuristic | ADR-T12 |
-| Tests | Vitest / React Testing Library / Playwright-compatible | Vitest + Playwright | 16_ |
+| Area              | Legacy TRD standard                                    | Prior attempt reported (as built)    | This blueprint              |
+| ----------------- | ------------------------------------------------------ | ------------------------------------ | --------------------------- |
+| Frontend          | React + TypeScript + Vite                              | same                                 | same (FEA-01)               |
+| PWA               | Service Worker + offline capability layer              | no service worker registered         | PWA-01 / ADR-T10            |
+| Routing           | React Router                                           | react-router-dom                     | open (FEA-01)               |
+| Server state      | TanStack Query                                         | plain React state + `fetch` helper   | FD-F2: TanStack Query v5    |
+| Backend           | Node.js + Fastify + TypeScript                         | same                                 | ADR-T04                     |
+| Validation        | Zod                                                    | same                                 | ADR-T08                     |
+| API               | REST/JSON + OpenAPI 3.1                                | no generated OpenAPI                 | ADR-T08 (generate from Zod) |
+| Database          | PostgreSQL                                             | same                                 | ADR-T05                     |
+| Platform          | Supabase                                               | Supabase assets only for SQL history | OPEN-14                     |
+| Auth              | Supabase Auth behind an application identity boundary  | self-issued HMAC tokens              | ADR-T06 (cookie sessions)   |
+| Storage           | Supabase Storage                                       | none                                 | object storage port         |
+| Queue             | Supabase Queues                                        | Postgres `background_jobs`           | ADR-T09 outbox + worker     |
+| Workers           | Dedicated worker process                               | yes                                  | ADR-T04                     |
+| Search            | PostgreSQL FTS + trigram initially                     | in-process matching                  | ADR-T11                     |
+| Realtime          | Selective                                              | none                                 | OPEN-49                     |
+| Telemetry         | OpenTelemetry-compatible                               | Pino logs only                       | ADR-T16                     |
+| Product analytics | Event pipeline with privacy controls                   | in-memory                            | 20_ANALYTICS                |
+| AI                | Central AI Gateway / Orchestrator                      | local heuristic                      | ADR-T12                     |
+| Tests             | Vitest / React Testing Library / Playwright-compatible | Vitest + Playwright                  | 16_                         |
 
 Legacy TRD open question: "Open question: GAP_ANALYSIS conflict C-5" (target stack vs built stack). **Decision needed:** none for the stack table - every row is closed by ADR-T04..T16 or FD-F2; only hosting (`Platform` row) stays open as OPEN-14.
 
@@ -225,7 +225,7 @@ Project-level additions recorded in the repository instructions of the prior att
 
 ## 7. ADR-015 - "Persist the core career loop; keep the API's Maps as a read model" (verbatim prior-attempt record)
 
-**Why this is kept in full:** ADR-015 is a *reference ADR*. It documents a hybrid (SQL write path + in-memory read model) that this blueprint **rejects** in ADR-T05 (SQL-only reads and writes). The conflict is tracked as OPEN-52 and TRC-18 and must stay visible. Status in the prior attempt: accepted for that branch, pending owner ratification; nothing about it is a decision for this project.
+**Why this is kept in full:** ADR-015 is a _reference ADR_. It documents a hybrid (SQL write path + in-memory read model) that this blueprint **rejects** in ADR-T05 (SQL-only reads and writes). The conflict is tracked as OPEN-52 and TRC-18 and must stay visible. Status in the prior attempt: accepted for that branch, pending owner ratification; nothing about it is a decision for this project.
 
 - **Status:** Accepted for this branch, **pending owner ratification** (it changes the schema — see "Escalation").
 - **Date:** 2026-10-10
@@ -245,7 +245,7 @@ Until this change every user, organization, job, application, evidence item and 
 3. **Scope.** Users, profiles, organizations, memberships, skills, jobs (+ `job_skills`), applications (+ `application_evidence`), evidence (+ `evidence_skills`), verified work history, references and corporate-email challenges; since migration `00044`, notifications and notification preferences, written in the same transaction as the event that causes them; since `00046`, signed-out sessions (`revoked_sessions`); since 2026-10-11, messaging (`message_threads`, `thread_participants`, `messages` from `00006`), each message's notification in its transaction. The routes they serve are listed in `apps/api/src/durability.ts` (`DURABLE_ROUTES`).
 4. **Honesty about the rest.** Every other route keeps its state in memory and says so: responses carry `x-talentsphere-durability: ephemeral`, and admin health diagnostics report the split. `tests/security/core-authz.test.ts` checks that every registered route exists and `tests/pg/concurrency.test.ts` checks the header against a real database.
 5. **Concurrency (added after adversarial review).** Because a commit is an `await`, two requests can both pass a check before either writes. Update ops carry `base` — the read-model value they were derived from. `persist()` refuses (409 `CONFLICT`, `reason: concurrent_modification`) when another write to the same record is in flight or the record is no longer `base`; Postgres re-checks the decisive columns inside the transaction (`WHERE status = …`, `WHERE attempts = … AND code_hash = …`), so the guarantee also holds against a second writer.
-6. **Schema alignment.** Migration `00043_core_persistence_alignment.sql` reconciles schema and domain: missing job/application/evidence columns and CHECKs; BR-15 as a partial unique index (one *active* application per job and candidate, re-applying after withdrawal allowed) instead of a plain `UNIQUE(job_id, candidate_id)`; work-history and reference FKs re-pointed from `profiles(id)` to `users(id)` (the API and the 00041 RLS policies use user ids); reference tokens stored as SHA-256 only (`token_hash`, plaintext column dropped after backfill); a `work_history_email_challenges` table (service-role only); case-insensitive unique emails.
+6. **Schema alignment.** Migration `00043_core_persistence_alignment.sql` reconciles schema and domain: missing job/application/evidence columns and CHECKs; BR-15 as a partial unique index (one _active_ application per job and candidate, re-applying after withdrawal allowed) instead of a plain `UNIQUE(job_id, candidate_id)`; work-history and reference FKs re-pointed from `profiles(id)` to `users(id)` (the API and the 00041 RLS policies use user ids); reference tokens stored as SHA-256 only (`token_hash`, plaintext column dropped after backfill); a `work_history_email_challenges` table (service-role only); case-insensitive unique emails.
 
 ## Consequences
 
@@ -270,39 +270,39 @@ Schema-changing and constraint-changing (dropping `UNIQUE(job_id, candidate_id)`
 
 ### 7.1 Target interpretation of ADR-015 (lessons carried into the blueprint)
 
-| Prior attempt reported | Target requires | Where |
-|---|---|---|
-| Writes only through one `persist(...ops)` function; one DB transaction; read model updated only after COMMIT | All state changes through a single transactional unit-of-work per use case; no state visible before commit | BE-01, DB-02 |
-| Update ops carry `base` (the read-model value they were derived from); 409 `CONFLICT` with `reason: concurrent_modification` when another write is in flight or the record is no longer `base`; DB re-checks decisive columns (`WHERE status = ...`, `WHERE attempts = ... AND code_hash = ...`) | Optimistic concurrency for guarded records using `If-Match`/version column (ADR-T08); decisive-column guards inside SQL for verification attempt counters and state transitions | 13_ API standards |
-| Reads served from Maps hydrated at boot; exactly one API process; advisory lock `pg_try_advisory_lock(718201, 1)`; losing the lock makes the API unhealthy | No read model, so no single-writer constraint (ADR-T05); API replicas allowed | OPEN-52 |
-| Out-of-band SQL changes need a restart | Not applicable once reads are SQL | - |
-| Boot time and memory grow with data | Not applicable once reads are SQL | - |
-| Long tail of ~220 routes ephemeral and labelled `x-talentsphere-durability: ephemeral` | Every route durable by default; any exception must be a documented, tested, labelled preview module | 16_ testing: persistence-honesty |
-| Migration `00043` aligned schema with domain: BR-15 as partial unique index (one *active* application per job and candidate, re-apply after withdrawal allowed) instead of plain `UNIQUE(job_id, candidate_id)`; FKs re-pointed to `users(id)`; reference tokens stored as SHA-256 (`token_hash`) with plaintext column dropped after backfill; `work_history_email_challenges` table (service-role only); case-insensitive unique emails (`uq_users_email_lower`) | Same constraints belong in the first schema: partial unique index for active applications, hashed verification credentials, citext/lower unique email | `../12_DATA_AND_DATABASE/LEGACY_MERGE_DATABASE_REFERENCE.md` |
-| Verification evidence: whole loop writes real rows; fresh process serves identical state after restart; 40 concurrent wrong email codes all counted; concurrent hire and withdrawal acknowledge exactly one; disabling `commit` or the guards fails tests (mutation-checked); CI against a `postgres:16` service container plus a migration-idempotency step | Same test classes are required of the new implementation, mutation-checked where cheap | `../16_QA_AND_TESTING/LEGACY_MERGE_TESTING_STRATEGY.md` |
-| Escalation: schema/constraint-changing; `uq_users_email_lower` fails to build if two emails differ only by case; owner ratifies before applying to a populated DB | Not applicable to a greenfield database; keep the "check duplicates first" rule in any import from a reference database (`../23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md`) | OPEN-17 |
+| Prior attempt reported                                                                                                                                                                                                                                                                                                                                                                                                                                             | Target requires                                                                                                                                                                                 | Where                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Writes only through one `persist(...ops)` function; one DB transaction; read model updated only after COMMIT                                                                                                                                                                                                                                                                                                                                                       | All state changes through a single transactional unit-of-work per use case; no state visible before commit                                                                                      | BE-01, DB-02                                                 |
+| Update ops carry `base` (the read-model value they were derived from); 409 `CONFLICT` with `reason: concurrent_modification` when another write is in flight or the record is no longer `base`; DB re-checks decisive columns (`WHERE status = ...`, `WHERE attempts = ... AND code_hash = ...`)                                                                                                                                                                   | Optimistic concurrency for guarded records using `If-Match`/version column (ADR-T08); decisive-column guards inside SQL for verification attempt counters and state transitions                 | 13_ API standards                                            |
+| Reads served from Maps hydrated at boot; exactly one API process; advisory lock `pg_try_advisory_lock(718201, 1)`; losing the lock makes the API unhealthy                                                                                                                                                                                                                                                                                                         | No read model, so no single-writer constraint (ADR-T05); API replicas allowed                                                                                                                   | OPEN-52                                                      |
+| Out-of-band SQL changes need a restart                                                                                                                                                                                                                                                                                                                                                                                                                             | Not applicable once reads are SQL                                                                                                                                                               | -                                                            |
+| Boot time and memory grow with data                                                                                                                                                                                                                                                                                                                                                                                                                                | Not applicable once reads are SQL                                                                                                                                                               | -                                                            |
+| Long tail of ~220 routes ephemeral and labelled `x-talentsphere-durability: ephemeral`                                                                                                                                                                                                                                                                                                                                                                             | Every route durable by default; any exception must be a documented, tested, labelled preview module                                                                                             | 16_ testing: persistence-honesty                             |
+| Migration `00043` aligned schema with domain: BR-15 as partial unique index (one _active_ application per job and candidate, re-apply after withdrawal allowed) instead of plain `UNIQUE(job_id, candidate_id)`; FKs re-pointed to `users(id)`; reference tokens stored as SHA-256 (`token_hash`) with plaintext column dropped after backfill; `work_history_email_challenges` table (service-role only); case-insensitive unique emails (`uq_users_email_lower`) | Same constraints belong in the first schema: partial unique index for active applications, hashed verification credentials, citext/lower unique email                                           | `../12_DATA_AND_DATABASE/LEGACY_MERGE_DATABASE_REFERENCE.md` |
+| Verification evidence: whole loop writes real rows; fresh process serves identical state after restart; 40 concurrent wrong email codes all counted; concurrent hire and withdrawal acknowledge exactly one; disabling `commit` or the guards fails tests (mutation-checked); CI against a `postgres:16` service container plus a migration-idempotency step                                                                                                       | Same test classes are required of the new implementation, mutation-checked where cheap                                                                                                          | `../16_QA_AND_TESTING/LEGACY_MERGE_TESTING_STRATEGY.md`      |
+| Escalation: schema/constraint-changing; `uq_users_email_lower` fails to build if two emails differ only by case; owner ratifies before applying to a populated DB                                                                                                                                                                                                                                                                                                  | Not applicable to a greenfield database; keep the "check duplicates first" rule in any import from a reference database (`../23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md`) | OPEN-17                                                      |
 
 **Exit path (prior attempt):** move reads for a module to SQL (repository functions), delete its Maps, and the single-writer constraint disappears for that module; when no core read uses a Map the API can run more than one replica. **Target requires** that exit already be complete at v1.
 
 ## 8. Open items raised by this file
 
-| ID | Question | Link |
-|---|---|---|
-| L-B11-01 | Realtime scope (client server-state library is decided: FD-F2) | OPEN-49 |
-| L-B11-02 | Adopt ARCH-013..020 as IDs or map to INV-T01..T20 | OPEN-47 |
-| L-B11-03 | Retire legacy ADR numbering namespaces | ARB secretary |
-| OPEN-52 | ADR-015 hybrid vs ADR-T05 SQL-only | `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` |
-
+| ID       | Question                                                       | Link                                          |
+| -------- | -------------------------------------------------------------- | --------------------------------------------- |
+| L-B11-01 | Realtime scope (client server-state library is decided: FD-F2) | OPEN-49                                       |
+| L-B11-02 | Adopt ARCH-013..020 as IDs or map to INV-T01..T20              | OPEN-47                                       |
+| L-B11-03 | Retire legacy ADR numbering namespaces                         | ARB secretary                                 |
+| OPEN-52  | ADR-015 hybrid vs ADR-T05 SQL-only                             | `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` |
 
 <!-- ledger-D D-09b -->
+
 ## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/ARCHITECTURE_DURABILITY_REPORT.md (gap closure D-09b)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 
 Named by the preservation audit: about 118 code/SQL/line-reference tokens (for example `server.ts:12701`, `core-store.ts:803-854`, `EMAIL_CHALLENGE_TTL_MS = 15 * 60 * 1000`, `EMAIL_CHALLENGE_MAX_ATTEMPTS = 5`, `writesInFlight: Set<string>`) and the URL https://api.resend.com/emails; token-bearing lines quoted.
 
-~~~~text
-L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`  
+```text
+L7: **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`
 [...]
 L23: 5. **AI Governance**: `AI_PROHIBITED` is enforced server-side, but relies on an in-memory assessment session map that clears on restart (**SEC-05**). Quota metering hardcodes `userTier: 'free'`, capping paying users at free limits (**SEC-06**). No remote LLMs are integrated; all responses are generated via local heuristic pattern matching.
 [...]
@@ -437,4 +437,4 @@ L313: | **SEC-05** | AI Governance | `apps/api/src/server.ts:4770` | Active asse
 L314: | **SEC-06** | AI Governance | `apps/api/src/server.ts:6097` | `userTier` hardcoded to `'free'` in `/api/v1/ai/career-assistant/chat`; usage meter is in-memory. | Paid subscribers throttled to free limits; token usage resets on server restart. | **Medium** | Read plan tier from `subscriptionsByUserId`; persist `ai_usage_meters` in PostgreSQL. |
 L315: | **OPS-01** | Scalability | `apps/api/src/storage/core-store.ts:803` | Boot hydration reads entire database ($O(N)$ memory/time); single-writer lock blocks scaling. | Scaling ceiling; memory exhaustion and deployment timeouts as data grows. | **High** | Move core reads directly to SQL queries; retire in-memory Maps to unlock multi-replica API scaling. |
 L316: | **OPS-02** | Deployment | `deploy/oracle/Caddyfile:7` | Caddy fails to route `/health` to API container. | Synthetic healthchecks return `index.html` 200 OK, masking API crash or outage. | **Low** | Route `/health` and `/api/*` to `api:4000` in `Caddyfile`. |
-~~~~
+```
