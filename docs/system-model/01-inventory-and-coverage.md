@@ -1,5 +1,7 @@
 # Implementation inventory and documentation coverage
 
+> **Path note (2026-11-25).** This is a 2026-10-23 snapshot. File names in the classification tables below are the paths at that date. On 2026-11-25 the documentation was consolidated into `docs/`: for the current location of any old path, see [`../archive/REMOVED_FILES.md`](../archive/REMOVED_FILES.md) and [`../INDEX.md`](../INDEX.md).
+
 Source snapshot: `431c425a33f4bd97da73dd966ed28b9acfe1398c`, 2026-10-23.
 Initial working tree: clean. During this work, another actor committed the first documentation edits as `335e9827`; this auditor did not commit or stage them. Comparisons use the original source snapshot, not only the current working-tree diff. This documentation-only audit preserves `SSOT.md`
 byte-for-byte and changes no application code, tests, SQL or protected build file.
@@ -167,10 +169,10 @@ useful content:
 
 | Former file | Retained home / reason |
 | --- | --- |
-| Root `ORIGINAL_REQUEST.md` | Original Windows maintenance requirements in [maintenance archive](../reports/MAINTENANCE_AUDIT_2026-10-21.md#original-windows-tool-requirements) |
-| Root `TEST_READY.md` | Full dated test record and defect note in [maintenance archive](../reports/MAINTENANCE_AUDIT_2026-10-21.md#historical-windows-test-readiness) |
+| Root `ORIGINAL_REQUEST.md` | Original Windows maintenance requirements in [maintenance archive](../reports/AUDITS_2026-10.md#original-windows-tool-requirements) |
+| Root `TEST_READY.md` | Full dated test record and defect note in [maintenance archive](../reports/AUDITS_2026-10.md#historical-windows-test-readiness) |
 | Root `PROJECT.md` | Byte-identical existing [.agents plan](../../.agents/teamwork/orchestrator_1/PROJECT.md); linked from maintenance archive |
-| `HOSTED_SUPABASE_DEPENDENCY_AUDIT.md` | [Hosted migration gate](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md), including static audit command and prerequisites |
+| `HOSTED_SUPABASE_DEPENDENCY_AUDIT.md` | [Hosted migration gate](../engineering/DATABASE.md#hosted-supabase-migration-gate-and-dependency-audit), including static audit command and prerequisites |
 
 137 substantive API-reference lines and 51 database-reference lines previously
 matched SSOT verbatim. Their target registers now link to SSOT; unique contract,
@@ -321,16 +323,16 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [AGENTS.md](../../AGENTS.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [ARCHITECTURE.md](../../ARCHITECTURE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [BRAIN/BRAIN.md](../../BRAIN/BRAIN.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [BRAIN/MEMORY.md](../../BRAIN/MEMORY.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [BRAIN/BRAIN.md](../history/PROJECT_HISTORY.md#talentsphere--brainmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
+| [BRAIN/MEMORY.md](../history/PROJECT_HISTORY.md#talentsphere--project-memory) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [CLAUDE.md](../../CLAUDE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [GEMINI.md](../../GEMINI.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [README.md](../../README.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) | Compatibility pointer to retained report; no duplicated report body |
+| [REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../reports/REPOSITORY_STATE_2026-10.md) | Compatibility pointer to retained report; no duplicated report body |
 | [RETICLE.md](../../RETICLE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [SSOT.md](../../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
-| [TalentSphere/Welcome.md](../../TalentSphere/Welcome.md) | Personal vault/template; preserved, outside technical authority |
-| [TalentSphere/create a link.md](../../TalentSphere/create%20a%20link.md) | Personal vault/template; preserved, outside technical authority |
+| [TalentSphere/Welcome.md](../archive/REMOVED_FILES.md) | Personal vault/template; preserved, outside technical authority |
+| [TalentSphere/create a link.md](../archive/REMOVED_FILES.md) | Personal vault/template; preserved, outside technical authority |
 | [deploy/oracle/NEW_SUPABASE_PROJECT.md](../../deploy/oracle/NEW_SUPABASE_PROJECT.md) | Protected deployment reference; read-only, live behavior unverified |
 | [deploy/oracle/README.md](../../deploy/oracle/README.md) | Protected deployment reference; read-only, live behavior unverified |
 | [deploy/oracle/RECOVERY.md](../../deploy/oracle/RECOVERY.md) | Protected deployment reference; read-only, live behavior unverified |
@@ -338,51 +340,51 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [docs/engineering/API_CONTRACTS.md](../engineering/API_CONTRACTS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/CODE_STYLE.md](../engineering/CODE_STYLE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/DATABASE.md](../engineering/DATABASE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+| [docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md](../engineering/DATABASE.md#hosted-supabase-migration-gate-and-dependency-audit) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/PROJECT_MAINTENANCE.md](../engineering/PROJECT_MAINTENANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/engineering/TARGET_ARCHITECTURE.md](../engineering/TARGET_ARCHITECTURE.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/engineering/TRD.md](../engineering/TRD.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/engineering/adr/ADR-015-core-loop-persistence.md](../engineering/adr/ADR-015-core-loop-persistence.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md](../engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+| [docs/engineering/TRD.md](../engineering/TARGET_ARCHITECTURE.md#talentsphere--trdmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
+| [docs/engineering/adr/ADR-015-core-loop-persistence.md](../engineering/DECISIONS.md#adr-015--persist-the-core-career-loop-keep-the-apis-maps-as-a-read-model) | Living navigation/technical/policy reference; retains distinct topic ownership |
+| [docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md](../engineering/DECISIONS.md#adr-016--measure-ui-quality-in-a-real-browser-and-test-it-adversarially) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/experience/APP_FLOW.md](../experience/APP_FLOW.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/experience/JOURNEY_REGISTRY.md](../experience/JOURNEY_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/experience/UI_UX_DESIGN_SYSTEM.md](../experience/UI_UX_DESIGN_SYSTEM.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/governance/GAP_ANALYSIS.md](../governance/GAP_ANALYSIS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+| [docs/governance/GAP_ANALYSIS.md](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/governance/GOVERNANCE.md](../governance/GOVERNANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [docs/governance/IMPLEMENTATION_PLAN.md](../governance/IMPLEMENTATION_PLAN.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/governance/SOURCE_RECONCILIATION.md](../governance/SOURCE_RECONCILIATION.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/governance/IMPLEMENTATION_PLAN.md](../governance/GOVERNANCE.md#talentsphere--implementation_planmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
+| [docs/governance/SOURCE_RECONCILIATION.md](../governance/GOVERNANCE.md#talentsphere--source-reconciliation-v10) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/product/PRD.md](../product/PRD.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/quality/OPERATIONS.md](../quality/OPERATIONS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/quality/SECURITY.md](../quality/SECURITY.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/quality/TESTING.md](../quality/TESTING.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/registries/BUSINESS_RULE_REGISTRY.md](../registries/BUSINESS_RULE_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/registries/FEATURE_REGISTRY.md](../registries/FEATURE_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md](../registries/WORKFLOWS_AND_BUSINESS_RULES.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/reports/ARCHITECTURE_DURABILITY_REPORT.md](../reports/ARCHITECTURE_DURABILITY_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/AUDIT_MASTER_REPORT.md](../reports/AUDIT_MASTER_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/E2E_AUDIT_2026-10-21.md](../reports/E2E_AUDIT_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md](../registries/BUSINESS_RULE_REGISTRY.md#talentsphere--workflows_and_business_rulesmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
+| [docs/reports/ARCHITECTURE_DURABILITY_REPORT.md](../reports/REPOSITORY_STATE_2026-10.md#talentsphere--architecture-security-durability--integrations-report) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/AUDIT_MASTER_REPORT.md](../reports/AUDITS_2026-10.md#talentsphere--master-repository-audit--strategic-engineering-report) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/E2E_AUDIT_2026-10-21.md](../reports/AUDITS_2026-10.md#end-to-end-audit--2026-10-21) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/FEATURE_PLAN_2026-10-21.md](../reports/FEATURE_PLAN_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/FEATURE_STATUS_2026-10-21.md](../reports/FEATURE_STATUS_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/FEATURE_TRACEABILITY_MATRIX.md](../reports/FEATURE_TRACEABILITY_MATRIX.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/FINAL_VALIDATION_REPORT.md](../reports/FINAL_VALIDATION_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/GIT_RECONCILIATION_REPORT.md](../reports/GIT_RECONCILIATION_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/FINAL_VALIDATION_REPORT.md](../reports/AUDITS_2026-10.md#talentsphere--final_validation_reportmd-v60) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/GIT_RECONCILIATION_REPORT.md](../reports/REPOSITORY_STATE_2026-10.md#talentsphere--git-history-issues--pull-requests-reconciliation-report) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md](../reports/IMPROVEMENT_PROGRAM_2026-10-10.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/MAINTENANCE_AUDIT_2026-10-21.md](../reports/MAINTENANCE_AUDIT_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/PAYMENT_AUDIT_2026-10-23.md](../reports/PAYMENT_AUDIT_2026-10-23.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/PRODUCTION_AUDIT_2026-10-03.md](../reports/PRODUCTION_AUDIT_2026-10-03.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/RELEASE_SCOPE_AND_BACKLOG.md](../reports/RELEASE_SCOPE_AND_BACKLOG.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md](../reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/superpowers/plans/2026-10-21-project-maintenance.md](../superpowers/plans/2026-10-21-project-maintenance.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/system-model/00-index.md](00-index.md) | Source model or dated evidence; coverage/verification limits explicit |
+| [docs/reports/MAINTENANCE_AUDIT_2026-10-21.md](../reports/AUDITS_2026-10.md#repository-maintenance-audit-and-proposed-design) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/PAYMENT_AUDIT_2026-10-23.md](../reports/AUDITS_2026-10.md#payment-audit-and-fixes-2026-10-23) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/PRODUCTION_AUDIT_2026-10-03.md](../reports/AUDITS_2026-10.md#talentsphere-complete--end-user--business-owner-production-audit) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/RELEASE_SCOPE_AND_BACKLOG.md](../reports/REPOSITORY_STATE_2026-10.md#talentsphere--release-scope-backlog--sprint-roadmap-stages-af) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../reports/REPOSITORY_STATE_2026-10.md#talentsphere--repository-re-audit--github-issue-reconciliation) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md](../reports/AUDITS_2026-10.md#stripe-and-supabase-audit-2026-10-23) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/superpowers/plans/2026-10-21-project-maintenance.md](../history/PROJECT_HISTORY.md#project-maintenance-implementation-plan) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| [docs/system-model/00-index.md](../INDEX.md#system-model) | Source model or dated evidence; coverage/verification limits explicit |
 | [docs/system-model/01-inventory-and-coverage.md](01-inventory-and-coverage.md) | Source model or dated evidence; coverage/verification limits explicit |
 | [docs/system-model/02-flows.md](02-flows.md) | Source model or dated evidence; coverage/verification limits explicit |
-| [docs/system-model/03-conflict-register.md](03-conflict-register.md) | Source model or dated evidence; coverage/verification limits explicit |
-| [docs/system-model/04-conditions.md](04-conditions.md) | Source model or dated evidence; coverage/verification limits explicit |
-| [docs/system-model/05-audit.md](05-audit.md) | Source model or dated evidence; coverage/verification limits explicit |
+| [docs/system-model/03-conflict-register.md](03-conflicts-conditions-audit.md#system-model-03--conflict-register-and-decision-records) | Source model or dated evidence; coverage/verification limits explicit |
+| [docs/system-model/04-conditions.md](03-conflicts-conditions-audit.md#system-model-04--condition-and-business-rule-matrix) | Source model or dated evidence; coverage/verification limits explicit |
+| [docs/system-model/05-audit.md](03-conflicts-conditions-audit.md#system-model-05--audit-traceability-sample-and-limits) | Source model or dated evidence; coverage/verification limits explicit |
 | [docs/system-model/06-route-authorization.md](06-route-authorization.md) | Source model or dated evidence; coverage/verification limits explicit |
-| [graphify-out/2026-10-23/GRAPH_REPORT.md](../../graphify-out/2026-10-23/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
-| [graphify-out/GRAPH_REPORT.md](../../graphify-out/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
+| `graphify-out/2026-10-23/GRAPH_REPORT.md` (deleted 2026-11-25, see [REMOVED_FILES](../archive/REMOVED_FILES.md)) | Generated graph snapshot; was retained, not implementation acceptance |
+| `graphify-out/GRAPH_REPORT.md` (deleted 2026-11-25, see [REMOVED_FILES](../archive/REMOVED_FILES.md)) | Generated graph snapshot; was retained, not implementation acceptance |
 | [supabase/hosted/README.md](../../supabase/hosted/README.md) | Manual adapter sequence and historical partial deployment; current applied state unverified |
 
 

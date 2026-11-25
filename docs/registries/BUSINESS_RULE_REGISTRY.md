@@ -1,3 +1,4 @@
+
 # TalentSphere — BUSINESS_RULE_REGISTRY.md v6.0
 
 ## Authority
@@ -9,10 +10,10 @@ This is the canonical business-rule identity and text registry derived from the 
 **Historical out-of-range BR references:** non-authoritative prose references outside BR-248 are treated as stale references unless explicitly ratified later.
 
 **Traceability limitation (2026-10-21):** IDs and rule text are inventoried in the
-[audit evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json), but a code comment
+[audit evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.md#audit_evidence_2026-10-21json), but a code comment
 or matching numeric ID does not verify the rule. Some SSOT feature summaries attach
 a different meaning to the same ID (for example F-01's BR-001/BR-002). Canonical rule
-text governs rule identity; the [conflict register](../governance/GAP_ANALYSIS.md)
+text governs rule identity; the [conflict register](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60)
 records the reconciliation work. No rule or security policy is changed by this note.
 
 ## Rule governance
@@ -294,3 +295,24 @@ Business-rule changes must:
 4. add/update tests;
 5. update the SSOT and affected documentation;
 6. record the decision rationale.
+
+---
+
+## TalentSphere — WORKFLOWS_AND_BUSINESS_RULES.md v6.0
+
+_Former file: `docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md`._
+
+> **Status: pointer document.** This file used to repeat content that now has one canonical home. The workflow, workflow-trace and state-machine lines were checked against `SSOT.md` on 2026-10-21 and all 246 appear there verbatim. The business-rule text was checked against `BUSINESS_RULE_REGISTRY.md` and all 248 rules are identical. The copies were removed. Use the locations below. Note: the business-rule lines were not checked against `SSOT.md`; SSOT may carry rule summaries rather than the full text.
+
+### Where each topic lives
+
+| Topic | Canonical location |
+|---|---|
+| Journeys J-01 to J-28, persona map, detailed J-02 and J-26 diagrams | [`../experience/JOURNEY_REGISTRY.md`](../experience/JOURNEY_REGISTRY.md) |
+| Workflow register WF-01 to WF-66 and integrity traces WIT-001 to WIT-025 | [`../../SSOT.md`](../../SSOT.md), Part V, §10 |
+| State machines and their invariants | [`../../SSOT.md`](../../SSOT.md), Part V, §10 (§18.1 to §18.3 of the source corpus) |
+| Business rules BR-001 to BR-248 (text) | [`BUSINESS_RULE_REGISTRY.md`](#) |
+| Migration rules MIG-01 to MIG-08 | [`BUSINESS_RULE_REGISTRY.md`](#), "Migration rules" |
+| Feature-to-rule links | Detailed feature contracts in [`../../SSOT.md`](../../SSOT.md); reconcile semantic mismatches against the canonical business-rule registry before relying on them |
+
+The registry's IDs use two digits for BR-01 to BR-35 and three digits after that. See conflict C-9 in [`../governance/GAP_ANALYSIS.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60).
