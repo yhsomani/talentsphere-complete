@@ -294,7 +294,9 @@ for bid, title, art, kids in branches:
     for k in kids:
         mmd.append(f'      {mm(k, 80)}')
 mindmap_text = '\n'.join(mmd) + '\n'
-w('master/MASTER_PROJECT_MINDMAP.mmd', mindmap_text)
+if not os.path.exists(os.path.join(OUT, 'master', 'MASTER_PROJECT_MINDMAP.mmd')):
+    w('master/MASTER_PROJECT_MINDMAP.mmd', mindmap_text)
+mindmap_text = read(os.path.join(OUT, 'master', 'MASTER_PROJECT_MINDMAP.mmd'))
 
 # aggregated type-level cross connection graph
 agg_edges = collections.Counter()
@@ -316,9 +318,7 @@ type_graph = '\n'.join(fl)
 
 md = [f"""# Master Project Mind Map — COMPLETE PROJECT ECOSYSTEM
 
-![COMPLETE PROJECT ECOSYSTEM poster](MASTER_PROJECT_MINDMAP.svg)
-
-*The poster above is generated from the same graph (`tools/poster.py`): 20 branch cards in three zones, a central hub, status dots and a cross-connection chain. Open `MASTER_PROJECT_MINDMAP.svg` full-size in a browser, or edit `MASTER_PROJECT_MINDMAP.drawio` in diagrams.net. A 4400 px PNG copy is `MASTER_PROJECT_MINDMAP.png`.*
+**Mermaid only (no images).** The master mind map below is generated from the graph. Detail mind maps for every branch, the hub/zone overview flowchart and the cross-connection chain are in [MASTER_PROJECT_DIAGRAMS.md](MASTER_PROJECT_DIAGRAMS.md).
 
 > Generated from the repository by read-only static analysis. Every node below has a stable ID, evidence (file, line, symbol), an implementation status and a confidence. Nothing here was executed: see [README](../README.md) "Limits".
 
@@ -339,7 +339,9 @@ md = [f"""# Master Project Mind Map — COMPLETE PROJECT ECOSYSTEM
 
 Not used (no evidence found, so no nodes exist): `ACT-`, `DATA-`, `NANO-`, `SUB-`, `MIC-` as separate prefixes. Their levels are carried by `INT-` (micro), `ERR-` (nano) and `API-` (sub-feature); see [feature inventory](../features/COMPLETE_FEATURE_INVENTORY.json) `level`.
 
-## 2. Mind map (20 branches)
+## 2. Mind map (20 branches in three zones)
+
+Grouped under three zones (product and experience, application and logic, data / platform / quality); every item of every branch is in the per-branch mind maps in [MASTER_PROJECT_DIAGRAMS.md](MASTER_PROJECT_DIAGRAMS.md).
 
 ```mermaid
 {mindmap_text.strip()}
@@ -1149,7 +1151,7 @@ mig_tables = sum(len(re.findall(r"CREATE TABLE(?: IF NOT EXISTS)?\s+(?:public\.)
 mig_tables_unique = len({m for f in glob.glob('supabase/migrations/*.sql') for m in re.findall(r"CREATE TABLE(?: IF NOT EXISTS)?\s+(?:public\.)?(\w+)", read(f), re.I)})
 checks.append(('Tables reconcile with distinct CREATE TABLE names in migrations', mig_tables_unique == len(dbs), f'{mig_tables_unique} distinct names ({mig_tables} statements) vs {len(dbs)} nodes'))
 checks.append(('Web API calls all resolve to a server route', not A['bad_calls'], f'{len(A["web_calls"])} call sites, {len(A["bad_calls"])} unresolved'))
-mmd_lines = mindmap_text.split('\n')
+mmd_lines = [l for l in mindmap_text.split('\n') if not l.startswith('%%')]
 mm_ok = mmd_lines[0] == 'mindmap' and all(re.match(r"^ +[A-Za-z0-9]", l) or l == '' or l == 'mindmap' or l.startswith('  root((') for l in mmd_lines)
 checks.append(('Mind map text is structurally valid (indent tree, sanitised labels)', mm_ok, 'syntax only; not rendered by mermaid'))
 _mm = json.load(open(f'{os.path.dirname(SCR)}/mmtest/mm_out.json')) if os.path.exists(f'{os.path.dirname(SCR)}/mmtest/mm_out.json') else None
@@ -1158,15 +1160,6 @@ if _mm:
     checks.append(('Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)', _mm['bad'] == 0, f"{_mm['ok']} diagrams ok, {_mm['bad']} failed; parsed, not rendered"))
 if _dt:
     checks.append(('DOT file parses and matches the graph (dotparser)', _dt['nodes'] == len(nodes) and _dt['edges'] == len(edges), f"{_dt['nodes']} nodes, {_dt['edges']} edges vs graph {len(nodes)}/{len(edges)}; not laid out by Graphviz"))
-import xml.dom.minidom as _md
-for _f, _lbl in (('MASTER_PROJECT_MINDMAP.svg', 'SVG poster'), ('MASTER_PROJECT_MINDMAP.drawio', 'draw.io file')):
-    _p = os.path.join(OUT, 'master', _f)
-    if os.path.exists(_p):
-        try:
-            _d = _md.parse(_p); _ok = True; _n = len(_d.getElementsByTagName('text' if _f.endswith('svg') else 'mxCell'))
-        except Exception as _e:
-            _ok = False; _n = str(_e)[:60]
-        checks.append((f'{_lbl} is well-formed XML', _ok, f'{_n} text elements' if _f.endswith('svg') else f'{_n} cells'))
 checks.append(('Graph JSON contains every node and edge (no truncation)', True, f'{len(nodes)} nodes, {len(edges)} edges written'))
 # repository coverage
 tracked = [f for f in src_files if not f.startswith(('Yash_Final', 'graphify-out', 'TalentSphere/', 'PRODUCT_BLUEPRINT', 'project-mindmap', 'docs/', 'BRAIN/', '.playwright', '.agents'))]
@@ -1247,7 +1240,7 @@ All numbers are computed from the generated graph (`master/MASTER_PROJECT_GRAPH.
 - Response shapes, request field-level validation, per-column constraints, RLS policy semantics and data retention rules are not extracted (see the evidence in migrations and contracts).
 - `TESTED_BY` is textual and path-level.
 - All Mermaid diagrams pass the Mermaid 11.4.1 parser and the DOT file passes a DOT parser, but nothing was *rendered or laid out* (no browser or Graphviz binary used); very large diagrams may need a layout engine tuned for size. The parser checks ran from a throwaway directory outside the repository.
-- The SVG poster and the draw.io file come from one layout model (`tools/poster.py`). Both were checked as well-formed XML and the SVG was rendered in Chromium and inspected; the draw.io file was **not opened in diagrams.net** here. The poster shows counts and top items per branch; the lossless forms are the JSON and DOT.
+- The master map is Mermaid only. All Mermaid diagrams (master mind map, overview, chain, 20 branch mind maps) were parsed and also rendered in headless Chromium with Mermaid 11.4.1 and inspected; the master mind map shows branches and sub-branches, and the per-branch mind maps carry every item. The lossless forms are the JSON and DOT.
 
 ## Remaining unknowns
 
@@ -1271,7 +1264,7 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 
 | Path | Contents |
 | --- | --- |
-| `master/MASTER_PROJECT_MINDMAP.svg` / `.png` / `.drawio` | **The poster**: one-page master mind map (20 branch cards, hub, status dots, cross-connection chain). `.drawio` is the same layout, editable |\n| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | 20-branch mind map, legend, type-level cross-connection graph, module table |
+| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | **Master mind map (Mermaid)**: 20 branches in three zones, legend, type-level cross-connection graph, module table |\n| `master/MASTER_PROJECT_DIAGRAMS.md` | Mermaid only: hub/zone overview flowchart, cross-connection chain, and one detail mind map per branch (every item, with status emoji) |
 | `master/MASTER_PROJECT_GRAPH.json` | **The master graph**: {len(nodes):,} nodes, {len(edges):,} typed edges, each with evidence |
 | `master/MASTER_PROJECT_GRAPH.dot` | The same graph for Graphviz |
 | `journeys/USER_JOURNEYS.md` / `.json` | Personas, navigation sets, {len(jours)} e2e-derived journeys |
@@ -1311,11 +1304,9 @@ The map is generated, not hand-written. From the repository root (read-only on t
 mkdir -p /tmp/mindmap-work
 python3 -I project-mindmap/tools/extract.py /tmp/mindmap-work
 python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work
-python3 -I project-mindmap/tools/poster.py /tmp/mindmap-work   # SVG + draw.io poster
-python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work   # again, so the validation report checks the poster files
+python3 -I project-mindmap/tools/mermaid_master.py /tmp/mindmap-work   # master mind map + per-branch Mermaid diagrams
+python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work   # again, so the master map embeds the rich mind map
 ```
-
-The PNG copy of the poster is a Chromium screenshot of the SVG at 4400 × 3380 (not produced by the scripts).
 
 Optional parser checks (install `mermaid@11.4.1 jsdom dotparser` in a directory **outside** the repository, put `validate-mermaid.mjs` and `validate-dot.mjs` there, and write their JSON output to `<parent of workdir>/mmtest/mm_out.json` and `dot_out.json`; `generate.py` embeds the results in the validation report). Output is deterministic: two runs on the same commit produce an identical graph.
 

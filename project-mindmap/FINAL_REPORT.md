@@ -20,7 +20,7 @@ All numbers are computed from the generated graph (`master/MASTER_PROJECT_GRAPH.
 | 14  | Status distribution                                       | IMPLEMENTED 1053, NOT_IMPLEMENTED 78, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1                                | capability nodes (API, SCR, INT, COMP, RULE, DB, EXT, JOUR, SVC, INFRA); per-type matrix in master map section 4 |
 | 15  | Contract schemas                                          | 141                                                                                                                 | `SCH-` nodes                                                                                                     |
 | 16  | Tests                                                     | 223 files, 1883 cases (not executed)                                                                                | `TEST-` nodes                                                                                                    |
-| 17  | Validation                                                | 16/16 checks pass                                                                                                   | VALIDATION_REPORT                                                                                                |
+| 17  | Validation                                                | 14/14 checks pass                                                                                                   | VALIDATION_REPORT                                                                                                |
 
 ## Known limitations
 
@@ -29,7 +29,7 @@ All numbers are computed from the generated graph (`master/MASTER_PROJECT_GRAPH.
 - Response shapes, request field-level validation, per-column constraints, RLS policy semantics and data retention rules are not extracted (see the evidence in migrations and contracts).
 - `TESTED_BY` is textual and path-level.
 - All Mermaid diagrams pass the Mermaid 11.4.1 parser and the DOT file passes a DOT parser, but nothing was _rendered or laid out_ (no browser or Graphviz binary used); very large diagrams may need a layout engine tuned for size. The parser checks ran from a throwaway directory outside the repository.
-- The SVG poster and the draw.io file come from one layout model (`tools/poster.py`). Both were checked as well-formed XML and the SVG was rendered in Chromium and inspected; the draw.io file was **not opened in diagrams.net** here. The poster shows counts and top items per branch; the lossless forms are the JSON and DOT.
+- The master map is Mermaid only. All Mermaid diagrams (master mind map, overview, chain, 20 branch mind maps) were parsed and also rendered in headless Chromium with Mermaid 11.4.1 and inspected; the master mind map shows branches and sub-branches, and the per-branch mind maps carry every item. The lossless forms are the JSON and DOT.
 
 ## Remaining unknowns
 
