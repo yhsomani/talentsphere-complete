@@ -168,11 +168,6 @@ export const NetworkPage: React.FC = () => {
         title="Network"
         intro="Answer requests, follow up on the ones you sent, and see your connections."
       />
-      {/* shortcut: this module keeps data in server memory, a restart clears it, upgrade when moved to durable storage */}
-      <Notice tone="info" style={{ marginBottom: spacing.lg }} data-testid="ephemeral-notice">
-        This page is not saved permanently yet. A server restart clears your connections and
-        requests.
-      </Notice>
       {loadError && (
         <LoadError
           message={loadError}

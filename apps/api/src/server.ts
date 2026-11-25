@@ -6503,6 +6503,7 @@ export async function buildApp(
       recipientSettings?.allowConnectionRequests ?? true
     );
 
+    await storage.connections.insert(connection);
     connectionsById.set(connection.id, connection);
 
     // Save for sender
@@ -6628,6 +6629,7 @@ export async function buildApp(
 
       if (input.action === 'accept') {
         updated = acceptConnection(conn, session.userId);
+        await storage.connections.update(updated, conn.updatedAt);
 
         const recipientProfile = profilesByUserId.get(session.userId);
         const recipientName = recipientProfile?.fullName || 'A professional';
@@ -6654,6 +6656,7 @@ export async function buildApp(
         });
       } else {
         updated = rejectConnection(conn, session.userId);
+        await storage.connections.update(updated, conn.updatedAt);
 
         await dispatchJob({
           type: 'connection.rejected',
@@ -6692,6 +6695,7 @@ export async function buildApp(
       }
 
       const updated = withdrawConnection(conn, session.userId);
+      await storage.connections.update(updated, conn.updatedAt);
       connectionsById.set(updated.id, updated);
 
       const senderList = connectionsByUserId.get(updated.senderId) || [];
@@ -6731,6 +6735,7 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'Access denied to connection.');
       }
 
+      await storage.connections.remove(id);
       connectionsById.delete(id);
 
       const senderList = connectionsByUserId.get(conn.senderId) || [];
@@ -10651,6 +10656,7 @@ export async function buildApp(
         dropFromIndex(warmIntroRequestsByTargetId, w.targetUserId, w.id);
       }
       warmIntroRequestsByRequesterId.delete(session.userId);
+      await storage.connections.eraseUser(session.userId);
       for (const c of connectionsByUserId.get(session.userId) || []) {
         connectionsById.delete(c.id);
         dropFromIndex(
@@ -13852,6 +13858,16 @@ export async function buildApp(
       });
     }
     for (const value of snapshot.messages) applyToReadModel({ kind: 'message', value });
+    // Connections (F-09): oldest first, so each user's list ends newest first
+    // as the request route builds it.
+    for (const connection of await storage.connections.loadAll()) {
+      connectionsById.set(connection.id, connection);
+      for (const userId of [connection.senderId, connection.recipientId]) {
+        const list = connectionsByUserId.get(userId) || [];
+        list.unshift(connection);
+        connectionsByUserId.set(userId, list);
+      }
+    }
     if (storage.core.durable) {
       app.log.info(
         {
