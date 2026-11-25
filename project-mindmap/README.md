@@ -6,19 +6,20 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 
 ## Structure
 
-| Path                                        | Contents                                                                                 |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | 20-branch mind map, legend, type-level cross-connection graph, module table              |
-| `master/MASTER_PROJECT_GRAPH.json`          | **The master graph**: 2,188 nodes, 5,582 typed edges, each with evidence                 |
-| `master/MASTER_PROJECT_GRAPH.dot`           | The same graph for Graphviz                                                              |
-| `journeys/USER_JOURNEYS.md` / `.json`       | Personas, navigation sets, 109 e2e-derived journeys                                      |
-| `features/COMPLETE_FEATURE_INVENTORY.json`  | Hierarchy with parent IDs, status, evidence, business rules                              |
-| `ui/SCREEN_INTERACTION_INVENTORY.md`        | Screens, components, interactions, navigation                                            |
-| `architecture/`                             | Frontend, backend/infra, API (all 282 endpoints), dependency graph, per-module subgraphs |
-| `data/`                                     | Database entity map, end-to-end data flows, state machines                               |
-| `quality/`                                  | Implementation gaps, test coverage map, traceability matrix (CSV)                        |
-| `evidence/`                                 | Evidence register (CSV + summary)                                                        |
-| `VALIDATION_REPORT.md`, `FINAL_REPORT.md`   | Phase 9–10 checks and computed totals                                                    |
+| Path                                        | Contents                                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | **Master mind map (Mermaid)**: 20 branches in three zones, legend, type-level cross-connection graph, module table                    |
+| `master/MASTER_PROJECT_DIAGRAMS.md`         | Mermaid only: hub/zone overview flowchart, cross-connection chain, and one detail mind map per branch (every item, with status emoji) |
+| `master/MASTER_PROJECT_GRAPH.json`          | **The master graph**: 2,188 nodes, 5,582 typed edges, each with evidence                                                              |
+| `master/MASTER_PROJECT_GRAPH.dot`           | The same graph for Graphviz                                                                                                           |
+| `journeys/USER_JOURNEYS.md` / `.json`       | Personas, navigation sets, 109 e2e-derived journeys                                                                                   |
+| `features/COMPLETE_FEATURE_INVENTORY.json`  | Hierarchy with parent IDs, status, evidence, business rules                                                                           |
+| `ui/SCREEN_INTERACTION_INVENTORY.md`        | Screens, components, interactions, navigation                                                                                         |
+| `architecture/`                             | Frontend, backend/infra, API (all 282 endpoints), dependency graph, per-module subgraphs                                              |
+| `data/`                                     | Database entity map, end-to-end data flows, state machines                                                                            |
+| `quality/`                                  | Implementation gaps, test coverage map, traceability matrix (CSV)                                                                     |
+| `evidence/`                                 | Evidence register (CSV + summary)                                                                                                     |
+| `VALIDATION_REPORT.md`, `FINAL_REPORT.md`   | Phase 9–10 checks and computed totals                                                                                                 |
 
 ## ID system
 
@@ -48,6 +49,8 @@ The map is generated, not hand-written. From the repository root (read-only on t
 mkdir -p /tmp/mindmap-work
 python3 -I project-mindmap/tools/extract.py /tmp/mindmap-work
 python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work
+python3 -I project-mindmap/tools/mermaid_master.py /tmp/mindmap-work   # master mind map + per-branch Mermaid diagrams
+python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work   # again, so the master map embeds the rich mind map
 ```
 
 Optional parser checks (install `mermaid@11.4.1 jsdom dotparser` in a directory **outside** the repository, put `validate-mermaid.mjs` and `validate-dot.mjs` there, and write their JSON output to `<parent of workdir>/mmtest/mm_out.json` and `dot_out.json`; `generate.py` embeds the results in the validation report). Output is deterministic: two runs on the same commit produce an identical graph.
