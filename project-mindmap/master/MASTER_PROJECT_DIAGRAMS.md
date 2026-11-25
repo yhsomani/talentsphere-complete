@@ -7,20 +7,20 @@ The master mind map as Mermaid only, generated from the graph by `tools/mermaid_
 - **Overview flowchart** (hub to zones to branches) and **cross-connection chain**: sections 1 and 2.
 - Zone colours: blue = product and experience, purple = application and logic, teal = data, platform and quality, orange = APIs.
 
-| Marker | Meaning                                                                     |
-| ------ | --------------------------------------------------------------------------- |
-| ✅     | IMPLEMENTED: source supports it (no runtime evidence; nothing was executed) |
-| ⚠️     | PARTIALLY_IMPLEMENTED: works but ephemeral, no-op, or opt-in                |
-| ❌     | NOT_IMPLEMENTED / BROKEN: schema-only, absent, or CI red                    |
-| 🟠     | MOCKED: a template stands in for an integration                             |
-| ⚪     | UNKNOWN: the scan could not tell                                            |
-| ▫️     | informational (no status applies)                                           |
+| Marker | Meaning                                                                                                    |
+| ------ | ---------------------------------------------------------------------------------------------------------- |
+| ✅     | IMPLEMENTED: source supports it (HIGH confidence where a linked test passed; see the master map section 4) |
+| ⚠️     | PARTIALLY_IMPLEMENTED: works but ephemeral, no-op, or opt-in                                               |
+| ❌     | NOT_IMPLEMENTED / BROKEN: schema-only, absent, or CI red                                                   |
+| 🟠     | MOCKED: a template stands in for an integration                                                            |
+| ⚪     | UNKNOWN: the scan could not tell                                                                           |
+| ▫️     | informational (no status applies)                                                                          |
 
 ## 1. Overview: hub, zones and the 20 branches
 
 ```mermaid
 flowchart LR
-  HUB(("COMPLETE PROJECT ECOSYSTEM<br/>TalentSphere<br/>2,188 nodes - 5,582 edges")):::hub
+  HUB(("COMPLETE PROJECT ECOSYSTEM<br/>TalentSphere<br/>2,628 nodes - 6,945 edges")):::hub
   ZA["PRODUCT and EXPERIENCE"]:::grpA
   HUB ==> ZA
   B01["01 PROJECT OVERVIEW<br/>architecture/BACKEND_ARCHITECTURE.md"]:::grpA
@@ -81,7 +81,7 @@ flowchart LR
   R["ROLE (12)"]:::grpA -->|"AUTHORIZES 209"| S["SCR (29)"]:::grpA
   S -->|"CALLS 94"| P["API (282)"]:::api
   I["INT (211)"]:::grpA -->|"TRIGGERS 82"| P
-  J["JOUR (109)"]:::grpA -->|"NAVIGATES_TO 122"| S
+  J["JOUR (100)"]:::grpA -->|"NAVIGATES_TO 113"| S
   P -->|"VALIDATES 132"| SC["SCH (141)"]:::grpB
   P -->|"CALLS 470"| RU["RULE (279)"]:::grpB
   P -->|"CALLS 83"| SV["SVC (113)"]:::grpB
@@ -166,20 +166,25 @@ Detail file: [`journeys/USER_JOURNEYS.md`](../journeys/USER_JOURNEYS.md)
 ```mermaid
 mindmap
   root(("BRANCH 03<br/>COMPLETE USER JOURNEYS"))
-    109 e2e-derived journeys - 28 specs
+    100 e2e-derived journeys - 28 specs
       ✅ mutation-feedback - 14
       ✅ navigation - 9
       ✅ web-ui - 8
       ✅ accessibility - 7
       ✅ core-loop - 7
-      ✅ credentials - 6
       ✅ frontend-fixes - 6
-      ✅ settings-page - 6
+      ✅ credentials - 5
       ✅ hostile-user - 5
-      ✅ career-readiness - 4
-      ✅ network-page - 4
+      ✅ settings-page - 5
       ✅ account-deletion - 3
+      ✅ account-security - 3
+      ✅ career-readiness - 3
       + 16 more to journeys/USER_JOURNEYS.md
+    Run results e2e
+      ✅ passed - 100
+    Documented target journeys J-01..J-28
+      ⚠️ cited by code or tests - 3
+      ⚪ named by nothing - 25
     Structural flows from source
       ▫️ guard redirect to /login return=
       ▫️ 401 to clear session to reason to /login
@@ -216,6 +221,13 @@ mindmap
       + 34 more to master/MASTER_PROJECT_MINDMAP.md 6
     Business rules
       ▫️ 279 exported domain functions RULE- nodes
+    Documented features F-01..F-173
+      ⚠️ cited by source - 59
+      ⚠️ documented status Partially implemented - 87
+      ❌ documented status Not implemented - 75
+      ✅ documented status Implemented, unverified - 6
+      ⚪ documented status Deprecated or rejected - 4
+      ❌ documented status Broken or regressed - 1
 ```
 
 ### Branch 05: Screens & Ui Components
@@ -343,8 +355,11 @@ mindmap
       ▫️ sessionStorage: session-ended reason
       ▫️ IndexedDB / SQLite: none found
     PWA / offline
-      ⚠️ service-worker + display-mode detection
+      ⚠️ manifest + display-mode detection
+      ❌ service-worker registration: none found
       ❌ offline data sync: none found
+    Rule copies
+      ⚠️ web lib/types.ts mirrors application and job transition tables
 ```
 
 ### Branch 10: Backend Architecture
@@ -535,17 +550,25 @@ Detail file: [`quality/TEST_COVERAGE_MAP.md`](../quality/TEST_COVERAGE_MAP.md)
 ```mermaid
 mindmap
   root(("BRANCH 18<br/>TESTING and QUALITY"))
-    223 files - 1883 cases not run here
+    223 files - 1883 static cases
       ▫️ scripts/tests - 1 files - 5 cases
       ▫️ tests/e2e - 61 files - 327 cases
       ▫️ tests/integration - 59 files - 518 cases
       ▫️ tests/pg - 15 files - 66 cases
       ▫️ tests/security - 6 files - 115 cases
       ▫️ tests/unit - 81 files - 852 cases
+    Executed 2026-11-25
+      ✅ vitest - 1571/1571 passed
+      ✅ vitest-pg - 66/66 passed
+      ✅ e2e - 265/265 passed
+      ✅ node-test - 5/5 passed
+      ✅ pnpm build all packages and apps - PASS
+      ✅ pnpm typecheck tsc -b and and tsc -p tests - PASS
+      ❌ pnpm lint prettier --check - FAIL
     Link coverage textual
       ▫️ endpoints referenced by a test - 279/282
       ▫️ screens with an e2e goto - 27/29
-      ⚪ no HIGH confidence: nothing executed
+      ✅ HIGH confidence = passing linked test path-level
 ```
 
 ### Branch 19: Infrastructure & Deployment
@@ -565,7 +588,7 @@ mindmap
     Config
       ▫️ 49 env vars validated zod
       ▫️ 9 scripts - 55 SQL migrations
-      ❌ CI on main red since 2026-10-26
+      ❌ CI on main red since 2026-10-26 at the Prettier step
 ```
 
 ### Branch 20: Implementation Gaps & Debt
@@ -576,7 +599,7 @@ Detail file: [`quality/IMPLEMENTATION_GAPS.md`](../quality/IMPLEMENTATION_GAPS.m
 mindmap
   root(("BRANCH 20<br/>IMPLEMENTATION GAPS and DEBT"))
     Status distribution capabilities
-      ✅ IMPLEMENTED - 1053
+      ✅ IMPLEMENTED - 1044
       ❌ NOT_IMPLEMENTED - 78
       ⚠️ PARTIALLY_IMPLEMENTED - 46
       ⚪ UNKNOWN - 21
@@ -587,4 +610,9 @@ mindmap
       ⚪ 206 endpoints with no web caller
       ⚠️ 43 no-op job kinds
       🟠 interview meeting link: fixed template
+      ❌ no service-worker registration
+    Documentation vs code
+      ⚪ features documented as built but cited nowhere - 30
+      ⚠️ features documented as missing but cited by handlers - 1
+      ⚪ endpoints citing no documented ID - 78
 ```

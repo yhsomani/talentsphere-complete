@@ -13,11 +13,11 @@ Every item names its evidence. Classification uses the requested vocabulary. `ep
 | RULE      | 269         | 0                     | 0               | 0      | 0      | 0           | 0          | 10      |
 | DB        | 34          | 0                     | 78              | 0      | 0      | 0           | 0          | 0       |
 | EXT       | 2           | 3                     | 0               | 0      | 1      | 0           | 0          | 0       |
-| JOUR      | 109         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
+| JOUR      | 100         | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 | SVC       | 70          | 43                    | 0               | 0      | 0      | 0           | 0          | 0       |
 | INFRA     | 14          | 0                     | 0               | 0      | 0      | 0           | 0          | 0       |
 
-Totals: IMPLEMENTED 1053, NOT_IMPLEMENTED 78, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. Journeys are IMPLEMENTED/MEDIUM only in the sense that the e2e path exists in source; the tests were not run.
+Totals: IMPLEMENTED 1044, NOT_IMPLEMENTED 78, PARTIALLY_IMPLEMENTED 46, UNKNOWN 21, MOCKED 1. Confidence: HIGH 658, MEDIUM 432, LOW 100. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
 
 ## 2. Ephemeral (non-durable) endpoints — 197 of 282
 
@@ -75,7 +75,7 @@ These are reachable by API clients and tests only. The documented audit also sta
 
 ## 5. Screens that call no API directly — 5
 
-/, /checkout, /privacy, /terms, /\* (static content or data via shared components).
+/, /checkout, /privacy, /terms, /* (static content or data via shared components).
 
 ## 6. Mocked / partial integrations
 
@@ -105,17 +105,23 @@ Explicit transition tables exist for **application** and **job** only. The other
 
 ## 10. Documentation vs code (three-source comparison)
 
-Documented status source: `docs/reports/FEATURE_STATUS_2026-10-21.md` (173 feature rows). Documented distribution: Partially implemented: 87, Not implemented: 75, Implemented, unverified: 6, Deprecated or rejected: 4, Broken or regressed: 1.
+Full comparison, per documented ID: [DOC_CODE_RECONCILIATION.md](DOC_CODE_RECONCILIATION.md). Summary:
 
-- Documented as **Not implemented** but cited by a route section in `server.ts` (1): F-130 Freelance Marketplace → GET /api/v1/recruiter/discovery/behavioral, GET /api/v1/recruiter/discovery/behavioral/:candidateId.
-- Documented as implemented/partial with **no citation of its F-id anywhere in production source** (32): F-02, F-03, F-101, F-103, F-106, F-117, F-118, F-169, F-172, F-21, F-29, F-33, F-45, F-55, F-60, F-61, F-66, F-67, F-68, F-74, F-77, F-80, F-81, F-82, F-83, F-87, F-89, F-90, F-93, F-95, F-98, F-99. A missing citation is weak evidence (comments are not required to cite IDs); treat as "needs review".
-- API sections in `server.ts` that cite no F-id: none: every banner section cites at least one F-id (routes before the first banner, the core loop, are unbannered).
+- Features documented as **Not implemented** (2026-10-21) whose endpoint handlers cite them today (1): F-130 Freelance Marketplace.
+- Features documented as implemented or partial that **no** source or test file cites (30): F-21, F-29, F-33, F-45, F-55, F-60, F-61, F-66, F-67, F-68, F-74, F-77, F-80, F-81, F-82, F-83, F-87, F-89, F-90, F-93, F-95, F-98, F-99, F-101, F-103, F-106, F-117, F-118, F-169, F-172 (weak evidence: code is not required to cite IDs; needs review).
+- 75 of 282 endpoints cite no documented F-/BR- ID (by module: interviews 12, reputation 8, evidence 7, organizations 7, auth 6, skills 6, jobs 6, job-templates 5). Those are capabilities in code that the registries cannot be traced to.
+- Numeric claims in living documents that differ from today's source: 0 of 10 checked (5 more are in dated snapshots, where differences are expected; table in the reconciliation file).
 
 Code-vs-test: endpoints with no test reference: 3 (see test map).
 
-## 11. Other findings
+## 11. Duplicated rules and PWA claims
+
+- `apps/web/src/lib/types.ts` `APPLICATION_TRANSITIONS` mirrors `ALLOWED_APPLICATION_TRANSITIONS` in `packages/domain/src/core.ts`: identical today; `apps/web/src/lib/types.ts` `JOB_TRANSITIONS` mirrors `ALLOWED_JOB_TRANSITIONS` in `packages/domain/src/jobs.ts`: identical today. A copy in the web app restates a domain rule outside `packages/domain` (CLAUDE.md: business rules live only there); it is a drift risk even while identical.
+- PWA: web manifest present (`apps/web/public/manifest.webmanifest`); service-worker **registration** in `apps/web`: **none found**. `apps/web/src/pwa.ts` only _detects_ a controlling worker, so with no registration `offlineReady` stays false and there is no offline behaviour, although the product is described as PWA-first.
+
+## 12. Other findings
 
 - Billing routes are registered twice by design: 6 disabled-mode stubs in `server.ts` and Stripe-mode handlers in `billing-stripe.ts` (selected by `BILLING_MODE`).
 - Interview join links are built from a fixed host string in `packages/domain/src/technical-interview.ts` (no provider integration): MOCKED.
-- CI on `main` has been red since 2026-10-26 (GitHub Actions); cause not investigated.
+- CI on `main` has been red since 2026-10-26 (GitHub Actions). Reproduced on 2026-11-25: `pnpm lint` fails (230 files unformatted: 199 in Yash_Final_Project_Document/, 25 tracked .omc/ agent-state JSON files (root, apps/web, deploy/oracle), 4 in PRODUCT_BLUEPRINT/, plus .claude/launch.json and tests/security/injection-defenses.test.ts. Lint is the first check step in .github/workflows/ci.yml, so CI on main stops there and the later steps never run.) Every later CI step that was re-run here passes.
 - Not detected (no occurrences in source): GraphQL, WebSockets, IndexedDB, SQLite, mobile apps, feature-flag SDKs (flags are a first-party table + endpoint).

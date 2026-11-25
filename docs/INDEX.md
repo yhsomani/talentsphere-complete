@@ -10,6 +10,8 @@ This is the single entry point to the project's documentation. Links are resolve
 | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
 | Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | [`../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`](../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) |
+| Reverse-engineered map of everything in the code: stable IDs, evidence, test results, docs-vs-code gaps | [`../project-mindmap/README.md`](../project-mindmap/README.md) (start at the [master mind map](../project-mindmap/master/MASTER_PROJECT_MINDMAP.md)) |
+| Which documentation tree owns what (SSOT, `PRODUCT_BLUEPRINT/`, `Yash_Final_Project_Document/`, `docs/`) | [`../project-mindmap/DOCUMENTATION_MAP.md`](../project-mindmap/DOCUMENTATION_MAP.md) |
 | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
 | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
 | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
@@ -23,8 +25,8 @@ This is the single entry point to the project's documentation. Links are resolve
 
 When two documents disagree:
 
-1. **What exists today:** the code, then the root `ARCHITECTURE.md`, then the source-scoped `system-model/01-inventory-and-coverage.md`. Dated reports do not override newer source.
-2. **What is intended:** `SSOT.md`, then the specialised files below (`PRD`, `TRD`, registries, `TARGET_ARCHITECTURE`).
+1. **What exists today:** the code, then the root `ARCHITECTURE.md`, then the generated [`project-mindmap/`](../project-mindmap/README.md) (regenerated from source; it names the commit of its test results), then the source-scoped `system-model/01-inventory-and-coverage.md` (a 2026-10-23 snapshot). Dated reports do not override newer source.
+2. **What is intended:** `SSOT.md`, then the specialised files below (`PRD`, `TRD`, registries, `TARGET_ARCHITECTURE`). `PRODUCT_BLUEPRINT/` and `Yash_Final_Project_Document/` are unratified proposals for the same intent (see the [documentation map](../project-mindmap/DOCUMENTATION_MAP.md)).
 3. **History:** dated reports and `BRAIN/MEMORY.md` are evidence of what happened, not current state.
 
 Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md#documentation-conflicts-open-2026-10-21). They are not resolved by assumption.
@@ -56,7 +58,7 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 | Document | Purpose |
 |---|---|
 | [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 55 migrations, lifecycle and hosted/local boundaries. |
-| [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 278 unique method/path pairs, request-schema locators, response/error semantics and billing retries. |
+| [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 279 unique method/path pairs (282 registrations), request-schema locators, response/error semantics and billing retries. |
 | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
 | [`experience/UI_UX_DESIGN_SYSTEM.md`](experience/UI_UX_DESIGN_SYSTEM.md) | Design tokens, components, accessibility (WCAG 2.2 AA). |
 | [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | Routes, navigation guards, state transitions. |

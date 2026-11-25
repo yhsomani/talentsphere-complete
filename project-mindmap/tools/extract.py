@@ -861,7 +861,8 @@ journeys = []
 for f in sorted(test_info):
     if not f.startswith('tests/e2e') or not f.endswith('.spec.ts'): continue
     t = test_info[f]['text']
-    ms = list(re.finditer(r"^\s*test(?:\.\w+)?\(\s*(['\"`])((?:(?!\1).)*)\1", t, re.M))
+    # test(...) and its modifiers only; test.describe(...) is a group, not a journey
+    ms = list(re.finditer(r"^\s*test(?:\.(?:only|skip|fixme|slow|fail))?\(\s*(['\"`])((?:(?!\1).)*)\1", t, re.M))
     for i, mm in enumerate(ms):
         body = t[mm.end(): ms[i + 1].start() if i + 1 < len(ms) else len(t)]
         gotos = re.findall(r"goto\(\s*[`'\"]([^`'\"]+)", body)

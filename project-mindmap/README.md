@@ -6,24 +6,28 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 
 ## Structure
 
-| Path                                        | Contents                                                                                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | **Master mind map (Mermaid)**: 20 branches in three zones, legend, type-level cross-connection graph, module table                    |
-| `master/MASTER_PROJECT_DIAGRAMS.md`         | Mermaid only: hub/zone overview flowchart, cross-connection chain, and one detail mind map per branch (every item, with status emoji) |
-| `master/MASTER_PROJECT_GRAPH.json`          | **The master graph**: 2,188 nodes, 5,582 typed edges, each with evidence                                                              |
-| `master/MASTER_PROJECT_GRAPH.dot`           | The same graph for Graphviz                                                                                                           |
-| `journeys/USER_JOURNEYS.md` / `.json`       | Personas, navigation sets, 109 e2e-derived journeys                                                                                   |
-| `features/COMPLETE_FEATURE_INVENTORY.json`  | Hierarchy with parent IDs, status, evidence, business rules                                                                           |
-| `ui/SCREEN_INTERACTION_INVENTORY.md`        | Screens, components, interactions, navigation                                                                                         |
-| `architecture/`                             | Frontend, backend/infra, API (all 282 endpoints), dependency graph, per-module subgraphs                                              |
-| `data/`                                     | Database entity map, end-to-end data flows, state machines                                                                            |
-| `quality/`                                  | Implementation gaps, test coverage map, traceability matrix (CSV)                                                                     |
-| `evidence/`                                 | Evidence register (CSV + summary)                                                                                                     |
-| `VALIDATION_REPORT.md`, `FINAL_REPORT.md`   | Phase 9–10 checks and computed totals                                                                                                 |
+| Path                                        | Contents                                                                                                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | **Master mind map (Mermaid)**: 20 branches in three zones, legend, type-level cross-connection graph, module table                                       |
+| `master/MASTER_PROJECT_DIAGRAMS.md`         | Mermaid only: hub/zone overview flowchart, cross-connection chain, and one detail mind map per branch (every item, with status emoji)                    |
+| `master/MASTER_PROJECT_GRAPH.json`          | **The master graph**: 2,628 nodes, 6,945 typed edges, each with evidence                                                                                 |
+| `master/MASTER_PROJECT_GRAPH.dot`           | The same graph for Graphviz                                                                                                                              |
+| `master/ID_LEDGER.json`                     | Logical key → stable ID for every generated node; IDs are never renumbered or reused                                                                     |
+| `journeys/USER_JOURNEYS.md` / `.json`       | Personas, navigation sets, 100 e2e-derived journeys with run results, 28 documented target journeys                                                      |
+| `features/COMPLETE_FEATURE_INVENTORY.json`  | Hierarchy with parent IDs, status, evidence, business rules                                                                                              |
+| `ui/SCREEN_INTERACTION_INVENTORY.md`        | Screens, components, interactions, navigation                                                                                                            |
+| `architecture/`                             | Frontend, backend/infra, API (all 282 endpoints), dependency graph, per-module subgraphs                                                                 |
+| `data/`                                     | Database entity map, end-to-end data flows, state machines                                                                                               |
+| `quality/`                                  | Implementation gaps, test coverage map with execution results, documentation-vs-code reconciliation, traceability matrix (CSV), `EXECUTION_RESULTS.json` |
+| `DOCUMENTATION_MAP.md`                      | Which document tree owns what (code, SSOT, PRODUCT_BLUEPRINT, Yash_Final_Project_Document, docs/), and where they overlap                                |
+| `evidence/`                                 | Evidence register (CSV + summary)                                                                                                                        |
+| `VALIDATION_REPORT.md`, `FINAL_REPORT.md`   | Phase 9–10 checks and computed totals                                                                                                                    |
 
 ## ID system
 
-`PROJ ROLE JOUR MOD FEAT API SCR COMP INT ERR RULE SCH SVC DB STATE TEST EXT INFRA`, numbered per prefix in a deterministic scan order. An ID is only stable for one generation run; regenerating after code changes can renumber. The graph JSON is the source of truth for ID → file:line.
+`PROJ ROLE JOUR MOD FEAT API SCR COMP INT ERR RULE SCH SVC DB STATE TEST EXT INFRA` for generated nodes, plus the project's own registry IDs `F-` (features), `J-` (journeys) and `BR-` (business rules) for documented entities, so a documented feature has exactly one ID everywhere.
+
+Generated IDs are **stable across runs**: `tools/enrich.py` keeps `master/ID_LEDGER.json`, which maps each node's logical key (type, name, defining file, and an ordinal when the same triple repeats) to its ID. A new entity gets the next free number for its prefix; a removed entity's ID is retired and never reused. The graph JSON is the source of truth for ID → file:line.
 
 ## Hierarchy levels used
 
@@ -31,11 +35,11 @@ APPLICATION → MODULE (API module) → FEATURE (resource group, shared componen
 
 ## Status and confidence
 
-Statuses: IMPLEMENTED, PARTIALLY_IMPLEMENTED, NOT_IMPLEMENTED, BROKEN, MOCKED, UNREACHABLE, DEPRECATED, UNKNOWN. Confidence: HIGH (source + execution/test), MEDIUM (source only), LOW (inferred). **No HIGH**: nothing was executed.
+Statuses: IMPLEMENTED, PARTIALLY_IMPLEMENTED, NOT_IMPLEMENTED, BROKEN, MOCKED, UNREACHABLE, DEPRECATED, UNKNOWN. `HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed (the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.
 
 ## Method
 
-Read-only extractor (Python, standard library, kept outside the repo) parsing: route registrations, handler bodies, `durability.ts`, `core-store.ts`, `App.tsx`, page and component source, domain exports, contract schemas, migrations, test files, workflows. See VALIDATION_REPORT for checks.
+Python scripts in `tools/` (standard library only) that read the repository and write only to `project-mindmap/`: `extract.py` parses route registrations, handler bodies, `durability.ts`, `core-store.ts`, `App.tsx`, page and component source, domain exports, contract schemas, migrations, test files and workflows; `enrich.py` applies the ID ledger, adds the documented F-/J-/BR- entities and attaches test results; `generate.py` and `mermaid_master.py` write every artifact. See VALIDATION_REPORT for checks.
 
 ## Limits
 
@@ -46,13 +50,16 @@ See [FINAL_REPORT](FINAL_REPORT.md) "Known limitations".
 The map is generated, not hand-written. From the repository root (read-only on the repo; outputs go to `project-mindmap/`):
 
 ```bash
-mkdir -p /tmp/mindmap-work
-python3 -I project-mindmap/tools/extract.py /tmp/mindmap-work
-python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work
-python3 -I project-mindmap/tools/mermaid_master.py /tmp/mindmap-work   # master mind map + per-branch Mermaid diagrams
-python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work   # again, so the master map embeds the rich mind map
+W=$(mktemp -d)                                                   # any directory outside the repository
+python3 -I project-mindmap/tools/extract.py "$W"
+python3 -I project-mindmap/tools/enrich.py "$W" [RESULTS_DIR]     # RESULTS_DIR optional, see below
+python3 -I project-mindmap/tools/generate.py "$W"
+python3 -I project-mindmap/tools/mermaid_master.py "$W"          # master mind map + per-branch Mermaid diagrams
+python3 -I project-mindmap/tools/generate.py "$W"                # again, so the master map embeds the rich mind map
 ```
+
+**Test results.** AGENTS.md forbids installing dependencies or building in the repository, so tests are run in a throwaway copy: `git ls-files -co --exclude-standard | tar -cf - -T - | tar -xf - -C <copy>`, then in the copy `pnpm install --frozen-lockfile`, `pnpm build`, `npx vitest run --reporter=json --outputFile=<RESULTS_DIR>/vitest.json`, `TEST_DATABASE_URL=... npx vitest run --config vitest.pg.config.ts --reporter=json --outputFile=<RESULTS_DIR>/vitest-pg.json` and `npx playwright test --reporter=json --trace off > <RESULTS_DIR>/e2e.json`. Add `<RESULTS_DIR>/run.json` with `commit`, `date`, `root` (the copy's path, stripped from file names), `commands` and `checks`. `enrich.py` reduces these to `quality/EXECUTION_RESULTS.json`; without RESULTS_DIR it reuses that file and the map states which commit it was measured on.
 
 Optional parser checks (install `mermaid@11.4.1 jsdom dotparser` in a directory **outside** the repository, put `validate-mermaid.mjs` and `validate-dot.mjs` there, and write their JSON output to `<parent of workdir>/mmtest/mm_out.json` and `dot_out.json`; `generate.py` embeds the results in the validation report). Output is deterministic: two runs on the same commit produce an identical graph.
 
-The scripts are documentation tooling only: they are not part of any build, test or CI step, and they never write outside `project-mindmap/`.
+The scripts are documentation tooling only: they are not part of any build, test or CI step, and they never write outside `project-mindmap/`. Generated Markdown is formatted with the repository's Prettier config afterwards (`pnpm lint` checks it).

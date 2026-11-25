@@ -21,6 +21,9 @@ def w(path, text):
     with open(full, 'w', encoding='utf8') as f:
         f.write(text)
 
+def lineno_of(text, idx):
+    return text.count('\n', 0, idx) + 1
+
 def esc(s):
     return str(s).replace('|', '\\|').replace('\n', ' ')
 
@@ -148,7 +151,7 @@ for n in nodes.values():
         n['notes'] = ['derived from an e2e test; test was not executed in this session']
     elif t == 'INFRA':
         n.setdefault('status', 'IMPLEMENTED'); n.setdefault('confidence', 'MEDIUM'); n.setdefault('notes', [])
-        if n.get('kind') == 'ci-workflow': n['notes'] = ['workflow exists; CI runs on main have failed since 2026-10-26 (cause not examined)']
+        if n.get('kind') == 'ci-workflow': n['notes'] = ['workflow exists; CI on main has failed at the Prettier lint step since 2026-10-26, so later steps do not run there']
     elif t in ('ROLE', 'STATE', 'ERR', 'TEST', 'SCH', 'PROJ'):
         n.setdefault('notes', [])
     elif t == 'SVC':
@@ -163,6 +166,93 @@ for n in apis:
         n['notes'] = n.get('notes', []) + ['no first-party web caller found']
     if n.get('variant'):
         n['notes'] = n.get('notes', []) + [n['variant']]
+# ---------------------------------------------------------------- execution evidence (from enrich.py; optional)
+EXE = A.get('execution') or {'available': False}
+EXECUTED = bool(EXE.get('available'))
+EXE_DATE = EXE.get('date') or 'unknown date'
+def test_exec(tid):
+    return nodes[tid].get('execution') if tid in nodes else None
+def linked_exec(nid):
+    """Execution results of the test files linked to a node by TESTED_BY (path-level link)."""
+    res = [test_exec(t) for t in outs(nid, 'TESTED_BY', 'TEST')]
+    return [r for r in res if r]
+for n in nodes.values():
+    t = n['type']
+    if t == 'JOUR':
+        x = n.get('execution')
+        if not EXECUTED or not x:
+            continue
+        if x['outcome'] == 'passed':
+            n['status'] = 'IMPLEMENTED'; n['confidence'] = 'HIGH'; n['notes'] = [f'e2e test passed ({EXE_DATE})']
+        elif x['outcome'] == 'failed':
+            n['status'] = 'BROKEN'; n['confidence'] = 'HIGH'; n['notes'] = [f'e2e test failed ({EXE_DATE})']
+        elif x['outcome'] == 'skipped':
+            n['status'] = 'UNKNOWN'; n['confidence'] = 'LOW'; n['notes'] = ['e2e test is skipped']
+        else:
+            n['notes'] = ['e2e test not found in the execution report']
+    elif t in ('API', 'RULE', 'SCR') and EXECUTED and n.get('status') == 'IMPLEMENTED':
+        res = linked_exec(n['id'])
+        ran = [r for r in res if r['passed'] or r['failed']]
+        if ran and all(r['failed'] == 0 for r in ran):
+            n['confidence'] = 'HIGH'
+            n['notes'] = [x for x in n.get('notes', []) if 'not executed' not in x] + [f'{len(ran)} linked test file(s) executed and passed ({EXE_DATE}); link is path-level']
+        elif any(r['failed'] for r in ran):
+            n['notes'] = n.get('notes', []) + ['a linked test file has failing tests: see TEST_COVERAGE_MAP']
+conf_dist = collections.Counter(n.get('confidence') for n in nodes.values() if n['type'] in ('API', 'SCR', 'INT', 'COMP', 'RULE', 'DB', 'EXT', 'JOUR', 'SVC', 'INFRA') and n.get('confidence'))
+if EXECUTED:
+    _s = EXE.get('suites', {})
+    EXEC_LINE = ', '.join(f"{k} {v['passed']}/{v['total']} passed" for k, v in _s.items())
+    EXEC_BANNER = (f"Generated from the repository by read-only static analysis, then cross-checked against a test run on {EXE_DATE} "
+                   f"(commit `{(EXE.get('commit') or '')[:7]}`; {EXEC_LINE}; results in [EXECUTION_RESULTS.json](../quality/EXECUTION_RESULTS.json)). "
+                   "Every node has a stable ID, evidence (file, line, symbol), an implementation status and a confidence.")
+    _lint = next((c for c in EXE.get('checks', []) if 'lint' in c['name']), None)
+    CI_SENTENCE = (f"Reproduced on {EXE_DATE}: `pnpm lint` fails ({_lint['detail']}) Every later CI step that was re-run here passes." if _lint and _lint['result'] == 'FAIL'
+                   else 'Cause not re-measured in this run.')
+    CONF_RULE = ("`HIGH` = source evidence plus a passing executed test: the journey's own e2e test passed, or every executed test file linked to the node passed "
+                 "(the link is path-level: a test that names the route or function, not an assertion-level trace). `MEDIUM` = supported by source. `LOW` = inferred.")
+else:
+    EXEC_LINE = 'not executed'
+    EXEC_BANNER = ('Generated from the repository by read-only static analysis. Every node has a stable ID, evidence (file, line, symbol), an implementation status and a confidence. '
+                   'No test results were supplied to this run: see [README](../README.md) "Limits".')
+    CONF_RULE = '`HIGH` is assigned to nothing: no test results were supplied. `MEDIUM` = supported by source. `LOW` = inferred.'
+    CI_SENTENCE = 'Cause not measured in this run.'
+
+# ---------------------------------------------------------------- documentation nodes (F-, J-, BR- from enrich.py)
+docf = [n for n in nodes.values() if n['type'] == 'DOCF']
+docj = [n for n in nodes.values() if n['type'] == 'DOCJ']
+docbr = [n for n in nodes.values() if n['type'] == 'DOCBR']
+DOC_STATUS_MAP = {'Implemented, unverified': 'IMPLEMENTED', 'Partially implemented': 'PARTIALLY_IMPLEMENTED', 'Not implemented': 'NOT_IMPLEMENTED',
+                  'Broken or regressed': 'BROKEN', 'Deprecated or rejected': 'DEPRECATED'}
+for n in docf + docj + docbr:
+    impl = ins(n['id'], 'IMPLEMENTS')
+    n['code_links'] = sorted(set(impl))
+    n['test_links'] = sorted(set(outs(n['id'], 'TESTED_BY', 'TEST')))
+    res = [test_exec(t) for t in n['test_links']]
+    res = [r for r in res if r]
+    n['tests_passed'] = sum(1 for r in res if r['passed'] and not r['failed'])
+    n['tests_failed'] = sum(1 for r in res if r['failed'])
+    if n['type'] == 'DOCF':
+        documented = DOC_STATUS_MAP.get(n.get('doc_status') or '', 'UNKNOWN')
+        n['status'] = documented
+        if documented == 'NOT_IMPLEMENTED' and any(nodes[c]['type'] == 'API' for c in impl):
+            n['disagreement'] = 'documented as not implemented (2026-10-21), but endpoint handlers cite it today; the citation may be a cross-reference, so review before changing either'
+        elif documented in ('IMPLEMENTED', 'PARTIALLY_IMPLEMENTED') and not impl and not n['test_links']:
+            n['disagreement'] = 'documented as (partially) implemented, but no source or test file cites the ID'
+    elif n['type'] == 'DOCBR':
+        # a citation in source is the code's own claim to enforce the rule; no citation proves nothing either way
+        n['status'] = 'IMPLEMENTED' if impl else 'UNKNOWN'
+    else:
+        n['status'] = 'PARTIALLY_IMPLEMENTED' if (impl or n['test_links']) else 'UNKNOWN'
+    if impl and n['test_links'] and n['tests_passed'] and not n['tests_failed'] and EXECUTED:
+        n['confidence'] = 'HIGH'
+    elif impl or n['test_links']:
+        n['confidence'] = 'MEDIUM'
+    else:
+        n['confidence'] = 'LOW'
+    n['notes'] = [n['disagreement']] if n.get('disagreement') else []
+    if n['type'] == 'DOCJ':
+        n['notes'].append('target journey from the registry; status reflects only whether code/tests cite the ID, not whether the terminal outcome is reachable')
+
 # MOD/FEAT aggregate status
 children = collections.defaultdict(list)
 for e in edges:
@@ -206,6 +296,71 @@ for f in prod_files:
         fid_files[fid].add(f)
 doc_status_count = collections.Counter(v['status'] for v in doc_rows.values())
 
+# ---------------------------------------------------------------- documentation vs code (three sources)
+dur_t = read('apps/api/src/durability.ts')
+def _set_size(name):
+    m = re.search(name + r"[^=]*=\s*new Set[^(]*\(\s*\[(.*?)\]\s*\)", dur_t, re.S)
+    return len(re.findall(r"'((?:GET|POST|PUT|PATCH|DELETE) /[^']+)'", m.group(1))) if m else None
+n_durable_keys, n_stateless_keys = _set_size('DURABLE_ROUTES'), _set_size('STATELESS_ROUTES')
+unique_pairs = len({(n['method'], n['path']) for n in apis})
+n_migrations = len(glob.glob('supabase/migrations/*.sql'))
+n_page_files = len(glob.glob('apps/web/src/pages/*.tsx'))
+ACTUAL = {'migration files': n_migrations, 'route registrations': len(apis), 'unique method/path pairs': unique_pairs,
+          'DURABLE_ROUTES size': n_durable_keys, 'DURABLE_ROUTES + STATELESS_ROUTES size': (n_durable_keys or 0) + (n_stateless_keys or 0),
+          'page components': n_page_files, 'documented features': len(docf), 'documented journeys': len(docj), 'documented business rules': len(docbr)}
+CLAIMS = [  # (file, regex with one number group, what the number counts)
+    ('CLAUDE.md', r"supabase/migrations` \((\d+) files\)", 'migration files'),
+    ('docs/INDEX.md', r"all (\d+) migrations", 'migration files'),
+    ('docs/INDEX.md', r"All (\d+) unique method/path pairs", 'unique method/path pairs'),
+    ('docs/INDEX.md', r"(\d+) feature IDs", 'documented features'),
+    ('docs/INDEX.md', r"BR-001 to BR-(\d+)", 'documented business rules'),
+    ('docs/INDEX.md', r"J-01 to J-(\d+)", 'documented journeys'),
+    ('docs/engineering/API_CONTRACTS.md', r"Measured: (\d+) literal registrations", 'route registrations'),
+    ('docs/engineering/API_CONTRACTS.md', r"(\d+) unique method/path pairs", 'unique method/path pairs'),
+    ('docs/engineering/API_CONTRACTS.md', r"(\d+) of them in `DURABLE_ROUTES`", 'DURABLE_ROUTES size'),
+    ('docs/system-model/01-inventory-and-coverage.md', r"(\d+) route registrations", 'route registrations'),
+    ('docs/system-model/01-inventory-and-coverage.md', r"(\d+) unique method-and-path pairs", 'unique method/path pairs'),
+    ('docs/system-model/01-inventory-and-coverage.md', r"(\d+) migrations \(`00001`", 'migration files'),
+    ('docs/system-model/01-inventory-and-coverage.md', r"lists (\d+) routes whose state is durable", 'DURABLE_ROUTES + STATELESS_ROUTES size'),
+    ('docs/system-model/01-inventory-and-coverage.md', r"Web app: (\d+) page components", 'page components'),
+    ('SSOT.md', r"(\d+) migrations", 'migration files'),
+]
+claim_rows = []
+for f, rx, what in CLAIMS:
+    if not os.path.exists(f):
+        continue
+    txt = read(f)
+    for m in re.finditer(rx, txt):
+        val = int(m.group(1))
+        act = ACTUAL[what]
+        snap = re.search(r"Source snapshot: `([0-9a-f]{7})[0-9a-f]*`, (\d{4}-\d{2}-\d{2})", txt[:600])
+        kind = f'dated snapshot ({snap.group(2)})' if snap else 'living'
+        claim_rows.append([f, lineno_of(txt, m.start()), kind, what, val, act, 'matches' if val == act else ('differs (expected for a snapshot)' if snap else 'differs from today')])
+stale_claims = [r for r in claim_rows if r[-1] == 'differs from today']
+
+# web copies of domain transition tables
+def _ts_table(path, name):
+    m = re.search(name + r"[^=]*=\s*\{(.*?)\n\};", read(path), re.S)
+    return {k: re.findall(r"'(\w+)'", v) for k, v in re.findall(r"(\w+):\s*\[([^\]]*)\]", m.group(1))} if m else None
+transition_copies = []
+for web_name, dom_path, dom_name in [('APPLICATION_TRANSITIONS', 'packages/domain/src/core.ts', 'ALLOWED_APPLICATION_TRANSITIONS'), ('JOB_TRANSITIONS', 'packages/domain/src/jobs.ts', 'ALLOWED_JOB_TRANSITIONS')]:
+    w_ = _ts_table('apps/web/src/lib/types.ts', web_name); d_ = _ts_table(dom_path, dom_name)
+    if w_ is not None and d_ is not None:
+        transition_copies.append((web_name, dom_name, dom_path, w_ == d_))
+sw_registration = [f for f, tx in code_text.items() if f.startswith('apps/web') and re.search(r"serviceWorker\.register\(|registerSW|vite-plugin-pwa", tx)]
+has_manifest = os.path.exists('apps/web/public/manifest.webmanifest')
+
+docf_disagree = [n for n in docf if n.get('disagreement')]
+docf_not_impl_but_code = [n for n in docf if (n.get('disagreement') or '').startswith('documented as not implemented')]
+docf_impl_no_cite = [n for n in docf if (n.get('disagreement') or '').startswith('documented as (partially)')]
+docf_by_doc = collections.Counter(n.get('doc_status') or 'no status row' for n in docf)
+docf_cited = [n for n in docf if n['code_links']]
+docbr_cited = [n for n in docbr if n['code_links']]
+docbr_tested = [n for n in docbr if n['test_links']]
+api_no_doc = [n for n in apis if not outs(n['id'], 'IMPLEMENTS') and not n['path'].startswith(('/health', '/ready', '/api/v1/health'))]
+api_no_doc_mod = collections.Counter(n['module'] for n in api_no_doc)
+scr_no_doc = [n for n in scrs if not outs(n['id'], 'IMPLEMENTS')]
+
 # ---------------------------------------------------------------- write: graph artifacts
 def node_out(n):
     d = dict(n)
@@ -221,7 +376,7 @@ def dot_label(n):
     return f"{n['id']}\\n{nm}"
 COLOR = {'JOUR': '#cfe2ff', 'ROLE': '#cfe2ff', 'API': '#ffe0b3', 'EXT': '#ffe0b3', 'RULE': '#e1d5f5', 'SVC': '#e1d5f5', 'DB': '#c8ece8',
          'INFRA': '#e0e0e0', 'SCR': '#cfe2ff', 'COMP': '#cfe2ff', 'INT': '#cfe2ff', 'TEST': '#f0f0f0', 'ERR': '#f8d7da', 'STATE': '#fff3cd',
-         'MOD': '#ffffff', 'FEAT': '#ffffff', 'SCH': '#fde2c8', 'PROJ': '#ffffff'}
+         'MOD': '#ffffff', 'FEAT': '#ffffff', 'SCH': '#fde2c8', 'PROJ': '#ffffff', 'DOCF': '#f3e5f5', 'DOCJ': '#f3e5f5', 'DOCBR': '#f3e5f5'}
 STATUS_BORDER = {'IMPLEMENTED': '#2e7d32', 'PARTIALLY_IMPLEMENTED': '#f9a825', 'NOT_IMPLEMENTED': '#c62828', 'BROKEN': '#c62828', 'MOCKED': '#e65100',
                  'UNREACHABLE': '#c62828', 'DEPRECATED': '#757575', 'UNKNOWN': '#9e9e9e'}
 EDGE_STYLE = {'CONTAINS': 'style=solid color="#9e9e9e"', 'DEPENDS_ON': 'style=dashed color="#546e7a"', 'TRIGGERS': 'style=bold color="#1565c0"',
@@ -229,7 +384,7 @@ EDGE_STYLE = {'CONTAINS': 'style=solid color="#9e9e9e"', 'DEPENDS_ON': 'style=da
               'UPDATES': 'style=bold color="#00796b"', 'CREATES': 'style=dotted color="#00796b"', 'NAVIGATES_TO': 'style=solid color="#1565c0" arrowhead=open',
               'VALIDATES': 'style=dashed color="#6a1b9a"', 'AUTHORIZES': 'style=dotted color="#2e7d32"', 'REQUIRES': 'style=dashed color="#2e7d32"',
               'PRODUCES': 'style=dotted color="#c62828"', 'TESTED_BY': 'style=dotted color="#9e9e9e"', 'FALLBACK_TO': 'style=dashed color="#f9a825"',
-              'BLOCKED_BY': 'style=bold color="#c62828"', 'CONSUMES': 'style=solid', 'TRANSFORMS': 'style=solid'}
+              'BLOCKED_BY': 'style=bold color="#c62828"', 'CONSUMES': 'style=solid', 'TRANSFORMS': 'style=solid', 'IMPLEMENTS': 'style=dashed color="#8e24aa"'}
 dot = ['digraph TalentSphere {', '  rankdir=LR; node [shape=box style="filled" fontsize=9]; edge [fontsize=8];']
 for tname in sorted(types):
     dot.append(f'  subgraph "cluster_{tname}" {{ label="{tname}"; style=dashed;')
@@ -320,7 +475,7 @@ md = [f"""# Master Project Mind Map — COMPLETE PROJECT ECOSYSTEM
 
 **Mermaid only (no images).** The master mind map below is generated from the graph. Detail mind maps for every branch, the hub/zone overview flowchart and the cross-connection chain are in [MASTER_PROJECT_DIAGRAMS.md](MASTER_PROJECT_DIAGRAMS.md).
 
-> Generated from the repository by read-only static analysis. Every node below has a stable ID, evidence (file, line, symbol), an implementation status and a confidence. Nothing here was executed: see [README](../README.md) "Limits".
+> {EXEC_BANNER}
 
 ## 1. How to read this map
 
@@ -331,11 +486,13 @@ md = [f"""# Master Project Mind Map — COMPLETE PROJECT ECOSYSTEM
 | Prefix | Meaning | Count |
 | --- | --- | --- |
 """ + '\n'.join(f'| {t}- | {d} | {types[t]} |' for t, d in [
-    ('PROJ', 'Project'), ('ROLE', 'Role / identity'), ('JOUR', 'User journey (derived from an e2e test)'), ('MOD', 'Module (application, API module, domain module, migration)'),
+    ('PROJ', 'Project'), ('ROLE', 'Role / identity'), ('JOUR', 'User journey (one Playwright e2e test)'), ('MOD', 'Module (application, API module, domain module, migration)'),
     ('FEAT', 'Feature group (API resource group)'), ('API', 'API endpoint (sub-feature)'), ('SCR', 'Screen (routed page)'), ('COMP', 'Shared UI component'),
     ('INT', 'Interaction (UI event binding, micro-feature)'), ('ERR', 'Error branch (nano-feature, observable system response)'), ('RULE', 'Business rule: exported domain function'),
     ('SCH', 'Contract schema (Zod)'), ('SVC', 'Service or data-access file, background job kind'), ('DB', 'Database table'), ('STATE', 'State definition or transition table'),
-    ('TEST', 'Test file'), ('EXT', 'External integration'), ('INFRA', 'CI workflow, deploy target, script')]) + f"""
+    ('TEST', 'Test file'), ('EXT', 'External integration'), ('INFRA', 'CI workflow, deploy target, script')]) + '\n' + '\n'.join(f'| {p} | {d} | {types[t]} |' for t, p, d in [
+    ('DOCF', 'F-', 'Documented feature (docs/registries/FEATURE_REGISTRY.md); the project\'s own ID'), ('DOCJ', 'J-', 'Documented target journey (docs/experience/JOURNEY_REGISTRY.md)'),
+    ('DOCBR', 'BR-', 'Documented business rule (docs/registries/BUSINESS_RULE_REGISTRY.md)')]) + f"""
 
 Not used (no evidence found, so no nodes exist): `ACT-`, `DATA-`, `NANO-`, `SUB-`, `MIC-` as separate prefixes. Their levels are carried by `INT-` (micro), `ERR-` (nano) and `API-` (sub-feature); see [feature inventory](../features/COMPLETE_FEATURE_INVENTORY.json) `level`.
 
@@ -367,7 +524,7 @@ Edge counts are computed from the graph. `CONTAINS` is omitted here (it is the h
         'TRIGGERS': 'interaction fires a request; route dispatches a background job; role starts a journey', 'WRITES': 'SQL INSERT/DELETE, or route to table through a persist kind',
         'READS': 'SQL SELECT/JOIN', 'UPDATES': 'SQL UPDATE', 'CREATES': 'migration creates table', 'NAVIGATES_TO': 'link, navigate() or nav set',
         'VALIDATES': 'route parses with a contract schema', 'AUTHORIZES': 'identity may reach a screen or endpoint', 'REQUIRES': 'endpoint checks a role',
-        'PRODUCES': 'endpoint throws a DomainError', 'TESTED_BY': 'test source references the item', 'FALLBACK_TO': 'integration degrades when not configured',
+        'PRODUCES': 'endpoint throws a DomainError', 'TESTED_BY': 'test source references the item (or cites its F-/J-/BR- ID)', 'IMPLEMENTS': 'source cites a documented F-/J-/BR- ID (route block or file)', 'FALLBACK_TO': 'integration degrades when not configured',
         'BLOCKED_BY': 'anonymous visitor redirected by RequireAuth'}.get(rel, '')]
     for rel, c in collections.Counter(e['rel'] for e in edges).most_common()])}
 
@@ -379,7 +536,7 @@ Relationship types requested but with **zero** edges because no evidence exists:
 
 Totals: {', '.join(f'{k} {v}' for k, v in status_dist.most_common())}. MOD and FEAT roll up their children; ERR/TEST/SCH/STATE/ROLE nodes carry no status because "implemented" is not meaningful for them.
 
-`HIGH` confidence is assigned to **nothing**: no test or runtime was executed (dependencies are not installed and installing would write protected files). `MEDIUM` = supported by source. `LOW` = inferred.
+Confidence (same node types): {', '.join(f'{k} {v}' for k, v in conf_dist.most_common())}. {CONF_RULE}
 
 ## 5. Legend
 
@@ -519,7 +676,15 @@ w('features/COMPLETE_FEATURE_INVENTORY.json', json.dumps(dict(
         MICRO_FEATURE='UI event binding (onClick, onSubmit, onChange ...) on a screen or component',
         NANO_FEATURE='error branch: a distinct DomainError(code, message) thrown by an endpoint, an observable system response',
         BUSINESS_RULE='exported function/class in packages/domain/src (listed under business_rules, not in the hierarchy)'),
-    entries=inv, business_rules=rules_inv), indent=1, default=list))
+    entries=inv, business_rules=rules_inv,
+    documented=dict(
+        note='Registry entities with their own IDs (docs/registries, docs/experience). status for F- is the documented 2026-10-21 status; disagreement flags where code or tests contradict it (see quality/DOC_CODE_RECONCILIATION.md).',
+        features=[dict(id=n['id'], name=n['name'], category=n.get('category'), documented_status=n.get('doc_status'), status=n['status'], confidence=n['confidence'],
+                       implemented_by=n['code_links'], tested_by=n['test_links'], disagreement=n.get('disagreement'), evidence=n['evidence']) for n in docf],
+        journeys=[dict(id=n['id'], name=n['name'], personas=n.get('personas'), terminal=n.get('terminal'), status=n['status'], confidence=n['confidence'],
+                       implemented_by=n['code_links'], tested_by=n['test_links'], evidence=n['evidence']) for n in docj],
+        business_rules=[dict(id=n['id'], name=n['name'], status=n['status'], confidence=n['confidence'], implemented_by=n['code_links'], tested_by=n['test_links'], evidence=n['evidence']) for n in docbr])),
+    indent=1, default=list))
 lvl = collections.Counter(e['level'] for e in inv)
 
 # ---------------------------------------------------------------- personas + journeys
@@ -541,14 +706,20 @@ for j in jours:
     scr = sorted({nodes[x]['name'] for x in outs(j['id'], 'NAVIGATES_TO', 'SCR')})
     roles_h = ', '.join(j['role_hints']) or 'unspecified'
     first_steps = ' → '.join(s[:60] for s in j['steps'][:5])
-    jrows.append([j['id'], j['spec'].replace('tests/e2e/', ''), j['title'][:100], roles_h, ', '.join(scr), j['gotos'][0] if j['gotos'] else '', len(j['steps']), len(j['api_paths'])])
+    jrows.append([j['id'], j['spec'].replace('tests/e2e/', ''), j['title'][:100], roles_h, ', '.join(scr), j['gotos'][0] if j['gotos'] else '', len(j['steps']), len(j['api_paths']), (j.get('execution') or {}).get('outcome', 'not run')])
     jjson.append(dict(id=j['id'], title=j['title'], spec=j['spec'], line=j['evidence'][0]['line'], personas=j['role_hints'] or ['unspecified'], entry_point=j['gotos'][0] if j['gotos'] else None,
-                      screens_visited=scr, steps=j['steps'], api_paths_referenced=j['api_paths'], status=j['status'], confidence=j['confidence'], notes=j['notes']))
+                      screens_visited=scr, steps=j['steps'], api_paths_referenced=j['api_paths'], execution=j.get('execution'), status=j['status'], confidence=j['confidence'], notes=j['notes']))
 w('journeys/USER_JOURNEYS.json', json.dumps(jjson, indent=1))
 jm = collections.Counter(re.sub(r"^.*/", '', j['spec']).replace('.spec.ts', '') for j in jours)
+_jo = collections.Counter((j.get('execution') or {}).get('outcome', 'not run') for j in jours)
+JOUR_EXEC_SENTENCE = (f"The specs were executed on {EXE_DATE}: {', '.join(f'{k} {v}' for k, v in _jo.most_common())} (column *Run result*). A passing test proves the steps it asserts, in Chromium, against the in-memory API; it does not prove the Postgres path or other browsers."
+                      if EXECUTED else 'That is evidence of an *intended, tested* path, not proof it passes: no test results were supplied to this run.')
 w('journeys/USER_JOURNEYS.md', f"""# User Journeys and Personas
 
-Journeys are **derived from the Playwright e2e specs** (`tests/e2e/*.spec.ts`): each `test(...)` that drives a page (`goto`, `click`, `fill`) is one journey. That is evidence of an *intended, tested* path, not proof it passes: the tests were not executed here. Journeys that exist only in documentation have no ID in this file and are listed in [implementation gaps](../quality/IMPLEMENTATION_GAPS.md).
+Two kinds of journey are mapped, and they are kept apart:
+
+- **Executable journeys (`JOUR-`)** are derived from the Playwright e2e specs (`tests/e2e/*.spec.ts`): each `test(...)` that drives a page (`goto`, `click`, `fill`) is one journey; `test.describe` groups are not journeys. {JOUR_EXEC_SENTENCE}
+- **Documented target journeys (`J-01`..`J-{len(docj):02d}`)** come from `docs/experience/JOURNEY_REGISTRY.md`. They describe intent. Section 4 shows which of them any code or test cites.
 
 Full step lists, API paths and entry points: [`USER_JOURNEYS.json`](USER_JOURNEYS.json) (every field, no truncation).
 
@@ -586,7 +757,15 @@ Selection rule (Layout.tsx): signed-out → PUBLIC_NAV; restricted account → R
 
 ## 3. E2E-derived journey inventory ({len(jours)} journeys in {len(jm)} spec files)
 
-{table(['ID', 'Spec', 'Journey (test title)', 'Persona hint', 'Screens visited', 'Entry', 'Steps', 'API paths'], jrows)}
+{table(['ID', 'Spec', 'Journey (test title)', 'Persona hint', 'Screens visited', 'Entry', 'Steps', 'API paths', 'Run result'], jrows)}
+
+## 4. Documented target journeys (J-01..J-{len(docj):02d}) against code and tests
+
+A documented journey is *cited* when a source or test file names its ID. Citation is weak evidence of intent, not proof that the terminal outcome is reachable; the full comparison is in [DOC_CODE_RECONCILIATION](../quality/DOC_CODE_RECONCILIATION.md).
+
+{table(['ID', 'Journey', 'Personas', 'Terminal outcome', 'Cited by source', 'Cited by tests (result)', 'Status/confidence'], [[n['id'], n['name'], n.get('personas', ''), n.get('terminal', ''), ', '.join(nodes[c]['name'] for c in n['code_links']) or 'none', ', '.join(nodes[x]['name'].replace('tests/', '') + (' (passed)' if (test_exec(x) or {}).get('passed') and not (test_exec(x) or {}).get('failed') else '') for x in n['test_links']) or 'none', f"{n['status']}/{n['confidence']}"] for n in docj])}
+
+{sum(1 for n in docj if n['code_links'] or n['test_links'])} of {len(docj)} documented journeys are cited by any code or test file; the other {sum(1 for n in docj if not (n['code_links'] or n['test_links']))} have **no implementation evidence that names them** (status UNKNOWN, not NOT_IMPLEMENTED: parts of them may exist under other names, such as the e2e journeys above).
 
 Fields not derivable by static analysis (start condition, user inputs, validation rules, business logic per step, decision branches, recovery paths, exit conditions, related journeys) are **not recorded** rather than invented. The test's own steps and assertions are in the JSON.
 """)
@@ -744,7 +923,10 @@ React 19 + TypeScript + Vite, `react-router-dom`. Server state is a small `fetch
 | Local state | `useState`/`useEffect` per page; no shared cache layer | pages |
 | API client | `apiFetch` (adds Bearer token; one 401 policy) and `apiJson` (JSON, 20 s timeout, `ApiError` with server message) | `lib/api.ts` |
 | Storage | `localStorage` keys `talentsphere_token`, `talentsphere_user`; `sessionStorage` `talentsphere_session_ended`; no IndexedDB use found | `lib/session.ts` |
-| Offline / PWA | service-worker and display-mode detection only (`usePwaCapability`); no offline data sync or queue found in source | `pwa.ts` |
+| Offline / PWA | web manifest {'present' if has_manifest else 'absent'}; `usePwaCapability` only *detects* display mode and a controlling service worker. Service-worker registration in `apps/web`: {', '.join(sw_registration) or '**none**'}, so there is no offline cache, sync or queue | `pwa.ts`, `public/manifest.webmanifest` |
+| Hooks | `usePageMeta` (title/description) and `usePwaCapability`; no data-fetching hooks | `hooks/usePageMeta.ts`, `pwa.ts` |
+| Client libraries | `api` (fetch helpers), `session` (storage + `talentsphere:session` event), `notifications` (`talentsphere:notifications-changed` event, link targets), `format` (dates, money, status labels, `safeHref`), `idempotency`, `career`, `course`, `messages`, `types` | `lib/*.ts` |
+| Rule copies | {'; '.join(f'`{w_}` mirrors domain `{d_}` (' + ('identical today' if same else 'differs') + ')' for w_, d_, p_, same in transition_copies) or 'none'}: used to offer only valid status changes in the UI; the API re-checks with the domain function | `lib/types.ts` |
 | Layout | one-row header at every width; role-specific nav sets; account menu; live-region route announcer; unread-notification badge polled on route change | `components/Layout.tsx` |
 | UI primitives | {len([c for c in comps if '/ui/' in c['file']])} components in `components/ui` (Badge, Button, Card, EmptyState, Field, Input, LoadError, Modal, Notice, PageHeader, ...) | `components/ui` |
 | Error boundary | `RouteErrorBoundary` | `components/RouteErrorBoundary.tsx` |
@@ -771,7 +953,7 @@ for m, v in sorted(api_mods.items(), key=lambda kv: -len(kv[1])):
 layers = ['flowchart TB', '  subgraph WEB["apps/web (React PWA)"]', f'    SCRN["{len(scrs)} screens / {len(comps)} components"]', '  end',
           '  subgraph API["apps/api (Fastify)"]', f'    RT["{len(apis)} endpoints"]', '  end', '  subgraph WRK["apps/worker"]', f'    JB["{len(job_rows)} job kinds (2 email)"]', '  end',
           '  subgraph PKG["packages"]', f'    DOM["domain: {len(rules)} rules"]', f'    CON["contracts: {types["SCH"]} schemas"]', '    CFG["config"]', '    OBS["observability"]', '    UI["ui tokens"]', '  end',
-          '  subgraph DATA["Postgres"]', f'    TBL[("{len(dbs)} tables / 55 migrations")]', '  end',
+          '  subgraph DATA["Postgres"]', f'    TBL[("{len(dbs)} tables / {n_migrations} migrations")]', '  end',
           '  subgraph EXTS["External"]', '    STR["Stripe (BILLING_MODE=stripe)"]', '    BRV["Brevo email (opt-in)"]', '  end',
           '  SCRN -->|CALLS| RT', '  RT -->|CALLS| DOM', '  RT -->|VALIDATES| CON', '  RT -->|READS/WRITES| TBL', '  RT -->|TRIGGERS| JB', '  JB -->|CLAIMS| TBL', '  JB -->|CALLS| BRV', '  RT -->|CALLS| STR',
           '  API --> CFG', '  WRK --> CFG', '  API --> OBS', '  SCRN --> UI']
@@ -931,9 +1113,30 @@ by_mod = []
 for m, v in sorted(api_mods.items()):
     by_mod.append([m, len(v), sum(1 for n in v if n.get('tests')), sum(1 for n in v if n['web_called']), sum(len(n.get('tests', [])) for n in v)])
 rule_untested = [n for n in rules if not n['tested_by']]
+if EXECUTED:
+    TEST_EXEC_SENTENCE = (f"The suites were **executed on {EXE_DATE}** at commit `{(EXE.get('commit') or '')[:7]}` in a throwaway copy of the tracked files (so no protected file in the repository was written); "
+                          "results are in [EXECUTION_RESULTS.json](EXECUTION_RESULTS.json). A passing linked test raises a node to `HIGH` confidence, but the link itself stays path-level.")
+    _rows = [[k, v.get('files', ''), v['total'], v['passed'], v['failed'], v['skipped'], EXE.get('commands', {}).get(k, '')] for k, v in EXE.get('suites', {}).items()]
+    _chk = [[c['name'], c['result'], c['detail']] for c in EXE.get('checks', [])]
+    _per = [[nodes[x]['name'], (nodes[x].get('execution') or {}).get('runner', 'not run'), (nodes[x].get('execution') or {}).get('passed', ''), (nodes[x].get('execution') or {}).get('failed', ''),
+             (nodes[x].get('execution') or {}).get('skipped', ''), nodes[x]['cases']] for x in sorted(n['id'] for n in tests)]
+    _notrun = [n['name'] for n in tests if not n.get('execution')]
+    EXEC_SECTION = ("| Suite | Files | Tests | Passed | Failed | Skipped | Command |\n| --- | --- | --- | --- | --- | --- | --- |\n" +
+                    '\n'.join('| ' + ' | '.join(esc(c) for c in r) + ' |' for r in _rows) + '\n\n' +
+                    (table(['Other check', 'Result', 'Detail'], _chk) + '\n\n' if _chk else '') +
+                    f"Failing test files: {', '.join(EXE.get('failed_files') or []) or 'none'}. Test files in the repository with no result: {', '.join(_notrun) or 'none'}. "
+                    f"Static `it/test` counts differ from executed counts where a test is generated in a loop or a file is excluded by the runner's config.\n\n"
+                    "<details><summary>Per-file results</summary>\n\n" + table(['Test file', 'Runner', 'Passed', 'Failed', 'Skipped', 'Static case count'], _per) + '\n\n</details>')
+else:
+    TEST_EXEC_SENTENCE = 'No test results were supplied to this run, so no confidence is `HIGH`.'
+    EXEC_SECTION = 'Not executed in this run. See the README for how to supply results.'
 w('quality/TEST_COVERAGE_MAP.md', f"""# Test Coverage Map (Branch 18)
 
-> **A test file referencing a route or function is not evidence that the feature works.** Matching is textual: a test is linked to an endpoint when its source contains the endpoint path (with `:param` as a wildcard) near a matching HTTP-method marker; it is linked to a rule when it names the function. None of these tests were executed in this session (no `node_modules`; installing would write protected files), so no confidence is `HIGH`. The documented audit (docs/reports/FEATURE_STATUS_2026-10-21.md) records 1,172 passing unit/integration tests on its own date; this map neither confirms nor refutes that.
+> **A test file referencing a route or function is not evidence that the feature works.** Matching is textual: a test is linked to an endpoint when its source contains the endpoint path (with `:param` as a wildcard) near a matching HTTP-method marker; it is linked to a rule when it names the function. {TEST_EXEC_SENTENCE}
+
+## 0. Execution results
+
+{EXEC_SECTION}
 
 ## 1. Test inventory
 
@@ -966,7 +1169,7 @@ Domain functions with **no test file naming them** ({len(rule_untested)}/{len(ru
 
 ## 6. What is not measured
 
-No coverage percentages, mutation scores, runtime results, accessibility results (an `accessibility.spec.ts` exists), or performance results are asserted. Features with weak evidence are in [implementation gaps](IMPLEMENTATION_GAPS.md).
+No line/branch coverage percentages or mutation scores are measured. Accessibility (`accessibility.spec.ts`) and performance (`performance.spec.ts`) specs are part of the e2e run above; their pass means the asserted budgets held in one headless Chromium run, not a WCAG conformance or load-test result. Live Stripe, Brevo, hosted Supabase and deployment paths are not exercised by any suite. Features with weak evidence are in [implementation gaps](IMPLEMENTATION_GAPS.md).
 """)
 
 # ---------------------------------------------------------------- gaps
@@ -1002,7 +1205,7 @@ Every item names its evidence. Classification uses the requested vocabulary. `ep
 
 {status_matrix}
 
-Totals: {', '.join(f'{k} {v}' for k, v in status_dist.most_common())}. Journeys are IMPLEMENTED/MEDIUM only in the sense that the e2e path exists in source; the tests were not run.
+Totals: {', '.join(f'{k} {v}' for k, v in status_dist.most_common())}. Confidence: {', '.join(f'{k} {v}' for k, v in conf_dist.most_common())}. {CONF_RULE}
 
 ## 2. Ephemeral (non-durable) endpoints — {len(eph)} of {len(apis)}
 
@@ -1049,20 +1252,92 @@ Explicit transition tables exist for **application** and **job** only. The other
 
 ## 10. Documentation vs code (three-source comparison)
 
-Documented status source: `docs/reports/FEATURE_STATUS_2026-10-21.md` ({len(doc_rows)} feature rows). Documented distribution: {', '.join(f'{k}: {v}' for k, v in doc_cnt.most_common())}.
+Full comparison, per documented ID: [DOC_CODE_RECONCILIATION.md](DOC_CODE_RECONCILIATION.md). Summary:
 
-- Documented as **Not implemented** but cited by a route section in `server.ts` ({len(doc_mismatch_a)}): {', '.join(f"{f} {d['name']} → {', '.join(r[:2])}" for f, d, r in doc_mismatch_a) or 'none'}.
-- Documented as implemented/partial with **no citation of its F-id anywhere in production source** ({len(doc_mismatch_b)}): {', '.join(f"{f}" for f, d in doc_mismatch_b) or 'none'}. A missing citation is weak evidence (comments are not required to cite IDs); treat as "needs review".
-- API sections in `server.ts` that cite no F-id: {('; '.join(s[:70] for s in code_no_fid_sections[:15])) if code_no_fid_sections else 'none: every banner section cites at least one F-id (routes before the first banner, the core loop, are unbannered)'}.
+- Features documented as **Not implemented** (2026-10-21) whose endpoint handlers cite them today ({len(docf_not_impl_but_code)}): {', '.join(f"{n['id']} {n['name']}" for n in docf_not_impl_but_code) or 'none'}.
+- Features documented as implemented or partial that **no** source or test file cites ({len(docf_impl_no_cite)}): {', '.join(n['id'] for n in docf_impl_no_cite) or 'none'} (weak evidence: code is not required to cite IDs; needs review).
+- {len(api_no_doc)} of {len(apis)} endpoints cite no documented F-/BR- ID (by module: {', '.join(f'{k} {v}' for k, v in api_no_doc_mod.most_common(8))}). Those are capabilities in code that the registries cannot be traced to.
+- Numeric claims in living documents that differ from today's source: {len(stale_claims)} of {sum(1 for r in claim_rows if r[2] == 'living')} checked ({len(claim_rows) - sum(1 for r in claim_rows if r[2] == 'living')} more are in dated snapshots, where differences are expected; table in the reconciliation file).
 
 Code-vs-test: endpoints with no test reference: {len(untested_api)} (see test map).
 
-## 11. Other findings
+## 11. Duplicated rules and PWA claims
+
+- {'; '.join(f'`apps/web/src/lib/types.ts` `{w_}` mirrors `{d_}` in `{p_}`: ' + ('identical today' if same else '**differs**') for w_, d_, p_, same in transition_copies) or 'no web copy of the transition tables found'}. A copy in the web app restates a domain rule outside `packages/domain` (CLAUDE.md: business rules live only there); it is a drift risk even while identical.
+- PWA: web manifest {'present' if has_manifest else 'absent'} (`apps/web/public/manifest.webmanifest`); service-worker **registration** in `apps/web`: {', '.join(sw_registration) or '**none found**'}. `apps/web/src/pwa.ts` only *detects* a controlling worker, so with no registration `offlineReady` stays false and there is no offline behaviour, although the product is described as PWA-first.
+
+## 12. Other findings
 
 - Billing routes are registered twice by design: {len(mode_variant)} disabled-mode stubs in `server.ts` and Stripe-mode handlers in `billing-stripe.ts` (selected by `BILLING_MODE`).
 - Interview join links are built from a fixed host string in `packages/domain/src/technical-interview.ts` (no provider integration): MOCKED.
-- CI on `main` has been red since 2026-10-26 (GitHub Actions); cause not investigated.
+- CI on `main` has been red since 2026-10-26 (GitHub Actions). {CI_SENTENCE}
 - Not detected (no occurrences in source): GraphQL, WebSockets, IndexedDB, SQLite, mobile apps, feature-flag SDKs (flags are a first-party table + endpoint).
+""")
+
+
+# ---------------------------------------------------------------- DOC_CODE_RECONCILIATION
+def _tests_cell(n):
+    out = []
+    for x in n['test_links']:
+        r = test_exec(x) or {}
+        mark = ' ✓' if r.get('passed') and not r.get('failed') else (' ✗' if r.get('failed') else '')
+        out.append(nodes[x]['name'].replace('tests/', '') + mark)
+    return ', '.join(out[:6]) + (f' (+{len(out) - 6})' if len(out) > 6 else '') or 'none'
+def _code_cell(n):
+    c = collections.Counter(nodes[x]['type'] for x in n['code_links'])
+    names = [nodes[x]['name'] for x in n['code_links'] if nodes[x]['type'] != 'API'][:3]
+    return (', '.join(f'{v} {k}' for k, v in c.most_common()) + (f" ({', '.join(names)})" if names else '')) or 'none'
+f_rows = [[n['id'], n['name'], n.get('category', ''), n.get('doc_status') or '—', _code_cell(n), _tests_cell(n), f"{n['status']}/{n['confidence']}", n.get('disagreement', '')] for n in docf]
+br_rows = [[n['id'], n['name'][:110], _code_cell(n), _tests_cell(n), f"{n['status']}/{n['confidence']}"] for n in docbr]
+w('quality/DOC_CODE_RECONCILIATION.md', f"""# Documentation vs Code vs Tests
+
+The three sources of truth, compared per documented ID. **Documentation is intent, not implementation evidence**: a status below comes from the documented status (for features) or from whether code cites the ID, and is raised or flagged only by code and test evidence.
+
+- Documented IDs come from `docs/registries/FEATURE_REGISTRY.md` (F-), `docs/experience/JOURNEY_REGISTRY.md` (J-) and `docs/registries/BUSINESS_RULE_REGISTRY.md` (BR-). They are graph nodes with the **same IDs**, so no second ID exists for the same entity.
+- Code evidence: an `IMPLEMENTS` edge, when a route handler block in `server.ts` or a source file cites the ID (file and line on the edge). A citation is the code's own claim; files that implement a feature without citing it are invisible here.
+- Test evidence: a `TESTED_BY` edge, when a test file cites the ID; ✓ = that file passed in the [execution run](EXECUTION_RESULTS.json), ✗ = it has failures.
+- Feature status: the 2026-10-21 documented status, mapped to the map's vocabulary and **never changed by this map**. Where today's code or tests disagree with it, the row is flagged in the *Disagreement* column for an owner to review; confidence rises only with code and passing-test evidence.
+
+## 1. Summary
+
+| Measure | Value |
+| --- | --- |
+| Documented features | {len(docf)}; documented status (2026-10-21): {', '.join(f'{k} {v}' for k, v in docf_by_doc.most_common())} |
+| Features cited by source code | {len(docf_cited)} of {len(docf)} |
+| Features cited by a test file | {sum(1 for n in docf if n['test_links'])} of {len(docf)} ({sum(1 for n in docf if n['tests_passed'])} with a passing cited test file) |
+| Documented *Not implemented*, but cited by endpoint handlers today | {len(docf_not_impl_but_code)} |
+| Documented implemented/partial, cited nowhere | {len(docf_impl_no_cite)} |
+| Documented journeys cited by code or tests | {sum(1 for n in docj if n['code_links'] or n['test_links'])} of {len(docj)} |
+| Documented business rules cited by source | {len(docbr_cited)} of {len(docbr)} (cited by tests: {len(docbr_tested)}) |
+| Endpoints citing no documented ID (code without a registry trace) | {len(api_no_doc)} of {len(apis)} |
+| Screens citing no documented ID | {len(scr_no_doc)} of {len(scrs)} |
+| Numeric claims in living docs that differ from source today | {len(stale_claims)} of {sum(1 for r in claim_rows if r[2] == 'living')} living-doc claims checked ({len(claim_rows)} claims in total, including dated snapshots) |
+
+## 2. Numeric claims in living documents
+
+Each row is a number a document states, found by a fixed pattern, against the same quantity measured from source now. A mismatch usually means the document was written at an earlier commit; it is listed, not corrected here, because the owning document decides its own wording.
+
+{table(['Document', 'Line', 'Kind', 'Quantity', 'Document says', 'Source today', 'Result'], claim_rows)}
+
+Measured today: {', '.join(f'{k} {v}' for k, v in ACTUAL.items())}.
+
+## 3. Features (F-01..F-{len(docf)})
+
+{table(['ID', 'Feature', 'Category', 'Documented status (2026-10-21)', 'Cited by source', 'Cited by tests', 'Status/confidence', 'Disagreement'], f_rows)}
+
+## 4. Code without a registry trace
+
+Endpoints whose handler block cites no F-/BR- ID, by API module: {', '.join(f'{k} {v}' for k, v in api_no_doc_mod.most_common())}. Screens: {', '.join(n['name'] for n in scr_no_doc)}.
+
+## 5. Journeys (J-01..J-{len(docj):02d})
+
+See [USER_JOURNEYS section 4](../journeys/USER_JOURNEYS.md). {sum(1 for n in docj if not (n['code_links'] or n['test_links']))} of {len(docj)} documented journeys are named by no code or test.
+
+## 6. Business rules (BR-01..BR-{len(docbr)})
+
+{table(['ID', 'Rule (registry text)', 'Cited by source', 'Cited by tests', 'Status/confidence'], br_rows)}
+
+Uncited rules are `UNKNOWN`, not `NOT_IMPLEMENTED`: a rule can be enforced without its ID in a comment.
 """)
 
 # ---------------------------------------------------------------- traceability CSV
@@ -1110,21 +1385,25 @@ The full register is [`EVIDENCE_REGISTER.csv`](EVIDENCE_REGISTER.csv): **{n_ev_r
 
 1. A node exists only if a file location was found for it (route registration line, export, `CREATE TABLE`, `<Route>`, test title, workflow file).
 2. A relationship exists only if a source construct implies it (call, import, SQL verb, JSX link, `parse(...)`). The edge's `file`/`line`/`note` say which.
-3. Status is derived from structure, never from documentation. Confidence is `MEDIUM` where source supports the capability and `LOW` where inferred; **`HIGH` is not used because nothing was executed**.
+3. Status is derived from structure, never from documentation (documented F-/J-/BR- nodes carry their documented status separately and are flagged where code disagrees). {CONF_RULE}
 4. Where the scan cannot tell, the node says `UNKNOWN` or the note says "not derivable" instead of a guess.
 
 ## Key findings with evidence
 
 | # | Finding | Evidence | Confidence |
 | --- | --- | --- | --- |
-| 1 | {n_dur} of {len(apis)} endpoints are durable; the rest are in-memory | `apps/api/src/durability.ts` `DURABLE_ROUTES` | MEDIUM |
+| 1 | {n_dur} of {len(apis)} endpoint registrations are durable or stateless ({n_durable_keys} keys in `DURABLE_ROUTES` + {n_stateless_keys} in `STATELESS_ROUTES`; 3 billing routes are registered twice); the rest are in-memory | `apps/api/src/durability.ts` | MEDIUM |
 | 2 | Worker performs real work for 2 of {len(job_rows)} dispatch kinds | `apps/worker/src/index.ts` claimHandlers | MEDIUM |
 | 3 | {len(unused)} of {len(dbs)} tables have no SQL consumer in source | graph `DB` nodes, `NOT_IMPLEMENTED` | LOW |
 | 4 | Browser route guard checks token presence only | `apps/web/src/App.tsx` `RequireAuth` | MEDIUM |
 | 5 | Only application and job lifecycles have explicit transition tables | `packages/domain/src/core.ts:99`, `jobs.ts:25` | MEDIUM |
 | 6 | Interview meeting links are a fixed-host template | `packages/domain/src/technical-interview.ts` | MEDIUM |
 | 7 | Stripe and Brevo are opt-in; behaviour not verified live | `billing-stripe.ts`, `apps/worker/src/email/brevo.ts` | MEDIUM |
-| 8 | CI on `main` red since 2026-10-26 | GitHub Actions run list (read-only) | MEDIUM |
+| 8 | CI on `main` red since 2026-10-26. {CI_SENTENCE} | GitHub Actions run list; [execution results](../quality/EXECUTION_RESULTS.json) | {'HIGH' if EXECUTED else 'MEDIUM'} |
+| 9 | Test suites at the mapped commit: {EXEC_LINE} | [EXECUTION_RESULTS.json](../quality/EXECUTION_RESULTS.json) | {'HIGH' if EXECUTED else 'n/a'} |
+| 10 | No service-worker registration in `apps/web`; the PWA has no offline behaviour | `apps/web/src/pwa.ts` (detection only); search of `apps/web` | MEDIUM |
+| 11 | Web app keeps its own copies of the application and job transition tables | `apps/web/src/lib/types.ts` | MEDIUM |
+| 12 | Documentation disagreements: {len(docf_not_impl_but_code)} feature(s) documented as not implemented but cited by endpoint handlers, {len(docf_impl_no_cite)} documented as built but cited nowhere, {len(stale_claims)} living-doc numeric claim(s) differ from source | [DOC_CODE_RECONCILIATION](../quality/DOC_CODE_RECONCILIATION.md) | MEDIUM |
 """)
 
 # ---------------------------------------------------------------- validation
@@ -1160,6 +1439,19 @@ if _mm:
     checks.append(('Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)', _mm['bad'] == 0, f"{_mm['ok']} diagrams ok, {_mm['bad']} failed; parsed, not rendered"))
 if _dt:
     checks.append(('DOT file parses and matches the graph (dotparser)', _dt['nodes'] == len(nodes) and _dt['edges'] == len(edges), f"{_dt['nodes']} nodes, {_dt['edges']} edges vs graph {len(nodes)}/{len(edges)}; not laid out by Graphviz"))
+_led = json.load(open(os.path.join(OUT, 'master', 'ID_LEDGER.json'))) if os.path.exists(os.path.join(OUT, 'master', 'ID_LEDGER.json')) else None
+if _led:
+    _vals = list(_led['ids'].values())
+    _gen = [n['id'] for n in nodes.values() if not n['type'].startswith('DOC')]
+    checks.append(('ID ledger: every generated node ID is recorded, no ID is assigned to two keys', len(_vals) == len(set(_vals)) and set(_gen) <= set(_vals),
+                   f"{len(_vals)} ledger keys, {len(_gen)} generated nodes; new this run {A.get('id_ledger', {}).get('new', 0)}, retired (kept reserved) {len(A.get('id_ledger', {}).get('retired', []))}"))
+checks.append(('Documented IDs (F-, J-, BR-) are graph nodes with their registry IDs', len(docf) > 0 and all(re.match(r'^(F-\d{2,3}|J-\d{2}|BR-\d{2,3})$', n['id']) for n in docf + docj + docbr),
+               f'{len(docf)} F, {len(docj)} J, {len(docbr)} BR'))
+if EXECUTED:
+    _unm = EXE.get('unmatched_files') or []
+    checks.append(('Every executed test file maps to a TEST node', not _unm, f"{sum(v.get('files', 0) for v in EXE.get('suites', {}).values())} executed files, {len(_unm)} unmatched {_unm[:3]}"))
+    _jn = [j for j in jours if (j.get('execution') or {}).get('outcome') == 'not-matched']
+    checks.append(('Every e2e-derived journey matches an executed test', not _jn, f'{len(jours) - len(_jn)}/{len(jours)} matched'))
 checks.append(('Graph JSON contains every node and edge (no truncation)', True, f'{len(nodes)} nodes, {len(edges)} edges written'))
 # repository coverage
 tracked = [f for f in src_files if not f.startswith(('Yash_Final', 'graphify-out', 'TalentSphere/', 'PRODUCT_BLUEPRINT', 'project-mindmap', 'docs/', 'BRAIN/', '.playwright', '.agents'))]
@@ -1202,7 +1494,7 @@ vt = ['# Validation Report (Phase 9/10)', '', 'Checks executed by the generator 
       '| Missed data operations? | SQL strings in source are scanned; ORM/dynamic SQL would be missed. |',
       '| Missed state transitions? | Only exported transition tables and status unions. Ad hoc `status = ...` assignments in handlers are not modelled. |',
       '| Missed integrations? | Hostname and SDK-import scan found Stripe and Brevo; Supabase appears as a hosting target only. |',
-      '| Missed journeys? | Journeys without an e2e test (documented-only) are not represented. Documented journeys: 28 in the 2026-10-21 audit. |',
+      f'| Missed journeys? | Executable journeys = e2e tests ({len(jours)}). Documented target journeys are nodes J-01..J-{len(docj):02d}; {sum(1 for n in docj if not (n["code_links"] or n["test_links"]))} of them are named by no code or test (see DOC_CODE_RECONCILIATION). |',
       '| Relationships invented? | No: each edge carries file/line/note; heuristic edges are labelled (TESTED_BY is path-level). |']
 w('VALIDATION_REPORT.md', '\n'.join(vt) + '\n')
 
@@ -1221,7 +1513,7 @@ All numbers are computed from the generated graph (`master/MASTER_PROJECT_GRAPH.
 | 4 | Sub-features (endpoints + screens) | {lvl['SUB-FEATURE']} ({len(apis)} endpoints + {len(scrs)} screens) | level SUB-FEATURE |
 | 5 | Micro-features (UI interactions) | {lvl['MICRO-FEATURE']} | level MICRO-FEATURE |
 | 6 | Nano-features (error branches) | {lvl['NANO-FEATURE']} | level NANO-FEATURE |
-| 7 | User journeys | {len(jours)} (e2e-derived) | `JOUR-` nodes |
+| 7 | User journeys | {len(jours)} executable (one per e2e test) + {len(docj)} documented targets | `JOUR-` and `J-` nodes |
 | 8 | Screens | {len(scrs)} | `SCR-` nodes |
 | 9 | Interactions | {len(ints)} | `INT-` nodes |
 | 10 | APIs | {len(apis)} ({n_dur} durable, {len(apis) - n_dur} ephemeral) | `API-` nodes |
@@ -1230,21 +1522,23 @@ All numbers are computed from the generated graph (`master/MASTER_PROJECT_GRAPH.
 | 13 | Cross-connections | {tot_cross:,} non-hierarchy edges ({len(edges):,} total incl. {len(edges) - tot_cross:,} CONTAINS) | edges |
 | 14 | Status distribution | {', '.join(f'{k} {v}' for k, v in status_dist.most_common())} | capability nodes (API, SCR, INT, COMP, RULE, DB, EXT, JOUR, SVC, INFRA); per-type matrix in master map section 4 |
 | 15 | Contract schemas | {types['SCH']} | `SCH-` nodes |
-| 16 | Tests | {len(tests)} files, {sum(n['cases'] for n in tests)} cases (not executed) | `TEST-` nodes |
+| 16 | Tests | {len(tests)} files, {sum(n['cases'] for n in tests)} static cases. Executed: {EXEC_LINE} | `TEST-` nodes; quality/EXECUTION_RESULTS.json |
+| 16a | Confidence distribution | {', '.join(f'{k} {v}' for k, v in conf_dist.most_common())} | same capability nodes as row 14 |
+| 16b | Documented entities | {len(docf)} features, {len(docj)} journeys, {len(docbr)} business rules; {sum(1 for e in edges if e['rel'] == 'IMPLEMENTS')} IMPLEMENTS edges | `F-`, `J-`, `BR-` nodes |
+| 16c | Documentation disagreements | {len(docf_not_impl_but_code)} feature(s) documented as not implemented but cited by handlers; {len(docf_impl_no_cite)} documented as built but cited nowhere; {len(stale_claims)} of {sum(1 for r in claim_rows if r[2] == 'living')} living-doc numeric claims differ | quality/DOC_CODE_RECONCILIATION.md |
 | 17 | Validation | {len(checks) - errors_total}/{len(checks)} checks pass | VALIDATION_REPORT |
 
 ## Known limitations
 
-- Static analysis only; **nothing was run**. No `node_modules` exist in this environment and installing writes protected files, so no unit, integration, e2e or runtime evidence was produced and no `HIGH` confidence exists.
-- Journeys come from e2e specs; documented-only journeys are not mapped. Per-journey fields such as business logic per step, decision branches and recovery paths are not derivable statically.
+- {('Tests were executed once, on ' + EXE_DATE + ', in a throwaway copy of the tracked files (dependencies installed there, never in the repository). Results reflect that commit and the in-memory API for unit, integration and e2e suites; the Postgres suite ran against a local PostgreSQL 16. No deployed environment, live provider or other browser was exercised.') if EXECUTED else 'Static analysis only; no test results were supplied, so no `HIGH` confidence exists.'}
+- Executable journeys come from e2e specs; documented journeys (J-) are linked only where code or tests cite their ID. Per-journey fields such as business logic per step, decision branches and recovery paths are not derivable statically.
 - Response shapes, request field-level validation, per-column constraints, RLS policy semantics and data retention rules are not extracted (see the evidence in migrations and contracts).
-- `TESTED_BY` is textual and path-level.
-- All Mermaid diagrams pass the Mermaid 11.4.1 parser and the DOT file passes a DOT parser, but nothing was *rendered or laid out* (no browser or Graphviz binary used); very large diagrams may need a layout engine tuned for size. The parser checks ran from a throwaway directory outside the repository.
-- The master map is Mermaid only. All Mermaid diagrams (master mind map, overview, chain, 20 branch mind maps) were parsed and also rendered in headless Chromium with Mermaid 11.4.1 and inspected; the master mind map shows branches and sub-branches, and the per-branch mind maps carry every item. The lossless forms are the JSON and DOT.
+- `TESTED_BY` is textual and path-level, so `HIGH` on an endpoint or rule means "a linked test file passed", not "an assertion covers this exact behaviour". `IMPLEMENTS` relies on code citing a documented ID.
+- Mermaid diagrams are checked with the Mermaid 11.4.1 parser and the DOT file with a DOT parser (VALIDATION_REPORT), from a throwaway directory outside the repository. This run parsed them; it did not render or lay them out, so very large diagrams may still need a layout engine tuned for size. The lossless forms are the JSON and DOT.
 
 ## Remaining unknowns
 
-- Whether the e2e/unit/integration tests pass today (CI on `main` is red; cause not examined).
+- {('Whether the suites still pass after commit ' + (EXE.get('commit') or '')[:7] + ': re-run them and regenerate (README).') if EXECUTED else 'Whether the e2e/unit/integration tests pass today.'}
 - Live behaviour of Stripe, Brevo and hosted Supabase.
 - Runtime state of the worker queue and the production database.
 - Which ephemeral modules are intended to be persisted next (documented in ADR-015 and the roadmap, not decided by code).
@@ -1267,18 +1561,22 @@ Start with [`master/MASTER_PROJECT_MINDMAP.md`](master/MASTER_PROJECT_MINDMAP.md
 | `master/MASTER_PROJECT_MINDMAP.md` / `.mmd` | **Master mind map (Mermaid)**: 20 branches in three zones, legend, type-level cross-connection graph, module table |\n| `master/MASTER_PROJECT_DIAGRAMS.md` | Mermaid only: hub/zone overview flowchart, cross-connection chain, and one detail mind map per branch (every item, with status emoji) |
 | `master/MASTER_PROJECT_GRAPH.json` | **The master graph**: {len(nodes):,} nodes, {len(edges):,} typed edges, each with evidence |
 | `master/MASTER_PROJECT_GRAPH.dot` | The same graph for Graphviz |
-| `journeys/USER_JOURNEYS.md` / `.json` | Personas, navigation sets, {len(jours)} e2e-derived journeys |
+| `master/ID_LEDGER.json` | Logical key → stable ID for every generated node; IDs are never renumbered or reused |
+| `journeys/USER_JOURNEYS.md` / `.json` | Personas, navigation sets, {len(jours)} e2e-derived journeys with run results, {len(docj)} documented target journeys |
 | `features/COMPLETE_FEATURE_INVENTORY.json` | Hierarchy with parent IDs, status, evidence, business rules |
 | `ui/SCREEN_INTERACTION_INVENTORY.md` | Screens, components, interactions, navigation |
 | `architecture/` | Frontend, backend/infra, API (all {len(apis)} endpoints), dependency graph, per-module subgraphs |
 | `data/` | Database entity map, end-to-end data flows, state machines |
-| `quality/` | Implementation gaps, test coverage map, traceability matrix (CSV) |
+| `quality/` | Implementation gaps, test coverage map with execution results, documentation-vs-code reconciliation, traceability matrix (CSV), `EXECUTION_RESULTS.json` |
+| `DOCUMENTATION_MAP.md` | Which document tree owns what (code, SSOT, PRODUCT_BLUEPRINT, Yash_Final_Project_Document, docs/), and where they overlap |
 | `evidence/` | Evidence register (CSV + summary) |
 | `VALIDATION_REPORT.md`, `FINAL_REPORT.md` | Phase 9–10 checks and computed totals |
 
 ## ID system
 
-`PROJ ROLE JOUR MOD FEAT API SCR COMP INT ERR RULE SCH SVC DB STATE TEST EXT INFRA`, numbered per prefix in a deterministic scan order. An ID is only stable for one generation run; regenerating after code changes can renumber. The graph JSON is the source of truth for ID → file:line.
+`PROJ ROLE JOUR MOD FEAT API SCR COMP INT ERR RULE SCH SVC DB STATE TEST EXT INFRA` for generated nodes, plus the project's own registry IDs `F-` (features), `J-` (journeys) and `BR-` (business rules) for documented entities, so a documented feature has exactly one ID everywhere.
+
+Generated IDs are **stable across runs**: `tools/enrich.py` keeps `master/ID_LEDGER.json`, which maps each node's logical key (type, name, defining file, and an ordinal when the same triple repeats) to its ID. A new entity gets the next free number for its prefix; a removed entity's ID is retired and never reused. The graph JSON is the source of truth for ID → file:line.
 
 ## Hierarchy levels used
 
@@ -1286,11 +1584,11 @@ APPLICATION → MODULE (API module) → FEATURE (resource group, shared componen
 
 ## Status and confidence
 
-Statuses: IMPLEMENTED, PARTIALLY_IMPLEMENTED, NOT_IMPLEMENTED, BROKEN, MOCKED, UNREACHABLE, DEPRECATED, UNKNOWN. Confidence: HIGH (source + execution/test), MEDIUM (source only), LOW (inferred). **No HIGH**: nothing was executed.
+Statuses: IMPLEMENTED, PARTIALLY_IMPLEMENTED, NOT_IMPLEMENTED, BROKEN, MOCKED, UNREACHABLE, DEPRECATED, UNKNOWN. {CONF_RULE}
 
 ## Method
 
-Read-only extractor (Python, standard library, kept outside the repo) parsing: route registrations, handler bodies, `durability.ts`, `core-store.ts`, `App.tsx`, page and component source, domain exports, contract schemas, migrations, test files, workflows. See VALIDATION_REPORT for checks.
+Python scripts in `tools/` (standard library only) that read the repository and write only to `project-mindmap/`: `extract.py` parses route registrations, handler bodies, `durability.ts`, `core-store.ts`, `App.tsx`, page and component source, domain exports, contract schemas, migrations, test files and workflows; `enrich.py` applies the ID ledger, adds the documented F-/J-/BR- entities and attaches test results; `generate.py` and `mermaid_master.py` write every artifact. See VALIDATION_REPORT for checks.
 
 ## Limits
 
@@ -1301,16 +1599,19 @@ See [FINAL_REPORT](FINAL_REPORT.md) "Known limitations".
 The map is generated, not hand-written. From the repository root (read-only on the repo; outputs go to `project-mindmap/`):
 
 ```bash
-mkdir -p /tmp/mindmap-work
-python3 -I project-mindmap/tools/extract.py /tmp/mindmap-work
-python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work
-python3 -I project-mindmap/tools/mermaid_master.py /tmp/mindmap-work   # master mind map + per-branch Mermaid diagrams
-python3 -I project-mindmap/tools/generate.py /tmp/mindmap-work   # again, so the master map embeds the rich mind map
+W=$(mktemp -d)                                                   # any directory outside the repository
+python3 -I project-mindmap/tools/extract.py "$W"
+python3 -I project-mindmap/tools/enrich.py "$W" [RESULTS_DIR]     # RESULTS_DIR optional, see below
+python3 -I project-mindmap/tools/generate.py "$W"
+python3 -I project-mindmap/tools/mermaid_master.py "$W"          # master mind map + per-branch Mermaid diagrams
+python3 -I project-mindmap/tools/generate.py "$W"                # again, so the master map embeds the rich mind map
 ```
+
+**Test results.** AGENTS.md forbids installing dependencies or building in the repository, so tests are run in a throwaway copy: `git ls-files -co --exclude-standard | tar -cf - -T - | tar -xf - -C <copy>`, then in the copy `pnpm install --frozen-lockfile`, `pnpm build`, `npx vitest run --reporter=json --outputFile=<RESULTS_DIR>/vitest.json`, `TEST_DATABASE_URL=... npx vitest run --config vitest.pg.config.ts --reporter=json --outputFile=<RESULTS_DIR>/vitest-pg.json` and `npx playwright test --reporter=json --trace off > <RESULTS_DIR>/e2e.json`. Add `<RESULTS_DIR>/run.json` with `commit`, `date`, `root` (the copy's path, stripped from file names), `commands` and `checks`. `enrich.py` reduces these to `quality/EXECUTION_RESULTS.json`; without RESULTS_DIR it reuses that file and the map states which commit it was measured on.
 
 Optional parser checks (install `mermaid@11.4.1 jsdom dotparser` in a directory **outside** the repository, put `validate-mermaid.mjs` and `validate-dot.mjs` there, and write their JSON output to `<parent of workdir>/mmtest/mm_out.json` and `dot_out.json`; `generate.py` embeds the results in the validation report). Output is deterministic: two runs on the same commit produce an identical graph.
 
-The scripts are documentation tooling only: they are not part of any build, test or CI step, and they never write outside `project-mindmap/`.
+The scripts are documentation tooling only: they are not part of any build, test or CI step, and they never write outside `project-mindmap/`. Generated Markdown is formatted with the repository's Prettier config afterwards (`pnpm lint` checks it).
 """)
 print('ok', len(inv), 'inventory entries;', 'checks failed:', errors_total)
 for c, ok, d in checks:

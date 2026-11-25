@@ -2,22 +2,26 @@
 
 Checks executed by the generator against the graph just written. A PASS means the stated invariant holds; it does not mean the map is complete.
 
-| Check                                                                     | Result | Detail                                                              |
-| ------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------- |
-| Every node ID is unique                                                   | PASS   | 2188 nodes                                                          |
-| Every edge endpoint exists                                                | PASS   | 5582 edges, 0 dangling                                              |
-| Every inventory parent_id exists in the graph                             | PASS   | 1070 entries, 0 bad                                                 |
-| Every node has evidence                                                   | PASS   | 0 without                                                           |
-| Every feature-like node has a status                                      | PASS   | 0 without                                                           |
-| No duplicate logical entities (type+name)                                 | PASS   | 0 duplicates: []                                                    |
-| Endpoint inventory reconciles with a separate grep of registrations       | PASS   | grep 282 vs inventory 282                                           |
-| Screens reconcile with <Route> elements that render a \*Page              | PASS   | 29 vs 29                                                            |
-| Tables reconcile with distinct CREATE TABLE names in migrations           | PASS   | 112 distinct names (113 statements) vs 112 nodes                    |
-| Web API calls all resolve to a server route                               | PASS   | 96 call sites, 0 unresolved                                         |
-| Mind map text is structurally valid (indent tree, sanitised labels)       | PASS   | syntax only; not rendered by mermaid                                |
-| Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files) | PASS   | 105 diagrams ok, 0 failed; parsed, not rendered                     |
-| DOT file parses and matches the graph (dotparser)                         | PASS   | 2188 nodes, 5582 edges vs graph 2188/5582; not laid out by Graphviz |
-| Graph JSON contains every node and edge (no truncation)                   | PASS   | 2188 nodes, 5582 edges written                                      |
+| Check                                                                         | Result | Detail                                                                            |
+| ----------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| Every node ID is unique                                                       | PASS   | 2628 nodes                                                                        |
+| Every edge endpoint exists                                                    | PASS   | 6945 edges, 0 dangling                                                            |
+| Every inventory parent_id exists in the graph                                 | PASS   | 1070 entries, 0 bad                                                               |
+| Every node has evidence                                                       | PASS   | 0 without                                                                         |
+| Every feature-like node has a status                                          | PASS   | 0 without                                                                         |
+| No duplicate logical entities (type+name)                                     | PASS   | 0 duplicates: []                                                                  |
+| Endpoint inventory reconciles with a separate grep of registrations           | PASS   | grep 282 vs inventory 282                                                         |
+| Screens reconcile with <Route> elements that render a *Page                   | PASS   | 29 vs 29                                                                          |
+| Tables reconcile with distinct CREATE TABLE names in migrations               | PASS   | 112 distinct names (113 statements) vs 112 nodes                                  |
+| Web API calls all resolve to a server route                                   | PASS   | 96 call sites, 0 unresolved                                                       |
+| Mind map text is structurally valid (indent tree, sanitised labels)           | PASS   | syntax only; not rendered by mermaid                                              |
+| Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)     | PASS   | 105 diagrams ok, 0 failed; parsed, not rendered                                   |
+| DOT file parses and matches the graph (dotparser)                             | PASS   | 2628 nodes, 6945 edges vs graph 2628/6945; not laid out by Graphviz               |
+| ID ledger: every generated node ID is recorded, no ID is assigned to two keys | PASS   | 2188 ledger keys, 2179 generated nodes; new this run 0, retired (kept reserved) 9 |
+| Documented IDs (F-, J-, BR-) are graph nodes with their registry IDs          | PASS   | 173 F, 28 J, 248 BR                                                               |
+| Every executed test file maps to a TEST node                                  | PASS   | 223 executed files, 0 unmatched []                                                |
+| Every e2e-derived journey matches an executed test                            | PASS   | 100/100 matched                                                                   |
+| Graph JSON contains every node and edge (no truncation)                       | PASS   | 2628 nodes, 6945 edges written                                                    |
 
 ## Repository coverage
 
@@ -37,5 +41,5 @@ Inventoried-only files: `apps/api/src/durability.ts`, `apps/api/src/index.ts`, `
 | Missed data operations?   | SQL strings in source are scanned; ORM/dynamic SQL would be missed.                                                                                                                                                                                                                     |
 | Missed state transitions? | Only exported transition tables and status unions. Ad hoc `status = ...` assignments in handlers are not modelled.                                                                                                                                                                      |
 | Missed integrations?      | Hostname and SDK-import scan found Stripe and Brevo; Supabase appears as a hosting target only.                                                                                                                                                                                         |
-| Missed journeys?          | Journeys without an e2e test (documented-only) are not represented. Documented journeys: 28 in the 2026-10-21 audit.                                                                                                                                                                    |
+| Missed journeys?          | Executable journeys = e2e tests (100). Documented target journeys are nodes J-01..J-28; 25 of them are named by no code or test (see DOC_CODE_RECONCILIATION).                                                                                                                          |
 | Relationships invented?   | No: each edge carries file/line/note; heuristic edges are labelled (TESTED_BY is path-level).                                                                                                                                                                                           |

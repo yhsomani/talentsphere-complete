@@ -1,0 +1,3212 @@
+{
+  "commit": "5d67317778b0c9bd4380b7fb4c4e6ed966e073e6",
+  "date": "2026-11-25",
+  "commands": {
+    "vitest": "vitest run (root config: unit, integration, security) after pnpm build, in a throwaway copy of the tracked files",
+    "vitest-pg": "vitest run --config vitest.pg.config.ts against a local PostgreSQL 16 cluster (TEST_DATABASE_URL), throwaway copy",
+    "e2e": "playwright test --trace off (Chromium; API + Vite preview webServers from playwright.config.ts), throwaway copy",
+    "node-test": "node --test scripts/tests/migration-integrity.test.mjs (as in ci.yml), throwaway copy"
+  },
+  "checks": [
+    {
+      "name": "pnpm build (all packages and apps)",
+      "result": "PASS",
+      "detail": "needed before the integration tests and e2e, which import compiled workspace packages"
+    },
+    {
+      "name": "pnpm typecheck (tsc -b && tsc -p tests)",
+      "result": "PASS",
+      "detail": "run in the throwaway copy, where its emitted files are discarded"
+    },
+    {
+      "name": "pnpm lint (prettier --check)",
+      "result": "FAIL",
+      "detail": "230 files unformatted: 199 in Yash_Final_Project_Document/, 25 tracked .omc/ agent-state JSON files (root, apps/web, deploy/oracle), 4 in PRODUCT_BLUEPRINT/, plus .claude/launch.json and tests/security/injection-defenses.test.ts. Lint is the first check step in .github/workflows/ci.yml, so CI on main stops there and the later steps never run."
+    }
+  ],
+  "suites": {
+    "vitest": {
+      "total": 1571,
+      "passed": 1571,
+      "failed": 0,
+      "skipped": 0,
+      "files": 146
+    },
+    "vitest-pg": {
+      "total": 66,
+      "passed": 66,
+      "failed": 0,
+      "skipped": 0,
+      "files": 15
+    },
+    "node-test": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "files": 1
+    },
+    "e2e": {
+      "total": 265,
+      "passed": 265,
+      "failed": 0,
+      "skipped": 0,
+      "files": 61
+    }
+  },
+  "files": {
+    "scripts/tests/migration-integrity.test.mjs": {
+      "runner": "node-test",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/accessibility.spec.ts": {
+      "runner": "playwright",
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/account-deletion.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/account-security.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/activity-contributions.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/alumni-networks.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/analytics.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/application-drafts.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/application-feedback.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/assessment-lms.spec.ts": {
+      "runner": "playwright",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/auth-profile.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/behavioral-talent-discovery.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/career-readiness.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/career-trajectory.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/certificate-verification.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/challenges.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/checkout-idempotency.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/core-loop.spec.ts": {
+      "runner": "playwright",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/credentials.spec.ts": {
+      "runner": "playwright",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/employer-reputation.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/evidence-skills.spec.ts": {
+      "runner": "playwright",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/frontend-fixes.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/gamification-billing-admin-search.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/hostile-user.spec.ts": {
+      "runner": "playwright",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/instructor-reputation.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/job-templates.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/jobs-applications.spec.ts": {
+      "runner": "playwright",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/learning-impact.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/learning-page.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/lesson-player.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/messaging-notifications-ai.spec.ts": {
+      "runner": "playwright",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/messaging.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/moderation.spec.ts": {
+      "runner": "playwright",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/mutation-feedback.spec.ts": {
+      "runner": "playwright",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/navigation.spec.ts": {
+      "runner": "playwright",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/network-page.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/notifications.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/peer-credibility.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/performance.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/portfolio-resumes.spec.ts": {
+      "runner": "playwright",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/privacy-contact.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/referral-requests.spec.ts": {
+      "runner": "playwright",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/reputation-engine.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/responsive.spec.ts": {
+      "runner": "playwright",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/restricted-account.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/resumes-networking-portfolio.spec.ts": {
+      "runner": "playwright",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/salary-intelligence.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/saved-searches-alerts.spec.ts": {
+      "runner": "playwright",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/session-resilience.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/settings-page.spec.ts": {
+      "runner": "playwright",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/skill-decay.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/skill-forecasting.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/skills-graph.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/talent-pool-intelligence.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/talent-segmentation.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/technical-interview.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/ui-sweep.spec.ts": {
+      "runner": "playwright",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/unified-search.spec.ts": {
+      "runner": "playwright",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/warm-introductions.spec.ts": {
+      "runner": "playwright",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/web-ui.spec.ts": {
+      "runner": "playwright",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/work-history-graph.spec.ts": {
+      "runner": "playwright",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/e2e/work-history-removal.spec.ts": {
+      "runner": "playwright",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/activity-contributions.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/admin.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/ai-gateway.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/alumni-networks.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/analytics.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/api-server.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/application-drafts.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/application-feedback.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/auth-profile.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/behavioral-talent-discovery.test.ts": {
+      "runner": "vitest",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/billing.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/career-trajectory.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/certificate-verification.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/challenges-assessment.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/connection-privacy.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/core-notifications.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/email-budget-race.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/email-delivery-gate.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/employer-reputation.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/erasure-ephemeral.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/erasure-resume.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/evidence-skills.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/evidence-visibility.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/gamification.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/instructor-reputation.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/job-observability.test.ts": {
+      "runner": "vitest",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/job-templates.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/jobs-applications.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/learning-impact.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/lms-courses.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/messaging-rules.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/messaging.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/moderation.test.ts": {
+      "runner": "vitest",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/networking.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/notifications.test.ts": {
+      "runner": "vitest",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/peer-credibility.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/plan-enforcement.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/portfolio.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/referral-requests.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/reputation-engine.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/reputation-visibility.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/resumes.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/review-r2-regressions.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/route-coverage-gaps.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/route-trust-flags.test.ts": {
+      "runner": "vitest",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/salary-intelligence.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/saved-searches.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/search.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/settings.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/skill-decay.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/skill-forecasting.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/storage-boot.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/stripe-billing.test.ts": {
+      "runner": "vitest",
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/talent-pool-intelligence.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/talent-segmentation.test.ts": {
+      "runner": "vitest",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/technical-interview.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/warm-introductions.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/work-history-graph.test.ts": {
+      "runner": "vitest",
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/integration/work-history-removal.test.ts": {
+      "runner": "vitest",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/admin-audit.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/analytics-consent.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/billing.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/concurrency.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/core-persistence.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/erasure-concurrency.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/feature-flags.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/job-claim-fencing.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/messaging.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/notifications.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/private-data-rls.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/saved-jobs.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/saved-searches.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/work-history-removal.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/pg/writer-lease.test.ts": {
+      "runner": "vitest-pg",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/security/api-security.test.ts": {
+      "runner": "vitest",
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/security/core-authz.test.ts": {
+      "runner": "vitest",
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/security/injection-defenses.test.ts": {
+      "runner": "vitest",
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/security/private-data-rls.test.ts": {
+      "runner": "vitest",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/security/route-authz-sweep.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/security/session-sign-out.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/activity-contributions-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/activity-visibility-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/admin-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/ai-gateway-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/alumni-networks-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/analytics-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/api-entry-order.test.ts": {
+      "runner": "vitest",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/api-lifecycle.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/application-drafts-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/application-feedback-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/background-jobs.test.ts": {
+      "runner": "vitest",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/behavioral-talent-discovery-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/billing-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/billing-grants-migration.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/career-trajectory-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/certificate-revocations-rls-migration.test.ts": {
+      "runner": "vitest",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/certificate-verification-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/challenges-assessment-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/contracts-url.test.ts": {
+      "runner": "vitest",
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/database-migrations.test.ts": {
+      "runner": "vitest",
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/email/architecture.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/email/brevo.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/email/service.test.ts": {
+      "runner": "vitest",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/employer-reputation-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/evidence-skills-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/feature-flag-store.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/foundation.test.ts": {
+      "runner": "vitest",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/gamification-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/instructor-reputation-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/job-templates-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/jobs-applications-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/learning-impact-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/lms-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/login-throttle-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/messaging-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/migration-references.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/moderation-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/networking-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/notifications-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/password-hashing.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/peer-credibility-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/persistence-honesty.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/plan-limits-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/portfolio-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/pricing-consistency.test.ts": {
+      "runner": "vitest",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/private-data-rls-hardening.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/production-config.test.ts": {
+      "runner": "vitest",
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/profile-visibility.test.ts": {
+      "runner": "vitest",
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/rate-limit-config.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/referral-requests-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/reputation-engine-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/resumes-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/salary-intelligence-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/saved-searches-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/search-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/session-ended-reason.test.ts": {
+      "runner": "vitest",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/settings-contract.test.ts": {
+      "runner": "vitest",
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/settings-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/skill-decay-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/skill-forecasting-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/stripe-billing-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/stripe-event-processing.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/stripe-gateway.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/subscription-lifecycle-edge.test.ts": {
+      "runner": "vitest",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/talent-pool-intelligence-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/talent-segmentation-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/technical-interview-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/warm-introductions-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-api-json.test.ts": {
+      "runner": "vitest",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-career.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-course.test.ts": {
+      "runner": "vitest",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-domain-mirrors.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-format.test.ts": {
+      "runner": "vitest",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-idempotency.test.ts": {
+      "runner": "vitest",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-landing-art.test.ts": {
+      "runner": "vitest",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-settings-controls.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/web-shell.test.ts": {
+      "runner": "vitest",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/work-history-graph-domain.test.ts": {
+      "runner": "vitest",
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/worker-claim.test.ts": {
+      "runner": "vitest",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/worker-loop.test.ts": {
+      "runner": "vitest",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "tests/unit/worker-queue.test.ts": {
+      "runner": "vitest",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    }
+  },
+  "e2e": [
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every route declares a language and a descriptive title",
+      "line": 56,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every route exposes banner, main and contentinfo landmarks",
+      "line": 67,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every route has exactly one h1",
+      "line": 77,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "heading levels never skip a level",
+      "line": 87,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every interactive control has an accessible name",
+      "line": 113,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every form input has a programmatic label",
+      "line": 144,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every image carries an alt attribute",
+      "line": 171,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "no element uses a positive tabindex",
+      "line": 184,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "the skip link is revealed on focus and moves focus to main content",
+      "line": 198,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "primary navigation is reachable by keyboard alone",
+      "line": 216,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every interactive control on the login form is operable by keyboard",
+      "line": 230,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "focused controls render a visible focus indicator",
+      "line": 249,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "no route requires horizontal scrolling at a 320px viewport",
+      "line": 264,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "content is not hidden when text is zoomed to 200%",
+      "line": 279,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "honours the reduced-motion preference",
+      "line": 298,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "every vacancy on the jobs page is named and actionable by keyboard",
+      "line": 331,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/accessibility.spec.ts",
+      "title": "each pricing option is a labelled region whose action is keyboard reachable",
+      "line": 357,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/account-deletion.spec.ts",
+      "title": "confirm stays disabled until DELETE and a password are both entered",
+      "line": 9,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/account-deletion.spec.ts",
+      "title": "a wrong password is shown on the field, keeps the account, and is gone after reopening",
+      "line": 29,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/account-deletion.spec.ts",
+      "title": "the right password deletes the account and signs out",
+      "line": 76,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/account-security.spec.ts",
+      "title": "changing the password signs out the other device and keeps this one",
+      "line": 9,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/account-security.spec.ts",
+      "title": "signing out ends the session on the server, not only in this browser",
+      "line": 66,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/account-security.spec.ts",
+      "title": "signing out of other devices ends the other session and keeps this one",
+      "line": 96,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/activity-contributions.spec.ts",
+      "title": "candidate initializes with neutral passive engagement score of 0",
+      "line": 41,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/activity-contributions.spec.ts",
+      "title": "records diverse activity events across categories and advances engagement band",
+      "line": 53,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/activity-contributions.spec.ts",
+      "title": "candidate queries chronological activity feed with category filtering",
+      "line": 105,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/activity-contributions.spec.ts",
+      "title": "recruiter inspects candidate aggregate engagement profile with zero event leakage (F-146, P-02)",
+      "line": 126,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/alumni-networks.spec.ts",
+      "title": "submits alumni affiliations and confirms them with institutional seat codes",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/alumni-networks.spec.ts",
+      "title": "enforces strict cross-institution isolation on directory discovery (BR-F125-03)",
+      "line": 166,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/alumni-networks.spec.ts",
+      "title": "creates, joins, and lists alumni chapter groups with institutional boundaries",
+      "line": 201,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/alumni-networks.spec.ts",
+      "title": "manages alumni mentorship requests and state transitions",
+      "line": 234,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/analytics.spec.ts",
+      "title": "ingests client telemetry events and enforces metadata allowlist (F-19, BR-27)",
+      "line": 35,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/analytics.spec.ts",
+      "title": "enforces RBAC on analytics queries and aggregates KPIs for platform admin (F-31, BR-06)",
+      "line": 101,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/analytics.spec.ts",
+      "title": "respects candidate privacy opt-out by anonymizing telemetry (F-15, \u00a731)",
+      "line": 135,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/application-drafts.spec.ts",
+      "title": "autosaves application draft, tracks versions, and enables historical recovery (F-36, BR-18, SSOT 1015)",
+      "line": 81,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/application-drafts.spec.ts",
+      "title": "submitting application marks draft as submitted and prevents further mutation (F-36, BR-15, SSOT 1015)",
+      "line": 153,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/application-drafts.spec.ts",
+      "title": "discards active draft on candidate command (F-36)",
+      "line": 181,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/application-feedback.spec.ts",
+      "title": "candidate cannot create recruiter feedback (403 Forbidden)",
+      "line": 96,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/application-feedback.spec.ts",
+      "title": "recruiter configures feedback template for organization (BR-224)",
+      "line": 113,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/application-feedback.spec.ts",
+      "title": "recruiter provides structured feedback and candidate views it privately (BR-217, BR-219, BR-223)",
+      "line": 141,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/assessment-lms.spec.ts",
+      "title": "enforces strict server-side AI prohibition during active assessment session (BR-10)",
+      "line": 27,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/assessment-lms.spec.ts",
+      "title": "enrolls in LMS course, enforces prerequisite sequential ordering, and issues verified evidence on completion (BR-21..BR-23)",
+      "line": 85,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/auth-profile.spec.ts",
+      "title": "registers candidate, prevents duplicates, and logs in with secure tokens (F-01)",
+      "line": 10,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/auth-profile.spec.ts",
+      "title": "manages profile information and enforces privacy levels (F-12)",
+      "line": 68,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/auth-profile.spec.ts",
+      "title": "configures privacy preferences, requests export, and initiates GDPR erasure (F-15)",
+      "line": 92,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/behavioral-talent-discovery.spec.ts",
+      "title": "candidate computes and publishes their own behavioral talent profile (F-159)",
+      "line": 80,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/behavioral-talent-discovery.spec.ts",
+      "title": "admin computes candidate profile with organic multi-dimensional signals",
+      "line": 95,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/behavioral-talent-discovery.spec.ts",
+      "title": "enforces anti-gaming dampening on bot spam activity and discounts collusion rings",
+      "line": 141,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/behavioral-talent-discovery.spec.ts",
+      "title": "recruiter searches and filters candidates by skill and composite score (F-159)",
+      "line": 172,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/behavioral-talent-discovery.spec.ts",
+      "title": "recruiter views candidate behavioral profile details",
+      "line": 189,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/behavioral-talent-discovery.spec.ts",
+      "title": "prevents non-recruiter candidates from accessing recruiter discovery endpoint (FORBIDDEN)",
+      "line": 201,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-readiness.spec.ts",
+      "title": "a candidate with no skills is sent to add some first",
+      "line": 32,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-readiness.spec.ts",
+      "title": "picks a role, must state education, and sees a score with the missing milestones",
+      "line": 40,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-readiness.spec.ts",
+      "title": "a lower education level lowers the education part of the score",
+      "line": 85,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-trajectory.spec.ts",
+      "title": "records an opt-in career transition and verifies individual user privacy (BR-157, BR-159, BR-161)",
+      "line": 79,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-trajectory.spec.ts",
+      "title": "enforces explicit user consent policy on career transitions (BR-157)",
+      "line": 119,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-trajectory.spec.ts",
+      "title": "queries progression benchmarks enforcing k-anonymity (sampleCount >= 20, BR-160)",
+      "line": 139,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-trajectory.spec.ts",
+      "title": "calculates career transition probability disclosing confidence intervals and source attribution (BR-163)",
+      "line": 172,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-trajectory.spec.ts",
+      "title": "discovers career progression pathways with 5-year salary trajectory projection (F-152, BR-161)",
+      "line": 194,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/career-trajectory.spec.ts",
+      "title": "evaluates candidate milestone readiness against target role prerequisites (F-85, F-152)",
+      "line": 221,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/certificate-verification.spec.ts",
+      "title": "candidate can view their earned certificates with verification links",
+      "line": 77,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/certificate-verification.spec.ts",
+      "title": "public Zero-PII verification verifies legitimate proof hash without auth",
+      "line": 91,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/certificate-verification.spec.ts",
+      "title": "returns 404 for unknown or tampered proof hash",
+      "line": 111,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/certificate-verification.spec.ts",
+      "title": "enforces role authorization on certificate revocation and reflects revocation publicly",
+      "line": 116,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/challenges.spec.ts",
+      "title": "lists real challenges and shows only the public examples in a session",
+      "line": 17,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/challenges.spec.ts",
+      "title": "submits a solution, says it was not run or scored, and stores it as unverified",
+      "line": 36,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/challenges.spec.ts",
+      "title": "AI assistance is refused while a session is open and allowed again after submitting",
+      "line": 74,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/checkout-idempotency.spec.ts",
+      "title": "checkout keys: reused after a network failure, new after an answered failure or a cycle change",
+      "line": 19,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "a recruiter signs up, sets up a company and publishes a job",
+      "line": 35,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "a candidate signs up and sees a dashboard about them, not a demo",
+      "line": 58,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "the candidate proves a role: work email code, then a reference",
+      "line": 73,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "the referee vouches from the emailed link, which then stops working",
+      "line": 102,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "the candidate finds the job and applies with a note",
+      "line": 134,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "the recruiter sees how the applicant is verified and moves them forward",
+      "line": 148,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/core-loop.spec.ts",
+      "title": "the candidate sees the new status and can withdraw",
+      "line": 171,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/credentials.spec.ts",
+      "title": "a new candidate sees an empty credentials section",
+      "line": 38,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/credentials.spec.ts",
+      "title": "an earned certificate is listed with a link to its public verification",
+      "line": 45,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/credentials.spec.ts",
+      "title": "verified skill evidence is listed with a working link; unverified evidence is not",
+      "line": 76,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/credentials.spec.ts",
+      "title": "a revoked certificate is shown as not valid, with the reason",
+      "line": 122,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/credentials.spec.ts",
+      "title": "a link that matches nothing is a final answer with no retry button",
+      "line": 144,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/employer-reputation.spec.ts",
+      "title": "queries baseline employer reputation profile with transparent factor breakdown",
+      "line": 56,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/employer-reputation.spec.ts",
+      "title": "submits employer review and updates reputation score dynamically (BR-F149-01)",
+      "line": 74,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/employer-reputation.spec.ts",
+      "title": "enforces duplicate review prevention per user (BR-F149-02)",
+      "line": 102,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/employer-reputation.spec.ts",
+      "title": "updates operational metrics and elevates reputation into top tier",
+      "line": 121,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/evidence-skills.spec.ts",
+      "title": "creates, verifies, disputes, and issues zero-PII cryptographic verification proofs (F-96, BR-150)",
+      "line": 35,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/evidence-skills.spec.ts",
+      "title": "explores skills taxonomy and graph relationships (F-84)",
+      "line": 105,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/frontend-fixes.spec.ts",
+      "title": "FE-07: text inputs have a border that meets 3:1 contrast",
+      "line": 29,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/frontend-fixes.spec.ts",
+      "title": "FE-04: retrying after a failed publish does not create a second job",
+      "line": 46,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/frontend-fixes.spec.ts",
+      "title": "FE-06: closing a job asks first, and Cancel leaves it open",
+      "line": 85,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/frontend-fixes.spec.ts",
+      "title": "FE-11: the applicant filter is a group of toggle buttons, not fake tabs",
+      "line": 101,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/frontend-fixes.spec.ts",
+      "title": "sign-in sends one request however fast it is submitted",
+      "line": 113,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/frontend-fixes.spec.ts",
+      "title": "FE-05: an API outage is not reported as a dead reference link",
+      "line": 133,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/gamification-billing-admin-search.spec.ts",
+      "title": "tracks gamification XP, enforces daily cap (200 XP/day BR-25), and views leaderboard (F-22, F-23)",
+      "line": 59,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/gamification-billing-admin-search.spec.ts",
+      "title": "subscribes to platform plan and verifies webhook replay idempotency (F-16, WIT-016)",
+      "line": 109,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/gamification-billing-admin-search.spec.ts",
+      "title": "enforces admin governance, feature flags, anti-lockout (BR-29, BR-068), and executes multi-entity search (F-17, F-35, F-20, F-34)",
+      "line": 167,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "script payloads in the name never execute",
+      "line": 24,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "a stored script payload is shown as text on the dashboard",
+      "line": 38,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "a 10,000 character name and a SQL-looking email are refused without a crash",
+      "line": 57,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "double-clicking submit registers once",
+      "line": 70,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "a forged token sends the user to sign in and is discarded",
+      "line": 87,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "a candidate cannot reach admin data through the API or the page",
+      "line": 103,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/hostile-user.spec.ts",
+      "title": "one candidate's token cannot read another's billing records",
+      "line": 121,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/instructor-reputation.spec.ts",
+      "title": "retrieves transparent factor breakdown with zero individual review leakage (F-148 Acceptance)",
+      "line": 74,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/instructor-reputation.spec.ts",
+      "title": "instructor updates operational metrics and recomputes composite score",
+      "line": 104,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/instructor-reputation.spec.ts",
+      "title": "student submits review and system recalculates reputation with anti-manipulation trimming",
+      "line": 130,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/instructor-reputation.spec.ts",
+      "title": "prevents self-reviews by instructor (BR-F148-02)",
+      "line": 148,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/job-templates.spec.ts",
+      "title": "candidate cannot create job template (BR-01 403 Forbidden)",
+      "line": 63,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/job-templates.spec.ts",
+      "title": "recruiter creates and manages reusable job template with screening questions and salary (F-37)",
+      "line": 80,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/job-templates.spec.ts",
+      "title": "recruiter instantiates job requisition, publishes it to marketplace, and clones it as new template (F-37, F-05, F-04)",
+      "line": 144,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/jobs-applications.spec.ts",
+      "title": "creates organization and posts job requisition (F-04, F-05)",
+      "line": 44,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/jobs-applications.spec.ts",
+      "title": "applies to job, enforces anti-duplicate constraint (BR-039), and progresses through hiring pipeline (F-06)",
+      "line": 98,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-impact.spec.ts",
+      "title": "records an opt-in learner career outcome (F-114, BR-190)",
+      "line": 62,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-impact.spec.ts",
+      "title": "enforces explicit consent policy on learner outcome tracking (BR-190)",
+      "line": 92,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-impact.spec.ts",
+      "title": "retrieves publishable course impact metrics when cohort >= 30 with correlational claim label (BR-189, BR-193, OD-51)",
+      "line": 110,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-impact.spec.ts",
+      "title": "suppresses course impact metrics when sample cohort is below threshold (BR-189)",
+      "line": 129,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-impact.spec.ts",
+      "title": "recomputes course impact metrics with updated cohort parameters (BR-191)",
+      "line": 143,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-impact.spec.ts",
+      "title": "retrieves platform-wide learning impact dashboard with top performing courses (F-153)",
+      "line": 172,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/learning-page.spec.ts",
+      "title": "lists courses, filters by level, and enrolls",
+      "line": 26,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/lesson-player.spec.ts",
+      "title": "a learner works through a course to a certificate",
+      "line": 16,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/lesson-player.spec.ts",
+      "title": "a course that does not exist is a final answer with no retry button",
+      "line": 81,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/lesson-player.spec.ts",
+      "title": "completing a lesson out of order is refused by the server with a clear message",
+      "line": 92,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/messaging-notifications-ai.spec.ts",
+      "title": "creates thread, sends messages with deduplication, and triggers recipient notification (F-12, F-14)",
+      "line": 61,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/messaging-notifications-ai.spec.ts",
+      "title": "interacts with AI Career Copilot with quota metering and advisory disclaimer (F-13, BR-12, BR-13)",
+      "line": 136,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/messaging.spec.ts",
+      "title": "a recruiter messages an applicant, the candidate replies, both see the conversation",
+      "line": 11,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/moderation.spec.ts",
+      "title": "scans user content for abuse prior to publication (BR-125)",
+      "line": 87,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/moderation.spec.ts",
+      "title": "submits moderation reports, enforces anti-self reporting and anti-duplicate rules",
+      "line": 112,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/moderation.spec.ts",
+      "title": "moderator reviews queue, transitions lifecycle status (BR-34), and enforces sanctions",
+      "line": 165,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/moderation.spec.ts",
+      "title": "enforces dual-human platform admin approval for permanent account bans (BR-068, WIT-008)",
+      "line": 213,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/moderation.spec.ts",
+      "title": "executes appeals lifecycle: submission, queue inspection, and moderator review (WIT-013, BR-154)",
+      "line": 275,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "apply shows pending state before any response exists, then reconciles on 201",
+      "line": 98,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "employment attestation shows pending state, blocks dismissal, and survives retry",
+      "line": 134,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "apply failure rolls back to idle with a safe error message, then retry succeeds",
+      "line": 193,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "apply conflict (409) reconciles to the server record instead of a dead Apply",
+      "line": 230,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "every rejected status (403, 404, 429) surfaces its message and stays idle",
+      "line": 270,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "rapid double activation sends exactly one request",
+      "line": 300,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "a response for one job never lands on another job the user moved to",
+      "line": 322,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "a verify-email rejection is still shown after the list refetch (regression)",
+      "line": 352,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "reference request shows pending feedback and confirms only from the server",
+      "line": 395,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "the pricing page asks for no card and never starts a purchase",
+      "line": 429,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "offline submission fails truthfully and succeeds after reconnect",
+      "line": 447,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "a dead session (401) mid-mutation clears state and returns to sign-in with ?return=",
+      "line": 475,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "applied state is restored from the server after a reload (hydration)",
+      "line": 492,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/mutation-feedback.spec.ts",
+      "title": "\"Send a new code\" is locked for a minute after a send, then unlocks",
+      "line": 517,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "a guarded deep link resumes after sign-in via ?return=",
+      "line": 41,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "sign-out clears the session and parks the user on /login",
+      "line": 61,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "an unknown path renders the 404 page with working destinations",
+      "line": 82,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "no route nests an interactive control inside a link",
+      "line": 93,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "client-side navigation retitles the document and announces it",
+      "line": 120,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "the active header destination carries aria-current=\"page\"",
+      "line": 138,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "push navigation returns the viewport to the top",
+      "line": 145,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "mobile menu is a dismissable disclosure with focus handoff",
+      "line": 161,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "modal traps Tab, closes on Escape and restores focus to its opener",
+      "line": 190,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/navigation.spec.ts",
+      "title": "signed out, candidate and hiring accounts each get their own destinations",
+      "line": 223,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/network-page.spec.ts",
+      "title": "sends a request, shows it as sent, and withdraws it",
+      "line": 35,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/network-page.spec.ts",
+      "title": "finds a member by name and connects with them",
+      "line": 50,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/network-page.spec.ts",
+      "title": "does not offer the signed-in member as a connection of their own",
+      "line": 62,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/notifications.spec.ts",
+      "title": "a recruiter is told about a new applicant and lands on that job\u2019s pipeline",
+      "line": 8,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/notifications.spec.ts",
+      "title": "a candidate sees their application move and marks everything read",
+      "line": 42,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/notifications.spec.ts",
+      "title": "someone with no notifications sees what will appear there",
+      "line": 82,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/peer-credibility.spec.ts",
+      "title": "endorses a 1st-degree peer with deterministic credibility weight breakdown (F-150 Acceptance)",
+      "line": 66,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/peer-credibility.spec.ts",
+      "title": "detects reciprocal endorsement rings and applies collusion dampening (BR-F150-02)",
+      "line": 92,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/peer-credibility.spec.ts",
+      "title": "prevents self-endorsement and duplicate active endorsements (BR-153)",
+      "line": 110,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/peer-credibility.spec.ts",
+      "title": "displays aggregated endorsement strength on candidate profile and supports 30-day revocation",
+      "line": 134,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/performance.spec.ts",
+      "title": "every route renders within the gross-regression guard and records a baseline",
+      "line": 48,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/performance.spec.ts",
+      "title": "records p50/p95 for a representative authenticated read path",
+      "line": 106,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/performance.spec.ts",
+      "title": "client-side navigation responds within the gross-regression guard",
+      "line": 154,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/performance.spec.ts",
+      "title": "signed-in pages do not shift as they load, on a phone or a desktop",
+      "line": 218,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/portfolio-resumes.spec.ts",
+      "title": "adds a portfolio project and shows it after reload (F-26)",
+      "line": 28,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/portfolio-resumes.spec.ts",
+      "title": "creates a resume and shows it after reload (F-13)",
+      "line": 42,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/privacy-contact.spec.ts",
+      "title": "unverified privacy contacts are not represented as a staffed DPO or an SLA",
+      "line": 3,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/referral-requests.spec.ts",
+      "title": "enforces employment verification: rejects referral request for non-employee (BR-237)",
+      "line": 115,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/referral-requests.spec.ts",
+      "title": "creates referral request in pending status (BR-233, BR-237)",
+      "line": 143,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/referral-requests.spec.ts",
+      "title": "referrer inspects incoming request and candidate inspects outgoing request",
+      "line": 164,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/referral-requests.spec.ts",
+      "title": "referrer approves referral, generates 12-month attribution outcome and tags application (BR-234..BR-240)",
+      "line": 184,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/referral-requests.spec.ts",
+      "title": "organization recruiters can query referral outcomes (BR-240)",
+      "line": 213,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/reputation-engine.spec.ts",
+      "title": "user starts with neutral baseline reputation of 50 in developing band",
+      "line": 51,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/reputation-engine.spec.ts",
+      "title": "aggregates signals across contexts and verifies context segregation (F-144)",
+      "line": 69,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/reputation-engine.spec.ts",
+      "title": "guarantees zero individual signal leakage on public profile query (BR-253)",
+      "line": 141,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/reputation-engine.spec.ts",
+      "title": "penalizes score and executes reputation recovery plan to restore score",
+      "line": 162,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/responsive.spec.ts",
+      "title": "public pages",
+      "line": 233,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/responsive.spec.ts",
+      "title": "candidate pages",
+      "line": 249,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/responsive.spec.ts",
+      "title": "hiring pages",
+      "line": 265,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/responsive.spec.ts",
+      "title": "the header is one row, and the menu that holds navigation fits at every width",
+      "line": 278,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/responsive.spec.ts",
+      "title": "a dialog is a bottom sheet on phones and a centred panel from 640 px",
+      "line": 320,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/restricted-account.spec.ts",
+      "title": "shows an honest notice, reduced navigation and no refused requests",
+      "line": 11,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/resumes-networking-portfolio.spec.ts",
+      "title": "creates resume, performs append-only exports, and verifies soft-delete (F-13, BR-26)",
+      "line": 51,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/resumes-networking-portfolio.spec.ts",
+      "title": "performs professional connection handshake and creates portfolio project (F-09, F-30)",
+      "line": 109,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/salary-intelligence.spec.ts",
+      "title": "submits salary reports and protects candidate privacy under k-anonymity (BR-178)",
+      "line": 52,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/salary-intelligence.spec.ts",
+      "title": "aggregates compensation benchmarks once cohort threshold is met (BR-178, BR-180, BR-183)",
+      "line": 117,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/salary-intelligence.spec.ts",
+      "title": "withdraws salary submission and updates live aggregates (BR-181)",
+      "line": 196,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/saved-searches-alerts.spec.ts",
+      "title": "creates, inspects, and updates candidate saved search (F-32)",
+      "line": 64,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/saved-searches-alerts.spec.ts",
+      "title": "dispatches job alert when matching job is published and allows running saved search (F-32, SSOT 1018)",
+      "line": 106,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/saved-searches-alerts.spec.ts",
+      "title": "manages saved job bookmarks and deletes saved search (F-04, F-25, F-32)",
+      "line": 163,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/session-resilience.spec.ts",
+      "title": "a throttled session check explains itself and recovers with Try again",
+      "line": 10,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/settings-page.spec.ts",
+      "title": "saves a preference and keeps it after reload (F-15)",
+      "line": 26,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/settings-page.spec.ts",
+      "title": "offers only controls the product acts on (C-29, K-15)",
+      "line": 50,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/settings-page.spec.ts",
+      "title": "connections-only visibility saved in Settings is what the profile shows (K-15)",
+      "line": 63,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/settings-page.spec.ts",
+      "title": "command search opens with Ctrl+K, filters, and navigates (F-20)",
+      "line": 75,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/settings-page.spec.ts",
+      "title": "command search closes on Escape and returns focus (F-20)",
+      "line": 91,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-decay.spec.ts",
+      "title": "candidate can register a skill for freshness tracking with initial 100 score and fresh band",
+      "line": 88,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-decay.spec.ts",
+      "title": "recruiter without application context cannot view candidate freshness (403 Forbidden, BR-230)",
+      "line": 121,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-decay.spec.ts",
+      "title": "recruiter within application context can inspect candidate skill freshness portfolio (BR-230)",
+      "line": 134,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-decay.spec.ts",
+      "title": "candidate can re-verify a skill via self-attestation with 0.5x credit and assessment challenge with 100 restoration",
+      "line": 160,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-forecasting.spec.ts",
+      "title": "queries top emerging skills with forward growth and scarcity scores",
+      "line": 38,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-forecasting.spec.ts",
+      "title": "refuses a signed-in account that is not a platform admin supplying market data",
+      "line": 79,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-forecasting.spec.ts",
+      "title": "records a new real-time labor market signal for a skill",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-forecasting.spec.ts",
+      "title": "retrieves 12-month forward forecast with salary bounds and regional distributions",
+      "line": 110,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-forecasting.spec.ts",
+      "title": "generates on-demand custom horizon forecast with prerequisite depth",
+      "line": 133,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skill-forecasting.spec.ts",
+      "title": "enforces validation and authentication error handling",
+      "line": 151,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/skills-graph.spec.ts",
+      "title": "adding a skill shows it with its related skills, and it cannot be added twice",
+      "line": 46,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-pool-intelligence.spec.ts",
+      "title": "creates a named talent pool for the recruiter organization (F-158, F-92)",
+      "line": 72,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-pool-intelligence.spec.ts",
+      "title": "lists organization talent pools with current member counts",
+      "line": 95,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-pool-intelligence.spec.ts",
+      "title": "adds candidate to talent pool with sourcing source and cost tracking (F-158)",
+      "line": 109,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-pool-intelligence.spec.ts",
+      "title": "rejects adding duplicate candidate to the same talent pool (409 Conflict)",
+      "line": 131,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-pool-intelligence.spec.ts",
+      "title": "advances candidate along recruitment funnel stages (sourced -> interviewing -> hired)",
+      "line": 145,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-pool-intelligence.spec.ts",
+      "title": "computes on-demand talent pool intelligence with skill gaps and k-anonymity (F-158, BR-200)",
+      "line": 175,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-segmentation.spec.ts",
+      "title": "candidate classifies their own segmentation profile (F-160)",
+      "line": 80,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-segmentation.spec.ts",
+      "title": "admin classifies cloud architect candidate into staff tier (F-160)",
+      "line": 102,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-segmentation.spec.ts",
+      "title": "recruiter queries aggregate segment distribution with k-anonymity (BR-200)",
+      "line": 130,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-segmentation.spec.ts",
+      "title": "recruiter filters candidates by specialization and seniority tier (F-160)",
+      "line": 148,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-segmentation.spec.ts",
+      "title": "recruiter inspects candidate detailed segmentation profile breakdown",
+      "line": 166,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/talent-segmentation.spec.ts",
+      "title": "prevents standard candidate from accessing recruiter segmentation directory (FORBIDDEN)",
+      "line": 183,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/technical-interview.spec.ts",
+      "title": "recruiter creates company-scoped question and candidate is forbidden from browsing bank (BR-173)",
+      "line": 98,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/technical-interview.spec.ts",
+      "title": "schedules interview assessment, candidate joins, and hidden test cases are stripped for candidate (BR-173)",
+      "line": 147,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/technical-interview.spec.ts",
+      "title": "enforces dual consent for recording before recording becomes active (BR-169, BR-170)",
+      "line": 190,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/technical-interview.spec.ts",
+      "title": "candidate executes live code in sandbox and session concludes (BR-175)",
+      "line": 225,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/technical-interview.spec.ts",
+      "title": "submits structured scorecard, performs compensating entry, and verifies candidate view privacy (BR-174, BR-176)",
+      "line": 253,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/technical-interview.spec.ts",
+      "title": "generates advisory AI feedback without protected attributes and completes HM review (BR-171, BR-172, F-102)",
+      "line": 346,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "the API answers hostile bodies with a client error, never a 5xx",
+      "line": 121,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "public pages load cleanly",
+      "line": 63,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "every candidate page loads cleanly",
+      "line": 67,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "every recruiter page loads cleanly",
+      "line": 72,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "/jobs/%00 neither runs script nor crashes the shell",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "/jobs/<script>window.__xss=1</script> neither runs script nor crashes the shell",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "/verify/%3Cimg%20src%3Dx%20onerror%3Dwindow.__xss%3D1%3E neither runs script nor crashes the shell",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "/reference/..%2F..%2Fetc%2Fpasswd neither runs script nor crashes the shell",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "/messages/%27%20OR%201%3D1-- neither runs script nor crashes the shell",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "/definitely/not/a/page neither runs script nor crashes the shell",
+      "line": 89,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "sign-in with return=https://evil.example/phish stays on this site",
+      "line": 106,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "sign-in with return=//evil.example stays on this site",
+      "line": 106,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/ui-sweep.spec.ts",
+      "title": "sign-in with return=javascript:window.__xss=1 stays on this site",
+      "line": 106,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/unified-search.spec.ts",
+      "title": "performs multi-entity cross-domain search across jobs, companies, and projects",
+      "line": 90,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/unified-search.spec.ts",
+      "title": "delivers sub-100ms autocomplete suggestions with prefix and typo tolerance (BR-265, BR-266)",
+      "line": 135,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/unified-search.spec.ts",
+      "title": "applies multi-faceted filtering on location and minScore (BR-267)",
+      "line": 153,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/unified-search.spec.ts",
+      "title": "enforces zero-leakage privacy on private portfolio projects",
+      "line": 178,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/warm-introductions.spec.ts",
+      "title": "discovers warm introduction path Alice -> Bob -> Charlie (BR-210, BR-215)",
+      "line": 92,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/warm-introductions.spec.ts",
+      "title": "creates warm introduction request in pending status and isolates from target (BR-209, BR-211)",
+      "line": 110,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/warm-introductions.spec.ts",
+      "title": "introducer approves request, establishing three-way thread and granting target access (BR-209, BR-214)",
+      "line": 140,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/warm-introductions.spec.ts",
+      "title": "introducer can decline introduction with reason",
+      "line": 171,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/warm-introductions.spec.ts",
+      "title": "user can update warm intro preferences to opt out of introducing (BR-212)",
+      "line": 200,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "renders landing page with accessibility skip-link and truthful PWA capability status",
+      "line": 8,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "guards the dashboard and displays career cockpit after real sign-in",
+      "line": 49,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "authenticates candidate via login page and redirects to dashboard (F-01)",
+      "line": 97,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "pricing is truthful: free, no card, and paid plans cannot be bought (F-16)",
+      "line": 136,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "navigates to evidence page and validates work history attestations with anti-fraud checks",
+      "line": 163,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "takes a challenge in a session and is told plainly that nothing was run or scored",
+      "line": 243,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "browses real job postings, is asked to sign in, then applies and tracks it",
+      "line": 281,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/web-ui.spec.ts",
+      "title": "renders privacy policy and terms of service pre-launch gates",
+      "line": 318,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-graph.spec.ts",
+      "title": "Step 1: Candidate creates work history entry",
+      "line": 67,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-graph.spec.ts",
+      "title": "Step 2: Candidate proves control of the corporate mailbox",
+      "line": 92,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-graph.spec.ts",
+      "title": "Step 3: Candidate requests structured employment reference from manager",
+      "line": 122,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-graph.spec.ts",
+      "title": "Step 4: Referee submits ratings and upgrades candidate work history to gold badge",
+      "line": 151,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-graph.spec.ts",
+      "title": "Step 5: Recruiter views verified candidate work histories",
+      "line": 183,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-graph.spec.ts",
+      "title": "Step 6: Recruiter queries verified work history network & graph",
+      "line": 194,
+      "outcome": "passed"
+    },
+    {
+      "file": "tests/e2e/work-history-removal.spec.ts",
+      "title": "removes a mistaken role after saying what goes with it, and keeps the rest",
+      "line": 13,
+      "outcome": "passed"
+    }
+  ]
+}
