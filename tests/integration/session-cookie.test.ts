@@ -109,6 +109,19 @@ describe('Session cookie (ADR-019)', () => {
     );
   });
 
+  it('does not block sign-in for a browser holding a stale cookie', async () => {
+    // A cookie whose session ended (another device signed out) is still sent
+    // with the login form, which carries no CSRF header.
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/login',
+      headers: { cookie: 'ts_session=ended.session-token' },
+      payload: { email: 'cookie.candidate@example.com', password: 'Password123!Secure' },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(String(res.headers['set-cookie'])).toMatch(/^ts_session=/);
+  });
+
   it('parses cookies and picks the Bearer header first', () => {
     expect(readCookie('a=1; ts_session=abc%2Edef; b=2', 'ts_session')).toBe('abc.def');
     expect(readCookie('ts_session=', 'ts_session')).toBeNull();
