@@ -158,7 +158,7 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-132 | Written recommendations display only after recipient acceptance |
 | BR-133 | Profile-view logging honours the viewer's privacy mode |
 | BR-134 | Identity-verification badges only via approved partners; failure never blocks core use |
-| BR-135 | Salary aggregates displayed only with ≥5 reports for a role/location cell |
+| BR-135 | Salary aggregates displayed only with reports from ≥10 different people for a role/location cell ([ADR-028](../engineering/DECISIONS.md#adr-028--one-small-cell-threshold-min_cohort_k--10-distinct-people-conflict-c-8)) |
 | BR-136 | Anonymous reviews hide identity from employer and public, never from Platform Admin/legal |
 | BR-137 | Company responses are appended, never edit the original review |
 | BR-138 | Interview questions require moderation before public display |
@@ -181,7 +181,7 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-155 | Privacy-preserving proofs allow skill verification without revealing full profile |
 | BR-156 | Credential issue requires underlying achievement verified by platform activity |
 | BR-157 | Career outcome tracking requires explicit user opt-in |
-| BR-158 | Aggregated career data requires k ≥5 for display |
+| BR-158 | Aggregated career data requires `min_cohort_k` for display: k ≥ 10 different people by default; stricter feature values stay (career benchmarks 20, BR-160) ([ADR-028](../engineering/DECISIONS.md#adr-028--one-small-cell-threshold-min_cohort_k--10-distinct-people-conflict-c-8)) |
 | BR-159 | Individual career transitions visible only to the user |
 | BR-160 | Progression benchmarks by role require ≥20 data points to publish |
 | BR-161 | Salary progression tracked separately from base salary |
@@ -201,7 +201,7 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-175 | Live coding environment reuses the challenge sandbox |
 | BR-176 | Comparison across candidates uses structured rubrics, never free-form scores |
 | BR-177 | Salary reports require verification: self-reported (0.5) or verified via employment (1.0) |
-| BR-178 | Aggregated salary data requires k ≥5 submissions per cell |
+| BR-178 | Aggregated salary data requires verified reports from k ≥ 10 different people per cell; a caller can raise the threshold, never lower it ([ADR-028](../engineering/DECISIONS.md#adr-028--one-small-cell-threshold-min_cohort_k--10-distinct-people-conflict-c-8)) |
 | BR-179 | Salary data displayed in minor units + ISO-4217 currency |
 | BR-180 | Company-specific salary data shown only if company has ≥3 reports OR opted in |
 | BR-181 | Users may withdraw their salary submission at any time |

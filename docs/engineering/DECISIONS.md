@@ -116,7 +116,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-025 | Staging on the existing Oracle assets; one API replica; nightly backups with a monthly restore drill | #47 | Owner runs the deploy steps |
 | ADR-026 | Beta durability scope: only modules with a screen are made durable; the rest stay parked or labelled | #48 | Continues as plan TS-03 |
 | ADR-027 | Launch free-only; Stripe stays wired and disabled | #50 | Already the default (`BILLING_MODE=disabled`) |
-| ADR-028 | `min_cohort_k` = 10 distinct people for every published aggregate | C-8 | One PR to follow |
+| ADR-028 | `min_cohort_k` = 10 distinct people for every published aggregate | C-8 | Salary built; review aggregates before un-parking |
 | ADR-029 | AI output quality follows the SSOT wording (capability-specific evaluation, no universal threshold) | C-22 | Registry corrected (this change) |
 
 ### ADR-017 — Ratify ADR-015: Fastify and PostgreSQL are the architecture of record (issue #46)
@@ -293,14 +293,15 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 ### ADR-028 — One small-cell threshold: `min_cohort_k` = 10 distinct people (conflict C-8)
 
 - **Status:** Accepted 2026-11-26 (delegated). This is the conservative privacy option.
-- **Context:** SSOT Amendment G sets k ≥ 10 for public and sensitive cells. Registry BR-158 and BR-178 say k ≥ 5. The code uses 5 for salary benchmarks (`SALARY_BENCHMARK_MIN_COHORT`) and counts reports, not people. Employer review aggregates show from 5 reviews.
+- **Context:** SSOT Amendment G sets k ≥ 10 for public and sensitive cells. Registry BR-158 and BR-178 say k ≥ 5. The code used 5 for salary benchmarks (`SALARY_BENCHMARK_MIN_COHORT`) and counted reports, not people, while one account may file 5 reports a day. Employer and instructor review aggregates have no display threshold at all: their `< 5` checks only switch off outlier trimming.
 
 | Option | Pros | Cons |
 | --- | --- | --- |
 | k ≥ 5 (registry) | More cells shown | Weaker re-identification protection; below the SSOT default, which needs counsel to lower |
 | k ≥ 10 distinct people (SSOT) | Stronger protection; one rule everywhere | Fewer cells shown early on |
 
-- **Decision:** k ≥ 10, counted as distinct people (a person who files two reports counts once). It applies to salary cells and employer and instructor review aggregates. Features that already use a higher value keep it: learning impact 30, career benchmarks 20, application feedback 10. The registry rows BR-158 and BR-178 change to match.
+- **Decision:** k ≥ 10, counted as distinct people (a person who files two reports counts once). It applies to salary cells and employer and instructor review aggregates. Features that already use a higher value keep it: learning impact 30, career benchmarks 20, application feedback 10. The registry rows BR-135, BR-158 and BR-178 change to match.
+- **Built:** salary benchmarks count distinct people with a floor of 10 (`SALARY_BENCHMARK_MIN_COHORT`, `countDistinctReporters` in `packages/domain/src/salary-intelligence.ts`). Employer and instructor review aggregates are parked (TPD-04, `FEATURE_REPUTATION`), so nobody sees them; the k ≥ 10 rule must be added to them before that flag is turned on.
 
 ### ADR-029 — AI output quality rules follow the SSOT wording (conflict C-22)
 

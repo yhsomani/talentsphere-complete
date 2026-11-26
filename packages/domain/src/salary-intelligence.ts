@@ -87,7 +87,9 @@ export type BenchmarkQueryResult =
   | {
       status: 'insufficient_data';
       message: string;
+      /** Different people needed (BR-178). */
       minRequired: number;
+      /** Different people with a matching verified report. */
       actualCount: number;
     };
 
@@ -251,8 +253,17 @@ function calculatePercentile(sorted: number[], p: number): number {
   return Math.round(sorted[lower] * (1 - weight) + sorted[upper] * weight);
 }
 
-/** BR-178: an aggregated salary cell needs at least this many verified reports. */
-export const SALARY_BENCHMARK_MIN_COHORT = 5;
+/**
+ * BR-178 (ADR-028, conflict C-8): an aggregated salary cell needs verified
+ * reports from at least this many different people. One person can file
+ * several reports, so reports are not people.
+ */
+export const SALARY_BENCHMARK_MIN_COHORT = 10;
+
+/** The number of different people behind a set of reports (BR-178). */
+export function countDistinctReporters(reports: Pick<SalaryReport, 'userId'>[]): number {
+  return new Set(reports.map((r) => r.userId)).size;
+}
 
 /**
  * Aggregates verified, non-withdrawn salary reports into statistical cohorts (BR-178, BR-183).
@@ -276,7 +287,7 @@ export function computeSalaryAggregates(
   const now = new Date().toISOString();
 
   for (const [cohortKey, cohortReports] of grouped.entries()) {
-    if (cohortReports.length < minCohortSize) {
+    if (countDistinctReporters(cohortReports) < minCohortSize) {
       continue; // k-anonymity privacy protection (BR-178)
     }
 
@@ -335,12 +346,13 @@ export function querySalaryBenchmark(
     return true;
   });
 
-  if (matching.length < minCohortSize) {
+  const people = countDistinctReporters(matching);
+  if (people < minCohortSize) {
     return {
       status: 'insufficient_data',
-      message: `Salary benchmark requires a minimum cohort of ${minCohortSize} verified reports to protect participant privacy (BR-178).`,
+      message: `Salary benchmark requires verified reports from at least ${minCohortSize} different people to protect participant privacy (BR-178).`,
       minRequired: minCohortSize,
-      actualCount: matching.length,
+      actualCount: people,
     };
   }
 

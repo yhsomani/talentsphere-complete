@@ -853,7 +853,7 @@ Owners: [`quality/SECURITY.md`](../quality/SECURITY.md), [`blueprint/05_SECURITY
 - One consent ledger (`consents`) with scopes per purpose: profile visibility, recruiter discovery, application snapshot, AI processing, product analytics, proof feed.
 - Imports minimize data and ignore third-party contacts (rule 10.1.6).
 - India's Digital Personal Data Protection Act and the GDPR shape notices, consent, erasure and breach duties; mapping to actual controls needs counsel before compliance is claimed (SSOT Amendment G; issue #45).
-- Cohort suppression for any aggregate uses `min_cohort_k`; its value is open conflict **C-8** and stays the owner's decision.
+- Cohort suppression for any aggregate uses `min_cohort_k`: 10 distinct people ([ADR-028](../engineering/DECISIONS.md#adr-028--one-small-cell-threshold-min_cohort_k--10-distinct-people-conflict-c-8)).
 
 ### 13.3 Scalability and performance
 
