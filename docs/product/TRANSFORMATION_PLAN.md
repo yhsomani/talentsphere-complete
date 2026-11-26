@@ -97,7 +97,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | A-02 | Core reads come from in-memory Maps hydrated at boot (ADR-015) | ARCHITECTURE §6, §13 | One API writer only; boot time grows with data; stale reads after external SQL | New modules read from SQL through dedicated stores (the pattern of `job-alert-store.ts`, `connection-store.ts`); move core reads to SQL before running a second API instance (TPD-05) |
 | A-03 | 184 ephemeral endpoints are live and return `x-talentsphere-durability: ephemeral` | `durability.ts` | A user can create data that disappears | Per module: make durable, or put behind a feature flag that is off in deployed environments (TS-03) |
 | A-04 | Session token in `localStorage`, no refresh flow | ARCHITECTURE §12 | Any XSS reads the token | httpOnly, `SameSite` cookie with CSRF protection (TS-10, **NEEDS OWNER**: security architecture) |
-| A-05 | Worker completion is not fenced by claim generation; a timeout does not abort the handler | ARCHITECTURE §18 | Duplicate effects when imports, parsing and AI jobs arrive | Add a claim token to completion before adding long-running job kinds (TS-05) |
+| A-05 | A handler timeout does not abort the handler. (Correction 2026-11-26: completion and failure **are** already fenced by the attempts counter and batches fit inside one lease, `apps/worker/src/claim.ts` and `tests/pg/job-claim-fencing.test.ts`; the earlier ARCHITECTURE §18 text was stale.) | ARCHITECTURE §18 | A long-running handler that ignores its bound (imports, parsing, AI) can run twice | Give long-running job kinds an abort signal and their own time bound when they are added (part of TS-08 and TS-11) |
 | A-06 | No file storage or malware scanning | No upload route in `server.ts` | Blocks resumes, imports, photos, course media | Object storage behind an adapter plus scanning (TS-06, **NEEDS OWNER**: new infrastructure) |
 | A-07 | Search is in-process over Maps | ARCHITECTURE §3 | Does not survive a second instance or large data | PostgreSQL full-text search and `pg_trgm`, as SSOT Amendment A.4 already intends |
 | A-08 | No generated API description | ARCHITECTURE §14 | Clients and partners guess shapes | Generate OpenAPI from the Zod contracts (**NEEDS OWNER**: new dependency in `package.json`) |
@@ -246,7 +246,7 @@ Phases are defined in [§15](#15-roadmap-priorities-and-dependencies). "Blueprin
 | TSF | Trust, safety, moderation | Moderation | **PARTIAL, ephemeral** | P1 | User content (imports, messages) needs reports and appeals that persist |
 | ADM | Admin console, support | Admin | **PARTIAL** | P1 | Moderation and import support views |
 | ANL | Analytics | Analytics | **PARTIAL, ephemeral** | P1 | Consented product analytics to measure the north star |
-| PLT | API, files, jobs, integrations | Integrations | **PARTIAL** (worker, Stripe, email) | P0 to P1 | Files and fenced jobs are prerequisites |
+| PLT | API, files, jobs, integrations | Integrations | **PARTIAL** (fenced worker, Stripe, email) | P0 to P1 | Files are the prerequisite |
 | PWA | PWA, offline, mobile | Mobile | **PARTIAL** (manifest; service worker in flight, T-009) | P0 | App shell cache, install prompt |
 | BGV | Verification and background checks | Verification | **EXISTS** (referee, work email) | P1 | Third-party checks gated (`OD-PRD-19`) |
 | MKT | Market intelligence, career pathing | Analytics | **PARTIAL, seed data** | P3 | Only with real, k-suppressed data |
@@ -584,7 +584,7 @@ flowchart TD
 | PostgreSQL | **Keep** | Covers relational data, queue, full-text search, `pg_trgm`, `jsonb` for import items, and `pgvector` later if semantic matching proves its worth |
 | In-memory Map read model (ADR-015) | **Change gradually** | Blocks a second API instance; new modules read SQL directly; core reads move next (TPD-05) |
 | Self-issued HMAC sessions | **Keep the issuer, move the token** | Changing identity provider has no user value now; moving the token to an httpOnly cookie closes the XSS risk (TS-10) |
-| PostgreSQL job queue | **Keep** (see A-11) | Already durable and tested; add claim fencing (TS-05) |
+| PostgreSQL job queue | **Keep** (see A-11) | Already durable, tested and fenced by attempts |
 | Local heuristic AI | **Replace behind the existing gateway** | `ai-gateway.ts` already models `executionMode: 'cloud_provider'`; add a provider adapter under consent and budget (**NEEDS OWNER**, ADR-007, INVARIANT-007) |
 | Stripe | **Keep, disabled** until issue #50 | Payment changes need the owner |
 | Oracle Always Free hosting | **Keep for staging** | Prove deploy and restore there (T-004) before choosing production hosting |
@@ -677,7 +677,7 @@ The current schema (57 migrations, 112 tables) is documented in [`engineering/DA
 | `career_goals` | GOL | id, user_id, target_role_id, target_date, preferences jsonb, visibility | Private by default |
 | `plan_steps` | GOL | id, goal_id, kind, ref, expected_skill_id, status, completed_by_signal | Completion only through a signal |
 | `role_templates` | GOL | id, title, skill requirements jsonb, source | Seeded, then refined from live postings |
-| `outbox_events` | PLT | id, topic, payload, created_at, delivered_at | Or reuse `background_jobs` with a topic column (decide in TS-05) |
+| `outbox_events` | PLT | id, topic, payload, created_at, delivered_at | Or reuse `background_jobs` with a topic column (decide in TS-07, the first slice that emits events) |
 | `consents` | SET | user_id, scope, granted_at, revoked_at, version | One ledger for all modules (blueprint `SET`) |
 
 ### 9.3 New and changed endpoints (PROPOSED)
@@ -861,7 +861,7 @@ Owners: [`quality/SECURITY.md`](../quality/SECURITY.md), [`blueprint/05_SECURITY
 | --- | --- | --- |
 | 1 | Now | Service worker app shell; HTTP caching of public pages; indexes for every new list query |
 | 2 | Before a second API instance | Core reads from SQL (TPD-05); single-writer lease removed only after that |
-| 3 | Import and AI volume | Separate worker processes per job family; claim fencing (TS-05) |
+| 3 | Import and AI volume | Separate worker processes per job family; abort signals for long handlers |
 | 4 | Search latency above budget | Materialized search documents; then a dedicated engine only with evidence |
 | 5 | Read load | Read replica for search and analytics |
 
@@ -900,7 +900,7 @@ flowchart LR
 
 | Phase | Goal | Contents | Exit scenario (observable) | Gating decisions |
 | --- | --- | --- | --- | --- |
-| **P0 Honest and safe** | No user meets a feature that loses data or pretends | Issues #44 to #47; T-007 resumes; T-009 service worker; ephemeral modules flagged off or made durable (TS-03); park list (TPD-04); claim fencing (TS-05); file storage (TS-06) | In a staging deploy, a user registers, resets a password by email, edits profile and resume, applies to a job, restarts the API, and finds everything intact; no deployed response carries `x-talentsphere-durability: ephemeral` on a visible screen; a restore drill is recorded | Email provider (#44), privacy text (#45), ADR-015 (#46), staging (#47), file storage vendor |
+| **P0 Honest and safe** | No user meets a feature that loses data or pretends | Issues #44 to #47; T-007 resumes; T-009 service worker; ephemeral modules flagged off or made durable (TS-03); park list (TPD-04, done in PR #101); file storage (TS-06) | In a staging deploy, a user registers, resets a password by email, edits profile and resume, applies to a job, restarts the API, and finds everything intact; no deployed response carries `x-talentsphere-durability: ephemeral` on a visible screen; a restore drill is recorded | Email provider (#44), privacy text (#45), ADR-015 (#46), staging (#47), file storage vendor |
 | **P1 Connected record** | A new user reaches a populated, explained record and real matches in one session | Skill-signal ledger and projector; import (resume, LinkedIn export, JSON Resume, CSV, GitHub); goals and gaps; explained matching from the profile; experience band and internship filters; evidence snapshot on apply; durable moderation | A fresher imports a resume and GitHub, confirms, sets a goal, sees gaps, and gets internship matches whose explanations name their own evidence; applying shares only the chosen items | `OD-PRD-01` north star, `OD-PRD-09` pilot scope, OAuth security change, AI provider for parse assist (optional) |
 | **P2 Proof and hiring** | Proof is executed or verified, and employers hire on it | Isolated code runner; executed challenges; course final assessments; credential verification (Open Badges, VC); interview preparation; recruiter seats, scorecards, consent-gated search; billing policy | A candidate passes an executed challenge, their match rises with a named reason, a recruiter in a multi-member organization finds them through consent-gated search, interviews and records a decision, and the candidate is notified | Issue #49 runner, issue #50 billing, organization roles, AI funding (`OD-PRD-21`) |
 | **P3 Ecosystem** | The record grows from people, programs and content | Communities and proof feed; mentorship; events and hackathons on the runner; instructor studio; institutions; market insights on real data | Each admitted module writes completed outcomes as signals | `OD-PRD-02` per module, `OD-PRD-04`, `OD-PRD-07`, `OD-PRD-11`, C-8 |
@@ -919,10 +919,10 @@ Each slice is one small pull request with tests, record-level authorization and 
 | Slice | What | Depends on | Acceptance | Tracker | Status |
 | --- | --- | --- | --- | --- | --- |
 | TS-01 | Merge durable resumes (T-007) and the service worker (T-009) already built | — | Existing tests plus restart test | T-007, T-009 | IN_PROGRESS elsewhere |
-| TS-02 | Park list: one feature flag per parked module, off by default in deployed environments, screens hidden | Feature flags (durable, 00051) | Flagged routes return 404 in staging config; tests updated, not deleted | T-022 | IN_PROGRESS |
+| TS-02 | Park list: one feature flag per parked module, off by default in deployed environments, screens hidden | Feature flags (durable, 00051) | Flagged routes return 404 in staging config; tests updated, not deleted | T-022 | IMPLEMENTED (PR #101) |
 | TS-03 | Durability sweep for visible ephemeral modules: portfolio, moderation, courses and lessons progress, challenge submissions — one PR each, using the existing tables | — | Restart test per module; routes added to `DURABLE_ROUTES` | T-010 | PLANNED |
 | TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | PROPOSED |
-| TS-05 | Worker claim fencing (completion checks the claim token) | — | Kill-the-worker test shows no duplicated effect | T-024 | PROPOSED |
+| TS-05 | Worker claim fencing (completion checks the claim token) | — | Already in place: fenced by the attempts counter (`tests/pg/job-claim-fencing.test.ts`) | T-024 | EXISTS (found 2026-11-26; no work needed) |
 | TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | **NEEDS OWNER** |
 | TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | PROPOSED |
 | TS-08 | Import v1: JSON Resume and CSV templates, review screen, commit and undo | TS-06, TS-07 | §10.4 cases 2, 5, 7 | T-027 | PROPOSED |
@@ -933,7 +933,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-13 | Goals, gaps and explained matching from the profile | TS-07 | §6.5 flow e2e; explanation names signals | T-032 | PROPOSED |
 | TS-14 | Isolated code runner and executed challenges | Issue #49 | §6.3 flow; sandbox escape tests | T-013 | **NEEDS OWNER** |
 
-The slices that need no owner input can start now in this order: TS-02, TS-05, TS-07, TS-04, TS-09, TS-03, then TS-08 once TS-06 is approved.
+The slices that need no owner input can start now in this order: TS-07, TS-04, TS-09, TS-03, then TS-08 once TS-06 is approved (TS-02 shipped in PR #101; TS-05 turned out to exist already).
 
 ---
 

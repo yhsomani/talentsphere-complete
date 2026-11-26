@@ -258,9 +258,14 @@ backoff is exponential with jitter and a cap. Unknown handlers dead-letter;
 permanent errors fail; transient failures retry or become dead. Cancellation is
 cooperative at acknowledgement and does not undo effects.
 
-A timeout does not abort the underlying promise. Batch waiting can consume later
-jobs' leases; expired leases can be reclaimed and execution duplicated. Completion
-is not fenced by claim generation. Do not claim exactly-once delivery. Most
+A cycle claims only as many jobs as can run back to back inside one lease, and
+a job that could not finish before its lease ends is not started (it is
+redelivered). Completion and failure are fenced by the attempts counter, which
+each claim increments: a worker whose job was re-claimed cannot complete or
+fail it (`tests/pg/job-claim-fencing.test.ts`, `tests/unit/worker-claim.test.ts`).
+A timeout still does not abort the underlying promise, so a handler that ignores
+its own time bound can keep running after its job is redelivered, and its side
+effects are not rolled back. Do not claim exactly-once delivery. Most
 handlers only record events; no digest/rollup scheduler or heavy queue exists.
 `JobQueueEngine` remains a separate unit-tested, unused memory engine. In memory
 mode the standalone worker idles because it cannot access the API's Maps.
