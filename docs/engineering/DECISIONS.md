@@ -231,6 +231,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | Completion stays unverified; a graded final assessment can raise the rung later | Honest; matches the evidence ladder | Completion certificates carry less weight |
 
 - **Decision:** the second option. Completion evidence stays `unverified`. The certificate is a **completion record**: "verified" on it means only that the certificate is authentic. Only a graded assessment, once executed assessments exist (ADR-021), may raise course evidence above `unverified`.
+- **Built:** the public verify answer names "TalentSphere course completion records" and carries `recordOf: 'course_completion'` (`verifyPublicCertificateProof`, `packages/domain/src/lms.ts`). The verify page calls it a "Course completion record" and says it is not an assessment of skill.
 
 ### ADR-024 — Erasure clocks and legal text (issue #45; SSOT DOR-017)
 

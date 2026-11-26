@@ -388,11 +388,14 @@ export function verifyPublicCertificateProof(
     isValid: cert.status === 'verified',
     status: cert.status,
     certificateNumber: cert.certificateNumber,
-    courseTitle: courseTitle || 'Verified Course',
+    courseTitle: courseTitle || 'Course',
     issuedAt: cert.issuedAt,
     verificationProofHash: cert.verificationProofHash,
     revokedAt: cert.revokedAt,
     revocationReason: cert.revocationReason,
-    authority: 'TalentSphere Verified Credential Authority (Zero-PII BR-150)',
+    // A completion record, not a skill assessment (ADR-023): "valid" means
+    // only that TalentSphere issued it and has not revoked it.
+    authority: 'TalentSphere course completion records (Zero-PII BR-150)',
+    recordOf: 'course_completion' as const,
   };
 }

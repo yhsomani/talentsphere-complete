@@ -62,6 +62,10 @@ test.describe('E2E: Credentials on the profile and public verification (F-96, F-
     await expect(page).toHaveURL(`/verify/${cert.verificationProofHash}`);
     await expect(page.getByTestId('verify-status')).toContainText('Valid');
     await expect(page.getByTestId('verify-page')).toContainText(cert.certificateNumber);
+    // A completion record, not a skill assessment (ADR-023).
+    await expect(page.getByTestId('verify-completion-note')).toContainText(
+      'not an assessment of skill'
+    );
 
     // The same link works for a stranger with no session, and shows no personal details.
     const anonymous = await browser.newContext();
