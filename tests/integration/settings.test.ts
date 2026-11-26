@@ -215,6 +215,10 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     expect(reqBody.erasureRequest.status).toBe('grace_period');
     expect(reqBody.erasureRequest.userId).toBe(candidateUserId);
     expect(reqBody.erasureRequest.gracePeriodEndsAt).toBeDefined();
+    const requestedAt = Date.parse(reqBody.erasureRequest.createdAt);
+    const day = 24 * 60 * 60 * 1000;
+    expect(Date.parse(reqBody.erasureRequest.gracePeriodEndsAt) - requestedAt).toBe(14 * day);
+    expect(Date.parse(reqBody.completeBy) - requestedAt).toBe(30 * day);
     const requestId = reqBody.erasureRequest.id;
 
     // 2. Check active erasure status

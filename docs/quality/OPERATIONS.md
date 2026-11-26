@@ -148,9 +148,11 @@ Erasure request creation, status history and cancellation now use the existing
 `public.data_erasure_requests` PostgreSQL table through
 `apps/api/src/storage/erasure-store.ts`. A database account-row lock
 serializes concurrent erasure requests. The immediate erasure operation is
-still separate. **No scheduled deletion executor exists yet** and the
-30-day grace-period versus immediate-delete policy needs explicit owner/legal
-approval before a public release. Do not claim due-date deletion is automatic.
+still separate. **No scheduled deletion executor exists yet.** The clocks are
+decided ([ADR-024](../engineering/DECISIONS.md#adr-024--erasure-clocks-and-legal-text-issue-45-ssot-dor-017)):
+a request can be cancelled for 14 days (`GDPR_GRACE_PERIOD_DAYS`) and must be
+complete within 30 days of the request (`ERASURE_COMPLETION_DAYS`, returned as
+`completeBy`). Do not claim due-date deletion is automatic.
 
 
 The core loop — accounts, profiles, organizations and members, skills, jobs,

@@ -150,6 +150,7 @@ import {
   updateUserSettings,
   withProfileVisibility,
   requestAccountErasure,
+  erasureCompleteBy,
   executeLogicalAnonymization,
   compileDataExportArchive,
   Subscription,
@@ -10335,7 +10336,7 @@ export async function buildApp(
     });
   });
 
-  // 5. Request Account Erasure (GDPR Art 17 with mandatory 30-day grace period)
+  // 5. Request Account Erasure (GDPR Art 17: 14 days to cancel, complete by day 30, ADR-024)
   app.post('/api/v1/settings/erasure/request', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = RequestErasureInputSchema.parse(req.body);
@@ -10355,8 +10356,10 @@ export async function buildApp(
     });
 
     return reply.status(201).send({
-      message: 'Account erasure request initiated with 30-day grace period (GDPR Art 17).',
+      message:
+        'Account erasure requested. You can cancel it for 14 days; it is completed within 30 days of the request (GDPR Art 17).',
       erasureRequest,
+      completeBy: erasureCompleteBy(erasureRequest),
     });
   });
 

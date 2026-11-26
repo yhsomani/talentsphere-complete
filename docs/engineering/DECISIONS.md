@@ -248,6 +248,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
   - Erasure must be completed within 30 days of the request.
 - **Recruiter-owned data:** on erasure, the person's jobs are closed and their personal identifiers removed. An organization they belong to stays if another admin exists; otherwise it is archived.
 - **Execution:** the request stays at "request, status and cancel" until a scheduled executor is observed running. No automatic expiry is claimed before then.
+- **Built:** `GDPR_GRACE_PERIOD_DAYS` = 14 and `ERASURE_COMPLETION_DAYS` = 30 in `packages/domain/src/settings.ts`; the request route returns `completeBy`. The Profile "Delete account" dialog still erases at once (with the current password, SSOT-AMD-01); that is the person's own choice and needs no window.
 - **Legal pages:** stay marked as drafts.
 - **Steps only the owner can run:**
   1. Have counsel review the privacy policy and terms, including the operator's legal identity and the India DPDP and GDPR positions.
