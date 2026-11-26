@@ -58,7 +58,7 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-32 | Subscription state webhook-owned |
 | BR-33 | AI drafts never auto-commit to records |
 | BR-34 | T&S report lifecycle pending→under_review→resolved/dismissed |
-| BR-35 | SUPERSEDED — closures cited in §19.6 |
+| BR-35 | SUPERSEDED — closures cited in SSOT §10.19 (ADR-029) |
 | BR-036 | Jobs require approved org + verified owner |
 | BR-037 | Applications require ≥70% profile |
 | BR-038 | Candidates may apply only to open jobs |
@@ -88,8 +88,8 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-062 | Verified organizations receive accelerated job approval |
 | BR-063 | Candidates may request data export; delivered within 30 days |
 | BR-064 | Recruiters see verified signals on candidate profiles |
-| BR-065 | AI outputs below 0.7 confidence display disclaimer |
-| BR-066 | AI outputs below 0.5 confidence are suppressed |
+| BR-065 | AI output presentation follows capability-specific evaluation and uncertainty policy; no universal confidence threshold is assumed (SSOT wording, ADR-029) |
+| BR-066 | AI outputs that fail the capability-specific quality/evaluation gate are suppressed or routed to human/non-AI fallback (SSOT wording, ADR-029) |
 | BR-067 | All admin actions are audit-logged |
 | BR-068 | Account termination requires Platform Admin dual approval |
 | BR-069 | Interviewer inactivity auto-escalation: 7 business days → HM escalation; 14 days → auto-transition stale_withdrawn |
@@ -231,7 +231,7 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-205 | API access requires enterprise tier; rate-limited per CON-006 |
 | BR-206 | Emerging skills require platform-wide adoption before taxonomy promotion |
 | BR-207 | Job market analytics require k ≥10 data points per geographic cell |
-| BR-208 | All new AI-powered features inherit AI safety rules §32 |
+| BR-208 | All new AI-powered features inherit AI safety rules SSOT §15.10 (ADR-029) |
 | BR-209 | Introducer consent required for each introduction |
 | BR-210 | Max path depth = 4 |
 | BR-211 | Max 10 intro requests/week/user |

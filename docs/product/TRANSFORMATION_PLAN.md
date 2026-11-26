@@ -110,7 +110,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | ID | Finding | Evidence | Recommendation |
 | --- | --- | --- | --- |
 | P-01 | Specification breadth far exceeds delivery: 1,144 blueprint features versus 98 durable endpoints and 29 screens | Blueprint README "At a glance"; gap map | Freeze new modules until the core loop passes its exit scenario ([§15](#15-roadmap-priorities-and-dependencies)) |
-| P-02 | Course completion can produce authority-verified evidence without a graded final assessment | ARCHITECTURE §20 | Completion produces at most an artifact-backed signal; authority-verified needs a graded assessment (business rule change, **NEEDS OWNER**) |
+| P-02 | (Correction 2026-11-26: completion evidence already starts `unverified`, commit `bbeb331`; the ARCHITECTURE §20 text was stale.) The certificate still names a "Verified Credential Authority" | `packages/domain/src/evidence.ts` `courseCompletionEvidence`, `lms.ts` | Decided in ADR-023: completion is a completion record; only a graded assessment can raise the rung |
 | P-03 | Candidate-level behavioral scoring, talent segmentation and transition probability exist as recruiter endpoints | `behavioral-talent-discovery.ts` (`compositeBehavioralScore`), `talent-segmentation.ts`, `career/transition-probability` | They appear to conflict with SSOT Amendment E (no candidate-level predictive hiring capability without a governance review). Park behind an off flag (TPD-04) |
 | P-04 | Reputation engine and XP score people on activity counts | `reputation-engine.ts`, `gamification.ts`, `activity-contributions.ts` | SSOT principle 11 says "evidence over popularity". Park; reuse only the parts that read verified evidence |
 | P-05 | Insights (salary, forecast, learning impact) run on seed data in memory | Ephemeral, no screens | Do not show insights until they are computed from real, k-suppressed data (C-8 decides k) |
@@ -954,24 +954,25 @@ The owner gave product-owner authority for reversible product decisions. These a
 | TPD-09 | One skill-signal ledger is the only way modules share what a person can do | Decoupling; makes the brief's cross-module examples true | Yes | Decided |
 | TPD-10 | Candidates free for the core loop; employers pay first | Marketplace balance; blueprint `BR-XCT-027` | Yes | Recommended; prices and launch policy stay with the owner (#50) |
 
-**Needs the owner (not decided here):**
+**Decided on 2026-11-26 under the owner's delegated authority.** Each item has a full record (options, pros and cons, decision, and the steps only the owner can run) in [`engineering/DECISIONS.md`](../engineering/DECISIONS.md#owner-delegated-decisions-2026-11-26):
 
-| Item | Where |
-| --- | --- |
-| Email provider and live delivery | Issue #44, T-001 |
-| Privacy and deletion policy | Issue #45, T-002 |
-| ADR-015 ratification | Issue #46, T-003 |
-| Staging deploy and restore proof | Issue #47, T-004 |
-| Code runner architecture | Issue #49, T-013 |
-| Launch billing policy, prices | Issue #50, T-014 |
-| `min_cohort_k` (C-8) and rule text drift (C-22) | T-015 |
-| Course completion rung (P-02): authority-verified only with a graded assessment | T-033 |
-| Session cookie and OAuth sign-in (security architecture) | TS-10 |
-| File storage and scanning vendor | TS-06 |
-| AI provider, funding and quotas | `OD-PRD-21`, ADR-007 |
-| `server.ts` split (big refactor) | TS-12 |
-| OpenAPI generator dependency (build file) | A-08 |
-| Ratifying this plan's vision wording and wedge into `SSOT.md` | T-021 |
+| Item | Decision | Record |
+| --- | --- | --- |
+| Email provider and live delivery (#44) | Brevo through the existing adapter | ADR-018 |
+| Privacy and deletion policy (#45) | 14-day cancel window, erasure within 30 days; legal text stays a labelled draft until counsel signs off | ADR-024 |
+| ADR-015 ratification (#46) | Ratified; core reads move to SQL before a second replica | ADR-017 |
+| Staging deploy and restore proof (#47) | Oracle staging, one replica, nightly backups, monthly restore drill | ADR-025 |
+| Beta durability scope (#48) | Only modules with a screen | ADR-026 |
+| Code runner and trust rules (#49) | Self-hosted Judge0 CE on an isolated host; PR #43 endorsement rule ratified | ADR-021 |
+| Launch billing policy (#50) | Free-only launch | ADR-027 |
+| `min_cohort_k` (C-8) | 10 distinct people | ADR-028 |
+| Rule text drift (C-22) | SSOT wording | ADR-029 |
+| Course completion rung (P-02) | Completion stays unverified; certificate is a completion record | ADR-023 |
+| Session cookie and password reset (TS-10) | httpOnly cookie with CSRF header; reset by hashed single-use email token | ADR-019 |
+| File storage and scanning (TS-06) | S3-compatible adapter (Oracle Object Storage), ClamAV | ADR-020 |
+| `server.ts` split (TS-12) | One module per PR, no behaviour change | ADR-022 |
+
+**Still open:** the AI provider, funding and quotas (`OD-PRD-21`, ADR-007), which matter only once an AI feature is built (P1 or later); the OpenAPI generator dependency (A-08); and ratifying this plan's vision wording and wedge into `SSOT.md` (T-021).
 
 ---
 
