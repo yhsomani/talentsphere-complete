@@ -107,6 +107,34 @@ export function updateFeatureFlagState(
 }
 
 /**
+ * Features parked by the product transformation plan (decision TPD-04 in
+ * docs/product/TRANSFORMATION_PLAN.md §4.3). Their code and tests stay; their
+ * routes answer 404 wherever the feature is off.
+ */
+export const PARKED_FEATURES = {
+  FEATURE_BEHAVIORAL_SCORING:
+    'Candidate-level behavioral scoring, talent segmentation and career transition probability (SSOT Amendment E)',
+  FEATURE_REPUTATION: 'Reputation engine and activity contribution scores',
+  FEATURE_GAMIFICATION: 'XP ledger, badges and leaderboard',
+  FEATURE_MARKET_INSIGHTS:
+    'Salary benchmarks, skill forecasts and learning impact computed from in-memory data',
+} as const;
+
+export type ParkedFeatureKey = keyof typeof PARKED_FEATURES;
+
+/**
+ * A parked feature is on only where someone chose it: a stored flag decides.
+ * With no stored flag it is off in deployed environments (staging, production)
+ * and on in development and tests, so its existing tests keep running.
+ */
+export function isParkedFeatureEnabled(
+  stored: Pick<FeatureFlag, 'enabled'> | undefined,
+  deployed: boolean
+): boolean {
+  return stored ? stored.enabled : !deployed;
+}
+
+/**
  * BR-067: Creates an immutable administrative audit log record.
  */
 export function createAdminAuditLog(params: {
