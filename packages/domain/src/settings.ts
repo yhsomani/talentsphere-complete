@@ -96,7 +96,22 @@ export interface DataExportPayload {
   notifications: Array<Record<string, unknown>>;
 }
 
-export const GDPR_GRACE_PERIOD_DAYS = 30;
+/**
+ * ADR-024 (SSOT DOR-017): both erasure clocks start at the request. The
+ * person can cancel for 14 days; erasure must be complete by day 30, inside
+ * the GDPR's one month (Art. 12(3)).
+ */
+export const GDPR_GRACE_PERIOD_DAYS = 14;
+export const ERASURE_COMPLETION_DAYS = 30;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** The latest moment an erasure request may be completed (ADR-024). */
+export function erasureCompleteBy(request: Pick<DataErasureRequest, 'createdAt'>): string {
+  return new Date(
+    new Date(request.createdAt).getTime() + ERASURE_COMPLETION_DAYS * DAY_MS
+  ).toISOString();
+}
 
 /**
  * Initializes default user settings with privacy-by-design baseline.
@@ -196,7 +211,7 @@ export function updateUserSettings(
 }
 
 /**
- * Initiates an account erasure request with mandatory 30-day grace period (GDPR Art 17).
+ * Initiates an account erasure request with a 14-day cancel window (GDPR Art 17, ADR-024).
  */
 export function requestAccountErasure(
   userId: string,
@@ -204,9 +219,7 @@ export function requestAccountErasure(
   nowIso: string = new Date().toISOString()
 ): DataErasureRequest {
   const requestDate = new Date(nowIso);
-  const gracePeriodEnd = new Date(
-    requestDate.getTime() + GDPR_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000
-  );
+  const gracePeriodEnd = new Date(requestDate.getTime() + GDPR_GRACE_PERIOD_DAYS * DAY_MS);
 
   return {
     id: crypto.randomUUID(),
@@ -220,7 +233,7 @@ export function requestAccountErasure(
 }
 
 /**
- * Cancels a pending account erasure request if still within the 30-day grace period.
+ * Cancels a pending account erasure request if still within the 14-day cancel window.
  */
 export function cancelAccountErasure(
   request: DataErasureRequest,

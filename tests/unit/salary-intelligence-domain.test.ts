@@ -7,6 +7,7 @@ import {
   computeSalaryAggregates,
   querySalaryBenchmark,
   queryCompanySalarySummary,
+  countDistinctReporters,
   type SalaryReport,
 } from '../../packages/domain/src/salary-intelligence.js';
 
@@ -137,82 +138,66 @@ describe('Domain: Salary Intelligence & Compensation Benchmarks (F-86, BR-177..B
     );
   });
 
-  it('computes salary percentiles and equity aggregates with k-anonymity (BR-178, BR-183)', () => {
-    const reports: SalaryReport[] = [
-      createSalaryReport({
-        userId: 'u1',
-        jobTitle: 'Backend Dev',
-        standardizedRole: 'backend_engineer',
-        seniorityLevel: 'senior',
-        location: 'San Francisco, CA',
-        baseSalaryMinor: 14000000,
-        equityAnnualMinor: 2000000,
-        bonusMinor: 1000000,
-        yearsOfExperience: 5,
-      }),
-      createSalaryReport({
-        userId: 'u2',
-        jobTitle: 'Senior Backend Engineer',
-        standardizedRole: 'backend_engineer',
-        seniorityLevel: 'senior',
-        location: 'San Francisco, CA',
-        baseSalaryMinor: 16000000,
-        equityAnnualMinor: 4000000,
-        bonusMinor: 2000000,
-        yearsOfExperience: 6,
-      }),
-      createSalaryReport({
-        userId: 'u3',
-        jobTitle: 'Staff Backend Architect',
-        standardizedRole: 'backend_engineer',
-        seniorityLevel: 'senior',
-        location: 'San Francisco, CA',
-        baseSalaryMinor: 18000000,
-        equityAnnualMinor: 6000000,
-        bonusMinor: 3000000,
-        yearsOfExperience: 8,
-      }),
-      createSalaryReport({
-        userId: 'u4',
-        jobTitle: 'Backend Engineer',
-        standardizedRole: 'backend_engineer',
-        seniorityLevel: 'senior',
-        location: 'San Francisco, CA',
-        baseSalaryMinor: 20000000,
-        equityAnnualMinor: 8000000,
-        bonusMinor: 4000000,
-        yearsOfExperience: 9,
-      }),
-    ];
+  // Person n reports base 130k + n*10k, equity n*1M, bonus n*0.5M (USD minor units).
+  const seniorBackendReport = (n: number, userId = `u${n}`) =>
+    createSalaryReport({
+      userId,
+      jobTitle: 'Senior Backend Engineer',
+      standardizedRole: 'backend_engineer',
+      seniorityLevel: 'senior',
+      location: n % 2 ? 'San Francisco, CA' : 'Austin, TX',
+      baseSalaryMinor: 13000000 + n * 1000000,
+      equityAnnualMinor: n * 1000000,
+      bonusMinor: n * 500000,
+      yearsOfExperience: 5 + n,
+    });
 
-    // Four reports: below BR-178's floor of 5, even when asked for 3 (G-27).
+  it('computes salary percentiles and equity aggregates with k-anonymity (BR-178, BR-183)', () => {
+    const reports: SalaryReport[] = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => seniorBackendReport(n));
+
+    // Nine people: below BR-178's floor of 10, even when asked for 3 (G-27, ADR-028).
     expect(computeSalaryAggregates(reports, 3).get('backend_engineer:senior:USD')).toBeUndefined();
 
-    reports.push(
-      createSalaryReport({
-        userId: 'u5',
-        jobTitle: 'Principal-track Backend Engineer',
-        standardizedRole: 'backend_engineer',
-        seniorityLevel: 'senior',
-        location: 'Austin, TX',
-        baseSalaryMinor: 22000000,
-        equityAnnualMinor: 10000000,
-        bonusMinor: 5000000,
-        yearsOfExperience: 10,
-      })
-    );
+    reports.push(seniorBackendReport(10));
     const aggregates = computeSalaryAggregates(reports, 3);
     const cohort = aggregates.get('backend_engineer:senior:USD');
     expect(cohort).toBeDefined();
-    expect(cohort?.sampleCount).toBe(5);
-    expect(cohort?.p50Minor).toBe(18000000); // Median of 140k..220k
-    expect(cohort?.equityP50Minor).toBe(6000000); // Median equity
-    expect(cohort?.bonusP50Minor).toBe(3000000); // Median bonus
+    expect(cohort?.sampleCount).toBe(10);
+    expect(cohort?.p50Minor).toBe(18500000); // Median of 140k..230k
+    expect(cohort?.equityP50Minor).toBe(5500000); // Median equity
+    expect(cohort?.bonusP50Minor).toBe(2750000); // Median bonus
     // No individual figure and no one person's location (REV-05).
     expect(cohort).not.toHaveProperty('minMinor');
     expect(cohort).not.toHaveProperty('maxMinor');
     expect(cohort).not.toHaveProperty('meanMinor');
     expect(cohort?.location).toBe('all');
+  });
+
+  it('counts different people, not reports, toward the cohort (BR-178, ADR-028)', () => {
+    // One person filing ten reports is still one person.
+    const onePerson = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => seniorBackendReport(n, 'u1'));
+    expect(countDistinctReporters(onePerson)).toBe(1);
+    expect(computeSalaryAggregates(onePerson).size).toBe(0);
+
+    // Twelve reports from nine people: not enough.
+    const ninePeople = [
+      ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => seniorBackendReport(n)),
+      seniorBackendReport(10, 'u1'),
+      seniorBackendReport(11, 'u2'),
+      seniorBackendReport(12, 'u3'),
+    ];
+    expect(computeSalaryAggregates(ninePeople).size).toBe(0);
+    const result = querySalaryBenchmark(ninePeople, { role: 'backend_engineer', level: 'senior' });
+    expect(result.status).toBe('insufficient_data');
+    if (result.status === 'insufficient_data') {
+      expect(result.actualCount).toBe(9);
+      expect(result.minRequired).toBe(10);
+    }
+
+    const tenPeople = [...ninePeople, seniorBackendReport(13, 'u10')];
+    expect(
+      querySalaryBenchmark(tenPeople, { role: 'backend_engineer', level: 'senior' }).status
+    ).toBe('available');
   });
 
   it('enforces k-anonymity privacy protection on query benchmark (BR-178)', () => {
@@ -228,7 +213,7 @@ describe('Domain: Salary Intelligence & Compensation Benchmarks (F-86, BR-177..B
       }),
     ];
 
-    // Even a caller asking for a cohort of 1 gets BR-178's floor of 5 (G-27).
+    // Even a caller asking for a cohort of 1 gets BR-178's floor of 10 (G-27).
     for (const requested of [1, 3, undefined]) {
       const result = querySalaryBenchmark(
         singleReport,
@@ -239,7 +224,7 @@ describe('Domain: Salary Intelligence & Compensation Benchmarks (F-86, BR-177..B
       expect(result.status).toBe('insufficient_data');
       if (result.status === 'insufficient_data') {
         expect(result.actualCount).toBe(1);
-        expect(result.minRequired).toBe(5);
+        expect(result.minRequired).toBe(10);
         expect(result.message).toContain('BR-178');
       }
     }

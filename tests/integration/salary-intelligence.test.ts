@@ -176,7 +176,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
   });
 
   it('enforces k-anonymity privacy protection before minimum cohort is reached (BR-178)', async () => {
-    // We currently have 2 backend_engineer:senior reports. BR-178 requires >= 5.
+    // We currently have 2 backend_engineer:senior reporters. BR-178 requires >= 10 people (ADR-028).
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior',
@@ -185,7 +185,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body.status).toBe('insufficient_data');
-    expect(body.minRequired).toBe(5);
+    expect(body.minRequired).toBe(10);
     expect(body.actualCount).toBe(2);
     expect(body.message).toContain('BR-178');
   });
@@ -197,7 +197,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     });
     const body = JSON.parse(res.payload);
     expect(body.status).toBe('insufficient_data');
-    expect(body.minRequired).toBe(5);
+    expect(body.minRequired).toBe(10);
     expect(body.benchmark).toBeUndefined();
   });
 
@@ -222,11 +222,16 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     });
     expect(res3.statusCode).toBe(201);
 
-    // Two more reporters at another company (the company view below still
+    // Seven more reporters at another company (the company view below still
     // has exactly 3 CloudScale reports).
     for (const [n, base, bonus, equity] of [
       [4, 16500000, 1500000, 3000000],
       [5, 20500000, 3500000, 7000000],
+      [6, 16000000, 1000000, 2000000],
+      [7, 21000000, 4000000, 8000000],
+      [8, 17000000, 2000000, 4500000],
+      [9, 20000000, 3000000, 5500000],
+      [10, 18500000, 2500000, 5000000],
     ]) {
       const reg = await app.inject({
         method: 'POST',
@@ -259,7 +264,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
       expect(report.statusCode).toBe(201);
     }
 
-    // Now cohort has 5 reports (BR-178: k >= 5) -> benchmark available!
+    // Now ten different people have reported (BR-178: k >= 10) -> benchmark available!
     const benchmarkRes = await app.inject({
       method: 'GET',
       url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior',
@@ -268,8 +273,8 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     expect(benchmarkRes.statusCode).toBe(200);
     const body = JSON.parse(benchmarkRes.payload);
     expect(body.status).toBe('available');
-    expect(body.benchmark.sampleCount).toBe(5);
-    expect(body.benchmark.p50Minor).toBe(18500000); // Median of 165k..205k
+    expect(body.benchmark.sampleCount).toBe(10);
+    expect(body.benchmark.p50Minor).toBe(18500000); // Median of 160k..210k
     // No individual salaries in the answer (REV-05).
     expect(body.benchmark).not.toHaveProperty('minMinor');
     expect(body.benchmark).not.toHaveProperty('maxMinor');
@@ -279,7 +284,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
   });
 
   it('filters the benchmark by location (REV-05)', async () => {
-    // All five reports are in San Francisco: another city has no cohort.
+    // All ten reports are in San Francisco: another city has no cohort.
     const elsewhere = JSON.parse(
       (
         await app.inject({
@@ -299,7 +304,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
       ).payload
     );
     expect(here.status).toBe('available');
-    expect(here.benchmark.sampleCount).toBe(5);
+    expect(here.benchmark.sampleCount).toBe(10);
   });
 
   it('enforces company reporting threshold of >= 3 reports (BR-180)', async () => {
@@ -346,13 +351,13 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     const withdrawBody = JSON.parse(withdrawRes.payload);
     expect(withdrawBody.report.status).toBe('withdrawn');
 
-    // After withdrawal, cohort count drops from 5 to 4 -> drops below k-anonymity!
+    // After withdrawal, the cohort drops from 10 people to 9 -> below k-anonymity!
     const benchmarkRes = await app.inject({
       method: 'GET',
       url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior',
     });
     const benchBody = JSON.parse(benchmarkRes.payload);
     expect(benchBody.status).toBe('insufficient_data');
-    expect(benchBody.actualCount).toBe(4);
+    expect(benchBody.actualCount).toBe(9);
   });
 });

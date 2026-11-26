@@ -77,7 +77,7 @@ export const VerifyPage: React.FC = () => {
     ? []
     : result.type === 'course_certificate'
       ? [
-          ['Credential', 'Course certificate'],
+          ['Credential', 'Course completion record'],
           ['Course', result.verification.courseTitle],
           ['Certificate number', result.verification.certificateNumber],
           ['Issued', formatDate(result.verification.issuedAt)],
@@ -132,6 +132,14 @@ export const VerifyPage: React.FC = () => {
               >
                 Issued by {v.authority}. This page shows no personal details.
               </p>
+              {result.type === 'course_certificate' && (
+                <p
+                  style={{ color: colors.neutral[700], fontSize: '0.875rem' }}
+                  data-testid="verify-completion-note"
+                >
+                  This records that the course was completed. It is not an assessment of skill.
+                </p>
+              )}
             </CardContent>
           </Card>
         </>

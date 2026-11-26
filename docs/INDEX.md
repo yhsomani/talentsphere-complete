@@ -38,7 +38,7 @@ The minimal documentation set, mapped onto the files that already hold each subj
 | Decisions | [Decisions](#decisions) below (an index: ADRs in [`engineering/DECISIONS.md`](engineering/DECISIONS.md), open conflicts in [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21)) | |
 | Project graph and mind map views | [`mindmap/README.md`](mindmap/README.md) (one machine-readable dataset, `master/MASTER_PROJECT_GRAPH.json`, and the views generated from it) | [`catalog/GRAPH_VALIDATION.md`](mindmap/catalog/GRAPH_VALIDATION.md) |
 
-Two open product contradictions stay as owner decisions, not edits: **C-8** (privacy threshold, k ≥ 10 in SSOT versus k ≥ 5 in BR-158 and BR-178) and **C-22** (rule text drift for BR-065, BR-066, BR-35 and BR-208). See [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and tracker row T-015.
+The two product contradictions that waited on the owner were decided on 2026-11-26: **C-8** (privacy threshold) becomes k ≥ 10 distinct people (ADR-028), and **C-22** (rule text drift for BR-065, BR-066, BR-35 and BR-208) keeps the SSOT wording (ADR-029). See [`engineering/DECISIONS.md`](engineering/DECISIONS.md#owner-delegated-decisions-2026-11-26) and tracker row T-015.
 
 ## Authority order
 
@@ -96,7 +96,7 @@ Documents that stay outside `docs/` because a tool or host reads them from a fix
 |---|---|
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
 | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) | **Target architecture**, then (appended) the technical requirements from the former `TRD.md`. Not a description of the running code. |
-| [`engineering/DECISIONS.md`](engineering/DECISIONS.md) | Full text of ADR-015 (persist the core career loop; the API's maps are a read model; ratification open, issue #46) and ADR-016 (browser-measured UI quality gates). |
+| [`engineering/DECISIONS.md`](engineering/DECISIONS.md) | Full text of ADR-015 (persist the core career loop; the API's maps are a read model; ratified by ADR-017), ADR-016 (browser-measured UI quality gates) and ADR-017 to ADR-029, the decisions the owner delegated on 2026-11-26 (issues #44 to #50, C-8, C-22, cookie session, file storage, code runner, `server.ts` split, course evidence), each with options, pros and cons and owner-only steps. |
 
 ### System model
 
@@ -148,7 +148,7 @@ Decisions are kept where they are made; this list is the index, not a copy.
 
 | Kind | Where |
 |---|---|
-| Approved architecture decisions (as built) | Decision register in [`ARCHITECTURE.md`](ARCHITECTURE.md); full ADR-015 and ADR-016 text in [`engineering/DECISIONS.md`](engineering/DECISIONS.md) |
+| Approved decisions | Decision register in [`ARCHITECTURE.md`](ARCHITECTURE.md); full text of ADR-015 to ADR-029 in [`engineering/DECISIONS.md`](engineering/DECISIONS.md) |
 | Intended architecture decisions | ADR-001 to ADR-013 in [`SSOT.md`](SSOT.md) |
 | Unresolved documentation conflicts (including C-8 and C-22) | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and the conflict register in [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md) |
 | Open product decisions awaiting the owner | GitHub issues #44 to #50 and the `REQUIRES_APPROVAL` rows in [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) |

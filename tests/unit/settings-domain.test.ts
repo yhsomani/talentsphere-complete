@@ -8,6 +8,7 @@ import {
   compileDataExportArchive,
   withProfileVisibility,
   GDPR_GRACE_PERIOD_DAYS,
+  erasureCompleteBy,
 } from '../../packages/domain/src/index.js';
 import type { User, Profile } from '../../packages/domain/src/index.js';
 
@@ -111,7 +112,7 @@ describe('Account Settings, Privacy & GDPR Erasure Domain (F-15, §31, BR-06)', 
   });
 
   describe('requestAccountErasure & cancelAccountErasure (GDPR Art 17)', () => {
-    it('initiates erasure with mandatory 30-day grace period', () => {
+    it('initiates erasure with a 14-day cancel window and a 30-day completion deadline (ADR-024)', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
       const request = requestAccountErasure(userId, 'Leaving the industry', nowIso);
 
@@ -119,13 +120,13 @@ describe('Account Settings, Privacy & GDPR Erasure Domain (F-15, §31, BR-06)', 
       expect(request.status).toBe('grace_period');
       expect(request.reason).toBe('Leaving the industry');
 
-      const expectedEnd = new Date(
-        new Date(nowIso).getTime() + GDPR_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000
-      ).toISOString();
-      expect(request.gracePeriodEndsAt).toBe(expectedEnd);
+      expect(GDPR_GRACE_PERIOD_DAYS).toBe(14);
+      expect(request.gracePeriodEndsAt).toBe('2026-10-08T12:00:00.000Z');
+      // Both clocks start at the request (SSOT DOR-017).
+      expect(erasureCompleteBy(request)).toBe('2026-10-24T12:00:00.000Z');
     });
 
-    it('cancels erasure request if still within the 30-day grace period', () => {
+    it('cancels erasure request if still within the 14-day cancel window', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
       const request = requestAccountErasure(userId, 'Changed my mind soon', nowIso);
 
@@ -137,12 +138,12 @@ describe('Account Settings, Privacy & GDPR Erasure Domain (F-15, §31, BR-06)', 
       expect(cancelled.cancelledAt).toBe(cancelDateIso);
     });
 
-    it('prohibits cancellation once the 30-day grace period expires', () => {
+    it('prohibits cancellation once the 14-day cancel window expires', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
       const request = requestAccountErasure(userId, 'Permanent departure', nowIso);
 
-      // Attempt cancellation 31 days later
-      const tooLateDateIso = '2026-10-26T12:00:00.000Z';
+      // Attempt cancellation 15 days later
+      const tooLateDateIso = '2026-10-09T12:00:00.000Z';
       expect(() => {
         cancelAccountErasure(request, tooLateDateIso);
       }).toThrowError(/Grace period has expired/);

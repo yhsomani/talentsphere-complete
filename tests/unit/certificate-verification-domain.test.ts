@@ -65,6 +65,9 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
     expect(verified.certificateNumber).toBe(cert.certificateNumber);
     expect(verified.verificationProofHash).toBe(cert.verificationProofHash);
     expect(verified.authority).toContain('Zero-PII');
+    // A completion record, not a skill verification (ADR-023).
+    expect(verified.recordOf).toBe('course_completion');
+    expect(verified.authority).not.toMatch(/verified/i);
   });
 
   it('rejects verification if proof hash does not match certificate or is malformed', () => {

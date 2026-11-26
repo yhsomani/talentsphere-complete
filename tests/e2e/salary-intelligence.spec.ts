@@ -103,7 +103,7 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     const sparseData = await benchSparse.json();
     expect(sparseData.status).toBe('insufficient_data');
     expect(sparseData.actualCount).toBe(2);
-    expect(sparseData.minRequired).toBe(5);
+    expect(sparseData.minRequired).toBe(10);
 
     // The caller cannot lower the threshold (G-27).
     const benchLowered = await request.get(
@@ -111,7 +111,7 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     );
     const loweredData = await benchLowered.json();
     expect(loweredData.status).toBe('insufficient_data');
-    expect(loweredData.minRequired).toBe(5);
+    expect(loweredData.minRequired).toBe(10);
   });
 
   test('aggregates compensation benchmarks once cohort threshold is met (BR-178, BR-180, BR-183)', async ({
@@ -136,11 +136,16 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     });
     expect(sub3.status()).toBe(201);
 
-    // Two more reporters at another company, so the cohort reaches BR-178's
-    // k of 5 while Apex Cloud Systems keeps exactly 3 reports (BR-180).
+    // Seven more reporters at another company, so the cohort reaches BR-178's
+    // k of 10 people (ADR-028) while Apex Cloud Systems keeps exactly 3 reports (BR-180).
     for (const [n, base, equity] of [
       [4, 17000000, 4000000],
       [5, 23000000, 10000000],
+      [6, 16000000, 3000000],
+      [7, 24000000, 11000000],
+      [8, 19000000, 6000000],
+      [9, 21000000, 8000000],
+      [10, 20000000, 7000000],
     ]) {
       const reg = await request.post(`${API_BASE}/auth/register`, {
         data: {
@@ -177,7 +182,7 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     expect(benchRes.status()).toBe(200);
     const benchData = await benchRes.json();
     expect(benchData.status).toBe('available');
-    expect(benchData.benchmark.sampleCount).toBe(5);
+    expect(benchData.benchmark.sampleCount).toBe(10);
     expect(benchData.benchmark.p50Minor).toBe(20000000); // Median: $200,000
     // No individual salaries in the answer (REV-05).
     expect(benchData.benchmark).not.toHaveProperty('minMinor');
@@ -202,13 +207,13 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     const delData = await delRes.json();
     expect(delData.report.status).toBe('withdrawn');
 
-    // 2. Query benchmark again: active cohort count is now 4, falls below k-anonymity!
+    // 2. Query benchmark again: the cohort is now 9 people, below k-anonymity!
     const benchRes = await request.get(
       `${API_BASE}/salaries/benchmarks?role=backend_engineer&level=principal`
     );
     expect(benchRes.status()).toBe(200);
     const benchData = await benchRes.json();
     expect(benchData.status).toBe('insufficient_data');
-    expect(benchData.actualCount).toBe(4);
+    expect(benchData.actualCount).toBe(9);
   });
 });

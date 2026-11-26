@@ -258,9 +258,14 @@ backoff is exponential with jitter and a cap. Unknown handlers dead-letter;
 permanent errors fail; transient failures retry or become dead. Cancellation is
 cooperative at acknowledgement and does not undo effects.
 
-A timeout does not abort the underlying promise. Batch waiting can consume later
-jobs' leases; expired leases can be reclaimed and execution duplicated. Completion
-is not fenced by claim generation. Do not claim exactly-once delivery. Most
+A cycle claims only as many jobs as can run back to back inside one lease, and
+a job that could not finish before its lease ends is not started (it is
+redelivered). Completion and failure are fenced by the attempts counter, which
+each claim increments: a worker whose job was re-claimed cannot complete or
+fail it (`tests/pg/job-claim-fencing.test.ts`, `tests/unit/worker-claim.test.ts`).
+A timeout still does not abort the underlying promise, so a handler that ignores
+its own time bound can keep running after its job is redelivered, and its side
+effects are not rolled back. Do not claim exactly-once delivery. Most
 handlers only record events; no digest/rollup scheduler or heavy queue exists.
 `JobQueueEngine` remains a separate unit-tested, unused memory engine. In memory
 mode the standalone worker idles because it cannot access the API's Maps.
@@ -285,8 +290,8 @@ Cohort suppression does not by itself establish differential privacy.
 Assessment submission does not execute code; it can still return simulated
 `passed`/100 while storing unverified evidence with `executed:false`. Interview
 execution is also simulated and refused in staging/production. Course completion
-can mint authority-verified evidence from lesson completion without the required
-final assessment. AI chat enforces a free quota, but the separate assistant query
+evidence starts `unverified` (C-20, commit `bbeb331`); per ADR-023 only a graded
+assessment may raise it. AI chat enforces a free quota, but the separate assistant query
 scaffold skips it; saved consent is not universally enforced. These are open gaps.
 
 ## 21. Observability and operations
@@ -377,7 +382,8 @@ numbering namespace. This reconciliation does not approve new architecture.
 | ADR-009 | Early SQL-as-text migration guard, superseded                                                                                                                     | Runner now executes SQL; checksum/honesty controls remain                                    |
 | ADR-010 | pnpm, packages before apps                                                                                                                                        | Built workspace dependencies are required; toolchain changes respect build-file protection   |
 | ADR-011 | Reticle for visible changes                                                                                                                                       | Real flow verdict required; setup alone is not verification                                  |
-| ADR-015 | [Core persistence/read model](engineering/DECISIONS.md#adr-015--persist-the-core-career-loop-keep-the-apis-maps-as-a-read-model), pending owner ratification | One writer and boot hydration; move reads to SQL before scaling                              |
+| ADR-015 | [Core persistence/read model](engineering/DECISIONS.md#adr-015--persist-the-core-career-loop-keep-the-apis-maps-as-a-read-model), ratified 2026-11-26 (ADR-017) | One writer and boot hydration; move reads to SQL before scaling                              |
+| ADR-017 to ADR-029 | [Owner-delegated decisions, 2026-11-26](engineering/DECISIONS.md#owner-delegated-decisions-2026-11-26): email (Brevo), cookie session and password reset, object storage and scanning, code runner, `server.ts` split, course evidence, erasure clocks, staging and backups, beta durability scope, free-only launch, `min_cohort_k` = 10, AI quality rules | Each record lists what is built, what follows as code, and the steps only the owner can run |
 | ADR-016 | [Browser UI quality gates](engineering/DECISIONS.md#adr-016--measure-ui-quality-in-a-real-browser-and-test-it-adversarially)                                 | Browser evidence, with its documented coverage limits                                        |
 
 ## 27. Agent quick reference
