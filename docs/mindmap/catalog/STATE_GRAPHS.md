@@ -1,6 +1,6 @@
 # State Transition Graphs
 
-Generated from the graph at `9b3032f`. Back to the [feature catalog](FEATURE_CATALOG.md).
+Generated from the graph at `eb166ea`. Back to the [feature catalog](FEATURE_CATALOG.md).
 
 ## Transition tables in packages/domain
 

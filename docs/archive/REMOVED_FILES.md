@@ -754,3 +754,157 @@ Moved with `git mv`, so `git log --follow` shows each file's history. Content is
 | `SSOT.md` | [`docs/SSOT.md`](../SSOT.md) |
 | `project-mindmap/` (whole folder: 164 Markdown files, the `.mmd`, JSON, CSV and DOT data, and the generator scripts in `tools/`) | [`docs/mindmap/`](../mindmap/README.md) |
 | `supabase/hosted/README.md` | [`docs/engineering/HOSTED_SUPABASE.md`](../engineering/HOSTED_SUPABASE.md) (the SQL files stay in `supabase/hosted/`) |
+
+## 7. Retired or folded on 2026-11-26 (owner-approved cuts)
+
+The owner approved both cuts ("both"). Commit before the change: `eb166ea`. See [`reports/DOC_DEDUP_2026-11-25.md` §12](../reports/DOC_DEDUP_2026-11-25.md#12-owner-approved-cuts-2026-11-26).
+
+### 7.1 Deleted
+
+| Former path | Why | Restore |
+|---|---|---|
+| `docs/reports/DOC_DEDUP_2026-11-25_GROUPS.md` (2 MB) | Machine output of the second-pass duplicate scan; its file:line pointers no longer matched the files. The summary stays in `DOC_DEDUP_2026-11-25.md` | `git checkout eb166ea -- docs/reports/DOC_DEDUP_2026-11-25_GROUPS.md` |
+
+### 7.2 Catalog module pages folded into one file per application
+
+`docs/mindmap/tools/catalog.py` now writes each module as a section of a per-application file instead of its own page. Every page body is in its new section unchanged (only the title line and heading levels differ). Restore any page with `git checkout eb166ea -- docs/<former path>`.
+
+| Former path | Now at |
+|---|---|
+| `mindmap/catalog/modules/api-activity.md` | [`mindmap/catalog/modules/api-1.md#apiactivity-mod-086`](../mindmap/catalog/modules/api-1.md#apiactivity-mod-086) |
+| `mindmap/catalog/modules/api-admin.md` | [`mindmap/catalog/modules/api-1.md#apiadmin-mod-091`](../mindmap/catalog/modules/api-1.md#apiadmin-mod-091) |
+| `mindmap/catalog/modules/api-ai.md` | [`mindmap/catalog/modules/api-1.md#apiai-mod-069`](../mindmap/catalog/modules/api-1.md#apiai-mod-069) |
+| `mindmap/catalog/modules/api-alumni.md` | [`mindmap/catalog/modules/api-1.md#apialumni-mod-085`](../mindmap/catalog/modules/api-1.md#apialumni-mod-085) |
+| `mindmap/catalog/modules/api-analytics.md` | [`mindmap/catalog/modules/api-1.md#apianalytics-mod-094`](../mindmap/catalog/modules/api-1.md#apianalytics-mod-094) |
+| `mindmap/catalog/modules/api-applications.md` | [`mindmap/catalog/modules/api-1.md#apiapplications-mod-063`](../mindmap/catalog/modules/api-1.md#apiapplications-mod-063) |
+| `mindmap/catalog/modules/api-auth.md` | [`mindmap/catalog/modules/api-1.md#apiauth-mod-055`](../mindmap/catalog/modules/api-1.md#apiauth-mod-055) |
+| `mindmap/catalog/modules/api-billing.md` | [`mindmap/catalog/modules/api-1.md#apibilling-mod-090`](../mindmap/catalog/modules/api-1.md#apibilling-mod-090) |
+| `mindmap/catalog/modules/api-candidates.md` | [`mindmap/catalog/modules/api-2.md#apicandidates-mod-065`](../mindmap/catalog/modules/api-2.md#apicandidates-mod-065) |
+| `mindmap/catalog/modules/api-career.md` | [`mindmap/catalog/modules/api-2.md#apicareer-mod-082`](../mindmap/catalog/modules/api-2.md#apicareer-mod-082) |
+| `mindmap/catalog/modules/api-certificates.md` | [`mindmap/catalog/modules/api-2.md#apicertificates-mod-074`](../mindmap/catalog/modules/api-2.md#apicertificates-mod-074) |
+| `mindmap/catalog/modules/api-challenges.md` | [`mindmap/catalog/modules/api-2.md#apichallenges-mod-068`](../mindmap/catalog/modules/api-2.md#apichallenges-mod-068) |
+| `mindmap/catalog/modules/api-connections.md` | [`mindmap/catalog/modules/api-2.md#apiconnections-mod-079`](../mindmap/catalog/modules/api-2.md#apiconnections-mod-079) |
+| `mindmap/catalog/modules/api-courses.md` | [`mindmap/catalog/modules/api-2.md#apicourses-mod-071`](../mindmap/catalog/modules/api-2.md#apicourses-mod-071) |
+| `mindmap/catalog/modules/api-evidence.md` | [`mindmap/catalog/modules/api-2.md#apievidence-mod-057`](../mindmap/catalog/modules/api-2.md#apievidence-mod-057) |
+| `mindmap/catalog/modules/api-feature-flags.md` | [`mindmap/catalog/modules/api-2.md#apifeature-flags-mod-054`](../mindmap/catalog/modules/api-2.md#apifeature-flags-mod-054) |
+| `mindmap/catalog/modules/api-feedback.md` | [`mindmap/catalog/modules/api-2.md#apifeedback-mod-064`](../mindmap/catalog/modules/api-2.md#apifeedback-mod-064) |
+| `mindmap/catalog/modules/api-gamification.md` | [`mindmap/catalog/modules/api-2.md#apigamification-mod-088`](../mindmap/catalog/modules/api-2.md#apigamification-mod-088) |
+| `mindmap/catalog/modules/api-health.md` | [`mindmap/catalog/modules/api-2.md#apihealth-mod-052`](../mindmap/catalog/modules/api-2.md#apihealth-mod-052) |
+| `mindmap/catalog/modules/api-internal.md` | [`mindmap/catalog/modules/api-2.md#apiinternal-mod-096`](../mindmap/catalog/modules/api-2.md#apiinternal-mod-096) |
+| `mindmap/catalog/modules/api-interviews.md` | [`mindmap/catalog/modules/api-3.md#apiinterviews-mod-066`](../mindmap/catalog/modules/api-3.md#apiinterviews-mod-066) |
+| `mindmap/catalog/modules/api-job-templates.md` | [`mindmap/catalog/modules/api-3.md#apijob-templates-mod-061`](../mindmap/catalog/modules/api-3.md#apijob-templates-mod-061) |
+| `mindmap/catalog/modules/api-jobs.md` | [`mindmap/catalog/modules/api-3.md#apijobs-mod-060`](../mindmap/catalog/modules/api-3.md#apijobs-mod-060) |
+| `mindmap/catalog/modules/api-learning.md` | [`mindmap/catalog/modules/api-3.md#apilearning-mod-083`](../mindmap/catalog/modules/api-3.md#apilearning-mod-083) |
+| `mindmap/catalog/modules/api-lessons.md` | [`mindmap/catalog/modules/api-3.md#apilessons-mod-073`](../mindmap/catalog/modules/api-3.md#apilessons-mod-073) |
+| `mindmap/catalog/modules/api-moderation.md` | [`mindmap/catalog/modules/api-3.md#apimoderation-mod-093`](../mindmap/catalog/modules/api-3.md#apimoderation-mod-093) |
+| `mindmap/catalog/modules/api-modules.md` | [`mindmap/catalog/modules/api-4.md#apimodules-mod-072`](../mindmap/catalog/modules/api-4.md#apimodules-mod-072) |
+| `mindmap/catalog/modules/api-networking.md` | [`mindmap/catalog/modules/api-4.md#apinetworking-mod-080`](../mindmap/catalog/modules/api-4.md#apinetworking-mod-080) |
+| `mindmap/catalog/modules/api-notifications.md` | [`mindmap/catalog/modules/api-4.md#apinotifications-mod-077`](../mindmap/catalog/modules/api-4.md#apinotifications-mod-077) |
+| `mindmap/catalog/modules/api-organizations.md` | [`mindmap/catalog/modules/api-4.md#apiorganizations-mod-059`](../mindmap/catalog/modules/api-4.md#apiorganizations-mod-059) |
+| `mindmap/catalog/modules/api-portfolio.md` | [`mindmap/catalog/modules/api-4.md#apiportfolio-mod-087`](../mindmap/catalog/modules/api-4.md#apiportfolio-mod-087) |
+| `mindmap/catalog/modules/api-profile.md` | [`mindmap/catalog/modules/api-4.md#apiprofile-mod-056`](../mindmap/catalog/modules/api-4.md#apiprofile-mod-056) |
+| `mindmap/catalog/modules/api-ready.md` | [`mindmap/catalog/modules/api-4.md#apiready-mod-053`](../mindmap/catalog/modules/api-4.md#apiready-mod-053) |
+| `mindmap/catalog/modules/api-recruiter.md` | [`mindmap/catalog/modules/api-4.md#apirecruiter-mod-084`](../mindmap/catalog/modules/api-4.md#apirecruiter-mod-084) |
+| `mindmap/catalog/modules/api-references.md` | [`mindmap/catalog/modules/api-4.md#apireferences-mod-095`](../mindmap/catalog/modules/api-4.md#apireferences-mod-095) |
+| `mindmap/catalog/modules/api-referrals.md` | [`mindmap/catalog/modules/api-4.md#apireferrals-mod-081`](../mindmap/catalog/modules/api-4.md#apireferrals-mod-081) |
+| `mindmap/catalog/modules/api-reputation.md` | [`mindmap/catalog/modules/api-5.md#apireputation-mod-067`](../mindmap/catalog/modules/api-5.md#apireputation-mod-067) |
+| `mindmap/catalog/modules/api-resumes.md` | [`mindmap/catalog/modules/api-5.md#apiresumes-mod-078`](../mindmap/catalog/modules/api-5.md#apiresumes-mod-078) |
+| `mindmap/catalog/modules/api-salaries.md` | [`mindmap/catalog/modules/api-5.md#apisalaries-mod-062`](../mindmap/catalog/modules/api-5.md#apisalaries-mod-062) |
+| `mindmap/catalog/modules/api-search.md` | [`mindmap/catalog/modules/api-5.md#apisearch-mod-092`](../mindmap/catalog/modules/api-5.md#apisearch-mod-092) |
+| `mindmap/catalog/modules/api-settings.md` | [`mindmap/catalog/modules/api-5.md#apisettings-mod-089`](../mindmap/catalog/modules/api-5.md#apisettings-mod-089) |
+| `mindmap/catalog/modules/api-skills.md` | [`mindmap/catalog/modules/api-5.md#apiskills-mod-058`](../mindmap/catalog/modules/api-5.md#apiskills-mod-058) |
+| `mindmap/catalog/modules/api-threads.md` | [`mindmap/catalog/modules/api-6.md#apithreads-mod-076`](../mindmap/catalog/modules/api-6.md#apithreads-mod-076) |
+| `mindmap/catalog/modules/api-verify.md` | [`mindmap/catalog/modules/api-6.md#apiverify-mod-075`](../mindmap/catalog/modules/api-6.md#apiverify-mod-075) |
+| `mindmap/catalog/modules/api-xp.md` | [`mindmap/catalog/modules/api-6.md#apixp-mod-070`](../mindmap/catalog/modules/api-6.md#apixp-mod-070) |
+| `mindmap/catalog/modules/documented-administration.md` | [`mindmap/catalog/modules/documented.md#documentedadministration-mod-245`](../mindmap/catalog/modules/documented.md#documentedadministration-mod-245) |
+| `mindmap/catalog/modules/documented-ai.md` | [`mindmap/catalog/modules/documented.md#documentedai-mod-222`](../mindmap/catalog/modules/documented.md#documentedai-mod-222) |
+| `mindmap/catalog/modules/documented-analytics.md` | [`mindmap/catalog/modules/documented.md#documentedanalytics-mod-219`](../mindmap/catalog/modules/documented.md#documentedanalytics-mod-219) |
+| `mindmap/catalog/modules/documented-assessment.md` | [`mindmap/catalog/modules/documented.md#documentedassessment-mod-214`](../mindmap/catalog/modules/documented.md#documentedassessment-mod-214) |
+| `mindmap/catalog/modules/documented-business.md` | [`mindmap/catalog/modules/documented.md#documentedbusiness-mod-248`](../mindmap/catalog/modules/documented.md#documentedbusiness-mod-248) |
+| `mindmap/catalog/modules/documented-candidate.md` | [`mindmap/catalog/modules/documented.md#documentedcandidate-mod-224`](../mindmap/catalog/modules/documented.md#documentedcandidate-mod-224) |
+| `mindmap/catalog/modules/documented-career.md` | [`mindmap/catalog/modules/documented.md#documentedcareer-mod-221`](../mindmap/catalog/modules/documented.md#documentedcareer-mod-221) |
+| `mindmap/catalog/modules/documented-careers.md` | [`mindmap/catalog/modules/documented.md#documentedcareers-mod-228`](../mindmap/catalog/modules/documented.md#documentedcareers-mod-228) |
+| `mindmap/catalog/modules/documented-communication.md` | [`mindmap/catalog/modules/documented.md#documentedcommunication-mod-216`](../mindmap/catalog/modules/documented.md#documentedcommunication-mod-216) |
+| `mindmap/catalog/modules/documented-community.md` | [`mindmap/catalog/modules/documented.md#documentedcommunity-mod-230`](../mindmap/catalog/modules/documented.md#documentedcommunity-mod-230) |
+| `mindmap/catalog/modules/documented-companies.md` | [`mindmap/catalog/modules/documented.md#documentedcompanies-mod-229`](../mindmap/catalog/modules/documented.md#documentedcompanies-mod-229) |
+| `mindmap/catalog/modules/documented-company.md` | [`mindmap/catalog/modules/documented.md#documentedcompany-mod-240`](../mindmap/catalog/modules/documented.md#documentedcompany-mod-240) |
+| `mindmap/catalog/modules/documented-credential.md` | [`mindmap/catalog/modules/documented.md#documentedcredential-mod-238`](../mindmap/catalog/modules/documented.md#documentedcredential-mod-238) |
+| `mindmap/catalog/modules/documented-discovery.md` | [`mindmap/catalog/modules/documented.md#documenteddiscovery-mod-235`](../mindmap/catalog/modules/documented.md#documenteddiscovery-mod-235) |
+| `mindmap/catalog/modules/documented-edge.md` | [`mindmap/catalog/modules/documented.md#documentededge-mod-241`](../mindmap/catalog/modules/documented.md#documentededge-mod-241) |
+| `mindmap/catalog/modules/documented-engagement.md` | [`mindmap/catalog/modules/documented.md#documentedengagement-mod-243`](../mindmap/catalog/modules/documented.md#documentedengagement-mod-243) |
+| `mindmap/catalog/modules/documented-enterprise.md` | [`mindmap/catalog/modules/documented.md#documentedenterprise-mod-237`](../mindmap/catalog/modules/documented.md#documentedenterprise-mod-237) |
+| `mindmap/catalog/modules/documented-foundation.md` | [`mindmap/catalog/modules/documented.md#documentedfoundation-mod-250`](../mindmap/catalog/modules/documented.md#documentedfoundation-mod-250) |
+| `mindmap/catalog/modules/documented-gamification.md` | [`mindmap/catalog/modules/documented.md#documentedgamification-mod-217`](../mindmap/catalog/modules/documented.md#documentedgamification-mod-217) |
+| `mindmap/catalog/modules/documented-governance.md` | [`mindmap/catalog/modules/documented.md#documentedgovernance-mod-239`](../mindmap/catalog/modules/documented.md#documentedgovernance-mod-239) |
+| `mindmap/catalog/modules/documented-hiring.md` | [`mindmap/catalog/modules/documented.md#documentedhiring-mod-218`](../mindmap/catalog/modules/documented.md#documentedhiring-mod-218) |
+| `mindmap/catalog/modules/documented-identity.md` | [`mindmap/catalog/modules/documented.md#documentedidentity-mod-209`](../mindmap/catalog/modules/documented.md#documentedidentity-mod-209) |
+| `mindmap/catalog/modules/documented-institutions.md` | [`mindmap/catalog/modules/documented.md#documentedinstitutions-mod-246`](../mindmap/catalog/modules/documented.md#documentedinstitutions-mod-246) |
+| `mindmap/catalog/modules/documented-integration.md` | [`mindmap/catalog/modules/documented.md#documentedintegration-mod-249`](../mindmap/catalog/modules/documented.md#documentedintegration-mod-249) |
+| `mindmap/catalog/modules/documented-intelligence.md` | [`mindmap/catalog/modules/documented.md#documentedintelligence-mod-226`](../mindmap/catalog/modules/documented.md#documentedintelligence-mod-226) |
+| `mindmap/catalog/modules/documented-jobs.md` | [`mindmap/catalog/modules/documented.md#documentedjobs-mod-227`](../mindmap/catalog/modules/documented.md#documentedjobs-mod-227) |
+| `mindmap/catalog/modules/documented-learning.md` | [`mindmap/catalog/modules/documented.md#documentedlearning-mod-213`](../mindmap/catalog/modules/documented.md#documentedlearning-mod-213) |
+| `mindmap/catalog/modules/documented-marketplace.md` | [`mindmap/catalog/modules/documented.md#documentedmarketplace-mod-211`](../mindmap/catalog/modules/documented.md#documentedmarketplace-mod-211) |
+| `mindmap/catalog/modules/documented-monetization.md` | [`mindmap/catalog/modules/documented.md#documentedmonetization-mod-236`](../mindmap/catalog/modules/documented.md#documentedmonetization-mod-236) |
+| `mindmap/catalog/modules/documented-networking.md` | [`mindmap/catalog/modules/documented.md#documentednetworking-mod-220`](../mindmap/catalog/modules/documented.md#documentednetworking-mod-220) |
+| `mindmap/catalog/modules/documented-os.md` | [`mindmap/catalog/modules/documented.md#documentedos-mod-247`](../mindmap/catalog/modules/documented.md#documentedos-mod-247) |
+| `mindmap/catalog/modules/documented-personalization.md` | [`mindmap/catalog/modules/documented.md#documentedpersonalization-mod-234`](../mindmap/catalog/modules/documented.md#documentedpersonalization-mod-234) |
+| `mindmap/catalog/modules/documented-platform.md` | [`mindmap/catalog/modules/documented.md#documentedplatform-mod-225`](../mindmap/catalog/modules/documented.md#documentedplatform-mod-225) |
+| `mindmap/catalog/modules/documented-portfolio.md` | [`mindmap/catalog/modules/documented.md#documentedportfolio-mod-232`](../mindmap/catalog/modules/documented.md#documentedportfolio-mod-232) |
+| `mindmap/catalog/modules/documented-profile.md` | [`mindmap/catalog/modules/documented.md#documentedprofile-mod-251`](../mindmap/catalog/modules/documented.md#documentedprofile-mod-251) |
+| `mindmap/catalog/modules/documented-recruiting.md` | [`mindmap/catalog/modules/documented.md#documentedrecruiting-mod-212`](../mindmap/catalog/modules/documented.md#documentedrecruiting-mod-212) |
+| `mindmap/catalog/modules/documented-reputation.md` | [`mindmap/catalog/modules/documented.md#documentedreputation-mod-233`](../mindmap/catalog/modules/documented.md#documentedreputation-mod-233) |
+| `mindmap/catalog/modules/documented-safety.md` | [`mindmap/catalog/modules/documented.md#documentedsafety-mod-244`](../mindmap/catalog/modules/documented.md#documentedsafety-mod-244) |
+| `mindmap/catalog/modules/documented-shell.md` | [`mindmap/catalog/modules/documented.md#documentedshell-mod-210`](../mindmap/catalog/modules/documented.md#documentedshell-mod-210) |
+| `mindmap/catalog/modules/documented-skills.md` | [`mindmap/catalog/modules/documented.md#documentedskills-mod-231`](../mindmap/catalog/modules/documented.md#documentedskills-mod-231) |
+| `mindmap/catalog/modules/documented-social.md` | [`mindmap/catalog/modules/documented.md#documentedsocial-mod-215`](../mindmap/catalog/modules/documented.md#documentedsocial-mod-215) |
+| `mindmap/catalog/modules/documented-telemetry.md` | [`mindmap/catalog/modules/documented.md#documentedtelemetry-mod-242`](../mindmap/catalog/modules/documented.md#documentedtelemetry-mod-242) |
+| `mindmap/catalog/modules/documented-verification.md` | [`mindmap/catalog/modules/documented.md#documentedverification-mod-223`](../mindmap/catalog/modules/documented.md#documentedverification-mod-223) |
+| `mindmap/catalog/modules/web-.md` | [`mindmap/catalog/modules/web.md#web-mod-161`](../mindmap/catalog/modules/web.md#web-mod-161) |
+| `mindmap/catalog/modules/web-admin.md` | [`mindmap/catalog/modules/web.md#webadmin-mod-162`](../mindmap/catalog/modules/web.md#webadmin-mod-162) |
+| `mindmap/catalog/modules/web-applications.md` | [`mindmap/catalog/modules/web.md#webapplications-mod-163`](../mindmap/catalog/modules/web.md#webapplications-mod-163) |
+| `mindmap/catalog/modules/web-assessments.md` | [`mindmap/catalog/modules/web.md#webassessments-mod-164`](../mindmap/catalog/modules/web.md#webassessments-mod-164) |
+| `mindmap/catalog/modules/web-career.md` | [`mindmap/catalog/modules/web.md#webcareer-mod-165`](../mindmap/catalog/modules/web.md#webcareer-mod-165) |
+| `mindmap/catalog/modules/web-checkout.md` | [`mindmap/catalog/modules/web.md#webcheckout-mod-166`](../mindmap/catalog/modules/web.md#webcheckout-mod-166) |
+| `mindmap/catalog/modules/web-dashboard.md` | [`mindmap/catalog/modules/web.md#webdashboard-mod-167`](../mindmap/catalog/modules/web.md#webdashboard-mod-167) |
+| `mindmap/catalog/modules/web-evidence.md` | [`mindmap/catalog/modules/web.md#webevidence-mod-168`](../mindmap/catalog/modules/web.md#webevidence-mod-168) |
+| `mindmap/catalog/modules/web-hiring.md` | [`mindmap/catalog/modules/web.md#webhiring-mod-169`](../mindmap/catalog/modules/web.md#webhiring-mod-169) |
+| `mindmap/catalog/modules/web-jobs.md` | [`mindmap/catalog/modules/web.md#webjobs-mod-170`](../mindmap/catalog/modules/web.md#webjobs-mod-170) |
+| `mindmap/catalog/modules/web-landing.md` | [`mindmap/catalog/modules/web.md#weblanding-mod-160`](../mindmap/catalog/modules/web.md#weblanding-mod-160) |
+| `mindmap/catalog/modules/web-learning.md` | [`mindmap/catalog/modules/web.md#weblearning-mod-171`](../mindmap/catalog/modules/web.md#weblearning-mod-171) |
+| `mindmap/catalog/modules/web-login.md` | [`mindmap/catalog/modules/web.md#weblogin-mod-172`](../mindmap/catalog/modules/web.md#weblogin-mod-172) |
+| `mindmap/catalog/modules/web-messages.md` | [`mindmap/catalog/modules/web.md#webmessages-mod-173`](../mindmap/catalog/modules/web.md#webmessages-mod-173) |
+| `mindmap/catalog/modules/web-network.md` | [`mindmap/catalog/modules/web.md#webnetwork-mod-174`](../mindmap/catalog/modules/web.md#webnetwork-mod-174) |
+| `mindmap/catalog/modules/web-notifications.md` | [`mindmap/catalog/modules/web.md#webnotifications-mod-175`](../mindmap/catalog/modules/web.md#webnotifications-mod-175) |
+| `mindmap/catalog/modules/web-portfolio.md` | [`mindmap/catalog/modules/web.md#webportfolio-mod-176`](../mindmap/catalog/modules/web.md#webportfolio-mod-176) |
+| `mindmap/catalog/modules/web-privacy.md` | [`mindmap/catalog/modules/web.md#webprivacy-mod-177`](../mindmap/catalog/modules/web.md#webprivacy-mod-177) |
+| `mindmap/catalog/modules/web-profile.md` | [`mindmap/catalog/modules/web.md#webprofile-mod-178`](../mindmap/catalog/modules/web.md#webprofile-mod-178) |
+| `mindmap/catalog/modules/web-reference.md` | [`mindmap/catalog/modules/web.md#webreference-mod-179`](../mindmap/catalog/modules/web.md#webreference-mod-179) |
+| `mindmap/catalog/modules/web-resumes.md` | [`mindmap/catalog/modules/web.md#webresumes-mod-180`](../mindmap/catalog/modules/web.md#webresumes-mod-180) |
+| `mindmap/catalog/modules/web-settings.md` | [`mindmap/catalog/modules/web.md#websettings-mod-181`](../mindmap/catalog/modules/web.md#websettings-mod-181) |
+| `mindmap/catalog/modules/web-shared-components.md` | [`mindmap/catalog/modules/web.md#webshared-components-mod-185`](../mindmap/catalog/modules/web.md#webshared-components-mod-185) |
+| `mindmap/catalog/modules/web-signup.md` | [`mindmap/catalog/modules/web.md#websignup-mod-182`](../mindmap/catalog/modules/web.md#websignup-mod-182) |
+| `mindmap/catalog/modules/web-terms.md` | [`mindmap/catalog/modules/web.md#webterms-mod-183`](../mindmap/catalog/modules/web.md#webterms-mod-183) |
+| `mindmap/catalog/modules/web-verify.md` | [`mindmap/catalog/modules/web.md#webverify-mod-184`](../mindmap/catalog/modules/web.md#webverify-mod-184) |
+| `mindmap/catalog/modules/worker-admin.md` | [`mindmap/catalog/modules/worker.md#workeradmin-mod-186`](../mindmap/catalog/modules/worker.md#workeradmin-mod-186) |
+| `mindmap/catalog/modules/worker-ai.md` | [`mindmap/catalog/modules/worker.md#workerai-mod-187`](../mindmap/catalog/modules/worker.md#workerai-mod-187) |
+| `mindmap/catalog/modules/worker-alumni.md` | [`mindmap/catalog/modules/worker.md#workeralumni-mod-188`](../mindmap/catalog/modules/worker.md#workeralumni-mod-188) |
+| `mindmap/catalog/modules/worker-application.md` | [`mindmap/catalog/modules/worker.md#workerapplication-mod-189`](../mindmap/catalog/modules/worker.md#workerapplication-mod-189) |
+| `mindmap/catalog/modules/worker-billing.md` | [`mindmap/catalog/modules/worker.md#workerbilling-mod-190`](../mindmap/catalog/modules/worker.md#workerbilling-mod-190) |
+| `mindmap/catalog/modules/worker-career.md` | [`mindmap/catalog/modules/worker.md#workercareer-mod-191`](../mindmap/catalog/modules/worker.md#workercareer-mod-191) |
+| `mindmap/catalog/modules/worker-connection.md` | [`mindmap/catalog/modules/worker.md#workerconnection-mod-192`](../mindmap/catalog/modules/worker.md#workerconnection-mod-192) |
+| `mindmap/catalog/modules/worker-employer.md` | [`mindmap/catalog/modules/worker.md#workeremployer-mod-193`](../mindmap/catalog/modules/worker.md#workeremployer-mod-193) |
+| `mindmap/catalog/modules/worker-evidence.md` | [`mindmap/catalog/modules/worker.md#workerevidence-mod-194`](../mindmap/catalog/modules/worker.md#workerevidence-mod-194) |
+| `mindmap/catalog/modules/worker-gamification.md` | [`mindmap/catalog/modules/worker.md#workergamification-mod-195`](../mindmap/catalog/modules/worker.md#workergamification-mod-195) |
+| `mindmap/catalog/modules/worker-gdpr.md` | [`mindmap/catalog/modules/worker.md#workergdpr-mod-196`](../mindmap/catalog/modules/worker.md#workergdpr-mod-196) |
+| `mindmap/catalog/modules/worker-instructor.md` | [`mindmap/catalog/modules/worker.md#workerinstructor-mod-197`](../mindmap/catalog/modules/worker.md#workerinstructor-mod-197) |
+| `mindmap/catalog/modules/worker-learning.md` | [`mindmap/catalog/modules/worker.md#workerlearning-mod-198`](../mindmap/catalog/modules/worker.md#workerlearning-mod-198) |
+| `mindmap/catalog/modules/worker-lms.md` | [`mindmap/catalog/modules/worker.md#workerlms-mod-199`](../mindmap/catalog/modules/worker.md#workerlms-mod-199) |
+| `mindmap/catalog/modules/worker-messaging.md` | [`mindmap/catalog/modules/worker.md#workermessaging-mod-200`](../mindmap/catalog/modules/worker.md#workermessaging-mod-200) |
+| `mindmap/catalog/modules/worker-moderation.md` | [`mindmap/catalog/modules/worker.md#workermoderation-mod-201`](../mindmap/catalog/modules/worker.md#workermoderation-mod-201) |
+| `mindmap/catalog/modules/worker-portfolio.md` | [`mindmap/catalog/modules/worker.md#workerportfolio-mod-202`](../mindmap/catalog/modules/worker.md#workerportfolio-mod-202) |
+| `mindmap/catalog/modules/worker-reference.md` | [`mindmap/catalog/modules/worker.md#workerreference-mod-203`](../mindmap/catalog/modules/worker.md#workerreference-mod-203) |
+| `mindmap/catalog/modules/worker-resume.md` | [`mindmap/catalog/modules/worker.md#workerresume-mod-204`](../mindmap/catalog/modules/worker.md#workerresume-mod-204) |
+| `mindmap/catalog/modules/worker-search.md` | [`mindmap/catalog/modules/worker.md#workersearch-mod-205`](../mindmap/catalog/modules/worker.md#workersearch-mod-205) |
+| `mindmap/catalog/modules/worker-skill.md` | [`mindmap/catalog/modules/worker.md#workerskill-mod-206`](../mindmap/catalog/modules/worker.md#workerskill-mod-206) |
+| `mindmap/catalog/modules/worker-user.md` | [`mindmap/catalog/modules/worker.md#workeruser-mod-207`](../mindmap/catalog/modules/worker.md#workeruser-mod-207) |
+| `mindmap/catalog/modules/worker-work-history.md` | [`mindmap/catalog/modules/worker.md#workerwork_history-mod-208`](../mindmap/catalog/modules/worker.md#workerwork_history-mod-208) |

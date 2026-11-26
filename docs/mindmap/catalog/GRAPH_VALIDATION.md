@@ -1,6 +1,6 @@
 # Graph Validation
 
-Checks run by `docs/mindmap/tools/catalog.py` on the merged graph at `9b3032f`. The script exits with an error and writes nothing if any check fails, so this file only exists for a passing graph. Back to the [feature catalog](FEATURE_CATALOG.md).
+Checks run by `docs/mindmap/tools/catalog.py` on the merged graph at `eb166ea`. The script exits with an error and writes nothing if any check fails, so this file only exists for a passing graph. Back to the [feature catalog](FEATURE_CATALOG.md).
 
 | Check                                                                                     | Result                                             |
 | ----------------------------------------------------------------------------------------- | -------------------------------------------------- |

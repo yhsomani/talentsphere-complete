@@ -20,30 +20,30 @@ The three sources of truth, compared per documented ID. **Documentation is inten
 | Documented business rules cited by source                          | 91 of 248 (cited by tests: 102)                                                                                                                               |
 | Endpoints citing no documented ID (code without a registry trace)  | 75 of 282                                                                                                                                                     |
 | Screens citing no documented ID                                    | 24 of 29                                                                                                                                                      |
-| Numeric claims in living docs that differ from source today        | 1 of 11 living-doc claims checked (16 claims in total, including dated snapshots)                                                                             |
+| Numeric claims in living docs that differ from source today        | 5 of 16 living-doc claims checked (16 claims in total, including dated snapshots)                                                                             |
 
 ## 2. Numeric claims in living documents
 
 Each row is a number a document states, found by a fixed pattern, against the same quantity measured from source now. A mismatch usually means the document was written at an earlier commit; it is listed, not corrected here, because the owning document decides its own wording.
 
-| Document                                       | Line | Kind                        | Quantity                               | Document says | Source today | Result                            |
-| ---------------------------------------------- | ---- | --------------------------- | -------------------------------------- | ------------- | ------------ | --------------------------------- |
-| CLAUDE.md                                      | 13   | living                      | migration files                        | 57            | 57           | matches                           |
-| docs/INDEX.md                                  | 87   | living                      | migration files                        | 57            | 57           | matches                           |
-| docs/INDEX.md                                  | 88   | living                      | unique method/path pairs               | 279           | 279          | matches                           |
-| docs/INDEX.md                                  | 57   | living                      | documented features                    | 173           | 173          | matches                           |
-| docs/INDEX.md                                  | 58   | living                      | documented business rules              | 248           | 248          | matches                           |
-| docs/INDEX.md                                  | 59   | living                      | documented journeys                    | 28            | 28           | matches                           |
-| docs/INDEX.md                                  | 127  | living                      | documented journeys                    | 28            | 28           | matches                           |
-| docs/engineering/API_CONTRACTS.md              | 205  | living                      | route registrations                    | 282           | 282          | matches                           |
-| docs/engineering/API_CONTRACTS.md              | 205  | living                      | unique method/path pairs               | 279           | 279          | matches                           |
-| docs/engineering/API_CONTRACTS.md              | 205  | living                      | DURABLE_ROUTES size                    | 91            | 91           | matches                           |
-| docs/system-model/01-inventory-and-coverage.md | 447  | dated snapshot (2026-10-23) | route registrations                    | 281           | 282          | differs (expected for a snapshot) |
-| docs/system-model/01-inventory-and-coverage.md | 447  | dated snapshot (2026-10-23) | unique method/path pairs               | 278           | 279          | differs (expected for a snapshot) |
-| docs/system-model/01-inventory-and-coverage.md | 439  | dated snapshot (2026-10-23) | migration files                        | 53            | 57           | differs (expected for a snapshot) |
-| docs/system-model/01-inventory-and-coverage.md | 448  | dated snapshot (2026-10-23) | DURABLE_ROUTES + STATELESS_ROUTES size | 80            | 95           | differs (expected for a snapshot) |
-| docs/system-model/01-inventory-and-coverage.md | 449  | dated snapshot (2026-10-23) | page components                        | 29            | 29           | matches                           |
-| SSOT.md                                        | 6441 | living                      | migration files                        | 55            | 57           | differs from today                |
+| Document                                       | Line | Kind   | Quantity                               | Document says | Source today | Result             |
+| ---------------------------------------------- | ---- | ------ | -------------------------------------- | ------------- | ------------ | ------------------ |
+| CLAUDE.md                                      | 13   | living | migration files                        | 57            | 57           | matches            |
+| docs/INDEX.md                                  | 118  | living | migration files                        | 57            | 57           | matches            |
+| docs/INDEX.md                                  | 119  | living | unique method/path pairs               | 279           | 279          | matches            |
+| docs/INDEX.md                                  | 88   | living | documented features                    | 173           | 173          | matches            |
+| docs/INDEX.md                                  | 89   | living | documented business rules              | 248           | 248          | matches            |
+| docs/INDEX.md                                  | 90   | living | documented journeys                    | 28            | 28           | matches            |
+| docs/INDEX.md                                  | 158  | living | documented journeys                    | 28            | 28           | matches            |
+| docs/engineering/API_CONTRACTS.md              | 205  | living | route registrations                    | 282           | 282          | matches            |
+| docs/engineering/API_CONTRACTS.md              | 205  | living | unique method/path pairs               | 279           | 279          | matches            |
+| docs/engineering/API_CONTRACTS.md              | 205  | living | DURABLE_ROUTES size                    | 91            | 91           | matches            |
+| docs/system-model/01-inventory-and-coverage.md | 447  | living | route registrations                    | 281           | 282          | differs from today |
+| docs/system-model/01-inventory-and-coverage.md | 447  | living | unique method/path pairs               | 278           | 279          | differs from today |
+| docs/system-model/01-inventory-and-coverage.md | 439  | living | migration files                        | 53            | 57           | differs from today |
+| docs/system-model/01-inventory-and-coverage.md | 448  | living | DURABLE_ROUTES + STATELESS_ROUTES size | 80            | 95           | differs from today |
+| docs/system-model/01-inventory-and-coverage.md | 449  | living | page components                        | 29            | 29           | matches            |
+| docs/SSOT.md                                   | 6441 | living | migration files                        | 55            | 57           | differs from today |
 
 Measured today: migration files 57, route registrations 282, unique method/path pairs 279, DURABLE_ROUTES size 91, DURABLE_ROUTES + STATELESS_ROUTES size 95, page components 29, documented features 173, documented journeys 28, documented business rules 248.
 

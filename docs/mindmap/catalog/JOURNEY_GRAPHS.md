@@ -1,6 +1,6 @@
 # Journey Graphs
 
-Generated from the graph at `9b3032f`. One flowchart per e2e spec: each journey (JOUR-) points to the screens (FEAT-) and endpoint capabilities (MIN-) it exercises, found from its `goto` targets and request paths. Documented target journeys (J-) are in [`journeys/USER_JOURNEYS.md`](../journeys/USER_JOURNEYS.md). Back to the [feature catalog](FEATURE_CATALOG.md).
+Generated from the graph at `eb166ea`. One flowchart per e2e spec: each journey (JOUR-) points to the screens (FEAT-) and endpoint capabilities (MIN-) it exercises, found from its `goto` targets and request paths. Documented target journeys (J-) are in [`journeys/USER_JOURNEYS.md`](../journeys/USER_JOURNEYS.md). Back to the [feature catalog](FEATURE_CATALOG.md).
 
 ## tests/e2e/accessibility.spec.ts
 

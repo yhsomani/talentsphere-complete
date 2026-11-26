@@ -1,6 +1,6 @@
 # Test Traceability and Gaps
 
-Generated from the graph at `9b3032f`; test results from `9b3032f`. Back to the [feature catalog](FEATURE_CATALOG.md). Path-level test links are described in [`quality/TEST_COVERAGE_MAP.md`](../quality/TEST_COVERAGE_MAP.md).
+Generated from the graph at `eb166ea`; test results from `9b3032f`. Back to the [feature catalog](FEATURE_CATALOG.md). Path-level test links are described in [`quality/TEST_COVERAGE_MAP.md`](../quality/TEST_COVERAGE_MAP.md).
 
 ## Verification by module
 

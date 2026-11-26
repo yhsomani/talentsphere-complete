@@ -38,7 +38,8 @@ Gaps computed from the [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | T-016 | Feature catalog to nano level and graph views | P3 | this file, `docs/mindmap/catalog/` | IMPLEMENTED | PR #94 merged 2026-11-25; graph validation passes | None |
 | T-017 | Third documentation consolidation round: merge agent working files, map the canonical set | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §10](../reports/DOC_DEDUP_2026-11-25.md#10-third-round-inventory-and-consolidation) | IMPLEMENTED | PR #95 merged 2026-11-25; 429 to 313 doc files, 0 broken links | None. Further merges need owner calls: see §10.7 of that report |
 | T-018 | Fourth documentation round, by reading: move superseded records to history, fix stale statements | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §11](../reports/DOC_DEDUP_2026-11-25.md#11-fourth-round-by-reading) | IMPLEMENTED | PR #97 merged 2026-11-26 | None |
-| T-019 | Gather every document into `docs/` (one folder) | P3 | [`archive/REMOVED_FILES.md` §6](../archive/REMOVED_FILES.md#6-moved-into-docs-on-2026-11-26-one-folder), [`INDEX.md` Layout](../INDEX.md#layout) | IN_PROGRESS | Draft PR on `claude/project-thread-tgmzm6`; 0 broken links | Owner review and merge |
+| T-019 | Gather every document into `docs/` (one folder) | P3 | [`archive/REMOVED_FILES.md` §6](../archive/REMOVED_FILES.md#6-moved-into-docs-on-2026-11-26-one-folder), [`INDEX.md` Layout](../INDEX.md#layout) | IMPLEMENTED | PR #98 merged 2026-11-26 | None |
+| T-020 | Owner-approved cuts: retire the 2 MB dedup groups appendix, fold the 137 catalog module pages into 9 | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §12](../reports/DOC_DEDUP_2026-11-25.md#12-owner-approved-cuts-2026-11-26) | IN_PROGRESS | Draft PR on `claude/project-thread-275ob2`; pipeline re-run, counts unchanged | Owner review and merge |
 
 ## Documentation work completed
 
