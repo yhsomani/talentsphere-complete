@@ -14,6 +14,7 @@ The documentation was consolidated on 2026-11-25: about 580 files in eight folde
 | Reverse-engineered map of everything in the code: stable IDs, evidence, test results, docs-vs-code gaps | [`mindmap/README.md`](mindmap/README.md) (start at the [master mind map](mindmap/master/MASTER_PROJECT_MINDMAP.md)) |
 | Every feature from module down to nano-feature (single rule, field constraint, error branch, UI binding), with status, evidence and tests | [`mindmap/catalog/FEATURE_CATALOG.md`](mindmap/catalog/FEATURE_CATALOG.md) (generated; journey, data-flow, API, database, state and test views next to it) |
 | What work is in flight, blocked or waiting on the owner, and where to resume | [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) |
+| How the product should change next, and why: audit, positioning, new modules, import strategy, architecture evolution, phased roadmap (proposed) | [`product/TRANSFORMATION_PLAN.md`](product/TRANSFORMATION_PLAN.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
 | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
 | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
@@ -137,6 +138,7 @@ Rules for keeping it true: change a diagram in the same commit as the code it de
 | Document | Purpose |
 |---|---|
 | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) | Authority, change classes, no-duplication rule and status vocabulary; then the gap analysis with the open documentation-conflicts register, the phased implementation plan, and the historical 2026-09-24 source reconciliation (its "greenfield" status is superseded). |
+| [`product/TRANSFORMATION_PLAN.md`](product/TRANSFORMATION_PLAN.md) | **Proposed** product transformation plan (2026-11-26): evidence-based audit, positioning and wedge, module register with phases, skill-signal ledger, import strategy, architecture evolution, roadmap P0 to P3 and first slices TS-01 to TS-14, decisions TPD-01 to TPD-10. Owns the reasoning; work items are tracker rows T-021 to T-033. |
 | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) | Proposed releases, sprint goals and explicit decision gates. |
 | [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) | Living tracker: work items with priority, status, evidence and next action, the current test baseline, and how to resume. |
 

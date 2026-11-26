@@ -1,6 +1,6 @@
 # Implementation Tracker
 
-> **Status.** Living document. Update it at the end of every work session so the next session resumes from here instead of re-discovering. Last updated 2026-11-25 (main at `9b3032f`).
+> **Status.** Living document. Update it at the end of every work session so the next session resumes from here instead of re-discovering. Last updated 2026-11-26 (main at `cc2b806`; baseline below still measured at `9b3032f`, no code changed since).
 >
 > **What this file holds.** Work items, their state and the next action. It does not restate features, rules or decisions: features are in the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md), rules in the [business-rule registry](../registries/BUSINESS_RULE_REGISTRY.md), decisions in the places listed under [Decisions](../INDEX.md#decisions). GitHub issues and pull requests are the source of truth for their own state; re-check them before acting on a row here.
 
@@ -39,7 +39,20 @@ Gaps computed from the [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | T-017 | Third documentation consolidation round: merge agent working files, map the canonical set | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §10](../reports/DOC_DEDUP_2026-11-25.md#10-third-round-inventory-and-consolidation) | IMPLEMENTED | PR #95 merged 2026-11-25; 429 to 313 doc files, 0 broken links | None. Further merges need owner calls: see §10.7 of that report |
 | T-018 | Fourth documentation round, by reading: move superseded records to history, fix stale statements | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §11](../reports/DOC_DEDUP_2026-11-25.md#11-fourth-round-by-reading) | IMPLEMENTED | PR #97 merged 2026-11-26 | None |
 | T-019 | Gather every document into `docs/` (one folder) | P3 | [`archive/REMOVED_FILES.md` §6](../archive/REMOVED_FILES.md#6-moved-into-docs-on-2026-11-26-one-folder), [`INDEX.md` Layout](../INDEX.md#layout) | IMPLEMENTED | PR #98 merged 2026-11-26 | None |
-| T-020 | Owner-approved cuts: retire the 2 MB dedup groups appendix, fold the 137 catalog module pages into 9 | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §12](../reports/DOC_DEDUP_2026-11-25.md#12-owner-approved-cuts-2026-11-26) | IN_PROGRESS | Draft PR on `claude/project-thread-275ob2`; pipeline re-run, counts unchanged | Owner review and merge |
+| T-020 | Owner-approved cuts: retire the 2 MB dedup groups appendix, fold the 137 catalog module pages into 9 | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §12](../reports/DOC_DEDUP_2026-11-25.md#12-owner-approved-cuts-2026-11-26) | IMPLEMENTED | PR #99 merged 2026-11-26 | None |
+| T-021 | Product transformation plan: audit, vision, module hierarchy, import strategy, architecture, roadmap | P2 | [plan](../product/TRANSFORMATION_PLAN.md) | IN_PROGRESS | Draft PR on `claude/project-thread-i0dg5f` (documentation only) | Owner reviews; ratifies vision wording, wedge and SSOT A.3 change into `SSOT.md` |
+| T-022 | Park list: feature flags off in deployed environments for behavioral scoring, segmentation, transition probability, reputation, XP and seed-data insights (TS-02) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#43-what-to-park-and-why), TPD-04 | PLANNED | 34 scoring and reputation endpoints plus the seed-data insight endpoints, all ephemeral, none with a screen | Build behind existing feature flags (migration 00051) |
+| T-023 | Organization-role policy in `packages/domain` and route checks (TS-04) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#22-architecture-and-engineering-findings) A-09; ARCHITECTURE R-2, U-3 | PLANNED | Several organization actions accept any membership | One PR with PostgreSQL cross-role tests |
+| T-024 | Worker claim fencing: completion checks the claim token (TS-05) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#22-architecture-and-engineering-findings) A-05; ARCHITECTURE §18 | PLANNED | Completion not fenced by claim generation | One PR with a kill-the-worker test |
+| T-025 | File service: storage adapter, scanning, `files` table (TS-06) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#153-first-implementation-slices) | REQUIRES_APPROVAL | No upload route exists | Owner approves storage and scanning vendor (new infrastructure, INVARIANT-011) |
+| T-026 | Skill-signal ledger and profile projector (TS-07) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#72-the-skill-signal-ledger) | PLANNED | Skills read per module today | Build; acceptance cases in plan §7.2 |
+| T-027 | Import v1: JSON Resume and CSV, review, commit, undo (TS-08) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#10-data-import-migration-and-integrations) | PLANNED | No import exists | After T-025 and T-026 |
+| T-028 | Experience band on jobs; job-type and band filters (TS-09) | P2 | [plan](../product/TRANSFORMATION_PLAN.md#23-product-and-business-logic-findings) P-07 | PLANNED | `jobType` has `internship`; jobs screen filters by work mode only | One PR with contract and e2e tests |
+| T-029 | Session token in httpOnly cookie; password reset (TS-10) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#131-security); ARCHITECTURE §12 | REQUIRES_APPROVAL | Token in localStorage; no reset flow | Owner approves the security change; reset needs T-001 |
+| T-030 | Import v2: resume PDF and DOCX, LinkedIn data export, GitHub OAuth (TS-11) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#102-per-platform-strategy) | PLANNED | — | After T-027 and T-029; re-check each provider's terms first |
+| T-031 | Split `server.ts` into per-module plugins, no behavior change (TS-12) | P3 | [plan](../product/TRANSFORMATION_PLAN.md#22-architecture-and-engineering-findings) A-01 | REQUIRES_APPROVAL | 13,887-line file | Owner approves a big refactor (`CLAUDE.md`) |
+| T-032 | Goals, gaps and explained matching from the skill profile (TS-13) | P1 | [plan](../product/TRANSFORMATION_PLAN.md#65-goal-to-plan) | PLANNED | `CareerPage` career paths only | After T-026 |
+| T-033 | Course completion may not mint authority-verified evidence without a graded assessment | P1 | [plan](../product/TRANSFORMATION_PLAN.md#23-product-and-business-logic-findings) P-02; ARCHITECTURE §20 | REQUIRES_APPROVAL | Changes an evidence rule | Owner decides the rule |
 
 ## Documentation work completed
 
@@ -51,6 +64,9 @@ Gaps computed from the [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | #94 | 2026-11-25 | Feature catalog to nano level, graph views, this tracker |
 | #95 | 2026-11-25 | `.agents/teamwork/` merged into `docs/history/`, canonical-set map in `INDEX.md`, per-file inventory |
 | #96 | 2026-11-25 | What remains unmerged and why (`DOC_DEDUP_2026-11-25.md` §10.7) |
+| #97 | 2026-11-26 | Fourth documentation round, by reading |
+| #98 | 2026-11-26 | Every document gathered into `docs/` |
+| #99 | 2026-11-26 | Dedup groups appendix retired; catalog module pages folded into 9 |
 
 ## How to resume
 
