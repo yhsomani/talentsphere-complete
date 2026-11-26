@@ -15,8 +15,6 @@ Checks executed by the generator against the graph just written. A PASS means th
 | Tables reconcile with distinct CREATE TABLE names in migrations               | PASS   | 112 distinct names (113 statements) vs 112 nodes                                   |
 | Web API calls all resolve to a server route                                   | PASS   | 96 call sites, 0 unresolved                                                        |
 | Mind map text is structurally valid (indent tree, sanitised labels)           | PASS   | syntax only; not rendered by mermaid                                               |
-| Every Mermaid diagram parses (mermaid 11.4.1 `parse`, all .md/.mmd files)     | PASS   | 539 diagrams ok, 0 failed; parsed, not rendered                                    |
-| DOT file parses and matches the graph (dotparser)                             | PASS   | 2635 nodes, 7004 edges vs graph 2635/7004; not laid out by Graphviz                |
 | ID ledger: every generated node ID is recorded, no ID is assigned to two keys | PASS   | 8524 ledger keys, 2186 generated nodes; new this run 0, retired (kept reserved) 11 |
 | Documented IDs (F-, J-, BR-) are graph nodes with their registry IDs          | PASS   | 173 F, 28 J, 248 BR                                                                |
 | Every executed test file maps to a TEST node                                  | PASS   | 226 executed files, 0 unmatched []                                                 |

@@ -109,7 +109,7 @@ Full comparison, per documented ID: [DOC_CODE_RECONCILIATION.md](DOC_CODE_RECONC
 - Features documented as **Not implemented** (2026-10-21) whose endpoint handlers cite them today (1): F-130 Freelance Marketplace.
 - Features documented as implemented or partial that **no** source or test file cites (30): F-21, F-29, F-33, F-45, F-55, F-60, F-61, F-66, F-67, F-68, F-74, F-77, F-80, F-81, F-82, F-83, F-87, F-89, F-90, F-93, F-95, F-98, F-99, F-101, F-103, F-106, F-117, F-118, F-169, F-172 (weak evidence: code is not required to cite IDs; needs review).
 - 75 of 282 endpoints cite no documented F-/BR- ID (by module: interviews 12, reputation 8, evidence 7, organizations 7, auth 6, skills 6, jobs 6, job-templates 5). Those are capabilities in code that the registries cannot be traced to.
-- Numeric claims in living documents that differ from today's source: 1 of 11 checked (5 more are in dated snapshots, where differences are expected; table in the reconciliation file).
+- Numeric claims in living documents that differ from today's source: 5 of 16 checked (0 more are in dated snapshots, where differences are expected; table in the reconciliation file).
 
 Code-vs-test: endpoints with no test reference: 3 (see test map).
 

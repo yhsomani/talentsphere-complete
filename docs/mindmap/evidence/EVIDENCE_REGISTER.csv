@@ -1,6 +1,6 @@
 id,type,name,file,line,symbol,status,confidence,test_evidence,notes
 PROJ-001,PROJ,TalentSphere,package.json,,,IMPLEMENTED,MEDIUM,,
-PROJ-001,PROJ,TalentSphere,ARCHITECTURE.md,,,IMPLEMENTED,MEDIUM,,
+PROJ-001,PROJ,TalentSphere,docs/ARCHITECTURE.md,,,IMPLEMENTED,MEDIUM,,
 MOD-001,MOD,apps/api,apps/api,,,PARTIALLY_IMPLEMENTED,MEDIUM,,
 MOD-002,MOD,apps/web,apps/web,,,PARTIALLY_IMPLEMENTED,MEDIUM,,
 MOD-003,MOD,apps/worker,apps/worker,,,PARTIALLY_IMPLEMENTED,MEDIUM,,

@@ -1,6 +1,6 @@
 # API and Dependency Graph
 
-Generated from the graph at `9b3032f`. Back to the [feature catalog](FEATURE_CATALOG.md). Per-endpoint detail is in each module file and in [`architecture/API_ARCHITECTURE.md`](../architecture/API_ARCHITECTURE.md).
+Generated from the graph at `eb166ea`. Back to the [feature catalog](FEATURE_CATALOG.md). Per-endpoint detail is in each module file and in [`architecture/API_ARCHITECTURE.md`](../architecture/API_ARCHITECTURE.md).
 
 ## API module to domain module (edge label = calls from endpoints)
 

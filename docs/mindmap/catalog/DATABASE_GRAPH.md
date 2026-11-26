@@ -1,6 +1,6 @@
 # Database Relationship Graph
 
-Generated from the graph at `9b3032f` (112 tables, 147 foreign-key relationships, from `supabase/migrations`). Back to the [feature catalog](FEATURE_CATALOG.md). Columns, RLS and indexes are in [`data/DATABASE_ENTITY_MAP.md`](../data/DATABASE_ENTITY_MAP.md).
+Generated from the graph at `eb166ea` (112 tables, 147 foreign-key relationships, from `supabase/migrations`). Back to the [feature catalog](FEATURE_CATALOG.md). Columns, RLS and indexes are in [`data/DATABASE_ENTITY_MAP.md`](../data/DATABASE_ENTITY_MAP.md).
 
 ```mermaid
 erDiagram

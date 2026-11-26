@@ -1,6 +1,6 @@
 # Data-Flow Graphs
 
-Generated from the graph at `9b3032f`. Each FLOW- node is one request the web app sends: UI, enclosing function, `apiFetch`, endpoint, validation, domain rules, persistence, background jobs, HTTP reply, state update. Grouped by API module. Back to the [feature catalog](FEATURE_CATALOG.md).
+Generated from the graph at `eb166ea`. Each FLOW- node is one request the web app sends: UI, enclosing function, `apiFetch`, endpoint, validation, domain rules, persistence, background jobs, HTTP reply, state update. Grouped by API module. Back to the [feature catalog](FEATURE_CATALOG.md).
 
 96 flows; 27 end in process memory (ephemeral).
 
