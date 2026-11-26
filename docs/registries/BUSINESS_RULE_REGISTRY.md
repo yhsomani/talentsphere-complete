@@ -309,10 +309,10 @@ _Former file: `docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md`._
 | Topic | Canonical location |
 |---|---|
 | Journeys J-01 to J-28, persona map, detailed J-02 and J-26 diagrams | [`../experience/JOURNEY_REGISTRY.md`](../experience/JOURNEY_REGISTRY.md) |
-| Workflow register WF-01 to WF-66 and integrity traces WIT-001 to WIT-025 | [`../../SSOT.md`](../../SSOT.md), Part V, §10 |
-| State machines and their invariants | [`../../SSOT.md`](../../SSOT.md), Part V, §10 (§18.1 to §18.3 of the source corpus) |
+| Workflow register WF-01 to WF-66 and integrity traces WIT-001 to WIT-025 | [`docs/SSOT.md`](../SSOT.md), Part V, §10 |
+| State machines and their invariants | [`docs/SSOT.md`](../SSOT.md), Part V, §10 (§18.1 to §18.3 of the source corpus) |
 | Business rules BR-001 to BR-248 (text) | [`BUSINESS_RULE_REGISTRY.md`](#) |
 | Migration rules MIG-01 to MIG-08 | [`BUSINESS_RULE_REGISTRY.md`](#), "Migration rules" |
-| Feature-to-rule links | Detailed feature contracts in [`../../SSOT.md`](../../SSOT.md); reconcile semantic mismatches against the canonical business-rule registry before relying on them |
+| Feature-to-rule links | Detailed feature contracts in [`docs/SSOT.md`](../SSOT.md); reconcile semantic mismatches against the canonical business-rule registry before relying on them |
 
 The registry's IDs use two digits for BR-01 to BR-35 and three digits after that. See conflict C-9 in [`../governance/GOVERNANCE.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) (former `GAP_ANALYSIS.md`).

@@ -15,7 +15,7 @@ A PWA-first career platform where candidates prove their skills and work history
 - Auth: self-issued HMAC session tokens (`packages/domain/src/auth.ts`). Supabase Auth is not used.
 - Payments: Stripe Checkout, Customer Portal and a signed webhook, active only with `BILLING_MODE=stripe` and the `STRIPE_*` settings (default `disabled`). Billing state is durable in Postgres. Email: opt-in Brevo (behind a provider-independent service in `apps/worker/src/email`) for transactional work-history messages; development uses the labelled dev outbox. Live delivery is not established by source.
 
-Read `ARCHITECTURE.md` (what is built) before changing code. `SSOT.md` is the intent, not a status report.
+Read `docs/ARCHITECTURE.md` (what is built) before changing code. `docs/SSOT.md` is the intent, not a status report.
 
 ## Commands
 
@@ -47,7 +47,7 @@ Read `ARCHITECTURE.md` (what is built) before changing code. `SSOT.md` is the in
 - API routes: `apps/api/src/server.ts`, one commented block per feature under `/api/v1`.
 - Request and response schemas: `packages/contracts/src/index.ts`.
 - Business rules and state machines: `packages/domain/src`.
-- Migrations: `supabase/migrations`. Docs index: `docs/INDEX.md`.
+- Migrations: `supabase/migrations`. Docs index: `docs/INDEX.md` (every document lives under `docs/`, including the generated mind map in `docs/mindmap/`).
 
 <!-- reticle:begin (managed by `reticle init` — edit outside these markers) -->
 ## Verifying with Reticle

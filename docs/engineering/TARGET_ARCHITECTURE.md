@@ -1,7 +1,7 @@
 
 # TalentSphere — TARGET_ARCHITECTURE.md v6.0
 
-**Scope:** the intended target architecture. It is not a description of the running code. For what is built today, and for the rules agents must follow before changing it, read the root [`ARCHITECTURE.md`](../../ARCHITECTURE.md). Where the two disagree about what exists, the root file governs.
+**Scope:** the intended target architecture. It is not a description of the running code. For what is built today, and for the rules agents must follow before changing it, read [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md). Where the two disagree about what exists, that file governs.
 
 ## 1. Decision
 
@@ -175,7 +175,7 @@ Do not introduce microservices by default. Extraction requires:
 
 ## 11. Source-Derived Detailed Architecture Corpus (superseded)
 
-This section was an older copy of [`SSOT.md`](../../SSOT.md) §12.6 to §12.12: the system context, logical architecture, authentication flow, AI safety flow, bounded contexts, domain boundary rules (ARCH-013 to ARCH-020) and the ADR-001 to ADR-013 list. SSOT carries the refined version of each, so read it there. The old text, including its earlier ADR wording, was moved on 2026-11-26 to [`history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#superseded-target-architecture-corpus-former-target_architecturemd-11). The ADR numbering conflict with the root `ARCHITECTURE.md` register is still open: [GOVERNANCE.md](../governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) C-13.
+This section was an older copy of [`SSOT.md`](../SSOT.md) §12.6 to §12.12: the system context, logical architecture, authentication flow, AI safety flow, bounded contexts, domain boundary rules (ARCH-013 to ARCH-020) and the ADR-001 to ADR-013 list. SSOT carries the refined version of each, so read it there. The old text, including its earlier ADR wording, was moved on 2026-11-26 to [`history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#superseded-target-architecture-corpus-former-target_architecturemd-11). The ADR numbering conflict with the root `ARCHITECTURE.md` register is still open: [GOVERNANCE.md](../governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) C-13.
 
 ---
 
@@ -199,7 +199,7 @@ Translate product requirements into technical requirements without duplicating t
 
 ### 2. Technical Baseline
 
-> **Target baseline.** The built system differs in several places: sessions are self-issued HMAC tokens rather than Supabase Auth, the web app uses plain React state and `fetch` rather than TanStack Query, and background jobs run on Postgres `background_jobs` rather than Supabase Queues. The root [`ARCHITECTURE.md`](../../ARCHITECTURE.md) §20 and §24 record what exists. Open question: [`GAP_ANALYSIS.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) conflict C-5.
+> **Target baseline.** The built system differs in several places: sessions are self-issued HMAC tokens rather than Supabase Auth, the web app uses plain React state and `fetch` rather than TanStack Query, and background jobs run on Postgres `background_jobs` rather than Supabase Queues. The root [`ARCHITECTURE.md`](../ARCHITECTURE.md) §20 and §24 record what exists. Open question: [`GAP_ANALYSIS.md`](../governance/GOVERNANCE.md#talentsphere--gap_analysismd-v60) conflict C-5.
 
 | Area | Standard |
 |---|---|

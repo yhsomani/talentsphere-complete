@@ -2050,7 +2050,7 @@ Authority: [PROJECT_MASTER_BLUEPRINT](99_FINAL_MASTER_BLUEPRINT.md#talentsphere-
 
 ### Final integration (added 2026-10-26): legacy merge, SSOT v6.1, prior-implementation reference
 
-- Founder intent: root [SSOT.md](../../../SSOT.md) (v6.0 + Appendix F v6.1 amendments; nothing is assumed implemented).
+- Founder intent: root [SSOT.md](../../SSOT.md) (v6.0 + Appendix F v6.1 amendments; nothing is assumed implemented).
 - Prior-attempt analysis (reference only, not truth about this project): [30_PRIOR_IMPLEMENTATION_REFERENCE](30_PRIOR_IMPLEMENTATION_REFERENCE.md#talentsphere--canonical-documentation-index).
 - Unmodified legacy documents kept until their content is verified as merged: 31_LEGACY_ARCHIVE/ (docs/, BRAIN/, deploy/). Merge ledgers: [A](#legacy-merge-ledger-a-preservation-record-for-source-group-a), [B](#record-legacy-merge-ledger-b), [C](#record-legacy-merge-ledger-c).
 - Links from older documents to application code files (apps/, packages/, tests/, scripts/, supabase/) point to the prior attempt's code, which exists only in git branch `main`, not on this branch.

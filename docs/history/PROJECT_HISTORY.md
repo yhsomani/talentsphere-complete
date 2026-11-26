@@ -451,7 +451,7 @@ Design approved by the user. Native implementation is authorized. Work is additi
 
 _Former file: `docs/governance/SOURCE_RECONCILIATION.md`._
 
-> **Historical record (2026-09-24). Not current status.** This file records the greenfield baseline before any code existed, including the claim "GREENFIELD — 0% IMPLEMENTATION VERIFIED". That claim is no longer true. Current status: [`docs/reports/FEATURE_STATUS_2026-10-21.md`](../reports/FEATURE_STATUS_2026-10-21.md). Current architecture: [`ARCHITECTURE.md`](../../ARCHITECTURE.md). The file tree in §4 names `FINAL_DOCUMENT_INDEX.md`, which was removed on 2026-10-21; the index is now [`docs/INDEX.md`](../INDEX.md).
+> **Historical record (2026-09-24). Not current status.** This file records the greenfield baseline before any code existed, including the claim "GREENFIELD — 0% IMPLEMENTATION VERIFIED". That claim is no longer true. Current status: [`docs/reports/FEATURE_STATUS_2026-10-21.md`](../reports/FEATURE_STATUS_2026-10-21.md). Current architecture: [`ARCHITECTURE.md`](../ARCHITECTURE.md). The file tree in §4 names `FINAL_DOCUMENT_INDEX.md`, which was removed on 2026-10-21; the index is now [`docs/INDEX.md`](../INDEX.md).
 
 ### 1. Executive Summary
 
@@ -568,7 +568,7 @@ talentsphere/
 
 ## Superseded target architecture corpus (former TARGET_ARCHITECTURE.md §11)
 
-> Moved on 2026-11-26 from `docs/engineering/TARGET_ARCHITECTURE.md` §11, text unchanged except headings one level down. [`SSOT.md`](../../SSOT.md) §12.6 to §12.12 holds the current wording of every diagram and list below. Restore with `git show b7d7eb6:docs/engineering/TARGET_ARCHITECTURE.md`.
+> Moved on 2026-11-26 from `docs/engineering/TARGET_ARCHITECTURE.md` §11, text unchanged except headings one level down. [`SSOT.md`](../SSOT.md) §12.6 to §12.12 holds the current wording of every diagram and list below. Restore with `git show b7d7eb6:docs/engineering/TARGET_ARCHITECTURE.md`.
 
 
 > **Overlap warning (2026-10-21).** 118 of this section's 144 unique lines also appear in `SSOT.md` Part VI. The rest are older diagram labels (for example "Edge Middleware", "AI Router", "Web OS Layer") that SSOT has replaced. Its §21.3 ADR list conflicts with the root `ARCHITECTURE.md` decision register (for example, ADR-001 here is "Supabase Auth sole session authority"; the root file's ADR-001 is "modular monolith"). Not removed yet: the ADR list is not in SSOT, so it needs an owner decision first. See `docs/governance/GAP_ANALYSIS.md` C-13.
@@ -743,7 +743,7 @@ flowchart TD
 
 ## TalentSphere — Master System Model
 
-> **Status.** History. A hand-built system model prepared 2026-11-10 on another branch, at source `40ee2de` (55 migrations, 277 endpoints then). Superseded by the generated graph in [`project-mindmap/`](../../project-mindmap/README.md), which is regenerated from source and is the one canonical graph dataset. Merged on 2026-11-26 from `docs/system-model/MASTER_SYSTEM_MODEL.md`, text unchanged except headings one level down. Restore with `git checkout b7d7eb6 -- docs/system-model/MASTER_SYSTEM_MODEL.md`.
+> **Status.** History. A hand-built system model prepared 2026-11-10 on another branch, at source `40ee2de` (55 migrations, 277 endpoints then). Superseded by the generated graph in [`project-mindmap/`](../mindmap/README.md), which is regenerated from source and is the one canonical graph dataset. Merged on 2026-11-26 from `docs/system-model/MASTER_SYSTEM_MODEL.md`, text unchanged except headings one level down. Restore with `git checkout b7d7eb6 -- docs/system-model/MASTER_SYSTEM_MODEL.md`.
 
 
 **Repository:** https://github.com/yhsomani/talentsphere-complete  

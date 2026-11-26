@@ -743,3 +743,14 @@ Decided by reading the documents. Commit before the change: `b7d7eb6`. Each move
 | `docs/system-model/MASTER_SYSTEM_MODEL.md` (whole file) | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#talentsphere--master-system-model) |
 | `docs/governance/GOVERNANCE.md`, section "TalentSphere — Source Reconciliation v1.0" | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#talentsphere--source-reconciliation-v10) |
 | `docs/engineering/TARGET_ARCHITECTURE.md` §11 "Source-Derived Detailed Architecture Corpus" | [`docs/history/PROJECT_HISTORY.md`](../history/PROJECT_HISTORY.md#superseded-target-architecture-corpus-former-target_architecturemd-11) |
+
+## 6. Moved into `docs/` on 2026-11-26 (one folder)
+
+Moved with `git mv`, so `git log --follow` shows each file's history. Content is unchanged except for link paths that the move made wrong. Commit before the change: `f499c66`.
+
+| Former path | Now at |
+|---|---|
+| `ARCHITECTURE.md` | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) |
+| `SSOT.md` | [`docs/SSOT.md`](../SSOT.md) |
+| `project-mindmap/` (whole folder: 164 Markdown files, the `.mmd`, JSON, CSV and DOT data, and the generator scripts in `tools/`) | [`docs/mindmap/`](../mindmap/README.md) |
+| `supabase/hosted/README.md` | [`docs/engineering/HOSTED_SUPABASE.md`](../engineering/HOSTED_SUPABASE.md) (the SQL files stay in `supabase/hosted/`) |

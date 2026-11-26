@@ -1,6 +1,6 @@
 # TalentSphere — Documentation Index
 
-The single entry point to the project's documentation. Every project document is a Markdown file under `docs/`, except the rule and entry files at the repository root and the generated [`project-mindmap/`](../project-mindmap/README.md). Links are relative to this file; `../` reaches the repository root.
+The single entry point to the project's documentation. Every project document lives under `docs/`, including the as-built record [`ARCHITECTURE.md`](ARCHITECTURE.md), the canonical intent [`SSOT.md`](SSOT.md) and the generated mind map [`mindmap/`](mindmap/README.md). The only documents left outside are files a tool reads from a fixed path; they are listed under [Layout](#layout). Links are relative to this file; `../` reaches the repository root.
 
 The documentation was consolidated on 2026-11-25: about 580 files in eight folders became about 150 Markdown files, and a third round the same day merged the 130 agent working files from `.agents/teamwork/`. Every old path, and where its content went, is listed in [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
 
@@ -9,10 +9,10 @@ The documentation was consolidated on 2026-11-25: about 580 files in eight folde
 | Need | Read |
 |---|---|
 | Set up and run the project | [`../README.md`](../README.md) |
-| What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
-| What the product is meant to be (canonical intent) | [`../SSOT.md`](../SSOT.md) |
-| Reverse-engineered map of everything in the code: stable IDs, evidence, test results, docs-vs-code gaps | [`../project-mindmap/README.md`](../project-mindmap/README.md) (start at the [master mind map](../project-mindmap/master/MASTER_PROJECT_MINDMAP.md)) |
-| Every feature from module down to nano-feature (single rule, field constraint, error branch, UI binding), with status, evidence and tests | [`../project-mindmap/catalog/FEATURE_CATALOG.md`](../project-mindmap/catalog/FEATURE_CATALOG.md) (generated; journey, data-flow, API, database, state and test views next to it) |
+| What is built, and the rules to follow before changing code | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| What the product is meant to be (canonical intent) | [`SSOT.md`](SSOT.md) |
+| Reverse-engineered map of everything in the code: stable IDs, evidence, test results, docs-vs-code gaps | [`mindmap/README.md`](mindmap/README.md) (start at the [master mind map](mindmap/master/MASTER_PROJECT_MINDMAP.md)) |
+| Every feature from module down to nano-feature (single rule, field constraint, error branch, UI binding), with status, evidence and tests | [`mindmap/catalog/FEATURE_CATALOG.md`](mindmap/catalog/FEATURE_CATALOG.md) (generated; journey, data-flow, API, database, state and test views next to it) |
 | What work is in flight, blocked or waiting on the owner, and where to resume | [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
 | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
@@ -26,16 +26,16 @@ The minimal documentation set, mapped onto the files that already hold each subj
 
 | Subject | Canonical file | Also read |
 |---|---|---|
-| Project single source of truth (purpose, scope, users, modules, intended rules) | [`../SSOT.md`](../SSOT.md) | [`product/PRD.md`](product/PRD.md) (short product summary) |
-| Architecture (as built) | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) (intended, not built) |
-| Feature catalog, module to nano-feature | [`../project-mindmap/catalog/FEATURE_CATALOG.md`](../project-mindmap/catalog/FEATURE_CATALOG.md) (generated) | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) (feature IDs) |
-| User journeys and navigation | [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md), [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | [`../project-mindmap/catalog/JOURNEY_GRAPHS.md`](../project-mindmap/catalog/JOURNEY_GRAPHS.md) (journeys proven by e2e) |
-| Business rules, permissions, state transitions | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | [`system-model/06-route-authorization.md`](system-model/06-route-authorization.md), [`../project-mindmap/catalog/STATE_GRAPHS.md`](../project-mindmap/catalog/STATE_GRAPHS.md) |
-| Data and API | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md), [`engineering/DATABASE.md`](engineering/DATABASE.md) | [`../project-mindmap/catalog/API_DEPENDENCY_GRAPH.md`](../project-mindmap/catalog/API_DEPENDENCY_GRAPH.md), [`../project-mindmap/catalog/DATABASE_GRAPH.md`](../project-mindmap/catalog/DATABASE_GRAPH.md), [`../project-mindmap/catalog/DATA_FLOW_GRAPHS.md`](../project-mindmap/catalog/DATA_FLOW_GRAPHS.md) |
-| Engineering quality (security, testing, operations, reliability) | [`quality/SECURITY.md`](quality/SECURITY.md), [`quality/TESTING.md`](quality/TESTING.md), [`quality/OPERATIONS.md`](quality/OPERATIONS.md) | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md), [`../project-mindmap/catalog/TEST_TRACEABILITY.md`](../project-mindmap/catalog/TEST_TRACEABILITY.md) |
+| Project single source of truth (purpose, scope, users, modules, intended rules) | [`SSOT.md`](SSOT.md) | [`product/PRD.md`](product/PRD.md) (short product summary) |
+| Architecture (as built) | [`ARCHITECTURE.md`](ARCHITECTURE.md) | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) (intended, not built) |
+| Feature catalog, module to nano-feature | [`mindmap/catalog/FEATURE_CATALOG.md`](mindmap/catalog/FEATURE_CATALOG.md) (generated) | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) (feature IDs) |
+| User journeys and navigation | [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md), [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | [`mindmap/catalog/JOURNEY_GRAPHS.md`](mindmap/catalog/JOURNEY_GRAPHS.md) (journeys proven by e2e) |
+| Business rules, permissions, state transitions | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | [`system-model/06-route-authorization.md`](system-model/06-route-authorization.md), [`mindmap/catalog/STATE_GRAPHS.md`](mindmap/catalog/STATE_GRAPHS.md) |
+| Data and API | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md), [`engineering/DATABASE.md`](engineering/DATABASE.md) | [`mindmap/catalog/API_DEPENDENCY_GRAPH.md`](mindmap/catalog/API_DEPENDENCY_GRAPH.md), [`mindmap/catalog/DATABASE_GRAPH.md`](mindmap/catalog/DATABASE_GRAPH.md), [`mindmap/catalog/DATA_FLOW_GRAPHS.md`](mindmap/catalog/DATA_FLOW_GRAPHS.md) |
+| Engineering quality (security, testing, operations, reliability) | [`quality/SECURITY.md`](quality/SECURITY.md), [`quality/TESTING.md`](quality/TESTING.md), [`quality/OPERATIONS.md`](quality/OPERATIONS.md) | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md), [`mindmap/catalog/TEST_TRACEABILITY.md`](mindmap/catalog/TEST_TRACEABILITY.md) |
 | Implementation tracker | [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) | GitHub issues and pull requests |
 | Decisions | [Decisions](#decisions) below (an index: ADRs in [`engineering/DECISIONS.md`](engineering/DECISIONS.md), open conflicts in [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21)) | |
-| Project graph and mind map views | [`../project-mindmap/README.md`](../project-mindmap/README.md) (one machine-readable dataset, `master/MASTER_PROJECT_GRAPH.json`, and the views generated from it) | [`catalog/GRAPH_VALIDATION.md`](../project-mindmap/catalog/GRAPH_VALIDATION.md) |
+| Project graph and mind map views | [`mindmap/README.md`](mindmap/README.md) (one machine-readable dataset, `master/MASTER_PROJECT_GRAPH.json`, and the views generated from it) | [`catalog/GRAPH_VALIDATION.md`](mindmap/catalog/GRAPH_VALIDATION.md) |
 
 Two open product contradictions stay as owner decisions, not edits: **C-8** (privacy threshold, k ≥ 10 in SSOT versus k ≥ 5 in BR-158 and BR-178) and **C-22** (rule text drift for BR-065, BR-066, BR-35 and BR-208). See [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and tracker row T-015.
 
@@ -43,8 +43,8 @@ Two open product contradictions stay as owner decisions, not edits: **C-8** (pri
 
 When two documents disagree:
 
-1. **What exists today:** the code, then [`../ARCHITECTURE.md`](../ARCHITECTURE.md), then the generated [`project-mindmap/`](../project-mindmap/README.md) (regenerated from source; it names the commit of its test results), then [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) (a 2026-10-23 snapshot). Dated reports do not override newer source.
-2. **What is intended:** [`../SSOT.md`](../SSOT.md), then the requirement documents and registries in sections 1 to 4 below. [`blueprint/`](blueprint/README.md) and [`archive/target-blueprint/`](archive/target-blueprint/README.md) are unratified proposals for the same intent: the blueprint's own `DEC-001` says it does not supersede `SSOT.md` until `OD-PRD-31` defines ratification.
+1. **What exists today:** the code, then [`ARCHITECTURE.md`](ARCHITECTURE.md), then the generated [`docs/mindmap/`](mindmap/README.md) (regenerated from source; it names the commit of its test results), then [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) (a 2026-10-23 snapshot). Dated reports do not override newer source.
+2. **What is intended:** [`SSOT.md`](SSOT.md), then the requirement documents and registries in sections 1 to 4 below. [`blueprint/`](blueprint/README.md) and [`archive/target-blueprint/`](archive/target-blueprint/README.md) are unratified proposals for the same intent: the blueprint's own `DEC-001` says it does not supersede `SSOT.md` until `OD-PRD-31` defines ratification.
 3. **History:** [`reports/`](#7-reports-dated-snapshots), [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md) and [`archive/`](#8-archive) are evidence of what happened, not current state.
 
 Unresolved conflicts are listed in [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md). They are not resolved by assumption.
@@ -52,10 +52,10 @@ Unresolved conflicts are listed in [`governance/GOVERNANCE.md`](governance/GOVER
 ## Layout
 
 ```text
-README.md, ARCHITECTURE.md, SSOT.md           entry, as-built record, canonical intent
-AGENTS.md, CLAUDE.md, GEMINI.md, RETICLE.md   agent and tooling rules
 docs/
   INDEX.md                     this file
+  ARCHITECTURE.md              architecture as built (former root ARCHITECTURE.md)
+  SSOT.md                      canonical intent (former root SSOT.md)
   PRICING.md                   plans and entitlements (read by a test)
   product/ engineering/ experience/ quality/ registries/ governance/ system-model/
                                as-built references, requirements and registries
@@ -64,14 +64,26 @@ docs/
   blueprint/                   intended-product blueprint (former PRODUCT_BLUEPRINT/)
   archive/target-blueprint/    earlier redesign blueprint (former Yash_Final_Project_Document/)
   archive/REMOVED_FILES.md     every moved, merged or deleted path
-project-mindmap/               generated from source; do not edit by hand (see its README)
+  mindmap/                     generated from source; do not edit by hand (former project-mindmap/; see its README)
 ```
+
+Documents that stay outside `docs/` because a tool or host reads them from a fixed path:
+
+| Path | Why it stays |
+| --- | --- |
+| `README.md` | GitHub shows it as the repository front page |
+| `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` | Coding agents (Codex and others, Claude Code, Gemini CLI) load them from the repository root |
+| `RETICLE.md` | Reticle's own reference file, linked from the block `reticle init` writes into `CLAUDE.md` |
+| `.github/copilot-instructions.md` | GitHub Copilot reads it there; `.github/` is a protected build path |
+| `.cursor/rules/repository.mdc` | Cursor reads rules from `.cursor/rules/` |
+| `.claude/commands/`, `.claude/skills/`, `.agents/skills/` | Claude Code and other agents load commands and skills from these folders |
+| `deploy/oracle/README.md`, `RECOVERY.md`, `NEW_SUPABASE_PROJECT.md` | Deployment runbooks beside the files they operate; `deploy/` is a protected build path that agents may not change |
 
 ## 1. Requirements
 
 | Document | Purpose |
 |---|---|
-| [`../SSOT.md`](../SSOT.md) | Canonical project and system definition. Owns intent. |
+| [`SSOT.md`](SSOT.md) | Canonical project and system definition. Owns intent. |
 | [`product/PRD.md`](product/PRD.md) | Product requirements, personas, capability matrix. |
 | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) | 173 feature IDs (F-01 to F-173). An inventory, not a status tracker. |
 | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | Business rules BR-001 to BR-248, then (appended) where the 66 workflow state machines live, from the former `WORKFLOWS_AND_BUSINESS_RULES.md`. |
@@ -81,7 +93,7 @@ project-mindmap/               generated from source; do not edit by hand (see i
 
 | Document | Purpose |
 |---|---|
-| [`../ARCHITECTURE.md`](../ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
 | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) | **Target architecture**, then (appended) the technical requirements from the former `TRD.md`. Not a description of the running code. |
 | [`engineering/DECISIONS.md`](engineering/DECISIONS.md) | Full text of ADR-015 (persist the core career loop; the API's maps are a read model; ratification open, issue #46) and ADR-016 (browser-measured UI quality gates). |
 
@@ -95,7 +107,7 @@ Source model and dated verification records, updated 2026-10-23. A source diagra
 | [`system-model/02-flows.md`](system-model/02-flows.md) | Mermaid flowcharts F1 to F7: architecture, auth, jobs and applications, verified work history, Stripe billing, boot and background jobs, web journeys |
 | [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md) | Conflict register (7 resolved, 21 open, with decision records), the condition and business-rule matrix (62 rules) and the completeness audit |
 | [`system-model/06-route-authorization.md`](system-model/06-route-authorization.md) | Who may call each of about 170 more routes, what is durable, 6 fixes and 15 findings (CF-31 to CF-45). Read by a test |
-| [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md#talentsphere--master-system-model) | The former `system-model/MASTER_SYSTEM_MODEL.md`: a hand-built Mermaid system model (2026-11-10 snapshot), superseded by the generated [`project-mindmap/`](../project-mindmap/README.md) |
+| [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md#talentsphere--master-system-model) | The former `system-model/MASTER_SYSTEM_MODEL.md`: a hand-built Mermaid system model (2026-11-10 snapshot), superseded by the generated [`docs/mindmap/`](mindmap/README.md) |
 
 Rules for keeping it true: change a diagram in the same commit as the code it describes; re-check a `path:line` before relying on it (lines drift); add every new contradiction to the conflict register instead of fixing a document silently.
 
@@ -134,8 +146,8 @@ Decisions are kept where they are made; this list is the index, not a copy.
 
 | Kind | Where |
 |---|---|
-| Approved architecture decisions (as built) | Decision register in [`../ARCHITECTURE.md`](../ARCHITECTURE.md); full ADR-015 and ADR-016 text in [`engineering/DECISIONS.md`](engineering/DECISIONS.md) |
-| Intended architecture decisions | ADR-001 to ADR-013 in [`../SSOT.md`](../SSOT.md) |
+| Approved architecture decisions (as built) | Decision register in [`ARCHITECTURE.md`](ARCHITECTURE.md); full ADR-015 and ADR-016 text in [`engineering/DECISIONS.md`](engineering/DECISIONS.md) |
+| Intended architecture decisions | ADR-001 to ADR-013 in [`SSOT.md`](SSOT.md) |
 | Unresolved documentation conflicts (including C-8 and C-22) | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md#documentation-conflicts-open-2026-10-21) and the conflict register in [`system-model/03-conflicts-conditions-audit.md`](system-model/03-conflicts-conditions-audit.md) |
 | Open product decisions awaiting the owner | GitHub issues #44 to #50 and the `REQUIRES_APPROVAL` rows in [`governance/IMPLEMENTATION_TRACKER.md`](governance/IMPLEMENTATION_TRACKER.md) |
 | Proposed (unratified) blueprint decisions | [`blueprint/09_REGISTERS/OPEN_DECISIONS_REGISTER.md`](blueprint/09_REGISTERS/OPEN_DECISIONS_REGISTER.md) |
@@ -143,7 +155,7 @@ Decisions are kept where they are made; this list is the index, not a copy.
 
 ### User journeys
 
-Documented target journeys: [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md) (J-01 to J-28) and navigation in [`experience/APP_FLOW.md`](experience/APP_FLOW.md). Journeys proven by the e2e suite, with the screens and endpoints each one exercises: [`../project-mindmap/catalog/JOURNEY_GRAPHS.md`](../project-mindmap/catalog/JOURNEY_GRAPHS.md) and [`../project-mindmap/journeys/USER_JOURNEYS.md`](../project-mindmap/journeys/USER_JOURNEYS.md).
+Documented target journeys: [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md) (J-01 to J-28) and navigation in [`experience/APP_FLOW.md`](experience/APP_FLOW.md). Journeys proven by the e2e suite, with the screens and endpoints each one exercises: [`mindmap/catalog/JOURNEY_GRAPHS.md`](mindmap/catalog/JOURNEY_GRAPHS.md) and [`mindmap/journeys/USER_JOURNEYS.md`](mindmap/journeys/USER_JOURNEYS.md).
 
 ## 6. Intended product blueprint
 
@@ -191,12 +203,13 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 - Dated report filenames carry their date. Undated files are living documents.
 - A merged file starts with a status block and a table of the former files it holds; each former file is a section under its original title. Old links resolve through [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
 - Paths read by tests, code comments, CI or the mind map generator keep their exact names: `PRICING.md`, `system-model/01`, `02`, `06`, `quality/*`, `engineering/API_CONTRACTS.md`, `CODE_STYLE.md`, `experience/*`, `registries/*`, `reports/FEATURE_STATUS_2026-10-21.md`, `reports/IMPROVEMENT_PROGRAM_2026-10-10.md` and this file.
-- On 2026-10-21, copies of SSOT sections that had drifted were replaced with pointers: the workflow sections of the former `WORKFLOWS_AND_BUSINESS_RULES.md`, `engineering/DATABASE.md` §15–§22 and §31–§32, and `experience/UI_UX_DESIGN_SYSTEM.md` Appendix D. Their content is canonical in [`../SSOT.md`](../SSOT.md).
+- On 2026-10-21, copies of SSOT sections that had drifted were replaced with pointers: the workflow sections of the former `WORKFLOWS_AND_BUSINESS_RULES.md`, `engineering/DATABASE.md` §15–§22 and §31–§32, and `experience/UI_UX_DESIGN_SYSTEM.md` Appendix D. Their content is canonical in [`SSOT.md`](SSOT.md).
 
 ## Documentation audits
 
 - **2026-10-23:** the [file-by-file inventory](system-model/01-inventory-and-coverage.md#file-by-file-documentation-classification) classified every tracked Markdown document then; four redundant files were consolidated (197 to 193).
 - **2026-11-25:** one documentation home. `PRODUCT_BLUEPRINT/` moved to `docs/blueprint/` (106 files to 49), `Yash_Final_Project_Document/` to `docs/archive/target-blueprint/` (246 files to 40), `BRAIN/` into `docs/history/`, and the rest of `docs/` went from 50 files to 32. The tool output in `graphify-out/` (127 files) and the empty Obsidian vault in `TalentSphere/` were deleted. See [`archive/REMOVED_FILES.md`](archive/REMOVED_FILES.md).
+- **2026-11-26 (one folder):** the last documents outside `docs/` moved in with `git mv`, history kept: `ARCHITECTURE.md` and `SSOT.md` from the root to `docs/`, `project-mindmap/` to `docs/mindmap/` (its generator scripts now write there), and `supabase/hosted/README.md` to `engineering/HOSTED_SUPABASE.md`. Links were rewritten; the files that must stay where a tool reads them are listed under [Layout](#layout). Dated reports, history and archive text keep the old names as written at the time.
 - **2026-11-26 (fourth round, by reading):** superseded records moved out of living documents into [`history/PROJECT_HISTORY.md`](history/PROJECT_HISTORY.md): `system-model/MASTER_SYSTEM_MODEL.md` (a hand-built 2026-11-10 graph, now replaced by the generated `project-mindmap/`), the greenfield source reconciliation from `governance/GOVERNANCE.md`, and `engineering/TARGET_ARCHITECTURE.md` §11 (an older copy of SSOT §12.6 to §12.12). Stale statements fixed in `README.md`, `quality/TESTING.md`, `system-model/02-flows.md` and the `GOVERNANCE.md` authority list. See [`reports/DOC_DEDUP_2026-11-25.md` §11](reports/DOC_DEDUP_2026-11-25.md#11-fourth-round-by-reading).
 - **2026-11-25 (third round):** the 130 files in `.agents/teamwork/` became two history files, `engineering/PROJECT_MAINTENANCE.md` became §10 of `quality/OPERATIONS.md`, and the canonical set above was mapped. Documentation files went from 429 to 313 with 0 broken relative links. Per-file inventory and classification: [`reports/DOC_DEDUP_2026-11-25.md` §10](reports/DOC_DEDUP_2026-11-25.md#10-third-round-inventory-and-consolidation).
 - **2026-11-25 (second pass):** paragraph-level duplicate scan and doc-to-code sync; the copies of the feature and business-rule registries in `system-model/MASTER_SYSTEM_MODEL.md` §4 and §5 were replaced with links. See [`reports/DOC_DEDUP_2026-11-25.md`](reports/DOC_DEDUP_2026-11-25.md).

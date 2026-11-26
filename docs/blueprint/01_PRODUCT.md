@@ -1,6 +1,6 @@
 # Blueprint 01: product
 
-> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `ARCHITECTURE.md` and `project-mindmap/`. Decision `DEC-001`: this blueprint does not supersede `SSOT.md` until `OD-PRD-31` defines ratification.
+> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `docs/ARCHITECTURE.md` and `docs/mindmap/`. Decision `DEC-001`: this blueprint does not supersede `docs/SSOT.md` until `OD-PRD-31` defines ratification.
 >
 > **What this file holds.** Vision, scope, personas, permissions, journeys, business model, module map and stakeholder decisions.
 >
@@ -4503,7 +4503,7 @@ High-level decisions only the owner can make (`OD-PRD-nn`), and the decisions al
 
 | Field            | Detail                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
-| Question         | Who ratifies `[PROP]` items, and when does the blueprint supersede `SSOT.md`?                   |
+| Question         | Who ratifies `[PROP]` items, and when does the blueprint supersede `docs/SSOT.md`?                   |
 | Options          | A: Owner ratifies per module. B: Owner ratifies per tier. C: Blueprint supersedes SSOT at once. |
 | Default proposal | A [PROP]; SSOT stays founder intent until each module is ratified.                              |
 | Impact           | All modules.                                                                                    |

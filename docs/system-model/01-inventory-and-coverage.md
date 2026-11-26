@@ -322,7 +322,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [.claude/skills/code-review/references/cli-workflows.md](../../.claude/skills/code-review/references/cli-workflows.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [AGENTS.md](../../AGENTS.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-| [ARCHITECTURE.md](../../ARCHITECTURE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+| [ARCHITECTURE.md](../ARCHITECTURE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [BRAIN/BRAIN.md](../history/PROJECT_HISTORY.md#talentsphere--brainmd-v60) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [BRAIN/MEMORY.md](../history/PROJECT_HISTORY.md#talentsphere--project-memory) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [CLAUDE.md](../../CLAUDE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
@@ -330,7 +330,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [README.md](../../README.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../reports/REPOSITORY_STATE_2026-10.md) | Compatibility pointer to retained report; no duplicated report body |
 | [RETICLE.md](../../RETICLE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-| [SSOT.md](../../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
+| [SSOT.md](../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
 | [TalentSphere/Welcome.md](../archive/REMOVED_FILES.md) | Personal vault/template; preserved, outside technical authority |
 | [TalentSphere/create a link.md](../archive/REMOVED_FILES.md) | Personal vault/template; preserved, outside technical authority |
 | [deploy/oracle/NEW_SUPABASE_PROJECT.md](../../deploy/oracle/NEW_SUPABASE_PROJECT.md) | Protected deployment reference; read-only, live behavior unverified |
@@ -385,7 +385,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [docs/system-model/06-route-authorization.md](06-route-authorization.md) | Source model or dated evidence; coverage/verification limits explicit |
 | `graphify-out/2026-10-23/GRAPH_REPORT.md` (deleted 2026-11-25, see [REMOVED_FILES](../archive/REMOVED_FILES.md)) | Generated graph snapshot; was retained, not implementation acceptance |
 | `graphify-out/GRAPH_REPORT.md` (deleted 2026-11-25, see [REMOVED_FILES](../archive/REMOVED_FILES.md)) | Generated graph snapshot; was retained, not implementation acceptance |
-| [supabase/hosted/README.md](../../supabase/hosted/README.md) | Manual adapter sequence and historical partial deployment; current applied state unverified |
+| [HOSTED_SUPABASE.md](../engineering/HOSTED_SUPABASE.md) | Manual adapter sequence and historical partial deployment; current applied state unverified |
 
 
 ## Validation and remaining work
