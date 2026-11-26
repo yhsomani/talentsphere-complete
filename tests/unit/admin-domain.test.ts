@@ -5,6 +5,7 @@ import {
   validateUserStatusTransition,
   updateFeatureFlagState,
   createAdminAuditLog,
+  isParkedFeatureEnabled,
   DomainError,
 } from '../../packages/domain/src/index.js';
 
@@ -179,6 +180,21 @@ describe('Platform Administration & Governance Domain (F-17, F-35, BR-06, BR-28,
       expect(log.targetType).toBe('user');
       expect(log.metadata.reason).toBe('Terms of service violation');
       expect(log.createdAt).toBe('2026-09-24T15:00:00.000Z');
+    });
+  });
+
+  describe('isParkedFeatureEnabled (TPD-04)', () => {
+    it('is off in deployed environments when no flag is stored', () => {
+      expect(isParkedFeatureEnabled(undefined, true)).toBe(false);
+    });
+
+    it('is on outside deployed environments when no flag is stored', () => {
+      expect(isParkedFeatureEnabled(undefined, false)).toBe(true);
+    });
+
+    it('follows a stored flag in every environment', () => {
+      expect(isParkedFeatureEnabled({ enabled: true }, true)).toBe(true);
+      expect(isParkedFeatureEnabled({ enabled: false }, false)).toBe(false);
     });
   });
 });

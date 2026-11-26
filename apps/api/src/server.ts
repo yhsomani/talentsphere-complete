@@ -11,7 +11,8 @@ import {
   validateServerEnv,
   ServerEnv,
 } from '@talentsphere/config';
-import { DURABLE_ROUTES, isEphemeralRoute } from './durability.js';
+import { DURABLE_ROUTES, isEphemeralRoute, routeKey } from './durability.js';
+import { PARKED_ROUTES } from './parked.js';
 import {
   cancelWithStripe,
   registerStripeBilling,
@@ -166,6 +167,9 @@ import {
   computeSystemHealth,
   validateUserStatusTransition,
   updateFeatureFlagState,
+  PARKED_FEATURES,
+  isParkedFeatureEnabled,
+  type ParkedFeatureKey,
   createAdminAuditLog,
   SystemDiagnostics,
   scoreSearchMatch,
@@ -634,6 +638,17 @@ export async function buildApp(
     }
   });
 
+  // Parked features (TPD-04, apps/api/src/parked.ts): off unless a stored flag
+  // or a non-deployed environment turns them on. Runs before authentication so
+  // a parked route looks the same to everyone.
+  app.addHook('onRequest', async (req) => {
+    const feature = PARKED_ROUTES.get(routeKey(req.method, req.routeOptions?.url));
+    if (!feature) return;
+    if (!isParkedFeatureEnabled(await storage.featureFlags.get(feature), isDeployed(env))) {
+      throw new DomainError('NOT_FOUND', 'This feature is not available.');
+    }
+  });
+
   // Security Plugins
   await app.register(helmet, {
     contentSecurityPolicy: isDeployed(env),
@@ -862,6 +877,9 @@ export async function buildApp(
     const flagsObj: Record<string, boolean> = {};
     for (const flag of await storage.featureFlags.list()) {
       flagsObj[flag.key] = flag.enabled;
+    }
+    for (const key of Object.keys(PARKED_FEATURES) as ParkedFeatureKey[]) {
+      flagsObj[key] ??= isParkedFeatureEnabled(undefined, isDeployed(env));
     }
     return {
       flags: flagsObj,

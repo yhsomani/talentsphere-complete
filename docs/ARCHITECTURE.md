@@ -203,6 +203,13 @@ There is no generated OpenAPI or universal pagination/idempotency layer. Hooks
 provide Helmet, CORS, rate limiting, request IDs and a global error envelope;
 handlers invoke authorization and domain validation.
 
+Parked features (decision TPD-04 in
+[the transformation plan](product/TRANSFORMATION_PLAN.md#43-what-to-park-and-why)):
+the routes listed in `apps/api/src/parked.ts` answer 404 `NOT_FOUND`, before
+authentication, unless `isParkedFeatureEnabled` allows them. A stored feature
+flag decides; with none stored they are off in staging and production and on in
+development and tests. `GET /api/v1/feature-flags` reports their effective state.
+
 ## 15. Frontend architecture
 
 `main.tsx` mounts React; `App.tsx` uses BrowserRouter and a shared Layout. Public

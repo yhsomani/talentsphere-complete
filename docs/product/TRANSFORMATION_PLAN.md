@@ -919,7 +919,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | Slice | What | Depends on | Acceptance | Tracker | Status |
 | --- | --- | --- | --- | --- | --- |
 | TS-01 | Merge durable resumes (T-007) and the service worker (T-009) already built | — | Existing tests plus restart test | T-007, T-009 | IN_PROGRESS elsewhere |
-| TS-02 | Park list: one feature flag per parked module, off by default in deployed environments, screens hidden | Feature flags (durable, 00051) | Flagged routes return 404 in staging config; tests updated, not deleted | T-022 | PROPOSED |
+| TS-02 | Park list: one feature flag per parked module, off by default in deployed environments, screens hidden | Feature flags (durable, 00051) | Flagged routes return 404 in staging config; tests updated, not deleted | T-022 | IN_PROGRESS |
 | TS-03 | Durability sweep for visible ephemeral modules: portfolio, moderation, courses and lessons progress, challenge submissions — one PR each, using the existing tables | — | Restart test per module; routes added to `DURABLE_ROUTES` | T-010 | PLANNED |
 | TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | PROPOSED |
 | TS-05 | Worker claim fencing (completion checks the claim token) | — | Kill-the-worker test shows no duplicated effect | T-024 | PROPOSED |
