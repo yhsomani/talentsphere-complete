@@ -1,8 +1,8 @@
 # Blueprint 10: intended-product mind maps
 
-> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `ARCHITECTURE.md` and `project-mindmap/`. Decision `DEC-001`: this blueprint does not supersede `SSOT.md` until `OD-PRD-31` defines ratification.
+> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `docs/ARCHITECTURE.md` and `docs/mindmap/`. Decision `DEC-001`: this blueprint does not supersede `docs/SSOT.md` until `OD-PRD-31` defines ratification.
 >
-> **What this file holds.** Mermaid mind maps of the intended product. For what the code actually contains, see `project-mindmap/`.
+> **What this file holds.** Mermaid mind maps of the intended product. For what the code actually contains, see `docs/mindmap/`.
 >
 > **Merged on 2026-11-25** from the files listed below; each one is a section under its original title. Nothing was removed; the originals are in git history at commit `08387ec`.
 
@@ -34,7 +34,7 @@ _Former file: `PRODUCT_BLUEPRINT/10_MINDMAPS/README.md`._
 
 Start at [00_MASTER_MINDMAP.md](#00_master_mindmapmd). Maps render as Mermaid on GitHub. Domain maps (`01`-`08`) are generated from the module specs and list every sub-module and feature; cross-cutting maps (`11`-`19`) are generated from the section structure of the other documents.
 
-These maps show the **intended** product. The map of what the code actually contains is [`project-mindmap/`](../../project-mindmap/master/MASTER_PROJECT_MINDMAP.md); the [documentation map](../../project-mindmap/DOCUMENTATION_MAP.md) explains how the two relate.
+These maps show the **intended** product. The map of what the code actually contains is [`docs/mindmap/`](../mindmap/master/MASTER_PROJECT_MINDMAP.md); the [documentation map](../mindmap/DOCUMENTATION_MAP.md) explains how the two relate.
 
 ## 00_MASTER_MINDMAP.md
 

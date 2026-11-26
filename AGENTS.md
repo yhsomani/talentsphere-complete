@@ -42,9 +42,9 @@ UNDERSTAND
 
 Read:
 
-1. `SSOT.md`
+1. `docs/SSOT.md`
 2. relevant `docs/product/PRD.md` / technical requirements (former `TRD.md`, now in `docs/engineering/TARGET_ARCHITECTURE.md`)
-3. `ARCHITECTURE.md`
+3. `docs/ARCHITECTURE.md`
 4. relevant feature contract
 5. relevant security/testing rules.
 

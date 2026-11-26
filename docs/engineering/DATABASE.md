@@ -81,7 +81,7 @@ Requirements remain: explicit constraints, UTC timestamps, integer minor units
 and currency, auditable lifecycle, concurrency policy, and corrections preserving
 evidence lineage. The current evidence code mutates state; do not equate these
 requirements with an implemented append-only version/event system. Target table
-clusters and RLS generator design are in [SSOT](../../SSOT.md), Part VII sections
+clusters and RLS generator design are in [SSOT](../SSOT.md), Part VII sections
 24.1–24.3. They replace the former duplicated 50/~220-table target lists here.
 
 ## Local migrations and hosted Supabase
@@ -102,7 +102,7 @@ use additive migrations. Each migration needs purpose, affected data/index/RLS
 impact, verification, release ordering and a rollback or forward-fix plan.
 
 The runner deliberately refuses hosted Supabase. A manual ordered adapter exists
-in [supabase/hosted/README.md](../../supabase/hosted/README.md), including aliases,
+in [HOSTED_SUPABASE.md](HOSTED_SUPABASE.md), including aliases,
 00054 and a Data API lockdown. That file records the state applied on 2026-10-23 (00001-00054, aliases, lockdown,
 `schema_migrations` ledger; all tables empty), not a freshly observed state. Follow the
 [hosted gate](#hosted-supabase-migration-gate-and-dependency-audit) before any live action. Never
@@ -202,7 +202,7 @@ refuses the hosted identity footprint. Hosted Auth objects belong to the platfor
 ### Current repository support and unknown live state
 
 A manual adapter now exists in
-[supabase/hosted/README.md](../../supabase/hosted/README.md): first migration,
+[HOSTED_SUPABASE.md](HOSTED_SUPABASE.md): first migration,
 organization alias views, migrations 00002–00053, migration 00054 to repoint
 foreign keys, then Data API lockdown and exact checksum ledger recording.
 This supersedes the older statement that no hosted path exists. It does not

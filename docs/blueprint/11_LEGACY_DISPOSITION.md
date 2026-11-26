@@ -1,6 +1,6 @@
 # Blueprint 11: legacy disposition
 
-> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `ARCHITECTURE.md` and `project-mindmap/`. Decision `DEC-001`: this blueprint does not supersede `SSOT.md` until `OD-PRD-31` defines ratification.
+> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `docs/ARCHITECTURE.md` and `docs/mindmap/`. Decision `DEC-001`: this blueprint does not supersede `docs/SSOT.md` until `OD-PRD-31` defines ratification.
 >
 > **What this file holds.** How older documents relate to this blueprint. The 2026-11-25 consolidation carried out the moves recorded in `docs/archive/REMOVED_FILES.md`.
 >
@@ -24,7 +24,7 @@ How the pre-existing documentation relates to this blueprint, what is kept, what
 
 The owner asked that old documents be used where required and **deleted once their need is complete**. This change does **not** delete anything, for four reasons that can each be checked:
 
-1. **Ratification is not done.** `DEC-001` records that the blueprint does not supersede `SSOT.md` until `OD-PRD-31` defines ratification. Deleting the document the blueprint has not yet replaced would leave the project without an accepted source.
+1. **Ratification is not done.** `DEC-001` records that the blueprint does not supersede `docs/SSOT.md` until `OD-PRD-31` defines ratification. Deleting the document the blueprint has not yet replaced would leave the project without an accepted source.
 2. **Automated checks read legacy files.** `tests/unit/pricing-consistency.test.ts` reads `docs/PRICING.md`; `tests/security/route-authz-sweep.test.ts` reads `docs/system-model/06-route-authorization.md`. Deleting those files fails the test suite.
 3. **Repository rules point at them.** `CLAUDE.md`, `AGENTS.md`, `README.md`, `ARCHITECTURE.md`, source comments in `packages/contracts`, `packages/domain` and `packages/ui`, SQL migration comments, `.prettierignore` and the CI workflow header reference `SSOT.md` or `docs/`.
 4. **Some legacy files are the only record of what is built.** The blueprint describes the intended product; `ARCHITECTURE.md` and `docs/reports/` record the as-built state and dated evidence. They are not superseded by it.

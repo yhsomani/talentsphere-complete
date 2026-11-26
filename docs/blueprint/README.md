@@ -1,6 +1,6 @@
 # TalentSphere product blueprint
 
-> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `ARCHITECTURE.md` and `project-mindmap/`. Decision `DEC-001`: this blueprint does not supersede `SSOT.md` until `OD-PRD-31` defines ratification.
+> **Status.** Intent, not ratified. Nothing here claims anything is built; what is built is in `docs/ARCHITECTURE.md` and `docs/mindmap/`. Decision `DEC-001`: this blueprint does not supersede `docs/SSOT.md` until `OD-PRD-31` defines ratification.
 >
 > **What this file holds.** Entry point, conventions, glossary and final audit of the blueprint.
 >
@@ -19,7 +19,7 @@ _Former file: `PRODUCT_BLUEPRINT/00_START_HERE/README.md`._
 
 The complete, from-scratch definition of the intended product: a career operating system covering identity, learning, assessment, evidence, hiring, networking, institutions and adjacent career services. It is written so a development team can build the product without inventing features or business rules.
 
-**Status.** Everything here is intended product definition. Nothing in this folder claims anything is built. What is built is recorded only in [`ARCHITECTURE.md`](../../ARCHITECTURE.md) and [`docs/reports/`](../reports). Existing documents (`SSOT.md`, `docs/`, `Yash_Final_Project_Document/`) were used as inputs and are not changed; see [legacy disposition](11_LEGACY_DISPOSITION.md#legacy-documentation-disposition-plan).
+**Status.** Everything here is intended product definition. Nothing in this folder claims anything is built. What is built is recorded only in [`ARCHITECTURE.md`](../ARCHITECTURE.md) and [`docs/reports/`](../reports). Existing documents (`SSOT.md`, `docs/`, `Yash_Final_Project_Document/`) were used as inputs and are not changed; see [legacy disposition](11_LEGACY_DISPOSITION.md#legacy-documentation-disposition-plan).
 
 **Not decided here.** Business objectives, prices, volumes, targets, dates, headcount and legal positions are not invented. Every unknown is an open decision (`OD-`) in the [register](09_REGISTERS/OPEN_DECISIONS_REGISTER.md) with options and a default proposal. Compliance content needs counsel review; it is not legal advice.
 
@@ -394,7 +394,7 @@ Totals (from the generated registers): 1,144 features, 1,273 business rules, 707
 
 **No legacy document was deleted.** The owner asked that old documents be deleted once their need is complete. That need is not complete, for reasons that can each be checked (detail in [`DISPOSITION_PLAN.md`](11_LEGACY_DISPOSITION.md#legacy-documentation-disposition-plan)):
 
-1. The blueprint does not supersede `SSOT.md` until `OD-PRD-31` defines ratification (`DEC-001`).
+1. The blueprint does not supersede `docs/SSOT.md` until `OD-PRD-31` defines ratification (`DEC-001`).
 2. Tests read `docs/PRICING.md` and `docs/system-model/06-route-authorization.md`. Deleting them fails the suite.
 3. `CLAUDE.md`, `AGENTS.md`, source comments, migrations, `.prettierignore` and the CI workflow reference `SSOT.md` or `docs/`. Several are protected build files that need explicit owner approval to edit.
 4. `ARCHITECTURE.md` and `docs/reports/` are the as-built record and are not superseded by an intended-product blueprint.
