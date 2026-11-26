@@ -181,7 +181,10 @@ revoked session. Non-active accounts have restricted appeal/data-rights access;
 an erased credential is denied. Memory-mode tests can accept signed identities
 absent from the account store; durable mode refuses them.
 
-Tokens are in browser localStorage and are XSS-readable. There is no refresh-token
+The web app still keeps its token in browser localStorage, where script can read it.
+The API also sets the token as an httpOnly `ts_session` cookie and accepts it, with a
+CSRF header and Origin check for writes ([ADR-019](engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10));
+the web app moves onto the cookie in a later change. There is no refresh-token
 flow. Resource authorization is per handler, not global auth middleware. Several
 organization actions accept any membership rather than checking membership role;
 this is a policy gap, not the intended tenancy model. See
