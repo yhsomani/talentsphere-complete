@@ -14,6 +14,12 @@ import {
 import { DURABLE_ROUTES, isEphemeralRoute, routeKey } from './durability.js';
 import { PARKED_ROUTES } from './parked.js';
 import {
+  clearedSessionCookie,
+  cookieCsrfProblem,
+  sessionCookie,
+  sessionTokenOf,
+} from './session-cookie.js';
+import {
   cancelWithStripe,
   registerStripeBilling,
   type StripeBillingDeps,
@@ -537,6 +543,8 @@ export async function buildApp(
       redact: [
         'req.headers.authorization',
         'headers.authorization',
+        'req.headers.cookie',
+        'headers.cookie',
         'password',
         'token',
         'accessToken',
@@ -650,6 +658,17 @@ export async function buildApp(
     }
   });
 
+  // Session cookie CSRF check (ADR-019, apps/api/src/session-cookie.ts): a
+  // state-changing request signed in by the cookie alone must carry the
+  // X-TalentSphere-CSRF header and come from an allowed origin.
+  const allowedOrigins = env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim());
+  const secureCookie = isDeployed(env);
+  app.addHook('onRequest', async (req) => {
+    if (sessionTokenOf(req.headers)?.via !== 'cookie') return;
+    const problem = cookieCsrfProblem(req.method, req.headers, allowedOrigins);
+    if (problem) throw new DomainError('FORBIDDEN', problem);
+  });
+
   // Security Plugins
   await app.register(helmet, {
     contentSecurityPolicy: isDeployed(env),
@@ -667,12 +686,9 @@ export async function buildApp(
     // do not throttle each other; anonymous traffic is keyed by address. An
     // invalid token falls back to the address, so forging tokens buys nothing.
     keyGenerator: (req) => {
-      const auth = req.headers.authorization;
-      if (typeof auth === 'string' && auth.startsWith('Bearer ')) {
-        const session = verifySessionToken(auth.substring(7).trim());
-        if (session) return `user:${session.userId}`;
-      }
-      return `ip:${req.ip}`;
+      const source = sessionTokenOf(req.headers);
+      const session = source ? verifySessionToken(source.token) : null;
+      return session ? `user:${session.userId}` : `ip:${req.ip}`;
     },
   });
 
@@ -972,12 +988,11 @@ export async function buildApp(
 
   // Authentication Helper
   const extractUser = (req: FastifyRequest): AuthPayload => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const source = sessionTokenOf(req.headers);
+    if (!source) {
       throw new DomainError('UNAUTHENTICATED', 'Missing or malformed Authorization header.');
     }
-    const token = authHeader.substring(7).trim();
-    const session = verifySessionToken(token);
+    const session = verifySessionToken(source.token);
     if (!session) {
       throw new DomainError(
         'UNAUTHENTICATED',
@@ -988,13 +1003,12 @@ export async function buildApp(
   };
 
   const maybeExtractUser = (req: FastifyRequest): AuthPayload | null => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const source = sessionTokenOf(req.headers);
+    if (!source) {
       return null;
     }
-    const token = authHeader.substring(7).trim();
     try {
-      const session = verifySessionToken(token);
+      const session = verifySessionToken(source.token);
       return session ? resolveSession(session, req) : null;
     } catch {
       return null;
@@ -1105,6 +1119,7 @@ export async function buildApp(
 
       const token = createSessionToken(userId, storedUser.email, storedUser.roles);
 
+      reply.header('set-cookie', sessionCookie(token, secureCookie));
       return reply.status(201).send({
         message: 'Registration successful',
         token,
@@ -1174,6 +1189,7 @@ export async function buildApp(
       const issuedAtMs = Math.max(Date.now(), Date.parse(user.sessionsValidAfter ?? '') || 0);
       const token = createSessionToken(user.id, user.email, user.roles, undefined, issuedAtMs);
 
+      reply.header('set-cookie', sessionCookie(token, secureCookie));
       return reply.status(200).send({
         message: 'Login successful',
         token,
@@ -1200,11 +1216,8 @@ export async function buildApp(
           max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
           timeWindow: AUTH_WINDOW_MS,
           keyGenerator: (req: FastifyRequest) => {
-            const auth = req.headers.authorization;
-            const session =
-              typeof auth === 'string' && auth.startsWith('Bearer ')
-                ? verifySessionToken(auth.substring(7).trim())
-                : null;
+            const source = sessionTokenOf(req.headers);
+            const session = source ? verifySessionToken(source.token) : null;
             return session ? `password:${session.userId}` : `password-ip:${req.ip}`;
           },
         },
@@ -1253,6 +1266,7 @@ export async function buildApp(
         timestamp: new Date().toISOString(),
       });
       const token = createSessionToken(user.id, user.email, user.roles, undefined, cutoffMs);
+      reply.header('set-cookie', sessionCookie(token, secureCookie));
       return reply.status(200).send({
         message: 'Password changed. You have been signed out everywhere else.',
         token,
@@ -1267,6 +1281,7 @@ export async function buildApp(
   // and end at expiry (or with a password change).
   app.post('/api/v1/auth/sign-out', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
+    reply.header('set-cookie', clearedSessionCookie(secureCookie));
     if (!session.sessionId) {
       return reply.status(200).send({
         ended: false,
@@ -1310,6 +1325,7 @@ export async function buildApp(
       timestamp: new Date().toISOString(),
     });
     const token = createSessionToken(user.id, user.email, user.roles, undefined, cutoffMs);
+    reply.header('set-cookie', sessionCookie(token, secureCookie));
     return reply.status(200).send({
       message: 'Signed out of every other device. This one stays signed in.',
       token,
@@ -10411,11 +10427,8 @@ export async function buildApp(
           max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
           timeWindow: AUTH_WINDOW_MS,
           keyGenerator: (req: FastifyRequest) => {
-            const auth = req.headers.authorization;
-            const session =
-              typeof auth === 'string' && auth.startsWith('Bearer ')
-                ? verifySessionToken(auth.substring(7).trim())
-                : null;
+            const source = sessionTokenOf(req.headers);
+            const session = source ? verifySessionToken(source.token) : null;
             return session ? `erasure:${session.userId}` : `erasure-ip:${req.ip}`;
           },
         },
@@ -10433,10 +10446,8 @@ export async function buildApp(
         // normal session is refused. A still-validly-signed, unrevoked token of
         // that same user may finish (or re-read) its own erasure and nothing
         // else; any other failure keeps its original error.
-        const bearer = req.headers.authorization;
-        const raw = bearer?.startsWith('Bearer ')
-          ? verifySessionToken(bearer.substring(7).trim())
-          : null;
+        const source = sessionTokenOf(req.headers);
+        const raw = source ? verifySessionToken(source.token) : null;
         const closed =
           raw &&
           !(raw.sessionId && revokedSessions.has(raw.sessionId)) &&
@@ -13288,7 +13299,7 @@ export async function buildApp(
     // A token that was sent but is expired or revoked is a 401, so the web
     // app signs the person in again instead of showing a private profile's
     // own owner a "forbidden" (review REV-12). No token: an anonymous read.
-    const session = req.headers.authorization ? extractUser(req) : null;
+    const session = sessionTokenOf(req.headers) ? extractUser(req) : null;
     const profile = profilesByUserId.get(candidateId) ?? profilesById.get(candidateId);
     if (!profile) {
       throw new DomainError('NOT_FOUND', 'Candidate not found.');
