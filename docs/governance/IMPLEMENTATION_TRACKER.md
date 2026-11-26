@@ -37,6 +37,7 @@ Gaps computed from the [feature catalog](../../project-mindmap/catalog/FEATURE_C
 | T-015 | Resolve documentation conflicts C-8 and C-22 | P2 | [GOVERNANCE.md](GOVERNANCE.md#documentation-conflicts-open-2026-10-21) | REQUIRES_APPROVAL | Both change approved product rules | Owner decision |
 | T-016 | Feature catalog to nano level and graph views | P3 | this file, `project-mindmap/catalog/` | IMPLEMENTED | PR #94 merged 2026-11-25; graph validation passes | None |
 | T-017 | Third documentation consolidation round: merge agent working files, map the canonical set | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §10](../reports/DOC_DEDUP_2026-11-25.md#10-third-round-inventory-and-consolidation) | IMPLEMENTED | PR #95 merged 2026-11-25; 429 to 313 doc files, 0 broken links | None. Further merges need owner calls: see §10.7 of that report |
+| T-018 | Fourth documentation round, by reading: move superseded records to history, fix stale statements | P3 | [`reports/DOC_DEDUP_2026-11-25.md` §11](../reports/DOC_DEDUP_2026-11-25.md#11-fourth-round-by-reading) | IN_PROGRESS | Draft PR on `claude/project-thread-275ob2` | Owner review and merge |
 
 ## Documentation work completed
 
@@ -47,6 +48,7 @@ Gaps computed from the [feature catalog](../../project-mindmap/catalog/FEATURE_C
 | #91 | 2026-11-25 | Paragraph-level duplicate scan, doc-to-code sync, mind map refresh |
 | #94 | 2026-11-25 | Feature catalog to nano level, graph views, this tracker |
 | #95 | 2026-11-25 | `.agents/teamwork/` merged into `docs/history/`, canonical-set map in `INDEX.md`, per-file inventory |
+| #96 | 2026-11-25 | What remains unmerged and why (`DOC_DEDUP_2026-11-25.md` §10.7) |
 
 ## How to resume
 

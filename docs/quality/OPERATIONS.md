@@ -155,7 +155,7 @@ approval before a public release. Do not claim due-date deletion is automatic.
 
 The core loop — accounts, profiles, organizations and members, skills, jobs,
 applications, evidence, work history, references, open email challenges,
-notifications and notification preferences — and background jobs. Dedicated SQL stores also persist account metadata, erasure requests, saved searches/jobs, admin audit, flags and billing. Remaining ephemeral routes keep state in process memory and are labelled with
+notifications and notification preferences, and messaging — and background jobs. Dedicated SQL stores also persist account metadata, erasure requests, saved searches/jobs, application drafts, job alerts, professional connections, admin audit, flags and billing (see the store list in [`DATABASE.md`](../engineering/DATABASE.md)). Remaining ephemeral routes keep state in process memory and are labelled with
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 
