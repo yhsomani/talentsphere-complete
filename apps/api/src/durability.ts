@@ -103,6 +103,13 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/connections/:id/respond',
   'POST /api/v1/connections/:id/withdraw',
   'DELETE /api/v1/connections/:id',
+  // Portfolio projects (migration 00011; plan TS-03).
+  'POST /api/v1/portfolio/projects',
+  'GET /api/v1/portfolio/projects',
+  'GET /api/v1/portfolio/projects/:id',
+  'PATCH /api/v1/portfolio/projects/:id',
+  'DELETE /api/v1/portfolio/projects/:id',
+  'GET /api/v1/portfolio/showcase/:targetUserId',
   // Application drafts and version history (migrations 00019 and 00056).
   'PUT /api/v1/jobs/:jobId/draft',
   'GET /api/v1/jobs/:jobId/draft',

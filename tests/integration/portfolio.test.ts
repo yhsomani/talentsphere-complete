@@ -350,4 +350,68 @@ describe('Portfolio Showcase Integration (F-26)', () => {
     });
     expect(afterShowcase.json().projects.length).toBe(0);
   });
+
+  it('links only real skills and the owner’s own evidence, and keeps media ids its own (TS-03)', async () => {
+    const ownerEvidence = await app.inject({
+      method: 'POST',
+      url: '/api/v1/evidence',
+      headers: { authorization: `Bearer ${ownerToken}` },
+      payload: {
+        type: 'project',
+        title: 'Distributed log',
+        description: 'Raft-based replicated log.',
+        source: 'https://example.com/log',
+        provenance: 'github_repository',
+        recencyDate: '2026-05-15',
+      },
+    });
+    expect(ownerEvidence.statusCode).toBe(201);
+    const evidenceId = ownerEvidence.json().evidence.id;
+    const create = (token: string, payload: Record<string, unknown>) =>
+      app.inject({
+        method: 'POST',
+        url: '/api/v1/portfolio/projects',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          title: 'Linked project',
+          description: 'A project with links to check.',
+          ...payload,
+        },
+      });
+
+    // Someone else's evidence cannot be shown as yours, and skills must exist.
+    expect((await create(strangerToken, { evidenceIds: [evidenceId] })).statusCode).toBe(422);
+    expect(
+      (await create(ownerToken, { skillIds: ['10000000-0000-4000-a000-0000000000ff'] })).statusCode
+    ).toBe(422);
+
+    const own = await create(ownerToken, {
+      evidenceIds: [evidenceId, evidenceId],
+      media: [{ id: 'client-chosen', mediaUrl: 'https://images.example.com/a.png' }],
+    });
+    expect(own.statusCode).toBe(201);
+    const project = own.json().project;
+    expect(project.evidenceIds).toEqual([evidenceId]);
+    expect(project.media[0].id).not.toBe('client-chosen');
+
+    // An update may keep its own media id; a foreign id is replaced.
+    const kept = await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/portfolio/projects/${project.id}`,
+      headers: { authorization: `Bearer ${ownerToken}` },
+      payload: {
+        media: [
+          { id: project.media[0].id, mediaUrl: 'https://images.example.com/a.png' },
+          {
+            id: '00000000-0000-4000-a000-000000000abc',
+            mediaUrl: 'https://images.example.com/b.png',
+          },
+        ],
+      },
+    });
+    expect(kept.statusCode).toBe(200);
+    const media = kept.json().project.media;
+    expect(media[0].id).toBe(project.media[0].id);
+    expect(media[1].id).not.toBe('00000000-0000-4000-a000-000000000abc');
+  });
 });

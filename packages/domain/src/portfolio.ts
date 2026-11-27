@@ -52,6 +52,38 @@ export interface CreatePortfolioProjectInput {
   }>;
 }
 
+/**
+ * Media ids are the server's: a client may keep the id of a media item the
+ * project already has, and any other id is replaced, so one project can never
+ * claim another's media row.
+ */
+const mediaIdOf = (id: string | undefined, current: readonly PortfolioProjectMedia[]) =>
+  id && current.some((m) => m.id === id) ? id : crypto.randomUUID();
+
+/**
+ * A project may tag only skills that exist and link only evidence its owner
+ * holds; another person's evidence cannot be shown as yours.
+ */
+export function assertPortfolioLinks(
+  project: Pick<PortfolioProject, 'skillIds' | 'evidenceIds'>,
+  known: { isSkill: (id: string) => boolean; ownsEvidence: (id: string) => boolean }
+): void {
+  const unknownSkill = project.skillIds.find((id) => !known.isSkill(id));
+  if (unknownSkill) {
+    throw new DomainError('VALIDATION_FAILED', `Unknown skill ${unknownSkill}.`, {
+      field: 'skillIds',
+    });
+  }
+  const foreignEvidence = project.evidenceIds.find((id) => !known.ownsEvidence(id));
+  if (foreignEvidence) {
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      `Evidence ${foreignEvidence} is not yours, so it cannot be linked to your project.`,
+      { field: 'evidenceIds' }
+    );
+  }
+}
+
 export interface ViewerContext {
   userId?: string;
   roles?: Role[];
@@ -87,7 +119,7 @@ export function createPortfolioProject(
 
   const now = new Date().toISOString();
   const media: PortfolioProjectMedia[] = (input.media || []).map((m, idx) => ({
-    id: m.id || crypto.randomUUID(),
+    id: mediaIdOf(m.id, []),
     mediaUrl: m.mediaUrl,
     mediaType: m.mediaType || 'image',
     caption: m.caption?.trim(),
@@ -104,8 +136,8 @@ export function createPortfolioProject(
     visibility: input.visibility || 'public',
     featured: input.featured ?? false,
     orderIndex: input.orderIndex ?? 0,
-    skillIds: input.skillIds || [],
-    evidenceIds: input.evidenceIds || [],
+    skillIds: [...new Set(input.skillIds || [])],
+    evidenceIds: [...new Set(input.evidenceIds || [])],
     media,
     createdAt: now,
     updatedAt: now,
@@ -159,16 +191,16 @@ export function updatePortfolioProject(
   }
 
   if (input.skillIds !== undefined) {
-    project.skillIds = input.skillIds;
+    project.skillIds = [...new Set(input.skillIds)];
   }
 
   if (input.evidenceIds !== undefined) {
-    project.evidenceIds = input.evidenceIds;
+    project.evidenceIds = [...new Set(input.evidenceIds)];
   }
 
   if (input.media !== undefined) {
     project.media = input.media.map((m, idx) => ({
-      id: m.id || crypto.randomUUID(),
+      id: mediaIdOf(m.id, project.media),
       mediaUrl: m.mediaUrl,
       mediaType: m.mediaType || 'image',
       caption: m.caption?.trim(),

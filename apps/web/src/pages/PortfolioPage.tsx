@@ -109,11 +109,6 @@ export const PortfolioPage: React.FC = () => {
         title="Portfolio"
         intro="Show the work you have done. Each project can link to a live demo or a repository."
       />
-      {/* shortcut: this module keeps data in server memory, a restart clears it, upgrade when moved to durable storage */}
-      <Notice tone="info" style={{ marginBottom: spacing.lg }} data-testid="ephemeral-notice">
-        This page is not saved permanently yet. A server restart clears your projects.
-      </Notice>
-
       <Card style={{ marginBottom: spacing.lg }}>
         <CardContent style={{ padding: spacing.lg }}>
           <h2 style={{ fontSize: '1.125rem', marginBottom: spacing.md }}>Add a project</h2>
