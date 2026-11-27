@@ -21,6 +21,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 | [erasure-store.ts](../../apps/api/src/storage/erasure-store.ts) | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
 | [saved-search-store.ts](../../apps/api/src/storage/saved-search-store.ts) | `saved_searches` owned by user | Owner-scoped CRUD |
 | [job-alert-store.ts](../../apps/api/src/storage/job-alert-store.ts) | `job_alerts` joins user, saved search and job | Alerts from one publish are inserted in one statement; an alert whose saved search was deleted meanwhile is skipped. Owner-scoped list and mark-read; erasure deletes the owner's rows |
+| [file-store.ts](../../apps/api/src/storage/file-store.ts) | `files` owned by user (cascade on account delete) | Metadata only; the bytes are in the `ObjectStore` under `storage_key`. Erasure deletes the rows and then the objects (ADR-020) |
 | [password-reset-store.ts](../../apps/api/src/storage/password-reset-store.ts) | `password_reset_tokens` owned by user (cascade on account delete) | Only token hashes. `claim` marks a token used in one statement, so a link works once; erasure deletes the rows (ADR-019) |
 | [saved-job-store.ts](../../apps/api/src/storage/saved-job-store.ts) | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
 | [application-draft-store.ts](../../apps/api/src/storage/application-draft-store.ts) | `application_drafts`, `application_draft_versions` keyed by candidate profile and job | Draft write and version snapshot in one transaction; a stale `previousVersion` is a `CONFLICT`. The `resume_id` foreign key is dropped (00056) because resumes are still in memory; the API checks resume ownership instead |
@@ -189,6 +190,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00056_application_drafts_durable.sql](../../supabase/migrations/00056_application_drafts_durable.sql) | Alterations only: drops `application_drafts_resume_id_fkey`, revokes `anon`/`authenticated` on both draft tables (API writes drafts to SQL from PR #87) |
 | [00057_connections_durable.sql](../../supabase/migrations/00057_connections_durable.sql) | Alterations only: replaces `uq_connections_pair` (directional) with `uq_connections_open_pair`, a unique index over the unordered pair for `pending`/`accepted` rows; revokes `anon`/`authenticated` on `connections` |
 | [00058_password_reset_tokens.sql](../../supabase/migrations/00058_password_reset_tokens.sql) | Creates `password_reset_tokens` (hash, expiry, used time; `user_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-019) |
+| [00059_files.sql](../../supabase/migrations/00059_files.sql) | Creates `files` (owner, purpose, type, size, SHA-256, name, storage key, scan status; `owner_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-020) |
 
 ---
 

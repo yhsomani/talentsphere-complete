@@ -66,6 +66,10 @@ const PUBLIC_ROUTES: Record<string, PublicRoute> = {
     why: 'the emailed single-use token is the credential (ADR-019)',
     doc: null,
   },
+  'GET /api/v1/files/:id/content': {
+    why: 'signed, 5-minute download link: the HMAC signature is the credential (ADR-020)',
+    doc: null,
+  },
   // --- Profiles, evidence, portfolio (canViewProfile lets anonymous read public profiles) ---
   'GET /api/v1/profile/:id': { why: 'public profile read', doc: '`GET /profile/:id`' },
   'GET /api/v1/evidence/:id': {
@@ -280,7 +284,11 @@ describe('SEC: every non-public /api/v1 route requires a valid session (A10-005)
     // other assertion here vacuous.
     expect(routes.length).toBeGreaterThanOrEqual(270);
     const declared = new Set<string>();
-    for (const file of ['apps/api/src/server.ts', 'apps/api/src/billing-stripe.ts']) {
+    for (const file of [
+      'apps/api/src/server.ts',
+      'apps/api/src/billing-stripe.ts',
+      'apps/api/src/file-routes.ts',
+    ]) {
       const source = readFileSync(file, 'utf8');
       for (const m of source.matchAll(
         /\b(?:app|scope)\.(get|post|put|patch|delete)\(\s*'(\/api\/v1\/[^']+)'/g

@@ -106,6 +106,8 @@ limits live in the named schemas, avoiding a second drifting schema definition.
 | `GET /auth/session` | Bearer token; user/profile/memberships | Uses current account roles, status, revocation and issuance cutoff |
 | `POST /auth/password` | `ChangePasswordInputSchema` | Verifies current password; advances session cutoff; ends unused reset links |
 | `POST /auth/password-reset/request` | `PasswordResetRequestInputSchema`: email; 202 message | Same answer for every email; for a known account stores a hashed token and queues the reset email; at most 3 an hour per account (ADR-019) |
+| `POST /files?purpose=&name=` | `FileUploadQuerySchema`; body is the file with its Content-Type; 201 `{ file }` | Purpose rules in `packages/domain/src/files.ts`; type checked against the first bytes; scanned; 413 over 5 MB; 503 when deployed without a scanner (ADR-020) |
+| `GET /files/:id/url` | 200 `{ url, expiresAt }` | Owner only (404 otherwise); link works for 5 minutes |
 | `POST /auth/password-reset/confirm` | `PasswordResetConfirmInputSchema`: token, newPassword; 200 message | Claims the token once; refused after 30 minutes (422); sets the password, advances the session cutoff, clears the cookie, issues no session |
 | `POST /evidence` | `CreateEvidenceInputSchema`; evidence | Uses caller's profile; validates all skill IDs before one transaction |
 | `POST /evidence/:id/verify` | `VerifyEvidenceInputSchema`; evidence | Verification level requires corresponding authority; guarded state update |
@@ -204,7 +206,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 284 literal registrations, 281 unique method/path pairs; 93 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 93 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), and the two password reset routes were added as `P` with migration 00058 (2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
+Measured: 289 literal registrations, 286 unique method/path pairs; 98 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 98 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, and the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -219,6 +221,11 @@ Measured: 284 literal registrations, 281 unique method/path pairs; 93 of them in
 | `POST /api/v1/auth/sign-out-others` | handler | P |
 | `POST /api/v1/auth/password-reset/request` | `PasswordResetRequestInputSchema` | P |
 | `POST /api/v1/auth/password-reset/confirm` | `PasswordResetConfirmInputSchema` | P |
+| `POST /api/v1/files` | `FileUploadQuerySchema` | P |
+| `GET /api/v1/files` | handler | P |
+| `GET /api/v1/files/:id/url` | handler | P |
+| `GET /api/v1/files/:id/content` | `FileContentQuerySchema` | P |
+| `DELETE /api/v1/files/:id` | handler | P |
 | `GET /api/v1/auth/session` | handler | P |
 | `GET /api/v1/profile/me` | handler | P |
 | `PATCH /api/v1/profile/me` | `UpdateProfileInputSchema` | P |

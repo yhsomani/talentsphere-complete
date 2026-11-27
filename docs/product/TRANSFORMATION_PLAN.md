@@ -98,7 +98,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | A-03 | 184 ephemeral endpoints are live and return `x-talentsphere-durability: ephemeral` | `durability.ts` | A user can create data that disappears | Per module: make durable, or put behind a feature flag that is off in deployed environments (TS-03) |
 | A-04 | Session token in `localStorage`, no refresh flow | ARCHITECTURE §12 | Any XSS reads the token | IMPLEMENTED 2026-11-27: httpOnly `SameSite=Lax` cookie with CSRF header and Origin check ([ADR-019](../engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)) |
 | A-05 | A handler timeout does not abort the handler. (Correction 2026-11-26: completion and failure **are** already fenced by the attempts counter and batches fit inside one lease, `apps/worker/src/claim.ts` and `tests/pg/job-claim-fencing.test.ts`; the earlier ARCHITECTURE §18 text was stale.) | ARCHITECTURE §18 | A long-running handler that ignores its bound (imports, parsing, AI) can run twice | Give long-running job kinds an abort signal and their own time bound when they are added (part of TS-08 and TS-11) |
-| A-06 | No file storage or malware scanning | No upload route in `server.ts` | Blocks resumes, imports, photos, course media | Object storage behind an adapter plus scanning (TS-06, **NEEDS OWNER**: new infrastructure) |
+| A-06 | No file storage or malware scanning | No upload route in `server.ts` | Blocks resumes, imports, photos, course media | Object storage behind an adapter plus scanning (TS-06): API IMPLEMENTED (ADR-020); bucket and `clamd` are owner steps |
 | A-07 | Search is in-process over Maps | ARCHITECTURE §3 | Does not survive a second instance or large data | PostgreSQL full-text search and `pg_trgm`, as SSOT Amendment A.4 already intends |
 | A-08 | No generated API description | ARCHITECTURE §14 | Clients and partners guess shapes | Generate OpenAPI from the Zod contracts (**NEEDS OWNER**: new dependency in `package.json`) |
 | A-09 | Organization actions accept any membership | ARCHITECTURE R-2, U-3; route review CF-31 to CF-45 | A member can act like an admin | Membership-role policy in `packages/domain` before employer seats ship |
@@ -653,7 +653,7 @@ flowchart LR
 
 ## 9. Database and API recommendations
 
-The current schema (58 migrations, 113 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
+The current schema (59 migrations, 114 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
 
 ### 9.1 Principles
 
@@ -923,7 +923,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-03 | Durability sweep for visible ephemeral modules: portfolio, moderation, courses and lessons progress, challenge submissions — one PR each, using the existing tables | — | Restart test per module; routes added to `DURABLE_ROUTES` | T-010 | PLANNED |
 | TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | PROPOSED |
 | TS-05 | Worker claim fencing (completion checks the claim token) | — | Already in place: fenced by the attempts counter (`tests/pg/job-claim-fencing.test.ts`) | T-024 | EXISTS (found 2026-11-26; no work needed) |
-| TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | **NEEDS OWNER** |
+| TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | IMPLEMENTED for the API (ADR-020); expiry job and the `clamd` container remain |
 | TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | PROPOSED |
 | TS-08 | Import v1: JSON Resume and CSV templates, review screen, commit and undo | TS-06, TS-07 | §10.4 cases 2, 5, 7 | T-027 | PROPOSED |
 | TS-09 | Experience band on jobs; job-type and band filters on the jobs screen | — | Contract and e2e tests | T-028 | PROPOSED |

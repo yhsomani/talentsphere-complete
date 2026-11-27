@@ -48,6 +48,7 @@ store/table relationships and migration inventory. Do not duplicate their counts
 | Identity    | Email/password, HMAC sessions, password change and session revocation                          | No Supabase Auth, OAuth or password-reset email flow                     |
 | Persistence | PostgreSQL core plus dedicated stores; explicit memory mode                                    | Many long-tail features are ephemeral                                    |
 | Billing     | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records                | Disabled by default; live acceptance unverified                          |
+| Files       | Private uploads behind an `ObjectStore` (local disk, or S3-compatible signed with SigV4), ClamAV scanning, 5-minute signed reads (ADR-020) | API only; deployed uploads refused until `clamd` is configured; no screen yet |
 | Email       | Opt-in Brevo (provider-independent service) for work-email verification, reference requests and password reset | Provider acceptance is not mailbox delivery; no push/SMS                 |
 | AI          | Local heuristic and simpler assistant scaffold                                                 | No remote model execution; saved BYO keys are not integration            |
 | Search      | In-process matching/ranking over available data                                                | No PostgreSQL FTS runtime integration                                    |

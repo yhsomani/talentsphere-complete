@@ -108,7 +108,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-017 | Ratify ADR-015; Fastify and PostgreSQL are the architecture of record | #46 | Documentation (this change) |
 | ADR-018 | Transactional email: Brevo, through the existing provider-independent service | #44 | Code exists; account and DNS steps for the owner |
 | ADR-019 | Browser sessions in an httpOnly cookie with CSRF defence; password reset by email | #49, plan TS-10 | Built: cookie (PRs #103 to #105) and password reset |
-| ADR-020 | Files: S3-compatible object storage behind an adapter; ClamAV scanning; uploads refused where no scanner is configured | Plan TS-06 | One PR to follow |
+| ADR-020 | Files: S3-compatible object storage behind an adapter; ClamAV scanning; uploads refused where no scanner is configured | Plan TS-06 | Built (API); owner: bucket, key, `clamd` |
 | ADR-021 | Code execution: self-hosted Judge0 CE on an isolated host; scoring stays refused until it runs; ratify the referee-endorsed skill rule from PR #43 | #49 | Adapter PR after the host exists |
 | ADR-022 | Split `server.ts` into per-module Fastify plugins, one module per PR, no behaviour change | Plan TS-12 | Later, after P0 |
 | ADR-023 | Course completion stays unverified evidence; its certificate is a completion record, not a skill verification | Plan P-02 | One small PR to follow |
@@ -175,7 +175,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 
 ### ADR-020 — Files: S3-compatible object storage behind an adapter, with malware scanning (plan TS-06)
 
-- **Status:** Accepted 2026-11-26 (delegated). Implementation: one PR (adapter, `files` table, upload route), with no vendor SDK.
+- **Status:** Accepted 2026-11-26 (delegated). Built (API): adapter, `files` table and upload routes, with no vendor SDK. No screen uses them yet; the import slice (TS-08) is the first.
 - **Context:** there is no upload route. Resumes, imports, profile photos and course media all need one.
 
 | Option | Pros | Cons |
@@ -196,6 +196,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
   1. Create the bucket and a customer secret key with access to that bucket only.
   2. Set the storage environment variables.
   3. Add a `clamd` container to the Oracle Compose file. `deploy/` is a protected path, so Claude proposes the change and the owner applies it.
+- **Built:** `apps/api/src/file-storage/object-store.ts` (`LocalDiskObjectStore`; `S3ObjectStore` with SigV4 over `fetch`, checked against the S3 reference signatures), `apps/api/src/file-storage/malware-scanner.ts` (`ClamdScanner`, clamd INSTREAM over TCP), `apps/api/src/file-routes.ts` and migration 00059 (`files`: metadata only). `POST /api/v1/files?purpose=…&name=…` takes the file as the request body with its Content-Type. The rules are in `packages/domain/src/files.ts`: resume PDF or DOCX up to 5 MB, profile photo PNG, JPEG or WebP up to 2 MB, import JSON or CSV up to 2 MB. The first bytes must match the type, and an account keeps at most 50 files. Every upload is scanned when a scanner is set; a deployed API without one answers 503. Outside deployed environments unscanned files are stored marked `not_scanned`. `GET /api/v1/files/:id/url` gives the owner a 5-minute signed link (a presigned S3 URL, or an HMAC-signed API link for local storage); anyone else gets 404. Deleting a file, or erasing the account, removes the row and the object. Settings: `FILE_STORAGE`, `FILE_STORAGE_DIR`, `S3_*`, `CLAMAV_HOST`, `CLAMAV_PORT` (`.env.example`); a half-configured S3 store stops the API at boot. Tests: `tests/unit/files-domain.test.ts`, `tests/integration/files.test.ts`, `tests/pg/files.test.ts`. Not built: an expiry job for unused files, and the `clamd` service in `deploy/oracle` (owner step 3).
 
 ### ADR-021 — Code execution sandbox and scoring trust rules (issue #49)
 

@@ -7,6 +7,7 @@ import { ZodError } from 'zod';
 import {
   isDeployed,
   stripeConfigProblems,
+  fileStorageConfigProblems,
   emailDeliveryConfigured,
   validateServerEnv,
   ServerEnv,
@@ -25,6 +26,13 @@ import {
   type StripeBillingDeps,
 } from './billing-stripe.js';
 import { createStripeGateway, type StripeGateway } from './stripe-gateway.js';
+import { eraseUserFiles, registerFileRoutes } from './file-routes.js';
+import {
+  LocalDiskObjectStore,
+  S3ObjectStore,
+  type ObjectStore,
+} from './file-storage/object-store.js';
+import { ClamdScanner, type MalwareScanner } from './file-storage/malware-scanner.js';
 import {
   concurrentModification,
   createStorage,
@@ -529,6 +537,10 @@ export interface BuildAppOverrides {
    * itself never exits the process.
    */
   onWriterLeaseLost?: () => void;
+  /** Replaces the object store chosen by FILE_STORAGE (ADR-020). */
+  objectStore?: ObjectStore;
+  /** Replaces the scanner chosen by CLAMAV_HOST; null means no scanner. */
+  malwareScanner?: MalwareScanner | null;
 }
 
 export async function buildApp(
@@ -541,6 +553,10 @@ export async function buildApp(
   const stripeProblems = stripeConfigProblems(env);
   if (stripeProblems.length > 0) {
     throw new Error(`Invalid billing configuration: ${stripeProblems.join('; ')}`);
+  }
+  const fileProblems = fileStorageConfigProblems(env);
+  if (fileProblems.length > 0) {
+    throw new Error(`Invalid file storage configuration: ${fileProblems.join('; ')}`);
   }
 
   const app = Fastify({
@@ -10743,6 +10759,7 @@ export async function buildApp(
       searchHistoryByUserId.delete(session.userId);
       await storage.savedJobs.eraseUser(session.userId);
       await storage.passwordResets.eraseUser(session.userId);
+      await eraseUserFiles(fileDeps, session.userId);
       for (const r of salaryReportsByUserId.get(session.userId) || []) {
         salaryReportsById.delete(r.id);
       }
@@ -10967,6 +10984,34 @@ export async function buildApp(
         },
       }
     : undefined;
+  // File uploads (ADR-020): object storage, malware scanning, signed reads.
+  const objectStore: ObjectStore =
+    overrides.objectStore ??
+    (env.FILE_STORAGE === 's3'
+      ? new S3ObjectStore({
+          endpoint: env.S3_ENDPOINT!,
+          region: env.S3_REGION!,
+          bucket: env.S3_BUCKET!,
+          accessKeyId: env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: env.S3_SECRET_ACCESS_KEY!,
+        })
+      : new LocalDiskObjectStore(env.FILE_STORAGE_DIR));
+  const fileDeps = {
+    storage,
+    objectStore,
+    scanner:
+      overrides.malwareScanner !== undefined
+        ? overrides.malwareScanner
+        : env.CLAMAV_HOST
+          ? new ClamdScanner(env.CLAMAV_HOST, env.CLAMAV_PORT)
+          : null,
+    deployed: isDeployed(env),
+    urlSecret: env.TOKEN_SECRET ?? crypto.randomBytes(32).toString('hex'),
+    extractUser,
+    log: app.log,
+  };
+  await registerFileRoutes(app, fileDeps);
+
   if (stripeDeps) {
     await registerStripeBilling(app, stripeDeps);
   } else {
