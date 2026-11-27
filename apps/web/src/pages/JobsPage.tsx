@@ -4,7 +4,15 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { useSession } from '../lib/SessionContext.js';
-import { formatDate, formatSalaryRange, jobTypeLabel, workModeLabel } from '../lib/format.js';
+import {
+  EXPERIENCE_LEVEL_OPTIONS,
+  JOB_TYPE_OPTIONS,
+  experienceLevelLabel,
+  formatDate,
+  formatSalaryRange,
+  jobTypeLabel,
+  workModeLabel,
+} from '../lib/format.js';
 import type { Application, Job } from '../lib/types.js';
 import {
   ButtonLink,
@@ -22,6 +30,8 @@ const WORK_MODE_FILTERS = [
   { value: 'hybrid', label: 'Hybrid' },
   { value: 'onsite', label: 'On-site' },
 ];
+const JOB_TYPE_FILTERS = [{ value: '', label: 'Any type' }, ...JOB_TYPE_OPTIONS];
+const EXPERIENCE_FILTERS = [{ value: '', label: 'Any experience' }, ...EXPERIENCE_LEVEL_OPTIONS];
 
 /** Every posting shown here is a published job from the API — nothing is invented. */
 export const JobsPage: React.FC = () => {
@@ -32,6 +42,8 @@ export const JobsPage: React.FC = () => {
   const [applied, setApplied] = useState<Record<string, string>>({});
   const [query, setQuery] = useState('');
   const [workMode, setWorkMode] = useState('');
+  const [jobType, setJobType] = useState('');
+  const [experience, setExperience] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -68,13 +80,15 @@ export const JobsPage: React.FC = () => {
     return (jobs ?? []).filter(
       (job) =>
         (!workMode || job.workMode === workMode) &&
+        (!jobType || job.jobType === jobType) &&
+        (!experience || job.experienceLevel === experience) &&
         (!q ||
           [job.title, job.location, job.organization?.name ?? '', job.description]
             .join(' ')
             .toLowerCase()
             .includes(q))
     );
-  }, [jobs, query, workMode]);
+  }, [jobs, query, workMode, jobType, experience]);
 
   return (
     <div>
@@ -114,6 +128,22 @@ export const JobsPage: React.FC = () => {
           value={workMode}
           onChange={(e) => setWorkMode(e.target.value)}
           options={WORK_MODE_FILTERS}
+        />
+        <Select
+          id="jobs-type"
+          label="Job type"
+          value={jobType}
+          onChange={(e) => setJobType(e.target.value)}
+          options={JOB_TYPE_FILTERS}
+          data-testid="jobs-type-filter"
+        />
+        <Select
+          id="jobs-experience"
+          label="Experience"
+          value={experience}
+          onChange={(e) => setExperience(e.target.value)}
+          options={EXPERIENCE_FILTERS}
+          data-testid="jobs-experience-filter"
         />
       </div>
 
@@ -172,6 +202,7 @@ export const JobsPage: React.FC = () => {
                   ? null
                   : workModeLabel(job.workMode),
                 jobTypeLabel(job.jobType),
+                experienceLevelLabel(job.experienceLevel),
                 formatSalaryRange(job.salaryRange),
               ].filter(Boolean);
               const myStatus = applied[job.id];

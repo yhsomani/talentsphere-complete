@@ -111,6 +111,20 @@ const JOB_TYPE_LABELS: Record<string, string> = {
 export const workModeLabel = (v?: string) => (v ? (WORK_MODE_LABELS[v] ?? v) : null);
 export const jobTypeLabel = (v?: string) => (v ? (JOB_TYPE_LABELS[v] ?? v) : null);
 
+/** Experience levels a job can ask for (TS-09), in order. */
+export const EXPERIENCE_LEVEL_OPTIONS = [
+  { value: 'fresher', label: 'Fresher' },
+  { value: 'junior', label: 'Junior' },
+  { value: 'mid', label: 'Mid-level' },
+  { value: 'senior', label: 'Senior' },
+];
+export const JOB_TYPE_OPTIONS = Object.entries(JOB_TYPE_LABELS).map(([value, label]) => ({
+  value,
+  label,
+}));
+export const experienceLevelLabel = (v?: string) =>
+  v ? (EXPERIENCE_LEVEL_OPTIONS.find((o) => o.value === v)?.label ?? v) : null;
+
 /** A link safe to render as an anchor: http(s) only, so a stored javascript: URL stays inert. */
 export const safeHref = (url: string | undefined | null): string | undefined =>
   url && /^https?:\/\//i.test(url) ? url : undefined;

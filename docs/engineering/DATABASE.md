@@ -192,6 +192,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00058_password_reset_tokens.sql](../../supabase/migrations/00058_password_reset_tokens.sql) | Creates `password_reset_tokens` (hash, expiry, used time; `user_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-019) |
 | [00059_files.sql](../../supabase/migrations/00059_files.sql) | Creates `files` (owner, purpose, type, size, SHA-256, name, storage key, scan status; `owner_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-020) |
 | [00060_skill_signals.sql](../../supabase/migrations/00060_skill_signals.sql) | Creates `skill_signals` (subject profile, skill, rung, source, status `live`/`superseded`/`revoked`; one live row per source and skill; `subject_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (TS-07) |
+| [00061_job_experience_level.sql](../../supabase/migrations/00061_job_experience_level.sql) | Adds nullable `jobs.experience_level` with a check for `fresher`, `junior`, `mid`, `senior` (TS-09) |
 
 ---
 

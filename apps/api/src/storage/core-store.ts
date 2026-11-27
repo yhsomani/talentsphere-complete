@@ -365,11 +365,13 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       const result = await db.query(
         `INSERT INTO public.jobs
            (id, org_id, title, description, status, location, work_mode, job_type,
-            salary_min_minor, salary_max_minor, salary_currency, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            salary_min_minor, salary_max_minor, salary_currency, created_at, updated_at,
+            experience_level)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $15)
          ON CONFLICT (id) DO UPDATE SET
            title = EXCLUDED.title, description = EXCLUDED.description, status = EXCLUDED.status,
            location = EXCLUDED.location, work_mode = EXCLUDED.work_mode, job_type = EXCLUDED.job_type,
+           experience_level = EXCLUDED.experience_level,
            salary_min_minor = EXCLUDED.salary_min_minor, salary_max_minor = EXCLUDED.salary_max_minor,
            salary_currency = EXCLUDED.salary_currency, updated_at = EXCLUDED.updated_at
          WHERE $14::text IS NULL OR jobs.status::text = $14::text`,
@@ -388,6 +390,7 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
           j.createdAt,
           j.updatedAt,
           op.base ? op.base.status : null,
+          nullable(j.experienceLevel),
         ]
       );
       assertGuardHeld(op.base !== undefined, result);
@@ -988,6 +991,7 @@ export class PgCoreStore implements CoreStore {
         location: r.location ?? '',
         workMode: opt(r.work_mode),
         jobType: opt(r.job_type),
+        experienceLevel: opt(r.experience_level),
         status: r.status,
         requiredSkillIds: skillsByJob.get(r.id) ?? [],
         salaryRange:
