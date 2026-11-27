@@ -127,10 +127,12 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page).toHaveURL(/.*dashboard/);
     await expect(page.locator('h1')).toHaveText('UI Login Candidate');
 
-    // The stored session must be API-issued, never a client-fabricated demo token.
-    const token = await page.evaluate(() => localStorage.getItem('talentsphere_token'));
-    expect(token).toBeTruthy();
-    expect(token?.startsWith('demo_token')).toBe(false);
+    // The session is the API's httpOnly cookie, never a token page script can
+    // read or a client-fabricated demo token (ADR-019).
+    const cookie = (await page.context().cookies()).find((c) => c.name === 'ts_session');
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.value.startsWith('demo_token')).toBe(false);
+    expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();
   });
 
   test('pricing is truthful: free, no card, and paid plans cannot be bought (F-16)', async ({

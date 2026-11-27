@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { spacing } from '@talentsphere/ui';
 import { apiJson, errorMessage } from '../lib/api.js';
-import { getStoredUser, storeSession } from '../lib/session.js';
 import { Button, Notice } from './ui/index.js';
 
 /**
@@ -20,11 +19,8 @@ export const SignOutOtherDevices: React.FC = () => {
     setDone(false);
     setError(null);
     try {
-      const res = await apiJson<{ token: string }>('/api/v1/auth/sign-out-others', {
-        method: 'POST',
-      });
-      const user = getStoredUser();
-      if (user) storeSession(res.token, user);
+      // The API answers with a fresh session cookie for this device (ADR-019).
+      await apiJson('/api/v1/auth/sign-out-others', { method: 'POST' });
       setDone(true);
     } catch (err) {
       setError(errorMessage(err));

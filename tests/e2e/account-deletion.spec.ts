@@ -83,7 +83,7 @@ test.describe('E2E: Delete account from the profile (C-04, K-13)', () => {
     await page.getByTestId('delete-confirm').click();
 
     await expect(page).toHaveURL(/\/$/);
-    expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('talentsphere_user'))).toBeNull();
     const login = await request.post(`${API_BASE}/auth/login`, {
       data: { email: account.email, password: PASSWORD },
     });

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { APIRequestContext, Page } from '@playwright/test';
+import { sessionCookie } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -28,9 +29,9 @@ async function mintSession(page: Page, request: APIRequestContext, label: string
   });
   expect(registered.status()).toBe(201);
   const { token, user } = await registered.json();
+  await page.context().addCookies(sessionCookie(token));
   await page.addInitScript(
     (session: { token: string; user: unknown }) => {
-      localStorage.setItem('talentsphere_token', session.token);
       localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
     },
     { token, user }
@@ -67,7 +68,6 @@ test.describe('NAV: deep links and session transitions', () => {
     await page.getByTestId('account-menu-toggle').click();
     await page.getByTestId('account-menu').getByRole('button', { name: 'Sign out' }).click();
     await expect(page).toHaveURL(/\/login$/);
-    expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();
     expect(await page.evaluate(() => localStorage.getItem('talentsphere_user'))).toBeNull();
 
     // A cleared session must bounce a protected route again. Use a fresh
@@ -266,9 +266,9 @@ test.describe('NAV: the header follows the account, not a fixed list', () => {
     });
     const { token, user } = await registered.json();
     await recruiter.goto('/');
+    await recruiter.context().addCookies(sessionCookie(token));
     await recruiter.evaluate(
       (session: { token: string; user: unknown }) => {
-        localStorage.setItem('talentsphere_token', session.token);
         localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
       },
       { token, user }

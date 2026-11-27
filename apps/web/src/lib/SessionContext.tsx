@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { apiJson, errorMessage } from './api.js';
-import { SESSION_EVENT, TOKEN_KEY, getToken, signOut } from './session.js';
+import { SESSION_EVENT, USER_KEY, hasSession, signOut } from './session.js';
 
 export interface SessionUser {
   id: string;
@@ -54,7 +54,7 @@ const SessionContext = createContext<Session | null>(null);
  */
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<Session['status']>(() =>
-    getToken() ? 'loading' : 'anonymous'
+    hasSession() ? 'loading' : 'anonymous'
   );
   const [user, setUser] = useState<SessionUser | null>(null);
   const [profile, setProfile] = useState<SessionProfile | null>(null);
@@ -62,7 +62,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!getToken()) {
+    if (!hasSession()) {
       setStatus('anonymous');
       setUser(null);
       setProfile(null);
@@ -86,7 +86,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // other failure leaves the session unknown rather than guessed, and
       // keeps the reason (offline, throttled, server fault) to show the user.
       setError(errorMessage(err));
-      setStatus(getToken() ? 'error' : 'anonymous');
+      setStatus(hasSession() ? 'error' : 'anonymous');
     }
   }, []);
 
@@ -94,7 +94,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     void refresh();
     const onSessionChange = () => void refresh();
     const onStorage = (e: StorageEvent) => {
-      if (e.key === TOKEN_KEY) void refresh();
+      if (e.key === USER_KEY) void refresh();
     };
     window.addEventListener(SESSION_EVENT, onSessionChange);
     window.addEventListener('storage', onStorage);

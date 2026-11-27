@@ -1,8 +1,15 @@
-import { clearSession, getToken, peekSessionEnded, rememberSessionEnded } from './session.js';
+import {
+  CSRF_HEADER,
+  clearSession,
+  hasSession,
+  peekSessionEnded,
+  rememberSessionEnded,
+} from './session.js';
 
 /**
- * fetch for authenticated API calls: attaches the session token and gives
- * 401 exactly one meaning.
+ * fetch for authenticated API calls: the browser sends the httpOnly session
+ * cookie, this adds the CSRF header the API requires for cookie-signed writes
+ * (ADR-019), and 401 has exactly one meaning.
  *
  * 401 = the session is no longer valid (expired, revoked, or the API
  * restarted and reissued its signing key). The stale token is cleared and
@@ -17,13 +24,13 @@ import { clearSession, getToken, peekSessionEnded, rememberSessionEnded } from '
  * "wrong credentials", not "dead session".
  */
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
-  const token = getToken();
+  const signedIn = hasSession();
   const headers = new Headers(init.headers);
-  if (token) headers.set('Authorization', `Bearer ${token}`);
+  headers.set(CSRF_HEADER, '1');
 
-  const res = await fetch(input, { ...init, headers });
+  const res = await fetch(input, { credentials: 'same-origin', ...init, headers });
 
-  if (res.status === 401 && token) {
+  if (res.status === 401 && signedIn) {
     // Say why on the sign-in page (another device ended it, it expired, the
     // account was closed) instead of dropping the person there unexplained.
     let reason: string | undefined;

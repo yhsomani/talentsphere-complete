@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { spacing } from '@talentsphere/ui';
 import { ApiError, apiJson, errorMessage } from '../lib/api.js';
-import { getStoredUser, storeSession } from '../lib/session.js';
 import { Button, Input, Notice } from './ui/index.js';
 
 /**
@@ -36,12 +35,11 @@ export const ChangePasswordForm: React.FC = () => {
 
     setBusy(true);
     try {
-      const res = await apiJson<{ token: string }>('/api/v1/auth/password', {
+      // The API answers with a fresh session cookie for this device (ADR-019).
+      await apiJson('/api/v1/auth/password', {
         method: 'POST',
         body: JSON.stringify({ currentPassword: current, newPassword: next }),
       });
-      const user = getStoredUser();
-      if (user) storeSession(res.token, user);
       setCurrent('');
       setNext('');
       setConfirm('');

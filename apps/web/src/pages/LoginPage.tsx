@@ -78,7 +78,7 @@ export const LoginPage: React.FC = () => {
         setError({ message: 'Failed to sign in. Please verify your credentials.' });
         return;
       }
-      storeSession(data.token, data.user);
+      storeSession(data.user);
 
       setSuccess(true);
       setTimeout(() => {

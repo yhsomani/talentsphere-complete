@@ -96,7 +96,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | A-01 | One 13,887-line `server.ts` closure holds most routes | `wc -l apps/api/src/server.ts` | Hard to review, own or test per module; every change touches one file | Split into per-module Fastify plugins with no behavior change (TS-12, **NEEDS OWNER**: big refactor per `CLAUDE.md`) |
 | A-02 | Core reads come from in-memory Maps hydrated at boot (ADR-015) | ARCHITECTURE §6, §13 | One API writer only; boot time grows with data; stale reads after external SQL | New modules read from SQL through dedicated stores (the pattern of `job-alert-store.ts`, `connection-store.ts`); move core reads to SQL before running a second API instance (TPD-05) |
 | A-03 | 184 ephemeral endpoints are live and return `x-talentsphere-durability: ephemeral` | `durability.ts` | A user can create data that disappears | Per module: make durable, or put behind a feature flag that is off in deployed environments (TS-03) |
-| A-04 | Session token in `localStorage`, no refresh flow | ARCHITECTURE §12 | Any XSS reads the token | httpOnly, `SameSite` cookie with CSRF protection (TS-10, **NEEDS OWNER**: security architecture) |
+| A-04 | Session token in `localStorage`, no refresh flow | ARCHITECTURE §12 | Any XSS reads the token | IMPLEMENTED 2026-11-27: httpOnly `SameSite=Lax` cookie with CSRF header and Origin check ([ADR-019](../engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)) |
 | A-05 | A handler timeout does not abort the handler. (Correction 2026-11-26: completion and failure **are** already fenced by the attempts counter and batches fit inside one lease, `apps/worker/src/claim.ts` and `tests/pg/job-claim-fencing.test.ts`; the earlier ARCHITECTURE §18 text was stale.) | ARCHITECTURE §18 | A long-running handler that ignores its bound (imports, parsing, AI) can run twice | Give long-running job kinds an abort signal and their own time bound when they are added (part of TS-08 and TS-11) |
 | A-06 | No file storage or malware scanning | No upload route in `server.ts` | Blocks resumes, imports, photos, course media | Object storage behind an adapter plus scanning (TS-06, **NEEDS OWNER**: new infrastructure) |
 | A-07 | Search is in-process over Maps | ARCHITECTURE §3 | Does not survive a second instance or large data | PostgreSQL full-text search and `pg_trgm`, as SSOT Amendment A.4 already intends |
@@ -638,7 +638,7 @@ flowchart LR
 | Mobile | PWA with service worker (T-009) and install prompt; native wrapper only after `OD-PRD-36` | PROPOSED |
 | Data ownership | Each table has one owning module; cross-module reads go through the owning module's domain function or the skill profile | PROPOSED |
 | API | Versioned `/api/v1`; cursor pagination and `Idempotency-Key` on every create from P1 onward; OpenAPI generated from Zod | PROPOSED (OpenAPI **NEEDS OWNER**) |
-| Authentication | httpOnly cookie; password reset by email; GitHub and Google OIDC sign-in linked to an existing account by verified email | PROPOSED (**NEEDS OWNER**: security architecture) |
+| Authentication | httpOnly cookie; password reset by email; GitHub and Google OIDC sign-in linked to an existing account by verified email | Cookie IMPLEMENTED ([ADR-019](../engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)); reset and OIDC PROPOSED |
 | Authorization | Keep per-handler checks; add an organization-role policy in `packages/domain` (A-09); test cross-tenant access in the PostgreSQL suite | PROPOSED |
 | AI orchestration | One gateway: consent check, `AI_PROHIBITED` check, quota, budget, prompt templates in code, output marked as suggestion; non-AI fallback always | PROPOSED (**NEEDS OWNER**) |
 | Search and recommendation | PostgreSQL FTS plus `pg_trgm` for jobs, people and courses; matching = explained score from the skill profile; embeddings only after a measured relevance gap | PROPOSED |
@@ -839,7 +839,7 @@ Owners: [`quality/SECURITY.md`](../quality/SECURITY.md), [`blueprint/05_SECURITY
 
 | Item | Why now | Status |
 | --- | --- | --- |
-| Session token to httpOnly cookie plus CSRF | Imports and OAuth raise the value of an account | PROPOSED, **NEEDS OWNER** |
+| Session token to httpOnly cookie plus CSRF | Imports and OAuth raise the value of an account | IMPLEMENTED (ADR-019) |
 | Password reset by email | No account recovery exists | Depends on issue #44 |
 | OAuth state and PKCE, token encryption, scope minimization | New provider sign-in | PROPOSED |
 | File pipeline: type sniffing, size and count limits, malware scan, parse in the worker only, no macros, zip-bomb limits | Untrusted uploads | PROPOSED |

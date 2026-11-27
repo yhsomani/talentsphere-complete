@@ -4,7 +4,7 @@
  * crash, duplicate side effects, another account's data on screen).
  */
 import { test, expect } from '@playwright/test';
-import { API_BASE, PASSWORD, registerAccount, useSession } from './fixtures.js';
+import { API_BASE, PASSWORD, registerAccount, sessionCookie, useSession } from './fixtures.js';
 
 const XSS_NAME = '<img src=x onerror="window.__xss=1"> <script>window.__xss=1</script>';
 const uniqueEmail = (label: string) =>
@@ -86,8 +86,8 @@ test.describe('hostile input on sign-up', () => {
 test.describe('session tampering', () => {
   test('a forged token sends the user to sign in and is discarded', async ({ page }) => {
     await page.goto('/privacy');
+    await page.context().addCookies(sessionCookie('forged.not-a-real-token'));
     await page.evaluate(() => {
-      localStorage.setItem('talentsphere_token', 'forged.not-a-real-token');
       localStorage.setItem(
         'talentsphere_user',
         JSON.stringify({ id: 'x', email: 'admin@example.com', roles: ['admin', 'platform_admin'] })
@@ -95,7 +95,7 @@ test.describe('session tampering', () => {
     });
     await page.goto('/admin');
     await expect(page).toHaveURL(/\/login/);
-    expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('talentsphere_user'))).toBeNull();
   });
 });
 
