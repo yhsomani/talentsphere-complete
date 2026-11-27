@@ -1,6 +1,6 @@
 # Architecture decision records
 
-> **Status.** As-built decisions (ADR-015, ADR-016) and the decisions the owner delegated on 2026-11-26 (ADR-017 to ADR-029). ADR-015 is ratified by ADR-017.
+> **Status.** As-built decisions (ADR-015, ADR-016) and the decisions the owner delegated on 2026-11-26 (ADR-017 to ADR-029) and the free-tier service picks (ADR-030, 2026-11-27). ADR-015 is ratified by ADR-017.
 >
 > **What this file holds.** Decisions about built behaviour. `ARCHITECTURE.md` holds the decision register; this file keeps the full ADR text.
 >
@@ -118,6 +118,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-027 | Launch free-only; Stripe stays wired and disabled | #50 | Already the default (`BILLING_MODE=disabled`) |
 | ADR-028 | `min_cohort_k` = 10 distinct people for every published aggregate | C-8 | Salary built; review aggregates before un-parking |
 | ADR-029 | AI output quality follows the SSOT wording (capability-specific evaluation, no universal threshold) | C-22 | Registry corrected (this change) |
+| ADR-030 | Free-tier services for the pilot, picked from the Free for Developers list | ADR-018, 020, 021, 025, 027 | Documentation; sign-ups are owner steps |
 
 ### ADR-017 — Ratify ADR-015: Fastify and PostgreSQL are the architecture of record (issue #46)
 
@@ -318,3 +319,35 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | SSOT wording | Each AI feature is gated by its own evaluation set (plan §17.1) and falls back to non-AI | Each feature needs its own gate |
 
 - **Decision:** the SSOT wording. The registry rows BR-065 and BR-066 now carry it, BR-208 cites SSOT §15.10, and BR-35 cites SSOT §10.19.
+
+### ADR-030 — Free-tier services for the pilot (Free for Developers list)
+
+- **Status:** Accepted 2026-11-27 (delegated). Documentation only: no code, dependency or `deploy/` change is made by this record.
+- **Context:** ADR-027 launches free-only, so every service the pilot runs on must have a free tier. The owner shared the [Free for Developers](https://free-for.dev/) list ([source README](https://github.com/ripienaar/free-for-dev), read 2026-11-27). The limits below are as that list states them; providers change them, so check each provider's own pricing page at sign-up.
+- **Rules applied:** keep ADR-018, ADR-020, ADR-021 and ADR-025 unless a free tier gives a clear gain. Prefer services we run ourselves on the Oracle host over a new processor of personal data (conservative privacy). Never pick a tier that is free only for non-commercial use. Never pick a tier that needs a card unless the owner chooses it (conservative money).
+
+| Need | Pick | Free tier (as listed) | Why, and what was rejected |
+| --- | --- | --- | --- |
+| API, worker and web hosting | **Oracle Cloud Always Free** (ADR-025, unchanged) | 2 Arm Ampere A1 cores and 12 GB, usable as one or two VMs; 2 AMD VMs of 1 GB; 200 GB block volume; 10 TB egress a month | `deploy/oracle` already targets it. Web, API and worker stay on one origin, which the `ts_session` cookie (ADR-019, `SameSite=Lax`, path `/api`) relies on. Rejected: Render, Koyeb (512 MB) and Netlify, Vercel or Cloudflare Pages for the web app, because they split the origin or sleep. **Risk:** Oracle reclaims Always Free instances it deems idle. |
+| PostgreSQL | **PostgreSQL 16 in `deploy/oracle/compose.yaml` on the Arm VM** (ADR-025, unchanged) | Uses the VM's block volume | No new processor; the hosted Supabase path is blocked by the migration gate in `deploy/oracle/NEW_SUPABASE_PROJECT.md`. Rejected: Neon (0.5 GB a project, scales to zero after 5 minutes, which breaks the API's boot-hydrated read model and advisory-lock writer lease), Aiven (1 GB storage), Koyeb (one small database), CockroachDB (a different engine with a PostgreSQL wire protocol; the 57 migrations are untested on it). Oracle's free databases are not PostgreSQL. |
+| File storage and backups | **Oracle Object Storage** (ADR-020, unchanged) | 10 GB | Same cloud as the host; S3-compatible, so the planned SigV4 adapter works. 10 GB is shared with ADR-025's backups, so keep backup retention as set there and watch usage. Fallbacks, configuration only: Cloudflare R2 (10 GB a month, no egress fees) or Backblaze B2 (10 GB). Rejected: Uploadcare and Cloudinary (media processors holding resumes), Supabase Storage (ADR-020). |
+| Transactional email | **Brevo** (ADR-018, unchanged) | 300 emails a day, 9,000 a month | Adapter built and contract-tested. Next-best free tiers if Brevo fails: Mailjet (200 a day), Mailtrap (150 a day), Resend (100 a day, one domain); each needs a new adapter. Rejected: Postmark (100 a month), MailerSend (500 a month), Amazon SES (free only for 6 months). |
+| `privacy@` and `security@` inboxes (ADR-024) | **Cloudflare Email Routing** (part of the free Application Services plan) | Free forwarding to an existing mailbox | Gives monitored addresses on the product domain with no mailbox to run. Alternative: ImprovMX. |
+| DNS, TLS, CDN | **Cloudflare free plan, DNS only at first** | Unlimited domains, DNS, DDoS protection, CDN, SSL, WAF, 1 rate-limit rule a domain | Caddy keeps issuing the TLS certificate. The proxy ("orange cloud") stays off for the pilot, because a proxy terminates TLS and would see every request's personal data; turn it on only for a DDoS need, and list Cloudflare in the privacy policy first. |
+| Code execution (judging) | **Self-hosted Judge0 CE** (ADR-021, unchanged), on a second Arm VM carved from the Always Free allowance | Splits the 2 A1 cores and 12 GB into two VMs | Candidate code stays with us. **Unverified:** whether Judge0 CE runs on Arm (its published images may be x86-64 only), and the 1 GB AMD VMs are too small. Test this first. If it does not run, scoring stays refused, which is today's behaviour, and the host becomes a paid decision for the owner. Rejected: hosted compilers (JDoodle 200 credits a day, OnlineCompiler.io 100,000 runs a month), because candidate code and hidden tests would leave our systems. |
+| Uptime and job monitoring | **UptimeRobot** for `/ready` and the web origin; **healthchecks.io** as a dead-man's switch for the nightly backup | UptimeRobot: 50 monitors, 5-minute checks. healthchecks.io: 20 checks | No personal data leaves; no code change. The backup ping is one `curl` line in `deploy/oracle/backup.sh` (protected path, the owner applies it). Alternative: Better Stack (10 monitors, 3-minute checks, status page). |
+| Error tracking | **Sentry, EU data region, off by default** | 5,000 errors a month, 1 user | Largest free tier with a Node and React SDK. It is a new processor of personal data, so: no DSN means it stays off; `sendDefaultPii: false` and the same redaction as `packages/observability`; listed in the draft privacy policy before it is turned on. Adding the SDK changes `package.json`, a protected build file, so it is a separate PR after the owner's go. Alternative: GlitchTip (Sentry SDK compatible, 1,000 events a month, or self-hosted). |
+| Logs and metrics | **Stay on the host** for the pilot: Docker logs with rotation, Pino redaction, the admin health endpoint | — | One host does not need a log service, and none of these sees personal data. Revisit at a second host: Grafana Cloud (50 GB logs, 14 days, 10,000 metric series) first, then Axiom or OpenObserve. |
+| CI | **GitHub Actions** (unchanged, `.github/workflows/ci.yml`) | Included with GitHub; the list gives no minute figure, so check the account's billing page for private-repository minutes | Already runs lint, typecheck, unit, PostgreSQL and e2e jobs. |
+| Analytics | **No third-party analytics** for the pilot | — | The pilot metric (`ns.evidence_backed_conversations`) is counted from our own records. If page views are needed later, prefer Cloudflare Web Analytics (cookieless) or self-hosted Umami. Rejected: GoatCounter hosted (non-commercial only), PostHog and Amplitude (behavioural tracking of candidates needs consent and a policy update). |
+| Search | **PostgreSQL full-text search** when a search feature needs it | — | Candidate profiles stay in our database. Rejected: Algolia (1M documents, 10,000 searches a month), because profile data would be copied to a third party. |
+
+- **What changes:** nothing in the running system. This record adds Cloudflare (DNS and email routing), UptimeRobot, healthchecks.io and, later and opt-in, Sentry. Everything else confirms an earlier ADR.
+- **Steps only the owner can run:**
+  1. Oracle: decide whether to upgrade the account to pay-as-you-go. That removes idle reclamation and still bills nothing inside the Always Free limits, but it puts a card on the account. Without it, an uptime monitor alone may not prevent reclamation.
+  2. Oracle: split the A1 allowance into an app VM and a runner VM, then try Judge0 CE on the runner VM (ADR-021).
+  3. Register the product domain and add it to Cloudflare (free plan). Keep records DNS-only. Add Brevo's SPF and DKIM and the DMARC record there (ADR-018).
+  4. Turn on Cloudflare Email Routing for `privacy@` and `security@`, forwarding to a monitored mailbox, then set `VITE_PRIVACY_EMAIL` and `VITE_SECURITY_EMAIL` (ADR-024).
+  5. Create a Brevo account (ADR-018) and the Oracle Object Storage bucket (ADR-020).
+  6. Create an UptimeRobot account with monitors on `https://<domain>/ready` and `https://<domain>/`, and a healthchecks.io check for the nightly backup; add its ping URL to `backup.sh`.
+  7. Later, only when wanted: a Sentry account in the EU region. Ask Claude for the SDK PR after that.
