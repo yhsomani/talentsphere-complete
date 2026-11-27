@@ -206,7 +206,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 290 literal registrations, 287 unique method/path pairs; 124 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 124 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27), the skill profile route with migration 00060 (2026-11-27), and the six portfolio routes with `portfolio-store.ts` over the 00011 tables (plan TS-03, 2026-11-27, no new migration), and the fourteen course, progress and certificate routes with `lms-store.ts` over the 00005 tables and migration 00062 (plan TS-03, 2026-11-27), and the five challenge routes with `challenge-store.ts` over the 00004 tables and migration 00063 (plan TS-03, 2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
+Measured: 290 literal registrations, 287 unique method/path pairs; 133 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 133 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27), the skill profile route with migration 00060 (2026-11-27), and the six portfolio routes with `portfolio-store.ts` over the 00011 tables (plan TS-03, 2026-11-27, no new migration), and the fourteen course, progress and certificate routes with `lms-store.ts` over the 00005 tables and migration 00062 (plan TS-03, 2026-11-27), and the five challenge routes with `challenge-store.ts` over the 00004 tables and migration 00063 (plan TS-03, 2026-11-27), and nine moderation report and appeal routes with `moderation-store.ts` over the 00017 tables and migration 00064 (plan TS-03, 2026-11-27; `POST /api/v1/moderation/scan` keeps no data and stays `E`); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -460,15 +460,15 @@ Measured: 290 literal registrations, 287 unique method/path pairs; 124 of them i
 | `GET /api/v1/search/history` | handler | E |
 | `DELETE /api/v1/search/history` | `ClearSearchHistoryInputSchema` | E |
 | `POST /api/v1/moderation/scan` | `ScanContentInputSchema` | E |
-| `POST /api/v1/moderation/reports` | `CreateModerationReportInputSchema` | E |
-| `GET /api/v1/moderation/reports/my` | handler | E |
-| `GET /api/v1/moderation/reports` | handler | E |
-| `GET /api/v1/moderation/reports/:id` | handler | E |
-| `PATCH /api/v1/moderation/reports/:id/status` | `UpdateModerationReportStatusInputSchema` | E |
-| `POST /api/v1/moderation/reports/:id/resolve` | `ResolveModerationReportInputSchema` | E |
-| `POST /api/v1/moderation/reports/:id/appeal` | `CreateModerationAppealInputSchema` | E |
-| `GET /api/v1/moderation/appeals` | handler | E |
-| `POST /api/v1/moderation/appeals/:id/review` | `ReviewModerationAppealInputSchema` | E |
+| `POST /api/v1/moderation/reports` | `CreateModerationReportInputSchema` || P |
+| `GET /api/v1/moderation/reports/my` | handler || P |
+| `GET /api/v1/moderation/reports` | handler || P |
+| `GET /api/v1/moderation/reports/:id` | handler || P |
+| `PATCH /api/v1/moderation/reports/:id/status` | `UpdateModerationReportStatusInputSchema` || P |
+| `POST /api/v1/moderation/reports/:id/resolve` | `ResolveModerationReportInputSchema` || P |
+| `POST /api/v1/moderation/reports/:id/appeal` | `CreateModerationAppealInputSchema` || P |
+| `GET /api/v1/moderation/appeals` | handler || P |
+| `POST /api/v1/moderation/appeals/:id/review` | `ReviewModerationAppealInputSchema` || P |
 | `POST /api/v1/jobs/saved-searches` | `CreateSavedSearchInputSchema` | P |
 | `GET /api/v1/jobs/saved-searches` | handler | P |
 | `GET /api/v1/jobs/saved-searches/:id` | handler | P |

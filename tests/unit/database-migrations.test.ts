@@ -589,6 +589,27 @@ describe('Challenge skills and submitted status (migration 00063, TS-03)', () =>
     expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
   });
 });
+describe('Moderation people are users (migration 00064, TS-03)', () => {
+  it('re-points every person column of reports and appeals at users, as the RLS policies assume', () => {
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00064_moderation_people_are_users.sql'),
+      'utf8'
+    );
+    for (const [table, column] of [
+      ['moderation_reports', 'reporter_id'],
+      ['moderation_reports', 'resolved_by'],
+      ['moderation_appeals', 'appellant_id'],
+      ['moderation_appeals', 'reviewed_by'],
+    ]) {
+      expect(sql).toContain(`ADD CONSTRAINT ${table}_${column}_fkey`);
+      expect(sql).toMatch(
+        new RegExp(`FOREIGN KEY \\(${column}\\) REFERENCES public\\.users\\(id\\)`)
+      );
+    }
+    expect(sql).not.toMatch(/REFERENCES public\.profiles/);
+    expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');
