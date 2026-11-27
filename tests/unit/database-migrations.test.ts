@@ -628,6 +628,16 @@ describe('Import batches (migration 00065, TS-08)', () => {
     expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
   });
 });
+describe('Career goals (migration 00066, TS-13)', () => {
+  it('creates a closed, owner-keyed table and changes nothing else', () => {
+    const sql = fs.readFileSync(path.resolve('supabase/migrations/00066_career_goals.sql'), 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.career_goals');
+    expect(sql).toContain('user_id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE');
+    expect(sql).toContain('ENABLE ROW LEVEL SECURITY');
+    expect(sql).toContain('REVOKE ALL ON public.career_goals FROM anon, authenticated;');
+    expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');

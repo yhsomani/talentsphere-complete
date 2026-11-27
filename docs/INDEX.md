@@ -116,7 +116,7 @@ Rules for keeping it true: change a diagram in the same commit as the code it de
 
 | Document | Purpose |
 |---|---|
-| [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 65 migrations, lifecycle and hosted/local boundaries, then (appended) the hosted Supabase migration gate. |
+| [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 66 migrations, lifecycle and hosted/local boundaries, then (appended) the hosted Supabase migration gate. |
 | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 279 unique method/path pairs (282 registrations), request-schema locators, response/error semantics and billing retries. |
 | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
 | [`quality/OPERATIONS.md` §10](quality/OPERATIONS.md#10-project-maintenance-tooling) | Windows maintenance scripts and their safety limits. |

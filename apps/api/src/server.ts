@@ -82,6 +82,8 @@ import {
   recordSkillSignals,
   projectSkillProfile,
   explainSkillMatch,
+  normalizeGoalTitle,
+  planCareerGoal,
   type SkillSignal,
   disputeEvidence,
   revokeEvidence,
@@ -395,6 +397,7 @@ import {
   CreateImportInputSchema,
   CommitImportInputSchema,
   ImportTemplateParamsSchema,
+  SetCareerGoalInputSchema,
   UpdateProfileInputSchema,
   CreateEvidenceInputSchema,
   VerifyEvidenceInputSchema,
@@ -2385,6 +2388,60 @@ export async function buildApp(
       return reply.status(200).send({ job, organization: org, requiredSkills: skills });
     }
   );
+
+  // TS-13 career goal (ADR-034): the role a person aims for, the skills live
+  // postings for that role require, how the person's skill profile meets
+  // each, and the one next step per skill. Private to its owner; the plan is
+  // computed on read, so a step is done as soon as its signal lands.
+  const goalView = async (userId: string) => {
+    const goal = await storage.careerGoals.get(userId);
+    if (!goal) return { goal: null, plan: null };
+    const profile = profilesByUserId.get(userId);
+    const plan = planCareerGoal(
+      goal.title,
+      [...jobsById.values()],
+      profile ? skillProfileOf(profile.id) : []
+    );
+    return {
+      goal: { title: goal.title, createdAt: goal.createdAt, updatedAt: goal.updatedAt },
+      plan: {
+        ...plan,
+        skills: plan.skills.map((entry) => ({
+          ...entry,
+          name: skillsById.get(entry.skillId)?.name ?? null,
+          sources: entry.sources.map((source) => ({
+            ...source,
+            title:
+              source.sourceModule === 'evidence'
+                ? (evidenceById.get(source.sourceRef)?.title ?? null)
+                : null,
+          })),
+        })),
+      },
+    };
+  };
+
+  app.get('/api/v1/goals/mine', async (req: FastifyRequest) => {
+    const session = extractUser(req);
+    return goalView(session.userId);
+  });
+
+  app.put('/api/v1/goals/mine', async (req: FastifyRequest) => {
+    const session = extractUser(req);
+    const input = SetCareerGoalInputSchema.parse(req.body);
+    await storage.careerGoals.set(
+      session.userId,
+      normalizeGoalTitle(input.title),
+      new Date().toISOString()
+    );
+    return goalView(session.userId);
+  });
+
+  app.delete('/api/v1/goals/mine', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    await storage.careerGoals.clear(session.userId);
+    return reply.status(204).send();
+  });
 
   // TS-13 explained match: how the signed-in person's skill profile meets this
   // posting's required skills, skill by skill, naming the records each rests
@@ -11036,6 +11093,7 @@ export async function buildApp(
       skillEndorsementsByRecipientId.delete(session.userId);
       await storage.savedSearches.eraseUser(session.userId);
       await storage.jobAlerts.eraseUser(session.userId);
+      await storage.careerGoals.eraseUser(session.userId);
       // The person's own records in the remaining in-memory stores (K-12).
       // Application drafts are keyed by PROFILE id and read only by their owner.
       await storage.applicationDrafts.eraseCandidate(profile.id);
