@@ -30,6 +30,7 @@ import { eraseUserFiles, registerFileRoutes } from './file-routes.js';
 import { registerSkillRoutes } from './skill-routes.js';
 import { registerImportRoutes } from './import-routes.js';
 import { registerSavedJobRoutes } from './saved-job-routes.js';
+import { registerPortfolioRoutes } from './portfolio-routes.js';
 import {
   LocalDiskObjectStore,
   S3ObjectStore,
@@ -160,10 +161,6 @@ import {
   areConnected,
   getConnectionBetween,
   PortfolioProject,
-  createPortfolioProject,
-  updatePortfolioProject,
-  assertPortfolioLinks,
-  canViewPortfolioProject,
   Badge,
   UserBadge,
   GamificationProfile,
@@ -410,8 +407,6 @@ import {
   ExportResumeInputSchema,
   RequestConnectionInputSchema,
   RespondConnectionInputSchema,
-  CreatePortfolioProjectInputSchema,
-  UpdatePortfolioProjectInputSchema,
   ClaimGamificationActivityInputSchema,
   GetLeaderboardQuerySchema,
   UpdateUserSettingsInputSchema,
@@ -9952,200 +9947,20 @@ export async function buildApp(
   // rebuilt at boot (plan TS-03).
   const portfolioProjectsById = new Map<string, PortfolioProject>();
   const portfolioProjectsByUserId = new Map<string, PortfolioProject[]>();
-  const portfolioLinkCheck = (userId: string) => {
-    const profileId = profilesByUserId.get(userId)?.id;
-    return {
-      isSkill: (id: string) => skillsById.has(id),
-      ownsEvidence: (id: string) =>
-        profileId !== undefined && evidenceById.get(id)?.subjectId === profileId,
-    };
-  };
-
-  app.post('/api/v1/portfolio/projects', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = CreatePortfolioProjectInputSchema.parse(req.body || {});
-
-    const project = createPortfolioProject(session.userId, input);
-    assertPortfolioLinks(project, portfolioLinkCheck(session.userId));
-    await storage.portfolio.save(project);
-    portfolioProjectsById.set(project.id, project);
-
-    const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
-    userProjects.push(project);
-    portfolioProjectsByUserId.set(session.userId, userProjects);
-
-    await dispatchJob({
-      type: 'portfolio.project.created',
-      payload: {
-        userId: session.userId,
-        projectId: project.id,
-        title: project.title,
-        visibility: project.visibility,
-      },
-      enqueuedAt: project.createdAt,
-    });
-
-    return reply.status(201).send({ project });
+  // Routes: apps/api/src/portfolio-routes.ts (ADR-022, plan TS-12).
+  registerPortfolioRoutes(app, {
+    storage,
+    extractUser,
+    maybeExtractUser,
+    dispatchJob,
+    portfolioProjectsById,
+    portfolioProjectsByUserId,
+    connectionsByUserId,
+    profilesById,
+    profilesByUserId,
+    evidenceById,
+    skillsById,
   });
-
-  app.get('/api/v1/portfolio/projects', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
-    return reply.status(200).send({ projects: userProjects });
-  });
-
-  app.get(
-    '/api/v1/portfolio/projects/:id',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const { id } = req.params;
-      const project = portfolioProjectsById.get(id);
-      if (!project) {
-        throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
-      }
-
-      const viewer = maybeExtractUser(req);
-      const viewerUserId: string | undefined = viewer?.userId;
-      const viewerRoles: Role[] | undefined = viewer?.roles;
-
-      const userConnections = viewerUserId ? connectionsByUserId.get(viewerUserId) || [] : [];
-      const isConnected = viewerUserId
-        ? areConnected(userConnections, viewerUserId, project.userId)
-        : false;
-
-      if (
-        !canViewPortfolioProject(project, { userId: viewerUserId, roles: viewerRoles, isConnected })
-      ) {
-        throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
-      }
-
-      return reply.status(200).send({ project });
-    }
-  );
-
-  app.patch(
-    '/api/v1/portfolio/projects/:id',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-
-      const project = portfolioProjectsById.get(id);
-      if (!project) {
-        throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
-      }
-
-      if (project.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
-      }
-
-      const input = UpdatePortfolioProjectInputSchema.parse(req.body || {});
-      // Update a copy: the read model changes only after the write is stored.
-      const updated = updatePortfolioProject(
-        { ...project, skillIds: [...project.skillIds], evidenceIds: [...project.evidenceIds] },
-        input
-      );
-      assertPortfolioLinks(updated, portfolioLinkCheck(session.userId));
-      await storage.portfolio.save(updated);
-      portfolioProjectsById.set(updated.id, updated);
-
-      const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
-      const idx = userProjects.findIndex((p) => p.id === updated.id);
-      if (idx !== -1) {
-        userProjects[idx] = updated;
-        portfolioProjectsByUserId.set(session.userId, userProjects);
-      }
-
-      await dispatchJob({
-        type: 'portfolio.project.updated',
-        payload: {
-          userId: session.userId,
-          projectId: updated.id,
-        },
-        enqueuedAt: updated.updatedAt,
-      });
-
-      return reply.status(200).send({ project: updated });
-    }
-  );
-
-  app.delete(
-    '/api/v1/portfolio/projects/:id',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-
-      const project = portfolioProjectsById.get(id);
-      if (!project) {
-        throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
-      }
-
-      if (project.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
-      }
-
-      await storage.portfolio.remove(id);
-      portfolioProjectsById.delete(id);
-
-      const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
-      portfolioProjectsByUserId.set(
-        session.userId,
-        userProjects.filter((p) => p.id !== id)
-      );
-
-      await dispatchJob({
-        type: 'portfolio.project.removed',
-        payload: {
-          userId: session.userId,
-          projectId: id,
-        },
-        enqueuedAt: new Date().toISOString(),
-      });
-
-      return reply.status(200).send({
-        message: 'Portfolio project deleted successfully',
-        deletedId: id,
-      });
-    }
-  );
-
-  app.get(
-    '/api/v1/portfolio/showcase/:targetUserId',
-    async (req: FastifyRequest<{ Params: { targetUserId: string } }>, reply: FastifyReply) => {
-      let { targetUserId } = req.params;
-      const targetProfile = profilesById.get(targetUserId);
-      if (targetProfile) {
-        targetUserId = targetProfile.userId;
-      }
-
-      const viewer = maybeExtractUser(req);
-      const viewerUserId: string | undefined = viewer?.userId;
-      const viewerRoles: Role[] | undefined = viewer?.roles;
-
-      const userConnections = viewerUserId ? connectionsByUserId.get(viewerUserId) || [] : [];
-      const isConnected = viewerUserId
-        ? areConnected(userConnections, viewerUserId, targetUserId)
-        : false;
-
-      const allProjects = portfolioProjectsByUserId.get(targetUserId) || [];
-      const visibleProjects = allProjects.filter((p) =>
-        canViewPortfolioProject(p, { userId: viewerUserId, roles: viewerRoles, isConnected })
-      );
-
-      visibleProjects.sort((a, b) => {
-        if (a.featured !== b.featured) {
-          return a.featured ? -1 : 1;
-        }
-        if (a.orderIndex !== b.orderIndex) {
-          return a.orderIndex - b.orderIndex;
-        }
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
-
-      return reply.status(200).send({
-        projects: visibleProjects,
-        totalCount: visibleProjects.length,
-      });
-    }
-  );
 
   // Gamification & XP Ledger Repositories & Endpoints (F-22, F-23, BR-25, WF-11)
   const gamificationProfilesByUserId = new Map<string, GamificationProfile>();

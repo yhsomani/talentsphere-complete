@@ -238,8 +238,14 @@ describe('Dispatch kind drift guard (server.ts ↔ DISPATCH_EVENT_KINDS)', () =>
     path.join(repoRoot, 'apps/api/src/billing-stripe.ts'),
     'utf8'
   );
+  // Route modules moved out of server.ts (ADR-022) receive dispatchJob as a
+  // dependency and call it by the same name.
+  const routeModuleSource = ['apps/api/src/portfolio-routes.ts']
+    .map((file) => fs.readFileSync(path.join(repoRoot, file), 'utf8'))
+    .join('\n');
   const emittedKinds = [
     ...[...serverSource.matchAll(/await dispatchJob\(\{\s*type: '([^']+)'/g)].map((m) => m[1]),
+    ...[...routeModuleSource.matchAll(/await dispatchJob\(\{\s*type: '([^']+)'/g)].map((m) => m[1]),
     ...[...stripeBillingSource.matchAll(/await deps\.dispatchJob\(\{\s*type: '([^']+)'/g)].map(
       (m) => m[1]
     ),
