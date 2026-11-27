@@ -121,6 +121,9 @@ export const SkillsSection: React.FC = () => {
         <h2 style={{ fontSize: '1.125rem' }}>Skills</h2>
         <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
           The skills you list, and the skills that go with each one.{' '}
+          <Link to="/goal" data-testid="goal-link">
+            Set a goal and see what open postings ask for.
+          </Link>{' '}
           <Link to="/career">See how ready you are for a role.</Link>
         </p>
         {/* K-19: skills live in server memory until durable storage lands. */}

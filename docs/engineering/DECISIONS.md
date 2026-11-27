@@ -122,6 +122,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-031 | Free security and launch checks (CodeQL, Dependabot, launch scans, mail checks, Pwned Passwords) | Full list review | Settings and checks for the owner; Pwned Passwords PR to follow |
 | ADR-032 | Organization roles decide what a member may do: owners and admins run the organization, recruiters post jobs, hiring managers review candidates, plain members only see jobs | CF-14, CF-45, plan TS-04 | Built (`packages/domain/src/org-roles.ts`) |
 | ADR-033 | Import v1 takes the file's text in the request, parses it in the API and keeps only the parsed entries; entries become unverified claims (roles as work history, the rest as self-declared evidence); undo within 7 days unless a record has been used | plan TS-08, FR-PRF-019 | Built (`packages/domain/src/imports.ts`, migration 00065, `apps/web/src/pages/ImportPage.tsx`) |
+| ADR-034 | Career goal v1: a person names a target role; the skills it needs come from live published postings with that title, not invented templates; the gap list and one next step per skill are computed on read from the skill profile; no score | plan TS-13, §6.5 | Built (`packages/domain/src/career-goals.ts`, migration 00066, `apps/web/src/pages/GoalPage.tsx`) |
 
 ### ADR-017 — Ratify ADR-015: Fastify and PostgreSQL are the architecture of record (issue #46)
 
@@ -434,3 +435,32 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
   - Imported roles report `importedFrom` on the work-history read; imported evidence carries its provenance (case 7).
 - **Not in v1:** projects, languages and profile basics; "replace" in the diff; skill aliases (the skill must match a canonical name or slug). PDF, DOCX, LinkedIn ZIP and GitHub (TS-11) will use the file service and the worker, as §6.2 describes.
 - **Verification:** `tests/unit/imports-domain.test.ts`, `tests/integration/imports.test.ts` (parse, privacy, problems, confirm with an edit, re-import duplicates, cancel, undo and its in-use refusal, templates and error messages), `tests/pg/imports.test.ts` (review, confirm and undo across restarts, boot purge of a lapsed import, erasure), the unit migration test for 00065, `tests/e2e/profile-import.spec.ts`, and Reticle runs on real Postgres of review, confirm, the source label after an API restart, and undo.
+
+### ADR-034 — Career goal v1: a target role whose skills come from live postings (plan TS-13)
+
+- **Status:** Accepted 2026-11-27 (delegated). Conservative on honesty: nothing is shown that the data does not support, and no score is computed.
+- **Context:** TS-13 asks for goals, gaps and explained matching from the skill profile (§6.5: pick a target role, required skills, compare, gap list with a reason, steps that name the signal they produce, a step completes when its signal lands). The explained job match shipped first (PR #119). The existing `/career` readiness screen scores five hard-coded role titles against generic requirements.
+
+**Where a role's required skills come from**
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| Role templates written by us | Works with no postings | Invented requirements presented as fact; someone has to keep them current |
+| Live published postings whose title matches | Real demand; each skill comes with its reason ("asked for by 3 of 4 postings"); nothing to maintain | Thin while few employers post; title matching is simple |
+| The person picks the skills | No data needed | No market signal; it only restates the profile |
+
+**What is stored**
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| Goal, gaps and plan steps as rows | An editable plan | Steps go stale when postings or evidence change; needs a projector |
+| Only the goal title; gaps and steps computed on read | Always current; a step is done as soon as its signal lands, by construction; one tiny private table | The plan cannot be edited yet |
+
+- **Decision:** live postings, and store only the goal. Details:
+  - One goal per person: a role title of 2 to 80 characters (`career_goals`, migration 00066). It is private to its owner, never shown to employers, and deleted on erasure.
+  - A posting matches when it is published and its title holds every word of the goal, case-insensitive. The listed skills are those any matching posting requires, most asked-for first, at most 15. Each carries `requiredBy` (how many matching postings ask for it).
+  - Each skill's status comes from `explainSkillMatch` (the same rule as the job match). The one next step is: not shown → add evidence (produces a self-reported signal); self-reported only → get it reviewed (produces a `peer_reviewed` or higher signal); checked by someone else → done.
+  - When no posting matches, the screen says so and lists nothing. Nothing is invented to fill the gap.
+  - New-module rule TPD-05: the store reads SQL directly; there is no in-memory read model.
+- **Not in v1:** editing the plan (§6.5 "user edits plan"), several goals, role templates, aliases or seniority handling in title matching, and recommendations of courses or challenges for a step.
+- **Verification:** `tests/unit/career-goals-domain.test.ts`, `tests/integration/career-goals.test.ts` (ranking by demand, a step moving on when evidence lands, is verified and is revoked, privacy, validation, clear), `tests/pg/career-goals.test.ts` (restarts, replace keeps the first-set time, clear, erasure), the unit migration test for 00066, `tests/e2e/career-goal.spec.ts`, and Reticle runs on real Postgres of setting a goal and of the goal and gap list after an API restart.

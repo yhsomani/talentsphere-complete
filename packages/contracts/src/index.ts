@@ -179,6 +179,11 @@ export const CommitImportInputSchema = z.object({
 export type CommitImportInput = z.infer<typeof CommitImportInputSchema>;
 
 /** Which CSV template to download (ADR-033). */
+// Career goal v1 (plan TS-13, ADR-034): the role title a person aims for.
+export const SetCareerGoalInputSchema = z
+  .object({ title: z.string().trim().min(2).max(80) })
+  .strict();
+
 export const ImportTemplateParamsSchema = z.object({
   source: z.enum(['csv_positions', 'csv_education', 'csv_skills', 'csv_certifications']),
 });

@@ -21,6 +21,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 | [erasure-store.ts](../../apps/api/src/storage/erasure-store.ts) | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
 | [saved-search-store.ts](../../apps/api/src/storage/saved-search-store.ts) | `saved_searches` owned by user | Owner-scoped CRUD |
 | [job-alert-store.ts](../../apps/api/src/storage/job-alert-store.ts) | `job_alerts` joins user, saved search and job | Alerts from one publish are inserted in one statement; an alert whose saved search was deleted meanwhile is skipped. Owner-scoped list and mark-read; erasure deletes the owner's rows |
+| [career-goal-store.ts](../../apps/api/src/storage/career-goal-store.ts) | `career_goals`, one per user (00066) | SQL is the source of truth (no read model, TPD-05). Owner-scoped get, set (replace keeps when it was first set) and clear; erasure deletes the row |
 | [file-store.ts](../../apps/api/src/storage/file-store.ts) | `files` owned by user (cascade on account delete) | Metadata only; the bytes are in the `ObjectStore` under `storage_key`. Erasure deletes the rows and then the objects (ADR-020) |
 | [password-reset-store.ts](../../apps/api/src/storage/password-reset-store.ts) | `password_reset_tokens` owned by user (cascade on account delete) | Only token hashes. `claim` marks a token used in one statement, so a link works once; erasure deletes the rows (ADR-019) |
 | [saved-job-store.ts](../../apps/api/src/storage/saved-job-store.ts) | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
@@ -201,6 +202,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00063_challenge_skills_and_submitted_status.sql](../../supabase/migrations/00063_challenge_skills_and_submitted_status.sql) | Adds `challenge_skills` (closed to client roles) and allows `submitted` in `challenge_submissions.status`, the only status the evaluator gives while code is not executed (TS-03) |
 | [00064_moderation_people_are_users.sql](../../supabase/migrations/00064_moderation_people_are_users.sql) | Re-points `moderation_reports.reporter_id`/`resolved_by` and `moderation_appeals.appellant_id`/`reviewed_by` from `profiles` to `users`, as the API writes and the 00017 RLS policies assume (as 00043 did for work history; TS-03) |
 | [00065_import_batches.sql](../../supabase/migrations/00065_import_batches.sql) | Creates `import_batches` (owner user, source, status `ready_for_review`/`applied`/`undone`, parsed entries as JSONB, review and undo windows; `owner_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated`. The raw file is not stored (ADR-033, TS-08) |
+| [00066_career_goals.sql](../../supabase/migrations/00066_career_goals.sql) | Creates `career_goals` (one row per user, the target role title; `user_id` is the key and cascades); RLS enabled with no client policy; revokes `anon`/`authenticated`. The gap list and steps are computed on read and not stored (ADR-034, TS-13) |
 
 ---
 

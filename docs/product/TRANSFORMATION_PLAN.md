@@ -669,7 +669,7 @@ flowchart LR
 
 ## 9. Database and API recommendations
 
-The current schema (65 migrations, 117 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
+The current schema (66 migrations, 118 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
 
 ### 9.1 Principles
 
@@ -945,8 +945,8 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-09 | Experience band on jobs; job-type and band filters on the jobs screen | — | Contract and e2e tests | T-028 | IMPLEMENTED (migration 00061; `tests/e2e/job-filters.spec.ts`) |
 | TS-10 | Session cookie and password reset | Issue #44 | Token not readable by page script; reset e2e | T-029 | IMPLEMENTED (ADR-019; reset emails reach people once live email is set up) |
 | TS-11 | Import v2: resume PDF and DOCX parser, LinkedIn export ZIP, GitHub OAuth | TS-08, TS-10 | §10.4 cases 1, 3, 4, 6, 8 | T-030 | PROPOSED |
-| TS-12 | Split `server.ts` into module plugins, no behavior change | — | All suites pass unchanged | T-031 | **NEEDS OWNER** |
-| TS-13 | Goals, gaps and explained matching from the profile | TS-07 | §6.5 flow e2e; explanation names signals | T-032 | IN_PROGRESS: explained job match built (`GET /api/v1/jobs/:id/match`, job page); goals and gap plan next |
+| TS-12 | Split `server.ts` into module plugins, no behavior change | — | All suites pass unchanged | T-031 | Decided ([ADR-022](../engineering/DECISIONS.md#adr-022--split-appsapisrcserverts-into-per-module-plugins-plan-ts-12)): one module per PR; not started |
+| TS-13 | Goals, gaps and explained matching from the profile | TS-07 | §6.5 flow e2e; explanation names signals | T-032 | IMPLEMENTED: explained job match (`GET /api/v1/jobs/:id/match`, job page) and career goal with gaps and next steps ([ADR-034](../engineering/DECISIONS.md#adr-034--career-goal-v1-a-target-role-whose-skills-come-from-live-postings-plan-ts-13), 00066, `/goal` screen); editing the plan is not built |
 | TS-14 | Isolated code runner and executed challenges | Issue #49 | §6.3 flow; sandbox escape tests | T-013 | **NEEDS OWNER** |
 
 The slices that need no owner input can start now in this order: TS-07, TS-04, TS-09, TS-03, then TS-08 once TS-06 is approved (TS-02 shipped in PR #101; TS-05 turned out to exist already).

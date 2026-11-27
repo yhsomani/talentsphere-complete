@@ -35,6 +35,7 @@ import { VerifyPage } from './pages/VerifyPage.js';
 import { CoursePage } from './pages/CoursePage.js';
 import { CareerPage } from './pages/CareerPage.js';
 import { ImportPage } from './pages/ImportPage.js';
+import { GoalPage } from './pages/GoalPage.js';
 
 // QW-04: authenticated workspaces are reachable only with a session;
 // anyone else is sent to /login with the requested destination preserved in
@@ -74,6 +75,7 @@ export const App: React.FC = () => {
             <Route path="applications" element={guarded(<ApplicationsPage />)} />
             <Route path="evidence" element={guarded(<EvidencePage />)} />
             <Route path="import" element={guarded(<ImportPage />)} />
+            <Route path="goal" element={guarded(<GoalPage />)} />
             <Route path="profile" element={guarded(<ProfilePage />)} />
             <Route path="settings" element={guarded(<SettingsPage />)} />
             <Route path="portfolio" element={guarded(<PortfolioPage />)} />
