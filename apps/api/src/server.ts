@@ -76,6 +76,9 @@ import {
   canSeeEvidenceInternals,
   verifyEvidence,
   deriveEvidenceSignals,
+  ORG_ACTIONS,
+  orgRoleAllows,
+  type OrgAction,
   recordSkillSignals,
   projectSkillProfile,
   type SkillSignal,
@@ -1065,14 +1068,33 @@ export async function buildApp(
    */
   const ERASED_CREDENTIAL = '!erased';
 
-  /** May this session manage the given organization's jobs and pipeline? (BR-12) */
-  const canManageJobs = (
+  /**
+   * May this user, as a member, take this action in the organization? The
+   * member's role decides (ADR-032, `packages/domain/src/org-roles.ts`).
+   * Platform admins are checked separately by each route.
+   */
+  const memberMay = (userId: string, orgId: string, action: OrgAction): boolean =>
+    (orgMembershipsByUserId.get(userId) || []).some(
+      (m) => m.orgId === orgId && orgRoleAllows(m.role, action)
+    );
+
+  /** The organizations where this user may take this action. */
+  const orgIdsWhere = (userId: string, action: OrgAction): Set<string> =>
+    new Set(
+      (orgMembershipsByUserId.get(userId) || [])
+        .filter((m) => orgRoleAllows(m.role, action))
+        .map((m) => m.orgId)
+    );
+
+  /** May this session take this action in the organization? Platform admins may. (BR-12) */
+  const canInOrg = (
     session: { userId: string; roles: Role[] } | null | undefined,
-    orgId: string
+    orgId: string,
+    action: OrgAction
   ): boolean => {
     if (!session) return false;
     if (session.roles.includes('platform_admin')) return true;
-    return (orgMembershipsByUserId.get(session.userId) || []).some((m) => m.orgId === orgId);
+    return memberMay(session.userId, orgId, action);
   };
 
   // Auth Routes
@@ -1613,10 +1635,12 @@ export async function buildApp(
     return notif;
   };
 
-  // The members of an organization, as notification recipients (profile ids).
+  // The members of an organization who review candidates, as notification
+  // recipients (profile ids). Notices name the applicant, so members whose
+  // role cannot see applicants do not get them (ADR-032).
   const orgMemberProfileIds = (orgId: string, exceptUserId?: string): string[] =>
     (orgMembershipsByOrgId.get(orgId) || [])
-      .filter((m) => m.userId !== exceptUserId)
+      .filter((m) => m.userId !== exceptUserId && orgRoleAllows(m.role, 'review_candidates'))
       .map((m) => profilesByUserId.get(m.userId)?.id)
       .filter((id): id is string => Boolean(id));
 
@@ -2123,7 +2147,9 @@ export async function buildApp(
     const organizations = (orgMembershipsByUserId.get(session.userId) || [])
       .map((m) => {
         const org = organizationsById.get(m.orgId);
-        return org ? { ...org, membershipRole: m.role } : null;
+        // What the role allows here, so screens offer only actions that will work.
+        const permissions = ORG_ACTIONS.filter((action) => orgRoleAllows(m.role, action));
+        return org ? { ...org, membershipRole: m.role, permissions } : null;
       })
       .filter(Boolean);
     return reply.status(200).send({ organizations });
@@ -2139,7 +2165,7 @@ export async function buildApp(
       if (!organizationsById.has(id)) {
         throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
       }
-      if (!canManageJobs(session, id)) {
+      if (!canInOrg(session, id, 'view_jobs')) {
         throw new DomainError('FORBIDDEN', 'Only members of this organization can see its jobs.');
       }
       const jobs = [...(jobsByOrgId.get(id) || [])]
@@ -2177,10 +2203,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isOwnerOrAdmin = userMemberships.some(
-        (m) => m.orgId === id && ['owner', 'admin'].includes(m.role)
-      );
+      const isOwnerOrAdmin = memberMay(session.userId, id, 'manage_organization');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isOwnerOrAdmin && !isPlatformAdmin) {
         throw new DomainError('FORBIDDEN', 'Only organization owner or admin can add members.');
@@ -2245,14 +2268,13 @@ export async function buildApp(
     const session = extractUser(req);
     const input = CreateJobInputSchema.parse(req.body);
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isMember = memberMay(session.userId, input.orgId, 'manage_jobs');
     const isAdmin = session.roles.includes('platform_admin');
 
     if (!isMember && !isAdmin) {
       throw new DomainError(
         'FORBIDDEN',
-        'You do not belong to the organization for this job posting (BR-12).'
+        'Only owners, admins and recruiters of this organization can post its jobs (BR-12).'
       );
     }
 
@@ -2328,7 +2350,7 @@ export async function buildApp(
       // hiring organization; to everyone else they do not exist (same 404),
       // so a draft's existence is not disclosed either.
       const viewer = maybeExtractUser(req);
-      if (!job || (job.status !== 'published' && !canManageJobs(viewer, job.orgId))) {
+      if (!job || (job.status !== 'published' && !canInOrg(viewer, job.orgId, 'view_jobs'))) {
         throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
       }
 
@@ -2355,7 +2377,7 @@ export async function buildApp(
       // memberships, never from the job being edited. (Previously the job's
       // own orgId was passed as the actor's, so any recruiter could pause,
       // close or archive any other company's postings.)
-      const actorOrgId = canManageJobs(session, job.orgId) ? job.orgId : undefined;
+      const actorOrgId = canInOrg(session, job.orgId, 'manage_jobs') ? job.orgId : undefined;
       const updated = transitionJobStatus(job, input.status, {
         userId: session.userId,
         roles: session.roles,
@@ -2390,8 +2412,7 @@ export async function buildApp(
     const session = extractUser(req);
     const input = CreateJobTemplateInputSchema.parse(req.body);
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isMember = memberMay(session.userId, input.orgId, 'manage_jobs');
     const isAdmin = session.roles.includes('platform_admin');
 
     if (!isMember && !isAdmin) {
@@ -2467,7 +2488,7 @@ export async function buildApp(
       let templates: JobTemplate[] = [];
 
       if (orgId) {
-        const isMember = userMemberships.some((m) => m.orgId === orgId);
+        const isMember = memberMay(session.userId, orgId, 'view_jobs');
         if (!isMember && !isAdmin) {
           throw new DomainError(
             'FORBIDDEN',
@@ -2505,8 +2526,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isMember = memberMay(session.userId, template.orgId, 'view_jobs');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -2532,8 +2552,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isMember = memberMay(session.userId, template.orgId, 'manage_jobs');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -2615,8 +2634,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isMember = memberMay(session.userId, template.orgId, 'manage_jobs');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -2663,8 +2681,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isMember = memberMay(session.userId, template.orgId, 'manage_jobs');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -2741,8 +2758,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === job.orgId);
+      const isMember = memberMay(session.userId, job.orgId, 'manage_jobs');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -3052,8 +3068,7 @@ export async function buildApp(
       const userProfile = profilesByUserId.get(session.userId);
       const isCandidate = userProfile && userProfile.id === application.candidateId;
       const job = jobsById.get(application.jobId);
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isOrgMember = job && userMemberships.some((m) => m.orgId === job.orgId);
+      const isOrgMember = job && memberMay(session.userId, job.orgId, 'review_candidates');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isCandidate && !isOrgMember && !isAdmin) {
@@ -3080,8 +3095,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === job.orgId);
+      const isMember = memberMay(session.userId, job.orgId, 'review_candidates');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -3139,8 +3153,9 @@ export async function buildApp(
       const isCandidateOwner = candidateProfile?.userId === session.userId;
 
       const job = jobsById.get(application.jobId);
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
+      const isRecruiterForJob = job
+        ? memberMay(session.userId, job.orgId, 'review_candidates')
+        : false;
 
       const updated = transitionApplicationState(
         application,
@@ -3230,8 +3245,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Associated job for application ${id} not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isRecruiterForJob = userMemberships.some((m) => m.orgId === job.orgId);
+      const isRecruiterForJob = memberMay(session.userId, job.orgId, 'review_candidates');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isRecruiterForJob && !isAdmin) {
@@ -3318,8 +3332,9 @@ export async function buildApp(
       const isCandidateOwner = candidateProfile?.userId === session.userId;
 
       const job = jobsById.get(application.jobId);
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
+      const isRecruiterForJob = job
+        ? memberMay(session.userId, job.orgId, 'review_candidates')
+        : false;
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isCandidateOwner && !isRecruiterForJob && !isAdmin) {
@@ -3398,8 +3413,7 @@ export async function buildApp(
       const { orgId } = req.params;
       const input = CreateFeedbackTemplateInputSchema.parse(req.body);
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      const isMember = memberMay(session.userId, orgId, 'manage_jobs');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -3441,8 +3455,7 @@ export async function buildApp(
       const session = extractUser(req);
       const { orgId } = req.params;
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      const isMember = memberMay(session.userId, orgId, 'review_candidates');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isMember && !isAdmin) {
@@ -3536,8 +3549,7 @@ export async function buildApp(
       const isOwner = targetProfile.userId === session.userId;
       const isAdmin = session.roles.includes('platform_admin');
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const recruiterOrgIds = new Set(userMemberships.map((m) => m.orgId));
+      const recruiterOrgIds = orgIdsWhere(session.userId, 'review_candidates');
       const candidateApps = applicationsByCandidateId.get(candidateProfileId) || [];
       const hasAppliedToRecruiterOrg = candidateApps.some((app) => {
         const job = jobsById.get(app.jobId);
@@ -3651,8 +3663,7 @@ export async function buildApp(
     const session = extractUser(req);
     const input = CreateInterviewQuestionInputSchema.parse(req.body);
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isMember = memberMay(session.userId, input.orgId, 'review_candidates');
     const isAdmin = session.roles.includes('platform_admin');
     if (!isMember && !isAdmin) {
       throw new DomainError(
@@ -3710,8 +3721,7 @@ export async function buildApp(
         );
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      const isMember = memberMay(session.userId, orgId, 'review_candidates');
       const isAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isAdmin) {
         throw new DomainError('FORBIDDEN', 'User is not a member of the requested organization.');
@@ -3731,9 +3741,7 @@ export async function buildApp(
   function interviewAccess(session: { userId: string; roles: string[] }, a: InterviewAssessment) {
     const profile = profilesByUserId.get(session.userId);
     const isCandidate = profile !== undefined && profile.id === a.candidateProfileId;
-    const isOrgMember = (orgMembershipsByUserId.get(session.userId) || []).some(
-      (m) => m.orgId === a.orgId
-    );
+    const isOrgMember = memberMay(session.userId, a.orgId, 'review_candidates');
     const isPanel =
       !isCandidate &&
       (isOrgMember ||
@@ -3766,8 +3774,7 @@ export async function buildApp(
     const session = extractUser(req);
     const input = ScheduleInterviewAssessmentInputSchema.parse(req.body);
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isMember = memberMay(session.userId, input.orgId, 'review_candidates');
     const isAdmin = session.roles.includes('platform_admin');
     if (!isMember && !isAdmin) {
       throw new DomainError(
@@ -4334,9 +4341,7 @@ export async function buildApp(
       const appliedToMyOrg =
         hiringAccount && candidateProfile
           ? (() => {
-              const orgIds = new Set(
-                (orgMembershipsByUserId.get(session.userId) || []).map((m) => m.orgId)
-              );
+              const orgIds = orgIdsWhere(session.userId, 'review_candidates');
               return (applicationsByCandidateId.get(candidateProfile.id) || []).some((a) => {
                 const job = jobsById.get(a.jobId);
                 return !!job && orgIds.has(job.orgId);
@@ -4860,8 +4865,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
       }
 
-      const memberships = orgMembershipsByOrgId.get(organizationId) || [];
-      const isMember = memberships.some((m) => m.userId === session.userId);
+      const isMember = memberMay(session.userId, organizationId, 'manage_organization');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isPlatformAdmin) {
         throw new DomainError(
@@ -5852,7 +5856,7 @@ export async function buildApp(
           (c.senderId === b.userId && c.recipientId === a.userId))
     );
   const appliedToTeamOf = (candidate: Profile, member: Profile): boolean => {
-    const orgIds = new Set((orgMembershipsByUserId.get(member.userId) || []).map((m) => m.orgId));
+    const orgIds = orgIdsWhere(member.userId, 'review_candidates');
     if (orgIds.size === 0) return false;
     return (applicationsByCandidateId.get(candidate.id) || []).some((application) => {
       const job = jobsById.get(application.jobId);
@@ -7376,8 +7380,7 @@ export async function buildApp(
 
       const isCandidate = request.candidateId === session.userId;
       const isReferrer = request.referrerId === session.userId;
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isOrgMember = userMemberships.some((m) => m.orgId === request.orgId);
+      const isOrgMember = memberMay(session.userId, request.orgId, 'review_candidates');
       const isAdmin = session.roles.includes('platform_admin');
 
       if (!isCandidate && !isReferrer && !isOrgMember && !isAdmin) {
@@ -7508,8 +7511,9 @@ export async function buildApp(
       const session = extractUser(req);
       const { orgId } = req.query;
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMemberOfQueryOrg = orgId ? userMemberships.some((m) => m.orgId === orgId) : false;
+      const isMemberOfQueryOrg = orgId
+        ? memberMay(session.userId, orgId, 'review_candidates')
+        : false;
       const isAdmin = session.roles.includes('platform_admin');
 
       let list = Array.from(referralOutcomesById.values());
@@ -8373,7 +8377,7 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'User does not belong to any organization.');
       }
     } else {
-      const isMember = userMemberships.some((m) => m.orgId === targetOrgId);
+      const isMember = memberMay(session.userId, targetOrgId, 'review_candidates');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isPlatformAdmin) {
         throw new DomainError('FORBIDDEN', 'Access denied to organization talent pools.');
@@ -8424,7 +8428,7 @@ export async function buildApp(
           throw new DomainError('FORBIDDEN', 'User does not belong to any organization.');
         }
       } else {
-        const isMember = userMemberships.some((m) => m.orgId === targetOrgId);
+        const isMember = memberMay(session.userId, targetOrgId, 'review_candidates');
         const isPlatformAdmin = session.roles.includes('platform_admin');
         if (!isMember && !isPlatformAdmin) {
           throw new DomainError('FORBIDDEN', 'Access denied to organization talent pools.');
@@ -8458,8 +8462,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isMember = memberMay(session.userId, pool.orgId, 'review_candidates');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isPlatformAdmin) {
         throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
@@ -8485,8 +8488,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isMember = memberMay(session.userId, pool.orgId, 'review_candidates');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isPlatformAdmin) {
         throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
@@ -8580,8 +8582,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isMember = memberMay(session.userId, pool.orgId, 'review_candidates');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isPlatformAdmin) {
         throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
@@ -8630,8 +8631,7 @@ export async function buildApp(
         throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
       }
 
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isMember = memberMay(session.userId, pool.orgId, 'review_candidates');
       const isPlatformAdmin = session.roles.includes('platform_admin');
       if (!isMember && !isPlatformAdmin) {
         throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
@@ -8793,7 +8793,7 @@ export async function buildApp(
     if (session.userId === (profile?.userId ?? candidateId)) return true;
     if (session.roles.includes('platform_admin')) return true;
     if (!profile || !session.roles.some((r) => HIRING_ROLES.includes(r))) return false;
-    const orgIds = new Set((orgMembershipsByUserId.get(session.userId) || []).map((m) => m.orgId));
+    const orgIds = orgIdsWhere(session.userId, 'review_candidates');
     const appliedHere = (applicationsByCandidateId.get(profile.id) || []).some((a) => {
       const job = jobsById.get(a.jobId);
       return !!job && orgIds.has(job.orgId);
@@ -12161,7 +12161,7 @@ export async function buildApp(
         return report.targetId === session.userId;
       case 'job': {
         const job = jobsById.get(report.targetId);
-        return !!job && canManageJobs(session, job.orgId);
+        return !!job && canInOrg(session, job.orgId, 'manage_jobs');
       }
       case 'message': {
         const message = messagesById.get(report.targetId);
@@ -12628,7 +12628,7 @@ export async function buildApp(
       const job = jobsById.get(jobId);
       // Bookmarking must not bypass the same draft/private visibility policy
       // enforced by GET /jobs/:id. Do not disclose an unpublished job's ID.
-      if (!job || (job.status !== 'published' && !canManageJobs(session, job.orgId))) {
+      if (!job || (job.status !== 'published' && !canInOrg(session, job.orgId, 'view_jobs'))) {
         throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
       }
       const savedJob = await storage.savedJobs.add(session.userId, jobId);
@@ -12655,7 +12655,8 @@ export async function buildApp(
       .map((s) => jobsById.get(s.jobId))
       .filter(
         (job): job is Job =>
-          job !== undefined && (job.status === 'published' || canManageJobs(session, job.orgId))
+          job !== undefined &&
+          (job.status === 'published' || canInOrg(session, job.orgId, 'view_jobs'))
       );
     return reply.status(200).send({ savedJobs: currentSaved, jobs, total: currentSaved.length });
   });

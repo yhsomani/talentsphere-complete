@@ -120,6 +120,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-029 | AI output quality follows the SSOT wording (capability-specific evaluation, no universal threshold) | C-22 | Registry corrected (this change) |
 | ADR-030 | Free-tier services for the pilot, picked from the Free for Developers list | ADR-018, 020, 021, 025, 027 | Documentation; sign-ups are owner steps |
 | ADR-031 | Free security and launch checks (CodeQL, Dependabot, launch scans, mail checks, Pwned Passwords) | Full list review | Settings and checks for the owner; Pwned Passwords PR to follow |
+| ADR-032 | Organization roles decide what a member may do: owners and admins run the organization, recruiters post jobs, hiring managers review candidates, plain members only see jobs | CF-14, CF-45, plan TS-04 | Built (`packages/domain/src/org-roles.ts`) |
 
 ### ADR-017 — Ratify ADR-015: Fastify and PostgreSQL are the architecture of record (issue #46)
 
@@ -378,3 +379,28 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
   2. Buy the domain.
   3. After the staging deploy, run Mozilla Observatory, SSL Labs and Internet.nl against it and fix any failing grade.
   4. Send one Brevo template to mail-tester.com and fix anything below 9/10.
+
+### ADR-032 — Organization roles decide what a member may do (CF-14, CF-45, plan TS-04)
+
+- **Status:** Accepted 2026-11-27 (delegated). This is the conservative privacy option for candidate data.
+- **Context:** memberships already store a role (`owner`, `admin`, `recruiter`, `hiring_manager`, `member`), but only adding members read it. About 40 route checks accepted any membership, so a plain `member` could post and close jobs, move applicants, read their applications, feedback and interviews, and use talent pools. New-application notices went to every member and named the applicant.
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| Keep "any membership" | No change for existing organizations | A member added for one purpose sees every applicant's data; the SSOT says "authorized recruiters" |
+| One rule per route, written inline | Fine-grained | The same decision restated about 40 times, which is how it drifted (ARCHITECTURE R-2) |
+| One policy in `packages/domain`, four actions, used by every route | One place to read and test; a role means the same thing everywhere | Plain members lose access they had, though no test or screen relied on it |
+
+- **Decision:** the third option. `ORG_ROLE_POLICY` in `packages/domain/src/org-roles.ts`:
+
+| Action | Owner | Admin | Recruiter | Hiring manager | Member |
+| --- | --- | --- | --- | --- | --- |
+| `view_jobs`: the organization's jobs in any status, job templates | yes | yes | yes | yes | yes |
+| `manage_jobs`: create, edit, publish, close jobs; job and feedback templates | yes | yes | yes | no | no |
+| `review_candidates`: applicants, pipeline moves, feedback, interviews, talent pools, referrals, applicant notices | yes | yes | yes | yes | no |
+| `manage_organization`: add members, the employer's own metrics | yes | yes | no | no | no |
+
+- Platform admins keep their existing access. An unknown role gets nothing. A referrer still only needs to be employed at the organization (any role), and an assigned interviewer still only needs membership; the assignment is what grants panel access.
+- `GET /api/v1/organizations/mine` returns each organization's `permissions`, so the hiring page offers only actions the role allows.
+- **Not changed:** CF-16 (the domain layer also wants the account-level `recruiter` role to create jobs) and CF-15 (job approval) stay open.
+- **Verification:** `tests/unit/org-roles-domain.test.ts`, `tests/integration/org-roles.test.ts` (each role against each action, notices), `tests/pg/org-roles.test.ts` (stored roles after a restart, one person with different roles in two organizations), and a Reticle run of the hiring page as a plain member.

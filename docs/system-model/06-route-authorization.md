@@ -33,7 +33,7 @@ Legend: Auth = anonymous (anon), signed in (any), or a role. Check = the role or
 | CF-42 | Maintenance mode only changes diagnostics output and resets on restart; it blocks no traffic. | S:10930, 10893 | Decide intended behaviour. |
 | CF-43 | In-memory only, although the UI offers them: resumes, connections, warm intros, portfolio, AI conversations, activity, moderation reports and appeals, analytics, salaries, reputation, interviews, talent pools, alumni, referrals, job templates (issue #48). | D:21-105 | Durable storage for each is a scoped project. |
 | CF-44 | Alumni and referral trust: alumni affiliation verification trusts the unverified account email; talent-pool stealth checks read a field (`isStealthMode`) not confirmed to be set; referral create passes `resumeId` through without an ownership check. | S:8911, 8064, 6846 | Needs verification of each before changing. |
-| CF-45 | "Any organization membership" authorizes interview questions and scorecards, talent pools (6 routes), employer metrics, job templates and referrals, in addition to the job and applicant routes in CF-14. The member's role is never read. | S:3280, 3339, 3359, 7892-8161, 4471, 2375, 6919 | Same decision as CF-14: define which organization roles may act. |
+| CF-45 | "Any organization membership" authorizes interview questions and scorecards, talent pools (6 routes), employer metrics, job templates and referrals, in addition to the job and applicant routes in CF-14. The member's role is never read. | S:3280, 3339, 3359, 7892-8161, 4471, 2375, 6919 | **Fixed 2026-11-27** with CF-14: each route now checks the member's role through `packages/domain/src/org-roles.ts` (ADR-032). |
 
 ## Route tables
 

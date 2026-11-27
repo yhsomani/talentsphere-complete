@@ -33,6 +33,8 @@ interface Organization {
   website?: string;
   description?: string;
   membershipRole: string;
+  /** What this account's role allows in the organization (ADR-032). */
+  permissions?: string[];
 }
 
 const slugify = (value: string) =>
@@ -422,6 +424,8 @@ export const HiringPage: React.FC = () => {
 
   const selectedOrg = orgs?.find((o) => o.id === params.get('org')) ?? orgs?.[0];
   const selectedOrgId = selectedOrg?.id;
+  const mayManageJobs = selectedOrg?.permissions?.includes('manage_jobs') ?? false;
+  const mayReview = selectedOrg?.permissions?.includes('review_candidates') ?? false;
 
   const loadOrgs = useCallback(async () => {
     try {
@@ -497,7 +501,7 @@ export const HiringPage: React.FC = () => {
             : 'Set up your company to start posting jobs.'
         }
         actions={
-          selectedOrg ? (
+          selectedOrg && mayManageJobs ? (
             <Button onClick={() => setFormOpen(true)} data-testid="post-job-btn">
               Post a job
             </Button>
@@ -520,6 +524,13 @@ export const HiringPage: React.FC = () => {
       )}
 
       {error && <LoadError message={error} style={{ marginBottom: spacing.md }} />}
+      {selectedOrg && !mayManageJobs && (
+        <Notice tone="info" style={{ marginBottom: spacing.md }} data-testid="hiring-role-notice">
+          {mayReview
+            ? `You can review applicants at ${selectedOrg.name}. Posting and changing jobs is for its owners, admins and recruiters.`
+            : `You can see the jobs at ${selectedOrg.name}. To post jobs or review applicants, ask an owner or admin to change your role.`}
+        </Notice>
+      )}
       {statusError && (
         <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="job-status-error">
           {statusError}
@@ -540,7 +551,11 @@ export const HiringPage: React.FC = () => {
         <EmptyState
           title="No jobs posted yet"
           description="Post your first role. Candidates see it on the Jobs page once it is published."
-          action={<Button onClick={() => setFormOpen(true)}>Post a job</Button>}
+          action={
+            mayManageJobs ? (
+              <Button onClick={() => setFormOpen(true)}>Post a job</Button>
+            ) : undefined
+          }
         />
       )}
 
@@ -579,12 +594,20 @@ export const HiringPage: React.FC = () => {
                 }}
               >
                 <div style={{ minWidth: 0, flex: '1 1 300px' }}>
-                  <Link
-                    to={`/hiring/jobs/${job.id}`}
-                    style={{ fontWeight: 700, color: colors.neutral[900], textDecoration: 'none' }}
-                  >
-                    {job.title}
-                  </Link>{' '}
+                  {mayReview ? (
+                    <Link
+                      to={`/hiring/jobs/${job.id}`}
+                      style={{
+                        fontWeight: 700,
+                        color: colors.neutral[900],
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {job.title}
+                    </Link>
+                  ) : (
+                    <span style={{ fontWeight: 700, color: colors.neutral[900] }}>{job.title}</span>
+                  )}{' '}
                   <StatusPill
                     kind="job"
                     status={job.status}
@@ -598,7 +621,7 @@ export const HiringPage: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: spacing.sm, flexWrap: 'wrap' }}>
-                  {actions.map((a) => (
+                  {(mayManageJobs ? actions : []).map((a) => (
                     <Button
                       key={a.to}
                       size="sm"
@@ -612,18 +635,20 @@ export const HiringPage: React.FC = () => {
                       {a.label}
                     </Button>
                   ))}
-                  <Link
-                    className="action-link"
-                    to={`/hiring/jobs/${job.id}`}
-                    style={{
-                      alignSelf: 'center',
-                      color: colors.primary[700],
-                      fontWeight: 600,
-                      fontSize: '0.875rem',
-                    }}
-                  >
-                    Review applicants
-                  </Link>
+                  {mayReview && (
+                    <Link
+                      className="action-link"
+                      to={`/hiring/jobs/${job.id}`}
+                      style={{
+                        alignSelf: 'center',
+                        color: colors.primary[700],
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      Review applicants
+                    </Link>
+                  )}
                 </div>
               </li>
             );
