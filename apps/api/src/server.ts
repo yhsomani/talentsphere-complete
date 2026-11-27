@@ -4972,6 +4972,14 @@ export async function buildApp(
       },
     });
 
+    // An unknown skill would fail the stored foreign key (BR-144).
+    challenge.skillIds = Array.from(new Set(challenge.skillIds));
+    for (const skillId of challenge.skillIds) {
+      if (!skillsById.has(skillId)) {
+        throw new DomainError('NOT_FOUND', `Canonical skill ${skillId} does not exist (BR-144).`);
+      }
+    }
+    await storage.challenges.saveChallenge(challenge);
     challengesById.set(challenge.id, challenge);
     challengesBySlug.set(challenge.slug, challenge);
 
@@ -5003,6 +5011,7 @@ export async function buildApp(
         challenge,
       });
 
+      await storage.challenges.saveSession(assessmentSession);
       assessmentSessionsById.set(assessmentSession.id, assessmentSession);
       const list = assessmentSessionsByCandidateId.get(profile.id) || [];
       list.push(assessmentSession);
@@ -5099,12 +5108,35 @@ export async function buildApp(
         }
       }
 
-      // Close session if active
-      if (activeSession && activeSession.status === 'in_progress') {
-        activeSession.status = 'submitted';
-        activeSession.submittedAt = new Date().toISOString();
-        activeSession.endTime = new Date().toISOString();
-      }
+      // Store the submission (the evidence cites its id) and close the session
+      // if it was active, in one transaction; the Maps change after (TS-03).
+      const submittedAt = new Date().toISOString();
+      const closedSession =
+        activeSession && activeSession.status === 'in_progress'
+          ? {
+              ...activeSession,
+              status: 'submitted' as const,
+              submittedAt,
+              endTime: submittedAt,
+            }
+          : undefined;
+      await storage.challenges.recordSubmission(
+        {
+          id: evalResult.submissionId,
+          sessionId: activeSession?.id ?? null,
+          challengeId: challenge.id,
+          candidateId: profile.id,
+          language: input.language,
+          code: input.code,
+          status: evalResult.status,
+          score: evalResult.score,
+          passedCases: evalResult.passedCases,
+          totalCases: evalResult.totalCases,
+          createdAt: submittedAt,
+        },
+        closedSession
+      );
+      if (activeSession && closedSession) Object.assign(activeSession, closedSession);
 
       return reply.status(200).send({
         result: evalResult,
@@ -10919,6 +10951,7 @@ export async function buildApp(
       behavioralProfilesByCandidateId.delete(profile.id);
       behavioralProfilesByCandidateId.delete(session.userId);
       interviewAssessmentsByCandidateId.delete(profile.id);
+      await storage.challenges.eraseCandidate(profile.id);
       for (const a of assessmentSessionsByCandidateId.get(profile.id) || []) {
         assessmentSessionsById.delete(a.id);
       }
@@ -14235,6 +14268,19 @@ export async function buildApp(
       const list = portfolioProjectsByUserId.get(project.userId) || [];
       list.push(project);
       portfolioProjectsByUserId.set(project.userId, list);
+    }
+    // Coding challenges and assessment sessions (F-08, plan TS-03): sessions
+    // oldest first, as started.
+    const arena = await storage.challenges.loadAll();
+    for (const challenge of arena.challenges) {
+      challengesById.set(challenge.id, challenge);
+      challengesBySlug.set(challenge.slug, challenge);
+    }
+    for (const assessmentSession of arena.sessions) {
+      assessmentSessionsById.set(assessmentSession.id, assessmentSession);
+      const list = assessmentSessionsByCandidateId.get(assessmentSession.candidateId) || [];
+      list.push(assessmentSession);
+      assessmentSessionsByCandidateId.set(assessmentSession.candidateId, list);
     }
     // Courses and learning progress (F-07, plan TS-03).
     const lms = await storage.lms.loadAll();

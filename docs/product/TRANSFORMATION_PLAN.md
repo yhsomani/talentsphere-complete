@@ -669,7 +669,7 @@ flowchart LR
 
 ## 9. Database and API recommendations
 
-The current schema (62 migrations, 115 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
+The current schema (63 migrations, 116 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
 
 ### 9.1 Principles
 
@@ -936,7 +936,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | --- | --- | --- | --- | --- | --- |
 | TS-01 | Merge durable resumes (T-007) and the service worker (T-009) already built | — | Existing tests plus restart test | T-007, T-009 | IN_PROGRESS elsewhere |
 | TS-02 | Park list: one feature flag per parked module, off by default in deployed environments, screens hidden | Feature flags (durable, 00051) | Flagged routes return 404 in staging config; tests updated, not deleted | T-022 | IMPLEMENTED (PR #101) |
-| TS-03 | Durability sweep for visible ephemeral modules: portfolio, moderation, courses and lessons progress, challenge submissions — one PR each, using the existing tables | — | Restart test per module; routes added to `DURABLE_ROUTES` | T-010 | IN PROGRESS: portfolio (`portfolio-store.ts`) and courses with progress and certificates (`lms-store.ts`, 00062) done; challenge submissions and moderation next |
+| TS-03 | Durability sweep for visible ephemeral modules: portfolio, moderation, courses and lessons progress, challenge submissions — one PR each, using the existing tables | — | Restart test per module; routes added to `DURABLE_ROUTES` | T-010 | IN PROGRESS: portfolio (`portfolio-store.ts`) courses with progress and certificates (`lms-store.ts`, 00062), and challenges with sessions and submissions (`challenge-store.ts`, 00063) done; moderation next |
 | TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | IMPLEMENTED ([ADR-032](../engineering/DECISIONS.md#adr-032--organization-roles-decide-what-a-member-may-do-cf-14-cf-45-plan-ts-04)) |
 | TS-05 | Worker claim fencing (completion checks the claim token) | — | Already in place: fenced by the attempts counter (`tests/pg/job-claim-fencing.test.ts`) | T-024 | EXISTS (found 2026-11-26; no work needed) |
 | TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | IMPLEMENTED for the API (ADR-020); expiry job and the `clamd` container remain |
