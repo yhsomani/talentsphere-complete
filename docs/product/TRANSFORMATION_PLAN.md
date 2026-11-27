@@ -222,7 +222,7 @@ Phases are defined in [§15](#15-roadmap-priorities-and-dependencies). "Blueprin
 | SET | Settings, privacy, consent, data rights | Admin, privacy | **EXISTS, durable** (export, erasure) | P0 | Consent ledger must exist before imports and AI |
 | PRF | Profile, resume, portfolio | Profile, resume | **PARTIAL, ephemeral** | P0 to P1 | First screen every user sees; durable resumes in flight (T-007) |
 | EVD | Evidence, work history, credentials | Verification | **EXISTS, durable** | P1 | Becomes the source of signals |
-| SKG | **Skill graph and signal ledger** (new; owns the taxonomy, resolves blueprint `OD-ARC-07`) | Verification, analytics | **PARTIAL** (skills taxonomy durable; no ledger) | P1 | The integration spine ([§7.2](#72-the-skill-signal-ledger)) |
+| SKG | **Skill graph and signal ledger** (new; owns the taxonomy, resolves blueprint `OD-ARC-07`) | Verification, analytics | **PARTIAL** (skills taxonomy durable; ledger built for evidence, TS-07) | P1 | The integration spine ([§7.2](#72-the-skill-signal-ledger)) |
 | IMP | **Import, export, portability** (new; consolidates blueprint `FR-PRF-019`, `FR-PRF-024`, `FR-PRF-025` and `PLT` import tooling) | Import | Export **EXISTS**; import not built | P1 | Fastest path to a useful profile; marketplace cold start |
 | GOL | **Goals, gaps and plans** (new; the Goal and Gap steps of the canonical loop, today spread across `MKT` and `AIC`) | Analytics, AI | **PARTIAL** (`CareerPage` career paths) | P1 | Without a goal, recommendations have nothing to aim at |
 | ASM | Practice, challenges, assessments | Coding practice | **PARTIAL, simulated** | P2 | Needs the isolated code runner (issue #49) |
@@ -543,6 +543,22 @@ flowchart LR
 
 **Acceptance.** (1) Given a passing executed challenge tagged SQL, the user's SQL confidence rises and a SQL-requiring job's match explanation names the challenge, within one request cycle. (2) Revoking the evidence removes its effect on the profile and the match. (3) Recomputing all profiles from signals gives the same result as the incremental projector.
 
+**Built (TS-07, 2026-11-27).** The ledger exists with evidence as its first and only source:
+
+- `skill_signals` (migration 00060) and `packages/domain/src/skill-signals.ts` (`deriveEvidenceSignals`, `recordSkillSignals`, `projectSkillProfile`).
+- Every evidence write emits its signals inside `persist()`, in the same transaction as the evidence: create, verify, dispute, revoke, course completion and erasure. A change retires the old rows (`superseded`, or `revoked` when the evidence stops counting) and inserts the new set.
+- At boot the API fills in signals for any evidence that has none, so existing evidence needed no data migration.
+- `GET /api/v1/skills/profile/me` returns the profile with the evidence each skill rests on.
+
+Where it differs from the design above, on purpose:
+
+- Rungs are the evidence verification levels (`unverified`, `peer_reviewed`, `institution_verified`, `authority_verified`), not a new ladder.
+- There is no numeric confidence, `level`, `issuer_class` or `expires_at` yet; nothing reads them.
+- The profile is computed on read from live signals, so case (3) holds by construction and `skill_profiles` is deferred until a reader needs it stored.
+- Signals are written in the writer's transaction, so no outbox is needed for them.
+
+Case (2) is tested for the profile (`tests/integration/skill-profile.test.ts`, `tests/pg/skill-signals.test.ts`). The match half of cases (1) and (2) is TS-13, and executed challenges do not exist yet.
+
 ### 7.3 Module dependencies (build order)
 
 ```mermaid
@@ -653,7 +669,7 @@ flowchart LR
 
 ## 9. Database and API recommendations
 
-The current schema (59 migrations, 114 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
+The current schema (60 migrations, 115 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
 
 ### 9.1 Principles
 
@@ -667,7 +683,7 @@ The current schema (59 migrations, 114 tables) is documented in [`engineering/DA
 
 | Entity | Owner | Key columns | Notes |
 | --- | --- | --- | --- |
-| `skill_signals` | SKG | id, subject_id, skill_id, level, rung, issuer_class, source_module, source_ref, observed_at, expires_at, status, superseded_by | Unique (source_module, source_ref, skill_id) where status = live |
+| `skill_signals` | SKG | id, subject_id, skill_id, level, rung, issuer_class, source_module, source_ref, observed_at, expires_at, status, superseded_by | Unique (source_module, source_ref, skill_id) where status = live. Built in 00060 without level, issuer_class, expires_at and superseded_by (retired rows carry `retired_at`) |
 | `skill_profiles` | SKG | subject_id, skill_id, confidence, strongest_rung, last_signal_at, visibility | Derived; rebuildable |
 | `skill_aliases` | SKG | alias, skill_id, source | Maps imported names ("ReactJS", "React.js") to canonical skills |
 | `files` | PLT | id, owner_id, purpose, storage_key, size, mime, scan_status, expires_at | No file bytes in PostgreSQL |
@@ -677,7 +693,7 @@ The current schema (59 migrations, 114 tables) is documented in [`engineering/DA
 | `career_goals` | GOL | id, user_id, target_role_id, target_date, preferences jsonb, visibility | Private by default |
 | `plan_steps` | GOL | id, goal_id, kind, ref, expected_skill_id, status, completed_by_signal | Completion only through a signal |
 | `role_templates` | GOL | id, title, skill requirements jsonb, source | Seeded, then refined from live postings |
-| `outbox_events` | PLT | id, topic, payload, created_at, delivered_at | Or reuse `background_jobs` with a topic column (decide in TS-07, the first slice that emits events) |
+| `outbox_events` | PLT | id, topic, payload, created_at, delivered_at | Not needed for TS-07: signals are written in the writer's own transaction. Decide when a slice first needs cross-module events |
 | `consents` | SET | user_id, scope, granted_at, revoked_at, version | One ledger for all modules (blueprint `SET`) |
 
 ### 9.3 New and changed endpoints (PROPOSED)
@@ -924,7 +940,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | PROPOSED |
 | TS-05 | Worker claim fencing (completion checks the claim token) | — | Already in place: fenced by the attempts counter (`tests/pg/job-claim-fencing.test.ts`) | T-024 | EXISTS (found 2026-11-26; no work needed) |
 | TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | IMPLEMENTED for the API (ADR-020); expiry job and the `clamd` container remain |
-| TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | PROPOSED |
+| TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | IMPLEMENTED for evidence (migration 00060; see §7.2 for what differs) |
 | TS-08 | Import v1: JSON Resume and CSV templates, review screen, commit and undo | TS-06, TS-07 | §10.4 cases 2, 5, 7 | T-027 | PROPOSED |
 | TS-09 | Experience band on jobs; job-type and band filters on the jobs screen | — | Contract and e2e tests | T-028 | PROPOSED |
 | TS-10 | Session cookie and password reset | Issue #44 | Token not readable by page script; reset e2e | T-029 | IMPLEMENTED (ADR-019; reset emails reach people once live email is set up) |

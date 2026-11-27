@@ -206,7 +206,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 289 literal registrations, 286 unique method/path pairs; 98 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 98 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, and the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
+Measured: 290 literal registrations, 287 unique method/path pairs; 99 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 99 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27), and the skill profile route with migration 00060 (2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -239,6 +239,7 @@ Measured: 289 literal registrations, 286 unique method/path pairs; 98 of them in
 | `POST /api/v1/evidence/:id/revoke` | `RevokeEvidenceInputSchema` | P |
 | `GET /api/v1/evidence/:id/verify-public` | handler | P |
 | `GET /api/v1/skills` | handler | P |
+| `GET /api/v1/skills/profile/me` | handler | P |
 | `POST /api/v1/skills` | `CreateSkillInputSchema` | P |
 | `POST /api/v1/skills/relationships` | `CreateSkillRelationshipInputSchema` | E |
 | `GET /api/v1/skills/:id/graph` | handler | E |

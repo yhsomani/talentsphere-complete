@@ -12,6 +12,8 @@ import {
   type Profile,
   type Role,
   type Skill,
+  type SkillSignal,
+  type SkillSignalSource,
   type ThreadParticipant,
   type VerifiedWorkHistory,
 } from '@talentsphere/domain';
@@ -129,7 +131,21 @@ export type CoreOp =
   /** A participant read the conversation up to value.lastReadAt (never moves back). */
   | { kind: 'threadRead'; value: ThreadParticipant }
   /** Erasure: the person's messages and their place in every conversation. */
-  | { kind: 'messagesDeleteForProfile'; profileId: string };
+  | { kind: 'messagesDeleteForProfile'; profileId: string }
+  /**
+   * Skill-signal ledger (TS-07, migration 00060): retires a source's live
+   * signals (as superseded or revoked) and writes its new live set.
+   */
+  | {
+      kind: 'skillSignals';
+      sourceModule: SkillSignalSource;
+      sourceRef: string;
+      signals: SkillSignal[];
+      retiredAs: 'superseded' | 'revoked';
+      atIso: string;
+    }
+  /** Erasure: every signal of a source, live or retired. */
+  | { kind: 'skillSignalsDelete'; sourceModule: SkillSignalSource; sourceRef: string };
 
 export interface CoreSnapshot {
   users: StoredUser[];
@@ -150,6 +166,8 @@ export interface CoreSnapshot {
   messageThreads: MessageThread[];
   threadParticipants: ThreadParticipant[];
   messages: Message[];
+  /** Live skill signals only. */
+  skillSignals: SkillSignal[];
 }
 
 export interface CoreStore {
@@ -179,6 +197,7 @@ export const emptySnapshot = (): CoreSnapshot => ({
   messageThreads: [],
   threadParticipants: [],
   messages: [],
+  skillSignals: [],
 });
 
 /** STORAGE=memory: the Maps are the store. Explicitly not durable. */
@@ -749,6 +768,38 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       );
       return;
     }
+    case 'skillSignals': {
+      await db.query(
+        `UPDATE public.skill_signals SET status = $3, retired_at = $4
+          WHERE source_module = $1 AND source_ref = $2 AND status = 'live'`,
+        [op.sourceModule, op.sourceRef, op.retiredAs, op.atIso]
+      );
+      for (const sig of op.signals) {
+        await db.query(
+          `INSERT INTO public.skill_signals
+             (id, subject_id, skill_id, rung, source_module, source_ref, observed_at, status, created_at)
+           VALUES ($1, $2, $3, $4::verification_level, $5, $6, $7, 'live', $8)`,
+          [
+            sig.id,
+            sig.subjectId,
+            sig.skillId,
+            sig.rung,
+            sig.sourceModule,
+            sig.sourceRef,
+            sig.observedAt,
+            sig.createdAt,
+          ]
+        );
+      }
+      return;
+    }
+    case 'skillSignalsDelete': {
+      await db.query(
+        'DELETE FROM public.skill_signals WHERE source_module = $1 AND source_ref = $2',
+        [op.sourceModule, op.sourceRef]
+      );
+      return;
+    }
     case 'messagesDeleteForProfile': {
       await db.query('DELETE FROM public.messages WHERE sender_id = $1', [op.profileId]);
       await db.query('DELETE FROM public.thread_participants WHERE user_id = $1', [op.profileId]);
@@ -787,6 +838,9 @@ const WRITE_ORDER: Record<CoreOp['kind'], number> = {
   referenceDelete: 11,
   notificationsDeleteForRecipient: 11,
   messagesDeleteForProfile: 11,
+  // Signals reference the profile and the skill; they follow their evidence.
+  skillSignals: 7,
+  skillSignalsDelete: 11,
 };
 
 export class PgCoreStore implements CoreStore {
@@ -835,6 +889,7 @@ export class PgCoreStore implements CoreStore {
       messageThreads,
       threadParticipants,
       messages,
+      skillSignals,
     ] = await Promise.all([
       q('SELECT * FROM public.users ORDER BY created_at, id'),
       q('SELECT * FROM public.profiles ORDER BY created_at, id'),
@@ -863,6 +918,7 @@ export class PgCoreStore implements CoreStore {
       q('SELECT * FROM public.message_threads ORDER BY created_at, id'),
       q('SELECT * FROM public.thread_participants ORDER BY created_at, id'),
       q('SELECT * FROM public.messages ORDER BY created_at, id'),
+      q(`SELECT * FROM public.skill_signals WHERE status = 'live' ORDER BY created_at, id`),
     ]);
 
     const group = (rows: Record<string, any>[], key: string, value: string) => {
@@ -1084,6 +1140,16 @@ export class PgCoreStore implements CoreStore {
         status: r.status,
         createdAt: isoRequired(r.created_at),
         updatedAt: isoRequired(r.updated_at),
+      })),
+      skillSignals: skillSignals.map((r) => ({
+        id: r.id,
+        subjectId: r.subject_id,
+        skillId: r.skill_id,
+        rung: r.rung,
+        sourceModule: r.source_module,
+        sourceRef: r.source_ref,
+        observedAt: isoRequired(r.observed_at),
+        createdAt: isoRequired(r.created_at),
       })),
     };
   }

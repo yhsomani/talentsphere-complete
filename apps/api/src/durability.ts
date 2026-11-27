@@ -44,6 +44,7 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/evidence/:id/revoke',
   'GET /api/v1/evidence/:id/verify-public',
   'GET /api/v1/skills',
+  'GET /api/v1/skills/profile/me',
   'POST /api/v1/skills',
   // Organizations, jobs, applications
   'POST /api/v1/organizations',

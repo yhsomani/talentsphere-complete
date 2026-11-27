@@ -16,7 +16,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 
 | Store | Persisted records / relationship | Read/write behavior |
 | --- | --- | --- |
-| [core-store.ts](../../apps/api/src/storage/core-store.ts) | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`; work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model |
+| [core-store.ts](../../apps/api/src/storage/core-store.ts) | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`, `skill_signals`; work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model |
 | [account-store.ts](../../apps/api/src/storage/account-store.ts) | `user_settings`, `data_export_requests`, keyed by account | SQL-backed settings/export history; BYO credentials encrypted with separate AES-GCM key |
 | [erasure-store.ts](../../apps/api/src/storage/erasure-store.ts) | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
 | [saved-search-store.ts](../../apps/api/src/storage/saved-search-store.ts) | `saved_searches` owned by user | Owner-scoped CRUD |
@@ -191,6 +191,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00057_connections_durable.sql](../../supabase/migrations/00057_connections_durable.sql) | Alterations only: replaces `uq_connections_pair` (directional) with `uq_connections_open_pair`, a unique index over the unordered pair for `pending`/`accepted` rows; revokes `anon`/`authenticated` on `connections` |
 | [00058_password_reset_tokens.sql](../../supabase/migrations/00058_password_reset_tokens.sql) | Creates `password_reset_tokens` (hash, expiry, used time; `user_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-019) |
 | [00059_files.sql](../../supabase/migrations/00059_files.sql) | Creates `files` (owner, purpose, type, size, SHA-256, name, storage key, scan status; `owner_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-020) |
+| [00060_skill_signals.sql](../../supabase/migrations/00060_skill_signals.sql) | Creates `skill_signals` (subject profile, skill, rung, source, status `live`/`superseded`/`revoked`; one live row per source and skill; `subject_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (TS-07) |
 
 ---
 

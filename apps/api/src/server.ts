@@ -75,6 +75,10 @@ import {
   evidenceSummaryForReviewers,
   canSeeEvidenceInternals,
   verifyEvidence,
+  deriveEvidenceSignals,
+  recordSkillSignals,
+  projectSkillProfile,
+  type SkillSignal,
   disputeEvidence,
   revokeEvidence,
   generatePublicProof,
@@ -1548,6 +1552,10 @@ export async function buildApp(
   const skillsBySlug = new Map<string, Skill>();
   const skillRelationships: SkillRelationship[] = [];
   const evidenceSkills = new Map<string, Set<string>>();
+  // Skill-signal ledger (TS-07): live signals by source (`module:ref`) and
+  // the sources that speak about each subject (profile id).
+  const liveSignalsBySource = new Map<string, SkillSignal[]>();
+  const signalSourcesBySubject = new Map<string, Set<string>>();
   // In-memory, write-only security/admin event trail: bounded so it cannot
   // grow without limit between restarts (K-06). Not durable (A05-005, owner).
   const auditLogEntries: unknown[] = [];
@@ -1737,6 +1745,32 @@ export async function buildApp(
       return reply.status(200).send({ evidence: view, skills });
     }
   );
+
+  // Skill profile (TS-07): derived from the skill-signal ledger, strongest
+  // skills first. Each entry names the evidence it rests on, so the rung is
+  // explained rather than asserted.
+  app.get('/api/v1/skills/profile/me', async (req: FastifyRequest) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    const entries = profile ? skillProfileOf(profile.id) : [];
+    return {
+      skills: entries.map((entry) => {
+        const skill = skillsById.get(entry.skillId);
+        return {
+          ...entry,
+          name: skill?.name ?? null,
+          slug: skill?.slug ?? null,
+          sources: entry.sources.map((source) => ({
+            ...source,
+            title:
+              source.sourceModule === 'evidence'
+                ? (evidenceById.get(source.sourceRef)?.title ?? null)
+                : null,
+          })),
+        };
+      }),
+    };
+  });
 
   // The signed-in candidate's own evidence, newest first.
   app.get('/api/v1/evidence/mine', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -13874,6 +13908,22 @@ export async function buildApp(
         list[at] = { ...list[at], lastReadAt: op.value.lastReadAt };
         return;
       }
+      case 'skillSignals':
+      case 'skillSignalsDelete': {
+        const key = `${op.sourceModule}:${op.sourceRef}`;
+        for (const old of liveSignalsBySource.get(key) ?? []) {
+          signalSourcesBySubject.get(old.subjectId)?.delete(key);
+        }
+        const next = op.kind === 'skillSignals' ? op.signals : [];
+        if (next.length > 0) liveSignalsBySource.set(key, next);
+        else liveSignalsBySource.delete(key);
+        for (const sig of next) {
+          const keys = signalSourcesBySubject.get(sig.subjectId) ?? new Set<string>();
+          keys.add(key);
+          signalSourcesBySubject.set(sig.subjectId, keys);
+        }
+        return;
+      }
       case 'messagesDeleteForProfile': {
         for (const [threadId, messages] of messagesByThreadId) {
           const kept: Message[] = [];
@@ -13983,7 +14033,47 @@ export async function buildApp(
     }
   }
 
-  async function persist(...ops: CoreOp[]): Promise<void> {
+  /**
+   * The ledger writes evidence makes (TS-07): for each evidence write in a
+   * batch, the change to that evidence's live signals, so they commit in the
+   * same transaction. Deleting evidence (erasure) deletes its signals.
+   */
+  function evidenceSignalOps(ops: readonly CoreOp[]): CoreOp[] {
+    const atIso = new Date().toISOString();
+    const out: CoreOp[] = [];
+    for (const op of ops) {
+      if (op.kind === 'evidenceDelete') {
+        out.push({ kind: 'skillSignalsDelete', sourceModule: 'evidence', sourceRef: op.id });
+        continue;
+      }
+      if (op.kind !== 'evidence') continue;
+      const skillIds = op.skillIds ?? [...(evidenceSkills.get(op.value.id) ?? [])];
+      const current = liveSignalsBySource.get(`evidence:${op.value.id}`) ?? [];
+      const desired = deriveEvidenceSignals(op.value, skillIds, atIso);
+      const next = recordSkillSignals(current, desired);
+      if (!next) continue;
+      out.push({
+        kind: 'skillSignals',
+        sourceModule: 'evidence',
+        sourceRef: op.value.id,
+        signals: next,
+        retiredAs: next.length === 0 ? 'revoked' : 'superseded',
+        atIso,
+      });
+    }
+    return out;
+  }
+
+  /** A person's skill profile, computed from their live signals. */
+  const skillProfileOf = (subjectId: string) =>
+    projectSkillProfile(
+      [...(signalSourcesBySubject.get(subjectId) ?? [])].flatMap(
+        (key) => liveSignalsBySource.get(key) ?? []
+      )
+    );
+
+  async function persist(...requested: CoreOp[]): Promise<void> {
+    const ops = [...requested, ...evidenceSignalOps(requested)];
     const keys = new Set<string>();
     for (const op of ops) {
       const key = recordKey(op);
@@ -14054,6 +14144,37 @@ export async function buildApp(
       });
     }
     for (const value of snapshot.messages) applyToReadModel({ kind: 'message', value });
+    // Skill signals (TS-07): load the live ledger, then write signals for any
+    // evidence whose live set does not match it (evidence from before the
+    // ledger existed, or a write the ledger missed). Recomputing from
+    // evidence is the projector's own check.
+    const signalsBySource = new Map<string, SkillSignal[]>();
+    for (const sig of snapshot.skillSignals) {
+      const key = `${sig.sourceModule}:${sig.sourceRef}`;
+      signalsBySource.set(key, [...(signalsBySource.get(key) ?? []), sig]);
+    }
+    for (const [key, signals] of signalsBySource) {
+      const [sourceModule, sourceRef] = key.split(/:(.*)/s) as [
+        SkillSignal['sourceModule'],
+        string,
+      ];
+      applyToReadModel({
+        kind: 'skillSignals',
+        sourceModule,
+        sourceRef,
+        signals,
+        retiredAs: 'superseded',
+        atIso: new Date().toISOString(),
+      });
+    }
+    const missingSignals = evidenceSignalOps(
+      [...evidenceById.values()].map((value) => ({ kind: 'evidence' as const, value }))
+    );
+    if (missingSignals.length > 0) {
+      await storage.core.commit(missingSignals);
+      for (const op of missingSignals) applyToReadModel(op);
+      app.log.info({ sources: missingSignals.length }, 'skill signals reconciled with evidence');
+    }
     // Connections (F-09): oldest first, so each user's list ends newest first
     // as the request route builds it.
     for (const connection of await storage.connections.loadAll()) {
