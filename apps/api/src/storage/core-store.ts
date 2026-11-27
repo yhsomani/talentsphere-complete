@@ -3,6 +3,7 @@ import {
   DomainError,
   type EmploymentReference,
   type Evidence,
+  type ImportBatch,
   type Job,
   type JobApplication,
   type Message,
@@ -145,7 +146,16 @@ export type CoreOp =
       atIso: string;
     }
   /** Erasure: every signal of a source, live or retired. */
-  | { kind: 'skillSignalsDelete'; sourceModule: SkillSignalSource; sourceRef: string };
+  | { kind: 'skillSignalsDelete'; sourceModule: SkillSignalSource; sourceRef: string }
+  /**
+   * Profile import (TS-08, migration 00065): a batch, written in the same
+   * transaction as the records its commit or undo creates or deletes.
+   */
+  | { kind: 'importBatch'; value: ImportBatch; base?: ImportBatch }
+  /** Discard an unconfirmed import, or one whose review window passed. */
+  | { kind: 'importBatchDelete'; id: string }
+  /** Erasure: every import of this account. */
+  | { kind: 'importBatchesDeleteForOwner'; ownerId: string };
 
 export interface CoreSnapshot {
   users: StoredUser[];
@@ -168,6 +178,7 @@ export interface CoreSnapshot {
   messages: Message[];
   /** Live skill signals only. */
   skillSignals: SkillSignal[];
+  importBatches: ImportBatch[];
 }
 
 export interface CoreStore {
@@ -198,6 +209,7 @@ export const emptySnapshot = (): CoreSnapshot => ({
   threadParticipants: [],
   messages: [],
   skillSignals: [],
+  importBatches: [],
 });
 
 /** STORAGE=memory: the Maps are the store. Explicitly not durable. */
@@ -803,6 +815,45 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       );
       return;
     }
+    case 'importBatch': {
+      const b = op.value;
+      const result = await db.query(
+        `INSERT INTO public.import_batches
+           (id, owner_id, source, status, items, ignored, review_expires_at, applied_at,
+            undo_until, undone_at, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12)
+         ON CONFLICT (id) DO UPDATE SET
+           status = EXCLUDED.status, items = EXCLUDED.items, applied_at = EXCLUDED.applied_at,
+           undo_until = EXCLUDED.undo_until, undone_at = EXCLUDED.undone_at,
+           updated_at = EXCLUDED.updated_at
+         WHERE $13::text IS NULL OR import_batches.status = $13::text`,
+        [
+          b.id,
+          b.ownerId,
+          b.source,
+          b.status,
+          JSON.stringify(b.items),
+          JSON.stringify(b.ignored),
+          b.reviewExpiresAt,
+          nullable(b.appliedAt),
+          nullable(b.undoUntil),
+          nullable(b.undoneAt),
+          b.createdAt,
+          b.updatedAt,
+          op.base ? op.base.status : null,
+        ]
+      );
+      assertGuardHeld(op.base !== undefined, result);
+      return;
+    }
+    case 'importBatchDelete': {
+      await db.query('DELETE FROM public.import_batches WHERE id = $1', [op.id]);
+      return;
+    }
+    case 'importBatchesDeleteForOwner': {
+      await db.query('DELETE FROM public.import_batches WHERE owner_id = $1', [op.ownerId]);
+      return;
+    }
     case 'messagesDeleteForProfile': {
       await db.query('DELETE FROM public.messages WHERE sender_id = $1', [op.profileId]);
       await db.query('DELETE FROM public.thread_participants WHERE user_id = $1', [op.profileId]);
@@ -844,6 +895,10 @@ const WRITE_ORDER: Record<CoreOp['kind'], number> = {
   // Signals reference the profile and the skill; they follow their evidence.
   skillSignals: 7,
   skillSignalsDelete: 11,
+  // A batch only names the records it made; it follows them.
+  importBatch: 9,
+  importBatchDelete: 11,
+  importBatchesDeleteForOwner: 11,
 };
 
 export class PgCoreStore implements CoreStore {
@@ -893,6 +948,7 @@ export class PgCoreStore implements CoreStore {
       threadParticipants,
       messages,
       skillSignals,
+      importBatches,
     ] = await Promise.all([
       q('SELECT * FROM public.users ORDER BY created_at, id'),
       q('SELECT * FROM public.profiles ORDER BY created_at, id'),
@@ -922,6 +978,7 @@ export class PgCoreStore implements CoreStore {
       q('SELECT * FROM public.thread_participants ORDER BY created_at, id'),
       q('SELECT * FROM public.messages ORDER BY created_at, id'),
       q(`SELECT * FROM public.skill_signals WHERE status = 'live' ORDER BY created_at, id`),
+      q('SELECT * FROM public.import_batches ORDER BY created_at, id'),
     ]);
 
     const group = (rows: Record<string, any>[], key: string, value: string) => {
@@ -1154,6 +1211,20 @@ export class PgCoreStore implements CoreStore {
         sourceRef: r.source_ref,
         observedAt: isoRequired(r.observed_at),
         createdAt: isoRequired(r.created_at),
+      })),
+      importBatches: importBatches.map((r) => ({
+        id: r.id,
+        ownerId: r.owner_id,
+        source: r.source,
+        status: r.status,
+        items: r.items,
+        ignored: r.ignored ?? {},
+        reviewExpiresAt: isoRequired(r.review_expires_at),
+        appliedAt: iso(r.applied_at),
+        undoUntil: iso(r.undo_until),
+        undoneAt: iso(r.undone_at),
+        createdAt: isoRequired(r.created_at),
+        updatedAt: isoRequired(r.updated_at),
       })),
     };
   }

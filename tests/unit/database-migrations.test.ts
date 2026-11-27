@@ -610,6 +610,24 @@ describe('Moderation people are users (migration 00064, TS-03)', () => {
     expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
   });
 });
+describe('Import batches (migration 00065, TS-08)', () => {
+  it('creates a closed table whose sources and statuses match the domain', async () => {
+    const { IMPORT_SOURCES } = await import('../../packages/domain/src/imports.js');
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00065_import_batches.sql'),
+      'utf8'
+    );
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.import_batches');
+    expect(sql).toContain('REFERENCES public.users(id) ON DELETE CASCADE');
+    expect(sql).toContain('ENABLE ROW LEVEL SECURITY');
+    expect(sql).toContain('REVOKE ALL ON public.import_batches FROM anon, authenticated;');
+    const sources = [.../source IN \(([^)]*)\)/.exec(sql)![1].matchAll(/'([a-z_]+)'/g)].map(
+      (m) => m[1]
+    );
+    expect(sources.sort()).toEqual([...IMPORT_SOURCES].sort());
+    expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');

@@ -369,6 +369,21 @@ import {
   submitEmploymentReference,
   calculateVerificationScoreAndBadge,
   buildWorkHistoryGraph,
+  type ImportBatch,
+  type ImportItem,
+  type ImportSource,
+  parseImport,
+  createImportBatch,
+  reviewImportItems,
+  planImportCommit,
+  applyImportBatch,
+  undoImportBatch,
+  isImportReviewExpired,
+  importCsvTemplate,
+  importedWorkHistoryFields,
+  importedEvidenceFields,
+  existingRecordImportKey,
+  importedRecordInUse,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -376,6 +391,9 @@ import {
   ChangePasswordInputSchema,
   PasswordResetRequestInputSchema,
   PasswordResetConfirmInputSchema,
+  CreateImportInputSchema,
+  CommitImportInputSchema,
+  ImportTemplateParamsSchema,
   UpdateProfileInputSchema,
   CreateEvidenceInputSchema,
   VerifyEvidenceInputSchema,
@@ -1579,6 +1597,10 @@ export async function buildApp(
   // the sources that speak about each subject (profile id).
   const liveSignalsBySource = new Map<string, SkillSignal[]>();
   const signalSourcesBySubject = new Map<string, Set<string>>();
+  // Profile imports (TS-08), and the import each record an applied import
+  // created came from, so the profile can show its source (§10.4 case 7).
+  const importBatchesById = new Map<string, ImportBatch>();
+  const importSourceByRecordId = new Map<string, ImportSource>();
   // In-memory, write-only security/admin event trail: bounded so it cannot
   // grow without limit between restarts (K-06). Not durable (A05-005, owner).
   const auditLogEntries: unknown[] = [];
@@ -10813,6 +10835,8 @@ export async function buildApp(
           { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
           // What they wrote, and their place in every conversation.
           { kind: 'messagesDeleteForProfile', profileId: profile.id },
+          // Imports hold the person's parsed file.
+          { kind: 'importBatchesDeleteForOwner', ownerId: user.id },
         ];
         const erasedHistoryIds: string[] = [];
         const erasedReferenceIds: string[] = [];
@@ -13088,9 +13112,12 @@ export async function buildApp(
   };
 
   // Response projections: replay keys and token hashes never leave the API.
-  const publicWorkHistory = (h: StoredWorkHistory): VerifiedWorkHistory => {
+  const publicWorkHistory = (
+    h: StoredWorkHistory
+  ): VerifiedWorkHistory & { importedFrom?: ImportSource } => {
     const { clientRequestId: _replayKey, ...rest } = h;
-    return rest;
+    const importedFrom = importSourceByRecordId.get(h.id);
+    return importedFrom ? { ...rest, importedFrom } : rest;
   };
   const publicReference = (r: StoredReference): Omit<EmploymentReference, 'token'> => {
     const { tokenHash: _tokenHash, clientRequestId: _replayKey, ...rest } = r;
@@ -13746,6 +13773,243 @@ export async function buildApp(
     }
   );
 
+  // ---------------------------------------------------------------------
+  // Profile import v1 (plan TS-08, ADR-033, FR-PRF-019). The user sends a
+  // JSON Resume or CSV template file's text; it is parsed here (bounded,
+  // text only) and only the parsed entries are kept. Nothing reaches the
+  // profile until the user confirms; confirm and undo are each one
+  // transaction with the records they create or delete.
+  // ---------------------------------------------------------------------
+
+  /** Dedupe keys of everything on the person's profile now (§10.1 rule 4). */
+  const profileImportKeys = (userId: string, profileId: string | undefined): Set<string> => {
+    const keys = new Set<string>();
+    const add = (key: string | null) => key && keys.add(key);
+    for (const h of verifiedWorkHistoriesByCandidateId.get(userId) || []) {
+      add(existingRecordImportKey({ kind: 'workHistory', ...h }));
+    }
+    for (const e of profileId ? evidenceBySubjectId.get(profileId) || [] : []) {
+      add(existingRecordImportKey({ kind: 'evidence', metadata: e.metadata }));
+      for (const skillId of evidenceSkills.get(e.id) ?? []) keys.add(`skill|${skillId}`);
+    }
+    return keys;
+  };
+
+  const ownImportBatch = (userId: string, id: string): ImportBatch => {
+    const batch = importBatchesById.get(id);
+    // Someone else's import is reported as missing, not forbidden.
+    if (
+      !batch ||
+      batch.ownerId !== userId ||
+      isImportReviewExpired(batch, new Date().toISOString())
+    ) {
+      throw new DomainError('NOT_FOUND', 'Import not found.');
+    }
+    return batch;
+  };
+
+  const importView = (batch: ImportBatch, userId: string) => {
+    const nowIso = new Date().toISOString();
+    const reviews =
+      batch.status === 'ready_for_review'
+        ? reviewImportItems(batch.items, {
+            existingKeys: profileImportKeys(userId, profilesByUserId.get(userId)?.id),
+            skills: skillsById.values(),
+            nowIso,
+          })
+        : [];
+    const reviewById = new Map(reviews.map((r) => [r.id, r]));
+    const items = batch.items.map((item) => {
+      const review = reviewById.get(item.id);
+      return {
+        id: item.id,
+        kind: item.kind,
+        payload: item.payload,
+        createdRef: item.createdRef ?? null,
+        review: review
+          ? {
+              suggested: review.suggested,
+              duplicate: review.duplicate,
+              problem: review.problem,
+              skill: review.skillId
+                ? { id: review.skillId, name: skillsById.get(review.skillId)?.name ?? null }
+                : null,
+            }
+          : null,
+      };
+    });
+    return {
+      id: batch.id,
+      source: batch.source,
+      status: batch.status,
+      ignored: batch.ignored,
+      reviewExpiresAt: batch.reviewExpiresAt,
+      appliedAt: batch.appliedAt ?? null,
+      undoUntil: batch.undoUntil ?? null,
+      undoneAt: batch.undoneAt ?? null,
+      createdAt: batch.createdAt,
+      counts: {
+        total: items.length,
+        suggestedAccept: reviews.filter((r) => r.suggested === 'accept').length,
+        duplicates: reviews.filter((r) => r.duplicate).length,
+        added: batch.items.filter((i) => i.createdRef).length,
+      },
+      items,
+    };
+  };
+
+  app.post(
+    '/api/v1/imports',
+    { bodyLimit: 2 * 1024 * 1024 },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = CreateImportInputSchema.parse(req.body);
+      const parsed = parseImport(input.source, input.content);
+      const batch = createImportBatch({ ownerId: session.userId, source: input.source, parsed });
+      await persist({ kind: 'importBatch', value: batch });
+      return reply.status(201).send({ import: importView(batch, session.userId) });
+    }
+  );
+
+  app.get('/api/v1/imports', async (req: FastifyRequest) => {
+    const session = extractUser(req);
+    const nowIso = new Date().toISOString();
+    const mine = [...importBatchesById.values()]
+      .filter((b) => b.ownerId === session.userId && !isImportReviewExpired(b, nowIso))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return {
+      imports: mine.map((b) => ({
+        id: b.id,
+        source: b.source,
+        status: b.status,
+        entries: b.items.length,
+        added: b.items.filter((i) => i.createdRef).length,
+        createdAt: b.createdAt,
+        reviewExpiresAt: b.reviewExpiresAt,
+        undoUntil: b.undoUntil ?? null,
+      })),
+    };
+  });
+
+  // Registered before /imports/:id so "templates" is never read as an id.
+  app.get(
+    '/api/v1/imports/templates/:source',
+    async (req: FastifyRequest<{ Params: { source: string } }>, reply: FastifyReply) => {
+      extractUser(req);
+      const { source } = ImportTemplateParamsSchema.parse(req.params);
+      return reply
+        .header('content-type', 'text/csv; charset=utf-8')
+        .header('content-disposition', `attachment; filename="talentsphere-${source}.csv"`)
+        .send(importCsvTemplate(source));
+    }
+  );
+
+  app.get('/api/v1/imports/:id', async (req: FastifyRequest<{ Params: { id: string } }>) => {
+    const session = extractUser(req);
+    return { import: importView(ownImportBatch(session.userId, req.params.id), session.userId) };
+  });
+
+  app.post(
+    '/api/v1/imports/:id/commit',
+    async (req: FastifyRequest<{ Params: { id: string } }>) => {
+      const session = extractUser(req);
+      const input = CommitImportInputSchema.parse(req.body);
+      const batch = ownImportBatch(session.userId, req.params.id);
+      const profile = profilesByUserId.get(session.userId);
+      const nowIso = new Date().toISOString();
+      const plan = planImportCommit(batch, input.accept, {
+        existingKeys: profileImportKeys(session.userId, profile?.id),
+        skills: skillsById.values(),
+        nowIso,
+      });
+      const ops: CoreOp[] = [];
+      const committed: ImportItem[] = [];
+      for (const { item, skillId } of plan.items) {
+        if (item.kind === 'position') {
+          const history = createWorkHistory({
+            candidateId: session.userId,
+            ...importedWorkHistoryFields(item),
+            nowIso,
+          });
+          ops.push({ kind: 'workHistory', value: history });
+          committed.push({ ...item, createdRef: { type: 'workHistory', id: history.id } });
+          continue;
+        }
+        if (!profile) {
+          throw new DomainError('NOT_FOUND', 'Profile required before importing evidence.');
+        }
+        const fields = importedEvidenceFields(batch, item, {
+          skillName: skillId ? skillsById.get(skillId)?.name : undefined,
+          nowIso,
+        });
+        const evidence = createEvidence({ subjectId: profile.id, ...fields });
+        ops.push({ kind: 'evidence', value: evidence, skillIds: skillId ? [skillId] : [] });
+        committed.push({ ...item, createdRef: { type: 'evidence', id: evidence.id } });
+      }
+      const applied = applyImportBatch(batch, committed, nowIso);
+      await persist(...ops, { kind: 'importBatch', value: applied, base: batch });
+      return {
+        import: importView(applied, session.userId),
+        added: committed.length,
+        skipped: plan.skipped,
+      };
+    }
+  );
+
+  app.post('/api/v1/imports/:id/undo', async (req: FastifyRequest<{ Params: { id: string } }>) => {
+    const session = extractUser(req);
+    const batch = ownImportBatch(session.userId, req.params.id);
+    const ops: CoreOp[] = [];
+    const inUse: string[] = [];
+    for (const item of batch.items) {
+      const ref = item.createdRef;
+      if (!ref) continue;
+      if (ref.type === 'workHistory') {
+        const h = verifiedWorkHistoriesById.get(ref.id);
+        if (!h) continue; // removed by the person since
+        const used = importedRecordInUse({
+          kind: 'workHistory',
+          emailVerifiedAt: h.emailVerifiedAt,
+          verificationStatus: h.verificationStatus,
+          references: (employmentReferencesByHistoryId.get(h.id) || []).length,
+          openEmailCheck: emailChallengesByHistoryId.has(h.id),
+        });
+        if (used) inUse.push(h.id);
+        else ops.push({ kind: 'workHistoryDelete', id: h.id });
+      } else {
+        const e = evidenceById.get(ref.id);
+        if (!e) continue;
+        const attached = (applicationsByCandidateId.get(e.subjectId) || []).some((a) =>
+          a.attachedEvidenceIds.includes(e.id)
+        );
+        const used = importedRecordInUse({
+          kind: 'evidence',
+          status: e.status,
+          verificationLevel: e.verificationLevel,
+          attached,
+        });
+        if (used) inUse.push(e.id);
+        else ops.push({ kind: 'evidenceDelete', id: e.id });
+      }
+    }
+    const undone = undoImportBatch(batch, new Date().toISOString(), inUse);
+    await persist(...ops, { kind: 'importBatch', value: undone, base: batch });
+    return { import: importView(undone, session.userId), removed: ops.length };
+  });
+
+  // Cancel at review: the parsed entries are deleted; nothing was added.
+  app.delete('/api/v1/imports/:id', async (req: FastifyRequest<{ Params: { id: string } }>) => {
+    const session = extractUser(req);
+    const batch = ownImportBatch(session.userId, req.params.id);
+    if (batch.status !== 'ready_for_review') {
+      throw new DomainError('CONFLICT', 'A confirmed import is undone, not discarded.', {
+        reason: 'not_reviewable',
+      });
+    }
+    await persist({ kind: 'importBatchDelete', id: batch.id });
+    return { discarded: true };
+  });
+
   // Emails still queued for a role that no longer exists would send a referee
   // a dead link, and their payloads hold the link token / verification code.
   // Best effort: the deletion has already committed, so a failure here is
@@ -14021,6 +14285,28 @@ export async function buildApp(
         }
         return;
       }
+      case 'importBatch': {
+        importBatchesById.set(op.value.id, op.value);
+        for (const item of op.value.items) {
+          if (!item.createdRef) continue;
+          if (op.value.status === 'applied') {
+            importSourceByRecordId.set(item.createdRef.id, op.value.source);
+          } else importSourceByRecordId.delete(item.createdRef.id);
+        }
+        return;
+      }
+      case 'importBatchDelete':
+        importBatchesById.delete(op.id);
+        return;
+      case 'importBatchesDeleteForOwner':
+        for (const batch of [...importBatchesById.values()]) {
+          if (batch.ownerId !== op.ownerId) continue;
+          importBatchesById.delete(batch.id);
+          for (const item of batch.items) {
+            if (item.createdRef) importSourceByRecordId.delete(item.createdRef.id);
+          }
+        }
+        return;
       case 'messagesDeleteForProfile': {
         for (const [threadId, messages] of messagesByThreadId) {
           const kept: Message[] = [];
@@ -14073,6 +14359,10 @@ export async function buildApp(
         return `workHistory:${op.value.id}`;
       case 'workHistoryDelete':
         return `workHistory:${op.id}`;
+      case 'importBatch':
+        return `importBatch:${op.value.id}`;
+      case 'importBatchDelete':
+        return `importBatch:${op.id}`;
       case 'reference':
         return `reference:${op.value.id}`;
       case 'referenceDelete':
@@ -14125,6 +14415,8 @@ export async function buildApp(
         return emailChallengesByHistoryId.get(op.workHistoryId);
       case 'notification':
         return notificationsById.get(op.value.id);
+      case 'importBatch':
+        return importBatchesById.get(op.value.id);
       default:
         return undefined;
     }
@@ -14272,6 +14564,16 @@ export async function buildApp(
       for (const op of missingSignals) applyToReadModel(op);
       app.log.info({ sources: missingSignals.length }, 'skill signals reconciled with evidence');
     }
+    // Profile imports (TS-08). An unconfirmed import past its review window
+    // is deleted rather than loaded (§10.1 rule 5).
+    const bootIso = new Date().toISOString();
+    const lapsedImports: CoreOp[] = [];
+    for (const value of snapshot.importBatches) {
+      if (isImportReviewExpired(value, bootIso)) {
+        lapsedImports.push({ kind: 'importBatchDelete', id: value.id });
+      } else applyToReadModel({ kind: 'importBatch', value });
+    }
+    if (lapsedImports.length > 0) await storage.core.commit(lapsedImports);
     // Portfolio projects (F-26, plan TS-03): oldest first, as created.
     for (const project of await storage.portfolio.loadAll()) {
       portfolioProjectsById.set(project.id, project);

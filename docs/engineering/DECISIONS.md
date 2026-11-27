@@ -121,6 +121,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-030 | Free-tier services for the pilot, picked from the Free for Developers list | ADR-018, 020, 021, 025, 027 | Documentation; sign-ups are owner steps |
 | ADR-031 | Free security and launch checks (CodeQL, Dependabot, launch scans, mail checks, Pwned Passwords) | Full list review | Settings and checks for the owner; Pwned Passwords PR to follow |
 | ADR-032 | Organization roles decide what a member may do: owners and admins run the organization, recruiters post jobs, hiring managers review candidates, plain members only see jobs | CF-14, CF-45, plan TS-04 | Built (`packages/domain/src/org-roles.ts`) |
+| ADR-033 | Import v1 takes the file's text in the request, parses it in the API and keeps only the parsed entries; entries become unverified claims (roles as work history, the rest as self-declared evidence); undo within 7 days unless a record has been used | plan TS-08, FR-PRF-019 | API built (`packages/domain/src/imports.ts`, migration 00065); review screen next |
 
 ### ADR-017 — Ratify ADR-015: Fastify and PostgreSQL are the architecture of record (issue #46)
 
@@ -404,3 +405,32 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 - `GET /api/v1/organizations/mine` returns each organization's `permissions`, so the hiring page offers only actions the role allows.
 - **Not changed:** CF-16 (the domain layer also wants the account-level `recruiter` role to create jobs) and CF-15 (job approval) stay open.
 - **Verification:** `tests/unit/org-roles-domain.test.ts`, `tests/integration/org-roles.test.ts` (each role against each action, notices), `tests/pg/org-roles.test.ts` (stored roles after a restart, one person with different roles in two organizations), and a Reticle run of the hiring page as a plain member.
+
+### ADR-033 — Profile import v1: text files parsed in the API, entries as unverified claims (plan TS-08)
+
+- **Status:** Accepted 2026-11-27 (delegated). Conservative for privacy: the raw file is never kept, and nothing reaches the profile without the person's confirmation.
+- **Context:** TS-08 brings a person's history in from a JSON Resume file or TalentSphere's CSV templates, with a review screen, commit and undo (§10.4 cases 2, 5, 7). The plan's application flow (§6.2) stores the raw file, scans it and parses it in the worker. The file service (ADR-020) exists, but a deployed API refuses uploads until the owner runs `clamd`, and raw-file expiry is not built.
+
+**How the file reaches the parser**
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| Upload through `/api/v1/files`, parse in the worker (plan §6.2) | One path for every source; heavy parsing off the request | Blocked in production until `clamd` and a bucket exist; needs a raw-file expiry job; a queue round trip for a 20 KB text file |
+| Send the file's text in the request, parse in the API, keep only the parsed entries | Works now; no raw personal file at rest, so retention (case 8) holds by construction; JSON and CSV parsing is bounded and cheap | Differs from §6.2; does not fit PDF, DOCX or ZIP |
+
+**Where entries go when confirmed**
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| New tables for education and certifications | Typed records | A new schema and screens before anyone imports anything |
+| Roles become work history; education, certifications and skills become `self_declaration` evidence with provenance `imported:<source>` | Uses what the profile already shows and verifies; skills feed the signal ledger at the `unverified` rung through the existing evidence path | Education and certifications are evidence rows, told apart by their metadata |
+
+- **Decision:** the second option in both tables. Details:
+  - Limits: 512 KB of text, at most 300 entries per file. JSON Resume sections read: `work`, `education`, `skills` (names and keywords), `certificates`. Other sections are counted, not stored, and `references` (other people's words) is never read (§10.1 rule 6).
+  - Review is computed when the import is read, against the profile as it is then. Duplicates (§10.1 rule 4) and entries with a problem (no start date, an unknown skill) default to skip. A confirm that would add a duplicate, because the profile changed since the review, is refused and the person reviews again (FR-PRF-019).
+  - Confirm is one transaction: the new records, their skill signals, and the batch marked `applied`. Undo is one transaction: deleting those records, and through them their signals. Undo is allowed for 7 days. It is refused when any record has a verified email, a reference, an open email check, a verification or dispute, or is attached to an application, because deleting it would destroy later work.
+  - An unconfirmed import is deleted after 7 days (at boot) or when the person cancels. Account erasure deletes every import in the erasure transaction.
+  - Certificate links are shown as "link provided, not checked" (§10.1 rule 8). Nothing imported is ever above `unverified`.
+  - Imported roles report `importedFrom` on the work-history read; imported evidence carries its provenance (case 7).
+- **Not in v1:** projects, languages and profile basics; "replace" in the diff; skill aliases (the skill must match a canonical name or slug). PDF, DOCX, LinkedIn ZIP and GitHub (TS-11) will use the file service and the worker, as §6.2 describes.
+- **Verification:** `tests/unit/imports-domain.test.ts`, `tests/integration/imports.test.ts` (parse, privacy, problems, confirm with an edit, re-import duplicates, cancel, undo and its in-use refusal, templates and error messages), `tests/pg/imports.test.ts` (review, confirm and undo across restarts, boot purge of a lapsed import, erasure), and the unit migration test for 00065.

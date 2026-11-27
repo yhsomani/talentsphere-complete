@@ -16,7 +16,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 
 | Store | Persisted records / relationship | Read/write behavior |
 | --- | --- | --- |
-| [core-store.ts](../../apps/api/src/storage/core-store.ts) | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`, `skill_signals`; work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model |
+| [core-store.ts](../../apps/api/src/storage/core-store.ts) | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`, `skill_signals`; `import_batches` (00065, TS-08); work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model |
 | [account-store.ts](../../apps/api/src/storage/account-store.ts) | `user_settings`, `data_export_requests`, keyed by account | SQL-backed settings/export history; BYO credentials encrypted with separate AES-GCM key |
 | [erasure-store.ts](../../apps/api/src/storage/erasure-store.ts) | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
 | [saved-search-store.ts](../../apps/api/src/storage/saved-search-store.ts) | `saved_searches` owned by user | Owner-scoped CRUD |
@@ -200,6 +200,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00062_certificate_outlives_enrollment.sql](../../supabase/migrations/00062_certificate_outlives_enrollment.sql) | Makes `course_certificates.enrollment_id` optional with `ON DELETE SET NULL`, so erasing a learner's enrolments no longer deletes their issued certificates (owner #5, TS-03) |
 | [00063_challenge_skills_and_submitted_status.sql](../../supabase/migrations/00063_challenge_skills_and_submitted_status.sql) | Adds `challenge_skills` (closed to client roles) and allows `submitted` in `challenge_submissions.status`, the only status the evaluator gives while code is not executed (TS-03) |
 | [00064_moderation_people_are_users.sql](../../supabase/migrations/00064_moderation_people_are_users.sql) | Re-points `moderation_reports.reporter_id`/`resolved_by` and `moderation_appeals.appellant_id`/`reviewed_by` from `profiles` to `users`, as the API writes and the 00017 RLS policies assume (as 00043 did for work history; TS-03) |
+| [00065_import_batches.sql](../../supabase/migrations/00065_import_batches.sql) | Creates `import_batches` (owner user, source, status `ready_for_review`/`applied`/`undone`, parsed entries as JSONB, review and undo windows; `owner_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated`. The raw file is not stored (ADR-033, TS-08) |
 
 ---
 
