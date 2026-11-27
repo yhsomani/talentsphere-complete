@@ -159,6 +159,7 @@ import {
   PortfolioProject,
   createPortfolioProject,
   updatePortfolioProject,
+  assertPortfolioLinks,
   canViewPortfolioProject,
   Badge,
   UserBadge,
@@ -9898,15 +9899,27 @@ export async function buildApp(
     return reply.status(200).send({ score });
   });
 
-  // Portfolio Showcase Repositories & Endpoints (F-26)
+  // Portfolio Showcase Repositories & Endpoints (F-26). Durable in pg mode:
+  // writes go to storage.portfolio first; the Maps are the read model,
+  // rebuilt at boot (plan TS-03).
   const portfolioProjectsById = new Map<string, PortfolioProject>();
   const portfolioProjectsByUserId = new Map<string, PortfolioProject[]>();
+  const portfolioLinkCheck = (userId: string) => {
+    const profileId = profilesByUserId.get(userId)?.id;
+    return {
+      isSkill: (id: string) => skillsById.has(id),
+      ownsEvidence: (id: string) =>
+        profileId !== undefined && evidenceById.get(id)?.subjectId === profileId,
+    };
+  };
 
   app.post('/api/v1/portfolio/projects', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = CreatePortfolioProjectInputSchema.parse(req.body || {});
 
     const project = createPortfolioProject(session.userId, input);
+    assertPortfolioLinks(project, portfolioLinkCheck(session.userId));
+    await storage.portfolio.save(project);
     portfolioProjectsById.set(project.id, project);
 
     const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
@@ -9977,7 +9990,13 @@ export async function buildApp(
       }
 
       const input = UpdatePortfolioProjectInputSchema.parse(req.body || {});
-      const updated = updatePortfolioProject(project, input);
+      // Update a copy: the read model changes only after the write is stored.
+      const updated = updatePortfolioProject(
+        { ...project, skillIds: [...project.skillIds], evidenceIds: [...project.evidenceIds] },
+        input
+      );
+      assertPortfolioLinks(updated, portfolioLinkCheck(session.userId));
+      await storage.portfolio.save(updated);
       portfolioProjectsById.set(updated.id, updated);
 
       const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
@@ -10015,6 +10034,7 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
       }
 
+      await storage.portfolio.remove(id);
       portfolioProjectsById.delete(id);
 
       const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
@@ -10819,6 +10839,7 @@ export async function buildApp(
         resumeExportsByResumeId.delete(resume.id);
       }
       resumesByUserId.delete(session.userId);
+      await storage.portfolio.eraseUser(session.userId);
       const projects = portfolioProjectsByUserId.get(session.userId) || [];
       for (const project of projects) portfolioProjectsById.delete(project.id);
       portfolioProjectsByUserId.delete(session.userId);
@@ -14176,6 +14197,13 @@ export async function buildApp(
       await storage.core.commit(missingSignals);
       for (const op of missingSignals) applyToReadModel(op);
       app.log.info({ sources: missingSignals.length }, 'skill signals reconciled with evidence');
+    }
+    // Portfolio projects (F-26, plan TS-03): oldest first, as created.
+    for (const project of await storage.portfolio.loadAll()) {
+      portfolioProjectsById.set(project.id, project);
+      const list = portfolioProjectsByUserId.get(project.userId) || [];
+      list.push(project);
+      portfolioProjectsByUserId.set(project.userId, list);
     }
     // Connections (F-09): oldest first, so each user's list ends newest first
     // as the request route builds it.

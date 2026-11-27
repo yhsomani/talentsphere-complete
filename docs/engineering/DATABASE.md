@@ -26,6 +26,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 | [saved-job-store.ts](../../apps/api/src/storage/saved-job-store.ts) | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
 | [application-draft-store.ts](../../apps/api/src/storage/application-draft-store.ts) | `application_drafts`, `application_draft_versions` keyed by candidate profile and job | Draft write and version snapshot in one transaction; a stale `previousVersion` is a `CONFLICT`. The `resume_id` foreign key is dropped (00056) because resumes are still in memory; the API checks resume ownership instead |
 | [connection-store.ts](../../apps/api/src/storage/connection-store.ts) | `connections` between two users | Write-through: SQL first, then the in-memory read model, which is rebuilt from the table at boot. Respond and withdraw are optimistic on `updated_at` (stale write is a `CONFLICT`). One open (pending or accepted) row per unordered pair (00057); closed rows stay as history. Erasure deletes rows the person sent or received |
+| [portfolio-store.ts](../../apps/api/src/storage/portfolio-store.ts) | `portfolio_projects` with their skills, evidence links and media (00011) | Write-through: one transaction saves the project and replaces its child rows, then the in-memory read model, which is rebuilt from the tables at boot. A project may link only canonical skills and its owner's own evidence; media ids are issued by the server. Delete cascades; erasure deletes the owner's projects |
 | [admin-audit-store.ts](../../apps/api/src/storage/admin-audit-store.ts) | `admin_audit_logs` | Append and filtered list; distinct from observability's in-memory sink |
 | [feature-flag-store.ts](../../apps/api/src/storage/feature-flag-store.ts) | `feature_flags` | SQL list/get/upsert; maintenance-mode state is separate |
 | [billing-store.ts](../../apps/api/src/storage/billing-store.ts) | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers` | Transactional state/event writes and customer ownership mapping |
@@ -54,7 +55,7 @@ does not automatically include dedicated stores, Stripe calls or queued jobs.
 transactional outbox guaranteeing delivery of every committed event.
 
 Long-tail modules (courses/enrollments/certificates, challenge sessions, resumes,
-portfolio, analytics, reputation and intelligence) retain Maps even
+analytics, reputation and intelligence) retain Maps even
 where SQL tables exist. Course/challenge routes may persist evidence while their
 originating records disappear on restart. See the
 [route inventory](API_CONTRACTS.md#complete-static-endpoint-index) and
