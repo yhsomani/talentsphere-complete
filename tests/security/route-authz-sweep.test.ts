@@ -289,6 +289,7 @@ describe('SEC: every non-public /api/v1 route requires a valid session (A10-005)
       'apps/api/src/billing-stripe.ts',
       'apps/api/src/file-routes.ts',
       'apps/api/src/skill-routes.ts',
+      'apps/api/src/import-routes.ts',
     ]) {
       const source = readFileSync(file, 'utf8');
       for (const m of source.matchAll(

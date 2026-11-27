@@ -44,7 +44,7 @@ Read `docs/ARCHITECTURE.md` (what is built) before changing code. `docs/SSOT.md`
 ## Where things live
 
 - Pages: `apps/web/src/pages`. Shared UI: `apps/web/src/components` (primitives in `components/ui`).
-- API routes: `apps/api/src/server.ts`, one commented block per feature under `/api/v1`. Modules are moving out one PR at a time (ADR-022): `file-routes.ts`, `skill-routes.ts`.
+- API routes: `apps/api/src/server.ts`, one commented block per feature under `/api/v1`. Modules are moving out one PR at a time (ADR-022): `file-routes.ts`, `skill-routes.ts`, `import-routes.ts`.
 - Request and response schemas: `packages/contracts/src/index.ts`.
 - Business rules and state machines: `packages/domain/src`.
 - Migrations: `supabase/migrations`. Docs index: `docs/INDEX.md` (every document lives under `docs/`, including the generated mind map in `docs/mindmap/`).

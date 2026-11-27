@@ -229,7 +229,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 
 - **Decision:** the third option. Start with modules no open branch touches. Each PR moves routes only, with all suites passing unchanged.
 - **Pattern** (from `apps/api/src/file-routes.ts`): a `registerXRoutes(app, deps)` function in its own file. `deps` passes the shared read-model Maps and helpers in, read-only where the routes only read. A dependency declared later in `buildApp` is passed as a function, so it is read when a request arrives. The file is added to the list `tests/security/route-authz-sweep.test.ts` reads.
-- **Progress:** 2026-11-27, the skill profile, explained job match and career goal routes moved to `apps/api/src/skill-routes.ts`.
+- **Progress:** 2026-11-27, the skill profile, explained job match and career goal routes moved to `apps/api/src/skill-routes.ts` (PR #121), then the seven profile import routes to `apps/api/src/import-routes.ts`.
 
 ### ADR-023 — Course completion is not skill verification (plan P-02)
 
