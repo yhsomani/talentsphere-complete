@@ -8,6 +8,7 @@ import { useSession } from '../lib/SessionContext.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import {
   Button,
+  ButtonLink,
   Badge,
   Card,
   CardHeader,
@@ -51,7 +52,14 @@ interface WorkHistoryEntry {
   verificationScore: number;
   badgeTier: 'none' | 'bronze' | 'silver' | 'gold';
   references?: ReferenceSummary[];
+  /** Set when the role came from an import (TS-08). */
+  importedFrom?: string;
 }
+
+const IMPORT_SOURCE_LABEL: Record<string, string> = {
+  json_resume: 'a JSON Resume file',
+  csv_positions: 'a CSV file',
+};
 
 // Instant feedback only — the server enforces the real policy.
 const DISPOSABLE_DOMAINS = [
@@ -530,15 +538,20 @@ export const EvidencePage: React.FC = () => {
         title="Work history"
         intro="Each role you add gets stronger as you prove it: confirm a work email at that employer, then ask a manager or colleague to vouch for you. Recruiters see how a role was verified — never your private email address."
         actions={
-          <Button
-            data-testid="add-work-history-btn"
-            onClick={() => {
-              setRemoved(null);
-              setIsAddModalOpen(true);
-            }}
-          >
-            + Add a role
-          </Button>
+          <div style={{ display: 'flex', gap: spacing.sm, flexWrap: 'wrap' }}>
+            <ButtonLink to="/import" variant="outline" data-testid="import-link">
+              Import from a file
+            </ButtonLink>
+            <Button
+              data-testid="add-work-history-btn"
+              onClick={() => {
+                setRemoved(null);
+                setIsAddModalOpen(true);
+              }}
+            >
+              + Add a role
+            </Button>
+          </div>
         }
       />
 
@@ -601,6 +614,15 @@ export const EvidencePage: React.FC = () => {
                     {formatDate(item.startDate)} —{' '}
                     {item.isCurrent ? 'Present' : formatDate(item.endDate)}
                   </CardDescription>
+                  {item.importedFrom && (
+                    <div
+                      style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}
+                      data-testid="work-history-imported"
+                    >
+                      Imported from {IMPORT_SOURCE_LABEL[item.importedFrom] ?? 'a file'}, not yet
+                      verified
+                    </div>
+                  )}
                 </div>
                 <div
                   style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flex: 'none' }}
