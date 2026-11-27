@@ -36,7 +36,8 @@ const unreadable = () => new Response('', { status: 401 });
 describe('the sign-in page is told why the session ended', () => {
   beforeEach(() => {
     const local = new MemoryStorage();
-    local.setItem('talentsphere_token', 'a-token');
+    // Signed in: the token itself is an httpOnly cookie the page cannot see (ADR-019).
+    local.setItem('talentsphere_user', JSON.stringify({ id: 'u1' }));
     vi.stubGlobal('localStorage', local);
     vi.stubGlobal('sessionStorage', new MemoryStorage());
     vi.stubGlobal('window', {
@@ -49,7 +50,7 @@ describe('the sign-in page is told why the session ended', () => {
   });
 
   /**
-   * Two requests leave with the token before either answer comes back; the
+   * Two requests leave with the session before either answer comes back; the
    * answers then arrive in the given order, each fully handled before the
    * next is released (so the order is the test's, not the microtask queue's).
    */

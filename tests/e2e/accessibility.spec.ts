@@ -8,7 +8,7 @@
  * order, keyboard reachability, skip link, focus order, reflow, reduced motion.
  */
 import { test, expect } from '@playwright/test';
-import { publishJob } from './fixtures.js';
+import { publishJob, sessionCookie } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -43,9 +43,9 @@ test.beforeEach(async ({ page, request }) => {
   });
   expect(registered.ok()).toBeTruthy();
   const { token, user } = await registered.json();
+  await page.context().addCookies(sessionCookie(token));
   await page.addInitScript(
     (session: { token: string; user: unknown }) => {
-      localStorage.setItem('talentsphere_token', session.token);
       localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
     },
     { token, user }

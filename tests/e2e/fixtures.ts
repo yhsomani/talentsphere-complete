@@ -6,6 +6,26 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
 
 export const API_BASE = process.env.E2E_API_BASE ?? 'http://127.0.0.1:4000/api/v1';
+
+/**
+ * The httpOnly session cookie the API sets on sign-in (ADR-019), for seeding
+ * a browser context: the web app keeps no token of its own.
+ */
+export const sessionCookie = (token: string) => [
+  {
+    name: 'ts_session',
+    value: token,
+    domain: '127.0.0.1',
+    path: '/api',
+    httpOnly: true,
+    sameSite: 'Lax' as const,
+  },
+];
+
+/** The session cookie this browser context holds, if any. */
+export async function sessionCookieValue(page: Page): Promise<string | undefined> {
+  return (await page.context().cookies()).find((c) => c.name === 'ts_session')?.value;
+}
 export const PASSWORD = 'Password123!Secure';
 
 export interface TestAccount {
@@ -35,15 +55,15 @@ export async function registerAccount(
 }
 
 /**
- * Seed a session into localStorage on the app origin. Done once (not via
+ * Seed a session (the cookie plus the signed-in marker) on the app origin. Done once (not via
  * addInitScript) so a test that expects the session to be CLEARED — a 401
  * redirect, sign-out — is not undone by the next navigation.
  */
 export async function useSession(page: Page, account: TestAccount): Promise<void> {
   await page.goto('/privacy');
+  await page.context().addCookies(sessionCookie(account.token));
   await page.evaluate(
     (session: { token: string; user: unknown }) => {
-      localStorage.setItem('talentsphere_token', session.token);
       localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
     },
     { token: account.token, user: account.user }

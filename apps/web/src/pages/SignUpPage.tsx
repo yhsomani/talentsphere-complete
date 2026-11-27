@@ -79,7 +79,7 @@ export const SignUpPage: React.FC = () => {
         });
         return;
       }
-      storeSession(body.token, body.user);
+      storeSession(body.user);
       navigate(role === 'recruiter' ? '/hiring' : '/dashboard', { replace: true });
     } catch {
       setError({ message: 'Could not reach TalentSphere. Check your connection and try again.' });

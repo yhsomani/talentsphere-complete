@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
-import { getToken } from './lib/session.js';
+import { hasSession } from './lib/session.js';
 import { SessionProvider } from './lib/SessionContext.js';
 import { Layout } from './components/Layout.js';
 import { LandingPage } from './pages/LandingPage.js';
@@ -33,13 +33,13 @@ import { VerifyPage } from './pages/VerifyPage.js';
 import { CoursePage } from './pages/CoursePage.js';
 import { CareerPage } from './pages/CareerPage.js';
 
-// QW-04: authenticated workspaces are reachable only with a session token;
+// QW-04: authenticated workspaces are reachable only with a session;
 // anyone else is sent to /login with the requested destination preserved in
 // ?return= (SSOT auth contract), so signing in resumes the deep link instead
 // of silently dropping the user on /dashboard.
 const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const location = useLocation();
-  if (getToken()) return children;
+  if (hasSession()) return children;
   const from = `${location.pathname}${location.search}`;
   return <Navigate to={`/login?return=${encodeURIComponent(from)}`} replace />;
 };

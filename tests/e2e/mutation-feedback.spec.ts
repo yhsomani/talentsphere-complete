@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { APIRequestContext, Page, Route } from '@playwright/test';
-import { publishJob, type PublishedJob } from './fixtures.js';
+import { publishJob, sessionCookie, sessionCookieValue, type PublishedJob } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -71,9 +71,9 @@ async function mintSession(page: Page, request: APIRequestContext, label: string
   // /login — an init script would re-plant the token on every navigation and
   // fake a session the server had already rejected.
   await page.goto('/');
+  await page.context().addCookies(sessionCookie(token));
   await page.evaluate(
     (session: { token: string; user: unknown }) => {
-      localStorage.setItem('talentsphere_token', session.token);
       localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
     },
     { token, user }
@@ -486,7 +486,7 @@ test.describe('MUT: reconciliation, idempotency keys and session truthfulness', 
 
     await page.waitForURL(/\/login\?return=/);
     expect(decodeURIComponent(page.url())).toContain(`/jobs/${job.jobId}`);
-    expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('talentsphere_user'))).toBeNull();
   });
 
   test('applied state is restored from the server after a reload (hydration)', async ({
@@ -495,7 +495,7 @@ test.describe('MUT: reconciliation, idempotency keys and session truthfulness', 
   }) => {
     await mintSession(page, request, 'apply-hydrate');
     // A REAL application, made through the API — not an intercepted one.
-    const token = await page.evaluate(() => localStorage.getItem('talentsphere_token'));
+    const token = await sessionCookieValue(page);
     const applied = await request.post(`${API_BASE}/jobs/${job.jobId}/apply`, {
       headers: { authorization: `Bearer ${token}` },
       data: {},

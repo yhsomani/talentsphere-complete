@@ -12,6 +12,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { sessionCookie } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 const BASELINE_DIR = 'test-results/performance';
@@ -62,9 +63,9 @@ test.describe('PERF: Route startup baseline', () => {
     });
     expect(registered.status()).toBe(201);
     const { token, user } = await registered.json();
+    await page.context().addCookies(sessionCookie(token));
     await page.addInitScript(
       (session: { token: string; user: unknown }) => {
-        localStorage.setItem('talentsphere_token', session.token);
         localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
       },
       { token, user }
@@ -166,9 +167,9 @@ test.describe('PERF: Interaction latency baseline', () => {
     });
     expect(registered.status()).toBe(201);
     const { token, user } = await registered.json();
+    await page.context().addCookies(sessionCookie(token));
     await page.addInitScript(
       (session: { token: string; user: unknown }) => {
-        localStorage.setItem('talentsphere_token', session.token);
         localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
       },
       { token, user }
@@ -238,9 +239,9 @@ test.describe('PERF: Layout stability', () => {
       });
       const page = await context.newPage();
       await page.goto('/privacy');
+      await page.context().addCookies(sessionCookie(account.token));
       await page.evaluate(
         (s) => {
-          localStorage.setItem('talentsphere_token', s.token);
           localStorage.setItem('talentsphere_user', JSON.stringify(s.user));
         },
         { token: account.token, user: account.user }
