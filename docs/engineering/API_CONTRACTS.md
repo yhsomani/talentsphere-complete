@@ -206,7 +206,7 @@ all downstream state survives restart. Some `E` routes also write durable rows.
 Three Stripe paths have conditional disabled-mode registrations and enabled-mode
 implementations; they are listed once.
 
-Measured: 290 literal registrations, 287 unique method/path pairs; 119 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 119 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27), the skill profile route with migration 00060 (2026-11-27), and the six portfolio routes with `portfolio-store.ts` over the 00011 tables (plan TS-03, 2026-11-27, no new migration), and the fourteen course, progress and certificate routes with `lms-store.ts` over the 00005 tables and migration 00062 (plan TS-03, 2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
+Measured: 290 literal registrations, 287 unique method/path pairs; 124 of them in `DURABLE_ROUTES` and 4 in `STATELESS_ROUTES` (registry sizes 124 and 4). The five application-draft routes moved from `E` to `P` with migration 00056 (PR #87, 2026-11-25), the two job-alert routes with `job-alert-store.ts` (PR #92, 2026-11-25, no new migration), the six connection routes with migration 00057 (2026-11-25), the two password reset routes were added as `P` with migration 00058, the five file routes (in `apps/api/src/file-routes.ts`) with migration 00059 (2026-11-27), the skill profile route with migration 00060 (2026-11-27), and the six portfolio routes with `portfolio-store.ts` over the 00011 tables (plan TS-03, 2026-11-27, no new migration), and the fourteen course, progress and certificate routes with `lms-store.ts` over the 00005 tables and migration 00062 (plan TS-03, 2026-11-27), and the five challenge routes with `challenge-store.ts` over the 00004 tables and migration 00063 (plan TS-03, 2026-11-27); re-counted from `apps/api/src/durability.ts` on 2026-11-27.
 
 | Method and path | Request schema | Registry |
 | --- | --- | --- |
@@ -308,11 +308,11 @@ Measured: 290 literal registrations, 287 unique method/path pairs; 119 of them i
 | `POST /api/v1/reputation/organizations/:organizationId/reviews` | `SubmitEmployerReviewInputSchema` | E |
 | `POST /api/v1/reputation/organizations/:organizationId/metrics` | `SubmitEmployerMetricsInputSchema` | E |
 | `GET /api/v1/reputation/organizations/:organizationId/reviews` | handler | E |
-| `GET /api/v1/challenges` | handler | E |
-| `GET /api/v1/challenges/:id` | handler | E |
-| `POST /api/v1/challenges` | `CreateChallengeInputSchema` | E |
-| `POST /api/v1/challenges/:id/start-session` | handler | E |
-| `POST /api/v1/challenges/:id/submit` | `SubmitChallengeSolutionInputSchema` | E |
+| `GET /api/v1/challenges` | handler | P |
+| `GET /api/v1/challenges/:id` | handler | P |
+| `POST /api/v1/challenges` | `CreateChallengeInputSchema` | P |
+| `POST /api/v1/challenges/:id/start-session` | handler | P |
+| `POST /api/v1/challenges/:id/submit` | `SubmitChallengeSolutionInputSchema` | P |
 | `POST /api/v1/ai/assistant/query` | `AIAssistantQueryInputSchema` | E |
 | `GET /api/v1/xp/ledger` | handler | E |
 | `GET /api/v1/courses` | handler || P |

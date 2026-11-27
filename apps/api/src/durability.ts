@@ -119,6 +119,13 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'GET /api/v1/certificates/verify/:hash',
   'GET /api/v1/certificates/my',
   'POST /api/v1/certificates/:certificateNumber/revoke',
+  // Coding challenges, assessment sessions and submissions (migrations 00004,
+  // 00063; plan TS-03). XP awards are still in memory.
+  'GET /api/v1/challenges',
+  'GET /api/v1/challenges/:id',
+  'POST /api/v1/challenges',
+  'POST /api/v1/challenges/:id/start-session',
+  'POST /api/v1/challenges/:id/submit',
   // Portfolio projects (migration 00011; plan TS-03).
   'POST /api/v1/portfolio/projects',
   'GET /api/v1/portfolio/projects',

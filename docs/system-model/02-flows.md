@@ -15,7 +15,7 @@ Evidence: Read (storage and worker investigation). `ARCHITECTURE.md` was compare
 ```mermaid
 flowchart LR
   Browser["Browser PWA<br/>apps/web (React 19)"] -->|"fetch /api/v1, Bearer token"| API["Fastify API<br/>apps/api (single writer)"]
-  API -->|"pg Pool, persist() one transaction"| PG[("PostgreSQL<br/>62 migrations")]
+  API -->|"pg Pool, persist() one transaction"| PG[("PostgreSQL<br/>63 migrations")]
   API -->|"enqueue background_jobs"| PG
   Worker["Worker<br/>apps/worker"] -->|"claim FOR UPDATE SKIP LOCKED"| PG
   Worker -->|"send email (Brevo adapter)"| Mail["Email provider"]

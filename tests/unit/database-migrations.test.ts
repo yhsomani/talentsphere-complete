@@ -562,6 +562,33 @@ describe('Certificate outlives its enrolment (migration 00062, TS-03)', () => {
     expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
   });
 });
+describe('Challenge skills and submitted status (migration 00063, TS-03)', () => {
+  it('adds a closed join table and lets a submission be stored as submitted', () => {
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00063_challenge_skills_and_submitted_status.sql'),
+      'utf8'
+    );
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.challenge_skills');
+    expect(sql).toContain('REFERENCES public.challenges(id) ON DELETE CASCADE');
+    expect(sql).toContain('REVOKE ALL ON public.challenge_skills FROM anon, authenticated;');
+    const statuses = /status IN \(([^)]*)\)/
+      .exec(sql)![1]
+      .match(/'([a-z_]+)'/g)!
+      .map((v) => v.slice(1, -1));
+    // Every status the 00004 check allowed is still allowed.
+    expect(statuses).toEqual(
+      expect.arrayContaining([
+        'passed',
+        'failed',
+        'compilation_error',
+        'runtime_error',
+        'timed_out',
+      ])
+    );
+    expect(statuses).toContain('submitted');
+    expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');
