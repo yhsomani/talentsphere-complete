@@ -5233,11 +5233,19 @@ export async function buildApp(
       updatedAt: now,
     };
 
+    const skillIds = Array.from(new Set(input.skillIds ?? []));
+    // An unknown skill would fail the stored foreign key (BR-144).
+    for (const skillId of skillIds) {
+      if (!skillsById.has(skillId)) {
+        throw new DomainError('NOT_FOUND', `Canonical skill ${skillId} does not exist (BR-144).`);
+      }
+    }
+    await storage.lms.saveCourse(course, skillIds);
     coursesById.set(course.id, course);
     coursesBySlug.set(course.slug, course);
 
-    if (input.skillIds && input.skillIds.length > 0) {
-      courseSkillsByCourseId.set(course.id, input.skillIds);
+    if (skillIds.length > 0) {
+      courseSkillsByCourseId.set(course.id, skillIds);
     }
 
     return reply.status(201).send({ course });
@@ -5326,6 +5334,7 @@ export async function buildApp(
         updatedAt: now,
       };
 
+      await storage.lms.saveModule(module);
       courseModulesById.set(module.id, module);
       return reply.status(201).send({ module });
     }
@@ -5386,6 +5395,7 @@ export async function buildApp(
         updatedAt: now,
       };
 
+      await storage.lms.saveLesson(lesson);
       lessonsById.set(lesson.id, lesson);
       return reply.status(201).send({ lesson });
     }
@@ -5423,8 +5433,13 @@ export async function buildApp(
         );
       }
 
-      course.status = 'published';
-      course.updatedAt = new Date().toISOString();
+      const published: Course = {
+        ...course,
+        status: 'published',
+        updatedAt: new Date().toISOString(),
+      };
+      await storage.lms.saveCourse(published);
+      Object.assign(course, published);
 
       return reply.status(200).send({
         message: 'Course published successfully',
@@ -5456,6 +5471,7 @@ export async function buildApp(
       const existingEnrollments = Array.from(enrollmentsById.values());
       const enrollment = enrollUserInCourse(existingEnrollments, profile.id, course);
 
+      await storage.lms.saveEnrollment(enrollment);
       enrollmentsById.set(enrollment.id, enrollment);
       enrollmentsByUserAndCourse.set(`${profile.id}:${course.id}`, enrollment);
 
@@ -5590,16 +5606,15 @@ export async function buildApp(
         status: 'completed',
         completedAt: now,
       };
-      lessonProgressByEnrollmentAndLesson.set(progressKey, progress);
       completedLessonIds.add(lesson.id);
 
-      // Calculate new progress percentage
-      const newProgressPercent = calculateCourseProgress(
-        courseLessons.length,
-        completedLessonIds.size
-      );
-      enrollment.progressPercent = newProgressPercent;
-      enrollment.updatedAt = now;
+      // Calculate new progress percentage. The enrolment changes on a copy
+      // until the store has the write.
+      const next: CourseEnrollment = {
+        ...enrollment,
+        progressPercent: calculateCourseProgress(courseLessons.length, completedLessonIds.size),
+        updatedAt: now,
+      };
 
       let certificate: CourseCertificate | undefined;
       let awardedXp = 0;
@@ -5607,8 +5622,8 @@ export async function buildApp(
       // Check course completion (BR-23, BR-48)
       const isCompleted = completedLessonIds.size === courseLessons.length;
       if (isCompleted && enrollment.status !== 'completed') {
-        enrollment.status = 'completed';
-        enrollment.completedAt = now;
+        next.status = 'completed';
+        next.completedAt = now;
 
         // Record the completion as evidence in the Talent Graph (BR-23); its
         // level is a domain rule (unverified: nothing was assessed) (C-20).
@@ -5632,6 +5647,14 @@ export async function buildApp(
 
         // Mint zero-PII certificate (BR-150)
         certificate = mintCourseCertificate(enrollment.id, profile.id, course, evidence.id);
+      }
+
+      // Progress, enrolment and any certificate are stored together (TS-03).
+      await storage.lms.recordLessonCompletion(progress, next, certificate);
+      lessonProgressByEnrollmentAndLesson.set(progressKey, progress);
+      Object.assign(enrollment, next);
+
+      if (certificate) {
         certificatesByNumber.set(certificate.certificateNumber, certificate);
         certificatesByEnrollmentId.set(enrollment.id, certificate);
         certificatesByProofHash.set(certificate.verificationProofHash, certificate);
@@ -5816,9 +5839,10 @@ export async function buildApp(
         coursesById.get(cert.courseId)
       );
 
+      await storage.lms.saveCertificate(revoked);
       certificatesByNumber.set(revoked.certificateNumber, revoked);
       certificatesByProofHash.set(revoked.verificationProofHash, revoked);
-      certificatesByEnrollmentId.set(revoked.enrollmentId, revoked);
+      if (revoked.enrollmentId) certificatesByEnrollmentId.set(revoked.enrollmentId, revoked);
 
       auditLogs.push({
         event: 'certificate.revoked',
@@ -10924,11 +10948,18 @@ export async function buildApp(
       // Application drafts are keyed by PROFILE id and read only by their owner.
       await storage.applicationDrafts.eraseCandidate(profile.id);
       // Course enrolments (keyed `${profileId}:${courseId}`) and their lesson
-      // progress. Issued certificates stay: public verification (owner #5).
+      // progress. Issued certificates stay: public verification (owner #5),
+      // no longer linked to an enrolment (00062).
+      await storage.lms.eraseLearner(profile.id);
       for (const [key, enrollment] of enrollmentsByUserAndCourse) {
         if (!key.startsWith(`${profile.id}:`)) continue;
         enrollmentsById.delete(enrollment.id);
         enrollmentsByUserAndCourse.delete(key);
+        const certificate = certificatesByEnrollmentId.get(enrollment.id);
+        if (certificate) {
+          certificate.enrollmentId = null;
+          certificatesByEnrollmentId.delete(enrollment.id);
+        }
         for (const progressKey of lessonProgressByEnrollmentAndLesson.keys()) {
           if (progressKey.startsWith(`${enrollment.id}:`)) {
             lessonProgressByEnrollmentAndLesson.delete(progressKey);
@@ -14204,6 +14235,36 @@ export async function buildApp(
       const list = portfolioProjectsByUserId.get(project.userId) || [];
       list.push(project);
       portfolioProjectsByUserId.set(project.userId, list);
+    }
+    // Courses and learning progress (F-07, plan TS-03).
+    const lms = await storage.lms.loadAll();
+    for (const course of lms.courses) {
+      coursesById.set(course.id, course);
+      coursesBySlug.set(course.slug, course);
+    }
+    for (const { courseId, skillId } of lms.courseSkills) {
+      courseSkillsByCourseId.set(courseId, [
+        ...(courseSkillsByCourseId.get(courseId) ?? []),
+        skillId,
+      ]);
+    }
+    for (const module of lms.modules) courseModulesById.set(module.id, module);
+    for (const lesson of lms.lessons) lessonsById.set(lesson.id, lesson);
+    for (const enrollment of lms.enrollments) {
+      enrollmentsById.set(enrollment.id, enrollment);
+      enrollmentsByUserAndCourse.set(`${enrollment.userId}:${enrollment.courseId}`, enrollment);
+    }
+    for (const progress of lms.progress) {
+      lessonProgressByEnrollmentAndLesson.set(
+        `${progress.enrollmentId}:${progress.lessonId}`,
+        progress
+      );
+    }
+    for (const certificate of lms.certificates) {
+      certificatesByNumber.set(certificate.certificateNumber, certificate);
+      certificatesByProofHash.set(certificate.verificationProofHash, certificate);
+      if (certificate.enrollmentId)
+        certificatesByEnrollmentId.set(certificate.enrollmentId, certificate);
     }
     // Connections (F-09): oldest first, so each user's list ends newest first
     // as the request route builds it.

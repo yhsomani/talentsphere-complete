@@ -547,6 +547,21 @@ describe('Job experience level (migration 00061, TS-09)', () => {
     expect(sql).not.toMatch(/NOT NULL|DROP |DELETE FROM|TRUNCATE|UPDATE public/i);
   });
 });
+describe('Certificate outlives its enrolment (migration 00062, TS-03)', () => {
+  it('makes the enrolment link optional and nulls it instead of deleting the certificate', () => {
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00062_certificate_outlives_enrollment.sql'),
+      'utf8'
+    );
+    expect(sql).toContain(
+      'ALTER TABLE public.course_certificates ALTER COLUMN enrollment_id DROP NOT NULL;'
+    );
+    expect(sql).toMatch(
+      /FOREIGN KEY \(enrollment_id\) REFERENCES public\.course_enrollments\(id\) ON DELETE SET NULL/
+    );
+    expect(sql).not.toMatch(/DROP TABLE|DROP COLUMN|DELETE FROM|TRUNCATE|UPDATE public/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');

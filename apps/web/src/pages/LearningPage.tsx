@@ -81,10 +81,6 @@ export const LearningPage: React.FC = () => {
   return (
     <div>
       <PageHeader title="Learning" intro="Courses that build the skills employers ask for." />
-      {/* shortcut: this module keeps data in server memory, a restart clears it, upgrade when moved to durable storage */}
-      <Notice tone="info" style={{ marginBottom: spacing.lg }} data-testid="ephemeral-notice">
-        This page is not saved permanently yet. A server restart clears your enrolments.
-      </Notice>
 
       <Card style={{ marginBottom: spacing.lg }}>
         <CardContent style={{ padding: spacing.lg }}>
