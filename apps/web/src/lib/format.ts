@@ -96,6 +96,11 @@ export function evidenceStatusLabel(ev: { status: string; verificationLevel: str
     : ev.verificationLevel.replace('_', ' ');
 }
 
+// How strongly a skill is shown, by its strongest rung (the evidence levels).
+export function skillRungLabel(rung: string): string {
+  return rung === 'unverified' ? 'self-reported' : rung.replace('_', ' ');
+}
+
 const WORK_MODE_LABELS: Record<string, string> = {
   remote: 'Remote',
   hybrid: 'Hybrid',

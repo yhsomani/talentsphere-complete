@@ -557,7 +557,7 @@ Where it differs from the design above, on purpose:
 - The profile is computed on read from live signals, so case (3) holds by construction and `skill_profiles` is deferred until a reader needs it stored.
 - Signals are written in the writer's transaction, so no outbox is needed for them.
 
-Case (2) is tested for the profile (`tests/integration/skill-profile.test.ts`, `tests/pg/skill-signals.test.ts`). The match half of cases (1) and (2) is TS-13, and executed challenges do not exist yet.
+Case (2) is tested for the profile (`tests/integration/skill-profile.test.ts`, `tests/pg/skill-signals.test.ts`). The match half of case (2) is tested too (`tests/integration/job-match.test.ts`): a posting's match lists each required skill with the evidence it rests on, verifying the evidence raises it and revoking it removes it. The match has no score, on purpose: it says what was shown and how, not a number. Case (1) waits for executed challenges, which do not exist yet.
 
 ### 7.3 Module dependencies (build order)
 
@@ -946,7 +946,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-10 | Session cookie and password reset | Issue #44 | Token not readable by page script; reset e2e | T-029 | IMPLEMENTED (ADR-019; reset emails reach people once live email is set up) |
 | TS-11 | Import v2: resume PDF and DOCX parser, LinkedIn export ZIP, GitHub OAuth | TS-08, TS-10 | §10.4 cases 1, 3, 4, 6, 8 | T-030 | PROPOSED |
 | TS-12 | Split `server.ts` into module plugins, no behavior change | — | All suites pass unchanged | T-031 | **NEEDS OWNER** |
-| TS-13 | Goals, gaps and explained matching from the profile | TS-07 | §6.5 flow e2e; explanation names signals | T-032 | PROPOSED |
+| TS-13 | Goals, gaps and explained matching from the profile | TS-07 | §6.5 flow e2e; explanation names signals | T-032 | IN_PROGRESS: explained job match built (`GET /api/v1/jobs/:id/match`, job page); goals and gap plan next |
 | TS-14 | Isolated code runner and executed challenges | Issue #49 | §6.3 flow; sandbox escape tests | T-013 | **NEEDS OWNER** |
 
 The slices that need no owner input can start now in this order: TS-07, TS-04, TS-09, TS-03, then TS-08 once TS-06 is approved (TS-02 shipped in PR #101; TS-05 turned out to exist already).

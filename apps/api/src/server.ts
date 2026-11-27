@@ -81,6 +81,7 @@ import {
   type OrgAction,
   recordSkillSignals,
   projectSkillProfile,
+  explainSkillMatch,
   type SkillSignal,
   disputeEvidence,
   revokeEvidence,
@@ -2382,6 +2383,40 @@ export async function buildApp(
       const skills = job.requiredSkillIds.map((sid) => skillsById.get(sid)).filter(Boolean);
 
       return reply.status(200).send({ job, organization: org, requiredSkills: skills });
+    }
+  );
+
+  // TS-13 explained match: how the signed-in person's skill profile meets this
+  // posting's required skills, skill by skill, naming the records each rests
+  // on. No score. Visible on the same terms as the posting itself.
+  app.get(
+    '/api/v1/jobs/:id/match',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const job = jobsById.get(id);
+      if (!job || (job.status !== 'published' && !canInOrg(session, job.orgId, 'view_jobs'))) {
+        throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+      }
+      const profile = profilesByUserId.get(session.userId);
+      const match = explainSkillMatch(
+        job.requiredSkillIds,
+        profile ? skillProfileOf(profile.id) : []
+      );
+      return reply.status(200).send({
+        ...match,
+        skills: match.skills.map((entry) => ({
+          ...entry,
+          name: skillsById.get(entry.skillId)?.name ?? null,
+          sources: entry.sources.map((source) => ({
+            ...source,
+            title:
+              source.sourceModule === 'evidence'
+                ? (evidenceById.get(source.sourceRef)?.title ?? null)
+                : null,
+          })),
+        })),
+      });
     }
   );
 
