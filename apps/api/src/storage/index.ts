@@ -26,6 +26,7 @@ import {
 } from './password-reset-store.js';
 import { MemoryFileStore, PgFileStore, type FileStore } from './file-store.js';
 import { MemoryPortfolioStore, PgPortfolioStore, type PortfolioStore } from './portfolio-store.js';
+import { MemoryLmsStore, PgLmsStore, type LmsStore } from './lms-store.js';
 import {
   MemoryAdminAuditStore,
   PgAdminAuditStore,
@@ -102,6 +103,8 @@ export interface Storage {
   readonly files: FileStore;
   /** Portfolio projects (F-26, migration 00011; plan TS-03). */
   readonly portfolio: PortfolioStore;
+  /** Courses, enrolments, lesson progress and certificates (F-07, 00005/00021/00062; plan TS-03). */
+  readonly lms: LmsStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -142,6 +145,7 @@ class PgStorage implements Storage {
   readonly passwordResets: PasswordResetStore;
   readonly files: FileStore;
   readonly portfolio: PortfolioStore;
+  readonly lms: LmsStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -187,6 +191,7 @@ class PgStorage implements Storage {
     this.passwordResets = new PgPasswordResetStore(this.pool);
     this.files = new PgFileStore(this.pool);
     this.portfolio = new PgPortfolioStore(this.pool);
+    this.lms = new PgLmsStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -311,6 +316,7 @@ class MemoryStorage implements Storage {
   readonly passwordResets: PasswordResetStore = new MemoryPasswordResetStore();
   readonly files: FileStore = new MemoryFileStore();
   readonly portfolio: PortfolioStore = new MemoryPortfolioStore();
+  readonly lms: LmsStore = new MemoryLmsStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

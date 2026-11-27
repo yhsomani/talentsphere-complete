@@ -67,7 +67,8 @@ export interface LessonProgress {
 
 export interface CourseCertificate {
   id: string;
-  enrollmentId: string;
+  /** Null once the learner's enrolment is erased; the certificate stays verifiable (00062). */
+  enrollmentId: string | null;
   userId: string;
   courseId: string;
   certificateNumber: string;

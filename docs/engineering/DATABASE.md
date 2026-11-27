@@ -27,6 +27,7 @@ pooling cannot be assumed compatible with this session-scoped lease.
 | [application-draft-store.ts](../../apps/api/src/storage/application-draft-store.ts) | `application_drafts`, `application_draft_versions` keyed by candidate profile and job | Draft write and version snapshot in one transaction; a stale `previousVersion` is a `CONFLICT`. The `resume_id` foreign key is dropped (00056) because resumes are still in memory; the API checks resume ownership instead |
 | [connection-store.ts](../../apps/api/src/storage/connection-store.ts) | `connections` between two users | Write-through: SQL first, then the in-memory read model, which is rebuilt from the table at boot. Respond and withdraw are optimistic on `updated_at` (stale write is a `CONFLICT`). One open (pending or accepted) row per unordered pair (00057); closed rows stay as history. Erasure deletes rows the person sent or received |
 | [portfolio-store.ts](../../apps/api/src/storage/portfolio-store.ts) | `portfolio_projects` with their skills, evidence links and media (00011) | Write-through: one transaction saves the project and replaces its child rows, then the in-memory read model, which is rebuilt from the tables at boot. A project may link only canonical skills and its owner's own evidence; media ids are issued by the server. Delete cascades; erasure deletes the owner's projects |
+| [lms-store.ts](../../apps/api/src/storage/lms-store.ts) | `courses`, `course_skills`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates` (00005, 00021, 00062) | Write-through: SQL first, then the in-memory read model, which is rebuilt from the tables at boot. A lesson's progress, the enrolment it updates and any certificate it earns are written in one transaction; the completion evidence is written just before through `persist()`. A course may link only canonical skills. Erasure deletes the learner's enrolments and progress; their certificates stay verifiable with the enrolment link set to NULL (00062). XP and learning-impact records are still in memory |
 | [admin-audit-store.ts](../../apps/api/src/storage/admin-audit-store.ts) | `admin_audit_logs` | Append and filtered list; distinct from observability's in-memory sink |
 | [feature-flag-store.ts](../../apps/api/src/storage/feature-flag-store.ts) | `feature_flags` | SQL list/get/upsert; maintenance-mode state is separate |
 | [billing-store.ts](../../apps/api/src/storage/billing-store.ts) | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers` | Transactional state/event writes and customer ownership mapping |
@@ -54,7 +55,7 @@ does not automatically include dedicated stores, Stripe calls or queued jobs.
 `dispatchJob` follows committed effects and logs enqueue failures. There is no
 transactional outbox guaranteeing delivery of every committed event.
 
-Long-tail modules (courses/enrollments/certificates, challenge sessions, resumes,
+Long-tail modules (challenge sessions, resumes, XP, learning impact,
 analytics, reputation and intelligence) retain Maps even
 where SQL tables exist. Course/challenge routes may persist evidence while their
 originating records disappear on restart. See the
@@ -194,6 +195,7 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00059_files.sql](../../supabase/migrations/00059_files.sql) | Creates `files` (owner, purpose, type, size, SHA-256, name, storage key, scan status; `owner_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (ADR-020) |
 | [00060_skill_signals.sql](../../supabase/migrations/00060_skill_signals.sql) | Creates `skill_signals` (subject profile, skill, rung, source, status `live`/`superseded`/`revoked`; one live row per source and skill; `subject_id` cascades); RLS enabled with no client policy; revokes `anon`/`authenticated` (TS-07) |
 | [00061_job_experience_level.sql](../../supabase/migrations/00061_job_experience_level.sql) | Adds nullable `jobs.experience_level` with a check for `fresher`, `junior`, `mid`, `senior` (TS-09) |
+| [00062_certificate_outlives_enrollment.sql](../../supabase/migrations/00062_certificate_outlives_enrollment.sql) | Makes `course_certificates.enrollment_id` optional with `ON DELETE SET NULL`, so erasing a learner's enrolments no longer deletes their issued certificates (owner #5, TS-03) |
 
 ---
 
