@@ -5,6 +5,7 @@
 
 export * from './auth.js';
 export * from './files.js';
+export * from './skill-signals.js';
 export * from './profile.js';
 export * from './evidence.js';
 export * from './skills.js';

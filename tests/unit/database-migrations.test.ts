@@ -501,6 +501,30 @@ describe('Uploaded files (migration 00059, ADR-020)', () => {
   });
 });
 
+describe('Skill-signal ledger (migration 00060, TS-07)', () => {
+  it('matches the domain sources and rungs, keeps one live signal per source and skill, and is closed to client roles', async () => {
+    const { SKILL_SIGNAL_SOURCES } = await import('../../packages/domain/src/skill-signals.js');
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00060_skill_signals.sql'),
+      'utf8'
+    );
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.skill_signals');
+    expect(sql).toContain('REFERENCES public.profiles(id) ON DELETE CASCADE');
+    expect(sql).toContain('rung verification_level NOT NULL');
+    const sources = /source_module IN \(([^)]*)\)/
+      .exec(sql)![1]
+      .match(/'([a-z_]+)'/g)!
+      .map((p) => p.slice(1, -1));
+    expect(sources.sort()).toEqual([...SKILL_SIGNAL_SOURCES].sort());
+    expect(sql).toMatch(
+      /UNIQUE INDEX[^;]*\(source_module, source_ref, skill_id\)[^;]*WHERE status = 'live'/
+    );
+    expect(sql).toContain('ALTER TABLE public.skill_signals ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('REVOKE ALL ON public.skill_signals FROM anon, authenticated;');
+    expect(sql).not.toContain('CREATE POLICY');
+    expect(sql).not.toMatch(/DROP TABLE|DELETE FROM|TRUNCATE/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');
