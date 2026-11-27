@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Evidence } from '../../packages/domain/src/core.js';
 import {
   deriveEvidenceSignals,
+  explainSkillMatch,
   projectSkillProfile,
   recordSkillSignals,
 } from '../../packages/domain/src/skill-signals.js';
@@ -78,5 +79,55 @@ describe('skill-signal ledger (TS-07)', () => {
         sources: [{ sourceModule: 'evidence', sourceRef: 'ev-1', rung: 'unverified' }],
       },
     ]);
+  });
+});
+
+describe('explainSkillMatch', () => {
+  const entry = (skillId: string, rung: Evidence['verificationLevel']) => ({
+    skillId,
+    strongestRung: rung,
+    signalCount: 1,
+    lastSignalAt: '2026-05-15T10:00:00.000Z',
+    sources: [{ sourceModule: 'evidence' as const, sourceRef: `ev-${skillId}`, rung }],
+  });
+
+  it('keeps the posting order, de-duplicates and counts shown and verified skills', () => {
+    const match = explainSkillMatch(
+      ['sql', 'go', 'ts', 'sql'],
+      [
+        entry('ts', 'unverified'),
+        entry('sql', 'peer_reviewed'),
+        entry('rust', 'authority_verified'),
+      ]
+    );
+    expect(match).toEqual({
+      required: 3,
+      shown: 2,
+      verified: 1,
+      skills: [
+        {
+          skillId: 'sql',
+          shown: true,
+          strongestRung: 'peer_reviewed',
+          sources: [{ sourceModule: 'evidence', sourceRef: 'ev-sql', rung: 'peer_reviewed' }],
+        },
+        { skillId: 'go', shown: false, strongestRung: null, sources: [] },
+        {
+          skillId: 'ts',
+          shown: true,
+          strongestRung: 'unverified',
+          sources: [{ sourceModule: 'evidence', sourceRef: 'ev-ts', rung: 'unverified' }],
+        },
+      ],
+    });
+  });
+
+  it('is empty for a posting with no required skills', () => {
+    expect(explainSkillMatch([], [entry('sql', 'unverified')])).toEqual({
+      required: 0,
+      shown: 0,
+      verified: 0,
+      skills: [],
+    });
   });
 });

@@ -80,7 +80,7 @@ export interface PublishedJob {
 /** A recruiter, their company and one published job — all real API records. */
 export async function publishJob(
   request: APIRequestContext,
-  options: { title?: string; recruiter?: TestAccount } = {}
+  options: { title?: string; recruiter?: TestAccount; requiredSkillIds?: string[] } = {}
 ): Promise<PublishedJob & { recruiter: TestAccount }> {
   const recruiter = options.recruiter ?? (await registerAccount(request, 'recruiter', 'recruiter'));
   const auth = { authorization: `Bearer ${recruiter.token}` };
@@ -109,6 +109,7 @@ export async function publishJob(
       location: 'Remote',
       workMode: 'remote',
       jobType: 'full_time',
+      ...(options.requiredSkillIds ? { requiredSkillIds: options.requiredSkillIds } : {}),
     },
   });
   expect(job.status()).toBe(201);

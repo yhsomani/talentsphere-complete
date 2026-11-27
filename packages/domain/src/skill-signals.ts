@@ -123,3 +123,42 @@ export function projectSkillProfile(signals: readonly SkillSignal[]): SkillProfi
       a.skillId.localeCompare(b.skillId)
   );
 }
+
+/**
+ * How a person's skill profile meets one posting's required skills (plan
+ * TS-13, §7.2 acceptance 1 and 2). There is no score: each required skill is
+ * either shown, at its strongest rung with the records it rests on, or not
+ * shown yet. "Verified" means a rung above the person's own claim.
+ */
+export interface SkillMatchEntry {
+  skillId: string;
+  shown: boolean;
+  strongestRung: VerificationLevel | null;
+  sources: SkillProfileEntry['sources'];
+}
+
+export interface SkillMatch {
+  required: number;
+  shown: number;
+  verified: number;
+  skills: SkillMatchEntry[];
+}
+
+export function explainSkillMatch(
+  requiredSkillIds: readonly string[],
+  profile: readonly SkillProfileEntry[]
+): SkillMatch {
+  const bySkill = new Map(profile.map((entry) => [entry.skillId, entry]));
+  const skills = [...new Set(requiredSkillIds)].map((skillId): SkillMatchEntry => {
+    const entry = bySkill.get(skillId);
+    return entry
+      ? { skillId, shown: true, strongestRung: entry.strongestRung, sources: entry.sources }
+      : { skillId, shown: false, strongestRung: null, sources: [] };
+  });
+  return {
+    required: skills.length,
+    shown: skills.filter((s) => s.shown).length,
+    verified: skills.filter((s) => s.strongestRung && rankOf(s.strongestRung) > 0).length,
+    skills,
+  };
+}

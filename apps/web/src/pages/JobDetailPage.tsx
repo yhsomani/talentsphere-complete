@@ -9,6 +9,7 @@ import {
   formatDate,
   formatSalaryRange,
   jobTypeLabel,
+  skillRungLabel,
   workModeLabel,
 } from '../lib/format.js';
 import type { Application, EvidenceItem, Job, OrganizationRef, Skill } from '../lib/types.js';
@@ -29,6 +30,19 @@ interface JobResponse {
   requiredSkills: Skill[];
 }
 
+interface SkillMatch {
+  required: number;
+  shown: number;
+  verified: number;
+  skills: Array<{
+    skillId: string;
+    name: string | null;
+    shown: boolean;
+    strongestRung: string | null;
+    sources: Array<{ sourceRef: string; rung: string; title: string | null }>;
+  }>;
+}
+
 const COVER_LETTER_MAX = 3000;
 
 export const JobDetailPage: React.FC = () => {
@@ -40,6 +54,7 @@ export const JobDetailPage: React.FC = () => {
   const [loadRetryable, setLoadRetryable] = useState(true);
   const [myApplication, setMyApplication] = useState<Application | null>(null);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
+  const [match, setMatch] = useState<SkillMatch | null>(null);
   const [attached, setAttached] = useState<string[]>([]);
   const [coverLetter, setCoverLetter] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -63,6 +78,7 @@ export const JobDetailPage: React.FC = () => {
     setApplyError(null);
     setCoverLetter('');
     setAttached([]);
+    setMatch(null);
     apiJson<JobResponse>(`/api/v1/jobs/${encodeURIComponent(id)}`)
       .then((res) => !cancelled && setData(res))
       .catch((err) => {
@@ -91,6 +107,9 @@ export const JobDetailPage: React.FC = () => {
       .catch(() => undefined);
     apiJson<{ evidence: EvidenceItem[] }>('/api/v1/evidence/mine')
       .then((res) => !cancelled && setEvidence(res.evidence))
+      .catch(() => undefined);
+    apiJson<SkillMatch>(`/api/v1/jobs/${encodeURIComponent(id)}/match`)
+      .then((res) => !cancelled && setMatch(res))
       .catch(() => undefined);
     return () => {
       cancelled = true;
@@ -230,36 +249,87 @@ export const JobDetailPage: React.FC = () => {
           {job.description}
         </p>
 
-        {requiredSkills.length > 0 && (
-          <>
-            <h2 style={{ fontSize: '1.125rem', marginTop: spacing.xl }}>
-              Skills they’re looking for
+        {match && match.required > 0 ? (
+          <section aria-labelledby="job-match-heading" data-testid="job-match">
+            <h2 id="job-match-heading" style={{ fontSize: '1.125rem', marginTop: spacing.xl }}>
+              Skills they’re looking for, and what you’ve shown
             </h2>
-            <ul
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: spacing.sm,
-                padding: 0,
-                listStyle: 'none',
-                marginTop: spacing.sm,
-              }}
+            <p
+              style={{ color: colors.neutral[700], marginTop: spacing.xs }}
+              data-testid="job-match-summary"
             >
-              {requiredSkills.map((skill) => (
+              You’ve shown {match.shown} of {match.required}
+              {match.verified > 0 ? `, ${match.verified} verified by someone else` : ''}.
+            </p>
+            <ul style={{ padding: 0, listStyle: 'none', marginTop: spacing.sm }}>
+              {match.skills.map((skill) => (
                 <li
-                  key={skill.id}
+                  key={skill.skillId}
+                  data-testid="job-match-skill"
                   style={{
-                    padding: '4px 12px',
-                    borderRadius: '999px',
-                    border: `1px solid ${colors.neutral[300]}`,
-                    fontSize: '0.875rem',
+                    padding: `${spacing.sm} 0`,
+                    borderTop: `1px solid ${colors.neutral[200]}`,
                   }}
                 >
-                  {skill.name}
+                  <strong>{skill.name ?? 'Skill'}</strong>
+                  {skill.shown && skill.strongestRung ? (
+                    <span style={{ color: colors.neutral[700] }}>
+                      {' '}
+                      ({skillRungLabel(skill.strongestRung)}), from{' '}
+                      {skill.sources
+                        .map((source) => source.title ?? 'a record')
+                        .filter((title, i, all) => all.indexOf(title) === i)
+                        .join(', ')}
+                    </span>
+                  ) : (
+                    <span style={{ color: colors.neutral[600] }} data-testid="job-match-missing">
+                      {' '}
+                      (not shown yet).{' '}
+                      <Link
+                        className="action-link"
+                        to="/evidence"
+                        style={{ color: colors.primary[700] }}
+                      >
+                        Add evidence
+                      </Link>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
-          </>
+          </section>
+        ) : (
+          requiredSkills.length > 0 && (
+            <>
+              <h2 style={{ fontSize: '1.125rem', marginTop: spacing.xl }}>
+                Skills they’re looking for
+              </h2>
+              <ul
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: spacing.sm,
+                  padding: 0,
+                  listStyle: 'none',
+                  marginTop: spacing.sm,
+                }}
+              >
+                {requiredSkills.map((skill) => (
+                  <li
+                    key={skill.id}
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: '999px',
+                      border: `1px solid ${colors.neutral[300]}`,
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    {skill.name}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
         )}
 
         {organization?.description && (
