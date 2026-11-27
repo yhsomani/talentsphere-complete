@@ -174,6 +174,7 @@ export const DISPATCH_EVENT_KINDS = [
   'alumni.affiliation.created',
   'alumni.affiliation.verified',
   'alumni.mentorship.requested',
+  'auth.password_reset_requested',
   'application.feedback_delivered',
   'application.status_changed',
   'application.submitted',

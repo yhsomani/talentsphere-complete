@@ -23,6 +23,8 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/auth/password',
   'POST /api/v1/auth/sign-out',
   'POST /api/v1/auth/sign-out-others',
+  'POST /api/v1/auth/password-reset/request',
+  'POST /api/v1/auth/password-reset/confirm',
   'GET /api/v1/profile/me',
   'PATCH /api/v1/profile/me',
   'GET /api/v1/profile/:id',

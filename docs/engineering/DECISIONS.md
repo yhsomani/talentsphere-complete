@@ -107,7 +107,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | --- | --- | --- | --- |
 | ADR-017 | Ratify ADR-015; Fastify and PostgreSQL are the architecture of record | #46 | Documentation (this change) |
 | ADR-018 | Transactional email: Brevo, through the existing provider-independent service | #44 | Code exists; account and DNS steps for the owner |
-| ADR-019 | Browser sessions in an httpOnly cookie with CSRF defence; password reset by email | #49, plan TS-10 | Two PRs to follow |
+| ADR-019 | Browser sessions in an httpOnly cookie with CSRF defence; password reset by email | #49, plan TS-10 | Built: cookie (PRs #103 to #105) and password reset |
 | ADR-020 | Files: S3-compatible object storage behind an adapter; ClamAV scanning; uploads refused where no scanner is configured | Plan TS-06 | One PR to follow |
 | ADR-021 | Code execution: self-hosted Judge0 CE on an isolated host; scoring stays refused until it runs; ratify the referee-endorsed skill rule from PR #43 | #49 | Adapter PR after the host exists |
 | ADR-022 | Split `server.ts` into per-module Fastify plugins, one module per PR, no behaviour change | Plan TS-12 | Later, after P0 |
@@ -155,7 +155,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 
 ### ADR-019 — Browser session in an httpOnly cookie, with CSRF defence; password reset by email (issue #49, plan TS-10)
 
-- **Status:** Accepted 2026-11-26 (delegated). Implementation: two PRs.
+- **Status:** Accepted 2026-11-26 (delegated). Built: cookie session and password reset.
 - **Context:** the session token is in `localStorage`, readable by any script that runs on the page. There is no account recovery. The token issuer (HMAC, `packages/domain/src/auth.ts`) and revocation work and stay.
 
 | Option | Pros | Cons |
@@ -171,6 +171,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 - **Steps only the owner can run:** none beyond ADR-018. Reset emails need live email delivery to reach users; until then they go to the labelled dev outbox.
 - **Built (API side):** `apps/api/src/session-cookie.ts`. Register, login, password change and "sign out other devices" set `ts_session`; sign-out clears it; every session read takes the Bearer header first, then the cookie; where the cookie signs someone in, a write without the CSRF header or from an origin outside `CORS_ALLOWED_ORIGINS` is refused (403), and an optional sign-in ignores such a cookie. A stale cookie never blocks the login form. Cookie headers are redacted from logs. Tests: `tests/integration/session-cookie.test.ts`.
 - **Built (web side):** the web app keeps no token. `apps/web/src/lib/session.ts` stores only the signed-in user as a UI marker (and removes a token an older version left); `apiFetch` sends `X-TalentSphere-CSRF: 1` with the cookie and never an `Authorization` header. E2E specs seed the cookie (`sessionCookie` in `tests/e2e/fixtures.ts`). Someone signed in before this change is asked to sign in once more, because their browser has no cookie yet.
+- **Built (password reset):** `POST /api/v1/auth/password-reset/request` answers 202 with the same message for every email, and for a known account stores a reset token (`password_reset_tokens`, migration 00058; only the SHA-256 hash) and queues `auth.password_reset_requested`, which the worker sends as the `auth.password_reset` email with a link to `/reset-password#token=…` (the token stays in the URL fragment). At most three links an hour are sent to one account; further requests get the same answer and send nothing. `POST /api/v1/auth/password-reset/confirm` claims the token in one statement (so a link works once even under a race), refuses it after 30 minutes, sets the new password, advances the session cutoff, ends the account's other unused links, clears the cookie and does not sign anyone in. A password change also ends unused links; account erasure deletes them. Rules: `packages/domain/src/auth.ts`. Web: `/forgot-password` (linked from sign-in) and `/reset-password`. Tests: `tests/unit/password-reset-domain.test.ts`, `tests/integration/password-reset.test.ts`, `tests/pg/password-reset.test.ts`, `tests/e2e/password-reset.spec.ts`. The raw token is in the queued job payload until the job is purged (7 days, as for reference links); it stops working after 30 minutes.
 
 ### ADR-020 — Files: S3-compatible object storage behind an adapter, with malware scanning (plan TS-06)
 

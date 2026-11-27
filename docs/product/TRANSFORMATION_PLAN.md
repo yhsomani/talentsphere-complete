@@ -638,7 +638,7 @@ flowchart LR
 | Mobile | PWA with service worker (T-009) and install prompt; native wrapper only after `OD-PRD-36` | PROPOSED |
 | Data ownership | Each table has one owning module; cross-module reads go through the owning module's domain function or the skill profile | PROPOSED |
 | API | Versioned `/api/v1`; cursor pagination and `Idempotency-Key` on every create from P1 onward; OpenAPI generated from Zod | PROPOSED (OpenAPI **NEEDS OWNER**) |
-| Authentication | httpOnly cookie; password reset by email; GitHub and Google OIDC sign-in linked to an existing account by verified email | Cookie IMPLEMENTED ([ADR-019](../engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)); reset and OIDC PROPOSED |
+| Authentication | httpOnly cookie; password reset by email; GitHub and Google OIDC sign-in linked to an existing account by verified email | Cookie and password reset IMPLEMENTED ([ADR-019](../engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)); OIDC PROPOSED |
 | Authorization | Keep per-handler checks; add an organization-role policy in `packages/domain` (A-09); test cross-tenant access in the PostgreSQL suite | PROPOSED |
 | AI orchestration | One gateway: consent check, `AI_PROHIBITED` check, quota, budget, prompt templates in code, output marked as suggestion; non-AI fallback always | PROPOSED (**NEEDS OWNER**) |
 | Search and recommendation | PostgreSQL FTS plus `pg_trgm` for jobs, people and courses; matching = explained score from the skill profile; embeddings only after a measured relevance gap | PROPOSED |
@@ -653,7 +653,7 @@ flowchart LR
 
 ## 9. Database and API recommendations
 
-The current schema (57 migrations, 112 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
+The current schema (58 migrations, 113 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
 
 ### 9.1 Principles
 
@@ -695,7 +695,7 @@ The current schema (57 migrations, 112 tables) is documented in [`engineering/DA
 | `GET /api/v1/goals/:id/gaps` | Gap analysis against the profile | GOL |
 | `GET /api/v1/jobs/:id/match` | Match explanation for the signed-in user | SRC |
 | `GET /api/v1/jobs/:id/prep` | Preparation set for a job | PREP |
-| `POST /api/v1/auth/password-reset` and `/confirm` | Password reset by email | IDN |
+| `POST /api/v1/auth/password-reset/request` and `/confirm` | Password reset by email (IMPLEMENTED, ADR-019) | IDN |
 | `GET /api/v1/auth/oauth/:provider/start` and `/callback` | GitHub and Google sign-in or account linking | IDN |
 | `GET /api/v1/events` (SSE) | Notification and message stream | NTF |
 
@@ -927,7 +927,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | PROPOSED |
 | TS-08 | Import v1: JSON Resume and CSV templates, review screen, commit and undo | TS-06, TS-07 | §10.4 cases 2, 5, 7 | T-027 | PROPOSED |
 | TS-09 | Experience band on jobs; job-type and band filters on the jobs screen | — | Contract and e2e tests | T-028 | PROPOSED |
-| TS-10 | Session cookie and password reset | Issue #44 | Token not readable by page script; reset e2e | T-029 | **NEEDS OWNER** |
+| TS-10 | Session cookie and password reset | Issue #44 | Token not readable by page script; reset e2e | T-029 | IMPLEMENTED (ADR-019; reset emails reach people once live email is set up) |
 | TS-11 | Import v2: resume PDF and DOCX parser, LinkedIn export ZIP, GitHub OAuth | TS-08, TS-10 | §10.4 cases 1, 3, 4, 6, 8 | T-030 | PROPOSED |
 | TS-12 | Split `server.ts` into module plugins, no behavior change | — | All suites pass unchanged | T-031 | **NEEDS OWNER** |
 | TS-13 | Goals, gaps and explained matching from the profile | TS-07 | §6.5 flow e2e; explanation names signals | T-032 | PROPOSED |

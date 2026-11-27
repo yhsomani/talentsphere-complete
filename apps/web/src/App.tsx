@@ -7,6 +7,8 @@ import { LandingPage } from './pages/LandingPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { SignUpPage } from './pages/SignUpPage.js';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage.js';
+import { ResetPasswordPage } from './pages/ResetPasswordPage.js';
 import { CheckoutPage } from './pages/CheckoutPage.js';
 import { EvidencePage } from './pages/EvidencePage.js';
 import { AssessmentsPage } from './pages/AssessmentsPage.js';
@@ -55,6 +57,9 @@ export const App: React.FC = () => {
             <Route index element={<LandingPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="signup" element={<SignUpPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            {/* Reached from the emailed reset link, without a session. */}
+            <Route path="reset-password" element={<ResetPasswordPage />} />
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="terms" element={<TermsPage />} />

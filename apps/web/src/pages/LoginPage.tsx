@@ -224,6 +224,13 @@ export const LoginPage: React.FC = () => {
             >
               Password
             </label>
+            <Link
+              to="/forgot-password"
+              data-testid="login-forgot-link"
+              style={{ fontSize: '0.8125rem', color: colors.primary[700], fontWeight: 600 }}
+            >
+              Forgot password?
+            </Link>
           </div>
           <input
             id="login-password"

@@ -58,6 +58,14 @@ const PUBLIC_ROUTES: Record<string, PublicRoute> = {
   // --- Auth (06 defers this group to 02-flows.md) ---
   'POST /api/v1/auth/register': { why: 'sign-up', doc: null },
   'POST /api/v1/auth/login': { why: 'sign-in', doc: null },
+  'POST /api/v1/auth/password-reset/request': {
+    why: 'forgotten password: same answer for every email (ADR-019)',
+    doc: null,
+  },
+  'POST /api/v1/auth/password-reset/confirm': {
+    why: 'the emailed single-use token is the credential (ADR-019)',
+    doc: null,
+  },
   // --- Profiles, evidence, portfolio (canViewProfile lets anonymous read public profiles) ---
   'GET /api/v1/profile/:id': { why: 'public profile read', doc: '`GET /profile/:id`' },
   'GET /api/v1/evidence/:id': {

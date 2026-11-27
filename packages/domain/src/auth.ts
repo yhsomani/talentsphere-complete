@@ -193,3 +193,59 @@ export function verifySessionToken(token: string): AuthPayload | null {
     return null;
   }
 }
+
+/**
+ * Password reset (ADR-019). A reset link carries a random token; only its
+ * SHA-256 hash is stored, so a copy of the database cannot be used to reset
+ * anyone's password. A token works once and for 30 minutes, and using it ends
+ * every session (the same cut-off as a password change).
+ */
+export const PASSWORD_RESET_TTL_MS = 30 * 60 * 1000;
+/** Reset emails one account may be sent per hour; more requests are answered the same way but send nothing. */
+export const PASSWORD_RESET_MAX_PER_HOUR = 3;
+export const PASSWORD_RESET_WINDOW_MS = 60 * 60 * 1000;
+
+export interface PasswordResetToken {
+  id: string;
+  userId: string;
+  tokenHash: string;
+  expiresAt: string;
+  usedAt: string | null;
+  createdAt: string;
+}
+
+export function hashPasswordResetToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+/** A new reset token for a user: the raw token goes in the email, the record is stored. */
+export function issuePasswordResetToken(
+  userId: string,
+  nowMs: number = Date.now()
+): { token: string; record: PasswordResetToken } {
+  const token = crypto.randomBytes(32).toString('base64url');
+  return {
+    token,
+    record: {
+      id: crypto.randomUUID(),
+      userId,
+      tokenHash: hashPasswordResetToken(token),
+      expiresAt: new Date(nowMs + PASSWORD_RESET_TTL_MS).toISOString(),
+      usedAt: null,
+      createdAt: new Date(nowMs).toISOString(),
+    },
+  };
+}
+
+/** Whether another reset email may be sent, given how many were sent in the last hour. */
+export function passwordResetSendDecision(sentInWindow: number): 'send' | 'skip' {
+  return sentInWindow >= PASSWORD_RESET_MAX_PER_HOUR ? 'skip' : 'send';
+}
+
+/** True while a claimed token is inside its 30 minutes. */
+export function passwordResetTokenUsable(
+  record: Pick<PasswordResetToken, 'expiresAt'>,
+  nowMs: number = Date.now()
+): boolean {
+  return nowMs < Date.parse(record.expiresAt);
+}

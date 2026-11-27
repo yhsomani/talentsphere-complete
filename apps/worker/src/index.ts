@@ -115,6 +115,14 @@ claimHandlers.set(
   }))
 );
 
+claimHandlers.set(
+  'auth.password_reset_requested',
+  deliverEmail('auth.password_reset', (p) => ({
+    token: p.token,
+    expiresAt: p.expiresAt,
+  }))
+);
+
 /** pg store from DATABASE_URL; null when this process must not claim (memory). */
 function resolveStore(): {
   store: JobStore;

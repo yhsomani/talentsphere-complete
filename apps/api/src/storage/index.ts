@@ -20,6 +20,11 @@ import {
 } from './saved-search-store.js';
 import { MemorySavedJobStore, PgSavedJobStore, type SavedJobStore } from './saved-job-store.js';
 import {
+  MemoryPasswordResetStore,
+  PgPasswordResetStore,
+  type PasswordResetStore,
+} from './password-reset-store.js';
+import {
   MemoryAdminAuditStore,
   PgAdminAuditStore,
   type AdminAuditStore,
@@ -89,6 +94,8 @@ export interface Storage {
   readonly billing: BillingStore;
   /** Application drafts and version history (F-36, migration 00019). */
   readonly applicationDrafts: ApplicationDraftStore;
+  /** Password reset tokens, stored as hashes (ADR-019, migration 00058). */
+  readonly passwordResets: PasswordResetStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -126,6 +133,7 @@ class PgStorage implements Storage {
   readonly featureFlags: FeatureFlagStore;
   readonly billing: BillingStore;
   readonly applicationDrafts: ApplicationDraftStore;
+  readonly passwordResets: PasswordResetStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -168,6 +176,7 @@ class PgStorage implements Storage {
     this.featureFlags = new PgFeatureFlagStore(this.pool);
     this.billing = new PgBillingStore(this.pool);
     this.applicationDrafts = new PgApplicationDraftStore(this.pool);
+    this.passwordResets = new PgPasswordResetStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -289,6 +298,7 @@ class MemoryStorage implements Storage {
   readonly featureFlags: FeatureFlagStore = new MemoryFeatureFlagStore();
   readonly billing: BillingStore = new MemoryBillingStore();
   readonly applicationDrafts: ApplicationDraftStore = new MemoryApplicationDraftStore();
+  readonly passwordResets: PasswordResetStore = new MemoryPasswordResetStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

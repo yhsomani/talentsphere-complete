@@ -48,7 +48,7 @@ store/table relationships and migration inventory. Do not duplicate their counts
 | Identity    | Email/password, HMAC sessions, password change and session revocation                          | No Supabase Auth, OAuth or password-reset email flow                     |
 | Persistence | PostgreSQL core plus dedicated stores; explicit memory mode                                    | Many long-tail features are ephemeral                                    |
 | Billing     | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records                | Disabled by default; live acceptance unverified                          |
-| Email       | Opt-in Brevo (provider-independent service) for work-email verification and reference requests | Provider acceptance is not mailbox delivery; no push/SMS                 |
+| Email       | Opt-in Brevo (provider-independent service) for work-email verification, reference requests and password reset | Provider acceptance is not mailbox delivery; no push/SMS                 |
 | AI          | Local heuristic and simpler assistant scaffold                                                 | No remote model execution; saved BYO keys are not integration            |
 | Search      | In-process matching/ranking over available data                                                | No PostgreSQL FTS runtime integration                                    |
 | Browser     | React routes, API fetch helpers, PWA manifest/capability detection                             | No implemented offline synchronization/service-worker installation       |
@@ -185,7 +185,9 @@ The session token lives only in the httpOnly `ts_session` cookie the API sets; p
 script cannot read it. The web app keeps a non-secret signed-in marker in localStorage
 and sends `X-TalentSphere-CSRF: 1`, which the API requires with an allowed Origin for
 cookie-signed writes ([ADR-019](engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)).
-API clients still send `Authorization: Bearer`. There is no refresh-token
+API clients still send `Authorization: Bearer`. A forgotten password is reset from an
+emailed single-use link that works for 30 minutes and ends every session (ADR-019,
+migration 00058). There is no refresh-token
 flow. Resource authorization is per handler, not global auth middleware. Several
 organization actions accept any membership rather than checking membership role;
 this is a policy gap, not the intended tenancy model. See

@@ -45,6 +45,11 @@ import {
   hashPassword,
   verifyPassword,
   passwordNeedsRehash,
+  hashPasswordResetToken,
+  issuePasswordResetToken,
+  passwordResetSendDecision,
+  passwordResetTokenUsable,
+  PASSWORD_RESET_WINDOW_MS,
   recentLoginFailures,
   loginFailureDecision,
   createSessionToken,
@@ -353,6 +358,8 @@ import {
   RegisterInputSchema,
   LoginInputSchema,
   ChangePasswordInputSchema,
+  PasswordResetRequestInputSchema,
+  PasswordResetConfirmInputSchema,
   UpdateProfileInputSchema,
   CreateEvidenceInputSchema,
   VerifyEvidenceInputSchema,
@@ -1266,8 +1273,10 @@ export async function buildApp(
           sessionsValidAfter: cutoff,
         },
       });
-      // Guesses against the old password no longer count against the account.
+      // Guesses against the old password no longer count against the account,
+      // and a reset link sent before the change no longer works.
       loginFailuresByEmail.delete(user.email.toLowerCase());
+      await storage.passwordResets.invalidateUser(user.id, new Date().toISOString());
       auditLogs.push({
         event: 'auth.password_changed',
         actorId: user.id,
@@ -1279,6 +1288,106 @@ export async function buildApp(
       return reply.status(200).send({
         message: 'Password changed. You have been signed out everywhere else.',
         token,
+      });
+    }
+  );
+
+  // Password reset (ADR-019). The request answers the same way whether or not
+  // an account uses the email, so it cannot be used to find accounts. A
+  // reset link carries a random token whose hash alone is stored; it works
+  // once and for 30 minutes, and at most PASSWORD_RESET_MAX_PER_HOUR links
+  // are sent to one account an hour. Setting the new password ends every
+  // session, as a password change does, and does not sign anyone in: the
+  // person signs in with the new password.
+  app.post(
+    '/api/v1/auth/password-reset/request',
+    {
+      config: {
+        rateLimit: {
+          ...loginRateLimit.rateLimit,
+          keyGenerator: (req: FastifyRequest) =>
+            `password-reset-request:${loginRateLimit.rateLimit.keyGenerator(req)}`,
+        },
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const input = PasswordResetRequestInputSchema.parse(req.body);
+      const user = usersByEmail.get(input.email.toLowerCase());
+      if (user) {
+        const nowMs = Date.now();
+        const sent = await storage.passwordResets.countSince(
+          user.id,
+          new Date(nowMs - PASSWORD_RESET_WINDOW_MS).toISOString()
+        );
+        if (passwordResetSendDecision(sent) === 'send') {
+          const { token, record } = issuePasswordResetToken(user.id, nowMs);
+          await storage.passwordResets.create(record);
+          await dispatchJob({
+            type: 'auth.password_reset_requested',
+            payload: { to: user.email, token, expiresAt: record.expiresAt },
+          });
+        }
+      }
+      return reply.status(202).send({
+        message:
+          'If an account uses that email, a link to reset its password is on its way. The link works for 30 minutes.',
+      });
+    }
+  );
+
+  app.post(
+    '/api/v1/auth/password-reset/confirm',
+    {
+      config: {
+        rateLimit: {
+          max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+          timeWindow: AUTH_WINDOW_MS,
+          keyGenerator: (req: FastifyRequest) => `password-reset:${req.ip}`,
+        },
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const input = PasswordResetConfirmInputSchema.parse(req.body);
+      const nowMs = Date.now();
+      // Claiming marks the token used, so a link works once even when two
+      // requests race; an expired token is claimed and then refused.
+      const claimed = await storage.passwordResets.claim(
+        hashPasswordResetToken(input.token),
+        new Date(nowMs).toISOString()
+      );
+      const user =
+        claimed && passwordResetTokenUsable(claimed, nowMs)
+          ? usersById.get(claimed.userId)
+          : undefined;
+      if (!user) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          'This reset link is not valid, has expired or was already used. Ask for a new one.',
+          { field: 'token' }
+        );
+      }
+      const cutoffMs = (Math.floor(Date.now() / 1000) + 1) * 1000;
+      await persist({
+        kind: 'user',
+        base: user,
+        value: {
+          ...user,
+          passwordHash: await hashPassword(input.newPassword),
+          sessionsValidAfter: new Date(cutoffMs).toISOString(),
+        },
+      });
+      await storage.passwordResets.invalidateUser(user.id, new Date().toISOString());
+      loginFailuresByEmail.delete(user.email.toLowerCase());
+      auditLogs.push({
+        event: 'auth.password_reset',
+        actorId: user.id,
+        targetId: user.id,
+        timestamp: new Date().toISOString(),
+      });
+      reply.header('set-cookie', clearedSessionCookie(secureCookie));
+      return reply.status(200).send({
+        message:
+          'Password reset. You have been signed out everywhere. Sign in with your new password.',
       });
     }
   );
@@ -10633,6 +10742,7 @@ export async function buildApp(
       exportRequestsByUserId.delete(session.userId);
       searchHistoryByUserId.delete(session.userId);
       await storage.savedJobs.eraseUser(session.userId);
+      await storage.passwordResets.eraseUser(session.userId);
       for (const r of salaryReportsByUserId.get(session.userId) || []) {
         salaryReportsById.delete(r.id);
       }
