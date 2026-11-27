@@ -47,6 +47,17 @@ const TEMPLATES: Record<EmailTemplateId, TemplateDefinition> = {
       };
     },
   },
+  'auth.password_reset': {
+    required: ['token', 'expiresAt'],
+    render: (v, appUrl) => ({
+      subject: 'Reset your TalentSphere password',
+      text:
+        `Someone asked to reset the password of your TalentSphere account. ` +
+        `To choose a new password, open ${appUrl}/reset-password#token=${v.token} ` +
+        `before ${v.expiresAt}. The link works once. ` +
+        `If you did not ask for this, ignore this email; your password stays the same.`,
+    }),
+  },
 };
 
 export function isEmailTemplateId(id: string): id is EmailTemplateId {

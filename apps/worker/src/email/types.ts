@@ -5,7 +5,8 @@
  */
 
 /** Logical template ids. Business code uses these, never vendor template ids. */
-export type EmailTemplateId = 'work_history.email_verification' | 'reference.request';
+export type EmailTemplateId =
+  'work_history.email_verification' | 'reference.request' | 'auth.password_reset';
 
 export interface EmailRequest {
   templateId: EmailTemplateId;

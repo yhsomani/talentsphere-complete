@@ -117,15 +117,33 @@ export const LoginInputSchema = z.object({
 
 export type LoginInput = z.infer<typeof LoginInputSchema>;
 
-export const ChangePasswordInputSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required').max(1024),
-  newPassword: z
+const newPassword = () =>
+  z
     .string()
     .min(8, 'Password must be at least 8 characters')
-    .max(256, 'Password must be at most 256 characters'),
+    .max(256, 'Password must be at most 256 characters');
+
+export const ChangePasswordInputSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required').max(1024),
+  newPassword: newPassword(),
 });
 
 export type ChangePasswordInput = z.infer<typeof ChangePasswordInputSchema>;
+
+/** Ask for a password reset link (ADR-019). */
+export const PasswordResetRequestInputSchema = z.object({
+  email: emailAddress(),
+});
+
+export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestInputSchema>;
+
+/** Set a new password with the token from a reset link (ADR-019). */
+export const PasswordResetConfirmInputSchema = z.object({
+  token: z.string().min(1, 'Reset link is incomplete').max(256),
+  newPassword: newPassword(),
+});
+
+export type PasswordResetConfirmInput = z.infer<typeof PasswordResetConfirmInputSchema>;
 
 /**
  * Profile Contracts
