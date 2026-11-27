@@ -29,6 +29,7 @@ import { createStripeGateway, type StripeGateway } from './stripe-gateway.js';
 import { eraseUserFiles, registerFileRoutes } from './file-routes.js';
 import { registerSkillRoutes } from './skill-routes.js';
 import { registerImportRoutes } from './import-routes.js';
+import { registerSavedJobRoutes } from './saved-job-routes.js';
 import {
   LocalDiskObjectStore,
   S3ObjectStore,
@@ -220,9 +221,6 @@ import {
   resolveModerationReport,
   createModerationAppeal,
   reviewModerationAppeal,
-  createSavedSearch,
-  updateSavedSearch,
-  matchJobAgainstCriteria,
   evaluateJobAlertsForPublishedJob,
   saveApplicationDraft,
   restoreApplicationDraftVersion,
@@ -438,8 +436,6 @@ import {
   ResolveModerationReportInputSchema,
   CreateModerationAppealInputSchema,
   ReviewModerationAppealInputSchema,
-  CreateSavedSearchInputSchema,
-  UpdateSavedSearchInputSchema,
   SaveApplicationDraftInputSchema,
   RestoreApplicationDraftVersionInputSchema,
   RecordAnalyticsEventInputSchema,
@@ -12593,168 +12589,9 @@ export async function buildApp(
     }
   );
 
-  // =========================================================================
-  // Saved Searches, Job Alerts & Saved Jobs Endpoints (F-32, F-04, F-25)
-  // =========================================================================
-
-  // 1. Create a new saved search
-  app.post('/api/v1/jobs/saved-searches', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = CreateSavedSearchInputSchema.parse(req.body);
-    const existing = await storage.savedSearches.listByUser(session.userId);
-
-    const savedSearch = createSavedSearch({
-      userId: session.userId,
-      title: input.title,
-      criteria: input.criteria,
-      alertFrequency: input.alertFrequency,
-      existingSearches: existing,
-    });
-
-    await storage.savedSearches.create(savedSearch);
-    return reply.status(201).send({ savedSearch });
-  });
-
-  // 2. List candidate's saved searches
-  app.get('/api/v1/jobs/saved-searches', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const userSearches = await storage.savedSearches.listByUser(session.userId);
-    return reply.status(200).send({ savedSearches: userSearches, total: userSearches.length });
-  });
-
-  // 3. Get single saved search by ID
-  app.get(
-    '/api/v1/jobs/saved-searches/:id',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-      const search = await storage.savedSearches.get(id);
-      if (!search) {
-        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
-      }
-      if (search.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-      }
-      return reply.status(200).send({ savedSearch: search });
-    }
-  );
-
-  // 4. Update saved search
-  app.patch(
-    '/api/v1/jobs/saved-searches/:id',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-      const search = await storage.savedSearches.get(id);
-      if (!search) {
-        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
-      }
-      if (search.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-      }
-      const input = UpdateSavedSearchInputSchema.parse(req.body);
-      const updated = updateSavedSearch(search, input);
-      const persisted = await storage.savedSearches.update(updated, search.updatedAt);
-      return reply.status(200).send({ savedSearch: persisted });
-    }
-  );
-
-  // 5. Delete saved search
-  app.delete(
-    '/api/v1/jobs/saved-searches/:id',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-      const search = await storage.savedSearches.get(id);
-      if (!search) {
-        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
-      }
-      if (search.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-      }
-      await storage.savedSearches.remove(id, session.userId);
-      return reply.status(200).send({ message: 'Saved search deleted successfully.' });
-    }
-  );
-
-  // 6. Run saved search on live published inventory
-  app.post(
-    '/api/v1/jobs/saved-searches/:id/run',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-      const search = await storage.savedSearches.get(id);
-      if (!search) {
-        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
-      }
-      if (search.userId !== session.userId) {
-        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-      }
-      const published = Array.from(jobsById.values()).filter((j) => j.status === 'published');
-      const matched = published.filter((j) => matchJobAgainstCriteria(j, search.criteria));
-      return reply.status(200).send({ matchingJobs: matched, total: matched.length });
-    }
-  );
-
-  // 7. List job alerts for candidate
-  app.get('/api/v1/jobs/alerts', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const alerts = await storage.jobAlerts.listByUser(session.userId);
-    return reply.status(200).send({ alerts, total: alerts.length });
-  });
-
-  // 8. Mark job alert as read
-  app.patch(
-    '/api/v1/jobs/alerts/:id/read',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id } = req.params;
-      const alert = await storage.jobAlerts.markRead(id, session.userId);
-      return reply.status(200).send({ alert });
-    }
-  );
-
-  // 9. Bookmark / save job
-  app.post(
-    '/api/v1/jobs/:id/save',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id: jobId } = req.params;
-      const job = jobsById.get(jobId);
-      // Bookmarking must not bypass the same draft/private visibility policy
-      // enforced by GET /jobs/:id. Do not disclose an unpublished job's ID.
-      if (!job || (job.status !== 'published' && !canInOrg(session, job.orgId, 'view_jobs'))) {
-        throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
-      }
-      const savedJob = await storage.savedJobs.add(session.userId, jobId);
-      return reply.status(201).send({ savedJob });
-    }
-  );
-
-  // 10. Remove saved job bookmark
-  app.delete(
-    '/api/v1/jobs/:id/save',
-    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
-      const { id: jobId } = req.params;
-      await storage.savedJobs.remove(session.userId, jobId);
-      return reply.status(200).send({ message: 'Job removed from saved bookmarks.' });
-    }
-  );
-
-  // 11. List candidate's saved jobs
-  app.get('/api/v1/jobs/saved', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const currentSaved = await storage.savedJobs.list(session.userId);
-    const jobs = currentSaved
-      .map((s) => jobsById.get(s.jobId))
-      .filter(
-        (job): job is Job =>
-          job !== undefined &&
-          (job.status === 'published' || canInOrg(session, job.orgId, 'view_jobs'))
-      );
-    return reply.status(200).send({ savedJobs: currentSaved, jobs, total: currentSaved.length });
-  });
+  // Saved searches, job alerts and saved jobs (F-32, F-04, F-25):
+  // apps/api/src/saved-job-routes.ts (ADR-022, plan TS-12).
+  registerSavedJobRoutes(app, { storage, extractUser, canInOrg, jobsById });
 
   // Application Draft Autosave & Version Recovery (F-36, BR-18, SSOT 1015)
   app.put(
