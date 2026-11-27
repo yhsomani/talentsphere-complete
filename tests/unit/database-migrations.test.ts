@@ -481,6 +481,26 @@ describe('Password reset tokens (migration 00058, ADR-019)', () => {
   });
 });
 
+describe('Uploaded files (migration 00059, ADR-020)', () => {
+  it('keeps metadata only, matches the domain purposes and is closed to client roles', async () => {
+    const { FILE_PURPOSES, FILE_MAX_BYTES } = await import('../../packages/domain/src/files.js');
+    const sql = fs.readFileSync(path.resolve('supabase/migrations/00059_files.sql'), 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.files');
+    expect(sql).toContain('REFERENCES public.users(id) ON DELETE CASCADE');
+    expect(sql).not.toMatch(/BYTEA/i);
+    const purposes = /purpose IN \(([^)]*)\)/
+      .exec(sql)![1]
+      .match(/'([a-z_]+)'/g)!
+      .map((p) => p.slice(1, -1));
+    expect(purposes.sort()).toEqual([...FILE_PURPOSES].sort());
+    expect(sql).toContain(`size_bytes <= ${FILE_MAX_BYTES}`);
+    expect(sql).toContain('ALTER TABLE public.files ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('REVOKE ALL ON public.files FROM anon, authenticated;');
+    expect(sql).not.toContain('CREATE POLICY');
+    expect(sql).not.toMatch(/DROP TABLE|DELETE FROM|TRUNCATE/i);
+  });
+});
+
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');

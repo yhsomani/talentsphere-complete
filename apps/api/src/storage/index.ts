@@ -24,6 +24,7 @@ import {
   PgPasswordResetStore,
   type PasswordResetStore,
 } from './password-reset-store.js';
+import { MemoryFileStore, PgFileStore, type FileStore } from './file-store.js';
 import {
   MemoryAdminAuditStore,
   PgAdminAuditStore,
@@ -96,6 +97,8 @@ export interface Storage {
   readonly applicationDrafts: ApplicationDraftStore;
   /** Password reset tokens, stored as hashes (ADR-019, migration 00058). */
   readonly passwordResets: PasswordResetStore;
+  /** Uploaded file metadata (ADR-020, migration 00059); bytes are in the ObjectStore. */
+  readonly files: FileStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -134,6 +137,7 @@ class PgStorage implements Storage {
   readonly billing: BillingStore;
   readonly applicationDrafts: ApplicationDraftStore;
   readonly passwordResets: PasswordResetStore;
+  readonly files: FileStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -177,6 +181,7 @@ class PgStorage implements Storage {
     this.billing = new PgBillingStore(this.pool);
     this.applicationDrafts = new PgApplicationDraftStore(this.pool);
     this.passwordResets = new PgPasswordResetStore(this.pool);
+    this.files = new PgFileStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -299,6 +304,7 @@ class MemoryStorage implements Storage {
   readonly billing: BillingStore = new MemoryBillingStore();
   readonly applicationDrafts: ApplicationDraftStore = new MemoryApplicationDraftStore();
   readonly passwordResets: PasswordResetStore = new MemoryPasswordResetStore();
+  readonly files: FileStore = new MemoryFileStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

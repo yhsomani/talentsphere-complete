@@ -25,6 +25,12 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/auth/sign-out-others',
   'POST /api/v1/auth/password-reset/request',
   'POST /api/v1/auth/password-reset/confirm',
+  // Uploaded files (ADR-020, migration 00059)
+  'POST /api/v1/files',
+  'GET /api/v1/files',
+  'GET /api/v1/files/:id/url',
+  'GET /api/v1/files/:id/content',
+  'DELETE /api/v1/files/:id',
   'GET /api/v1/profile/me',
   'PATCH /api/v1/profile/me',
   'GET /api/v1/profile/:id',

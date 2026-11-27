@@ -130,6 +130,20 @@ export const ChangePasswordInputSchema = z.object({
 
 export type ChangePasswordInput = z.infer<typeof ChangePasswordInputSchema>;
 
+/** Query of a file upload; the body is the file's bytes with its Content-Type (ADR-020). */
+export const FileUploadQuerySchema = z.object({
+  purpose: z.enum(['resume', 'profile_photo', 'import']),
+  name: z.string().trim().min(1, 'File name is required').max(255),
+});
+
+export type FileUploadQuery = z.infer<typeof FileUploadQuerySchema>;
+
+/** Query of a signed local file read (ADR-020). */
+export const FileContentQuerySchema = z.object({
+  expires: z.coerce.number().int().positive(),
+  signature: z.string().regex(/^[0-9a-f]{64}$/),
+});
+
 /** Ask for a password reset link (ADR-019). */
 export const PasswordResetRequestInputSchema = z.object({
   email: emailAddress(),

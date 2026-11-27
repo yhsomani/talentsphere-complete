@@ -89,6 +89,22 @@ export const ServerEnvSchema = z.object({
   SUPABASE_BUCKET_COURSE_CONTENT: z.string().default('course-content'),
   SUPABASE_BUCKET_PORTFOLIO: z.string().default('portfolio'),
 
+  // Uploaded files (ADR-020). 'local' keeps them on the API host's disk
+  // (FILE_STORAGE_DIR, default a folder in the OS temp directory: set it for
+  // files to outlive a reboot). 's3' uses any S3-compatible service through
+  // the S3_* settings; fileStorageConfigProblems refuses a half-configured one.
+  FILE_STORAGE: z.enum(['local', 's3']).default('local'),
+  FILE_STORAGE_DIR: optional(z.string().min(1)),
+  S3_ENDPOINT: optional(z.string().url()),
+  S3_REGION: optional(z.string().min(1)),
+  S3_BUCKET: optional(z.string().min(1)),
+  S3_ACCESS_KEY_ID: optional(z.string().min(1)),
+  S3_SECRET_ACCESS_KEY: optional(z.string().min(1)),
+  // ClamAV daemon that scans every upload. Unset: deployed environments
+  // refuse uploads; development and tests store them marked not_scanned.
+  CLAMAV_HOST: optional(z.string().min(1)),
+  CLAMAV_PORT: z.coerce.number().int().positive().default(3310),
+
   // Optional, server-only transactional email. 'none' fails closed in deployed
   // environments. Brevo is the only provider; it still needs a verified sender
   // domain (SPF/DKIM/DMARC at the DNS host) and a real mailbox test outside CI.
@@ -205,6 +221,15 @@ export function stripeConfigProblems(env: ServerEnv): string[] {
     problems.push('STRIPE_PRICE_* ids must be distinct: one price cannot grant two plans');
   }
   return problems;
+}
+
+/** Settings FILE_STORAGE=s3 cannot work without. Checked at boot in every environment. */
+export function fileStorageConfigProblems(env: ServerEnv): string[] {
+  if (env.FILE_STORAGE !== 's3') return [];
+  const missing = (
+    ['S3_ENDPOINT', 'S3_REGION', 'S3_BUCKET', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'] as const
+  ).filter((key) => !env[key]);
+  return missing.length ? [`FILE_STORAGE=s3 requires ${missing.join(', ')}`] : [];
 }
 
 /** True when deployed email delivery is fully configured. The single gate the API routes use. */
