@@ -101,7 +101,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | A-06 | No file storage or malware scanning | No upload route in `server.ts` | Blocks resumes, imports, photos, course media | Object storage behind an adapter plus scanning (TS-06): API IMPLEMENTED (ADR-020); bucket and `clamd` are owner steps |
 | A-07 | Search is in-process over Maps | ARCHITECTURE §3 | Does not survive a second instance or large data | PostgreSQL full-text search and `pg_trgm`, as SSOT Amendment A.4 already intends |
 | A-08 | No generated API description | ARCHITECTURE §14 | Clients and partners guess shapes | Generate OpenAPI from the Zod contracts (**NEEDS OWNER**: new dependency in `package.json`) |
-| A-09 | Organization actions accept any membership | ARCHITECTURE R-2, U-3; route review CF-31 to CF-45 | A member can act like an admin | Membership-role policy in `packages/domain` before employer seats ship |
+| A-09 | Organization actions accept any membership | ARCHITECTURE R-2, U-3; route review CF-31 to CF-45 | A member can act like an admin | Fixed by TS-04: one role policy in `packages/domain/src/org-roles.ts` (ADR-032) |
 | A-10 | Web copy of job and application transition rules | T-008 | Two definitions of one rule (breaks INVARIANT-002) | Import from `packages/domain` (pending approval in T-008) |
 | A-11 | SSOT Amendment A.3 names Supabase Queues; the code uses a PostgreSQL `background_jobs` table with `FOR UPDATE SKIP LOCKED` | `apps/worker/src/claim.ts`, migration 00042 | Intent and code disagree | Keep the as-built queue (tested, no new vendor); owner updates SSOT A.3 (TPD-06) |
 
@@ -655,7 +655,7 @@ flowchart LR
 | Data ownership | Each table has one owning module; cross-module reads go through the owning module's domain function or the skill profile | PROPOSED |
 | API | Versioned `/api/v1`; cursor pagination and `Idempotency-Key` on every create from P1 onward; OpenAPI generated from Zod | PROPOSED (OpenAPI **NEEDS OWNER**) |
 | Authentication | httpOnly cookie; password reset by email; GitHub and Google OIDC sign-in linked to an existing account by verified email | Cookie and password reset IMPLEMENTED ([ADR-019](../engineering/DECISIONS.md#adr-019--browser-session-in-an-httponly-cookie-with-csrf-defence-password-reset-by-email-issue-49-plan-ts-10)); OIDC PROPOSED |
-| Authorization | Keep per-handler checks; add an organization-role policy in `packages/domain` (A-09); test cross-tenant access in the PostgreSQL suite | PROPOSED |
+| Authorization | Keep per-handler checks; add an organization-role policy in `packages/domain` (A-09); test cross-tenant access in the PostgreSQL suite | IMPLEMENTED (TS-04, ADR-032) |
 | AI orchestration | One gateway: consent check, `AI_PROHIBITED` check, quota, budget, prompt templates in code, output marked as suggestion; non-AI fallback always | PROPOSED (**NEEDS OWNER**) |
 | Search and recommendation | PostgreSQL FTS plus `pg_trgm` for jobs, people and courses; matching = explained score from the skill profile; embeddings only after a measured relevance gap | PROPOSED |
 | Events | Transactional outbox rows written in the same transaction as the change; worker delivers to handlers (projector, notifications, feed) | PROPOSED (extends `background_jobs`) |
@@ -860,7 +860,7 @@ Owners: [`quality/SECURITY.md`](../quality/SECURITY.md), [`blueprint/05_SECURITY
 | OAuth state and PKCE, token encryption, scope minimization | New provider sign-in | PROPOSED |
 | File pipeline: type sniffing, size and count limits, malware scan, parse in the worker only, no macros, zip-bomb limits | Untrusted uploads | PROPOSED |
 | Code runner isolation: no network, CPU, memory and time caps, read-only filesystem, separate host or sandbox | Untrusted code | **NEEDS OWNER** (issue #49) |
-| Organization-role policy | Employer seats | PROPOSED (A-09) |
+| Organization-role policy | Employer seats | IMPLEMENTED (A-09, ADR-032) |
 | Server-side request forgery guard for any link verification fetch | Credential links | PROPOSED |
 | Prompt-injection handling: imported text is data, never instructions, in AI prompts | AI over user files | PROPOSED |
 
@@ -937,7 +937,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-01 | Merge durable resumes (T-007) and the service worker (T-009) already built | — | Existing tests plus restart test | T-007, T-009 | IN_PROGRESS elsewhere |
 | TS-02 | Park list: one feature flag per parked module, off by default in deployed environments, screens hidden | Feature flags (durable, 00051) | Flagged routes return 404 in staging config; tests updated, not deleted | T-022 | IMPLEMENTED (PR #101) |
 | TS-03 | Durability sweep for visible ephemeral modules: portfolio, moderation, courses and lessons progress, challenge submissions — one PR each, using the existing tables | — | Restart test per module; routes added to `DURABLE_ROUTES` | T-010 | PLANNED |
-| TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | PROPOSED |
+| TS-04 | Organization-role policy in `packages/domain` and route checks | — | Cross-role tests in the PostgreSQL suite | T-023 | IMPLEMENTED ([ADR-032](../engineering/DECISIONS.md#adr-032--organization-roles-decide-what-a-member-may-do-cf-14-cf-45-plan-ts-04)) |
 | TS-05 | Worker claim fencing (completion checks the claim token) | — | Already in place: fenced by the attempts counter (`tests/pg/job-claim-fencing.test.ts`) | T-024 | EXISTS (found 2026-11-26; no work needed) |
 | TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | IMPLEMENTED for the API (ADR-020); expiry job and the `clamd` container remain |
 | TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | IMPLEMENTED for evidence (migration 00060; see §7.2 for what differs) |

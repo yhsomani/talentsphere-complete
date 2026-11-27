@@ -334,7 +334,7 @@ manual adapter. Do not substitute `supabase db push` for the repository workflow
 
 ## 24. Risks and unresolved decisions
 
-- R-2: inline/duplicated authorization and organization-role inconsistencies.
+- R-2: inline/duplicated authorization. Organization roles now come from one policy (`packages/domain/src/org-roles.ts`, ADR-032); other checks are still per handler.
 - R-3: keep UI tokens and web primitives as distinct existing owners; no second UI kit.
 - R-4: AI tier is hardcoded free despite billing entitlements; consent/quotas differ
   between assistant paths. Entitlement changes require an owner decision.
@@ -344,7 +344,7 @@ manual adapter. Do not substitute `supabase db push` for the repository workflow
   assessment/revocation and billing concurrency remain material release risks.
 - U-1/U-2: deployment assets and local proxies exist; deployed topology, gateway,
   restore and runtime acceptance remain unverified.
-- U-3: tenant/membership permissions need an explicit policy reconciliation.
+- U-3: tenant/membership permissions: reconciled for organization roles by ADR-032; CF-16 (account-level `recruiter` role for job creation) remains.
 
 The [conflict register](system-model/03-conflicts-conditions-audit.md#system-model-03--conflict-register-and-decision-records) and
 [route review](system-model/06-route-authorization.md) preserve finding IDs,
