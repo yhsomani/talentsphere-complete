@@ -56,6 +56,11 @@ describe('background_jobs attempts fencing (pg)', () => {
 
   /** Worker A claims with a 1ms lease, it lapses, worker B re-claims (attempts 2). */
   async function reclaimed(kind: string) {
+    // Start from an empty queue: an earlier test's retried job (100ms backoff)
+    // would otherwise be claimable here and win the claim.
+    await pool.query(
+      "UPDATE public.background_jobs SET status = 'canceled' WHERE status IN ('queued', 'running')"
+    );
     const { job } = await store.enqueue({ kind, payload: {} });
     const [a] = await store.claim({ limit: 1, leaseMs: 1 });
     expect(a.id).toBe(job.id);
