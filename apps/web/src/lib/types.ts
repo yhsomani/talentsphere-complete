@@ -18,6 +18,7 @@ export interface Job {
   location: string;
   workMode?: 'remote' | 'hybrid' | 'onsite';
   jobType?: 'full_time' | 'part_time' | 'contract' | 'internship';
+  experienceLevel?: 'fresher' | 'junior' | 'mid' | 'senior';
   status: string;
   requiredSkillIds: string[];
   salaryRange?: { minMinor: number; maxMinor: number; currency: string };

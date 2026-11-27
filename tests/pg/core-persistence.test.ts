@@ -123,6 +123,7 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
       location: 'Remote',
       workMode: 'remote',
       jobType: 'full_time',
+      experienceLevel: 'mid',
       requiredSkillIds: ['10000000-0000-4000-a000-000000000001'],
       salaryMinMinor: 9_000_000,
       salaryMaxMinor: 12_000_000,
@@ -202,10 +203,15 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
       status: 'active',
     });
     const [jobRow] = await sql(
-      `SELECT status, work_mode, salary_min_minor::int AS min, salary_currency FROM jobs WHERE id = $1`,
+      `SELECT status, work_mode, experience_level, salary_min_minor::int AS min, salary_currency FROM jobs WHERE id = $1`,
       [ids.jobId]
     );
-    expect(jobRow).toMatchObject({ status: 'published', work_mode: 'remote', min: 9_000_000 });
+    expect(jobRow).toMatchObject({
+      status: 'published',
+      work_mode: 'remote',
+      experience_level: 'mid',
+      min: 9_000_000,
+    });
     const [appRow] = await sql(`SELECT status, cover_letter FROM job_applications WHERE id = $1`, [
       ids.applicationId,
     ]);
@@ -260,6 +266,7 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     const job = jobs.body.jobs.find((j: Json) => j.id === ids.jobId);
     expect(job).toMatchObject({
       status: 'published',
+      experienceLevel: 'mid',
       requiredSkillIds: ['10000000-0000-4000-a000-000000000001'],
       salaryRange: { minMinor: 9_000_000, maxMinor: 12_000_000, currency: 'USD' },
     });

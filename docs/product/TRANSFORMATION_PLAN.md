@@ -73,7 +73,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | Professional identity and profile | **EXISTS, durable** | `/api/v1/auth/*`, `/api/v1/profile/*` in `DURABLE_ROUTES`; `ProfilePage.tsx` | No photo or file upload; no import; no public profile URL designed for sharing |
 | Resume and portfolio | **PARTIAL, ephemeral** | `resumes` (7 ephemeral endpoints), `portfolio` (6); `ResumesPage.tsx`, `PortfolioPage.tsx`. Durable resumes built but not merged (T-007) | Resumes and projects vanish on restart; no PDF export file; no parsing |
 | Networking and community | **PARTIAL** | Connections durable (PR #93, migration 00057); warm intros, referrals, alumni ephemeral with no screen | No posts, groups, or community spaces; referrals unreachable from the web |
-| Jobs, internships, recruitment | **EXISTS, durable core** | Jobs, applications, saved jobs, alerts, drafts durable; `JobsPage`, `ApplicationsPage`, `HiringPage`, `HiringJobPage` `internship` is a job type, but the jobs screen filters only by work mode; no experience band (fresher, junior); no employer public page; no interview scheduling a user can see |
+| Jobs, internships, recruitment | **EXISTS, durable core** | Jobs, applications, saved jobs, alerts, drafts durable; `JobsPage`, `ApplicationsPage`, `HiringPage`, `HiringJobPage` jobs carry an optional experience level and the jobs screen filters by work mode, type and experience (TS-09); no employer public page; no interview scheduling a user can see |
 | Learning management | **PARTIAL, ephemeral** | `courses`, `modules`, `lessons` (ephemeral); `LearningPage`, `CoursePage` | No content authoring screen, no media, no payments for courses; course completion can mint authority-verified evidence without the final assessment (ARCHITECTURE §20) |
 | Coding practice and assessments | **PARTIAL, simulated** | `challenges` (5 ephemeral); `AssessmentsPage`; `assessment.ts` stores `executed: false` | **No code runner.** A submission proves nothing; the evidence it creates is correctly marked unverified |
 | Skill verification and credentials | **EXISTS, durable core** | Evidence ladder and verify/dispute/revoke durable; certificates and revocation (00021, 00055) partly ephemeral; `VerificationSeal.tsx` | No import or verification of external credentials (Coursera, Credly, Open Badges) |
@@ -115,7 +115,7 @@ Sources: the generated [feature catalog](../mindmap/catalog/FEATURE_CATALOG.md) 
 | P-04 | Reputation engine and XP score people on activity counts | `reputation-engine.ts`, `gamification.ts`, `activity-contributions.ts` | SSOT principle 11 says "evidence over popularity". Park; reuse only the parts that read verified evidence |
 | P-05 | Insights (salary, forecast, learning impact) run on seed data in memory | Ephemeral, no screens | Do not show insights until they are computed from real, k-suppressed data (C-8 decides k) |
 | P-06 | Free recruiters can post unlimited jobs | [`PRICING.md`](../PRICING.md) | Part of the launch policy decision (issue #50) |
-| P-07 | Jobs carry `jobType` including `internship`, but have no experience band and the jobs screen cannot filter by type | `packages/contracts/src/index.ts` (`jobType` enum), `JobsPage.tsx` (`WORK_MODE_FILTERS` only) | Add an experience band (fresher, junior, mid, senior) and type and band filters (TS-09), since the wedge depends on it |
+| P-07 | Jobs carry `jobType` including `internship`, but have no experience band and the jobs screen cannot filter by type | `packages/contracts/src/index.ts` (`jobType` enum), `JobsPage.tsx` (`WORK_MODE_FILTERS` only) | Fixed by TS-09: optional `experienceLevel` (fresher, junior, mid, senior) on jobs, and job-type and experience filters on the jobs screen |
 
 ### 2.4 Against the reference platforms
 
@@ -669,7 +669,7 @@ flowchart LR
 
 ## 9. Database and API recommendations
 
-The current schema (60 migrations, 115 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
+The current schema (61 migrations, 115 tables) is documented in [`engineering/DATABASE.md`](../engineering/DATABASE.md) and the endpoints in [`engineering/API_CONTRACTS.md`](../engineering/API_CONTRACTS.md). The blueprint's intended entities are in [`blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md`](../blueprint/09_REGISTERS/DATA_ENTITY_REGISTER.md).
 
 ### 9.1 Principles
 
@@ -942,7 +942,7 @@ Each slice is one small pull request with tests, record-level authorization and 
 | TS-06 | File service: storage adapter (local disk in development), scan hook, `files` table, `POST /api/v1/files` | Vendor choice | Upload limits and type tests; files private; expiry job | T-025 | IMPLEMENTED for the API (ADR-020); expiry job and the `clamd` container remain |
 | TS-07 | Skill-signal ledger: table, `recordSkillSignal`, projector, `GET /skills/profile/me`; evidence writes emit signals | — | The three acceptance cases in §7.2 | T-026 | IMPLEMENTED for evidence (migration 00060; see §7.2 for what differs) |
 | TS-08 | Import v1: JSON Resume and CSV templates, review screen, commit and undo | TS-06, TS-07 | §10.4 cases 2, 5, 7 | T-027 | PROPOSED |
-| TS-09 | Experience band on jobs; job-type and band filters on the jobs screen | — | Contract and e2e tests | T-028 | PROPOSED |
+| TS-09 | Experience band on jobs; job-type and band filters on the jobs screen | — | Contract and e2e tests | T-028 | IMPLEMENTED (migration 00061; `tests/e2e/job-filters.spec.ts`) |
 | TS-10 | Session cookie and password reset | Issue #44 | Token not readable by page script; reset e2e | T-029 | IMPLEMENTED (ADR-019; reset emails reach people once live email is set up) |
 | TS-11 | Import v2: resume PDF and DOCX parser, LinkedIn export ZIP, GitHub OAuth | TS-08, TS-10 | §10.4 cases 1, 3, 4, 6, 8 | T-030 | PROPOSED |
 | TS-12 | Split `server.ts` into module plugins, no behavior change | — | All suites pass unchanged | T-031 | **NEEDS OWNER** |

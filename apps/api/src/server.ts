@@ -2293,6 +2293,7 @@ export async function buildApp(
       location: input.location,
       workMode: input.workMode,
       jobType: input.jobType,
+      experienceLevel: input.experienceLevel,
       requiredSkillIds: input.requiredSkillIds,
       salaryRange:
         input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined

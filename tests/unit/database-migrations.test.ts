@@ -525,6 +525,28 @@ describe('Skill-signal ledger (migration 00060, TS-07)', () => {
     expect(sql).not.toMatch(/DROP TABLE|DELETE FROM|TRUNCATE/i);
   });
 });
+describe('Job experience level (migration 00061, TS-09)', () => {
+  it('adds a nullable column whose values match the domain and the contract', async () => {
+    const { EXPERIENCE_LEVELS } = await import('../../packages/domain/src/jobs.js');
+    const { CreateJobInputSchema } = await import('../../packages/contracts/src/index.js');
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00061_job_experience_level.sql'),
+      'utf8'
+    );
+    expect(sql).toContain(
+      'ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS experience_level TEXT;'
+    );
+    const values = /experience_level IN \(([^)]*)\)/
+      .exec(sql)![1]
+      .match(/'([a-z_]+)'/g)!
+      .map((v) => v.slice(1, -1));
+    expect(values).toEqual([...EXPERIENCE_LEVELS]);
+    expect(CreateJobInputSchema.shape.experienceLevel.unwrap().options).toEqual([
+      ...EXPERIENCE_LEVELS,
+    ]);
+    expect(sql).not.toMatch(/NOT NULL|DROP |DELETE FROM|TRUNCATE|UPDATE public/i);
+  });
+});
 describe('Notification types: database and domain agree (migration 00044)', () => {
   it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
     const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');

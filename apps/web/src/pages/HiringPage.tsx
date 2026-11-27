@@ -4,7 +4,7 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { useSession } from '../lib/SessionContext.js';
-import { formatDate } from '../lib/format.js';
+import { EXPERIENCE_LEVEL_OPTIONS, formatDate } from '../lib/format.js';
 import {
   ACTIVE_APPLICATION_STATUSES,
   JOB_TRANSITIONS,
@@ -176,6 +176,7 @@ const JobForm: React.FC<{
   const [location, setLocation] = useState('');
   const [workMode, setWorkMode] = useState('remote');
   const [jobType, setJobType] = useState('full_time');
+  const [experienceLevel, setExperienceLevel] = useState('');
   const [description, setDescription] = useState('');
   const [salaryMin, setSalaryMin] = useState('');
   const [salaryMax, setSalaryMax] = useState('');
@@ -225,6 +226,7 @@ const JobForm: React.FC<{
             location: location.trim(),
             workMode,
             jobType,
+            ...(experienceLevel ? { experienceLevel } : {}),
             description: description.trim(),
             ...(skillIds.length ? { requiredSkillIds: skillIds } : {}),
             ...(min !== undefined && max !== undefined
@@ -301,6 +303,14 @@ const JobForm: React.FC<{
             value={jobType}
             onChange={(e) => setJobType(e.target.value)}
             options={JOB_TYPES}
+          />
+          <Select
+            id="job-experience"
+            label="Experience"
+            value={experienceLevel}
+            onChange={(e) => setExperienceLevel(e.target.value)}
+            options={[{ value: '', label: 'Not stated' }, ...EXPERIENCE_LEVEL_OPTIONS]}
+            data-testid="job-experience"
           />
         </div>
         <TextArea

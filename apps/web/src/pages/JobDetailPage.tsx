@@ -4,7 +4,13 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { useSession } from '../lib/SessionContext.js';
-import { formatDate, formatSalaryRange, jobTypeLabel, workModeLabel } from '../lib/format.js';
+import {
+  experienceLevelLabel,
+  formatDate,
+  formatSalaryRange,
+  jobTypeLabel,
+  workModeLabel,
+} from '../lib/format.js';
 import type { Application, EvidenceItem, Job, OrganizationRef, Skill } from '../lib/types.js';
 import {
   Button,
@@ -169,6 +175,7 @@ export const JobDetailPage: React.FC = () => {
       ? null
       : workModeLabel(job.workMode),
     jobTypeLabel(job.jobType),
+    experienceLevelLabel(job.experienceLevel),
     formatSalaryRange(job.salaryRange),
   ].filter(Boolean);
   const isOpen = job.status === 'published';

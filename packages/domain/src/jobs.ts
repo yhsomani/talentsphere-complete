@@ -1,5 +1,12 @@
 import { DomainError, type Role } from './core.js';
 
+/**
+ * How much experience a job asks for (plan TS-09, finding P-07). "Fresher"
+ * means a recent graduate or someone with no paid experience yet.
+ */
+export const EXPERIENCE_LEVELS = ['fresher', 'junior', 'mid', 'senior'] as const;
+export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
+
 export type JobStatus =
   'draft' | 'pending_approval' | 'approved' | 'published' | 'paused' | 'closed' | 'archived';
 
@@ -11,6 +18,7 @@ export interface Job {
   location: string;
   workMode?: 'remote' | 'hybrid' | 'onsite';
   jobType?: 'full_time' | 'part_time' | 'contract' | 'internship';
+  experienceLevel?: ExperienceLevel;
   status: JobStatus;
   requiredSkillIds: string[];
   salaryRange?: {
@@ -44,6 +52,7 @@ export interface CreateJobParams {
   location: string;
   workMode?: 'remote' | 'hybrid' | 'onsite';
   jobType?: 'full_time' | 'part_time' | 'contract' | 'internship';
+  experienceLevel?: ExperienceLevel;
   requiredSkillIds?: string[];
   salaryRange?: {
     minMinor: number;
@@ -113,6 +122,7 @@ export function createJobPosting(params: CreateJobParams): Job {
     location: params.location.trim(),
     workMode: params.workMode,
     jobType: params.jobType,
+    experienceLevel: params.experienceLevel,
     status: 'draft',
     requiredSkillIds: params.requiredSkillIds || [],
     salaryRange: params.salaryRange,

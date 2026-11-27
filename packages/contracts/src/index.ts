@@ -278,6 +278,8 @@ export const CreateJobInputSchema = z.object({
   location: z.string().min(2).max(100),
   workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
   jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
+  /** Matches EXPERIENCE_LEVELS in packages/domain/src/jobs.ts (TS-09). */
+  experienceLevel: z.enum(['fresher', 'junior', 'mid', 'senior']).optional(),
   requiredSkillIds: uniqueIdList(z.string().uuid()).optional(),
   salaryMinMinor: salaryMinor().optional(),
   salaryMaxMinor: salaryMinor().optional(),
