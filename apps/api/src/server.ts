@@ -658,16 +658,11 @@ export async function buildApp(
     }
   });
 
-  // Session cookie CSRF check (ADR-019, apps/api/src/session-cookie.ts): a
-  // state-changing request signed in by the cookie alone must carry the
-  // X-TalentSphere-CSRF header and come from an allowed origin.
+  // Session cookie (ADR-019, apps/api/src/session-cookie.ts). The CSRF check
+  // runs where the cookie signs someone in (sessionSourceOf), not on every
+  // request that carries it: a stale cookie must not block the login form.
   const allowedOrigins = env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim());
   const secureCookie = isDeployed(env);
-  app.addHook('onRequest', async (req) => {
-    if (sessionTokenOf(req.headers)?.via !== 'cookie') return;
-    const problem = cookieCsrfProblem(req.method, req.headers, allowedOrigins);
-    if (problem) throw new DomainError('FORBIDDEN', problem);
-  });
 
   // Security Plugins
   await app.register(helmet, {
@@ -987,8 +982,22 @@ export async function buildApp(
   };
 
   // Authentication Helper
-  const extractUser = (req: FastifyRequest): AuthPayload => {
+  /**
+   * The request's session token. A state-changing request signed in by the
+   * cookie alone must carry the X-TalentSphere-CSRF header and come from an
+   * allowed origin, or it is refused (ADR-019).
+   */
+  const sessionSourceOf = (req: FastifyRequest) => {
     const source = sessionTokenOf(req.headers);
+    if (source?.via === 'cookie') {
+      const problem = cookieCsrfProblem(req.method, req.headers, allowedOrigins);
+      if (problem) throw new DomainError('FORBIDDEN', problem);
+    }
+    return source;
+  };
+
+  const extractUser = (req: FastifyRequest): AuthPayload => {
+    const source = sessionSourceOf(req);
     if (!source) {
       throw new DomainError('UNAUTHENTICATED', 'Missing or malformed Authorization header.');
     }
@@ -1002,12 +1011,12 @@ export async function buildApp(
     return resolveSession(session, req);
   };
 
+  // Optional sign-in: a cookie that fails the CSRF check is ignored, so the
+  // request is served as anonymous rather than refused.
   const maybeExtractUser = (req: FastifyRequest): AuthPayload | null => {
-    const source = sessionTokenOf(req.headers);
-    if (!source) {
-      return null;
-    }
     try {
+      const source = sessionSourceOf(req);
+      if (!source) return null;
       const session = verifySessionToken(source.token);
       return session ? resolveSession(session, req) : null;
     } catch {
@@ -10446,7 +10455,7 @@ export async function buildApp(
         // normal session is refused. A still-validly-signed, unrevoked token of
         // that same user may finish (or re-read) its own erasure and nothing
         // else; any other failure keeps its original error.
-        const source = sessionTokenOf(req.headers);
+        const source = sessionSourceOf(req);
         const raw = source ? verifySessionToken(source.token) : null;
         const closed =
           raw &&
@@ -13299,7 +13308,7 @@ export async function buildApp(
     // A token that was sent but is expired or revoked is a 401, so the web
     // app signs the person in again instead of showing a private profile's
     // own owner a "forbidden" (review REV-12). No token: an anonymous read.
-    const session = sessionTokenOf(req.headers) ? extractUser(req) : null;
+    const session = sessionSourceOf(req) ? extractUser(req) : null;
     const profile = profilesByUserId.get(candidateId) ?? profilesById.get(candidateId);
     if (!profile) {
       throw new DomainError('NOT_FOUND', 'Candidate not found.');
