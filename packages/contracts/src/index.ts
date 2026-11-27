@@ -144,6 +144,45 @@ export const FileContentQuerySchema = z.object({
   signature: z.string().regex(/^[0-9a-f]{64}$/),
 });
 
+/** Start a profile import from a file's text (plan TS-08, ADR-033). */
+export const CreateImportInputSchema = z.object({
+  source: z.enum([
+    'json_resume',
+    'csv_positions',
+    'csv_education',
+    'csv_skills',
+    'csv_certifications',
+  ]),
+  // The domain gives the clear "too large" message; this only bounds the body.
+  content: z
+    .string()
+    .min(1, 'The file is empty')
+    .max(600 * 1024),
+});
+
+export type CreateImportInput = z.infer<typeof CreateImportInputSchema>;
+
+/** Confirm an import: the entries to add, each optionally edited (ADR-033). */
+export const CommitImportInputSchema = z.object({
+  accept: z
+    .array(
+      z.object({
+        itemId: z.string().uuid(),
+        edit: z
+          .record(z.string(), z.union([z.string().max(3000), z.boolean(), z.null()]))
+          .optional(),
+      })
+    )
+    .max(300),
+});
+
+export type CommitImportInput = z.infer<typeof CommitImportInputSchema>;
+
+/** Which CSV template to download (ADR-033). */
+export const ImportTemplateParamsSchema = z.object({
+  source: z.enum(['csv_positions', 'csv_education', 'csv_skills', 'csv_certifications']),
+});
+
 /** Ask for a password reset link (ADR-019). */
 export const PasswordResetRequestInputSchema = z.object({
   email: emailAddress(),
