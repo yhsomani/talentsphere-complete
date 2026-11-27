@@ -1,6 +1,6 @@
 # Architecture decision records
 
-> **Status.** As-built decisions (ADR-015, ADR-016) and the decisions the owner delegated on 2026-11-26 (ADR-017 to ADR-029) and the free-tier service picks (ADR-030, 2026-11-27). ADR-015 is ratified by ADR-017.
+> **Status.** As-built decisions (ADR-015, ADR-016) and the decisions the owner delegated on 2026-11-26 (ADR-017 to ADR-029) and the free-tier service picks (ADR-030 and ADR-031, 2026-11-27). ADR-015 is ratified by ADR-017.
 >
 > **What this file holds.** Decisions about built behaviour. `ARCHITECTURE.md` holds the decision register; this file keeps the full ADR text.
 >
@@ -119,6 +119,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | ADR-028 | `min_cohort_k` = 10 distinct people for every published aggregate | C-8 | Salary built; review aggregates before un-parking |
 | ADR-029 | AI output quality follows the SSOT wording (capability-specific evaluation, no universal threshold) | C-22 | Registry corrected (this change) |
 | ADR-030 | Free-tier services for the pilot, picked from the Free for Developers list | ADR-018, 020, 021, 025, 027 | Documentation; sign-ups are owner steps |
+| ADR-031 | Free security and launch checks (CodeQL, Dependabot, launch scans, mail checks, Pwned Passwords) | Full list review | Settings and checks for the owner; Pwned Passwords PR to follow |
 | ADR-032 | Organization roles decide what a member may do: owners and admins run the organization, recruiters post jobs, hiring managers review candidates, plain members only see jobs | CF-14, CF-45, plan TS-04 | Built (`packages/domain/src/org-roles.ts`) |
 
 ### ADR-017 — Ratify ADR-015: Fastify and PostgreSQL are the architecture of record (issue #46)
@@ -345,6 +346,7 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
 | Analytics | **No third-party analytics** for the pilot | — | The pilot metric (`ns.evidence_backed_conversations`) is counted from our own records. If page views are needed later, prefer Cloudflare Web Analytics (cookieless) or self-hosted Umami. Rejected: GoatCounter hosted (non-commercial only), PostHog and Amplitude (behavioural tracking of candidates needs consent and a policy update). |
 | Search | **PostgreSQL full-text search** when a search feature needs it | — | Candidate profiles stay in our database. Rejected: Algolia (1M documents, 10,000 searches a month), because profile data would be copied to a third party. |
 
+- **Full review:** every category of the list is judged in [`FREE_FOR_DEV_REVIEW.md`](FREE_FOR_DEV_REVIEW.md); further picks are in ADR-031.
 - **What changes:** nothing in the running system. This record adds Cloudflare (DNS and email routing), UptimeRobot, healthchecks.io and, later and opt-in, Sentry. Everything else confirms an earlier ADR.
 - **Steps only the owner can run:**
   1. Oracle: decide whether to upgrade the account to pay-as-you-go. That removes idle reclamation and still bills nothing inside the Always Free limits, but it puts a card on the account. Without it, an uptime monitor alone may not prevent reclamation.
@@ -354,6 +356,29 @@ On 2026-11-26 the owner delegated every open decision in this repository to Clau
   5. Create a Brevo account (ADR-018) and the Oracle Object Storage bucket (ADR-020).
   6. Create an UptimeRobot account with monitors on `https://<domain>/ready` and `https://<domain>/`, and a healthchecks.io check for the nightly backup; add its ping URL to `backup.sh`.
   7. Later, only when wanted: a Sentry account in the EU region. Ask Claude for the SDK PR after that.
+
+### ADR-031 — Free security and launch checks from the Free for Developers review
+
+- **Status:** Accepted 2026-11-27 (delegated). Documentation only. The full 56-category review is in [`FREE_FOR_DEV_REVIEW.md`](FREE_FOR_DEV_REVIEW.md).
+- **Context:** ADR-030 covered infrastructure. The owner asked whether the rest of the list holds anything TalentSphere should use. Most of it is either rejected (it would send candidate data to a third party, or it duplicates something we already have) or not relevant. Four free items are worth adopting, and none of them sends personal data out.
+
+| Option | Pros | Cons |
+| --- | --- | --- |
+| GitHub CodeQL default setup and Dependabot alerts | Free for a public repository; turned on in repository settings with no workflow file, so no protected-file change | Some alert noise to triage |
+| Semgrep or SonarQube Cloud in CI | Wider rule sets | A `.github/` change; another account; overlaps CodeQL |
+| Mozilla Observatory, SSL Labs, Internet.nl before the pilot | No account; checks headers, TLS, DNSSEC and email DNS on the real host | Manual, run once per deploy change |
+| mail-tester.com and dkimvalidator.com before the first real send | Catches SPF, DKIM or DMARC mistakes before users miss their codes | 20 tests a month on mail-tester |
+| Pwned Passwords check on register, reset and change | Blocks passwords already seen in breaches. Only the first 5 characters of the SHA-1 hash leave the server (k-anonymity) | One outbound call; must not block sign-up when the API is down |
+
+- **Decision:**
+  - Adopt CodeQL with Dependabot, the three launch checks, and the mail checks now. Semgrep stays a later option.
+  - Add the Pwned Passwords check in its own code PR. It sends only the hash prefix, with the `Add-Padding` header, and times out after 2 seconds. If the check fails or times out, the password is allowed (fail open) and the failure is logged. The rule ("a password seen in a breach is refused") lives in `packages/domain`.
+- **Also recorded:** the product domain (about 10 USD a year) is the one cost that a free-only launch cannot avoid. Free subdomains hurt email deliverability.
+- **Steps only the owner can run:**
+  1. In the repository's Settings, Code security: turn on CodeQL default setup, Dependabot alerts and secret scanning.
+  2. Buy the domain.
+  3. After the staging deploy, run Mozilla Observatory, SSL Labs and Internet.nl against it and fix any failing grade.
+  4. Send one Brevo template to mail-tester.com and fix anything below 9/10.
 
 ### ADR-032 — Organization roles decide what a member may do (CF-14, CF-45, plan TS-04)
 
