@@ -2,7 +2,7 @@
 -- Migration: 00064_moderation_people_are_users.sql
 -- Description: Moderation reports and appeals are keyed by USER id (plan
 --              TS-03): the API writes user ids and the 00017 RLS policies
---              compare reporter_id and appellant_id to auth.uid(). The 00017
+--              compare reporter_id and appellant_id to the signed-in user. The 00017
 --              foreign keys pointed at profiles(id), which would reject every
 --              row the API writes. Re-point them at users(id), as 00043 did
 --              for work history. Constraint changes only; no data changes.
