@@ -29,6 +29,11 @@ import { MemoryPortfolioStore, PgPortfolioStore, type PortfolioStore } from './p
 import { MemoryLmsStore, PgLmsStore, type LmsStore } from './lms-store.js';
 import { MemoryChallengeStore, PgChallengeStore, type ChallengeStore } from './challenge-store.js';
 import {
+  MemoryModerationStore,
+  PgModerationStore,
+  type ModerationStore,
+} from './moderation-store.js';
+import {
   MemoryAdminAuditStore,
   PgAdminAuditStore,
   type AdminAuditStore,
@@ -108,6 +113,8 @@ export interface Storage {
   readonly lms: LmsStore;
   /** Coding challenges, assessment sessions and submissions (F-08, 00004/00063; plan TS-03). */
   readonly challenges: ChallengeStore;
+  /** Moderation reports and appeals (F-24, 00017/00064; plan TS-03). */
+  readonly moderation: ModerationStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -150,6 +157,7 @@ class PgStorage implements Storage {
   readonly portfolio: PortfolioStore;
   readonly lms: LmsStore;
   readonly challenges: ChallengeStore;
+  readonly moderation: ModerationStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -197,6 +205,7 @@ class PgStorage implements Storage {
     this.portfolio = new PgPortfolioStore(this.pool);
     this.lms = new PgLmsStore(this.pool);
     this.challenges = new PgChallengeStore(this.pool);
+    this.moderation = new PgModerationStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -323,6 +332,7 @@ class MemoryStorage implements Storage {
   readonly portfolio: PortfolioStore = new MemoryPortfolioStore();
   readonly lms: LmsStore = new MemoryLmsStore();
   readonly challenges: ChallengeStore = new MemoryChallengeStore();
+  readonly moderation: ModerationStore = new MemoryModerationStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

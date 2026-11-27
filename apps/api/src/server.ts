@@ -12212,6 +12212,7 @@ export async function buildApp(
       existingReports,
     });
 
+    await storage.moderation.saveReport(report);
     moderationReportsById.set(report.id, report);
 
     await dispatchJob({
@@ -12350,6 +12351,7 @@ export async function buildApp(
         userId: session.userId,
         roles: session.roles,
       });
+      await storage.moderation.saveReport(updated);
       moderationReportsById.set(id, updated);
 
       return reply.status(200).send({ report: updated });
@@ -12454,6 +12456,7 @@ export async function buildApp(
         secondApproverRoles,
       });
 
+      await storage.moderation.saveReport(resolved);
       moderationReportsById.set(id, resolved);
       pendingBanProposals.delete(id);
 
@@ -12518,6 +12521,7 @@ export async function buildApp(
 
       const existingAppeals = Array.from(moderationAppealsById.values());
       const appeal = createModerationAppeal(report, session.userId, input.reason, existingAppeals);
+      await storage.moderation.saveAppeal(appeal);
       moderationAppealsById.set(appeal.id, appeal);
 
       await dispatchJob({
@@ -12557,19 +12561,25 @@ export async function buildApp(
         roles: session.roles,
       });
 
+      // If appeal is upheld, the report's penalty is reversed; the appeal and
+      // the report are stored together, then the Maps change (TS-03).
+      const original =
+        reviewed.status === 'upheld' ? moderationReportsById.get(reviewed.reportId) : undefined;
+      const reversed: ModerationReport | undefined = original && {
+        ...original,
+        actionTaken: 'dismissed',
+        status: 'dismissed',
+        updatedAt: new Date().toISOString(),
+      };
+      await storage.moderation.saveAppealReview(reviewed, reversed);
       moderationAppealsById.set(id, reviewed);
 
-      // If appeal is upheld, reverse penalty on target entity
-      if (reviewed.status === 'upheld') {
-        const origReport = moderationReportsById.get(reviewed.reportId);
-        if (origReport) {
-          origReport.actionTaken = 'dismissed';
-          origReport.status = 'dismissed';
-          if (origReport.targetType === 'user') {
-            const user = usersById.get(origReport.targetId);
-            if (user) {
-              await persist({ kind: 'user', base: user, value: { ...user, status: 'active' } });
-            }
+      if (reversed) {
+        moderationReportsById.set(reversed.id, reversed);
+        if (reversed.targetType === 'user') {
+          const user = usersById.get(reversed.targetId);
+          if (user) {
+            await persist({ kind: 'user', base: user, value: { ...user, status: 'active' } });
           }
         }
       }
@@ -14269,6 +14279,10 @@ export async function buildApp(
       list.push(project);
       portfolioProjectsByUserId.set(project.userId, list);
     }
+    // Moderation reports and appeals (F-24, plan TS-03).
+    const moderation = await storage.moderation.loadAll();
+    for (const report of moderation.reports) moderationReportsById.set(report.id, report);
+    for (const appeal of moderation.appeals) moderationAppealsById.set(appeal.id, appeal);
     // Coding challenges and assessment sessions (F-08, plan TS-03): sessions
     // oldest first, as started.
     const arena = await storage.challenges.loadAll();

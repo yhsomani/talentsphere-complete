@@ -126,6 +126,17 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/challenges',
   'POST /api/v1/challenges/:id/start-session',
   'POST /api/v1/challenges/:id/submit',
+  // Moderation reports and appeals (migrations 00017, 00064; plan TS-03).
+  // Pending ban proposals are still in memory and lapse on a restart.
+  'POST /api/v1/moderation/reports',
+  'GET /api/v1/moderation/reports/my',
+  'GET /api/v1/moderation/reports',
+  'GET /api/v1/moderation/reports/:id',
+  'PATCH /api/v1/moderation/reports/:id/status',
+  'POST /api/v1/moderation/reports/:id/resolve',
+  'POST /api/v1/moderation/reports/:id/appeal',
+  'GET /api/v1/moderation/appeals',
+  'POST /api/v1/moderation/appeals/:id/review',
   // Portfolio projects (migration 00011; plan TS-03).
   'POST /api/v1/portfolio/projects',
   'GET /api/v1/portfolio/projects',
