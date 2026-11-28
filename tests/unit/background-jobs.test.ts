@@ -240,7 +240,11 @@ describe('Dispatch kind drift guard (server.ts ↔ DISPATCH_EVENT_KINDS)', () =>
   );
   // Route modules moved out of server.ts (ADR-022) receive dispatchJob as a
   // dependency and call it by the same name.
-  const routeModuleSource = ['apps/api/src/portfolio-routes.ts', 'apps/api/src/resume-routes.ts']
+  const routeModuleSource = [
+    'apps/api/src/portfolio-routes.ts',
+    'apps/api/src/resume-routes.ts',
+    'apps/api/src/challenge-routes.ts',
+  ]
     .map((file) => fs.readFileSync(path.join(repoRoot, file), 'utf8'))
     .join('\n');
   const emittedKinds = [

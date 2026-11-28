@@ -294,6 +294,7 @@ describe('SEC: every non-public /api/v1 route requires a valid session (A10-005)
       'apps/api/src/portfolio-routes.ts',
       'apps/api/src/resume-routes.ts',
       'apps/api/src/notification-routes.ts',
+      'apps/api/src/challenge-routes.ts',
     ]) {
       const source = readFileSync(file, 'utf8');
       for (const m of source.matchAll(
