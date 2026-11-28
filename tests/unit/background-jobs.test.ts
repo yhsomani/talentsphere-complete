@@ -244,6 +244,7 @@ describe('Dispatch kind drift guard (server.ts ↔ DISPATCH_EVENT_KINDS)', () =>
     'apps/api/src/portfolio-routes.ts',
     'apps/api/src/resume-routes.ts',
     'apps/api/src/challenge-routes.ts',
+    'apps/api/src/gamification-routes.ts',
   ]
     .map((file) => fs.readFileSync(path.join(repoRoot, file), 'utf8'))
     .join('\n');
